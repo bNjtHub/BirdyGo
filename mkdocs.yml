@@ -1,0 +1,521 @@
+site_name: BirdNET Live
+site_description: Real-time bird species identification using on-device ONNX 
+  inference
+site_url: https://birdnet-team.github.io/birdnet-live-app
+repo_url: https://github.com/birdnet-team/birdnet-live-app
+repo_name: birdnet-live-app
+
+theme:
+  name: material
+  logo: assets/images/logo.png
+  favicon: assets/images/logo.png
+  palette:
+  - scheme: slate
+    primary: blue
+    accent: amber
+    toggle:
+      icon: material/brightness-4
+      name: Switch to light mode
+  - scheme: default
+    primary: blue
+    accent: amber
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - navigation.expand
+  - navigation.top
+  - search.suggest
+  - search.highlight
+  - content.code.copy
+
+markdown_extensions:
+- admonition
+- pymdownx.details
+- pymdownx.superfences
+- pymdownx.tabbed:
+    alternate_style: true
+- pymdownx.highlight:
+    anchor_linenums: true
+- pymdownx.emoji:
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+- attr_list
+- md_in_html
+- tables
+- toc:
+    permalink: true
+    # Unicode-aware slugs so headings in ru/zh/pl/cs (and accented fr/de/es/pt)
+    # produce usable anchors instead of being stripped to empty strings.
+    # ASCII headings slugify identically to the MkDocs default, so existing
+    # English anchors and inbound links stay stable.
+    slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+
+plugins:
+- search
+- i18n:
+    languages:
+    - locale: en
+      name: English
+      default: true
+      build: true
+    - locale: de
+      name: Deutsch
+      build: true
+      nav_translations:
+        API Integration: API-Integration
+        API Reference: API-Referenz
+        Architecture: Architektur
+        Audio Pipeline: Audio-Pipeline
+        Building: Build
+        Code Style: Codestil
+        Developer Guide: Entwicklerhandbuch
+        Explore: Erkunden
+        FAQ: FAQ
+        Batch Analysis: Batch-Analyse
+        ARU Mode: ARU-Modus
+        File Analysis: Dateianalyse
+        Getting Started: Erste Schritte
+        Home: Start
+        Icons & Controls: Symbole und Steuerelemente
+        Inference Engine: Inferenz-Engine
+        Live Mode: Live-Modus
+        Localization: Lokalisierung
+        Overview: Überblick
+        Point Count Mode: Point-Count-Modus
+        Privacy Policy: Datenschutzrichtlinie
+        Releasing: Veröffentlichen
+        Session Library: Session-Bibliothek
+        Session Review: Session-Übersicht
+        Settings: Einstellungen
+        Species Bundle: Artenpaket
+        Spectrogram: Spektrogramm
+        State Management: Zustandsverwaltung
+        Storage: Speicher
+        Survey Mode: Survey-Modus
+        Taxonomy & Sync API: Taxonomie- und Synchronisierungs-API
+        Acceptable Use Policy: Richtlinie zur akzeptablen Nutzung
+        Testing: Testen
+        User Guide: Benutzerhandbuch
+    - locale: cs
+      name: Čeština
+      build: true
+      nav_translations:
+        API Integration: Integrace API
+        API Reference: Reference API
+        Architecture: Architektura
+        Audio Pipeline: Audio pipeline
+        Building: Sestavení
+        Code Style: Styl kódu
+        Developer Guide: Příručka pro vývojáře
+        Explore: Prozkoumat
+        FAQ: FAQ
+        Batch Analysis: Dávková analýza
+        ARU Mode: Režim ARU
+        File Analysis: Analýza souborů
+        Getting Started: Začínáme
+        Home: Domů
+        Icons & Controls: Ikony a ovládací prvky
+        Inference Engine: Inference Engine
+        Live Mode: Režim Live
+        Localization: Lokalizace
+        Overview: Přehled
+        Point Count Mode: Režim Point Count
+        Privacy Policy: Zásady ochrany osobních údajů
+        Releasing: Vydávání
+        Session Library: Knihovna sessions
+        Session Review: Přehled session
+        Settings: Nastavení
+        Species Bundle: Svazek druhů
+        Spectrogram: Spektrogram
+        State Management: Správa stavu
+        Storage: Úložiště
+        Survey Mode: Režim Survey
+        Taxonomy & Sync API: Taxonomy & Sync API
+        Acceptable Use Policy: Zásady přijatelného použití
+        Testing: Testování
+        User Guide: Uživatelská příručka
+    - locale: es
+      name: Español
+      build: true
+      nav_translations:
+        API Integration: Integración API
+        API Reference: Referencia de API
+        Architecture: Arquitectura
+        Audio Pipeline: Canalización de audio
+        Building: Compilación
+        Code Style: Estilo de código
+        Developer Guide: Guía para desarrolladores
+        Explore: Explorar
+        FAQ: Preguntas frecuentes
+        Batch Analysis: Análisis por lotes
+        ARU Mode: Modo ARU
+        File Analysis: Análisis de archivos
+        Getting Started: Primeros pasos
+        Home: Inicio
+        Icons & Controls: Iconos y controles
+        Inference Engine: Motor de inferencia
+        Live Mode: Modo Live
+        Localization: Localización
+        Overview: Descripción general
+        Point Count Mode: Modo Point Count
+        Privacy Policy: Política de privacidad
+        Releasing: Publicación
+        Session Library: Biblioteca de sesiones
+        Session Review: Resumen de la sesión
+        Settings: Ajustes
+        Species Bundle: Paquete de especies
+        Spectrogram: Espectrograma
+        State Management: Gestión de estado
+        Storage: Almacenamiento
+        Survey Mode: Modo Survey
+        Taxonomy & Sync API: API de taxonomía y sincronización
+        Acceptable Use Policy: Política de uso aceptable
+        Testing: Pruebas
+        User Guide: Guía del usuario
+    - locale: fr
+      name: Français
+      build: true
+      nav_translations:
+        API Integration: Intégration d'API
+        API Reference: Référence API
+        Architecture: Architecture
+        Audio Pipeline: Pipeline audio
+        Building: Compilation
+        Code Style: Style de code
+        Developer Guide: Guide du développeur
+        Explore: Explorer
+        FAQ: FAQ
+        Batch Analysis: Analyse par lots
+        ARU Mode: Mode ARU
+        File Analysis: Analyse de fichiers
+        Getting Started: Premiers pas
+        Home: Accueil
+        Icons & Controls: Icônes et commandes
+        Inference Engine: Moteur d'inférence
+        Live Mode: Mode En direct
+        Localization: Localisation
+        Overview: Aperçu
+        Point Count Mode: Mode Point d'écoute
+        Privacy Policy: Politique de confidentialité
+        Releasing: Publication
+        Session Library: Bibliothèque de sessions
+        Session Review: Résumé de la session
+        Settings: Paramètres
+        Species Bundle: Ensemble d'espèces
+        Spectrogram: Spectrogramme
+        State Management: Gestion d'état
+        Storage: Stockage
+        Survey Mode: Mode Relevé
+        Taxonomy & Sync API: API de taxonomie et de synchronisation
+        Acceptable Use Policy: Politique d'utilisation acceptable
+        Testing: Essai
+        User Guide: Guide de l'utilisateur
+    - locale: it
+      name: Italiano
+      build: true
+      nav_translations:
+        API Integration: Integrazione API
+        API Reference: Riferimento API
+        Architecture: Architettura
+        Audio Pipeline: Pipeline audio
+        Building: Compilazione
+        Code Style: Stile del codice
+        Developer Guide: Guida per gli sviluppatori
+        Explore: Esplora
+        FAQ: Domande frequenti
+        Batch Analysis: Analisi in batch
+        ARU Mode: Modalità ARU
+        File Analysis: Analisi file
+        Getting Started: Per iniziare
+        Home: Home
+        Icons & Controls: Icone e controlli
+        Inference Engine: Motore di inferenza
+        Live Mode: Modalità Live
+        Localization: Localizzazione
+        Overview: Panoramica
+        Point Count Mode: Modalità Point Count
+        Privacy Policy: Informativa sulla privacy
+        Releasing: Pubblicazione
+        Session Library: Libreria delle sessioni
+        Session Review: Riepilogo sessione
+        Settings: Impostazioni
+        Species Bundle: Pacchetto specie
+        Spectrogram: Spettrogramma
+        State Management: Gestione dello stato
+        Storage: Archiviazione
+        Survey Mode: Modalità Survey
+        Taxonomy & Sync API: API di tassonomia e sincronizzazione
+        Acceptable Use Policy: Politica di uso accettabile
+        Testing: Test
+        User Guide: Guida per l'utente
+    - locale: pt
+      name: Português
+      build: true
+
+      nav_translations:
+        API Integration: Integração de API
+        API Reference: Referência de API
+        Architecture: Arquitetura
+        Audio Pipeline: Pipeline de áudio
+        Building: Compilação
+        Code Style: Estilo de código
+        Developer Guide: Guia do desenvolvedor
+        Explore: Explorar
+        FAQ: Perguntas frequentes
+        Batch Analysis: Análise em lote
+        ARU Mode: Modo ARU
+        File Analysis: Análise de arquivos
+        Getting Started: Primeiros passos
+        Home: Início
+        Icons & Controls: Ícones e controles
+        Inference Engine: Motor de inferência
+        Live Mode: Modo Live
+        Localization: Localização
+        Overview: Visão geral
+        Point Count Mode: Modo Point Count
+        Privacy Policy: Política de privacidade
+        Releasing: Publicação
+        Session Library: Biblioteca de sessões
+        Session Review: Resumo da sessão
+        Settings: Configurações
+        Species Bundle: Pacote de espécies
+        Spectrogram: Espectrograma
+        State Management: Gerenciamento de estado
+        Storage: Armazenamento
+        Survey Mode: Modo Survey
+        Taxonomy & Sync API: API de taxonomia e sincronização
+        Acceptable Use Policy: Política de uso aceitável
+        Testing: Teste
+        User Guide: Guia do usuário
+    - locale: nl
+      name: Nederlands
+      build: true
+      nav_translations:
+        API Integration: API-integratie
+        API Reference: API-referentie
+        Architecture: Architectuur
+        Audio Pipeline: Audiopijplijn
+        Building: Bouwen
+        Code Style: Codestijl
+        Developer Guide: Developer Guide
+        Explore: Verkennen
+        FAQ: Veelgestelde vragen
+        Batch Analysis: Batchanalyse
+        ARU Mode: ARU-modus
+        File Analysis: Bestandsanalyse
+        Getting Started: Aan de slag
+        Home: Start
+        Icons & Controls: Pictogrammen en bediening
+        Inference Engine: Inferentie-engine
+        Live Mode: Live-modus
+        Localization: Lokalisatie
+        Overview: Overzicht
+        Point Count Mode: Point Count-modus
+        Privacy Policy: Privacybeleid
+        Releasing: Releasen
+        Session Library: Session-bibliotheek
+        Session Review: Session-overzicht
+        Settings: Instellingen
+        Species Bundle: Soortenpakket
+        Spectrogram: Spectrogram
+        State Management: Statusbeheer
+        Storage: Opslag
+        Survey Mode: Survey-modus
+        Taxonomy & Sync API: Taxonomie- en synchronisatie-API
+        Acceptable Use Policy: Beleid voor aanvaardbaar gebruik
+        Testing: Testen
+        User Guide: Gebruikershandleiding
+    - locale: pl
+      name: Polski
+      build: true
+      nav_translations:
+        API Integration: Integracja API
+        API Reference: Dokumentacja API
+        Architecture: Architektura
+        Audio Pipeline: Potok audio
+        Building: Budowanie
+        Code Style: Styl kodu
+        Developer Guide: Developer Guide
+        Explore: Przeglądaj
+        FAQ: Najczęstsze pytania
+        Batch Analysis: Analiza wsadowa
+        ARU Mode: Tryb ARU
+        File Analysis: Analiza plików
+        Getting Started: Pierwsze kroki
+        Home: Strona główna
+        Icons & Controls: Ikony i elementy sterujące
+        Inference Engine: Silnik wnioskowania
+        Live Mode: Tryb Live
+        Localization: Lokalizacja
+        Overview: Przegląd
+        Point Count Mode: Tryb Point Count
+        Privacy Policy: Polityka prywatności
+        Releasing: Wydawanie
+        Session Library: Biblioteka Sessions
+        Session Review: Przegląd Session
+        Settings: Ustawienia
+        Species Bundle: Pakiet gatunków
+        Spectrogram: Spektrogram
+        State Management: Zarządzanie stanem
+        Storage: Przechowywanie danych
+        Survey Mode: Tryb Survey
+        Taxonomy & Sync API: API taksonomii i synchronizacji
+        Acceptable Use Policy: Polityka dopuszczalnego użycia
+        Testing: Testowanie
+        User Guide: Podręcznik użytkownika
+    - locale: nb
+      name: Norsk bokmål
+      build: true
+      nav_translations:
+        API Integration: API-integrasjon
+        API Reference: API-referanse
+        Architecture: Arkitektur
+        Audio Pipeline: Lydbehandling
+        Building: Bygging
+        Code Style: Kodestil
+        Developer Guide: Utviklerveiledning
+        Explore: Utforsk
+        FAQ: Vanlige spørsmål
+        Batch Analysis: Batch Analysis
+        ARU Mode: ARU Mode
+        File Analysis: File Analysis
+        Getting Started: Kom i gang
+        Home: Hjem
+        Icons & Controls: Ikoner og kontroller
+        Inference Engine: Inferensmotor
+        Live Mode: Live Mode
+        Localization: Lokalisering
+        Overview: Oversikt
+        Point Count Mode: Point Count-modus
+        Privacy Policy: Personvernerklæring
+        Releasing: Publisering
+        Session Library: Session-bibliotek
+        Session Review: Session-gjennomgang
+        Settings: Innstillinger
+        Species Bundle: Artspakke
+        Spectrogram: Spektrogram
+        State Management: Tilstandshåndtering
+        Storage: Lagring
+        Survey Mode: Survey-modus
+        Taxonomy & Sync API: Taksonomi- og synkroniserings-API
+        Acceptable Use Policy: Retningslinjer for akseptabel bruk
+        Testing: Testing
+        User Guide: Brukerveiledning
+    - locale: ru
+      name: Русский
+      build: true
+      nav_translations:
+        API Integration: Интеграция с API
+        API Reference: Справочник API
+        Architecture: Архитектура
+        Audio Pipeline: Аудиоконвейер
+        Building: Сборка
+        Code Style: Стиль кода
+        Developer Guide: Developer Guide
+        Explore: Обзор
+        FAQ: Частые вопросы
+        Batch Analysis: Пакетный анализ
+        ARU Mode: Режим ARU
+        File Analysis: Анализ файлов
+        Getting Started: Начало работы
+        Home: Главная
+        Icons & Controls: Значки и элементы управления
+        Inference Engine: Движок вычислений
+        Live Mode: Режим Live
+        Localization: Локализация
+        Overview: Обзор раздела
+        Point Count Mode: Режим Point Count
+        Privacy Policy: Политика конфиденциальности
+        Releasing: Выпуск версий
+        Session Library: Библиотека Sessions
+        Session Review: Просмотр Session
+        Settings: Настройки
+        Species Bundle: Пакет видов
+        Spectrogram: Спектрограмма
+        State Management: Управление состоянием
+        Storage: Хранилище
+        Survey Mode: Режим Survey
+        Taxonomy & Sync API: API таксономии и синхронизации
+        Acceptable Use Policy: Политика допустимого использования
+        Testing: Тестирование
+        User Guide: Руководство пользователя
+    - locale: zh
+      name: 简体中文
+      build: true
+      nav_translations:
+        API Integration: API 集成
+        API Reference: API 参考
+        Architecture: 架构
+        Audio Pipeline: 音频流水线
+        Building: 构建
+        Code Style: 代码风格
+        Developer Guide: Developer Guide
+        Explore: 探索
+        FAQ: 常见问题
+        Batch Analysis: 批量分析
+        ARU Mode: ARU 模式
+        File Analysis: 文件分析
+        Getting Started: 入门
+        Home: 主页
+        Icons & Controls: 图标与控件
+        Inference Engine: 推理引擎
+        Live Mode: Live 模式
+        Localization: 本地化
+        Overview: 概览
+        Point Count Mode: Point Count 模式
+        Privacy Policy: 隐私政策
+        Releasing: 发布
+        Session Library: Session 库
+        Session Review: Session 回顾
+        Settings: 设置
+        Species Bundle: 物种资源包
+        Spectrogram: 语谱图
+        State Management: 状态管理
+        Storage: 存储
+        Survey Mode: Survey 模式
+        Taxonomy & Sync API: 分类学与同步 API
+        Acceptable Use Policy: 使用规范
+        Testing: 测试
+        User Guide: 用户指南
+nav:
+- Home: index.md
+- User Guide:
+  - Overview: user/index.md
+  - Getting Started: user/getting-started.md
+  - Icons & Controls: user/icons-and-controls.md
+  - Live Mode: user/live-mode.md
+  - Explore: user/explore.md
+  - Session Library: user/session-library.md
+  - Session Review: user/session-review.md
+  - Point Count Mode: user/point-count-mode.md
+  - Survey Mode: user/survey-mode.md
+  - File Analysis: user/file-analysis.md
+  - Batch Analysis: user/batch-analysis.md
+  - ARU Mode: user/aru-mode.md
+  - Settings: user/settings.md
+  - FAQ: user/faq.md
+- Developer Guide:
+  - Overview: developer/index.md
+  - Getting Started: developer/getting-started.md
+  - Architecture: developer/architecture.md
+  - Building: developer/building.md
+  - Testing: developer/testing.md
+  - Code Style: developer/code-style.md
+  - Species Bundle: developer/species-bundle.md
+  - Session Review: developer/session-review.md
+  - State Management: developer/state-management.md
+  - Audio Pipeline: developer/audio-pipeline.md
+  - Inference Engine: developer/inference-engine.md
+  - Spectrogram: developer/spectrogram.md
+  - Localization: developer/localization.md
+  - Share Targets: developer/share-targets.md
+  - Storage: developer/database.md
+  - API Integration: developer/api-integration.md
+  - Releasing: developer/releasing.md
+- API Reference:
+  - Taxonomy & Sync API: api/sync-api.md
+- Privacy Policy: privacy.md
+- Acceptable Use Policy: acceptable-use.md

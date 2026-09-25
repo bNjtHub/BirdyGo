@@ -1,0 +1,246 @@
+{
+  "locale": "cs",
+  "version": 4,
+  "_comment": [
+    "Vzory frází pro funkci Announcements. Viz dev/announcements.md §3.",
+    "Každý bucket má seznam `balanced` (vždy přítomen) a volitelně seznam",
+    "`chatty` (delší, hovornější varianty). Při Verbosity = Minimal se vzory",
+    "obejdou a říká se jen `{name}.`. Překlady jsou přirozené přeformulace,",
+    "nikoli doslovné.",
+    "",
+    "POZNÁMKA — pasti rodu / pádu:",
+    "  Čeština nemá členy, ale jména druhů přicházejí v 1. pádě a jejich rod",
+    "  neznáme. Bezpečné jsou:",
+    "    - dvojtečka: 'Rozpoznáno: {name}.'",
+    "    - {name} na začátku věty: '{name}, jasně.'",
+    "    - srovnání se spojkou 'jako' (1. pád): 'Zní jako {name}.'",
+    "    - příslovce + jmenný přísudek: 'Nejspíš {name}.'",
+    "  Před {name} radši nedávat 'ten/ta/to' ani sloveso, které by vynutilo",
+    "  jiný pád (rod druhu neznáme).",
+    "  Tón (revize v4): jako průvodce v terénu, ne klasifikátor. Bez technického",
+    "  žargonu ('čistý signál', 'dobrá shoda'). Chatty smí přidat krátký vřelý",
+    "  komentář, nikdy kýčovitý."
+  ],
+  "buckets": {
+    "A": {
+      "balanced": [
+        "Tady {name}.",
+        "Rozpoznáno: {name}.",
+        "{name}, jasně.",
+        "Bezpochyby {name}.",
+        "Zachyceno: {name}.",
+        "{name}, bez pochyb.",
+        "Ozvalo se: {name}.",
+        "Jasně slyšet: {name}."
+      ],
+      "chatty": [
+        "{name}, naprosto jasně.",
+        "Bez nejmenších pochyb: {name}.",
+        "Jasně a zřetelně: {name}.",
+        "Ozývá se: {name}.",
+        "Krásně slyšet: {name}.",
+        "{name}, hlasitě a zřetelně.",
+        "{name} — čitelné jako nic.",
+        "Zřetelně: {name}."
+      ]
+    },
+    "B": {
+      "balanced": [
+        "Znovu: {name}.",
+        "Opět {name}.",
+        "{name}, znovu.",
+        "Vrací se: {name}.",
+        "Ještě jednou: {name}."
+      ],
+      "chatty": [
+        "Znovu {name}, drží se.",
+        "Opět {name}, jasně slyšitelné.",
+        "Vrací se: {name} — zjevně se tu drží.",
+        "Zase {name}, neodchází daleko.",
+        "{name} znovu — má tu zřejmě svůj revír."
+      ]
+    },
+    "C": {
+      "balanced": [
+        "Pokračuje: {name}.",
+        "Stále {name}.",
+        "{name}, dál a dál.",
+        "{name} nepřestává.",
+        "{name} pokračuje."
+      ],
+      "chatty": [
+        "{name} jen tak nepřestane.",
+        "{name} je dnes hodně aktivní.",
+        "{name} drží tempo.",
+        "{name} pořád zpívá.",
+        "{name} se pořád ozývá.",
+        "Pořád {name}, ve skvělé formě.",
+        "{name} nepolevuje.",
+        "{name} si vesele pokračuje."
+      ]
+    },
+    "D": {
+      "balanced": [
+        "Nejspíš {name}.",
+        "Zní jako {name}.",
+        "Asi {name}.",
+        "Nejspíš to bude {name}.",
+        "Docela jistě {name}.",
+        "Dost pravděpodobně {name}.",
+        "{name}, dost možná."
+      ],
+      "chatty": [
+        "Zní to jako {name}, docela jistě.",
+        "Řekl bych, že {name}.",
+        "Docela jistě {name}.",
+        "Nejspíš to bude {name}.",
+        "Zní to jasně jako {name}.",
+        "Dost možná {name}, řekl bych."
+      ]
+    },
+    "E": {
+      "balanced": [
+        "Možná zase {name}.",
+        "Zase {name}, nejspíš.",
+        "Nejspíš znovu {name}.",
+        "{name}, nejspíš podruhé."
+      ],
+      "chatty": [
+        "Možná se vrací {name}.",
+        "Nejspíš zase {name}.",
+        "Vypadá to na návrat: {name}.",
+        "Zase {name}, řekl bych."
+      ]
+    },
+    "F": {
+      "balanced": [
+        "Možná {name}.",
+        "Mohlo by to být {name}.",
+        "Zní to trochu jako {name}.",
+        "Snad {name}.",
+        "{name}, snad.",
+        "Těžko říct — možná {name}.",
+        "Za pozornost stojí: možná {name}."
+      ],
+      "chatty": [
+        "Klidně to může být {name}, ale těžko říct.",
+        "Zní to trochu jako {name} — chce to druhé poslechnutí.",
+        "Možná {name} — natáhněte uši.",
+        "Řekl bych {name}, ale bez jistoty.",
+        "Snad {name}, není to jednoznačné.",
+        "{name} — ber s rezervou."
+      ]
+    },
+    "G": {
+      "balanced": [
+        "Možná zase {name}?",
+        "Mohlo by to být znovu {name}.",
+        "Slabě, ale snad {name}.",
+        "Těžko říct — možná zase {name}.",
+        "Nejspíš znovu {name}."
+      ],
+      "chatty": [
+        "Možná zase {name} — jisté to není.",
+        "Mohl by se vracet {name}, těžko říct.",
+        "Snad {name} znovu, bez záruky.",
+        "Nejspíš zase {name}, ale bez jistoty."
+      ]
+    },
+    "H_two": {
+      "balanced": [
+        "Dva najednou: {name1} a {name2}.",
+        "Slyším {name1} a {name2}.",
+        "{name1} a {name2}, společně.",
+        "Dva ptáci: {name1} a {name2}.",
+        "Duet: {name1} a {name2}."
+      ],
+      "chatty": [
+        "Pěkné duo — {name1} a {name2} najednou.",
+        "Dva hlasy teď: {name1} a {name2}.",
+        "{name1} a {name2} zpívají spolu.",
+        "Zajímavá dvojice: {name1} a {name2}.",
+        "Dva současně — {name1} a {name2} si odpovídají."
+      ]
+    },
+    "H_three": {
+      "balanced": [
+        "Více najednou: {name1}, {name2}, {name3}.",
+        "Tři naráz: {name1}, {name2}, {name3}.",
+        "Tři druhy společně: {name1}, {name2}, {name3}.",
+        "{name1}, {name2} a {name3}, vše naráz."
+      ],
+      "chatty": [
+        "Pěkný sbor — {name1}, {name2} a {name3} naráz.",
+        "Tři druhy najednou: {name1}, {name2} a {name3} — živé místo.",
+        "{name1}, {name2} a {name3} zpívají spolu.",
+        "Trojprogram právě teď: {name1}, {name2} a {name3}.",
+        "Pěkná směsice: {name1}, {name2} a {name3}."
+      ]
+    },
+    "H_many": {
+      "balanced": [
+        "Hodně se děje: {name1}, {name2}, {name3} a další.",
+        "Více pohromadě: {name1}, {name2}, {name3} a další.",
+        "Živé místo: {name1}, {name2}, {name3} a další."
+      ],
+      "chatty": [
+        "Teď se toho děje hodně — {name1}, {name2}, {name3} a několik dalších.",
+        "Pěkný ruch: {name1}, {name2}, {name3} a další k tomu.",
+        "Celý sbor v akci — {name1}, {name2}, {name3} a další.",
+        "Pořádný provoz — {name1}, {name2}, {name3} a pár dalších, které rozeznám.",
+        "Pěkná zvuková kulisa — {name1}, {name2}, {name3} a další se přidávají."
+      ]
+    }
+  },
+  "commonness": {
+    "abundant": [
+      "Velmi běžný druh ve vaší oblasti.",
+      "Tady ho je slyšet opravdu hodně.",
+      "Velmi rozšířený ve vaší oblasti v tuto roční dobu.",
+      "Patří tu mezi stálice.",
+      "Jeden z místních klasiků."
+    ],
+    "common": [
+      "Tady běžný druh.",
+      "Ve vaší oblasti v tuto dobu poměrně rozšířený.",
+      "Pravidelný host v této oblasti.",
+      "Jste v dobrém kraji pro tento druh.",
+      "Pro vaši oblast docela typické."
+    ],
+    "uncommon": [
+      "Ne zrovna běžný v této oblasti.",
+      "O něco méně častý ve vaší oblasti.",
+      "Stojí za zaznamenání — neslyšíme každý den.",
+      "Příjemné zpestření — tady moc nelítá.",
+      "Není to tu běžný hlas."
+    ],
+    "frequent": [
+      "Pravidelný host ve vaší oblasti.",
+      "Ozývá se tu docela pravidelně.",
+      "Objevuje se tu poměrně často.",
+      "Ve vaší oblasti docela běžně k slyšení.",
+      "Tady celkem pravidelný host."
+    ],
+    "scarce": [
+      "Spíše řídký host ve vaší oblasti.",
+      "Není tu k slyšení příliš často.",
+      "Ve vaší oblasti dost řídce.",
+      "Tady se moc neozývá.",
+      "Nepříliš častý host v této oblasti."
+    ],
+    "rare": [
+      "Vzácnost pro tuhle oblast — pěkný úlovek!",
+      "Pro tuhle oblast nezvyklý druh.",
+      "U vás dost vzácný.",
+      "Stojí za zapamatování — tady málokdy.",
+      "Pozoruhodné pozorování pro vaši oblast."
+    ],
+    "seasonalAddendum": [
+      "I když v tuto roční dobu obvykle nebývá k slyšení.",
+      "A trochu mimo sezonu navíc.",
+      "Je na něj tak trochu brzo, nebo pozdě.",
+      "Mimo obvyklé období — o to zajímavější.",
+      "Tady se obvykle ozývá v jiném období."
+    ]
+  }
+}

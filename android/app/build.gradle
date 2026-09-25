@@ -1,0 +1,199 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+
+// hasKeystore is true only when key.properties exists AND the referenced
+// storeFile is present on disk. Release builds use signingConfigs.release
+// when this is true (CI with secrets, local developer with keystore) and
+// fall back to signingConfigs.debug otherwise (CI without secrets, local
+// developer without keystore) so that validateSigningRelease never fails
+// against a missing file.
+def hasKeystore = false
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    def storeFilePath = keystoreProperties['storeFile']
+    if (storeFilePath) {
+        hasKeystore = file(storeFilePath).exists()
+    }
+}
+
+android {
+    namespace = "com.birdnet.birdnet_live"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    // Store ONNX models uncompressed in the APK so rootBundle.load() can
+    // memory-map them instead of decompressing ~259 MB into RAM.
+    aaptOptions {
+        noCompress 'onnx'
+    }
+
+    // ── 16 KB memory page size support ────────────────────────────────
+    //
+    // Required by Google Play for apps targeting Android 15+ devices that
+    // boot with 16 KB pages (current and future ARM64 hardware). When
+    // native libraries are packaged COMPRESSED, the loader has to copy
+    // them into RAM and the page-size constraint doesn't apply — but the
+    // resulting app can't be memory-mapped efficiently. Setting
+    // `useLegacyPackaging = false` keeps .so files uncompressed inside
+    // the APK/AAB; combined with AGP 8.5.1+'s 16 KB ELF alignment, the
+    // bundle satisfies the Play Console "16 KB page size" requirement.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+            // Drop x86/x86_64/armeabi-v7a copies of third-party native
+            // libraries (e.g. libonnxruntime.so from flutter_onnxruntime).
+            // `ndk.abiFilters` only filters Flutter's own libs, so without
+            // this exclude the standalone APK ships ~34 MB of unused .so
+            // files. The App Bundle (`bundleRelease`) still gets all
+            // architectures because Play splits per-device automatically.
+            excludes += [
+                'lib/x86/**',
+                'lib/x86_64/**',
+                'lib/armeabi-v7a/**',
+            ]
+        }
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // Application ID identifying the published app on the Play Store /
+        // device. Kept stable across releases — changing it after publish
+        // produces a different installable app.
+        applicationId = "de.tu_chemnitz.mi.kahst.birdnet_live"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // Only include 64-bit ARM. Drops armeabi-v7a (~9 MB) and x86 libs.
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    // ── Asset pack split ──────────────────────────────────────────────
+    //
+    // The `models_pack` install-time asset pack ships the two large ONNX
+    // model files (~152 MB + ~6 MB) outside the base module so that the
+    // compressed base download stays under Google Play's 200 MB limit.
+    //
+    // Asset packs are inherently App Bundle only: `bundleRelease` includes
+    // the pack, `assembleRelease` ignores it. The standalone APK we build
+    // for sideload / GitHub releases therefore keeps the .onnx files in
+    // `flutter_assets` and remains fully self-contained — no asset pack,
+    // no online download, no Play services required.
+    //
+    // The Dart-side `AssetPackService` resolves models from the pack when
+    // available, and falls back to extracting them from `rootBundle` on
+    // sideload installs. Both paths run fully offline at runtime.
+    assetPacks = [":models_pack"]
+
+    signingConfigs {
+        if (hasKeystore) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = hasKeystore ? signingConfigs.release : signingConfigs.debug
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+// geolocator normally packages Play Services Location and prefers its fused
+// provider. BirdNET Live deliberately uses Android's LocationManager instead:
+// the fused provider can repeatedly show Google's location-accuracy resolution
+// dialog when Google Location Accuracy is off. Keep the Play libraries needed
+// by Asset Delivery; exclude only the location module.
+configurations.configureEach {
+    exclude group: 'com.google.android.gms', module: 'play-services-location'
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+
+    // Play Asset Delivery — used at runtime to resolve the install-time
+    // `models_pack` asset pack's on-device path. The library degrades
+    // gracefully on sideload APKs (no Play Store install): the API simply
+    // returns null for any pack lookup, and we fall back to extracting
+    // models from `rootBundle`.
+    implementation 'com.google.android.play:asset-delivery:2.2.2'
+}
+
+// ── Strip *.onnx from base module assets when building the App Bundle ──
+//
+// The asset pack ships the .onnx files for AAB builds. If we left them
+// in `flutter_assets` as well, the base module would still be ~218 MB
+// compressed and Google Play would reject the upload (>200 MB limit).
+//
+// Asset flow on the Flutter Android pipeline:
+//   1. mergeReleaseAssets       — merges Android library assets
+//   2. copyFlutterAssetsRelease — Flutter copies its assets into the
+//                                  same `intermediates/assets/release/`
+//   3. packageReleaseBundle     — packs the AAB (bundle build only)
+//      packageRelease           — packs the APK   (apk build only)
+//
+// We hook `doLast` to `copyFlutterAssetsRelease` (which runs for both
+// AAB and APK builds), and only strip when the current task graph
+// contains `packageReleaseBundle`. APK builds therefore retain the
+// self-contained .onnx files automatically.
+//
+// `copyFlutterAssetsRelease` is also marked non-cacheable so a
+// follow-up APK build always re-copies the .onnx files we deleted.
+afterEvaluate {
+    tasks.matching { it.name == 'copyFlutterAssetsRelease' }.configureEach { copyTask ->
+        copyTask.outputs.upToDateWhen { false }
+        copyTask.doLast {
+            if (!gradle.taskGraph.hasTask(':app:packageReleaseBundle')) {
+                logger.info("[asset-pack] APK build detected — keeping .onnx in flutter_assets")
+                return
+            }
+            def root = file("${buildDir}/intermediates/assets/release")
+            if (!root.exists()) {
+                logger.warn("[asset-pack] merged assets dir not found: ${root}")
+                return
+            }
+            def removed = 0
+            def freedBytes = 0L
+            fileTree(dir: root, include: '**/*.onnx').each { f ->
+                freedBytes += f.length()
+                if (f.delete()) removed++
+            }
+            def freedMb = (freedBytes / 1024.0 / 1024.0).round(1)
+            logger.lifecycle(
+                "[asset-pack] stripped ${removed} .onnx file(s) (${freedMb} MB) " +
+                "from base module — shipped via models_pack instead")
+        }
+    }
+}

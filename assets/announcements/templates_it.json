@@ -1,0 +1,245 @@
+{
+  "locale": "it",
+  "version": 4,
+  "_comment": [
+    "Modelli di frasi per la funzione Announcements. Vedi dev/announcements.md §3.",
+    "Ogni bucket ha una lista `balanced` (sempre presente) e opzionalmente",
+    "una lista `chatty` (varianti più discorsive). Con Verbosity = Minimal le",
+    "frasi vengono ignorate e si dice solo `{name}.`. Le traduzioni sono",
+    "riformulazioni naturali, non letterali.",
+    "",
+    "IMPORTANTE — trappola di genere:",
+    "  I nomi degli uccelli hanno genere grammaticale (il pettirosso, la",
+    "  cinciallegra) che NON conosciamo a runtime. Mai mettere articoli",
+    "  determinativi o indeterminativi (il, lo, la, i, gli, le, un, uno, una)",
+    "  davanti a {name}, {name1}, {name2}, {name3}. Sicuro:",
+    "    - due punti: 'Rilevato: {name}.'",
+    "    - {name} a inizio frase: '{name}, senza dubbio.'",
+    "    - costruzioni senza articolo: 'Suona come {name}.'",
+    "  Tono (rivisto v4): come un compagno di osservazione, non un classificatore.",
+    "  Evitare il gergo tecnico ('segnale pulito', 'buona corrispondenza'). In",
+    "  chatty è ammesso un commento breve e caloroso, mai sdolcinato."
+  ],
+  "buckets": {
+    "A": {
+      "balanced": [
+        "Ecco {name}.",
+        "È {name}.",
+        "Rilevato: {name}.",
+        "{name}, senza dubbio.",
+        "Si sente {name}.",
+        "Chiaramente {name}.",
+        "{name}, qui vicino.",
+        "{name}, che canta."
+      ],
+      "chatty": [
+        "Si sente {name}, qui vicino.",
+        "È {name} — un piacere sentirlo.",
+        "Nessun dubbio, è {name}.",
+        "{name} si fa sentire, ben chiaro.",
+        "Ecco {name} in piena voce.",
+        "Non c'è da sbagliarsi — {name}.",
+        "{name} ha appena iniziato.",
+        "È {name}, limpido."
+      ]
+    },
+    "B": {
+      "balanced": [
+        "Di nuovo: {name}.",
+        "Ancora {name}.",
+        "{name}, di nuovo.",
+        "Ritorna {name}.",
+        "Ancora una volta, {name}."
+      ],
+      "chatty": [
+        "Ancora {name}, non molla.",
+        "Ritorna {name} — sembra fermarsi qui.",
+        "Di nuovo {name}, ben chiaro.",
+        "{name} ritorna, non va lontano.",
+        "Ancora {name}, si tiene la zona."
+      ]
+    },
+    "C": {
+      "balanced": [
+        "{name} continua.",
+        "Sempre {name}.",
+        "{name}, ancora attivo.",
+        "{name} non smette.",
+        "{name} va avanti."
+      ],
+      "chatty": [
+        "{name} non si ferma.",
+        "{name} resta molto attivo oggi.",
+        "{name} mantiene il ritmo.",
+        "{name} continua a cantare.",
+        "{name} resta bello presente.",
+        "Sempre {name}, in gran forma.",
+        "{name} non ha ripreso fiato.",
+        "{name} continua imperterrito."
+      ]
+    },
+    "D": {
+      "balanced": [
+        "Probabilmente {name}.",
+        "Suona come {name}.",
+        "Forse {name}.",
+        "Direi {name}.",
+        "Abbastanza sicuro: {name}.",
+        "Propendo per {name}.",
+        "{name}, direi."
+      ],
+      "chatty": [
+        "Suona come {name}, direi.",
+        "Direi {name}, con discreta sicurezza.",
+        "Ha un'aria di {name}.",
+        "Abbastanza sicuro: {name}.",
+        "Propendo per {name}.",
+        "Tutto porta a {name}."
+      ]
+    },
+    "E": {
+      "balanced": [
+        "Forse di nuovo {name}.",
+        "Potrebbe essere {name} ancora.",
+        "Di nuovo {name}, forse.",
+        "Probabilmente ancora {name}."
+      ],
+      "chatty": [
+        "Sembra che ritorni {name}.",
+        "Credo sia di nuovo {name}.",
+        "Forse {name} di ritorno.",
+        "Probabilmente {name}, ancora una volta."
+      ]
+    },
+    "F": {
+      "balanced": [
+        "Forse {name}?",
+        "Potrebbe essere {name}.",
+        "Suona un po' come {name}.",
+        "Magari {name}.",
+        "{name}, forse.",
+        "Difficile dirlo — forse {name}.",
+        "Da tenere d'occhio — forse {name}."
+      ],
+      "chatty": [
+        "Potrebbe essere {name} — difficile dirlo.",
+        "Suona un po' come {name} — da riascoltare.",
+        "Magari {name} lì — orecchie tese.",
+        "Direi {name}, senza certezza.",
+        "Forse {name}, non facile da dire.",
+        "{name}, con le dovute cautele."
+      ]
+    },
+    "G": {
+      "balanced": [
+        "Forse di nuovo {name}?",
+        "Potrebbe essere {name} ancora.",
+        "Debole, ma forse {name}.",
+        "Difficile dirlo — forse ancora {name}.",
+        "Probabilmente ancora {name}."
+      ],
+      "chatty": [
+        "Forse {name} ancora — non è sicuro.",
+        "Potrebbe essere {name} che ritorna, difficile dirlo.",
+        "Magari {name} di nuovo, senza garanzie.",
+        "Probabilmente ancora {name}, ma senza certezza."
+      ]
+    },
+    "H_two": {
+      "balanced": [
+        "Due insieme: {name1} e {name2}.",
+        "Sento {name1} e {name2}.",
+        "{name1} e {name2}, insieme.",
+        "Due uccelli: {name1} e {name2}.",
+        "Duetto: {name1} e {name2}."
+      ],
+      "chatty": [
+        "Bel duetto — {name1} e {name2} insieme.",
+        "Due voci ora: {name1} e {name2}.",
+        "{name1} e {name2} cantano insieme.",
+        "Coppia interessante: {name1} e {name2}.",
+        "Due alla volta — {name1} e {name2} si rispondono."
+      ]
+    },
+    "H_three": {
+      "balanced": [
+        "Più specie insieme: {name1}, {name2}, {name3}.",
+        "Tre alla volta: {name1}, {name2}, {name3}.",
+        "Tre specie insieme: {name1}, {name2}, {name3}.",
+        "{name1}, {name2} e {name3}, tutti insieme."
+      ],
+      "chatty": [
+        "Bel coro — {name1}, {name2} e {name3} contemporaneamente.",
+        "Tre specie insieme: {name1}, {name2} e {name3} — posto vivace.",
+        "{name1}, {name2} e {name3} cantano insieme.",
+        "Trio in corso: {name1}, {name2} e {name3}.",
+        "Bel mix in arrivo: {name1}, {name2} e {name3}."
+      ]
+    },
+    "H_many": {
+      "balanced": [
+        "Molta attività: {name1}, {name2}, {name3} e altri.",
+        "Diverse specie insieme: {name1}, {name2}, {name3} e altre.",
+        "Posto vivace: {name1}, {name2}, {name3} e altri ancora."
+      ],
+      "chatty": [
+        "Momento molto attivo — {name1}, {name2}, {name3} e diversi altri.",
+        "Bella attività: {name1}, {name2}, {name3} e altri ancora.",
+        "Vero coro — {name1}, {name2}, {name3} e parecchi altri.",
+        "Molto movimento qui — {name1}, {name2}, {name3} e qualcuno in più.",
+        "Che paesaggio sonoro — {name1}, {name2}, {name3} e altri che si uniscono."
+      ]
+    }
+  },
+  "commonness": {
+    "abundant": [
+      "Una specie molto comune nella tua zona.",
+      "Da queste parti si sente moltissimo.",
+      "Molto diffusa nella tua zona in questo periodo.",
+      "Una di casa qui.",
+      "Quanto di più familiare per la tua zona."
+    ],
+    "common": [
+      "Una specie comune da queste parti.",
+      "Abbastanza presente nella tua zona in questo periodo.",
+      "Presenza abituale in zona.",
+      "Sei in buon territorio per questa specie.",
+      "Piuttosto tipica della tua zona."
+    ],
+    "uncommon": [
+      "Non particolarmente comune da queste parti.",
+      "Un po' meno frequente nella tua zona.",
+      "Da segnalare — non si sente tutti i giorni.",
+      "Piccola sorpresa — non così frequente nella tua zona.",
+      "Non è una presenza quotidiana da queste parti."
+    ],
+    "frequent": [
+      "Un habitué della zona.",
+      "Si sente abbastanza regolarmente nella tua zona.",
+      "Compare spesso da queste parti.",
+      "Un visitatore regolare della tua zona.",
+      "Lo senti con regolarità da queste parti."
+    ],
+    "scarce": [
+      "Piuttosto scarso da queste parti.",
+      "Non si sente molto spesso nella tua zona.",
+      "Poco frequente nella tua zona.",
+      "Non lo senti spesso da queste parti.",
+      "Poco presente in questa zona."
+    ],
+    "rare": [
+      "Una vera rarità da queste parti.",
+      "Specie insolita per questa zona.",
+      "Piuttosto rara nella tua zona, questa.",
+      "Da ricordare — molto scarsa qui.",
+      "Bell'osservazione per la tua zona."
+    ],
+    "seasonalAddendum": [
+      "Anche se di solito non è in giro in questa stagione.",
+      "E un po' fuori stagione, tra l'altro.",
+      "Un po' presto o tardi per questa specie, di norma.",
+      "Fuori dal periodo abituale qui, oltretutto.",
+      "Di solito si sente in un'altra stagione qui."
+    ]
+  }
+}
