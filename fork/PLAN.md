@@ -1,4 +1,4 @@
-# Plan de développement de Ramage
+# Plan de développement de BirdyGo
 
 Base : BirdNET Live (github.com/birdnet-team/birdnet-live-app), l'app officielle de l'équipe BirdNET
 (Cornell Lab et TU Chemnitz). On ne refait pas ce qui existe : on ajoute ce qui manque et on refait
@@ -9,7 +9,7 @@ Flutter (section « Phase iOS » en bas de ce fichier).
 
 ## Ce qui existe déjà, ce qu'on ajoute
 
-| Besoin | Déjà dans BirdNET Live | Ajouté par Ramage |
+| Besoin | Déjà dans BirdNET Live | Ajouté par BirdyGo |
 |---|---|---|
 | Savoir si l'app se trompe | score, seuil réglable, filtre géographique (3 modes), lissage temporel, confirmation manuelle | niveaux Sûr, Probable, À vérifier, alerte « inattendu ici », revue rapide par balayage, précision mesurée sur tes revues (J3) |
 | Retrouver et réécouter les sons | bibliothèque de sessions, lecteur de clips, spectrogramme | réécoute pendant l'écoute, sonothèque par espèce avec favoris (J2) |
@@ -23,11 +23,11 @@ Flutter (section « Phase iOS » en bas de ce fichier).
 
 - [ ] Installer BirdNET Live depuis le Play Store, faire une ou deux sorties, noter ce qui gêne vraiment.
 - [ ] Sur GitHub, forker birdnet-team/birdnet-live-app vers Bnjthub (tu peux renommer le dépôt en
-      `ramage`). Un fork est public. Pour un dépôt privé, il faut le dupliquer au lieu de le forker.
+      `BirdyGo`). Un fork est public. Pour un dépôt privé, il faut le dupliquer au lieu de le forker.
 - [ ] Sur le PC : installer Flutter (canal stable), Android Studio (pour le SDK Android) et Git LFS, puis :
   ```
-  git clone https://github.com/Bnjthub/ramage.git
-  cd ramage
+  git clone https://github.com/Bnjthub/BirdyGo.git
+  cd BirdyGo
   git lfs install
   git lfs pull
   flutter pub get
@@ -83,7 +83,7 @@ Bug sur le téléphone, branche <nom>. J'ai fait : <étapes>. Résultat : <ce qu
 
 ## J0 : faire du fork une app à part
 
-- [ ] Nom affiché « Ramage », applicationId Android `fr.justcodeit.ramage`, pour que l'app s'installe
+- [ ] Nom affiché « BirdyGo », applicationId Android `fr.justcodeit.birdygo`, pour que l'app s'installe
       à côté de BirdNET Live. Mettre aussi le bundle id iOS au même nom, sans rien tester côté iOS.
 - [ ] Icône provisoire simple, refaite en J6.
 - [ ] Écran À propos : « Propulsé par BirdNET » avec le lien vers le dépôt d'origine. Garder LICENSE,

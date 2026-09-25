@@ -1,11 +1,11 @@
-# Ramage, fork de BirdNET Live
+# BirdyGo, fork de BirdNET Live
 
 App Flutter (Android et iOS) qui identifie les oiseaux au chant, hors ligne. C'est un fork de
 birdnet-team/birdnet-live-app : code sous MIT, poids du modèle sous Apache 2.0 (MODEL_LICENSE),
 charte d'usage dans ACCEPTABLE_USE.md. Développeur solo francophone (Benjamin), poste Windows,
 tests sur un Xiaomi 17 Ultra (HyperOS).
 
-Nom de travail : Ramage. Identifiant Android et iOS : `fr.justcodeit.ramage`.
+Nom de travail : BirdyGo. Identifiant Android et iOS : `fr.justcodeit.birdygo`.
 
 Cible actuelle : Android seulement. La version iOS viendra une fois Android validé, avec le même code
 Flutter. Donc : ne pas supprimer ni casser le dossier `ios/`, et pour toute fonction qui passe par du

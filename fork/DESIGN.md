@@ -1,4 +1,4 @@
-# Direction visuelle de Ramage
+# Direction visuelle de BirdyGo
 
 ## L'idée
 
