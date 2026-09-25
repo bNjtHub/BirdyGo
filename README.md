@@ -1,255 +1,154 @@
-# BirdNET Live - Professional bioacoustics in your pocket
+<h1 align="center">
+  <img src="fork/brand/birdygo-logo.svg" alt="Logo BirdyGo" width="180"><br>
+  BirdyGo
+</h1>
 
 <p align="center">
-  <img src="assets/images/app-icon.png" alt="BirdNET Live" width="250">
+  <b>Reconnais les oiseaux à leur chant, hors ligne, sur le terrain.</b>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-   <img src="https://img.shields.io/badge/flutter-%3E%3D3.27-blue.svg" alt="Flutter >=3.27">
-  <img src="https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Windows-green.svg" alt="Platforms">
-  <img src="https://img.shields.io/badge/version-1.1.3-orange.svg" alt="Version">
-  <img src="https://img.shields.io/badge/species-9%2C789-brightgreen.svg" alt="Species: 9,789">
+  <img src="https://img.shields.io/badge/statut-en%20d%C3%A9veloppement-F4C542.svg" alt="Statut : en développement">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-19A7B3.svg" alt="Licence MIT"></a>
+  <img src="https://img.shields.io/badge/Flutter-stable-19A7B3.svg" alt="Flutter stable">
+  <img src="https://img.shields.io/badge/plateforme-Android-9DB46A.svg" alt="Plateforme : Android">
+  <a href="https://github.com/birdnet-team/birdnet-live-app"><img src="https://img.shields.io/badge/propuls%C3%A9%20par-BirdNET-13233A.svg" alt="Propulsé par BirdNET"></a>
 </p>
 
-Built for field researchers, conservationists, and birders, BirdNET Live identifies bird species in real time using on-device BirdNET+ inference — no internet required. Built with Flutter for Android, iOS, and Windows.
+BirdyGo est une app Flutter qui identifie les oiseaux au chant, en direct et sans connexion. C'est un fork de
+[BirdNET Live](https://github.com/birdnet-team/birdnet-live-app), l'app officielle de l'équipe BirdNET
+(Cornell Lab of Ornithology et TU Chemnitz). BirdyGo garde tout ce que BirdNET Live fait déjà et ajoute ce qui
+sert au quotidien : savoir quand l'app se trompe, réécouter ses meilleurs enregistrements, suivre ses espèces
+dans le temps et sur une carte, dans une interface pensée comme un carnet de terrain.
 
-<p align="center">
-  <img src="docs/assets/screenshots/live-mode.png" alt="Live Mode" width="150">
-  <img src="docs/assets/screenshots/session-review.png" alt="Session Review" width="150">
-  <img src="docs/assets/screenshots/explore.png" alt="Explore" width="150">
-  <img src="docs/assets/screenshots/species.png" alt="Species Overlay" width="150">
-  <img src="docs/assets/screenshots/file-analysis.png" alt="File Analysis" width="150">
-</p>
-
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=de.tu_chemnitz.mi.kahst.birdnet_live"><b>Google Play</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://apps.apple.com/us/app/birdnet-live/id6776168518"><b>App Store</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://github.com/birdnet-team/birdnet-live-app/releases/latest"><b>Download APK</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://birdnet-team.github.io/birdnet-live-app/"><b>Documentation</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://github.com/birdnet-team/birdnet-live-app/releases"><b>All Releases</b></a>
-</p>
-
-**NOTE: BirdNET Live is under active development. Some rough edges and limitations remain — please [report issues](https://github.com/birdnet-team/birdnet-live-app/issues) you run into and contribute if you can!**
+> **Projet en cours.** BirdyGo n'est pas encore publié. Pour une app prête à l'emploi, installe
+> [BirdNET Live](https://play.google.com/store/apps/details?id=de.tu_chemnitz.mi.kahst.birdnet_live).
 
 ---
 
-## Table of Contents
+## Sommaire
 
-- [Features](#features)
-- [Install on Android](#install-on-android)
-- [Quick Start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-  - [Verify](#verify)
-- [Deploy to Phone](#deploy-to-phone)
-  - [Android (USB — Windows / macOS / Linux)](#android-usb--windows--macos--linux)
-  - [Android (Wireless — Windows)](#android-wireless--windows)
-  - [iOS (macOS only)](#ios-macos-only)
-  - [VS Code Tips](#vs-code-tips)
-- [Documentation](#documentation)
-- [Project Structure](#project-structure)
-- [Model Assets](#model-assets)
-- [Development](#development)
-- [License](#license)
-- [Acceptable Use](#acceptable-use)
-- [Citation](#citation)
-- [Funding](#funding)
-- [Partners](#partners)
+- [Ce que fait BirdyGo](#ce-que-fait-birdygo)
+- [Feuille de route](#feuille-de-route)
+- [Démarrer](#démarrer)
+- [Organisation du fork](#organisation-du-fork)
+- [Rester à jour avec BirdNET Live](#rester-à-jour-avec-birdnet-live)
+- [Licences et crédits](#licences-et-crédits)
 
-## Features
+## Ce que fait BirdyGo
 
-- **Live Mode** — Real-time scrolling spectrogram with species identification
-- **Point Count Mode** — Timed survey sessions with countdown timer and station metadata
-- **Survey Mode** — Long-running transect surveys with GPS tracking, background monitoring, and detection sampling
-- **File Analysis Mode** — Analyze existing audio files (WAV, FLAC, MP3, OGG, and more)
-- **ARU Mode** — Turn your device into an acoustic recording unit for multi-day deployments
-- **Explore** — Browse species expected at your location using the BirdNET geo-model
-- **Session Library** — Review, edit, and export past sessions with audio playback
-- **Export** — Raven Pro, CSV, JSON, GPX, and ZIP bundle formats
-- **On-device inference** — BirdNET+ model (9,789 species), no internet required
-- **FLAC recording** — Pure Dart encoder for compressed audio (50–60% reduction)
-- **Landscape & tablet layouts** — Adaptive UI for phones and tablets in both orientations
-- **Localization** — UI translations and spoken announcement phrasing for English, German, Czech, Spanish, French, Italian, Portuguese, Dutch, Norwegian Bokmål, Polish, Russian, and Simplified Chinese
+**Hérité de BirdNET Live**, et déjà fonctionnel :
 
-## Install on Android
+- identification en direct avec spectrogramme défilant, modèle BirdNET+ embarqué (plus de 9 000 espèces), sans internet ;
+- modes Live, Point d'écoute, Transect avec suivi GPS, analyse de fichiers audio et station fixe (ARU) ;
+- filtre géographique selon le lieu et la saison ;
+- bibliothèque de sessions, lecteur de clips, exports CSV, GPX, Raven et JSON.
 
-BirdNET Live is available on the [Google Play Store](https://play.google.com/store/apps/details?id=de.tu_chemnitz.mi.kahst.birdnet_live) and is available as a signed APK for sideloading. Download the latest release from the [Releases page](https://github.com/birdnet-team/birdnet-live-app/releases/latest), transfer the `.apk` file to your phone, and open it to install. You may need to allow installation from unknown sources in your device settings.
+**Ajouté par BirdyGo** (en préparation, voir la [feuille de route](#feuille-de-route)) :
 
-> **Note:** The APK is ~260 MB because it includes the full BirdNET+ audio model and all species images for full offline use.
+- **Fiabilité** : trois niveaux (Sûr, Probable, À vérifier), badge « Inattendu ici », revue rapide par balayage
+  et précision mesurée sur tes propres vérifications.
+- **Réécoute** : rejouer un chant pendant l'écoute sans que le modèle ne se détecte lui-même, et une sonothèque
+  par espèce avec favoris.
+- **Palmarès** : espèces classées par contacts, jours ou dernière écoute, activité par heure et par mois.
+- **Carte** : tous tes contacts sur une seule carte, en hexagones, avec les fonds IGN.
+- **Nouvelle interface** : photos d'oiseaux, thèmes clair et sombre, animations sobres (voir [fork/DESIGN.md](fork/DESIGN.md)).
 
-## Quick Start
+## Feuille de route
 
-### Prerequisites
+Android d'abord, jusqu'à une version validée sur le Play Store, puis iOS avec le même code. Le détail de chaque
+jalon et ses critères de fin sont dans [fork/PLAN.md](fork/PLAN.md).
 
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (3.27+ with Dart 3.7+)
-- [Git LFS](https://git-lfs.com/) for the large ONNX model files
-- [Android Studio](https://developer.android.com/studio) (for Android SDK & emulator)
-- Xcode (macOS only, for iOS development)
+| Jalon | Contenu | État |
+|---|---|---|
+| J0 | Renommage en BirdyGo, identifiant `fr.justcodeit.birdygo`, écran À propos | à faire |
+| J1 | Index des observations (SQLite dérivé des sessions) | à faire |
+| J2 | Réécoute pendant l'écoute et sonothèque | à faire |
+| J3 | Niveaux de fiabilité et revue rapide | à faire |
+| J4 | Palmarès | à faire |
+| J5 | Carte de tous les contacts | à faire |
+| J6 | Refonte visuelle | à faire |
+| J7 | Publication Android | à faire |
 
-### Setup
+## Démarrer
+
+### Prérequis
+
+- [Flutter](https://docs.flutter.dev/get-started/install), canal stable
+- [Android Studio](https://developer.android.com/studio), pour le SDK Android
+- [Git LFS](https://git-lfs.com/), pour les modèles ONNX
+
+### Installation
 
 ```bash
-git clone https://github.com/birdnet-team/birdnet-live-app.git
-cd birdnet-live-app
+git clone https://github.com/bNjtHub/BirdyGo.git
+cd BirdyGo
 git lfs install
 git lfs pull
 flutter pub get
 flutter gen-l10n
+flutter run
 ```
 
-Do not skip the LFS step on a fresh clone. The two `.onnx` model files under `assets/models/` are stored with Git LFS; without the real files the app may build from pointer files but model loading will fail at runtime. You only need to run the Python model build pipeline in `dev/` when updating or rebuilding the models themselves.
-
-### Verify
+Les deux fichiers `.onnx` de `assets/models/` sont stockés avec Git LFS. Sans eux, l'app se compile mais ne
+peut pas charger le modèle. Si `git lfs pull` échoue sur ce dépôt, récupère-les depuis le dépôt d'origine :
 
 ```bash
-flutter doctor    # Check Flutter setup
-flutter test      # Run tests
-flutter analyze   # Check for issues
+git config lfs.url https://github.com/birdnet-team/birdnet-live-app.git/info/lfs
+git lfs pull
 ```
 
-## Deploy to Phone
-
-### Android (USB — Windows / macOS / Linux)
-
-1. **Enable Developer Options** on your phone: Settings → About phone → tap "Build number" 7 times.
-2. **Enable USB debugging**: Settings → Developer options → USB debugging → On.
-3. **Connect** phone via USB and accept the debugging prompt.
-4. **Check** Flutter sees the device:
-   ```bash
-   flutter devices
-   ```
-5. **Run** (debug mode with hot reload):
-   ```bash
-   flutter run
-   ```
-   Or press `F5` in VS Code with the Flutter extension installed.
-
-6. **Build release APK** (optional):
-   ```bash
-   flutter build apk --release
-   ```
-   The APK will be at `build/app/outputs/flutter-apk/app-release.apk`. It is self-contained for sideloading and includes the ONNX models. Transfer it to your phone and install.
-
-### Android (Wireless — Windows)
-
-1. Complete steps 1–3 above (USB debugging on, phone connected via USB).
-2. **Pair** over Wi-Fi (Android 11+):
-   ```bash
-   # On the phone: Developer options → Wireless debugging → Pair device with pairing code
-   # Note the IP:port and pairing code shown
-   adb pair <ip>:<port>
-   # Enter the pairing code when prompted
-   ```
-3. **Connect** wirelessly:
-   ```bash
-   adb connect <ip>:<port>
-   # Use the port shown under "Wireless debugging" (not the pairing port)
-   ```
-4. **Unplug** the USB cable. Run as usual:
-   ```bash
-   flutter run
-   ```
-
-### iOS (macOS only)
-
-1. **Connect** iPhone via USB.
-2. **Trust** the computer on the phone when prompted.
-3. **Open** `ios/Runner.xcworkspace` in Xcode and set your signing team under Signing & Capabilities.
-4. **Run**:
-   ```bash
-   flutter run
-   ```
-   Or press `F5` in VS Code.
-
-### VS Code Tips
-
-- Install the **Flutter** and **Dart** extensions.
-- Select your target device in the status bar (bottom-right).
-- `F5` to launch with debugger attached.
-- `Ctrl+F5` to launch without debugger (faster startup).
-- Use the hot reload button (⚡) or `r` in the terminal for quick iterations.
-- `R` in the terminal for hot restart (resets state).
-
-## Documentation
-
-- **User & Developer Docs**: [GitHub Pages](https://birdnet-team.github.io/birdnet-live-app/) (MkDocs Material)
-
-To preview the documentation locally:
+### Vérifier
 
 ```bash
-pip install mkdocs mkdocs-material mkdocs-static-i18n pymdown-extensions
-mkdocs serve
+mkdir -p assets/species_data   # dossier généré, attendu par pubspec.yaml
+flutter analyze
+flutter test
 ```
 
-Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+## Organisation du fork
 
-## Project Structure
+Le fork reste proche d'upstream pour que les mises à jour de BirdNET Live se fusionnent sans douleur :
 
-```
-lib/
-  core/           # Constants, theme, utilities, extensions
-  features/       # Feature modules (live, point_count, survey, file_analysis,
-                  #   aru, audio, recording, spectrogram, inference, explore,
-                  #   announcements, history, settings, home, onboarding, about)
-  l10n/          # Localization ARB files (en, de, cs, es, fr, it, pt, nl, nb, pl, ru, zh)
-  shared/         # Shared models, providers, services, widgets
-                  #   (e.g. ContentWidthConstraint for tablet max-width)
+| Emplacement | Contenu |
+|---|---|
+| `lib/fork/<domaine>/` | code propre à BirdyGo |
+| `test/fork/` | tests de ce code |
+| `fork/` | [plan de développement](fork/PLAN.md), [direction visuelle](fork/DESIGN.md), logo et scripts d'environnement |
+| `// FORK: <raison>` | marque chaque modification, minimale, d'un fichier upstream |
+| `docs/developer/` | documentation technique d'upstream (architecture, pipeline audio, inférence…) |
 
-docs/             # MkDocs source for GitHub Pages documentation
-assets/           # App assets (LFS ONNX models, species data, images, fonts)
-  announcements/  # Spoken announcement phrasing per locale (second translation
-                  #   surface — see assets/announcements/README.md)
-test/             # Tests mirroring lib/ structure
-```
+Les règles de travail du fork sont dans [CLAUDE.md](CLAUDE.md). Elles complètent celles de l'équipe BirdNET
+([AGENTS.md](AGENTS.md)).
 
-## Model Assets
+## Rester à jour avec BirdNET Live
 
-BirdNET Live runs fully on-device, so the model assets are part of the checkout/build rather than downloaded by the app at runtime. The large `.onnx` files in `assets/models/` are tracked with Git LFS:
-
-- `BirdNET+_V3.0-preview3.1_Global_10K-pruned_FP16.onnx` — audio classifier (~65 MB)
-- `BirdNET+_Geomodel_V3.0.4_Global_10K-pruned_FP16.onnx` — location-based species model (~13 MB)
-
-Release APKs for sideloading keep those models inside `flutter_assets`. Play Store App Bundles move the `.onnx` files into the install-time `models_pack` asset pack so the base module stays below Play's size limit while still working offline after installation.
-
-## Development
+Une fois par mois, on fusionne la branche `main` d'upstream :
 
 ```bash
-flutter run          # Run with hot reload
-flutter test         # Run tests
-flutter analyze      # Static analysis
-dart format .        # Format code
+git remote add upstream https://github.com/birdnet-team/birdnet-live-app.git   # la première fois
+git fetch upstream
+git checkout -b sync-AAAA-MM
+git merge upstream/main
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+En cas de conflit, on garde les ajouts marqués `FORK` et le code de `lib/fork/`, et la version upstream pour
+le reste. Ce README est propre au fork : en cas de conflit, garder cette version.
 
-### Contributing Translations
+## Licences et crédits
 
-Translations are very welcome contributions, and they cover **two** surfaces — both need updating for a language to be complete:
+BirdyGo est une **version modifiée** de BirdNET Live. Ce n'est pas une app officielle BirdNET, et elle n'est ni
+affiliée à l'équipe BirdNET, au Cornell Lab ou à la TU Chemnitz, ni approuvée par eux.
 
-- **UI strings** — ARB files in `lib/l10n/`. See [CONTRIBUTING.md](CONTRIBUTING.md#translation-contributions).
-- **Spoken announcement phrasing** — the sentences the app says out loud, in `assets/announcements/templates_<locale>.json`. See [assets/announcements/README.md](assets/announcements/README.md).
+- **Code** : licence [MIT](LICENSE), © 2026 BirdNET-Team pour le code d'origine.
+- **Modèles** : les poids BirdNET+ de `assets/models/` sont sous licence [Apache 2.0](MODEL_LICENSE).
+- **Usage responsable** : voir la [charte d'usage de BirdNET](ACCEPTABLE_USE.md), notamment sur la publication
+  de la position d'espèces sensibles.
+- **Logo** : création originale du projet BirdyGo ([fork/brand/](fork/brand/)).
 
-The announcement templates are not in ARB because each entry is a *list* of interchangeable variants rather than a single string. A missing or incomplete template file falls back to English silently, so it is easy to ship a "complete" translation that still speaks English.
-
-## License
-
-- **Source Code**: The source code for this project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
-- **Models**: The bundled BirdNET model weights are licensed under the [Apache License 2.0](MODEL_LICENSE).
-
-Please ensure you review and adhere to the specific license terms provided with each model.
-
-## Acceptable Use
-
-Please refer to the [Acceptable Use Policy](ACCEPTABLE_USE.md) for responsible-use guidance for BirdNET and BirdNET Live.
-
-## Citation
-
-If you use this app in your scientific work, please cite it using the following BibTeX entry:
+Tout le mérite de la reconnaissance revient à l'équipe BirdNET, à ses financeurs et à ses partenaires, listés
+dans le [README d'origine](https://github.com/birdnet-team/birdnet-live-app#funding). Pour un usage
+scientifique, cite BirdNET Live :
 
 ```bibtex
 @software{BirdNET_Live_2026,
@@ -259,17 +158,3 @@ If you use this app in your scientific work, please cite it using the following 
   year = {2026}
 }
 ```
-
-## Funding
-
-Our work in the Cornell K. Lisa Yang Center for Conservation Bioacoustics is made possible by the generosity of K. Lisa Yang to advance innovative conservation technologies to inspire and inform the conservation of wildlife and habitats.
-
-The development of BirdNET is supported by the German Federal Ministry of Research, Technology and Space (FKZ 01|S22072), the German Federal Ministry for the Environment, Climate Action, Nature Conservation and Nuclear Safety (FKZ 67KI31040E), the German Federal Ministry of Economic Affairs and Energy (FKZ 16KN095550), the Deutsche Bundesstiftung Umwelt (project 39263/01) and the European Social Fund.
-
-## Partners
-
-BirdNET is a joint effort of partners from academia and industry.
-Without these partnerships, this project would not have been possible.
-Thank you!
-
-![Our partners](https://tuc.cloud/index.php/s/KSdWfX5CnSRpRgQ/download/box_logos.png)
