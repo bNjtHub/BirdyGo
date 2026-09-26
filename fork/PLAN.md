@@ -207,43 +207,40 @@ Fini quand : les compteurs d'une espèce correspondent à un export CSV sur un �
 
 But : pour chaque oiseau de France, une fiche claire en français : taille, ce qu'il fait, pourquoi il
 est là, migration, comment le reconnaître à l'oreille, confusions possibles, une anecdote, et un indice
-court pour le carnet du jeu (J6e). Les fiches
-sont écrites une fois, vérifiées, relues et embarquées : hors ligne, sans coût à l'usage, sans clé
-d'API dans l'app.
+court pour le carnet du jeu (J6e). Les fiches sont écrites une fois, vérifiées, relues et embarquées :
+hors ligne, sans coût à l'usage, sans clé d'API dans l'app.
 
-- [ ] Liste des espèces de la région : `tools/fork_region_species.py` (prévu d'abord en J6b), géomodèle
-      sur une grille France et Europe de l'Ouest × 48 semaines, seuil de `model_config.json`. Toutes
-      les espèces plausibles, avec une colonne « oiseau » : les fiches ne prennent que les oiseaux
-      (environ 300 à 450), les photos de J6b prennent tout. À lancer sur le PC : les modèles LFS ne
-      sont pas dans le cloud.
-- [ ] `tools/fork_species_sheets.py`, avec sa propre dépendance (`anthropic`) dans
-      `tools/requirements-fork-sheets.txt`. Collecte des sources par espèce : article Wikipédia FR
-      (numéro de révision noté), Wikidata pour la taille, l'envergure, la masse et le statut UICN,
-      description déjà embarquée si sa source est Wikipédia (colonne `description_source` de
-      `taxonomy.csv`), statut saisonnier calculé par le géomodèle. Génération par la
-      Message Batches API avec une sortie JSON structurée et, pour chaque affirmation, la phrase exacte
-      de la source. Consigne : laisser vide plutôt qu'inventer.
-- [ ] Vérification automatique : chaque citation existe dans la source (sinon la section est vidée),
-      tailles cohérentes avec Wikidata, statut migratoire cohérent avec le géomodèle, noms français
-      identiques à `taxonomy.csv`. Puis un second passage, avec un modèle moins cher, qui liste les
-      affirmations non couvertes par les sources.
-- [ ] Relecture par Benjamin sur une page HTML locale : les 100 espèces les plus entendues, toutes les
-      fiches signalées, et 10 % des autres au hasard. Commencer par un pilote de 20 espèces.
-- [ ] Fiches vérifiées versionnées dans `tools/fork_sheets/fr.jsonl` (une ligne par espèce, avec un
-      champ « relue »), livrées dans `assets/fork/species_sheets_fr.json.gz` (environ 0,5 Mo) sans les
-      citations. Une fiche signalée et pas encore relue n'est pas livrée.
-- [ ] Licence : les fiches dérivent de Wikipédia, donc le fichier de données est sous CC BY-SA 4.0 ; le
-      code reste MIT. Pied de fiche : « Texte rédigé par IA à partir de l'article Wikipédia “X”,
-      modifié, CC BY-SA 4.0 », avec le lien vers la révision. Ne jamais donner au modèle des textes de
-      la LPO, d'oiseaux.net ou d'eBird (droits réservés).
-- [ ] Écran : la fiche prend la place du bloc description de `SpeciesInfoOverlay`
-      (lib/features/explore/widgets/species_info_overlay.dart), par un point d'accroche minimal marqué
-      FORK ; le code va dans `lib/fork/species_sheet/`. « Ici en ce moment » est calculé en direct par
-      le géomodèle (courbe sur 48 semaines, `geoCommonnessProvider`), jamais par l'IA. Sans fiche, ou
-      si l'app n'est pas en français, on garde la description existante. Titres de section et pied de
-      fiche en français et en anglais.
-- Coût, en plus du crédit Claude Code : environ 40 à 70 $ d'API Anthropic pour 300 à 450 espèces, sur
-  un compte de la console Anthropic. Choisir le modèle au moment du pilote, avec les tarifs du jour.
+Changement de méthode (septembre 2026) : les fiches sont écrites par Claude à partir de ses propres
+connaissances, avec la consigne « laisser vide plutôt que deviner ». Wikipédia et Wikidata ne servent
+plus de source mais de contrôle. Plus simple (pas de collecte ni de clé d'API pour écrire), et pas de
+licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
+
+- [x] Liste des espèces de la région : `tools/fork_region_species.py`, géomodèle sur une grille France
+      et Europe de l'Ouest × 48 semaines, seuil de `model_config.json`, colonne « oiseau » et statut
+      saisonnier (sédentaire, estivant, hivernant, de passage). À lancer sur le PC (modèles LFS).
+- [x] `tools/fork_species_sheets.py` (dépendances dans `tools/requirements-fork-sheets.txt`, tests
+      dans `tools/test_fork_species_sheets.py`) : `verify`, `review`, `apply-review`, `bundle`,
+      `status`, et en option `write` et `check` par la Message Batches API (modèle à choisir avec
+      `--model`, tarifs du jour).
+- [x] 100 premières fiches (les oiseaux les plus courants de France) écrites dans une session Claude
+      Code, dans `tools/fork_sheets/fr.jsonl`, livrées dans `assets/fork/species_sheets_fr.json.gz`.
+- [ ] Vérification gratuite sur le PC : `python tools/fork_species_sheets.py verify` (tailles contre
+      Wikidata, migration contre le géomodèle, noms contre `taxonomy.csv`). Une fiche signalée n'est
+      plus livrée tant qu'elle n'est pas relue.
+- [ ] Relecture par Benjamin : `review` ouvre une page HTML locale (les 100 plus courantes, toutes les
+      fiches signalées, 10 % des autres), puis `apply-review review_decisions.json` et `bundle`.
+- [ ] Optionnel, avec une clé d'API : `check --model <modèle moins cher>` compare chaque fiche à
+      l'article Wikipédia et signale les contradictions ; `write --model <modèle>` pour les autres
+      espèces de la région (environ 10 à 20 $ pour 300 espèces).
+- [x] Écran : la fiche prend la place du bloc description de `SpeciesInfoOverlay` par un point
+      d'accroche marqué FORK ; code dans `lib/fork/species_sheet/`. « Ici en ce moment » reste le
+      graphique 48 semaines existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
+      sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
+      par IA : elle peut contenir des erreurs. ») en français et en anglais.
+- Ne jamais donner au modèle des textes de la LPO, d'oiseaux.net ou d'eBird (droits réservés).
+
+Notes de réalisation : les fiches se chargent au démarrage (préchargement de l'accueil), 1 fichier gzip.
+Le champ `hint` est embarqué mais pas affiché : il servira au carnet du jeu (J6e).
 
 Fini quand : les 100 espèces les plus entendues ont une fiche relue et l'app les affiche hors ligne.
 

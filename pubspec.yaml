@@ -112,6 +112,8 @@ flutter:
     - assets/species_images/
     - assets/species_data/
     - assets/announcements/
+    # FORK: AI species sheets (J4b).
+    - assets/fork/
 
 flutter_launcher_icons:
   android: true

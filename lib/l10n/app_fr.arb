@@ -1165,5 +1165,14 @@
   "forkLastYesterday": "hier à {time}",
   "forkLastOn": "le {date} à {time}",
   "forkActivityByHour": "Activité par heure",
-  "forkActivityByMonth": "Activité par mois"
+  "forkActivityByMonth": "Activité par mois",
+  "forkSheetSummary": "En bref",
+  "forkSheetSize": "Taille",
+  "forkSheetBehaviour": "Ce qu'il fait",
+  "forkSheetWhyHere": "Pourquoi il est là",
+  "forkSheetMigration": "Migration",
+  "forkSheetByEar": "À l'oreille",
+  "forkSheetConfusions": "Confusions possibles",
+  "forkSheetAnecdote": "Le saviez-vous ?",
+  "forkSheetFooter": "Fiche rédigée par IA : elle peut contenir des erreurs."
 }

@@ -155,3 +155,8 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+# FORK: species sheets work files (tools/fork_species_sheets.py)
+tools/fork_sheets/cache/
+tools/fork_sheets/review.html
+review_decisions.json

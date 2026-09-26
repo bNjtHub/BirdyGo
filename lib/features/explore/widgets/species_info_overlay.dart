@@ -34,6 +34,8 @@ import '../../live/live_providers.dart';
 import 'pick_wikipedia_url.dart';
 import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (J3)
 import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
+import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
+import '../../../fork/species_sheet/species_sheet_section.dart'; // FORK: AI sheet (J4b)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -301,7 +303,10 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
 
               // ── Description ─────────────────────────────────
               if (!_loading) ...[
-                if (_description != null) ...[
+                // FORK: an AI species sheet (J4b) replaces the description.
+                SpeciesSheetSection(scientificName: widget.scientificName),
+                if (_description != null &&
+                    watchSpeciesSheet(ref, widget.scientificName) == null) ...[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                     child: Text(

@@ -29,6 +29,7 @@ import '../../fork/data/observation_index_service.dart'; // FORK: observation in
 import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
 import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
 import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
+import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -95,8 +96,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _preload(ref.read(audioLabelsSetProvider.future), 'audio labels');
     _preload(ref.read(geoModelProvider.future), 'geo model');
     unawaited(_warmUpLocation());
-    // FORK: open (and fill once in the background) the observation index.
-    _preload(ref.read(observationIndexServiceProvider).ensureReady(), 'observation index');
+    // FORK: open (and fill once in the background) the observation index,
+    // and load the AI species sheets (J4b).
+    _preload(
+      ref.read(observationIndexServiceProvider).ensureReady(),
+      'observation index',
+    );
+    _preload(ref.read(speciesSheetsProvider.future), 'species sheets');
   }
 
   /// Decode the logo into the image cache, so the header can paint it on the
