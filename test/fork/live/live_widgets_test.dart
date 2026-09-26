@@ -435,31 +435,56 @@ void main() {
   });
 
   group('LiveListeningLayout', () {
-    Widget layout(List<LiveTableEntry> entries) => LiveListeningLayout(
-      statusText: 'En écoute',
-      live: true,
-      capturing: false,
-      elapsed: () => Duration.zero,
-      entries: entries,
-      spans: [
-        MarkSpan(
-          scientificName: 'Merle',
-          label: 'Merle noir',
-          start: _t0,
-          end: _t0.add(const Duration(seconds: 2)),
-        ),
-      ],
-      displaySeconds: 10,
-      spectrogramBuilder:
-          (expanded) => Text(expanded ? 'spectre agrandi' : 'spectre'),
-      phase: LiveControlPhase.active,
-      onStart: () {},
-      onStop: () {},
-      onTogglePause: () {},
-      onBack: () {},
-      onSettings: () {},
-      onHelp: () {},
-    );
+    Widget layout(List<LiveTableEntry> entries, {bool practice = false}) =>
+        LiveListeningLayout(
+          practice: practice,
+          statusText: 'En écoute',
+          live: true,
+          capturing: false,
+          elapsed: () => Duration.zero,
+          entries: entries,
+          spans: [
+            MarkSpan(
+              scientificName: 'Merle',
+              label: 'Merle noir',
+              start: _t0,
+              end: _t0.add(const Duration(seconds: 2)),
+            ),
+          ],
+          displaySeconds: 10,
+          spectrogramBuilder:
+              (expanded) => Text(expanded ? 'spectre agrandi' : 'spectre'),
+          phase: LiveControlPhase.active,
+          onStart: () {},
+          onStop: () {},
+          onTogglePause: () {},
+          onBack: () {},
+          onSettings: () {},
+          onHelp: () {},
+        );
+
+    testWidgets('a recording shows the « Enregistrement » strip', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app(layout([_entry('Merle', 0)]), scaffold: false),
+      );
+      expect(find.text('Enregistrement'), findsNothing);
+
+      await tester.pumpWidget(
+        _app(layout([_entry('Merle', 0)], practice: true), scaffold: false),
+      );
+      expect(find.text('Enregistrement'), findsOneWidget);
+
+      // Landscape too, once.
+      tester.view.physicalSize = const Size(900, 400);
+      await tester.pumpAndSettle();
+      expect(find.text('Enregistrement'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('the header button enlarges the spectrogram to 60 %', (
       tester,

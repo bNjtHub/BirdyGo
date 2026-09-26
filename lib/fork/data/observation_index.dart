@@ -11,6 +11,7 @@ library;
 import 'package:sqflite/sqflite.dart';
 
 import '../../features/live/live_session.dart';
+import '../practice/practice.dart';
 
 /// One detection row, flattened from a session for indexing.
 class IndexedDetection {
@@ -151,7 +152,9 @@ class ObservationIndex {
   ObservationIndex._(this._db);
 
   /// Current schema version. Bump it to force a rebuild after a change.
-  static const int schemaVersion = 2;
+  /// 3: sessions that do not count (practice, file analyses) left the
+  /// index (J5c); the upgrade rebuild drops the ones already indexed.
+  static const int schemaVersion = 3;
 
   final Database _db;
 
@@ -243,12 +246,18 @@ class ObservationIndex {
   Future<void> upsertSession(LiveSession session) =>
       _db.transaction((txn) => _upsert(txn, session));
 
+  /// A session that does not count ([countsAsObservation]) is removed
+  /// instead: marking one after the fact takes it out everywhere.
   Future<void> _upsert(Transaction txn, LiveSession session) async {
     await txn.delete(
       'detections',
       where: 'session_id = ?',
       whereArgs: [session.id],
     );
+    if (!countsAsObservation(session)) {
+      await txn.delete('sessions', where: 'id = ?', whereArgs: [session.id]);
+      return;
+    }
     await txn.insert('sessions', {
       'id': session.id,
       'type': session.type.name,

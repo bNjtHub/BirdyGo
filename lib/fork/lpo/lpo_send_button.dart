@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/live/live_session.dart';
 import '../../shared/utils/app_icons.dart';
+import '../practice/practice.dart';
 import 'lpo_send_screen.dart';
 
 /// Full-width secondary button and its caption.
@@ -21,6 +22,8 @@ class LpoSendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A recording is not an observation (J5c): nothing to send.
+    if (!countsAsObservation(session)) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(

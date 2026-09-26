@@ -99,7 +99,15 @@ abstract final class LiveScreenPresence {
 
 /// Live mode screen — real-time species identification.
 class LiveScreen extends ConsumerStatefulWidget {
-  const LiveScreen({super.key, this.forceAutoStart = false});
+  const LiveScreen({
+    super.key,
+    this.forceAutoStart = false,
+    this.forkPractice = false, // FORK: listening to a recording (J5c)
+  });
+
+  // FORK: listening to a recording (J5c), from the home menu: species filter
+  // off, no geo-model, session marked practice (it counts nowhere).
+  final bool forkPractice;
 
   /// One-shot override that starts a session as soon as the model is
   /// ready, regardless of the persistent [liveAutoStartProvider] setting.
@@ -135,6 +143,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
   /// Duration after which a warning dialog is shown to the user.
   static const _warningDuration = Duration(minutes: 10);
+
+  // FORK: listening to a recording (J5c). The running session keeps the
+  // flag when the screen is reopened (notification, presence).
+  bool get _forkPractice =>
+      widget.forkPractice || (_liveController?.session?.practice ?? false);
 
   @override
   void initState() {
@@ -341,7 +354,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       final windowDuration = ref.read(windowDurationProvider);
       final inferenceRate = ref.read(inferenceRateProvider);
       final confidenceThreshold = ref.read(confidenceThresholdProvider);
-      final filterMode = ref.read(speciesFilterModeProvider);
+      final filterMode =
+          _forkPractice
+              ? 'off' // FORK: recording (J5c)
+              : ref.read(speciesFilterModeProvider);
       final recordingModeStr = ref.read(recordingModeProvider);
       final recordingMode = recordingModeFromString(recordingModeStr);
       final recordingFormat = ref.read(recordingFormatProvider);
@@ -363,7 +379,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       if (useGps) {
         ref.invalidate(currentLocationProvider);
       }
-      final geoScores = await ref.read(geoScoresProvider.future);
+      final geoScores =
+          _forkPractice
+              ? null // FORK: no geo-model on a recording (J5c)
+              : await ref.read(geoScoresProvider.future);
       final ignoredSpeciesNames = await ref.read(
         ignoredSpeciesNamesProvider.future,
       );
@@ -425,6 +444,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         latitude: startLat,
         longitude: startLon,
       );
+      if (_forkPractice) controller.session?.practice = true; // FORK: J5c
 
       _isStarting = false;
       _onControllerStateChanged();
@@ -742,7 +762,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     };
     final forkRecordsClips = ref.watch(recordingModeProvider) != 'off';
     final forkController = ref.read(liveControllerProvider);
-    final forkCommonness = ref.watch(geoCommonnessProvider).value;
+    final forkCommonness =
+        _forkPractice ? null : ref.watch(geoCommonnessProvider).value;
     Widget? forkTrailing(DetectionRecord detection) {
       final presence = livePresence(forkCommonness, detection.scientificName);
       return buildReplayTrailing(
@@ -788,7 +809,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     });
     ref.listen(speciesIgnoreSettingsProvider, (_, _) async {
       final names = await ref.read(ignoredSpeciesNamesProvider.future);
-      final geoScores = await ref.read(geoScoresProvider.future);
+      final geoScores =
+          _forkPractice
+              ? null // FORK: J5c
+              : await ref.read(geoScoresProvider.future);
       ref
           .read(liveControllerProvider)
           .setSpeciesIgnoreFilter(scientificNames: names, geoScores: geoScores);
@@ -1049,6 +1073,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                         commonName: entry.record.commonName,
                       ),
                   empty: const LiveTipsCarousel(),
+                  practice: _forkPractice, // FORK: J5c
                   banner:
                       liveState == LiveState.error
                           ? _StatusBanner(liveState: liveState, ref: ref)

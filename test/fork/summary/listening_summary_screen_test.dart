@@ -1,5 +1,7 @@
 import 'package:birdnet_live/features/announcements/geo_commonness_provider.dart';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
+import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/summary/listening_summary.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_loader.dart';
@@ -14,13 +16,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'summary_fixture.dart';
 
+/// Keeps saved sessions in memory.
+class _MemoryRepository extends SessionRepository {
+  final saved = <LiveSession>[];
+
+  @override
+  Future<void> save(LiveSession session) async => saved.add(session);
+}
+
 void main() {
   // The index part of the loading is tested in listening_summary_test.dart
   // (sqflite runs on real async, which widget tests do not drive).
   Future<void> pump(
     WidgetTester tester,
-    Future<ListeningSummary> Function(LiveSession session) loader,
-  ) async {
+    Future<ListeningSummary> Function(LiveSession session) loader, {
+    SessionRepository? repository,
+  }) async {
     tester.view.physicalSize = const Size(360, 800) * 3;
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -31,6 +42,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           listeningSummaryLoaderProvider.overrideWithValue(loader),
+          if (repository != null)
+            sessionRepositoryProvider.overrideWithValue(repository),
           geoCommonnessProvider.overrideWith((ref) async => null),
           currentLocationProvider.overrideWith((ref) async => null),
           taxonomyServiceProvider.overrideWith(
@@ -126,5 +139,34 @@ void main() {
     expect(find.text('Belle matinée !'), findsOneWidget);
     expect(find.text('Première fois'), findsNothing);
     expect(find.text('Une nouvelle, peut-être deux'), findsNothing);
+  });
+
+  testWidgets('« C\'était un enregistrement ? » saves the session as one', (
+    tester,
+  ) async {
+    final repository = _MemoryRepository();
+    await pump(
+      tester,
+      (session) async => ListeningSummary.of(
+        session,
+        verifiedBefore: verifiedBeforeMorning,
+        presence: morningPresence,
+      ),
+      repository: repository,
+    );
+    final page = find.byType(Scrollable).first;
+    final link = find.text("C'était un enregistrement ?");
+    await tester.scrollUntilVisible(link, 300, scrollable: page);
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+
+    expect(repository.saved.last.practice, isTrue);
+    expect(find.text('Première fois'), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text("Non, c'étaient de vrais oiseaux"),
+      300,
+      scrollable: page,
+    );
+    expect(find.text('Envoyer à Faune-France (LPO)'), findsNothing);
   });
 }

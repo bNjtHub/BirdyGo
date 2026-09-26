@@ -1362,5 +1362,10 @@
   "forkFicheSeeOnMap": "Voir sur la carte",
   "forkFicheMapLabel": "Carte de tes contacts",
   "forkFicheNeverHeard": "Tu ne l'as pas encore entendu.",
-  "forkFicheEthics": "Garde le son pour toi : un chant diffusé fort dérange les oiseaux, surtout au printemps."
+  "forkFicheEthics": "Garde le son pour toi : un chant diffusé fort dérange les oiseaux, surtout au printemps.",
+  "forkPracticeMenu": "Écouter un enregistrement",
+  "forkPracticeBanner": "Enregistrement",
+  "forkPracticeMark": "C'était un enregistrement ?",
+  "forkPracticeMarked": "Enregistrement : cette écoute ne compte ni au palmarès, ni sur la carte, ni pour la LPO.",
+  "forkPracticeUnmark": "Non, c'étaient de vrais oiseaux"
 }

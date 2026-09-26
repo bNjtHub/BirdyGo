@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
+import '../practice/practice_banner.dart';
 import 'detection_marks.dart';
 import 'live_control_bar.dart';
 import 'live_header.dart';
@@ -45,6 +46,7 @@ class LiveListeningLayout extends StatefulWidget {
     this.onOpen,
     this.empty,
     this.banner,
+    this.practice = false,
   });
 
   final String statusText;
@@ -83,6 +85,9 @@ class LiveListeningLayout extends StatefulWidget {
 
   /// Error banner, under the header.
   final Widget? banner;
+
+  /// Listening to a recording (J5c): « Enregistrement » under the header.
+  final bool practice;
 
   @override
   State<LiveListeningLayout> createState() => _LiveListeningLayoutState();
@@ -172,6 +177,7 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             header,
+            if (widget.practice) const PracticeBanner(),
             if (widget.banner != null) widget.banner!,
             Expanded(
               child: SafeArea(
@@ -223,6 +229,7 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
+          if (widget.practice) const PracticeBanner(),
           if (widget.banner != null) widget.banner!,
           Expanded(
             child: LayoutBuilder(
