@@ -5245,5 +5245,15 @@
   "forkFicheNeverHeard": "You haven't heard it yet.",
   "@forkFicheNeverHeard": {"description": "BirdyGo fork: species page (J6c)."},
   "forkFicheEthics": "Keep the sound to yourself: a song played loud disturbs birds, especially in spring.",
-  "@forkFicheEthics": {"description": "BirdyGo fork: species page (J6c)."}
+  "@forkFicheEthics": {"description": "BirdyGo fork: species page (J6c)."},
+  "forkPracticeMenu": "Listen to a recording",
+  "@forkPracticeMenu": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeBanner": "Recording",
+  "@forkPracticeBanner": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeMark": "Was it a recording?",
+  "@forkPracticeMark": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeMarked": "Recording: this session doesn't count in the ranking, on the map or for the LPO.",
+  "@forkPracticeMarked": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeUnmark": "No, those were real birds",
+  "@forkPracticeUnmark": {"description": "BirdyGo fork: listening to a recording (J5c)."}
 }

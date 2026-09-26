@@ -38,6 +38,7 @@ class ListeningSummaryView extends StatelessWidget {
     this.onOpenSpecies,
     this.onCheck,
     this.onDetails,
+    this.onMarkRecording,
     this.footer,
   });
 
@@ -62,6 +63,10 @@ class ListeningSummaryView extends StatelessWidget {
 
   /// Opens the full session review.
   final VoidCallback? onDetails;
+
+  /// « C'était un enregistrement ? » (J5c): marks the session as a
+  /// recording (true) or back as real birds (false). Hidden when null.
+  final void Function(bool recording)? onMarkRecording;
 
   /// Below the actions: the Faune-France button.
   final Widget? footer;
@@ -98,6 +103,11 @@ class ListeningSummaryView extends StatelessWidget {
         onCheck: onCheck == null ? null : () => onCheck!(toCheck),
         onDetails: onDetails,
       ),
+      if (onMarkRecording != null)
+        _RecordingLink(
+          isRecording: summary.isRecording,
+          onMark: onMarkRecording!,
+        ),
     ];
     return Scaffold(
       backgroundColor: c.background,
@@ -616,6 +626,43 @@ class _Actions extends StatelessWidget {
               child: Text(details),
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// « C'était un enregistrement ? » (J5c). Once marked: what it means, and
+/// the way back.
+class _RecordingLink extends StatelessWidget {
+  const _RecordingLink({required this.isRecording, required this.onMark});
+
+  final bool isRecording;
+  final void Function(bool recording) onMark;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final link = TextButton(
+      style: TextButton.styleFrom(
+        minimumSize: const Size.fromHeight(BirdySizes.target),
+        foregroundColor: c.text2,
+      ),
+      onPressed: () => onMark(!isRecording),
+      child: Text(
+        isRecording ? l10n.forkPracticeUnmark : l10n.forkPracticeMark,
+      ),
+    );
+    if (!isRecording) return link;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.forkPracticeMarked,
+          textAlign: TextAlign.center,
+          style: BirdyText.caption.copyWith(color: c.text2),
+        ),
+        link,
       ],
     );
   }

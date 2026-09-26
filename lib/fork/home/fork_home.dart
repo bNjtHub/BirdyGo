@@ -164,6 +164,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                   _openAru,
                 ),
                 HomeMenuEntry(
+                  AppIcons.musicNote,
+                  l10n.forkPracticeMenu,
+                  () => _open(const LiveScreen(forkPractice: true)),
+                ),
+                HomeMenuEntry(
                   sessionTypeIcon(SessionType.fileUpload),
                   l10n.fileAnalysisMode,
                   () => _open(const FileAnalysisScreen()),

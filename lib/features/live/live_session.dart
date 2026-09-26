@@ -1031,6 +1031,7 @@ class LiveSession {
     this.aruMetadata,
     int? recordedDurationSeconds,
     List<SessionSegment>? segments,
+    this.practice = false, // FORK: recorded sounds do not count (J5c)
   }) : detections = detections ?? [],
        annotations = annotations ?? [],
        gpsTrack = gpsTrack ?? [],
@@ -1135,6 +1136,11 @@ class LiveSession {
   /// [accumulateRecordedSeconds] each time a recording segment ends.
   /// List of active recording segments during this session.
   final List<SessionSegment> segments;
+
+  // FORK: recorded sounds do not count (J5c). True when the session listened
+  // to a recording (web, CD) rather than to real birds; see
+  // lib/fork/practice/practice.dart.
+  bool practice;
 
   int? _recordedDurationSeconds;
 
@@ -1348,6 +1354,7 @@ class LiveSession {
               ?.map((s) => SessionSegment.fromJson(s as Map<String, dynamic>))
               .toList() ??
           [],
+      practice: json['practice'] == true, // FORK: J5c
       aruMetadata:
           json['aru'] != null
               ? AruDeploymentMetadata.fromJson(
@@ -1387,6 +1394,7 @@ class LiveSession {
       'recordedDurationSeconds': _recordedDurationSeconds,
     if (segments.isNotEmpty) 'segments': segments.map(_segmentToJson).toList(),
     if (aruMetadata != null) 'aru': aruMetadata!.toJson(),
+    if (practice) 'practice': true, // FORK: J5c
   };
 
   @override

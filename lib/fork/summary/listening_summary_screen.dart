@@ -96,6 +96,14 @@ class _ListeningSummaryScreenState
     await _load();
   }
 
+  /// « C'était un enregistrement ? » (J5c). Saving re-indexes the session,
+  /// which takes it out of (or back into) every count.
+  Future<void> _markRecording(bool recording) async {
+    _session.practice = recording;
+    await ref.read(sessionRepositoryProvider).save(_session);
+    if (mounted) await _load();
+  }
+
   Future<void> _push(Widget screen) async {
     await Navigator.of(
       context,
@@ -162,6 +170,9 @@ class _ListeningSummaryScreenState
             ),
         onCheck: (keys) => _push(QuickReviewScreen(onlyKeys: keys)),
         onDetails: () => _push(SessionReviewScreen(session: _session)),
+        // A file analysis never counts: nothing to mark.
+        onMarkRecording:
+            _session.type == SessionType.fileUpload ? null : _markRecording,
         footer: LpoSendButton(session: _session),
       ),
     );
