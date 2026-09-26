@@ -1128,5 +1128,22 @@
   "forkSoundLibraryScore": "Score {score}",
   "forkSoundLibraryFavorite": "Ajouter aux favoris",
   "forkSoundLibraryUnfavorite": "Retirer des favoris",
-  "forkWestLetter": "O"
+  "forkWestLetter": "O",
+  "forkLevelSure": "Sûr",
+  "forkLevelProbable": "Probable",
+  "forkLevelToCheck": "À vérifier",
+  "forkUnexpectedHere": "Inattendu ici",
+  "forkQuickReview": "Revue rapide",
+  "forkQuickReviewProgress": "{position} sur {total}",
+  "forkQuickReviewEmpty": "Rien à vérifier. Toutes les détections sont triées.",
+  "forkQuickReviewDone": "Tout est trié, bravo. Tes réponses rendent l'app plus fiable.",
+  "forkQuickReviewNoClip": "Pas d'enregistrement pour cette détection.",
+  "forkReviewItIs": "C'est bien lui",
+  "forkReviewItIsNot": "Ce n'est pas lui",
+  "forkReviewDontKnow": "Je ne sais pas",
+  "forkReliabilityTitle": "Fiabilité",
+  "forkReliabilityIntro": "Part des détections que tu as confirmées, parmi celles que tu as vérifiées. C'est la fiabilité de l'app, chez toi.",
+  "forkReliabilityBySpecies": "Par espèce (au moins {count} vérifications)",
+  "forkPrecisionLine": "{confirmed, plural, =0{0 bonne} =1{1 bonne} other{{confirmed} bonnes}} sur {reviewed, plural, =1{1 vérifiée} other{{reviewed} vérifiées}}",
+  "forkPrecisionNone": "Pas encore vérifié."
 }

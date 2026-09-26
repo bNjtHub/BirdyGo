@@ -159,24 +159,30 @@ Fini quand : rejouer un rougegorge pendant une écoute ne crée aucune nouvelle 
 
 ## J3 : savoir quand l'app se trompe
 
-- [ ] Trois niveaux affichés partout (Live, revue de session, sonothèque, palmarès) : Sûr, Probable,
+- [x] Trois niveaux affichés partout (Live, revue de session, sonothèque, palmarès) : Sûr, Probable,
       À vérifier. Calculés à partir du score et du niveau d'abondance du géomodèle pour le lieu et la
       semaine. Seuils de départ dans `lib/fork/reliability/reliability_config.dart` : Sûr à partir de
       0,80 si l'espèce est plausible ici, Probable de 0,55 à 0,80, À vérifier en dessous ou si
       l'espèce est rare ici à cette saison.
-- [ ] Badge « Inattendu ici » quand le géomodèle juge l'espèce rare ou absente pour ce lieu et cette semaine.
-- [ ] Réutiliser ce qui existe au lieu de recalculer : `GeoModel.predict` (lib/features/inference/geo_model.dart),
+- [x] Badge « Inattendu ici » quand le géomodèle juge l'espèce rare ou absente pour ce lieu et cette semaine.
+- [x] Réutiliser ce qui existe au lieu de recalculer : `GeoModel.predict` (lib/features/inference/geo_model.dart),
       `geoCommonnessProvider` et son indicateur hors saison, `ExploreTierScale`
       (`lib/features/inference/geo_abundance.dart`), `AlertReason.rare` des alertes Survey.
-- [ ] Ces niveaux alimentent le jeu (J6e) et l'envoi à la LPO (J5b) : seules les détections Sûr ou
+- [x] Ces niveaux alimentent le jeu (J6e) et l'envoi à la LPO (J5b) : seules les détections Sûr ou
       confirmées font progresser, et seules les confirmées peuvent partir.
-- [ ] Revue rapide : une pile de cartes des détections à vérifier, avec photo, clip joué
+- [x] Revue rapide : une pile de cartes des détections à vérifier, avec photo, clip joué
       automatiquement et spectrogramme. À droite « C'est bien lui », à gauche « Ce n'est pas lui »,
       vers le haut « Je ne sais pas ». Utilise les champs de revue existants et met l'index à jour.
-- [ ] Précision mesurée : pour chaque niveau, et pour chaque espèce revue au moins 5 fois, la part de
+- [x] Précision mesurée : pour chaque niveau, et pour chaque espèce revue au moins 5 fois, la part de
       détections confirmées. Visible dans la fiche espèce (« 11 bonnes sur 12 vérifiées ») et dans un
       écran Fiabilité.
-- [ ] Après quelques semaines de revues, ajuster les seuils avec ces chiffres.
+- [ ] (Benjamin, plus tard) Après quelques semaines de revues, ajuster les seuils avec ces chiffres.
+- Notes de réalisation : les niveaux s'affichent dans Live, le comptage ponctuel, la sonothèque et la
+  revue rapide ; la revue de session d'upstream et le palmarès (J4) les recevront avec leurs écrans.
+  En Live, la présence vient de `geoCommonnessProvider` (lieu actuel, hors saison compris) ; ailleurs,
+  du géomodèle au lieu et à la semaine de la détection (`GeoPresenceService`). Sans position, un
+  score élevé reste « Probable ». La précision par niveau est mesurée par tranche de score, car ce
+  sont ces seuils qu'on ajuste. « Je ne sais pas » laisse la détection non revue mais la retire de la file.
 
 Fini quand : les niveaux sont cohérents d'un écran à l'autre et chaque balayage est bien enregistré.
 

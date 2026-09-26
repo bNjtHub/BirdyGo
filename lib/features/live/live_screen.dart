@@ -30,6 +30,10 @@ import 'live_session.dart';
 import 'widgets/detection_list_widget.dart';
 import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
 import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
+import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -702,13 +706,26 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     };
     final forkRecordsClips = ref.watch(recordingModeProvider) != 'off';
     final forkController = ref.read(liveControllerProvider);
-    Widget? forkTrailing(DetectionRecord detection) => buildReplayTrailing(
-      controller: forkController,
-      clipPath: forkClips[detection.scientificName],
-      clipPending:
-          forkRecordsClips &&
-          forkActiveSpecies.contains(detection.scientificName),
-    );
+    final forkCommonness = ref.watch(geoCommonnessProvider).value;
+    Widget? forkTrailing(DetectionRecord detection) {
+      final presence = livePresence(forkCommonness, detection.scientificName);
+      return buildReplayTrailing(
+        controller: forkController,
+        clipPath: forkClips[detection.scientificName],
+        clipPending:
+            forkRecordsClips &&
+            forkActiveSpecies.contains(detection.scientificName),
+        badge: ReliabilityBadge(
+          level: reliabilityFor(
+            score: detection.confidence,
+            review: detection.reviewStatus,
+            presence: presence,
+          ),
+          unexpected: presence?.unexpected ?? false,
+          compact: true,
+        ),
+      );
+    }
 
     // Hot-apply tunable settings to the running session: when the user
     // tweaks the confidence threshold or pooling window count from the

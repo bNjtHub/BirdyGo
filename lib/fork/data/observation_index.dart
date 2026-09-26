@@ -151,7 +151,7 @@ class ObservationIndex {
   ObservationIndex._(this._db);
 
   /// Current schema version. Bump it to force a rebuild after a change.
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
 
   final Database _db;
 
@@ -228,6 +228,10 @@ class ObservationIndex {
     );
     await db.execute(
       'CREATE TABLE IF NOT EXISTS favorites (key TEXT PRIMARY KEY)',
+    );
+    // "Je ne sais pas" answers of the quick review (J3). Kept on rebuild.
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS review_skipped (key TEXT PRIMARY KEY)',
     );
   }
 
@@ -500,13 +504,102 @@ class ObservationIndex {
   }
 
   /// Unreviewed detections waiting for the quick review, lowest score first
-  /// (the most doubtful come first), capped at [limit].
+  /// (the most doubtful come first), capped at [limit]. Detections answered
+  /// "Je ne sais pas" leave the queue.
   Future<List<IndexedDetection>> reviewQueue({int limit = 50}) async {
     final rows = await _db.rawQuery(
       "SELECT * FROM detections WHERE review_status = 'unreviewed' "
+      'AND key NOT IN (SELECT key FROM review_skipped) '
       'ORDER BY confidence ASC, start_ms DESC LIMIT ?',
       [limit],
     );
     return rows.map(IndexedDetection.fromRow).toList();
+  }
+
+  /// Number of detections waiting in the quick review.
+  Future<int> reviewQueueLength() async =>
+      Sqflite.firstIntValue(
+        await _db.rawQuery(
+          "SELECT COUNT(*) FROM detections WHERE review_status = 'unreviewed' "
+          'AND key NOT IN (SELECT key FROM review_skipped)',
+        ),
+      ) ??
+      0;
+
+  /// Records a "Je ne sais pas" answer: the detection stays unreviewed but
+  /// leaves the review queue.
+  Future<void> markSkipped(String key) => _db.insert('review_skipped', {
+    'key': key,
+  }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+  /// Confirmed and reviewed (confirmed + rejected) counts per score band,
+  /// with [sureMin] and [probableMin] as band limits.
+  Future<Map<String, ({int confirmed, int reviewed})>> precisionByScoreBand({
+    required double sureMin,
+    required double probableMin,
+  }) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT CASE WHEN confidence >= ? THEN 'sure'
+                  WHEN confidence >= ? THEN 'probable'
+                  ELSE 'toCheck' END AS band,
+             SUM(review_status = 'confirmed') AS confirmed,
+             COUNT(*) AS reviewed
+      FROM detections WHERE review_status IN ('confirmed', 'rejected')
+      GROUP BY band''',
+      [sureMin, probableMin],
+    );
+    return {
+      for (final row in rows)
+        row['band']! as String: (
+          confirmed: (row['confirmed'] as int?) ?? 0,
+          reviewed: row['reviewed']! as int,
+        ),
+    };
+  }
+
+  /// Per-species precision for species reviewed at least [minReviews]
+  /// times, best reviewed first.
+  Future<
+    List<
+      ({String scientificName, String commonName, int confirmed, int reviewed})
+    >
+  >
+  precisionBySpecies({required int minReviews}) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT scientific_name, MAX(common_name) AS common_name,
+             SUM(review_status = 'confirmed') AS confirmed, COUNT(*) AS reviewed
+      FROM detections WHERE review_status IN ('confirmed', 'rejected')
+      GROUP BY scientific_name HAVING COUNT(*) >= ?
+      ORDER BY reviewed DESC, scientific_name''',
+      [minReviews],
+    );
+    return [
+      for (final row in rows)
+        (
+          scientificName: row['scientific_name']! as String,
+          commonName: row['common_name']! as String,
+          confirmed: (row['confirmed'] as int?) ?? 0,
+          reviewed: row['reviewed']! as int,
+        ),
+    ];
+  }
+
+  /// Confirmed and reviewed counts for one species.
+  Future<({int confirmed, int reviewed})> speciesPrecision(
+    String scientificName,
+  ) async {
+    final rows = await _db.rawQuery(
+      "SELECT SUM(review_status = 'confirmed') AS confirmed, COUNT(*) AS n "
+      "FROM detections WHERE scientific_name = ? "
+      "AND review_status IN ('confirmed', 'rejected')",
+      [scientificName],
+    );
+    final row = rows.single;
+    return (
+      confirmed: (row['confirmed'] as int?) ?? 0,
+      reviewed: (row['n'] as int?) ?? 0,
+    );
   }
 }

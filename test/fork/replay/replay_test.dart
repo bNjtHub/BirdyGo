@@ -36,9 +36,10 @@ void main() {
     });
 
     test('a closed replay skips its range plus the tail, then stops', () {
-      final guard = ReplayGuard()
-        ..begin(100000)
-        ..end(196000, paddingSamples: 16000); // 0.5 s at 32 kHz
+      final guard =
+          ReplayGuard()
+            ..begin(100000)
+            ..end(196000, paddingSamples: 16000); // 0.5 s at 32 kHz
       expect(guard.isReplaying, isFalse);
       expect(guard.overlaps(150000, 246000), isTrue);
       expect(guard.overlaps(200000, 296000), isTrue); // in the tail
@@ -48,9 +49,10 @@ void main() {
     });
 
     test('begin is idempotent while playing; reset forgets everything', () {
-      final guard = ReplayGuard()
-        ..begin(1000)
-        ..begin(5000);
+      final guard =
+          ReplayGuard()
+            ..begin(1000)
+            ..begin(5000);
       expect(guard.overlaps(0, 2000), isTrue);
       guard.reset();
       expect(guard.overlaps(0, 2000), isFalse);

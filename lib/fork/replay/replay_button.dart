@@ -30,12 +30,25 @@ Widget? buildReplayTrailing({
   required LiveController controller,
   required String? clipPath,
   required bool clipPending,
+  Widget? badge,
 }) {
-  if (clipPath != null) {
-    return ReplayButton(controller: controller, clipPath: clipPath);
-  }
-  if (clipPending) return const _ClipPendingIndicator();
-  return null;
+  final Widget? action =
+      clipPath != null
+          ? ReplayButton(controller: controller, clipPath: clipPath)
+          : clipPending
+          ? const _ClipPendingIndicator()
+          : null;
+  if (badge == null) return action;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Padding(
+        padding: EdgeInsets.only(right: action == null ? 12 : 0),
+        child: badge,
+      ),
+      if (action != null) action,
+    ],
+  );
 }
 
 /// Plays or stops a detection clip without stopping the session.

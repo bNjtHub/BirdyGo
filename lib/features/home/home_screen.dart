@@ -27,6 +27,7 @@ import '../../shared/utils/session_type_visuals.dart';
 import 'help_screen.dart';
 import '../../fork/data/observation_index_service.dart'; // FORK: observation index
 import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
+import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -951,6 +952,20 @@ class _Footer extends StatelessWidget {
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const SessionLibraryScreen(),
+                ),
+              ),
+        ),
+        // FORK: quick review of doubtful detections (fork/PLAN.md J3).
+        _FooterButton(
+          icon: AppIcons.verifiedRounded,
+          label: l10n.forkQuickReview,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const QuickReviewScreen(),
                 ),
               ),
         ),

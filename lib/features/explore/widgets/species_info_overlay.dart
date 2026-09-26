@@ -32,6 +32,7 @@ import '../../inference/geo_model.dart';
 import '../../history/global_species_history.dart';
 import '../../live/live_providers.dart';
 import 'pick_wikipedia_url.dart';
+import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (J3)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -275,6 +276,13 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
               // this species. Skipped entirely when the species has never
               // been detected — there's nothing useful to show.
               _DetectionStatsTile(scientificName: widget.scientificName),
+              // FORK: measured precision from the user's reviews (J3).
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SpeciesPrecisionLine(
+                  scientificName: widget.scientificName,
+                ),
+              ),
 
               // ── Loading skeleton (shimmer placeholder for the bio paragraph) ─
               if (_loading)

@@ -16,6 +16,9 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../reliability/geo_presence_service.dart';
+import '../reliability/reliability_badge.dart';
+import '../reliability/reliability_config.dart';
 
 /// Localized common name, falling back to the name stored with the clip.
 String _speciesName(WidgetRef ref, String scientificName, String fallback) {
@@ -231,13 +234,20 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
-                      subtitle: Text(
-                        [
-                          l10n.forkSoundLibraryScore(
-                            scoreFormat.format(clip.confidence),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            [
+                              l10n.forkSoundLibraryScore(
+                                scoreFormat.format(clip.confidence),
+                              ),
+                              if (place != null) place,
+                            ].join(' · '),
                           ),
-                          if (place != null) place,
-                        ].join(' · '),
+                          const SizedBox(height: 4),
+                          _ClipLevel(clip: clip),
+                        ],
                       ),
                       trailing: IconButton(
                         tooltip:
@@ -274,6 +284,36 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
     String part(double v, String pos, String neg) =>
         '${v.abs().toStringAsFixed(2)}° ${v >= 0 ? pos : neg}';
     return '${part(lat, 'N', 'S')}, ${part(lon, 'E', west)}';
+  }
+}
+
+/// Reliability badge of a clip, at its own place and week (J3).
+class _ClipLevel extends ConsumerWidget {
+  const _ClipLevel({required this.clip});
+
+  final IndexedDetection clip;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<GeoPresence?>(
+      future: ref
+          .read(geoPresenceServiceProvider)
+          .presenceAt(
+            clip.scientificName,
+            latitude: clip.latitude,
+            longitude: clip.longitude,
+            time: clip.start,
+          ),
+      builder:
+          (context, snapshot) => ReliabilityBadge(
+            level: reliabilityFor(
+              score: clip.confidence,
+              review: clip.reviewStatus,
+              presence: snapshot.data,
+            ),
+            unexpected: snapshot.data?.unexpected ?? false,
+          ),
+    );
   }
 }
 
