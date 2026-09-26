@@ -432,10 +432,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
   }
 
   /// Show confirmation dialog, then finalize and navigate to review.
-  Future<void> _confirmStop() async {
+  // FORK: [dialogContext] opens the dialog dark from the listening screen (J6c).
+  Future<void> _confirmStop([BuildContext? dialogContext]) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await confirmDestructive(
-      context,
+      dialogContext ?? context, // FORK: J6c
       title: l10n.sessionStopTitle,
       body: l10n.sessionStopMessage,
       confirmLabel: l10n.sessionStopConfirm,
@@ -793,9 +794,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       ref.read(audioCaptureServiceProvider).setHighPassCutoff(next);
     });
 
-    // FORK: listening screen (J6c), dark portrait layout. Landscape keeps
-    // the upstream layout below.
-    if (MediaQuery.orientationOf(context) == Orientation.portrait) {
+    // FORK: listening screen (J6c), dark layout in both orientations. The
+    // upstream layout below is kept untouched to ease merges.
+    if (_forkListeningLayout) {
       return _forkListeningScreen(
         context,
         liveState: liveState,
@@ -858,6 +859,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     );
   }
 
+  // FORK: listening screen (J6c). A getter, not a constant, so the upstream
+  // layout after it is not reported as dead code.
+  bool get _forkListeningLayout => true;
+
   // FORK: listening screen (J6c, fork/DESIGN.md « Live »).
   Widget _forkListeningScreen(
     BuildContext context, {
@@ -916,84 +921,93 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       _ => l10n.statusInitializing,
     };
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        if (inSession) {
-          await _confirmStop();
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
-      child: ListeningTheme(
-        child: Scaffold(
-          body: LiveListeningLayout(
-            statusText: statusText,
-            live: isActive,
-            capturing: isCapturing,
-            elapsed: () => controller.session?.duration ?? Duration.zero,
-            entries: entries,
-            spans: spans,
-            displaySeconds:
-                ref.watch(spectrogramDurationProvider).toDouble(),
-            spectrogramBuilder:
-                (expanded) => _LiveSpectrogram(
-                  isCapturing: isCapturing,
-                  showFrequencyAxis: expanded,
-                ),
-            phase: phase,
-            onStart: _toggleSession,
-            onStop: _confirmStop,
-            onTogglePause: _forkTogglePause,
-            onBack: () => Navigator.of(context).maybePop(),
-            onSettings:
-                () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder:
-                        (_) => const SettingsScreen(
-                          settingsContext: SettingsContext.live,
+    final displaySeconds = ref.watch(spectrogramDurationProvider).toDouble();
+
+    // Dialogs and sheets take the theme of the context that opens them:
+    // [themed] sits under [ListeningTheme], so they open dark too.
+    return ListeningTheme(
+      child: Builder(
+        builder:
+            (themed) => PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, _) async {
+                if (didPop) return;
+                if (inSession) {
+                  await _confirmStop(themed);
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Scaffold(
+                body: LiveListeningLayout(
+                  statusText: statusText,
+                  live: isActive,
+                  capturing: isCapturing,
+                  elapsed: () => controller.session?.duration ?? Duration.zero,
+                  entries: entries,
+                  spans: spans,
+                  displaySeconds: displaySeconds,
+                  spectrogramBuilder:
+                      (expanded) => _LiveSpectrogram(
+                        isCapturing: isCapturing,
+                        showFrequencyAxis: expanded,
+                      ),
+                  phase: phase,
+                  onStart: _toggleSession,
+                  onStop: () => _confirmStop(themed),
+                  onTogglePause: _forkTogglePause,
+                  onBack: () => Navigator.of(context).maybePop(),
+                  onSettings:
+                      () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder:
+                              (_) => const SettingsScreen(
+                                settingsContext: SettingsContext.live,
+                              ),
                         ),
-                  ),
+                      ),
+                  onHelp: () => _showLiveHelp(themed),
+                  replaying: controller.replayingClip,
+                  imageFor: (name) {
+                    final path = imagePath(name);
+                    return path == null ? null : AssetImage(path);
+                  },
+                  badgeFor: (entry, {required compact}) {
+                    final presence = livePresence(
+                      commonness,
+                      entry.scientificName,
+                    );
+                    return ReliabilityBadge(
+                      level: reliabilityFor(
+                        score: entry.record.confidence,
+                        review: entry.record.reviewStatus,
+                        presence: presence,
+                      ),
+                      unexpected: presence?.unexpected ?? false,
+                      compact: compact,
+                    );
+                  },
+                  actionFor:
+                      (entry) => buildReplayTrailing(
+                        controller: controller,
+                        clipPath: clips[entry.scientificName],
+                        clipPending: recordsClips && entry.singing,
+                      ),
+                  onOpen:
+                      (entry) => SpeciesInfoOverlay.show(
+                        themed,
+                        ref,
+                        scientificName: entry.scientificName,
+                        commonName: entry.record.commonName,
+                      ),
+                  empty: const LiveTipsCarousel(),
+                  banner:
+                      liveState == LiveState.error
+                          ? _StatusBanner(liveState: liveState, ref: ref)
+                          : null,
                 ),
-            onHelp: () => _showLiveHelp(context),
-            replaying: controller.replayingClip,
-            imageFor: (name) {
-              final path = imagePath(name);
-              return path == null ? null : AssetImage(path);
-            },
-            badgeFor: (entry, {required compact}) {
-              final presence = livePresence(commonness, entry.scientificName);
-              return ReliabilityBadge(
-                level: reliabilityFor(
-                  score: entry.record.confidence,
-                  review: entry.record.reviewStatus,
-                  presence: presence,
-                ),
-                unexpected: presence?.unexpected ?? false,
-                compact: compact,
-              );
-            },
-            actionFor:
-                (entry) => buildReplayTrailing(
-                  controller: controller,
-                  clipPath: clips[entry.scientificName],
-                  clipPending: recordsClips && entry.singing,
-                ),
-            onOpen:
-                (entry) => SpeciesInfoOverlay.show(
-                  context,
-                  ref,
-                  scientificName: entry.scientificName,
-                  commonName: entry.record.commonName,
-                ),
-            empty: const LiveTipsCarousel(),
-            banner:
-                liveState == LiveState.error
-                    ? _StatusBanner(liveState: liveState, ref: ref)
-                    : null,
-          ),
-        ),
+              ),
+            ),
       ),
     );
   }

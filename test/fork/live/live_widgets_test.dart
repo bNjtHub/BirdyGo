@@ -11,6 +11,7 @@ import 'package:birdnet_live/fork/live/live_spectrogram_panel.dart';
 import 'package:birdnet_live/fork/live/live_table.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/widgets/confirm_destructive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -149,8 +150,9 @@ void main() {
     });
 
     testWidgets('names wrap at 130 % text, nothing overflows', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(360, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await pumpTable(tester, [
         _entry('A', 0, common: 'Pouillot de Bonelli occidental', count: 12),
         _entry('B', 1, common: 'Rougegorge familier', singing: true),
@@ -361,8 +363,9 @@ void main() {
     testWidgets('the header button enlarges the spectrogram to 60 %', (
       tester,
     ) async {
-      await tester.binding.setSurfaceSize(const Size(400, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         _app(layout([_entry('Merle', 0)]), scaffold: false),
       );
@@ -382,5 +385,71 @@ void main() {
       expect(table.compact, isTrue);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'landscape: spectrogram on the left, table and bar on the right',
+      (tester) async {
+        tester.view.physicalSize = const Size(900, 420);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          _app(layout([_entry('Merle', 0)]), scaffold: false),
+        );
+        // Scale and names from the start, no stat tiles.
+        expect(find.text('spectre agrandi'), findsOneWidget);
+        expect(find.text('1 espèce · 1 contact'), findsOneWidget);
+        final panel = tester.getRect(find.byType(LiveSpectrogramPanel));
+        final table = tester.getRect(find.byType(LiveTable));
+        final bar = tester.getRect(find.byType(LiveControlBar));
+        expect(panel.width, closeTo(450, 1));
+        expect(table.left, greaterThanOrEqualTo(panel.right));
+        expect(bar.left, greaterThanOrEqualTo(panel.right));
+        expect(bar.top, greaterThanOrEqualTo(table.bottom));
+
+        // A tap widens the spectrogram.
+        await tester.tap(find.byType(LiveSpectrogramPanel));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byType(LiveSpectrogramPanel)).width,
+          closeTo(900 * 0.65, 1),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  });
+
+  testWidgets('a dialog opened under ListeningTheme is dark', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: BirdyTheme.light(),
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ListeningTheme(
+          child: Builder(
+            builder:
+                (themed) => Scaffold(
+                  body: TextButton(
+                    onPressed:
+                        () => confirmDestructive(
+                          themed,
+                          title: 'Terminer ?',
+                          body: 'corps',
+                          confirmLabel: 'Oui',
+                          cancelLabel: 'Non',
+                        ),
+                    child: const Text('ouvrir'),
+                  ),
+                ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('ouvrir'));
+    await tester.pumpAndSettle();
+    expect(
+      Theme.of(tester.element(find.text('Terminer ?'))).brightness,
+      Brightness.dark,
+    );
   });
 }

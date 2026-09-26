@@ -1,6 +1,7 @@
-/// Portrait layout of the listening screen (J6c, fork/DESIGN.md « Live »):
-/// header, spectrogram, live table, control bar. Dark by default: wrap it
-/// in `ListeningTheme`.
+/// Layout of the listening screen (J6c, fork/DESIGN.md « Live »):
+/// header, spectrogram, live table, control bar; in landscape the
+/// spectrogram takes the left side. Dark by default: wrap it in
+/// `ListeningTheme`.
 ///
 /// Holds only the spectrogram size; the session itself stays in the
 /// upstream `LiveScreen`, which passes data and callbacks in.
@@ -10,6 +11,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import 'detection_marks.dart';
 import 'live_control_bar.dart';
@@ -90,6 +92,10 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
   /// Share of the screen body taken by the enlarged spectrogram.
   static const double _expandedShare = 0.6;
 
+  /// Width share of the spectrogram in landscape, normal and widened.
+  static const double _landscapeShare = 0.5;
+  static const double _landscapeExpandedShare = 0.65;
+
   bool _expanded = false;
 
   void _toggle() => setState(() => _expanded = !_expanded);
@@ -101,29 +107,122 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
     final stats = LiveStats.of(widget.entries);
     final toggleLabel =
         _expanded ? l10n.forkLiveCollapseSpectrum : l10n.forkLiveExpandSpectrum;
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final marked = <String>{
       for (final s in widget.spans.reversed.take(12)) s.label,
     };
+
+    final header = SafeArea(
+      bottom: false,
+      child: LiveHeader(
+        statusText: widget.statusText,
+        live: widget.live,
+        stats: stats,
+        elapsed: widget.elapsed,
+        expanded: _expanded,
+        showTiles: !landscape,
+        onToggleSpectrum: _toggle,
+        onBack: widget.onBack,
+        onSettings: widget.onSettings,
+        onHelp: widget.onHelp,
+      ),
+    );
+    Widget panel({required bool expanded, required double expandedHeight}) =>
+        LiveSpectrogramPanel(
+          expanded: expanded,
+          expandedHeight: expandedHeight,
+          onToggle: _toggle,
+          toggleLabel: toggleLabel,
+          semanticLabel:
+              marked.isEmpty
+                  ? l10n.forkLiveSpectrumLabel
+                  : l10n.forkLiveSpectrumMarksLabel(marked.join(', ')),
+          spectrogram: widget.spectrogramBuilder(expanded),
+          marks: DetectionMarks(
+            spans: widget.spans,
+            displaySeconds: widget.displaySeconds,
+            running: widget.capturing,
+            showLabels: expanded,
+          ),
+        );
+    Widget table({required bool compact}) => LiveTable(
+      entries: widget.entries,
+      compact: compact,
+      imageFor: widget.imageFor,
+      badgeFor: widget.badgeFor,
+      actionFor: widget.actionFor,
+      onOpen: widget.onOpen,
+      empty: widget.empty,
+    );
+    final controls = LiveControlBar(
+      phase: widget.phase,
+      onStart: widget.onStart,
+      onStop: widget.onStop,
+      onTogglePause: widget.onTogglePause,
+      replaying: widget.replaying,
+    );
+
+    if (landscape) {
+      // Spectrogram on the left, full height, with its scale and names; the
+      // tap widens it. Table and controls on the right.
+      return ColoredBox(
+        color: c.background,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            header,
+            if (widget.banner != null) widget.banner!,
+            Expanded(
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: LayoutBuilder(
+                  builder:
+                      (context, constraints) => Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AnimatedContainer(
+                            duration:
+                                BirdyMotion.reduced(context)
+                                    ? Duration.zero
+                                    : BirdyMotion.reorder,
+                            curve: BirdyMotion.move,
+                            width:
+                                constraints.maxWidth *
+                                (_expanded
+                                    ? _landscapeExpandedShare
+                                    : _landscapeShare),
+                            child: panel(
+                              expanded: true,
+                              expandedHeight: constraints.maxHeight,
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(child: table(compact: false)),
+                                controls,
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return ColoredBox(
       color: c.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SafeArea(
-            bottom: false,
-            child: LiveHeader(
-              statusText: widget.statusText,
-              live: widget.live,
-              stats: stats,
-              elapsed: widget.elapsed,
-              expanded: _expanded,
-              onToggleSpectrum: _toggle,
-              onBack: widget.onBack,
-              onSettings: widget.onSettings,
-              onHelp: widget.onHelp,
-            ),
-          ),
+          header,
           if (widget.banner != null) widget.banner!,
           Expanded(
             child: LayoutBuilder(
@@ -136,48 +235,14 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    LiveSpectrogramPanel(
-                      expanded: _expanded,
-                      expandedHeight: expandedHeight,
-                      onToggle: _toggle,
-                      toggleLabel: toggleLabel,
-                      semanticLabel:
-                          marked.isEmpty
-                              ? l10n.forkLiveSpectrumLabel
-                              : l10n.forkLiveSpectrumMarksLabel(
-                                marked.join(', '),
-                              ),
-                      spectrogram: widget.spectrogramBuilder(_expanded),
-                      marks: DetectionMarks(
-                        spans: widget.spans,
-                        displaySeconds: widget.displaySeconds,
-                        running: widget.capturing,
-                        showLabels: _expanded,
-                      ),
-                    ),
-                    Expanded(
-                      child: LiveTable(
-                        entries: widget.entries,
-                        compact: _expanded,
-                        imageFor: widget.imageFor,
-                        badgeFor: widget.badgeFor,
-                        actionFor: widget.actionFor,
-                        onOpen: widget.onOpen,
-                        empty: widget.empty,
-                      ),
-                    ),
+                    panel(expanded: _expanded, expandedHeight: expandedHeight),
+                    Expanded(child: table(compact: _expanded)),
                   ],
                 );
               },
             ),
           ),
-          LiveControlBar(
-            phase: widget.phase,
-            onStart: widget.onStart,
-            onStop: widget.onStop,
-            onTogglePause: widget.onTogglePause,
-            replaying: widget.replaying,
-          ),
+          controls,
         ],
       ),
     );

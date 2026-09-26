@@ -31,6 +31,7 @@ class LiveHeader extends StatelessWidget {
     required this.stats,
     required this.elapsed,
     required this.expanded,
+    this.showTiles = true,
     required this.onToggleSpectrum,
     required this.onBack,
     required this.onSettings,
@@ -51,6 +52,10 @@ class LiveHeader extends StatelessWidget {
   /// The spectrogram is enlarged: the tiles give way to a one-line summary.
   final bool expanded;
 
+  /// False in landscape: the summary line replaces the tiles to leave the
+  /// height to the spectrogram.
+  final bool showTiles;
+
   final VoidCallback onToggleSpectrum;
   final VoidCallback onBack;
   final VoidCallback onSettings;
@@ -61,6 +66,7 @@ class LiveHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
+    final tiles = showTiles && !expanded;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BirdySpace.gutterDark,
@@ -100,7 +106,7 @@ class LiveHeader extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (expanded)
+                      if (!tiles)
                         Text(
                           l10n.forkLiveSummary(stats.species, stats.contacts),
                           style: BirdyText.caption.copyWith(color: c.text2),
@@ -120,7 +126,7 @@ class LiveHeader extends StatelessWidget {
                 _Menu(onSettings: onSettings, onHelp: onHelp),
               ],
             ),
-            if (!expanded) ...[
+            if (tiles) ...[
               const SizedBox(height: BirdySpace.m),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
