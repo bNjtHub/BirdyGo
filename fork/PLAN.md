@@ -348,6 +348,13 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       Carte, Sonothèque, Revue rapide, Envoi à la LPO. Carnet et Profil (statut, badges, série)
       viennent avec le jeu, en J6e. Le logo de l'accueil s'anime en Flutter à partir du logo statique
       (flutter_svg ne lit pas les animations CSS).
+      - [x] Live : thème sombre, spectrogramme normal ou agrandi d'un appui avec un trait de la couleur
+            de l'espèce sous chaque passage, tableau en direct (nouvelle espèce en haut, espèce
+            réentendue qui remonte en 250 ms, ×N qui rebondit, total toutes sorties), barre Arrêter /
+            Pause. Code dans `lib/fork/live/`. Couleurs d'espèces provisoires
+            (`lib/fork/design/species_accents.dart`) en attendant J6d. Paysage : disposition upstream.
+            À mesurer sur le Xiaomi en mode profile : 60 images par seconde, spectrogramme agrandi
+            compris.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -433,5 +440,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
+- Live (J6c) : aucun code natif. La pause volontaire arrête puis relance la capture comme la mise en
+  arrière-plan : vérifier sur iPhone que la session audio reprend bien (et la réécoute pendant une pause).
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
