@@ -283,22 +283,42 @@ jumelles, de comparer les enregistrements douteux avec xeno-canto, et de ne pas 
 listes d'espèces identifiées par une appli ; la Station ornithologique suisse demande de ne saisir que
 des observations confirmées. L'envoi est donc guidé, jamais automatique.
 
-- [ ] Écran « Envoyer à la LPO » réservé aux détections confirmées (« C'est bien lui »). Avant l'envoi,
+- [x] Écran « Envoyer à la LPO » réservé aux détections confirmées (« C'est bien lui »). Avant l'envoi,
       l'app demande en plus « Tu l'as vu ? » et « Tu connais ce chant ? », avec un lien vers xeno-canto
       pour comparer.
-- [ ] Pour chaque observation, une fiche prête à reporter : nom français et latin, date, heure,
+- [x] Pour chaque observation, une fiche prête à reporter : nom français et latin, date, heure,
       position GPS et précision, nombre, entendu ou vu, remarque « Contact auditif ; identification
       assistée par IA puis confirmée par l'observateur ». Code atlas proposé seulement pendant la
       période de nidification de l'espèce. Boutons copier, partager le clip, ouvrir NaturaList ou
       faune-france.org (nous n'avons trouvé aucun pré-remplissage documenté).
-- [ ] Alertes avant l'envoi : espèce sensible (proposer de masquer la donnée), espèce rare ou hors saison.
-- [ ] Mode « Oiseaux des jardins » (LPO et MNHN) : minuteur (1 h les deux week-ends nationaux, les
+- [x] Alertes avant l'envoi : espèce sensible (proposer de masquer la donnée), espèce rare ou hors saison.
+- [x] Mode « Oiseaux des jardins » (LPO et MNHN) : minuteur (1 h les deux week-ends nationaux, les
       derniers week-ends complets de janvier et de mai ; durée libre le reste de l'année), compteur du
       nombre maximum vu en même temps pour chaque espèce, saisi à la main. Les détections sonores
       servent seulement d'invitation à regarder : le protocole compte les oiseaux vus posés dans le
       jardin, plus les hirondelles, martinets et rapaces qui chassent au-dessus. À la fin,
       un résumé à reporter sur oiseauxdesjardins.fr.
-- [ ] Ne jamais aspirer ni imiter NaturaList, ne jamais demander le mot de passe Faune-France.
+- [x] Ne jamais aspirer ni imiter NaturaList, ne jamais demander le mot de passe Faune-France.
+
+Fait (code dans `lib/fork/lpo/` et `lib/fork/garden/`) : bouton « Envoyer à Faune-France (LPO) » et sa
+légende en bas de la liste des espèces du bilan de session (`session_review_screen.dart`, lignes FORK),
+comme dans la maquette Resume. Une seule porte, `lpoEligible` : statut « confirmé » ; ni « Sûr », ni les
+détections non revues ou rejetées. Une observation = une espèce en un lieu (détections confirmées à moins
+de 250 m regroupées), heure du premier contact, précision tirée du point GPS de la trace le plus proche
+(60 s). La fiche n'apparaît qu'après « Tu l'as vu ? » et « Tu connais ce chant ? » ; « Pas sûr » demande
+de comparer sur xeno-canto d'abord. Code atlas proposé (3, sinon 2 ou aucun) seulement pendant la période
+de nidification, table approximative des 100 espèces des fiches dans `atlas_codes.dart` (à vérifier avec
+le coordinateur local). Alertes : espèce sensible (interrupteur « Masquer la donnée », coché), rare et
+hors saison par `geoCommonnessProvider` quand l'observation est ici et cette semaine (moins de 10 km),
+sinon rareté seule par `GeoPresenceService` au lieu et à la semaine de l'observation. Liste des espèces
+sensibles revue (liste SINP : Aigle botté, Faucon d'Éléonore, Hibou des marais, Pies-grièches grise et
+méridionale ajoutés). NaturaList s'ouvre par sa page Play Store (bouton « Ouvrir » si installée).
+Aucun appel réseau, aucun compte. Oiseaux des jardins : bouton sur l'accueil, minuteur (1 h les derniers
+week-ends complets de janvier et de mai, libre sinon, sans compte à rebours), compteurs à la main,
+espèces entendues pendant le comptage (écoute en cours) proposées comme invitation à regarder, résumé à
+copier, comptage gardé dans les préférences.
+À tester sur le Xiaomi : une observation confirmée reportée dans NaturaList en moins d'une minute,
+ouverture de NaturaList, partage d'un extrait, comptage des jardins interrompu puis repris.
 
 Plus tard, hors de ce jalon : un export CSV (lisible par Excel) des observations confirmées, car
 l'import sur Faune-France demande un droit donné par le portail (vérifier le modèle de colonnes avec
@@ -366,6 +386,9 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [ ] Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
+- [ ] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
+      exportés (`BirdNET_Live_…`), champ creator des exports GPX et JSON, rapport HTML. Adapter les
+      tests upstream concernés.
 - [ ] Quelques semaines d'usage réel avant de passer à iOS.
 
 Fini quand : la build de test interne s'installe depuis le Play Store et tient une matinée d'écoute
@@ -401,6 +424,13 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
+  posés dans le projet, jamais compilés. Créer l'App ID et l'App Group sur le portail Apple, renseigner
+  l'équipe (DEVELOPMENT_TEAM). L'App Group ne sert qu'à une ancienne extension de partage upstream : on
+  peut aussi le retirer de `Runner.entitlements` et d'`AppDelegate.swift`.
+- Envoi à la LPO (J5b) : aucun code natif ; NaturaList s'ouvre par sa page App Store
+  (`LpoConfig.naturaListAppStore`, choisie selon la plateforme), à vérifier ; partage de l'extrait par
+  share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via

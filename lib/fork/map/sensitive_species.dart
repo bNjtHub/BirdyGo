@@ -19,14 +19,22 @@ const String kBlurSensitiveExportPref = 'fork_export_blur_sensitive';
 
 /// Species whose breeding or roosting sites are commonly kept confidential
 /// by French naturalist databases (Faune-France, INPN): mostly raptors,
-/// owls, grouses and rare breeders disturbed by visitors. A starting list,
-/// to review with the LPO rules in J5b.
+/// owls, grouses and rare breeders disturbed by visitors.
+///
+/// Reviewed in J5b against the LPO practice: Faune-France hides the data
+/// of the species of the national sensitive-data list (SINP) itself, and
+/// asks observers to hide any data whose publication could disturb a bird.
+/// This list follows the SINP birds (Booted Eagle, Eleonora's Falcon,
+/// Short-eared Owl and the grey shrikes added in J5b); the LPO card
+/// (lib/fork/lpo) proposes to hide the data of every species listed here.
+/// Regional lists differ: check with the local coordinator.
 const Set<String> kSensitiveSpecies = {
   'Aegolius funereus',
   'Aegypius monachus',
   'Acrocephalus paludicola',
   'Aquila chrysaetos',
   'Aquila fasciata',
+  'Asio flammeus',
   'Botaurus stellaris',
   'Bubo bubo',
   'Ciconia nigra',
@@ -35,12 +43,16 @@ const Set<String> kSensitiveSpecies = {
   'Crex crex',
   'Dendrocopos leucotos',
   'Emberiza hortulana',
+  'Falco eleonorae',
   'Falco naumanni',
   'Falco peregrinus',
   'Glaucidium passerinum',
   'Gypaetus barbatus',
   'Gyps fulvus',
+  'Hieraaetus pennatus',
   'Lagopus muta',
+  'Lanius excubitor',
+  'Lanius meridionalis',
   'Lanius minor',
   'Lyrurus tetrix',
   'Milvus milvus',

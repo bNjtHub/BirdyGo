@@ -102,6 +102,7 @@ import '../survey/widgets/survey_map_widget.dart';
 import '../../core/services/reverse_geocoding_service.dart';
 import 'services/detection_sharing_service.dart';
 import 'services/session_audio_trim.dart';
+import '../../fork/lpo/lpo_send_button.dart'; // FORK: LPO sending (J5b)
 
 part 'widgets/session_review_widgets.dart';
 
@@ -4669,8 +4670,15 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
     } else {
       body = ListView.builder(
         padding: const EdgeInsets.only(bottom: 80),
-        itemCount: sorted.length,
+        itemCount: sorted.length + 1, // FORK: LPO button after the list (J5b)
         itemBuilder: (context, index) {
+          // FORK: send confirmed observations to Faune-France (J5b).
+          if (index == sorted.length) {
+            return LpoSendButton(
+              session: widget.session,
+              detections: _detections,
+            );
+          }
           final group = sorted[index];
           final isExpanded = _expandedSpecies.contains(group.scientificName);
           return _SpeciesTile(
