@@ -53,6 +53,11 @@ faudra faire côté iOS. Pas de build ni de test iOS pour l'instant.
 - Lire seulement ce qui sert. Pour une recherche large dans le code upstream, passer par un
   sous-agent et ne rapporter que les fichiers, classes et fonctions utiles.
 - Un jalon = une branche = une PR. Petits commits. Cocher les cases du jalon dans `fork/PLAN.md`.
+- Sessions en parallèle : chaque session reçoit un jalon ou un écran précis. Avant d'écrire du
+  code, lister les PR ouvertes : si ce jalon ou cet écran est déjà pris par l'une d'elles, s'arrêter
+  et le dire (J6b et le Bilan de J6c ont été faits deux fois faute de ce contrôle).
+- Titre de PR : commencer par le jalon et l'écran (« J6c Palmarès : … »), pour que ce contrôle soit
+  facile.
 - Après deux tentatives ratées sur le même problème : s'arrêter, résumer ce qui a été essayé,
   proposer des pistes. Ne pas tourner en rond.
 - Réponses courtes, en français. Code, identifiants et commentaires de code en anglais.
