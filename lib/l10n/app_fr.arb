@@ -1289,5 +1289,15 @@
   "forkGallerySpecies": "Espèces",
   "forkGalleryPlayer": "Lecteur d'extrait",
   "forkGalleryMotion": "Animations",
-  "forkGalleryReplay": "Rejouer"
+  "forkGalleryReplay": "Rejouer",
+  "forkPhotoCredit": "Crédit photo",
+  "forkPhotoAuthor": "Photo : {author}",
+  "forkPhotoLicense": "Licence : {license}",
+  "forkPhotoSource": "Source : {source}",
+  "forkPhotoAllRightsReserved": "Tous droits réservés",
+  "forkPhotoPublicDomain": "Domaine public",
+  "forkPhotoNoCredit": "On ne connaît pas l'auteur de cette photo.",
+  "forkPhotoOpenPage": "Voir la photo en ligne",
+  "forkOnlinePhotos": "Photos en grand (en ligne)",
+  "forkOnlinePhotosHint": "Quand tu ouvres une fiche, une photo plus grande est chargée depuis iNaturalist et gardée sur le téléphone."
 }
