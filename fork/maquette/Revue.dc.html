@@ -15,29 +15,23 @@ body{margin:0;background:#EEF1EC}
 a{color:#19A7B3}a:hover{color:#0E7C86}
 .bg-press{transition:transform 120ms cubic-bezier(0.23,1,0.32,1)}.bg-press:active{transform:scale(.97)}
 @keyframes bg-fade{from{opacity:0}to{opacity:1}}
-@keyframes bg-rise{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
-@keyframes bg-arrive{0%{opacity:0;transform:translateY(-12px) scale(.96)}55%{opacity:1;transform:translateY(2px) scale(1.01)}100%{opacity:1;transform:none}}
-@keyframes bg-bump-a{0%{transform:scale(1)}35%{transform:scale(1.15)}100%{transform:scale(1)}}
-@keyframes bg-bump-b{0%{transform:scale(1)}35%{transform:scale(1.15)}100%{transform:scale(1)}}
-@keyframes bg-glow-a{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
-@keyframes bg-glow-b{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
-@keyframes bg-sing{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes bg-rise{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes bg-arrive{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes bg-bump-a{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes bg-bump-b{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes bg-glow-a{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
+@keyframes bg-glow-b{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
+@keyframes bg-sing{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(.85)}}
 @keyframes bg-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes bg-live{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes bg-ripple{0%{opacity:.55;transform:scale(.95)}100%{opacity:0;transform:scale(1.6)}}
-@keyframes bg-sheet{0%{opacity:0;transform:translateY(48px)}70%{opacity:1;transform:translateY(-4px)}100%{opacity:1;transform:none}}
-@keyframes bg-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@keyframes bg-land{0%{opacity:0;transform:translateY(24px) scale(.95)}50%{opacity:1;transform:translateY(-4px) scale(1.03)}100%{opacity:1;transform:none}}
-@keyframes bg-pop{0%{opacity:0;transform:scale(.95)}60%{opacity:1;transform:scale(1.04)}100%{opacity:1;transform:none}}
-@keyframes bg-ring{0%{opacity:.8;transform:scale(.95)}100%{opacity:0;transform:scale(1.9)}}
-@keyframes bg-shimmer{0%{transform:translateX(-120%)}55%,100%{transform:translateX(120%)}}
-@keyframes bg-twinkle{0%,100%{opacity:0;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes bg-live{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes bg-sheet{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes bg-land{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes bg-pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes bg-ring{0%{opacity:0;transform:scale(1)}35%{opacity:.6}100%{opacity:0;transform:scale(1.1)}}
 @keyframes bg-gain{from{transform:scaleX(.05)}to{transform:scaleX(1)}}
-@keyframes bg-feather{0%{opacity:0;transform:translate(0,-24px) rotate(-12deg)}15%{opacity:.9}100%{opacity:0;transform:translate(28px,180px) rotate(28deg)}}
-@keyframes bg-nudge{0%,62%,78%,94%,100%{transform:none}70%{transform:translateX(16px) rotate(2deg)}86%{transform:translateX(-10px) rotate(-1.5deg)}}
-@keyframes bg-fly-right{to{opacity:0;transform:translateX(440px) rotate(14deg)}}
-@keyframes bg-fly-left{to{opacity:0;transform:translateX(-440px) rotate(-14deg)}}
-@keyframes bg-fly-up{to{opacity:0;transform:translateY(-560px)}}
+@keyframes bg-fly-right{to{opacity:0;transform:translateX(8px)}}
+@keyframes bg-fly-left{to{opacity:0;transform:translateX(-8px)}}
+@keyframes bg-fly-up{to{opacity:0;transform:translateY(-8px)}}
 @keyframes bg-playhead{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 @media (prefers-reduced-motion: reduce){[style*="animation"]{animation-name:bg-fade!important;animation-duration:200ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}.fx{display:none!important}}
 </style>
