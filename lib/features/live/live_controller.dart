@@ -54,6 +54,7 @@ import '../inference/models/detection.dart';
 import '../inference/species_filter.dart';
 import '../inference/species_ignore_filter.dart';
 import '../../fork/replay/replay_guard.dart'; // FORK: replay during listening
+import '../../fork/live/inference_timing.dart'; // FORK: timing (J6c-bis-a)
 import '../recording/recording_service.dart';
 import 'live_session.dart';
 
@@ -119,6 +120,9 @@ class LiveController {
     handleAudioSessionActivation: false,
   );
   StreamSubscription<PlayerState>? _replaySubscription;
+
+  /// FORK: inference timing, logged outside release builds (J6c-bis-a).
+  final InferenceTiming _forkTiming = InferenceTiming();
 
   /// FORK: path of the clip being replayed, or null.
   final ValueNotifier<String?> replayingClip = ValueNotifier<String?>(null);
@@ -847,6 +851,7 @@ class LiveController {
       }
 
       debugPrint('[LiveController] running inference …');
+      final forkInferWatch = Stopwatch()..start(); // FORK: timing (J6c-bis-a)
       final detections = await _isolate.infer(
         audioSamples,
         windowSeconds: windowDuration,
@@ -854,6 +859,7 @@ class LiveController {
         confidenceThreshold: confidenceThreshold / 100.0,
         timestamp: windowTimestamp,
       );
+      forkInferWatch.stop(); // FORK: timing (J6c-bis-a)
 
       if (generation != _sessionGeneration) {
         return;
@@ -946,6 +952,8 @@ class LiveController {
       // Always notify — even when the list becomes empty (species dropped
       // below threshold), so the current-vocalizing UI clears stale rows.
       _notifyListeners();
+      // FORK: timing (J6c-bis-a)
+      _forkTiming.record(forkInferWatch.elapsed, windowEnd: audioReadAt);
     } catch (e, st) {
       // Inference errors are logged but don't stop the session.
       debugPrint('[LiveController] inference ERROR: $e\n$st');
