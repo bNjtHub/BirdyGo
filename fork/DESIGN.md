@@ -252,6 +252,26 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
   navigation (Accueil, Carnet, Carte, Profil).
 
+## Mise en œuvre (J6c, Fiche espèce)
+
+Code dans `lib/fork/species_page/`. `SpeciesInfoOverlay.show` ouvre cette fiche (une ligne `// FORK`,
+constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On suit SPEC.md 9.13.
+
+- Page plein écran avec retour ; pendant une écoute (`liveStateProvider` actif ou en pause), feuille
+  qui garde le thème de l'écran d'écoute, pour ne pas le quitter.
+- En-tête : photo de J6b bord à bord (3:2) sur la teinte claire ou sombre de l'espèce
+  (`SpeciesAccents`), rayon 28 en bas, nom en Fraunces 34, nom latin. Les icônes de J6d
+  remplaceront la photo seulement aux petites tailles.
+- Blocs : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr (confirmée ou score
+  Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Ici en ce moment » avec les 12 mois
+  du géomodèle (un mois = sa meilleure semaine, seuil de la liste Explorer) ; « Mes sons » ; fiche IA
+  (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
+  activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
+  sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
+  pour toi ».
+- Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).
+- Colonne de 600 dp au plus en paysage et sur tablette.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.
