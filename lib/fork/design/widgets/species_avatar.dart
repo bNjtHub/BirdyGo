@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../shared/utils/app_icons.dart';
+import '../../species_icons/species_icon.dart';
 import '../species_tint.dart';
 
 class SpeciesAvatar extends StatelessWidget {
@@ -12,17 +13,25 @@ class SpeciesAvatar extends StatelessWidget {
     super.key,
     this.image,
     this.icon,
+    this.scientificName,
+    this.preferIcon = false,
     this.tint,
     this.size = 42,
     this.muted = false,
     this.heroTag,
   });
 
-  /// Photo, drawn as a circle. Wins over [icon].
+  /// Photo, drawn as a circle. Wins at large sizes unless [preferIcon] is set.
   final ImageProvider? image;
 
   /// Species icon (J6d), drawn on the halo of [tint].
   final Widget? icon;
+
+  /// Scientific name used to resolve the generated J6d SVG.
+  final String? scientificName;
+
+  /// Use the SVG at 48 dp too (Live); smaller avatars prefer it by default.
+  final bool preferIcon;
 
   /// Species colors; [SpeciesTint.neutral] when unknown.
   final SpeciesTint? tint;
@@ -47,7 +56,15 @@ class SpeciesAvatar extends StatelessWidget {
     final t = tint ?? SpeciesTint.neutral;
     Widget visual;
     final photo = image;
-    if (photo != null) {
+    final generated =
+        icon ??
+        (scientificName == null
+            ? null
+            : SpeciesIcon(scientificName: scientificName!, size: size * 0.9));
+    final useIcon = generated != null && (preferIcon || size < 48);
+    if (useIcon) {
+      visual = _halo(t, generated);
+    } else if (photo != null) {
       final pixels = (size * MediaQuery.devicePixelRatioOf(context)).round();
       visual = ClipOval(
         child: Image(
@@ -57,11 +74,12 @@ class SpeciesAvatar extends StatelessWidget {
           fit: BoxFit.cover,
           gaplessPlayback: true,
           excludeFromSemantics: true,
-          errorBuilder: (context, error, stack) => _halo(t, _silhouette(t)),
+          errorBuilder:
+              (context, error, stack) => _halo(t, generated ?? _silhouette(t)),
         ),
       );
     } else {
-      visual = _halo(t, icon ?? _silhouette(t));
+      visual = _halo(t, generated ?? _silhouette(t));
     }
     if (muted) {
       visual = Opacity(

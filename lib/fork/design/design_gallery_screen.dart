@@ -355,6 +355,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
           name: s.name,
           scientificName: i.isEven ? s.latin : null,
           avatar: SpeciesAvatar(
+            scientificName: s.latin,
             tint: tint(s),
             muted: s.level == ReliabilityLevel.toCheck,
           ),
@@ -381,7 +382,11 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         name: _samples.first.name,
         hero: true,
         tint: tint(_samples.first),
-        visual: SpeciesAvatar(tint: tint(_samples.first), size: 96),
+        visual: SpeciesAvatar(
+          scientificName: _samples.first.latin,
+          tint: tint(_samples.first),
+          size: 96,
+        ),
         caption: Text(_samples.first.latin),
         onTap: () {},
       ),
@@ -397,14 +402,22 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 SpeciesCard(
                   name: _samples[2].name,
                   tint: tint(_samples[2]),
-                  visual: SpeciesAvatar(tint: tint(_samples[2]), size: 56),
+                  visual: SpeciesAvatar(
+                    scientificName: _samples[2].latin,
+                    tint: tint(_samples[2]),
+                    size: 56,
+                  ),
                   corner: const NoveltyPill(kind: NoveltyKind.isNew),
                   onTap: () {},
                 ),
                 SpeciesCard(
                   name: _samples[3].name,
                   tint: tint(_samples[3]),
-                  visual: SpeciesAvatar(tint: tint(_samples[3]), size: 56),
+                  visual: SpeciesAvatar(
+                    scientificName: _samples[3].latin,
+                    tint: tint(_samples[3]),
+                    size: 56,
+                  ),
                   corner: Icon(
                     AppIcons.diamond,
                     size: 14,
@@ -416,6 +429,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 SpeciesCard.toConfirm(
                   name: _samples[4].name,
                   visual: SpeciesAvatar(
+                    scientificName: _samples[4].latin,
                     tint: tint(_samples[4]),
                     size: 56,
                     muted: true,
@@ -424,7 +438,11 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 ),
                 SpeciesCard.mystery(
                   name: l10n.forkMystery,
-                  visual: const SpeciesAvatar(size: 56, muted: true),
+                  visual: const SpeciesAvatar(
+                    scientificName: 'Species incognita',
+                    size: 56,
+                    muted: true,
+                  ),
                 ),
               ])
                 SizedBox(width: width, child: card),
@@ -471,6 +489,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
             name: s.name,
             compact: true,
             avatar: SpeciesAvatar(
+              scientificName: s.latin,
               tint: SpeciesTint.fromAccent(s.accent),
               size: 40,
             ),

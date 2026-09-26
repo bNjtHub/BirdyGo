@@ -752,6 +752,7 @@ class _ContactMarker extends ConsumerWidget {
                 ),
                 child: birdy.SpeciesAvatar(
                   image: path == null ? null : AssetImage(path),
+                  scientificName: spot.scientificName,
                   size: 34,
                 ),
               ),

@@ -170,6 +170,7 @@ class _PodiumStep extends StatelessWidget {
                     const SizedBox(height: BirdySpace.xs),
                     SpeciesAvatar(
                       image: species.image,
+                      scientificName: species.scientificName,
                       tint: tint,
                       size: rank == 1 ? 80 : 64,
                     ),
@@ -241,7 +242,12 @@ class RankingRow extends StatelessWidget {
                     style: BirdyText.label.copyWith(color: c.rarityMuted),
                   ),
                 ),
-                SpeciesAvatar(image: species.image, tint: tint, size: 36),
+                SpeciesAvatar(
+                  image: species.image,
+                  scientificName: species.scientificName,
+                  tint: tint,
+                  size: 36,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(

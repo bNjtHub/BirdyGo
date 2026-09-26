@@ -180,7 +180,13 @@ class LiveTableRow extends StatelessWidget {
       name: entry.commonName,
       compact: compact,
       onTap: onTap,
-      avatar: SpeciesAvatar(image: image, tint: tint, size: compact ? 40 : 48),
+      avatar: SpeciesAvatar(
+        image: image,
+        scientificName: entry.scientificName,
+        preferIcon: true,
+        tint: tint,
+        size: compact ? 40 : 48,
+      ),
       meta: Wrap(
         spacing: BirdySpace.s,
         runSpacing: BirdySpace.xs,

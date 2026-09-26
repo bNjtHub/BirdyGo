@@ -552,20 +552,31 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       À faire sur le Xiaomi : à l'aube, noter si « Analyse… » reste allumé presque tout le temps ;
       vérifier le coût du cycle dans `[InferenceTiming]` ; réécoute par le haut-parleur sans
       « Analyse… » ni symbole.
-- [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
-      d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
-      construit nous-mêmes, dans le style du logo.
-      - Une famille de 30 à 50 gabarits (un par famille ou genre), avec des zones de couleur nommées
-        (calotte, joue, poitrine, dos, aile, barre alaire, queue, bec, pattes), remplies depuis une table
-        de couleurs par espèce. Formes de base : dessins maison ou silhouettes PhyloPic sous CC0.
-        Couleurs relevées sur des planches du domaine public, jamais sur des guides protégés.
-      - Silhouettes PhyloPic (environ 19 des 20 oiseaux les plus courants en France, sous CC0 ou CC BY)
-        comme secours pour les espèces sans gabarit : récupérées une fois par un script, jamais en
-        lien direct, en filtrant NC et SA, avec licence et auteur notés pour chaque image.
-      - Écran des crédits pour les images CC BY (auteur, licence, « recolorée »). Ne jamais partir
-        d'OpenMoji ni de Mulberry (CC BY-SA) ni d'images NC.
-      - Relecture sur planches. La photo reste sur la fiche.
-      - Nouvelle dépendance prévue : `flutter_svg` (absente du projet).
+- [x] J6d Icônes d'espèces en SVG et atelier local de génération.
+      - [x] 49 gabarits à 12 zones de couleur, six réglages de proportions, formes propres aux
+            canards, oies, cygnes, échassiers, oiseaux en vol, rapaces, pigeons et chouettes.
+            Motifs distinctifs par espèce ; les 15 dessins de référence restent inchangés par défaut.
+      - [x] `tools/fork_icons/species.csv` : les 100 oiseaux prioritaires du CSV régional et le
+            loriot, soit 101 espèces. Chaque ligne cite une planche couleur du domaine public
+            consultée ; `sources.json` conserve auteur, figure, URL et empreinte du scan.
+            Couleurs stylisées, toutes marquées `draft` jusqu'à relecture de Benjamin.
+      - [x] Atelier FR/EN : `python tools/fork_icons/app.py`, puis http://127.0.0.1:8765.
+            Aperçus clair/sombre et 34/48/64 px, édition, projet JSON, SVG et lot ZIP.
+            Le navigateur garde les brouillons ; les exports ne modifient pas le dépôt.
+      - [x] Génération reproductible par `tools/fork_species_icons.py` : 151 SVG + index,
+            environ 390 Ko, IDs préfixés. Planche `tools/fork_icons/sheet.html`.
+            Secours hors ligne : genre, famille en gris, puis mystère.
+      - [x] `SpeciesIcon` avec index Riverpod chargé une fois, cache SVG partagé, état gris à 0,45.
+            Branché au Live, à la carte et ses feuilles, au Palmarès, à la Sonothèque et au Bilan.
+            Les grandes photos restent prioritaires ; échec photo et absence photo ont le secours SVG.
+            Le carnet pourra employer le même composant en J6e.
+      - [x] Tests Python, widget et écrans ; `flutter_svg` est la seule dépendance directe ajoutée.
+      - PhyloPic et crédits d'images CC BY reportés comme décidé au plan : dessins maison uniquement,
+        aucun OpenMoji/Mulberry. Attribution des correspondances GBIF CC BY dans les données/outils.
+      - [ ] Benjamin : relire les couleurs/plumages et les espèces proches sur la planche ; la
+            reconnaissance de toutes les espèces à 34 dp n'est pas garantie par les tests structurels.
+      - [ ] Xiaomi : lisibilité à 34 dp, défilement et carte avec plusieurs centaines de marqueurs
+            en mode profile. Mesures de fluidité à faire sur téléphone, pas déduites des tests widget.
 - [ ] J6e Jeu : statuts selon le nombre d'espèces découvertes, badges, série de jours, défis de la
       semaine, carnet façon collection (silhouettes mystère pour les espèces attendues ici en cette
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau

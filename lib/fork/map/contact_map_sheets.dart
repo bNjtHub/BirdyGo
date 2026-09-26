@@ -17,6 +17,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/clip_play_button.dart';
+import '../design/widgets/species_avatar.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
 
@@ -31,45 +32,6 @@ String localizedSpeciesName(
   final locale = ref.watch(effectiveSpeciesLocaleProvider);
   return taxonomy?.lookup(scientificName)?.commonNameForLocale(locale) ??
       fallback;
-}
-
-/// Round species photo, as in the survey map markers.
-class SpeciesAvatar extends ConsumerWidget {
-  const SpeciesAvatar({
-    super.key,
-    required this.scientificName,
-    this.size = 44,
-  });
-
-  final String scientificName;
-  final double size;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final path =
-        ref
-            .watch(taxonomyServiceProvider)
-            .value
-            ?.assetImagePath(scientificName) ??
-        'assets/images/dummy_species.png';
-    final theme = Theme.of(context);
-    return ClipOval(
-      child: Image.asset(
-        path,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
-        errorBuilder:
-            (_, _, _) => Container(
-              width: size,
-              height: size,
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(AppIcons.brokenImage, size: size * 0.45),
-            ),
-      ),
-    );
-  }
 }
 
 /// Shows the species heard in an area (a hexagon or a spot).
@@ -178,6 +140,7 @@ class _AreaSheet extends ConsumerWidget {
                               ),
                               child: SpeciesAvatar(
                                 scientificName: s.scientificName,
+                                tint: tint,
                                 size: 40,
                               ),
                             ),
@@ -335,6 +298,7 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                       minTileHeight: 56,
                       leading: SpeciesAvatar(
                         scientificName: e.tally.scientificName,
+                        tint: SpeciesAccents.tintOf(e.tally.scientificName),
                         size: 40,
                       ),
                       title: Text(e.name),

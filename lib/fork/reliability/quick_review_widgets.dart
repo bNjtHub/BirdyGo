@@ -227,7 +227,7 @@ class ReviewCard extends StatelessWidget {
           const SizedBox(height: BirdySpace.m),
           Row(
             children: [
-              SpeciesAvatar(image: image, size: 96),
+              SpeciesAvatar(image: image, scientificName: latin, size: 96),
               const SizedBox(width: BirdySpace.l),
               Expanded(
                 child: Column(

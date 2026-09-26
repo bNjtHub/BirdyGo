@@ -338,6 +338,44 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
 
+## Mise en œuvre (J6d)
+
+Les petits portraits utilisent des SVG locaux dans le langage du logo. Le générateur partage les
+formes de `fork/maquette/icons_gen.py` et conserve les 14 oiseaux originaux plus le mystère à
+l'identique. Les autres dessins partent de 49 gabarits, avec 12 zones de couleur et six réglages
+de proportions. Les becs, cous, ailes, queues et postures varient selon les familles ; des masques,
+colliers et motifs clairsemés renforcent les espèces qui en ont besoin. La première planche trop
+uniforme a conduit à distinguer explicitement canard/oie/cygne, échassier, oiseau en vol, rapace,
+pigeon et chouette. La planche colorée reste à relire : une icône n'est pas une clé d'identification.
+
+L'atelier `tools/fork_icons/app.py` est un serveur Python local, sans dépendance ni modèle.
+Il propose les fonds Brume/Encre, les tailles réelles 34/48/64 px, l'état entendu gris à 0,45,
+l'édition des couleurs et formes, des projets JSON et l'export SVG/ZIP. Les exports ne changent
+pas les fichiers du dépôt. Voir `tools/fork_icons/README.md` pour la génération reproductible.
+
+Les 101 palettes documentent un plumage précis et une planche ancienne du domaine public consultée.
+Elles restent `draft` tant que Benjamin ne les a pas relues. Les 100 premières espèces sont les
+oiseaux les mieux classés par présence régionale moyenne du géomodèle, auxquels s'ajoute le loriot.
+Ce classement ne mesure pas l'abondance réelle. Les attributions, les synonymes historiques et les
+limites des correspondances de famille sont conservés dans `sources.json` et `README-sources.md`.
+PhyloPic est reporté ; aucun dessin sous CC BY, NC, SA ou ND n'est utilisé.
+
+`lib/fork/species_icons/` contient l'index immuable, son provider Riverpod persistant et le widget
+`SpeciesIcon`. Résolution : espèce/synonyme, gabarit du genre, gabarit de la famille, mystère.
+`flutter_svg` mutualise le décodage par clé ; la capacité du cache couvre les variantes de thème
+du catalogue sans réduire un cache déjà plus grand. Aucun accès réseau pour ces icônes.
+
+`SpeciesAvatar` accepte `scientificName`. Sous 48 dp, le SVG est prioritaire ; le Live l'utilise
+aussi à 48 dp. Aux grandes tailles, la photo reste prioritaire, y compris lorsqu'un widget `icon`
+de secours est fourni. Une photo en erreur retombe sur l'icône. Fiche, podium, revue rapide, LPO
+et grandes cartes conservent leurs photos. La carte garde ses anneaux, compteurs et sélection.
+Le gris/opacité s'applique à un seul niveau ; cet état doit venir du statut métier, jamais du
+manque d'image ou d'extrait audio.
+
+Avant validation visuelle définitive : contrôler sur le Xiaomi les silhouettes proches à 34 dp,
+les couleurs en clair/sombre et la fluidité d'une carte chargée en mode profile. Aucun changement
+natif iOS ni du pipeline audio/inférence.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

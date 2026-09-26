@@ -168,6 +168,7 @@ class SoundLibraryScreen extends ConsumerWidget {
                       children: [
                         SpeciesAvatar(
                           image: _imageOf(ref, s.scientificName),
+                          scientificName: s.scientificName,
                           tint: SpeciesAccents.tintOf(s.scientificName),
                           size: 44,
                         ),

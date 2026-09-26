@@ -287,6 +287,7 @@ class _LpoObservationCardState extends State<LpoObservationCard>
               children: [
                 SpeciesAvatar(
                   image: widget.image,
+                  scientificName: o.scientificName,
                   tint: SpeciesAccents.tintOf(o.scientificName),
                   size: 48,
                 ),

@@ -158,7 +158,12 @@ class LastBirdCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  SpeciesAvatar(image: image, tint: tint, size: 64),
+                  SpeciesAvatar(
+                    image: image,
+                    scientificName: last.scientificName,
+                    tint: tint,
+                    size: 64,
+                  ),
                   const SizedBox(width: BirdySpace.m),
                   Expanded(
                     child: Column(

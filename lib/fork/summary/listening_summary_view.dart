@@ -347,7 +347,12 @@ class _FirstTimeCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  SpeciesAvatar(image: image, tint: tint, size: 80),
+                  SpeciesAvatar(
+                    image: image,
+                    scientificName: first.species.scientificName,
+                    tint: tint,
+                    size: 80,
+                  ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -414,6 +419,7 @@ class _MaybeFirstRow extends StatelessWidget {
                 children: [
                   SpeciesAvatar(
                     image: image,
+                    scientificName: species.scientificName,
                     tint: SpeciesAccents.tintOf(species.scientificName),
                     size: 40,
                     muted: true,
@@ -546,6 +552,7 @@ class _StripItem extends StatelessWidget {
                         child: Center(
                           child: SpeciesAvatar(
                             image: image,
+                            scientificName: species.scientificName,
                             tint: tint,
                             size: 40,
                           ),

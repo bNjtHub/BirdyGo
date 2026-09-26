@@ -74,6 +74,8 @@ dependencies:
 
   # Icons
   material_symbols_icons: ^4.2928.1
+  # FORK: SVG species icons (J6d).
+  flutter_svg: ^2.3.0
 
   # Dynamic theming
   dynamic_color: ^1.9.0
@@ -114,6 +116,8 @@ flutter:
     - assets/announcements/
     # FORK: AI species sheets (J4b).
     - assets/fork/
+    # FORK: generated SVG species icons and index (J6d).
+    - assets/fork/species_icons/
     # FORK: OFL licenses of the bundled fonts (J6a).
     - assets/fonts/OFL-Fraunces.txt
     - assets/fonts/OFL-AtkinsonHyperlegibleNext.txt
