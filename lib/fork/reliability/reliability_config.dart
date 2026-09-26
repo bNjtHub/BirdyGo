@@ -54,6 +54,16 @@ ReliabilityLevel reliabilityFor({
   return ReliabilityLevel.toCheck;
 }
 
+/// Most trusted of [levels] (the level of a species over several contacts);
+/// [ReliabilityLevel.toCheck] when there is none.
+ReliabilityLevel bestLevel(Iterable<ReliabilityLevel> levels) {
+  var best = ReliabilityLevel.toCheck;
+  for (final level in levels) {
+    if (level.index < best.index) best = level;
+  }
+  return best;
+}
+
 /// Presence of every audio-detectable species for one place and week, from
 /// the geo-model's raw scores ([weekScores]: species -> probability).
 ///

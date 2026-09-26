@@ -226,6 +226,32 @@ quand la session est déjà enregistrée ; sinon la revue upstream s'ouvre comme
 - Écarts assumés avec la maquette : heures au format de la langue (07:26), pas de carte de statut ni
   de puce de badge avant J6e, bandeau qui défile au lieu d'être coupé, partage sans lieu.
 
+## Mise en œuvre (J6c, Accueil)
+
+Code dans `lib/fork/home/`, affiché par `HomeScreen` (un seul branchement `// FORK` dans `build` ;
+la disposition upstream reste dans le fichier, et le préchargement `_warmUpApp` ne change pas).
+On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
+
+- Logo : `birdygo_logo.dart` redessine `birdygo-logo-static.svg` en `CustomPainter` (pas de
+  `flutter_svg` avant J6d). À l'arrivée, les quatre barres de l'aile se dessinent de bas en haut,
+  l'une après l'autre, en 480 ms ; l'oiseau ne bouge pas. Animations réduites : dessiné d'un coup.
+- Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
+  (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
+- Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
+  jamais vérifiées avant : même règle que « Première fois » du Bilan, via `verifiedSpecies(before:)`).
+  Sans écoute du jour : phrase d'invitation à la place des tuiles.
+- « Dernier oiseau entendu » sur la teinte de l'espèce (niveau, heure au format de la langue, total),
+  vers la fiche. « N détections à vérifier » (cachée à 0), vers la revue rapide. « Écouter » fixé en
+  bas, au pouce.
+- Les chiffres se chargent après la première image et se remettent à jour quand l'index change.
+- Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
+  Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
+  fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
+- Paysage large : salutation et tuiles à gauche, cartes et « Écouter » à droite. Colonne de 600 dp
+  au plus sur tablette.
+- Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
+  navigation (Accueil, Carnet, Carte, Profil).
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

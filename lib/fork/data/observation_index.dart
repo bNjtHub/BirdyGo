@@ -422,6 +422,31 @@ class ObservationIndex {
     return {for (final row in rows) row['scientific_name']! as String};
   }
 
+  /// Newest detection (rejected ones and « unknown species » aside), for the
+  /// home screen's « Dernier oiseau entendu » (J6c).
+  Future<IndexedDetection?> lastDetection() async {
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE review_status != 'rejected' "
+      'AND scientific_name != ? ORDER BY start_ms DESC LIMIT 1',
+      [DetectionRecord.unknownSpeciesName],
+    );
+    return rows.isEmpty ? null : IndexedDetection.fromRow(rows.first);
+  }
+
+  /// Detections at or after [since], oldest first (rejected ones and
+  /// « unknown species » aside): the home screen's day tiles (J6c).
+  Future<List<IndexedDetection>> detectionsSince(DateTime since) async {
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE review_status != 'rejected' "
+      'AND scientific_name != ? AND start_ms >= ? ORDER BY start_ms ASC',
+      [
+        DetectionRecord.unknownSpeciesName,
+        since.toUtc().millisecondsSinceEpoch,
+      ],
+    );
+    return rows.map(IndexedDetection.fromRow).toList();
+  }
+
   /// All-time contact count per species (for "×3 · 142 au total").
   Future<Map<String, int>> totalContactsBySpecies() async {
     final rows = await _db.rawQuery(
@@ -564,16 +589,25 @@ class ObservationIndex {
   /// confirmed by the user, or unreviewed with a score of at least
   /// [minScore]. The index does not keep the geo-model's opinion, so a past
   /// high-score detection counts even if the species was unexpected there.
+  ///
+  /// With [before], only detections that started earlier (the home screen's
+  /// « nouvelles » of the day, J6c).
   Future<Set<String>> verifiedSpecies({
     required double minScore,
     String? excludeSessionId,
+    DateTime? before,
   }) async {
     final rows = await _db.rawQuery(
       'SELECT DISTINCT scientific_name FROM detections WHERE '
       "(review_status = 'confirmed' OR "
       "(review_status = 'unreviewed' AND confidence >= ?))"
-      '${excludeSessionId == null ? '' : ' AND session_id != ?'}',
-      [minScore, if (excludeSessionId != null) excludeSessionId],
+      '${excludeSessionId == null ? '' : ' AND session_id != ?'}'
+      '${before == null ? '' : ' AND start_ms < ?'}',
+      [
+        minScore,
+        if (excludeSessionId != null) excludeSessionId,
+        if (before != null) before.toUtc().millisecondsSinceEpoch,
+      ],
     );
     return {for (final row in rows) row['scientific_name']! as String};
   }

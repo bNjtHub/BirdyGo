@@ -185,6 +185,36 @@ void main() {
       },
     );
 
+    test('last detection and detections since a time (home)', () async {
+      expect((await index.lastDetection())?.scientificName, 'Strix aluco');
+      final since = await index.detectionsSince(
+        DateTime.utc(2026, 9, 20, 5, 35),
+      );
+      // Turdus merula (05:45) is rejected.
+      expect(since.map((d) => d.scientificName), [
+        'Upupa epops',
+        'Erithacus rubecula',
+        'Strix aluco',
+      ]);
+
+      await index.clear();
+      expect(await index.lastDetection(), isNull);
+    });
+
+    test('species verified before a time (home)', () async {
+      expect(await index.verifiedSpecies(minScore: 0.7), {
+        'Erithacus rubecula',
+        'Strix aluco',
+      });
+      expect(
+        await index.verifiedSpecies(
+          minScore: 0.7,
+          before: DateTime.utc(2026, 9, 21),
+        ),
+        {'Erithacus rubecula'},
+      );
+    });
+
     test('upsert replaces a session and remove deletes it', () async {
       morning.detections.removeLast();
       await index.upsertSession(morning);
