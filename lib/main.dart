@@ -10,6 +10,7 @@ import 'app.dart';
 import 'core/constants/app_constants.dart';
 import 'features/aru/aru_notification.dart';
 import 'features/survey/survey_notification.dart';
+import 'fork/design/font_licenses.dart'; // FORK: OFL font licenses (J6a)
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
@@ -91,6 +92,8 @@ Future<void> main() async {
 
   final launchSharedFile = await launchShareRead;
   final launchQuickAction = await launchQuickActionRead;
+
+  registerForkFontLicenses(); // FORK: OFL font licenses (J6a)
 
   runApp(
     ProviderScope(
