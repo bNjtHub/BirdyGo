@@ -380,6 +380,9 @@ abstract final class BirdySizes {
   static const double row = 72;
   static const double rowCompact = 60;
 
+  /// Minimum height of a collection card (notebook grid of 3).
+  static const double collectionCard = 168;
+
   /// Spectrum heights: reduced strip, normal band, expanded plot.
   static const double spectrumReduced = 56;
   static const double spectrumNormal = 120;

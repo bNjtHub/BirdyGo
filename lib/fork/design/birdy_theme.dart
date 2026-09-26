@@ -130,13 +130,11 @@ abstract final class BirdyTheme {
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: base.elevatedButtonTheme.style?.merge(
-          ElevatedButton.styleFrom(
-            elevation: 0,
-            shape: stadium,
-            textStyle: BirdyText.labelCompact,
-          ),
-        ),
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          shape: stadium,
+          textStyle: BirdyText.labelCompact,
+        ).merge(base.elevatedButtonTheme.style),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -149,12 +147,10 @@ abstract final class BirdyTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: base.textButtonTheme.style?.merge(
-          TextButton.styleFrom(
-            shape: stadium,
-            textStyle: BirdyText.labelCompact,
-          ),
-        ),
+        style: TextButton.styleFrom(
+          shape: stadium,
+          textStyle: BirdyText.labelCompact,
+        ).merge(base.textButtonTheme.style),
       ),
       chipTheme: base.chipTheme.copyWith(
         shape: const StadiumBorder(),

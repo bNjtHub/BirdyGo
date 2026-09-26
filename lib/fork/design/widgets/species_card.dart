@@ -128,7 +128,15 @@ class SpeciesCard extends StatelessWidget {
       color: background ?? Colors.transparent,
       borderRadius: BorderRadius.circular(radius),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(onTap: onTap, child: content),
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: hero ? 0 : BirdySizes.collectionCard,
+          ),
+          child: content,
+        ),
+      ),
     );
     if (isMystery || isToConfirm) {
       card = CustomPaint(

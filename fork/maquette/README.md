@@ -44,5 +44,7 @@ maquettes avec des données fictives, pas du code de l'app.
   `Rare.dc.html` : scintillement doux en attendant, fête seulement après « C'est bien lui ».
 - Tableau Live : les écrans gardent les lignes à leur place. Benjamin préfère que l'oiseau entendu
   remonte en tête de liste (voir `fork/DESIGN.md`).
-- Texte Martin-pêcheur sur fond clair : la maquette utilise `#0B6E77`, car `#0E7C86` (DESIGN.md)
-  n'atteint que 4,3:1 sur Brume. À trancher en J6a.
+- Texte Martin-pêcheur sur fond clair : `#0B6E77`, comme la maquette (tranché en J6a), car
+  `#0E7C86` n'atteint que 4,3:1 sur Brume.
+- Animations : `fork/DESIGN.md` prime sur la section 6 de `SPEC.md` (tranché en J6a) : pas d'entrée
+  en 420 ms, de rebond à 1,15, de plumes, de rotation ni d'effet en boucle hors écoute.

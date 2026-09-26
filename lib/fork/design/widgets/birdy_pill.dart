@@ -37,6 +37,8 @@ class BirdyPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Loose Flexible in a min-size Row: wraps in narrow rows, and stays
+    // legal in unbounded ones (live row trailing).
     final content = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: BirdySizes.pill),
       child: Padding(
