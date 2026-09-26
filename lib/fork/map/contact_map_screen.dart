@@ -16,11 +16,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../features/explore/explore_providers.dart';
-import '../../features/survey/widgets/survey_map_widget.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/widgets/pressable.dart';
+import '../design/widgets/species_avatar.dart' as birdy;
 import '../ranking/ranking_logic.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
@@ -28,12 +31,13 @@ import 'contact_map_sheets.dart';
 import 'hex_grid.dart';
 import 'map_config.dart';
 
-/// Martin-pêcheur (fork/DESIGN.md): hexagons and the user's position.
-const Color _kingfisher = Color(0xFF19A7B3);
+/// Martin-pêcheur (fork/DESIGN.md): hexagons, markers and the user's
+/// position.
+const Color _kingfisher = BirdyBrand.kingfisher;
 
 /// Encre de nuit and Brume (fork/DESIGN.md): marker count badges.
-const Color _ink = Color(0xFF13233A);
-const Color _mist = Color(0xFFEEF1EC);
+const Color _ink = BirdyBrand.ink;
+const Color _mist = BirdyBrand.mist;
 
 /// Where the map opens when there is nothing to show: France.
 const LatLng _defaultCenter = LatLng(46.6, 2.4);
@@ -289,6 +293,16 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     ];
   }
 
+  /// Distinct species in a cluster (markers are keyed by spot and species).
+  static int _clusterSpecies(List<Marker> markers) {
+    final species = <Object?>{};
+    for (final m in markers) {
+      final key = m.key;
+      species.add(key is ValueKey<(HexKey, String)> ? key.value.$2 : key);
+    }
+    return species.length;
+  }
+
   List<Marker> _spotMarkers(ContactMapData data, AppLocalizations l10n) {
     if (_markersKey == (data, _selectedSpot)) return _markers;
     _markersKey = (data, _selectedSpot);
@@ -366,8 +380,9 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                         padding: const EdgeInsets.all(50),
                         markers: _spotMarkers(data, l10n),
                         builder:
-                            (context, markers) =>
-                                SurveyMapClusterBubble(count: markers.length),
+                            (context, markers) => _ClusterBubble(
+                              species: _clusterSpecies(markers),
+                            ),
                       ),
                     ),
                   if (_userPosition != null)
@@ -375,8 +390,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                       markers: [
                         Marker(
                           point: _userPosition!,
-                          width: 20,
-                          height: 20,
+                          width: 32,
+                          height: 32,
                           child: const _UserDot(),
                         ),
                       ],
@@ -493,7 +508,8 @@ class _FilterBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      clipBehavior: Clip.none,
       child: Row(
         children: [
           _MapButton(
@@ -519,6 +535,7 @@ class _FilterBar extends StatelessWidget {
           _MapChip(
             label: l10n.forkMapConfirmedOnly,
             selected: confirmedOnly,
+            toggle: true,
             onPressed: () => onConfirmed(!confirmedOnly),
           ),
         ],
@@ -527,13 +544,15 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-/// A 48 dp pill over the map; selected pills take the action color.
+/// A 48 dp filter chip over the map (SPEC.md 5.10): selected chips take
+/// the text color as fill, toggles show a check.
 class _MapChip extends StatelessWidget {
   const _MapChip({
     required this.label,
     required this.selected,
     required this.onPressed,
     this.trailing,
+    this.toggle = false,
   });
 
   final String label;
@@ -541,45 +560,60 @@ class _MapChip extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData? trailing;
 
+  /// On/off chip: a check when selected.
+  final bool toggle;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final background =
-        selected
-            ? theme.colorScheme.primaryContainer
-            : theme.colorScheme.surface;
-    final foreground =
-        selected
-            ? theme.colorScheme.onPrimaryContainer
-            : theme.colorScheme.onSurface;
+    final c = BirdyColors.of(context);
+    final background = selected ? c.text1 : c.surface1;
+    final foreground = selected ? c.background : c.text1;
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: background,
-        elevation: 2,
-        shape: const StadiumBorder(),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onPressed,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: foreground,
-                    ),
+      child: Pressable(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: const StadiumBorder(),
+            shadows: c.floatShadow,
+          ),
+          child: Material(
+            color: background,
+            shape: StadiumBorder(
+              side: BorderSide(color: selected ? c.text1 : c.borderStrong),
+            ),
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: onPressed,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: BirdySizes.target),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    toggle && selected ? 12 : 16,
+                    0,
+                    trailing == null ? 16 : 12,
+                    0,
                   ),
-                  if (trailing != null) ...[
-                    const SizedBox(width: 4),
-                    Icon(trailing, size: 20, color: foreground),
-                  ],
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (toggle && selected) ...[
+                        Icon(AppIcons.check, size: 18, color: foreground),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        label,
+                        style: BirdyText.labelCompact.copyWith(
+                          color: foreground,
+                        ),
+                      ),
+                      if (trailing != null) ...[
+                        const SizedBox(width: 4),
+                        Icon(trailing, size: 20, color: foreground),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -603,16 +637,26 @@ class _MapButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      elevation: 2,
-      shape: const CircleBorder(),
-      child: IconButton(
-        tooltip: tooltip,
-        icon: Icon(icon, color: theme.colorScheme.onSurface),
-        constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-        onPressed: onPressed,
+    final c = BirdyColors.of(context);
+    return Pressable(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: c.floatShadow,
+        ),
+        child: Material(
+          color: c.surface1,
+          shape: CircleBorder(side: BorderSide(color: c.line)),
+          child: IconButton(
+            tooltip: tooltip,
+            icon: Icon(icon, color: c.text1),
+            constraints: const BoxConstraints.tightFor(
+              width: BirdySizes.target,
+              height: BirdySizes.target,
+            ),
+            onPressed: onPressed,
+          ),
+        ),
       ),
     );
   }
@@ -628,16 +672,23 @@ class _Notice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      elevation: 2,
-      borderRadius: BorderRadius.circular(20),
+    final c = BirdyColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+        boxShadow: c.floatShadow,
+      ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
         child: Row(
           children: [
-            Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+            Expanded(
+              child: Text(
+                text,
+                style: BirdyText.bodyCompact.copyWith(color: c.text1),
+              ),
+            ),
             if (action != null)
               TextButton(onPressed: onAction, child: Text(action!)),
           ],
@@ -647,9 +698,10 @@ class _Notice extends StatelessWidget {
   }
 }
 
-/// A species at a spot: the survey map's round photo marker, with the
-/// number of contacts in a badge (maquette Carte).
-class _ContactMarker extends StatelessWidget {
+/// A species at a spot (SPEC.md 9.14): white disc with a Martin-pêcheur
+/// ring (Loriot when its spot is selected), the photo inside, and the
+/// number of contacts in a badge.
+class _ContactMarker extends ConsumerWidget {
   const _ContactMarker({
     required this.spot,
     required this.selected,
@@ -661,11 +713,15 @@ class _ContactMarker extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final path = ref
+        .watch(taxonomyServiceProvider)
+        .value
+        ?.assetImagePath(spot.scientificName);
     return Semantics(
       button: true,
+      selected: selected,
       label: '${spot.commonName} : ${l10n.forkMapContacts(spot.count)}',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -675,12 +731,29 @@ class _ContactMarker extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              SpeciesMarker(
-                scientificName: spot.scientificName,
-                confidence: spot.maxConfidence,
-                hasAudio: spot.hasClip,
-                isConfirmed: spot.confirmed,
-                isHighlighted: selected,
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: selected ? BirdyBrand.oriole : _kingfisher,
+                      spreadRadius: 3,
+                    ),
+                    const BoxShadow(
+                      color: Color(0x2E13233A),
+                      offset: Offset(0, 4),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: birdy.SpeciesAvatar(
+                  image: path == null ? null : AssetImage(path),
+                  size: 34,
+                ),
               ),
               Positioned(
                 top: 0,
@@ -692,14 +765,14 @@ class _ContactMarker extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: _ink,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: _mist, width: 1.5),
+                    borderRadius: BorderRadius.circular(BirdyRadii.pill),
                   ),
                   child: Text(
                     '${spot.count}',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    style: BirdyText.labelCompact.copyWith(
                       color: _mist,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      height: 1,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
@@ -713,18 +786,89 @@ class _ContactMarker extends StatelessWidget {
   }
 }
 
-/// The user's position: a Martin-pêcheur dot with a white border.
+/// Several markers close together: a Martin-pêcheur disc with the number
+/// of species (SPEC.md 9.14, « Le jardin »).
+class _ClusterBubble extends StatelessWidget {
+  const _ClusterBubble({required this.species});
+
+  final int species;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final unit = l10n.forkMapClusterSpecies(species);
+    return Semantics(
+      button: true,
+      label: '$species $unit',
+      excludeSemantics: true,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: _kingfisher,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x2E13233A),
+              offset: Offset(0, 4),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$species',
+                  style: BirdyText.numberM.copyWith(color: _ink, height: 1),
+                ),
+                Text(
+                  unit,
+                  style: BirdyText.caption.copyWith(
+                    color: _ink,
+                    fontSize: 11,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The user's position: a Martin-pêcheur dot with a white border and a
+/// soft, still halo (no endless animation on the map).
 class _UserDot extends StatelessWidget {
   const _UserDot();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: _kingfisher,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 3),
-        boxShadow: const [BoxShadow(color: Color(0x2E13233A), blurRadius: 8)],
+        color: _kingfisher.withValues(alpha: 0.18),
+      ),
+      child: Center(
+        child: Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: _kingfisher,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: const [
+              BoxShadow(color: Color(0x2E13233A), blurRadius: 8),
+            ],
+          ),
+        ),
       ),
     );
   }

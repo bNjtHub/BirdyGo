@@ -5301,5 +5301,7 @@
   "forkRankingUnitDays": "{count, plural, =1{day} other{days}}",
   "@forkRankingUnitDays": {"description": "BirdyGo fork: palmarès screen (J6c).", "placeholders": {"count": {"type": "int"}}},
   "forkRankingSortMenu": "Sort and filter",
-  "@forkRankingSortMenu": {"description": "BirdyGo fork: palmarès screen (J6c)."}
+  "@forkRankingSortMenu": {"description": "BirdyGo fork: palmarès screen (J6c)."},
+  "forkMapClusterSpecies": "{count, plural, =1{species} other{species}}",
+  "@forkMapClusterSpecies": {"description": "BirdyGo fork: map cluster bubble, under the number (J6c).", "placeholders": {"count": {"type": "int"}}}
 }

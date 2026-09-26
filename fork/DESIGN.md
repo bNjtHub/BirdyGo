@@ -327,6 +327,17 @@ Code dans `lib/fork/ranking/ranking_screen.dart` (données, période, options) e
 - Dates de la période : « du 27 août au 26 septembre », « depuis le 1er septembre », « en 2026 »,
   « depuis le 4 octobre 2025 » (premier contact de la liste).
 
+## Mise en œuvre (J6c, Carte)
+
+Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
+
+- Marqueur : disque blanc de 44 dp, anneau de 3 dp Martin-pêcheur (Loriot pour le lieu choisi),
+  ombre légère, photo de 34 dp, pastille Encre du nombre de contacts en haut à droite.
+- Groupe : disque Martin-pêcheur de 56 dp, bord blanc de 3 dp, nombre d'espèces distinctes et
+  « espèces » en dessous.
+- Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
+- Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

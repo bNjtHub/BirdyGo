@@ -1390,5 +1390,6 @@
   "forkRankingByLastHeard": "dernière écoute",
   "forkRankingUnitContacts": "{count, plural, =1{contact} other{contacts}}",
   "forkRankingUnitDays": "{count, plural, =1{jour} other{jours}}",
-  "forkRankingSortMenu": "Trier et filtrer"
+  "forkRankingSortMenu": "Trier et filtrer",
+  "forkMapClusterSpecies": "{count, plural, =1{espèce} other{espèces}}"
 }

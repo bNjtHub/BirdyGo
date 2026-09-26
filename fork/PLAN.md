@@ -484,7 +484,16 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             couleur `deep` de l'espèce et pastille « Nouveau cette année ». Un appui ouvre la fiche.
             Écarts : « Confirmées seulement » reste désactivé par défaut (peu de détections sont
             confirmées au début) ; tri et filtre oiseaux dans un menu plutôt qu'en puces.
-      - [ ] Carte
+      - [x] Carte (`lib/fork/map/`) : couleurs et textes du design system partout. Puces de filtre
+            SPEC.md 5.10 (sélectionnée = fond de la couleur du texte, coche sur « Confirmées »),
+            boutons ronds blancs avec ombre, marqueurs en disque blanc cerclé de Martin-pêcheur
+            (Loriot pour le lieu choisi) avec la photo et le nombre de contacts, groupes en disque
+            Martin-pêcheur avec le nombre d'espèces, position de l'utilisateur avec un halo fixe.
+            Feuille d'une zone : « N espèces · M contacts », lignes avec photo sur la teinte de
+            l'espèce, nombre de contacts et bouton de réécoute, ligne « Tes positions précises… ».
+            Écarts : pas de halo animé autour de la position (pas d'animation sans fin sur la
+            carte), pas de barre de navigation (elle vient avec J6e), marqueurs avec photo tant que
+            les icônes de J6d manquent.
       - [ ] Sonothèque
       - [x] Revue rapide (`lib/fork/reliability/quick_review_*.dart`) : barre « Revue rapide · N sur M »
             (fermer, écran Fiabilité), barre de progression et « Tu as trié N détections », pile de
