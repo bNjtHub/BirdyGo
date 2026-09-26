@@ -51,8 +51,12 @@ dans le temps et sur une carte, dans une interface pensée comme un carnet de te
 - **Réécoute** : rejouer un chant pendant l'écoute sans que le modèle ne se détecte lui-même, et une sonothèque
   par espèce avec favoris.
 - **Palmarès** : espèces classées par contacts, jours ou dernière écoute, activité par heure et par mois.
-- **Carte** : tous tes contacts sur une seule carte, en hexagones, avec les fonds IGN.
-- **Nouvelle interface** : photos d'oiseaux, thèmes clair et sombre, animations sobres (voir [fork/DESIGN.md](fork/DESIGN.md)).
+- **Fiches espèces** : taille, comportement, migration, anecdote, rédigées par IA à partir de Wikipédia,
+  vérifiées et relues, disponibles hors ligne.
+- **Carte** : tous tes contacts sur une seule carte, avec les icônes des oiseaux et les fonds IGN.
+- **LPO** : envoi guidé des observations confirmées vers Faune-France, et un mode « Oiseaux des jardins ».
+- **Nouvelle interface** : simple, rapide et colorée grâce aux oiseaux, avec un jeu (statuts, badges,
+  carnet à compléter) et de belles animations pour les grands moments (voir [fork/DESIGN.md](fork/DESIGN.md)).
 
 ## Feuille de route
 
@@ -66,8 +70,10 @@ jalon et ses critères de fin sont dans [fork/PLAN.md](fork/PLAN.md).
 | J2 | Réécoute pendant l'écoute et sonothèque | à faire |
 | J3 | Niveaux de fiabilité et revue rapide | à faire |
 | J4 | Palmarès | à faire |
+| J4b | Fiches espèces rédigées par IA | à faire |
 | J5 | Carte de tous les contacts | à faire |
-| J6 | Refonte visuelle | à faire |
+| J5b | Envoi guidé à la LPO, mode Oiseaux des jardins | à faire |
+| J6 | Refonte visuelle, icônes d'espèces, jeu | à faire |
 | J7 | Publication Android | à faire |
 
 ## Démarrer

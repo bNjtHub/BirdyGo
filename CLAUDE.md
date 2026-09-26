@@ -67,3 +67,8 @@ faudra faire côté iOS. Pas de build ni de test iOS pour l'instant.
 - Rejouer un clip pendant une écoute : suspendre l'inférence pendant la lecture, plus 0,5 s,
   sinon le modèle détecte le haut-parleur.
 - HyperOS coupe volontiers les services en arrière-plan : prévoir un test d'écoute écran éteint.
+- Déjà dans upstream, à réutiliser : `GeoModel.predict` et `geoCommonnessProvider` (présence ici et
+  maintenant, hors saison), `SpeciesInfoOverlay` (fiche espèce), `_SpeciesMarker` et
+  `SurveyMapClusterBubble` dans `survey_map_widget.dart` (marqueurs ronds sur la carte).
+- Le bundle espèces (photos, descriptions) se génère sur le PC : birdnet.cornell.edu n'est pas
+  joignable depuis le cloud, et `assets/species_images/` n'y contient qu'une image factice.
