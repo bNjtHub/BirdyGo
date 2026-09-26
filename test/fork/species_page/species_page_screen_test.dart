@@ -32,6 +32,7 @@ class _FakeLoader implements SpeciesPageLoader {
 
   final SpeciesRecord recordValue;
   final YearPresence? year;
+  bool unexpected = false;
   final favoriteCalls = <(String, bool)>[];
 
   @override
@@ -39,6 +40,12 @@ class _FakeLoader implements SpeciesPageLoader {
 
   @override
   Future<YearPresence?> presence(String scientificName) async => year;
+
+  @override
+  Future<bool> unexpectedNow(
+    String scientificName, {
+    required DateTime now,
+  }) async => unexpected;
 
   @override
   Future<void> setFavorite(String key, {required bool favorite}) async =>
@@ -222,6 +229,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(_sheet.sections[SheetSection.migration]!), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.size]!), findsNothing);
+  });
+
+  testWidgets('unexpected here: the page explains « Rare ici »', (
+    tester,
+  ) async {
+    const explanation =
+        'Le chant ressemble bien. C\'est le lieu ou la saison qui surprend : '
+        'réécoute-le pour confirmer.';
+    await pump(tester);
+    expect(find.text(explanation), findsNothing);
+
+    loader.unexpected = true;
+    await pump(tester, home: const SizedBox());
+    await pump(tester);
+    expect(find.text(explanation), findsOneWidget);
   });
 
   testWidgets('play a recording and change a favorite', (tester) async {

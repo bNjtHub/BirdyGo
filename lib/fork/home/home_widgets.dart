@@ -181,6 +181,7 @@ class LastBirdCard extends StatelessWidget {
                             ReliabilityBadge(
                               level: last.level,
                               unexpected: last.unexpected,
+                              score: last.detection.confidence,
                             ),
                             Text(
                               l10n.forkHomeLastBirdMeta(when, last.total),

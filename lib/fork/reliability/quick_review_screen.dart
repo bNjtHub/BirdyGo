@@ -289,14 +289,8 @@ class _ReviewCard extends ConsumerWidget {
                         presence: presence,
                       ),
                       unexpected: presence?.unexpected ?? false,
+                      score: detection.confidence,
                     ),
-                    if (presence?.unexpected ?? false)
-                      Text(
-                        l10n.forkUnexpectedHere,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.tertiary,
-                        ),
-                      ),
                   ],
                 );
               },

@@ -5245,5 +5245,9 @@
   "forkFicheNeverHeard": "You haven't heard it yet.",
   "@forkFicheNeverHeard": {"description": "BirdyGo fork: species page (J6c)."},
   "forkFicheEthics": "Keep the sound to yourself: a song played loud disturbs birds, especially in spring.",
-  "@forkFicheEthics": {"description": "BirdyGo fork: species page (J6c)."}
+  "@forkFicheEthics": {"description": "BirdyGo fork: species page (J6c)."},
+  "forkRareHereToConfirm": "Rare here · to confirm",
+  "@forkRareHereToConfirm": {"description": "BirdyGo fork: rare here explained (J3b)."},
+  "forkRareHereExplanation": "The song is a good match. It's the place or the season that's surprising: listen again to confirm.",
+  "@forkRareHereExplanation": {"description": "BirdyGo fork: rare here explained (J3b)."}
 }

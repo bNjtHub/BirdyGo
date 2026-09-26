@@ -1,4 +1,6 @@
-/// Compact badges for reliability levels and "Inattendu ici" (J3).
+/// Compact badges for reliability levels and "Inattendu ici" (J3), and
+/// « Rare ici · à confirmer » when the place alone makes it « À vérifier »
+/// (J3b).
 ///
 /// Levels differ by the number of filled bars, by lightness and by outline
 /// (dashed for "À vérifier"), not by hue alone.
@@ -11,6 +13,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/dashed_border.dart';
+import 'rare_here_sheet.dart';
 import 'reliability_config.dart';
 
 /// Localized label of a level.
@@ -27,6 +30,7 @@ class ReliabilityBadge extends StatelessWidget {
     super.key,
     required this.level,
     this.unexpected = false,
+    this.score,
     this.compact = false,
   });
 
@@ -34,6 +38,11 @@ class ReliabilityBadge extends StatelessWidget {
 
   /// Adds the "Inattendu ici" mark.
   final bool unexpected;
+
+  /// Detection score (best one for a species). With [unexpected] and a
+  /// score that passes on its own, the level and the "Inattendu ici" mark
+  /// merge into « Rare ici · à confirmer » (J3b). Null keeps both marks.
+  final double? score;
 
   /// Glyph only (label kept for screen readers and the tooltip).
   final bool compact;
@@ -44,6 +53,14 @@ class ReliabilityBadge extends StatelessWidget {
     final c = BirdyColors.of(context);
     final colors = c.level(level);
     final label = reliabilityLabel(l10n, level);
+    final rareHere =
+        level == ReliabilityLevel.toCheck &&
+        score != null &&
+        placeOnlyToCheck(
+          score: score!,
+          presence: GeoPresence(unexpected: unexpected),
+        );
+    if (rareHere) return _RareHereBadge(compact: compact);
     final semantics = unexpected ? '$label, ${l10n.forkUnexpectedHere}' : label;
     final glyph = ReliabilityGlyph(level: level, color: colors.foreground);
     final Widget badge =
@@ -78,6 +95,65 @@ class ReliabilityBadge extends StatelessWidget {
                   : const NoveltyPill(kind: NoveltyKind.unexpectedHere),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Single Loriot pill replacing « À vérifier » + « Inattendu ici » (J3b).
+/// Full size opens the explanation; compact (inside tappable rows) does
+/// not, and keeps the label for the tooltip and screen readers.
+class _RareHereBadge extends StatelessWidget {
+  const _RareHereBadge({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final label = l10n.forkRareHereToConfirm;
+    if (compact) {
+      return Tooltip(
+        message: label,
+        child: Semantics(
+          label: label,
+          excludeSemantics: true,
+          child: CustomPaint(
+            foregroundPainter: DashedBorderPainter(
+              color: c.orioleText,
+              radius: BirdyRadii.pill,
+              dash: 3,
+              gap: 2.5,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.orioleContainer,
+                shape: BoxShape.circle,
+              ),
+              child: SizedBox.square(
+                dimension: BirdySizes.pill,
+                child: Icon(
+                  AppIcons.diamond,
+                  size: 14,
+                  fill: 1,
+                  color: c.orioleText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return Semantics(
+      button: true,
+      label: label,
+      hint: l10n.forkRareHereExplanation,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => showRareHereSheet(context),
+        child: const NoveltyPill(kind: NoveltyKind.rareHereToConfirm),
       ),
     );
   }

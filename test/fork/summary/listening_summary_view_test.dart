@@ -93,7 +93,9 @@ void main() {
     expect(find.text('Pic épeiche'), findsOneWidget);
     expect(find.text('Ta 24e espèce, à 07:26.'), findsOneWidget);
     expect(find.text('Huppe fasciée'), findsOneWidget);
-    expect(find.text('Inattendu ici'), findsOneWidget);
+    // Good score, unexpected here: one pill, still to check (J3b).
+    expect(find.text('Rare ici · à confirmer'), findsOneWidget);
+    expect(find.text('Inattendu ici'), findsNothing);
     expect(find.text('Les 13 espèces entendues'), findsOneWidget);
     expect(find.text('×9'), findsOneWidget);
   });

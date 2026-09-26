@@ -32,7 +32,8 @@ class BirdyPill extends StatelessWidget {
   /// 1.5 px solid outline in [foreground].
   final bool outlined;
 
-  /// 1.5 px dashed outline in [foreground] (« À vérifier » only).
+  /// 1.5 px dashed outline in [foreground] (« À vérifier » and
+  /// « Rare ici · à confirmer »).
   final bool dashed;
 
   @override
@@ -151,6 +152,10 @@ enum NoveltyKind {
   /// The geomodel says Rare or Exceptionnel here this week.
   unexpectedHere,
 
+  /// « À vérifier » only because the species is unexpected here, with a
+  /// score that would otherwise pass (J3b): Loriot, dashed like « À vérifier ».
+  rareHereToConfirm,
+
   /// Collection card not opened yet (Loriot fill).
   isNew,
 }
@@ -189,6 +194,13 @@ class NoveltyPill extends StatelessWidget {
         label: l10n.forkUnexpectedHere,
         foreground: c.orioleText,
         background: c.orioleContainer,
+        leading: icon(AppIcons.diamond, c.orioleText),
+      ),
+      NoveltyKind.rareHereToConfirm => BirdyPill(
+        label: l10n.forkRareHereToConfirm,
+        foreground: c.orioleText,
+        background: c.orioleContainer,
+        dashed: true,
         leading: icon(AppIcons.diamond, c.orioleText),
       ),
     };

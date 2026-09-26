@@ -3,11 +3,13 @@
 /// cached for the app's lifetime.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/announcements/domain/announcement_signals.dart';
 import '../../features/announcements/geo_commonness_provider.dart';
 import '../../features/explore/explore_providers.dart';
+import '../../features/inference/geo_abundance.dart';
 import '../../features/inference/geo_model.dart';
 import 'reliability_config.dart';
 
@@ -65,16 +67,52 @@ final geoPresenceServiceProvider = Provider<GeoPresenceService>(
 );
 
 /// Presence for the Live screen, from the current-location commonness map
-/// that the announcements already compute (it also knows "out of season").
-/// Null while the map is unavailable.
+/// that the announcements already compute. Null while the map is
+/// unavailable.
+///
+/// Same rule as [GeoPresenceService.presenceAt] (J3b): rare tier, below the
+/// abundance inclusion threshold, or missing from the map. "Out of season"
+/// alone no longer makes a species unexpected, so Live and the listening
+/// summary agree; it stays in the spoken hints and the LPO status.
 GeoPresence? livePresence(
   Map<String, GeoCommonnessEntry>? commonness,
   String scientificName,
 ) {
   if (commonness == null || commonness.isEmpty) return null;
-  final entry = commonness[scientificName];
-  if (entry == null) return kAbsentHere;
-  return GeoPresence(
-    unexpected: entry.commonness == CommonnessBin.rare || entry.isOutOfSeason,
+  final cause = liveUnexpectedCause(commonness[scientificName]);
+  if (kDebugMode) _logLiveCause(scientificName, commonness[scientificName]);
+  return GeoPresence(unexpected: cause != null);
+}
+
+/// Why the Live screen finds a species unexpected here, or null when it is
+/// expected. [entry] null means missing from the commonness map.
+LiveUnexpectedCause? liveUnexpectedCause(GeoCommonnessEntry? entry) {
+  if (entry == null) return LiveUnexpectedCause.absent;
+  if (entry.commonness == CommonnessBin.rare) return LiveUnexpectedCause.rare;
+  if (entry.currentScore < kAbundanceInclusionThreshold) {
+    return LiveUnexpectedCause.belowInclusion;
+  }
+  return null;
+}
+
+/// Criteria behind "unexpected here" in Live.
+enum LiveUnexpectedCause { absent, rare, belowInclusion }
+
+final Set<String> _loggedLiveCauses = {};
+
+/// Debug only, once per species: which criterion fired, and whether the
+/// former "out of season" rule would have fired too (J3b).
+void _logLiveCause(String scientificName, GeoCommonnessEntry? entry) {
+  if (!_loggedLiveCauses.add(scientificName)) return;
+  final cause = liveUnexpectedCause(entry);
+  final outOfSeason = entry?.isOutOfSeason ?? false;
+  if (cause == null && !outOfSeason) return;
+  debugPrint(
+    '[GeoPresence] $scientificName: '
+    'unexpected=${cause != null} cause=${cause?.name ?? '-'} '
+    'outOfSeason=$outOfSeason '
+    'commonness=${entry?.commonness.name ?? '-'} '
+    'week=${entry?.currentScore.toStringAsFixed(3) ?? '-'} '
+    'annualMax=${entry?.annualMax.toStringAsFixed(3) ?? '-'}',
   );
 }

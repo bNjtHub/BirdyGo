@@ -320,6 +320,11 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
           level: ReliabilityLevel.toCheck,
           unexpected: true,
         ),
+        const ReliabilityBadge(
+          level: ReliabilityLevel.toCheck,
+          unexpected: true,
+          score: 0.9,
+        ),
         for (final kind in NoveltyKind.values) NoveltyPill(kind: kind),
       ],
     ),

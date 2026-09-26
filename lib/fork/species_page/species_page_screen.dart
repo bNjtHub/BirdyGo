@@ -124,6 +124,9 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
   String? _description;
   SpeciesRecord? _record;
   YearPresence? _year;
+
+  /// Unexpected here this week (J3b): the page explains why.
+  bool _unexpectedNow = false;
   int _loadGeneration = 0;
 
   @override
@@ -177,6 +180,11 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
   Future<void> _loadYear() async {
     final year = await _loader.presence(widget.scientificName);
     if (mounted && year != null) setState(() => _year = year);
+    final unexpected = await _loader.unexpectedNow(
+      widget.scientificName,
+      now: DateTime.now(),
+    );
+    if (mounted && unexpected) setState(() => _unexpectedNow = true);
   }
 
   String get _name =>
@@ -288,6 +296,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           sentence: presenceSentence(l10n, language, _year!, now: now),
           monthsCaption: monthsCaption(language),
           currentMonth: now.month,
+          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
       if ((record?.clips.isNotEmpty ?? false) || referenceUrl != null)
         ValueListenableBuilder<String?>(

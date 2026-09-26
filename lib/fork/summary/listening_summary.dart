@@ -41,6 +41,7 @@ class SummarySpecies {
     required this.level,
     required this.unexpected,
     required this.firstEver,
+    this.bestScore,
     this.verifiedAt,
     this.keysToCheck = const {},
   });
@@ -58,6 +59,10 @@ class SummarySpecies {
 
   /// The geo-model does not expect it here this week.
   final bool unexpected;
+
+  /// Highest score over the session's contacts: with [unexpected], tells
+  /// « Rare ici · à confirmer » from a plain « À vérifier » (J3b).
+  final double? bestScore;
 
   /// Never verified in another session.
   final bool firstEver;
@@ -124,7 +129,9 @@ class ListeningSummary {
       final geo = presence?.call(name);
       var best = ReliabilityLevel.toCheck;
       DateTime? verifiedAt;
+      var bestScore = 0.0;
       for (final (_, d) in records) {
+        if (d.confidence > bestScore) bestScore = d.confidence;
         final level = reliabilityFor(
           score: d.confidence,
           review: d.reviewStatus,
@@ -141,6 +148,7 @@ class ListeningSummary {
           firstHeard: records.first.$2.timestamp,
           level: best,
           unexpected: geo?.unexpected ?? false,
+          bestScore: bestScore,
           firstEver: !verifiedBefore.contains(name),
           verifiedAt: verifiedAt,
           keysToCheck:
