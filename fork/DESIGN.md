@@ -185,6 +185,29 @@ hors version publiée) montre chaque composant en clair et en sombre.
 - Animations : ce document prime sur `fork/maquette/SPEC.md` (section 6). Écartés de la maquette :
   entrée en 420 ms, rebond à 1,15, plumes qui tombent, rotations, anneaux et reflets en boucle.
 
+## Mise en œuvre (J6c, Live)
+
+Code dans `lib/fork/live/`, branché sur `LiveScreen` dans les deux orientations (la disposition
+upstream reste dans le fichier, inutilisée, pour faciliter les fusions). La session, la pause du cycle
+de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
+
+- `live_table_model.dart` : une ligne par espèce de la sortie, triée sur le début du dernier contact.
+  Un contact qui dure ne fait pas bouger sa ligne ; un nouveau contact la remonte en tête.
+- `live_table.dart` et `flip_move.dart` : entrée `BirdyEntrance` depuis 8 px au-dessus avec vibration
+  légère, remontée de 250 ms (`BirdyMotion.move`) lue dans la mise en page de la colonne, donc
+  valable pour des lignes de toute hauteur. Animations réduites : les lignes sautent à leur place.
+- `detection_marks.dart` : un trait par passage, de `timestamp − fenêtre d'analyse` à
+  `endTimestamp` (ou maintenant s'il chante encore), sur trois rangées au plus quand ils se
+  chevauchent. Noms sous les traits en mode agrandi. Jamais de cadre autour d'un son.
+- `live_spectrogram_panel.dart` : bande de 120 dp, ou 60 % du corps de l'écran avec l'échelle en kHz.
+  En paysage : spectre à gauche sur toute la hauteur (moitié de la largeur, 65 % d'un appui), avec
+  l'échelle et les noms ; tableau et barre à droite ; une ligne de résumé à la place des tuiles.
+- Couleur d'espèce : `SpeciesAccents` (`lib/fork/design/species_accents.dart`), table de SPEC.md 2.5
+  et palette de repli stable, jusqu'aux icônes de J6d.
+- Écarts assumés avec la maquette : pas de halo ni d'onde sur la ligne réentendue (un seul effet à la
+  fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
+  et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.
