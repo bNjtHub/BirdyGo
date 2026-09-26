@@ -78,9 +78,12 @@ GeoPresence? livePresence(
   Map<String, GeoCommonnessEntry>? commonness,
   String scientificName,
 ) {
-  if (commonness == null || commonness.isEmpty) return null;
+  if (commonness == null || commonness.isEmpty) {
+    if (!kReleaseMode) _logNoMap(commonness);
+    return null;
+  }
   final cause = liveUnexpectedCause(commonness[scientificName]);
-  if (kDebugMode) _logLiveCause(scientificName, commonness[scientificName]);
+  if (!kReleaseMode) _logLiveCause(scientificName, commonness[scientificName]);
   return GeoPresence(unexpected: cause != null);
 }
 
@@ -99,20 +102,30 @@ LiveUnexpectedCause? liveUnexpectedCause(GeoCommonnessEntry? entry) {
 enum LiveUnexpectedCause { absent, rare, belowInclusion }
 
 final Set<String> _loggedLiveCauses = {};
+bool _loggedNoMap = false;
 
-/// Debug only, once per species: which criterion fired, and whether the
-/// former "out of season" rule would have fired too (J3b).
+/// Outside release builds, once per species: which criterion fired, and
+/// whether the former "out of season" rule would have fired too (J3b).
 void _logLiveCause(String scientificName, GeoCommonnessEntry? entry) {
   if (!_loggedLiveCauses.add(scientificName)) return;
   final cause = liveUnexpectedCause(entry);
-  final outOfSeason = entry?.isOutOfSeason ?? false;
-  if (cause == null && !outOfSeason) return;
   debugPrint(
     '[GeoPresence] $scientificName: '
     'unexpected=${cause != null} cause=${cause?.name ?? '-'} '
-    'outOfSeason=$outOfSeason '
+    'outOfSeason=${entry?.isOutOfSeason ?? false} '
     'commonness=${entry?.commonness.name ?? '-'} '
     'week=${entry?.currentScore.toStringAsFixed(3) ?? '-'} '
     'annualMax=${entry?.annualMax.toStringAsFixed(3) ?? '-'}',
+  );
+}
+
+/// Outside release builds, once: Live has no geo information, so no
+/// species can be unexpected (no position, or geo-model not loaded).
+void _logNoMap(Map<String, GeoCommonnessEntry>? commonness) {
+  if (_loggedNoMap) return;
+  _loggedNoMap = true;
+  debugPrint(
+    '[GeoPresence] no commonness map '
+    '(${commonness == null ? 'no position or geo-model yet' : 'empty'})',
   );
 }

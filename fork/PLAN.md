@@ -195,7 +195,8 @@ inattendu reste « À vérifier » et doit être confirmé avant de compter. Seu
 - [x] Comprendre : en Live, `livePresence` comptait aussi le « hors saison » (score de la semaine
       sous 40 % du pic annuel), alors que `presenceAt` (Bilan, revue, sonothèque, Accueil) n'utilise
       que le palier rare et le seuil d'inclusion. Un `debugPrint` `[GeoPresence]` (une fois par
-      espèce, hors version publiée) dit quel critère a joué et si le hors-saison aurait joué.
+      espèce, attendue ou non, en debug et en profile) dit quel critère a joué et si le hors-saison
+      aurait joué ; une ligne « no commonness map » si le Live n'a ni position ni géomodèle.
 - [x] Aligner le Live sur `presenceAt` : palier rare, sous le seuil d'inclusion ou absent de la carte.
       Le hors-saison seul ne rend plus une espèce inattendue ; il reste dans les annonces vocales et
       dans `LpoGeoStatus.outOfSeason`.
