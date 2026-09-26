@@ -5123,5 +5123,19 @@
   "forkLiveSpectrumLabel": "Live spectrogram",
   "@forkLiveSpectrumLabel": {"description": "BirdyGo fork: listening screen (J6c)."},
   "forkLiveSpectrumMarksLabel": "Live spectrogram. A colored line marks each detected passage: {species}",
-  "@forkLiveSpectrumMarksLabel": {"description": "BirdyGo fork: listening screen (J6c).", "placeholders": {"species": {"type": "String"}}}
+  "@forkLiveSpectrumMarksLabel": {"description": "BirdyGo fork: listening screen (J6c).", "placeholders": {"species": {"type": "String"}}},
+  "forkPhotoCreditTitle": "Photo credit",
+  "@forkPhotoCreditTitle": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditOpen": "Photo credit and license",
+  "@forkPhotoCreditOpen": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditAuthor": "Author",
+  "@forkPhotoCreditAuthor": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditLicense": "License",
+  "@forkPhotoCreditLicense": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditSource": "Source",
+  "@forkPhotoCreditSource": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditCropped": "Cropped and resized for the app.",
+  "@forkPhotoCreditCropped": {"description": "BirdyGo fork: species photos (J6b)."},
+  "forkPhotoCreditLine": "Photo: {credit}",
+  "@forkPhotoCreditLine": {"description": "BirdyGo fork: species photos (J6b).", "placeholders": {"credit": {"type": "String"}}}
 }

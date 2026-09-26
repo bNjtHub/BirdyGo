@@ -1301,5 +1301,12 @@
   "forkLiveSessionCount": "{count, plural, =1{entendu une fois pendant cette sortie} other{entendu {count} fois pendant cette sortie}}",
   "forkLiveReplayToast": "Réécoute à faible volume. L'écoute continue.",
   "forkLiveSpectrumLabel": "Spectre en direct",
-  "forkLiveSpectrumMarksLabel": "Spectre en direct. Un trait coloré marque chaque passage détecté : {species}"
+  "forkLiveSpectrumMarksLabel": "Spectre en direct. Un trait coloré marque chaque passage détecté : {species}",
+  "forkPhotoCreditTitle": "Crédit photo",
+  "forkPhotoCreditOpen": "Crédit et licence de la photo",
+  "forkPhotoCreditAuthor": "Auteur",
+  "forkPhotoCreditLicense": "Licence",
+  "forkPhotoCreditSource": "Source",
+  "forkPhotoCreditCropped": "Recadrée et redimensionnée pour l'app.",
+  "forkPhotoCreditLine": "Photo : {credit}"
 }

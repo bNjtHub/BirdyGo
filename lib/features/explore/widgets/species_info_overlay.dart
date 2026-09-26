@@ -36,6 +36,8 @@ import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (
 import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
 import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
 import '../../../fork/species_sheet/species_sheet_section.dart'; // FORK: AI sheet (J4b)
+import '../../../fork/photos/photo_credit.dart'; // FORK: photo credit (J6b)
+import '../../../fork/photos/species_photo.dart'; // FORK: photos (J6b)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -134,7 +136,7 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final highContrast = AppTheme.isHighContrastTheme(theme);
+    // FORK: highContrast only served the photo credit, now PhotoCreditLine (J6b).
     final l10n = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
@@ -162,51 +164,25 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
               ),
 
               // ── Image ────────────────────────────────────────
-              // Bundled species photos are 360×240 (3:2); using a 3:2
-              // aspect ratio with BoxFit.contain shows the full photo
-              // without vertical cropping or sideways distortion.
-              AspectRatio(
-                aspectRatio: 3 / 2,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
-                      _detail?.assetImagePath ??
-                          'assets/images/dummy_species.png',
-                      fit: BoxFit.contain,
-                      errorBuilder:
-                          (a, b, c) => Image.asset(
-                            'assets/images/dummy_species.png',
-                            fit: BoxFit.contain,
-                          ),
+              // FORK: bundled photo, large version fading in over it and
+              // credit on tap (J6b). Upstream: Image.asset, BoxFit.contain.
+              SpeciesPhoto(
+                scientificName: widget.scientificName,
+                overlays: [
+                  if (ref
+                      .watch(detectedSpeciesSetProvider)
+                      .contains(widget.scientificName))
+                    const Positioned(
+                      top: 12,
+                      right: 12,
+                      child: _OverlayDetectedBadge(),
                     ),
-                    if (ref
-                        .watch(detectedSpeciesSetProvider)
-                        .contains(widget.scientificName))
-                      const Positioned(
-                        top: 12,
-                        right: 12,
-                        child: _OverlayDetectedBadge(),
-                      ),
-                  ],
-                ),
+                ],
               ),
 
               // ── Image credit (below photo) ────────────────────
-              if (_detail?.imageAuthor != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                  child: Text(
-                    '${l10n.speciesPhotoCreditLabel}: ${_detail!.imageAuthor}'
-                    '${_detail!.imageSource != null ? ' — ${_detail!.imageSource}' : ''}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          highContrast
-                              ? theme.colorScheme.onSurface
-                              : theme.colorScheme.onSurface.withAlpha(100),
-                    ),
-                  ),
-                ),
+              // FORK: credit and licence from the photo manifest (J6b).
+              PhotoCreditLine(scientificName: widget.scientificName),
 
               // ── Names ────────────────────────────────────────
               Padding(
