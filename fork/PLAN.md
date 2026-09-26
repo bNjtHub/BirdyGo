@@ -246,21 +246,32 @@ Fini quand : les 100 espèces les plus entendues ont une fiche relue et l'app le
 
 ## J5 : carte de tous les contacts
 
-- [ ] Carte plein écran avec flutter_map, déjà utilisé. Aux petits zooms, grille d'hexagones dont la
+- [x] Carte plein écran avec flutter_map, déjà utilisé. Aux petits zooms, grille d'hexagones dont la
       couleur suit le nombre de contacts. Aux grands zooms, les icônes rondes des oiseaux, regroupées
       avec flutter_map_marker_cluster, déjà présent. Réutiliser `_SpeciesMarker` et
       `SurveyMapClusterBubble` de `lib/features/survey/widgets/survey_map_widget.dart`, qui dessinent
       déjà des marqueurs ronds avec la photo de l'espèce en mode Survey. `SurveyMapClusterBubble` est déjà
       public ; rendre `_SpeciesMarker` public par une modification minimale marquée FORK, ou le recopier
       dans `lib/fork/map/` si l'extraction touche trop de lignes. Plus tard, les icônes SVG de J6d.
-- [ ] Filtres : espèce (recherche), période, confirmées seulement. Appui sur un hexagone : feuille avec
+- [x] Filtres : espèce (recherche), période, confirmées seulement. Appui sur un hexagone : feuille avec
       les espèces de la zone, leurs compteurs et leurs clips.
-- [ ] Fonds de carte : OSM avec les réglages partagés, plus Plan IGN et photos aériennes IGN
+- [x] Fonds de carte : OSM avec les réglages partagés, plus Plan IGN et photos aériennes IGN
       (Géoplateforme). Vérifier les URL WMTS actuelles et la mention de source obligatoire.
-- [ ] Dans les exports, option pour flouter la position des espèces sensibles, dans l'esprit
+- [x] Dans les exports, option pour flouter la position des espèces sensibles, dans l'esprit
       d'ACCEPTABLE_USE.md.
 
 Fini quand : 10 000 points se déplacent et zooment sans saccade sur le téléphone.
+
+Fait (code dans `lib/fork/map/`) : bouton « Carte » sur l'accueil. Hexagones sous le zoom 13
+(`map_config.dart`), marqueurs `SpeciesMarker` (typedef public de `_SpeciesMarker`, une ligne FORK)
+avec le nombre de contacts, un marqueur par espèce et par lieu (environ 25 m), regroupés par
+`SurveyMapClusterBubble`. URL IGN vérifiées en septembre 2026 (data.geopf.fr, WMTS, matrice PM),
+mention « © IGN – Géoplateforme » ; data.geopf.fr n'est pas joignable depuis le cloud, donc
+l'affichage des tuiles IGN est à vérifier sur le téléphone. Exports : case « Flouter les espèces
+sensibles » (réglages, section export, cochée par défaut), liste de départ dans
+`sensitive_species.dart` à revoir avec les règles LPO en J5b.
+À tester sur le Xiaomi : fluidité avec beaucoup de points (le test unitaire bine 10 000 points),
+tuiles IGN, bouton « Me localiser ».
 
 ## J5b : envoyer ses observations à la LPO
 
@@ -390,3 +401,5 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
+  (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
