@@ -29,6 +29,7 @@ import '../../fork/data/observation_index_service.dart'; // FORK: observation in
 import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
 import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
 import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
+import '../../fork/map/contact_map_screen.dart'; // FORK: contact map (J5)
 import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
 
 // =============================================================================
@@ -972,6 +973,20 @@ class _Footer extends StatelessWidget {
           onPressed:
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const RankingScreen()),
+              ),
+        ),
+        // FORK: map of every contact (fork/PLAN.md J5).
+        _FooterButton(
+          icon: AppIcons.mapSheet,
+          label: l10n.forkMap,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ContactMapScreen(),
+                ),
               ),
         ),
         // FORK: quick review of doubtful detections (fork/PLAN.md J3).

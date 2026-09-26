@@ -769,6 +769,9 @@ String buildSurveyMapMarkerSemanticsValue({
 // Species marker with thumbnail image
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// FORK: public name for the fork's contact map (fork/PLAN.md J5).
+typedef SpeciesMarker = _SpeciesMarker;
+
 class _SpeciesMarker extends ConsumerWidget {
   const _SpeciesMarker({
     required this.scientificName,
