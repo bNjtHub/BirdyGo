@@ -336,7 +336,7 @@ référence : le canevas « BirdyGo – Interface » sur claude.ai
 (https://claude.ai/artifact/C6XUNf7AKdf1YUZzRr1K3j, privé), exporté dans `fork/maquette/` pour que
 les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessions.
 
-- [ ] J6a Design system : thèmes clair et sombre, polices embarquées, composants (carte espèce, puce
+- [x] J6a Design system : thèmes clair et sombre, polices embarquées, composants (carte espèce, puce
       de niveau, compteur, lecteur de clip, boutons), jetons d'animation. Opus pour le concevoir,
       Sonnet ensuite.
 - [ ] J6b Photos : `tools/fork_region_species.py` (créé en J4b) donne la liste des espèces de la
@@ -433,3 +433,5 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
+- Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
+  `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).

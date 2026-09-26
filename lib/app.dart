@@ -21,6 +21,7 @@ import 'features/live/live_controller.dart';
 import 'features/live/live_providers.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/live_session.dart';
+import 'fork/design/birdy_theme.dart'; // FORK: BirdyGo design system (J6a)
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
@@ -91,8 +92,8 @@ class App extends ConsumerWidget {
           lightTheme = AppTheme.fromColorScheme(lightDynamic.harmonized());
           darkTheme = AppTheme.fromColorScheme(darkDynamic.harmonized());
         } else {
-          lightTheme = AppTheme.light();
-          darkTheme = AppTheme.dark();
+          lightTheme = BirdyTheme.light(); // FORK: BirdyGo theme (J6a)
+          darkTheme = BirdyTheme.dark(); // FORK: BirdyGo theme (J6a)
         }
 
         return MaterialApp(

@@ -114,6 +114,20 @@ flutter:
     - assets/announcements/
     # FORK: AI species sheets (J4b).
     - assets/fork/
+    # FORK: OFL licenses of the bundled fonts (J6a).
+    - assets/fonts/OFL-Fraunces.txt
+    - assets/fonts/OFL-AtkinsonHyperlegibleNext.txt
+
+  # FORK: BirdyGo fonts (J6a), variable, OFL. See lib/fork/design/birdy_typography.dart.
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-Variable.ttf
+        - asset: assets/fonts/Fraunces-Italic-Variable.ttf
+          style: italic
+    - family: AtkinsonHyperlegibleNext
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf
 
 flutter_launcher_icons:
   android: true

@@ -34,7 +34,7 @@ Dans l'ordre, quand deux principes se contredisent :
 |---|---|---|
 | Encre de nuit | #13233A | fond du thème sombre et de l'écoute, texte principal du thème clair |
 | Brume | #EEF1EC | fond du thème clair |
-| Martin-pêcheur | #19A7B3 | action : Écouter, lecture, liens. Sur fond clair, texte en #0E7C86 pour le contraste |
+| Martin-pêcheur | #19A7B3 | action : Écouter, lecture, liens. En texte : #0B6E77 sur fond clair (5,25:1 sur Brume ; #0E7C86 n'atteignait que 4,3:1), #4FC3CC sur fond sombre |
 | Loriot | #F4C542 | nouveauté et rareté : première espèce, nouvelle de l'année, oiseau rare |
 | Lichen | #9DB46A | confirmé, niveau Sûr |
 | Écorce | #6B5847 | textes secondaires et séparateurs du thème clair |
@@ -162,6 +162,28 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 - Animations réduites : si `MediaQuery.disableAnimationsOf(context)` est vrai, ne garder que les fondus.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
+
+## Mise en œuvre (J6a)
+
+Le design system vit dans `lib/fork/design/`, et la galerie « Composants de l'interface » (Réglages,
+hors version publiée) montre chaque composant en clair et en sombre.
+
+- Jetons : `birdy_tokens.dart` (couleurs `BirdyColors.of(context)`, rayons, espacements, tailles),
+  `birdy_typography.dart` (`BirdyText`), `birdy_motion.dart` (`BirdyMotion`, `BirdyHaptics`),
+  `species_tint.dart` (couleur d'espèce), `birdy_theme.dart` (`BirdyTheme`, `ListeningTheme`).
+- Thème appliqué à toute l'app, écrans upstream compris. Les options « couleur dynamique » et
+  « contraste élevé » d'upstream restent. Rampes de score et palettes du spectrogramme inchangées.
+- Rôle `primary` de Material = le Martin-pêcheur lisible en texte (#0B6E77 clair, #4FC3CC sombre).
+  Le remplissage vif #19A7B3 avec texte Encre passe par `BirdyButtonStyles` et `ListenButton` : le
+  thème ne peut pas le donner à `FilledButton` sans repeindre aussi `FilledButton.tonal`.
+- Polices variables : la graisse passe par `fontWeight` (Flutter l'applique à l'axe `wght`), jamais
+  par une variation `wght`, qui écraserait les `bold` des écrans upstream. Fraunces reçoit toujours
+  `SOFT` 100 et `opsz` égal à la taille du texte (Flutter ne règle pas la taille optique seul).
+- Couleur d'espèce (`SpeciesTint.fromAccent`) : `tintDark` = l'accent à 24 % sur Encre, `tintLight`
+  = même teinte à luminosité 0,92 (au moins 12:1 avec Encre), `deep` = l'accent assombri vers Encre
+  jusqu'à 3,2:1 sur blanc. On retrouve la table de la maquette.
+- Animations : ce document prime sur `fork/maquette/SPEC.md` (section 6). Écartés de la maquette :
+  entrée en 420 ms, rebond à 1,15, plumes qui tombent, rotations, anneaux et reflets en boucle.
 
 ## Photos
 

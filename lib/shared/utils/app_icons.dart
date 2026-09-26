@@ -31,6 +31,7 @@ abstract final class AppIcons {
   static const IconData batterySaverRounded = Symbols.battery_saver_rounded;
   static const IconData bluetoothAudio = Symbols.bluetooth_audio;
   static const IconData bookmarkAdded = Symbols.bookmark_added;
+  static const IconData bird = Symbols.raven; // FORK: species silhouette (J6a)
   static const IconData brokenImage = Symbols.broken_image;
   static const IconData calendarToday = Symbols.calendar_today;
   static const IconData calendarTodayRounded = Symbols.calendar_today_rounded;
@@ -55,6 +56,7 @@ abstract final class AppIcons {
   static const IconData deleteOutline = Symbols.delete;
   static const IconData deleteOutlineRounded = Symbols.delete_outline_rounded;
   static const IconData deleteSweep = Symbols.delete_sweep;
+  static const IconData diamond = Symbols.diamond; // FORK: rarity mark (J6a)
   static const IconData directionsWalkRounded = Symbols.directions_walk_rounded;
   static const IconData detections = Symbols.list_alt_rounded;
   static const IconData downloadForOffline = Symbols.download_for_offline;
@@ -169,6 +171,7 @@ abstract final class AppIcons {
   static const IconData skipNextRounded = Symbols.skip_next_rounded;
   static const IconData skipPreviousRounded = Symbols.skip_previous_rounded;
   static const IconData sort = Symbols.sort;
+  static const IconData sparkle = Symbols.auto_awesome; // FORK: novelty pills (J6a)
   static const IconData species = Symbols.graphic_eq;
   static const IconData speciesFallback = brokenImage;
   static const IconData speedRounded = Symbols.speed_rounded;

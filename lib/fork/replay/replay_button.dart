@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/app_providers.dart';
-import '../../shared/utils/app_icons.dart';
+import '../design/widgets/clip_play_button.dart';
 
 /// SharedPreferences key: the replay notice was shown once.
 const String kReplayNoticeShown = 'fork_replay_notice_shown';
@@ -69,9 +69,9 @@ class ReplayButton extends ConsumerWidget {
       valueListenable: controller.replayingClip,
       builder: (context, playing, _) {
         final isPlaying = playing == clipPath;
-        return IconButton(
-          tooltip: isPlaying ? l10n.forkReplayStop : l10n.forkReplay,
-          icon: Icon(isPlaying ? AppIcons.stop : AppIcons.playArrow),
+        return ClipPlayButton(
+          state: isPlaying ? ClipPlayState.playing : ClipPlayState.idle,
+          semanticLabel: isPlaying ? l10n.forkReplayStop : l10n.forkReplay,
           onPressed: () {
             if (isPlaying) {
               controller.stopReplay();
@@ -105,19 +105,9 @@ class _ClipPendingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Tooltip(
-      message: l10n.forkReplayPending,
-      child: const SizedBox(
-        width: 48,
-        height: 48,
-        child: Center(
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
+    return ClipPlayButton(
+      state: ClipPlayState.pending,
+      semanticLabel: l10n.forkReplayPending,
     );
   }
 }

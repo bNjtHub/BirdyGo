@@ -18,6 +18,7 @@ import '../explore/explore_providers.dart';
 import '../spectrogram/color_maps.dart';
 import 'offline_map_download_tile.dart';
 import '../../fork/data/rebuild_index_tile.dart'; // FORK: observation index
+import '../../fork/design/design_gallery_screen.dart'; // FORK: design system (J6a)
 import '../../fork/map/blur_sensitive_tile.dart'; // FORK: export privacy (J5)
 
 bool get _showOfflineMapDownloadSetting => false;
@@ -843,6 +844,7 @@ class SettingsScreen extends ConsumerWidget {
             if (_showSection('general')) ...[
               const Divider(),
               const RebuildObservationIndexTile(), // FORK: observation index
+              const DesignGalleryTile(), // FORK: design system (J6a)
               _SectionHeader(
                 title: l10n.settingsDangerZone,
                 subtitle: l10n.settingsDangerZoneDescription,
