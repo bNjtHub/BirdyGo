@@ -339,10 +339,23 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
 - [x] J6a Design system : thèmes clair et sombre, polices embarquées, composants (carte espèce, puce
       de niveau, compteur, lecteur de clip, boutons), jetons d'animation. Opus pour le concevoir,
       Sonnet ensuite.
-- [ ] J6b Photos : `tools/fork_region_species.py` (créé en J4b) donne la liste des espèces de la
+- [x] J6b Photos : `tools/fork_region_species.py` (créé en J4b) donne la liste des espèces de la
       région. Ajouter à `tools/build_species_bundle.py` une option pour ne traiter que cette liste, à
       lancer sur le PC (birdnet.cornell.edu n'est pas joignable depuis le cloud). En ligne, photos plus
       grandes via iNaturalist (inat_id), mises en cache. Crédit et licence accessibles d'un appui.
+      Notes de réalisation :
+      - Script : `--species-list` limite les photos à la liste (noms et descriptions restent complets),
+        `--replace-reserved` remplace les photos sans licence ouverte (« © Macaulay Library ») par une
+        photo iNaturalist libre et réécrit leur crédit dans `taxonomy.csv` (source « iNaturalist
+        <id> »). Code dans `tools/fork_species_photos.py`, tests dans `tools/test_fork_species_photos.py`.
+        Les photos sont recadrées en 3:2 au lieu d'être étirées ; le cache de téléchargement est
+        indexé par URL.
+      - App : `lib/fork/species_photo/`. `SpeciesPhoto` remplace la photo de `SpeciesInfoOverlay`
+        (point FORK) ; la ligne de crédit sous la photo devient une feuille ouverte d'un appui.
+        Réglage « Photos en grand (en ligne) », désactivé par défaut (Confidentialité, et dans la
+        feuille de crédit). Photo `large` d'iNaturalist, licence ouverte sans « nd », format paysage,
+        même règle que le script ; cache disque de 50 Mo ; valeurs dans `species_photo_config.dart`.
+      - Reste à vérifier sur le téléphone : photos hors ligne, crédit, grande photo en fondu, mode avion.
 - [ ] J6c Écrans, un par session : Accueil, Live (spectrogramme agrandi ou réduit, tableau en direct
       avec compteurs de session et totaux), Fin de sortie (résumé de l'écoute), Fiche espèce, Palmarès,
       Carte, Sonothèque, Revue rapide, Envoi à la LPO. Carnet et Profil (statut, badges, série)
@@ -383,6 +396,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       de celle d'upstream.
 - [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
+      `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
 - [ ] Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
@@ -433,5 +447,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
+- Photos (J6b) : aucun code natif. Grandes photos par `http`, cache dans le dossier cache de l'app
+  (`getApplicationCacheDirectory`, non sauvegardé sur iCloud), en HTTPS : rien à régler dans ATS.
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
