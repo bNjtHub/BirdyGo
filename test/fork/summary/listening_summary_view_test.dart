@@ -29,11 +29,13 @@ void main() {
   Set<String>? checked;
   var details = 0;
   var shared = 0;
+  bool? markedRecording;
 
   setUp(() {
     checked = null;
     details = 0;
     shared = 0;
+    markedRecording = null;
   });
 
   Future<void> pump(
@@ -70,6 +72,7 @@ void main() {
           onShare: () => shared++,
           onCheck: (keys) => checked = keys,
           onDetails: () => details++,
+          onMarkRecording: (recording) => markedRecording = recording,
         ),
       ),
     );
@@ -138,6 +141,37 @@ void main() {
     expect(find.text('2 nouvelles espèces'), findsOneWidget);
     await _tapInPage(tester, find.text("Voir le détail de l'écoute"));
     expect(details, 1);
+  });
+
+  testWidgets('« C\'était un enregistrement ? » marks the listening', (
+    tester,
+  ) async {
+    await pump(tester, _morning());
+    expect(find.textContaining('ne compte ni au palmarès'), findsNothing);
+    await _tapInPage(tester, find.text("C'était un enregistrement ?"));
+    expect(markedRecording, isTrue);
+  });
+
+  testWidgets('a recording says it counts nowhere, and can be undone', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      ListeningSummary.of(
+        morningSession()..practice = true,
+        verifiedBefore: const {},
+        presence: morningPresence,
+      ),
+    );
+    expect(find.text('Première fois'), findsNothing);
+    expect(find.textContaining('Vérifier'), findsNothing);
+    await tester.scrollUntilVisible(
+      find.textContaining('ne compte ni au palmarès'),
+      200,
+      scrollable: _page,
+    );
+    await _tapInPage(tester, find.text("Non, c'étaient de vrais oiseaux"));
+    expect(markedRecording, isFalse);
   });
 
   testWidgets('a quiet listening invites to try again', (tester) async {

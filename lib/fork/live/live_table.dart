@@ -186,7 +186,7 @@ class LiveTableRow extends StatelessWidget {
         runSpacing: BirdySpace.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          SingingIndicator(singing: entry.singing, color: c.accentText),
+          SingingIndicator(singing: entry.singingVisual, color: c.accentText),
           if (badge != null) badge!,
           if (!compact)
             Text(

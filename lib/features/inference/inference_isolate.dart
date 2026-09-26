@@ -40,6 +40,9 @@ class InferenceIsolate {
   /// Whether the underlying inference service is initialized and ready.
   bool get isRunning => _service != null;
 
+  // FORK: read-only access to the service for the Live screen (J6c-bis-b).
+  InferenceService? get forkService => _service;
+
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------

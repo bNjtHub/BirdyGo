@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/live/live_session.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../practice/practice.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
 import 'listening_summary.dart';
@@ -29,7 +30,8 @@ Future<ListeningSummary> loadListeningSummary({
       if (!d.isRejected && !d.isUnknown) d.scientificName,
   };
   final presence = <String, GeoPresence?>{};
-  for (final name in names) {
+  // A recording (J5c) gets no geo-model opinion.
+  for (final name in countsAsObservation(session) ? names : const <String>{}) {
     presence[name] = await presenceOf(name);
   }
   return ListeningSummary.of(

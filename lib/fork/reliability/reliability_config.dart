@@ -23,6 +23,15 @@ abstract final class ReliabilityConfig {
 
   /// Reviews needed before a species' precision is shown.
   static const int minReviewsForSpeciesPrecision = 5;
+
+  /// Live (J6c-bis-b): consecutive windows under the support threshold that
+  /// put out the « chante » symbol. One missed window between two phrases
+  /// keeps it on.
+  static const int liveSingingHoldWindows = 2;
+
+  /// Live (J6c-bis-b): cycles « Analyse… » stays on after a candidate is
+  /// confirmed, so the header does not fade while the row comes in.
+  static const int analysingHoldWindows = 1;
 }
 
 /// What the geo-model says about a species at a place and week.

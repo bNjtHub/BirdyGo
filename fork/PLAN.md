@@ -359,6 +359,51 @@ pour proposer un partenariat.
 Fini quand : une observation confirmée se reporte dans NaturaList en moins d'une minute, et aucune
 détection non confirmée ne peut partir.
 
+## J5c : écouter un enregistrement
+
+But : tester l'app avec des sons du web ou d'un CD sans fausser les données. Un son enregistré n'est
+pas une observation. Règle unique, dans `lib/fork/practice/` : **les sons enregistrés ne comptent
+pas**. Une sortie compte seulement si elle n'est pas marquée `practice` et n'est pas une analyse de
+fichier (`SessionType.fileUpload`, qui comptait partout jusqu'ici).
+
+- [x] Entrée « Écouter un enregistrement » dans le menu de l'accueil (`lib/fork/home/`), pas
+      d'interrupteur sur l'écran d'écoute. Le mode n'est pas enregistré dans les préférences : il est
+      remis à zéro à chaque démarrage.
+- [x] Pendant cette écoute : filtre d'espèces sur « off », pas de géomodèle (ni « Inattendu ici » ni
+      « Rare ici »), bandeau discret « Enregistrement » sur l'écran d'écoute.
+- [x] Champ `practice` (FORK) dans `LiveSession`, écrit dans le JSON seulement quand il vaut vrai ;
+      les anciennes sessions se lisent sans lui (faux).
+- [x] Index : une sortie qui ne compte pas n'y entre pas (ni détections, ni précision, ni
+      `verifiedSpecies`), et en sort si on la marque après coup. Schéma de l'index 2 → 3 pour
+      forcer une reconstruction qui retire les analyses de fichier déjà indexées (favoris gardés).
+- [x] Rien au palmarès, sur la carte, sur l'accueil, dans la sonothèque ni la revue rapide (tous lus
+      dans l'index) ; la LPO renvoie une liste vide et son bouton disparaît. Jeu (J6e) : il lira
+      l'index, donc la règle s'applique d'office.
+- [x] Bilan (`lib/fork/summary/`) : lien « C'était un enregistrement ? » pour marquer la sortie après
+      coup (et l'annuler) ; une sortie marquée n'a ni « Première fois », ni avis du géomodèle, ni
+      « Vérifier », ni bouton LPO.
+- [x] Chaînes en français et en anglais.
+- [x] Tests : sérialisation, exclusion de l'index, palmarès, carte et LPO vides, lien du Bilan,
+      reconstruction de l'index.
+
+Fait (règle dans `lib/fork/practice/practice.dart`, `countsAsObservation`) : l'entrée du menu ouvre
+`LiveScreen(forkPractice: true)`, qui lance l'écoute avec le filtre sur « off », sans `geoScores` ni
+avis du géomodèle, et marque la session `practice` au démarrage ; le mode vit avec cet écran, rien
+n'est gardé ailleurs. Rouvrir l'écoute en cours (notification) garde le bandeau, lu sur la session.
+L'index retire toute session qui ne compte pas dans `_upsert` et `rebuild` : palmarès, carte,
+accueil, sonothèque, revue rapide, précision et totaux en sont exclus d'office. Conséquences
+voulues : les anciennes analyses de fichier disparaissent après la reconstruction, et les détections
+d'une sortie qui ne compte pas ne passent plus par la revue rapide (le détail de la session reste).
+Limites : l'option « ignorer les espèces communes » (qui dépend du géomodèle) ne s'applique pas
+pendant un enregistrement ; les annonces vocales (option upstream) lisent encore la rareté du
+géomodèle ; l'export JSON upstream ne transporte pas `practice`.
+À tester sur le Xiaomi : un chant joué depuis un autre téléphone, bandeau visible, puis rien au
+palmarès, sur la carte ni sur l'accueil ; « C'était un enregistrement ? » sur une vraie sortie, puis
+annulé ; reconstruction de l'index au premier lancement après la mise à jour.
+
+Fini quand : une écoute d'un son du web ne laisse aucune trace au palmarès, sur la carte, sur
+l'accueil ni à la LPO, et une sortie marquée après coup disparaît partout.
+
 ## J6 : refonte visuelle (voir fork/DESIGN.md)
 
 Objectif : l'app la plus belle, la plus fluide et la plus utile de sa catégorie. Assez simple pour
@@ -452,6 +497,25 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             immediate threshold » à 0,90 puis 0,80 en `flutter run --profile` sur le Xiaomi.
       À faire sur le Xiaomi : relever les lignes `[InferenceTiming]` (toutes les 30 analyses) en
       `--profile`, et vérifier que symbole et trait s'éteignent en pause et pendant une réécoute.
+- [ ] J6c-bis-b Live : « Analyse… » et fin rapide (`lib/fork/live/`, PR « J6c-bis-b Live : … »).
+      Lecture seule dans `lib/features/inference` (quelques lignes `// FORK`, `infer()` et le lissage
+      inchangés).
+      - [x] Upstream : `lastWindowScores` (scores de la dernière fenêtre × multiplicateurs) et
+            `supportThresholdFor` dans `InferenceService`, un getter dans `InferenceIsolate`, un
+            `ValueNotifier` du cycle dans `LiveController`, publié avec les détections, vidé en pause et
+            en réécoute ; `ReplayGuard.heard` sans effet de bord.
+      - [x] « Analyse… » : l'en-tête passe en fondu de « En écoute » à « Analyse… » quand la dernière
+            fenêtre contient un candidat (Aves, dans le filtre d'espèces et l'intersection géo, score de
+            fenêtre au moins égal au seuil de support, pas déjà confirmé). Rien en lissage off, avg ou
+            max. Reste un cycle de plus après la confirmation. Ni nom, ni ligne, ni vibration.
+      - [x] Fin rapide : le symbole « chante » s'allume à l'ouverture du contact et s'éteint après
+            2 fenêtres de suite sous le seuil de support (`LiveTableEntry.singingVisual`) ; `singing`
+            garde son sens. Fin du trait : `heardUntil` (fin de la dernière fenêtre au-dessus du seuil de
+            support), jamais en recul.
+      - [x] Seuils `liveSingingHoldWindows` et `analysingHoldWindows` dans `reliability_config.dart`.
+      À faire sur le Xiaomi : à l'aube, noter si « Analyse… » reste allumé presque tout le temps ;
+      vérifier le coût du cycle dans `[InferenceTiming]` ; réécoute par le haut-parleur sans
+      « Analyse… » ni symbole.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -539,6 +603,8 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
 - Accueil (J6c) : aucun code natif ; logo dessiné en Flutter.
+- Écouter un enregistrement (J5c) : aucun code natif ; même écran d'écoute avec le filtre sur « off »
+  et sans géomodèle.
 - Fiche espèce (J6c) : aucun code natif ; partage par share_plus (ancrage iPad par
   `shareOriginFrom`), liens externes par url_launcher, réécoute par just_audio comme le Live.
 - Bilan de l'écoute (J6c) : aucun code natif ; partage du texte par share_plus (ancrage iPad par
@@ -549,3 +615,5 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
 - Live, corrections (J6c-bis-a) : aucun code natif. Mesures p50/p95 à refaire sur iPhone en
   `--profile` (le temps d'analyse ONNX y sera différent).
+- Live, « Analyse… » et fin rapide (J6c-bis-b) : aucun code natif. Vérifier qu'une réécoute par le
+  haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».

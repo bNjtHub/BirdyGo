@@ -5102,6 +5102,8 @@
   "@forkGalleryReplay": {"description": "BirdyGo fork: design system (J6a)."},
   "forkLiveListening": "Listening",
   "@forkLiveListening": {"description": "BirdyGo fork: listening screen (J6c)."},
+  "forkLiveAnalysing": "Analysing…",
+  "@forkLiveAnalysing": {"description": "BirdyGo fork: live header while the last window holds a bird not confirmed yet (J6c-bis-b)."},
   "forkLiveDuration": "duration",
   "@forkLiveDuration": {"description": "BirdyGo fork: listening screen (J6c)."},
   "forkLiveSpeciesStat": "{count, plural, =1{species} other{species}}",
@@ -5249,5 +5251,15 @@
   "forkRareHereToConfirm": "Rare here · to confirm",
   "@forkRareHereToConfirm": {"description": "BirdyGo fork: rare here explained (J3b)."},
   "forkRareHereExplanation": "The song is a good match. It's the place or the season that's surprising: listen again to confirm.",
-  "@forkRareHereExplanation": {"description": "BirdyGo fork: rare here explained (J3b)."}
+  "@forkRareHereExplanation": {"description": "BirdyGo fork: rare here explained (J3b)."},
+  "forkPracticeMenu": "Listen to a recording",
+  "@forkPracticeMenu": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeBanner": "Recording",
+  "@forkPracticeBanner": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeMark": "Was it a recording?",
+  "@forkPracticeMark": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeMarked": "Recording: this session doesn't count in the ranking, on the map or for the LPO.",
+  "@forkPracticeMarked": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkPracticeUnmark": "No, those were real birds",
+  "@forkPracticeUnmark": {"description": "BirdyGo fork: listening to a recording (J5c)."}
 }

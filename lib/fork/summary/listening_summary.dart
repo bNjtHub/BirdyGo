@@ -8,6 +8,7 @@ library;
 import '../../features/live/live_session.dart';
 import '../data/observation_index.dart';
 import '../reliability/reliability_config.dart';
+import '../practice/practice.dart';
 
 /// Part of the day a listening started in, for the headline.
 enum DayPart { morning, afternoon, evening, night }
@@ -103,6 +104,7 @@ class ListeningSummary {
     required this.contacts,
     required this.firstTimes,
     required this.maybeFirsts,
+    this.isRecording = false,
   });
 
   /// Builds the summary of [session].
@@ -110,12 +112,14 @@ class ListeningSummary {
   /// [verifiedBefore] holds the species verified in other sessions
   /// ([ObservationIndex.verifiedSpecies]). [presence] gives the geo-model's
   /// opinion per species, null when unknown (then a high score stays
-  /// « Probable », as in the Live screen).
+  /// « Probable », as in the Live screen). A recording (J5c) gets neither:
+  /// no first time, no geo-model, nothing to check.
   factory ListeningSummary.of(
     LiveSession session, {
     required Set<String> verifiedBefore,
     GeoPresence? Function(String scientificName)? presence,
   }) {
+    final counts = countsAsObservation(session);
     final bySpecies = <String, List<(int, DetectionRecord)>>{};
     for (var i = 0; i < session.detections.length; i++) {
       final d = session.detections[i];
@@ -126,7 +130,7 @@ class ListeningSummary {
     final species = <SummarySpecies>[];
     for (final MapEntry(key: name, value: records) in bySpecies.entries) {
       records.sort((a, b) => a.$2.timestamp.compareTo(b.$2.timestamp));
-      final geo = presence?.call(name);
+      final geo = counts ? presence?.call(name) : null;
       var best = ReliabilityLevel.toCheck;
       DateTime? verifiedAt;
       var bestScore = 0.0;
@@ -149,10 +153,10 @@ class ListeningSummary {
           level: best,
           unexpected: geo?.unexpected ?? false,
           bestScore: bestScore,
-          firstEver: !verifiedBefore.contains(name),
+          firstEver: counts && !verifiedBefore.contains(name),
           verifiedAt: verifiedAt,
           keysToCheck:
-              best == ReliabilityLevel.sure
+              best == ReliabilityLevel.sure || !counts
                   ? const {}
                   : {
                     for (final (_, d) in records)
@@ -186,6 +190,7 @@ class ListeningSummary {
         for (final s in species)
           if (s.isMaybeFirst) s,
       ]..sort((a, b) => a.firstHeard.compareTo(b.firstHeard)),
+      isRecording: !counts,
     );
   }
 
@@ -206,6 +211,9 @@ class ListeningSummary {
 
   /// First-ever species still to verify, in the order they were heard.
   final List<SummarySpecies> maybeFirsts;
+
+  /// The session listened to a recording and counts nowhere (J5c).
+  final bool isRecording;
 
   DayPart get dayPart => dayPartOf(start);
 

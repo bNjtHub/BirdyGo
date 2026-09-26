@@ -11,6 +11,7 @@ import '../../features/announcements/geo_commonness_provider.dart';
 import '../../features/inference/geo_model.dart';
 import '../../features/live/live_session.dart';
 import '../map/sensitive_species.dart';
+import '../practice/practice.dart';
 import '../reliability/reliability_config.dart';
 import 'lpo_config.dart';
 
@@ -61,10 +62,12 @@ class LpoObservation {
 
 /// Groups the confirmed detections of [detections] (defaults to the
 /// session's) into observations: one per species and place, oldest first.
+/// Empty for a session that does not count (a recording, J5c).
 List<LpoObservation> lpoObservations(
   LiveSession session, {
   List<DetectionRecord>? detections,
 }) {
+  if (!countsAsObservation(session)) return [];
   final confirmed =
       (detections ?? session.detections).where(lpoEligible).toList()
         ..sort((a, b) => a.timestamp.compareTo(b.timestamp));

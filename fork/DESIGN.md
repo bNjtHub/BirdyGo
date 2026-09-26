@@ -216,6 +216,26 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
   et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
 
+## Mise en œuvre (J6c-bis-b, Live : « Analyse… » et fin rapide)
+
+- « Analyse… » : l'en-tête passe en fondu de « En écoute » à « Analyse… » (même fondu que les autres
+  statuts) quand la dernière fenêtre contient un candidat : un oiseau (Aves) dont le score de cette
+  seule fenêtre atteint le seuil de support du lissage, admis par le filtre d'espèces actif et
+  l'intersection géo, pas encore confirmé. Ni nom, ni ligne, ni vibration. Rien en lissage off, avg
+  ou max (aucune porte de support). Le texte reste un cycle de plus après la confirmation, pour que
+  l'en-tête ne s'anime pas en même temps que l'entrée de la ligne. Code : `live_candidates.dart`.
+- Symbole « chante » (`LiveTableEntry.singingVisual`) : il s'allume à l'ouverture du contact et
+  s'éteint après 2 fenêtres de suite sous le seuil de support, même si le lissage garde encore
+  l'espèce dans les résultats ; une seule fenêtre manquée entre deux phrases ne l'éteint pas.
+  `singing` (présence dans les résultats) garde son sens : l'extrait en attente en dépend. Code :
+  `live_heard.dart`, seuils dans `reliability_config.dart`.
+- Trait sous le spectre : il court jusqu'à maintenant tant que le symbole est allumé, puis s'arrête
+  là où il est à l'écran (jamais de recul). Redessiné à neuf (rotation, contact fermé), il finit à
+  `heardUntil`, la fin de la dernière fenêtre au-dessus du seuil de support. **Cette fin affichée
+  diffère de `endTimestamp` dans le JSON de la session**, qui reste la fin de la dernière fenêtre où
+  l'espèce était dans les résultats lissés (plus tard de quelques secondes). Le JSON ne change pas.
+- En pause et pendant une réécoute : ni « Analyse… » ni symbole ; les fins de traits sont gardées.
+
 ## Mise en œuvre (J6c, Bilan)
 
 Code dans `lib/fork/summary/`. `LiveScreen` l'ouvre après « Arrêter » (une ligne FORK), seulement

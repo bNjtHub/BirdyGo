@@ -55,6 +55,7 @@ import '../inference/species_filter.dart';
 import '../inference/species_ignore_filter.dart';
 import '../../fork/replay/replay_guard.dart'; // FORK: replay during listening
 import '../../fork/live/inference_timing.dart'; // FORK: timing (J6c-bis-a)
+import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import '../recording/recording_service.dart';
 import 'live_session.dart';
 
@@ -126,6 +127,12 @@ class LiveController {
 
   /// FORK: path of the clip being replayed, or null.
   final ValueNotifier<String?> replayingClip = ValueNotifier<String?>(null);
+
+  /// FORK: « Analyse… » and quick end of « chante », per cycle (J6c-bis-b).
+  final LiveCycleTracker _forkCycleTracker = LiveCycleTracker();
+  final ValueNotifier<LiveCycleSignal> forkCycle = ValueNotifier(
+    LiveCycleSignal.empty,
+  );
   LiveState _state = LiveState.idle;
   String? _errorMessage;
 
@@ -485,6 +492,7 @@ class LiveController {
     );
     _clipWriter.reset();
     _replayGuard.reset(); // FORK: replay (J2)
+    _forkCycleTracker.reset(); // FORK: J6c-bis-b
     _sessionGeneration++;
     _confidenceThreshold = confidenceThreshold;
     _sensitivity = sensitivity;
@@ -584,6 +592,7 @@ class LiveController {
     }
     _syncSessionDetections();
     _closeRecordingSegment();
+    forkCycle.value = _forkCycleTracker.pause(); // FORK: J6c-bis-b
 
     _state = LiveState.paused;
     _notifyListeners();
@@ -668,6 +677,8 @@ class LiveController {
     _latestDetections = const [];
     _currentLiveDetections = const [];
     _accumulator = null;
+    _forkCycleTracker.reset(); // FORK: J6c-bis-b
+    forkCycle.value = LiveCycleSignal.empty; // FORK: J6c-bis-b
     _windowDriver.stop();
     _clipWriter.reset();
     unawaited(stopReplay()); // FORK: replay (J2)
@@ -711,6 +722,7 @@ class LiveController {
   Future<void> replayClip(String clipPath) async {
     await stopReplay();
     _replayGuard.begin(ringBuffer.totalWritten);
+    forkCycle.value = _forkCycleTracker.pause(); // FORK: J6c-bis-b
     replayingClip.value = clipPath;
     try {
       await _replayPlayer.setFilePath(clipPath);
@@ -726,6 +738,10 @@ class LiveController {
       await stopReplay();
     }
   }
+
+  /// FORK: whether samples `[start, end)` heard a replay (J6c-bis-b).
+  bool forkReplayHeard(int start, int end) =>
+      _replayGuard.isReplaying || _replayGuard.heard(start, end);
 
   /// Stop the current replay, if any.
   Future<void> stopReplay() async {
@@ -812,6 +828,7 @@ class LiveController {
     await _replaySubscription?.cancel(); // FORK: replay (J2)
     await _replayPlayer.dispose(); // FORK: replay (J2)
     replayingClip.dispose(); // FORK: replay (J2)
+    forkCycle.dispose(); // FORK: J6c-bis-b
     recordingService.dispose();
   }
 
@@ -949,6 +966,24 @@ class LiveController {
         }
       }
 
+      // FORK: « Analyse… » and quick end of « chante » (J6c-bis-b).
+      forkCycle.value = _forkCycleTracker.updateFrom(
+        _isolate.forkService,
+        confidenceThreshold: confidenceThreshold / 100.0,
+        confirmed: filteredDetections,
+        records: _session?.detections ?? const [],
+        filterMode: _filterMode,
+        geoScores: _geoScores,
+        geoThreshold: _geoThreshold,
+        geoNames: geoNames,
+        windowEnd: audioReadAt,
+        window: Duration(seconds: windowDuration),
+        replayHeard: forkReplayHeard(
+          window.windowEndSample - audioSamples.length,
+          window.windowEndSample,
+        ),
+      );
+
       // Always notify — even when the list becomes empty (species dropped
       // below threshold), so the current-vocalizing UI clears stale rows.
       _notifyListeners();
@@ -998,6 +1033,8 @@ class LiveController {
     _latestDetections = const [];
     _currentLiveDetections = const [];
     _accumulator = null;
+    _forkCycleTracker.reset(); // FORK: J6c-bis-b
+    forkCycle.value = LiveCycleSignal.empty; // FORK: J6c-bis-b
     _windowDriver.stop();
     _clipWriter.reset();
     _notifyListeners();
