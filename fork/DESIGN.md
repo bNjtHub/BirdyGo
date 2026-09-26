@@ -6,10 +6,10 @@ Un carnet de terrain vivant. Les photos d'oiseaux portent l'interface, et chaque
 ses couleurs dans la photo de l'oiseau (`ColorScheme.fromImageProvider`, calculé une fois puis mis en
 cache). Le reste est calme, lisible en plein soleil et utilisable d'une main, parfois avec des gants.
 
-L'audace est concentrée sur les moments d'oiseaux : l'arrivée d'une espèce pendant une écoute, la
-toute première rencontre, l'oiseau rare, le passage à un nouveau statut. La nouvelle espèce entre dans
-le tableau avec un ressort et le téléphone vibre légèrement ; pour une toute première espèce, une onde
-de la couleur de l'oiseau traverse l'écran. Ailleurs, pas d'effet gratuit.
+Le mouvement est sobre, comme dans une app pro : court, discret, utile. Les moments d'oiseaux
+(l'arrivée d'une espèce, la toute première rencontre, l'oiseau rare, un nouveau statut) sont marqués,
+mais avec retenue : un fondu, un léger glissement, une teinte de la couleur de l'oiseau, une vibration
+légère. Jamais de confettis, de scintillements en boucle ni d'effets empilés. Ailleurs, pas d'effet gratuit.
 
 ## Les principes
 
@@ -134,7 +134,10 @@ pour les filtres.
 
 Règle de fréquence : ce qu'on voit cent fois par jour (onglets, défilement, listes) ne s'anime pas,
 ou à peine. Feuilles et dialogues : animation standard. Événements rares, comme une nouvelle espèce
-ou la première de l'année : c'est là qu'on se fait plaisir.
+ou la première de l'année : un peu plus marqués, mais toujours sobres.
+
+Règle de retenue : un seul effet à la fois ; déplacement de 8 px au plus ; échelle jamais sous 0,97 ;
+pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébration.
 
 | Élément | Durée | Courbe |
 |---|---|---|
@@ -144,11 +147,11 @@ ou la première de l'année : c'est là qu'on se fait plaisir.
 | Déplacement à l'écran | 250 ms | `Cubic(0.77, 0, 0.175, 1)` |
 | Feuille du bas | ressort | `SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85)` |
 | Carte de revue balayée | ressort interruptible | suit le doigt, repart avec la vitesse du geste |
-| Compteur qui augmente | 200 ms | le chiffre rebondit (échelle 1,15 vers 1), la ligne ne bouge pas |
-| Nouvelle espèce en Live | ressort | glisse de 12 px, échelle 0,96 vers 1, fondu, vibration légère |
-| Toute première espèce | 600 ms, une seule fois | onde de la couleur de l'oiseau, vibration moyenne |
-| Oiseau rare | attente, puis 800 ms | la carte dorée (Loriot) scintille doucement en attendant « C'est bien lui » ; les anneaux ne partent qu'après |
-| Nouveau statut | 900 ms, une seule fois | l'emblème du statut se pose, anneaux de sa couleur, vibration moyenne |
+| Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
+| Nouvelle espèce en Live | 220 ms | glisse de 8 px, échelle 0,97 vers 1, fondu, vibration légère |
+| Toute première espèce | 250 ms, une seule fois | carte « Première rencontre » en fondu, légère teinte de la couleur de l'oiseau derrière (opacité 15 % au plus), vibration légère |
+| Oiseau rare | attente, puis 450 ms | carte dorée immobile (fin liseré Loriot) en attendant « C'est bien lui » ; puis un seul anneau doux et la pastille « +1 espèce rare » en fondu |
+| Nouveau statut | 300 ms, une seule fois | l'emblème apparaît en fondu (échelle 0,97 vers 1), le texte suit 60 ms après, vibration légère |
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
 - Jamais d'apparition depuis une échelle 0 : partir de 0,95 avec une opacité 0.
