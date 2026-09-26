@@ -279,11 +279,19 @@ référence : le canevas « BirdyGo – Interface » (claude.ai), à suivre et �
 - [ ] J6c Écrans, un par session : Accueil, Live (spectre agrandi ou réduit, tableau en direct avec
       compteurs de session et totaux), Fin de sortie, Fiche espèce, Carnet, Profil, Palmarès, Carte,
       Sonothèque, Revue rapide, Envoi à la LPO.
-- [ ] J6d Icônes d'espèces en SVG : une famille d'une quinzaine de silhouettes dans le style du logo,
-      avec les couleurs et les marques de chaque espèce, pour la carte, le tableau en direct et le
-      carnet. Générées par script pour les espèces de la région, silhouette de famille pour les
-      autres, relues sur planches. Une base existante n'est réutilisée que si sa licence le permet
-      (CC0 ou CC BY, jamais NC) ; sinon, on dessine la famille nous-mêmes. La photo reste sur la fiche.
+- [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
+      d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
+      construit nous-mêmes, dans le style du logo.
+      - Une famille de 30 à 50 gabarits (un par famille ou genre), avec des zones de couleur nommées
+        (calotte, joue, poitrine, dos, aile, barre alaire, queue, bec, pattes), remplies depuis une table
+        de couleurs par espèce. Formes de base : dessins maison ou silhouettes PhyloPic sous CC0.
+        Couleurs relevées sur des planches du domaine public, jamais sur des guides protégés.
+      - Silhouettes PhyloPic (environ 19 des 20 oiseaux les plus courants en France, sous CC0 ou CC BY)
+        comme secours pour les espèces sans gabarit : récupérées une fois par un script, jamais en
+        lien direct, en filtrant NC et SA, avec licence et auteur notés pour chaque image.
+      - Écran des crédits pour les images CC BY (auteur, licence, « recolorée »). Ne jamais partir
+        d'OpenMoji ni de Mulberry (CC BY-SA) ni d'images NC.
+      - Relecture sur planches. La photo reste sur la fiche.
 - [ ] J6e Jeu : statuts selon le nombre d'espèces découvertes, badges, série de jours, défis de la
       semaine, carnet façon collection (silhouettes mystère pour les espèces attendues ici en cette
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau
