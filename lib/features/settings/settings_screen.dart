@@ -18,6 +18,7 @@ import '../explore/explore_providers.dart';
 import '../spectrogram/color_maps.dart';
 import 'offline_map_download_tile.dart';
 import '../../fork/data/rebuild_index_tile.dart'; // FORK: observation index
+import '../../fork/map/blur_sensitive_tile.dart'; // FORK: export privacy (J5)
 
 bool get _showOfflineMapDownloadSetting => false;
 
@@ -770,6 +771,7 @@ class SettingsScreen extends ConsumerWidget {
                         .read(exportHtmlReportProvider.notifier)
                         .set(v ?? false),
               ),
+              const BlurSensitiveExportTile(), // FORK: export privacy (J5)
               const Divider(),
             ],
 
