@@ -98,9 +98,9 @@ class LiveHeader extends StatelessWidget {
                         children: [
                           _LiveDot(live: live),
                           const SizedBox(width: BirdySpace.s),
-                          Flexible(
-                            child: Text(
-                              statusText,
+                          Expanded(
+                            child: _StatusText(
+                              text: statusText,
                               style: BirdyText.label.copyWith(color: c.text1),
                             ),
                           ),
@@ -242,6 +242,36 @@ class _Menu extends StatelessWidget {
 
 /// Listening time, refreshed every second in this widget only, so the rest
 /// of the screen does not rebuild with the clock.
+/// Status on one line; a new text fades in over the old one, the height
+/// stays that of one line whatever the text (room for « Analyse… »).
+class _StatusText extends StatelessWidget {
+  const _StatusText({required this.text, required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSwitcher(
+    duration: BirdyMotion.enter,
+    reverseDuration: BirdyMotion.exit,
+    switchInCurve: BirdyMotion.standard,
+    switchOutCurve: BirdyMotion.standard,
+    layoutBuilder:
+        (current, previous) => Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: [...previous, if (current != null) current],
+        ),
+    child: Text(
+      text,
+      key: ValueKey(text),
+      style: style,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      softWrap: false,
+    ),
+  );
+}
+
 class _ElapsedText extends StatefulWidget {
   const _ElapsedText({required this.elapsed, required this.running});
 

@@ -83,13 +83,16 @@ List<LiveTableEntry> buildLiveTable({
     counts.update(record.scientificName, (n) => n + 1, ifAbsent: () => 1);
     add(record);
   }
+  // Current detections get a new timestamp every cycle: they only stand in
+  // for a species the session does not hold yet, so rows do not reorder
+  // while a contact goes on.
   final current = <String, DetectionRecord>{};
   for (final record in currentDetections) {
     current[record.scientificName] = record;
     if (!counts.containsKey(record.scientificName)) {
       counts[record.scientificName] = 1;
+      add(record);
     }
-    add(record);
   }
 
   final entries = [
@@ -110,3 +113,12 @@ List<LiveTableEntry> buildLiveTable({
   });
   return entries;
 }
+
+/// Detections to show as singing: none while [paused] or [replaying] a clip,
+/// since inference is stopped or skips the replayed audio. The « chante »
+/// bars and the running marks go out; the session keeps its records.
+List<DetectionRecord> singingDetections(
+  List<DetectionRecord> current, {
+  required bool paused,
+  required bool replaying,
+}) => paused || replaying ? const [] : current;

@@ -162,6 +162,53 @@ void main() {
       expect(find.text('Pouillot de Bonelli occidental'), findsOneWidget);
     });
 
+    testWidgets('the « chante » bars fade in place, the row does not move', (
+      tester,
+    ) async {
+      TickerMode tickerOf() => tester.widget<TickerMode>(
+        find
+            .ancestor(
+              of: find.byType(SingingBars),
+              matching: find.byType(TickerMode),
+            )
+            .first,
+      );
+      double opacity() =>
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(
+                  of: find.byType(SingingBars),
+                  matching: find.byType(AnimatedOpacity),
+                ),
+              )
+              .opacity;
+
+      await pumpTable(tester, [_entry('A', 0)], textScale: 1.3);
+      await tester.pump(const Duration(milliseconds: 300));
+      final rowSize = tester.getSize(find.byType(LiveTableRow));
+      final namePos = tester.getTopLeft(find.text('A'));
+      expect(opacity(), 0);
+      expect(tickerOf().enabled, isFalse);
+
+      await pumpTable(tester, [_entry('A', 0, singing: true)], textScale: 1.3);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tickerOf().enabled, isTrue);
+      expect(tester.getSize(find.byType(LiveTableRow)), rowSize);
+      expect(tester.getTopLeft(find.text('A')), namePos);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(opacity(), 1);
+
+      // Paused or replaying: the table gets no current detection.
+      await pumpTable(tester, [_entry('A', 0)], textScale: 1.3);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tickerOf().enabled, isTrue, reason: 'still fading out');
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(opacity(), 0);
+      expect(tickerOf().enabled, isFalse);
+      expect(tester.getSize(find.byType(LiveTableRow)), rowSize);
+      expect(tester.getTopLeft(find.text('A')), namePos);
+    });
+
     testWidgets('empty table shows the placeholder', (tester) async {
       await tester.pumpWidget(
         _app(const LiveTable(entries: [], empty: Text('vide'))),
@@ -317,6 +364,60 @@ void main() {
       onSettings: () {},
       onHelp: () {},
     );
+
+    for (final (orientation, width, tiles) in [
+      ('portrait', 360.0, true),
+      ('landscape', 360.0, false),
+    ]) {
+      testWidgets('same height whatever the status ($orientation, 130 %)', (
+        tester,
+      ) async {
+        Widget sized(String status) => _app(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width,
+              child: LiveHeader(
+                statusText: status,
+                live: true,
+                stats: const LiveStats(species: 5, contacts: 12),
+                elapsed: () => const Duration(minutes: 12, seconds: 47),
+                expanded: false,
+                showTiles: tiles,
+                onToggleSpectrum: () {},
+                onBack: () {},
+                onSettings: () {},
+                onHelp: () {},
+              ),
+            ),
+          ),
+          textScale: 1.3,
+        );
+        await tester.pumpWidget(sized('En écoute'));
+        await tester.pump(const Duration(milliseconds: 300));
+        final size = tester.getSize(find.byType(LiveHeader));
+
+        await tester.pumpWidget(
+          sized('Chargement du modèle, cela peut prendre un moment…'),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+        // Mid-fade: both texts stacked on one line.
+        expect(tester.getSize(find.byType(LiveHeader)), size);
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(tester.getSize(find.byType(LiveHeader)), size);
+        expect(find.text('En écoute'), findsNothing);
+        final status = tester.widget<Text>(
+          find.text('Chargement du modèle, cela peut prendre un moment…'),
+        );
+        expect(status.maxLines, 1);
+        expect(status.overflow, TextOverflow.ellipsis);
+
+        await tester.pumpWidget(sized('En pause'));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(tester.getSize(find.byType(LiveHeader)), size);
+        expect(tester.takeException(), isNull);
+      });
+    }
 
     testWidgets('three tiles, then a summary when enlarged', (tester) async {
       await tester.pumpWidget(_app(header(expanded: false)));

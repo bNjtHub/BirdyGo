@@ -1,5 +1,7 @@
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/live/detection_marks.dart';
+import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final _t0 = DateTime(2026, 9, 26, 7, 0);
@@ -23,13 +25,13 @@ void main() {
       endTimestamp: end == null ? null : _at(end),
     );
 
-    test('a passage starts one analysis window before its timestamp', () {
+    test('a passage starts at its timestamp, the start of the window', () {
       final spans = markSpansFrom(
         records: [rec('A', 10, end: 14)],
         singing: const {},
         window: const Duration(seconds: 3),
       );
-      expect(spans.single.start, _at(7));
+      expect(spans.single.start, _at(10));
       expect(spans.single.end, _at(14));
       expect(spans.single.label, 'common A');
     });
@@ -40,12 +42,62 @@ void main() {
         singing: const {'A'},
         window: const Duration(seconds: 3),
       );
-      expect([for (final s in spans) s.start], [_at(2), _at(5), _at(17)]);
+      expect([for (final s in spans) s.start], [_at(5), _at(8), _at(20)]);
       expect(spans[2].end, isNull);
-      // Old record without end: one window long.
-      expect(spans[0].end, _at(5));
-      // Not singing: closes at its timestamp.
-      expect(spans[1].end, _at(8));
+      // Closed records without end: one window long.
+      expect(spans[0].end, _at(8));
+      expect(spans[1].end, _at(11));
+    });
+  });
+
+  group('MarkEndHold', () {
+    test('a closing passage keeps the instant it stopped on screen', () {
+      final hold = MarkEndHold();
+      final running = hold.apply(
+        previous: const [],
+        next: [_span('A', 5)],
+        now: _at(9.4),
+      );
+      expect(running.single.end, isNull);
+      // Closed at the end of the last window seen, before the painted now.
+      final closed = hold.apply(
+        previous: running,
+        next: [_span('A', 5, 8)],
+        now: _at(9.6),
+      );
+      expect(closed.single.end, _at(9.6));
+      // Later rebuilds keep it.
+      final again = hold.apply(
+        previous: closed,
+        next: [_span('A', 5, 8)],
+        now: _at(12),
+      );
+      expect(again.single.end, _at(9.6));
+    });
+
+    test('a recorded end later than the screen wins', () {
+      final hold = MarkEndHold();
+      final running = hold.apply(
+        previous: const [],
+        next: [_span('A', 5)],
+        now: _at(9),
+      );
+      final closed = hold.apply(
+        previous: running,
+        next: [_span('A', 5, 10)],
+        now: _at(9),
+      );
+      expect(closed.single.end, _at(10));
+    });
+
+    test('closed passages never seen running keep their end', () {
+      final hold = MarkEndHold();
+      final spans = hold.apply(
+        previous: const [],
+        next: [_span('A', 5, 8)],
+        now: _at(20),
+      );
+      expect(spans.single.end, _at(8));
     });
   });
 
@@ -186,5 +238,59 @@ void main() {
       );
       expect(marks, isEmpty);
     });
+  });
+
+  group('DetectionMarks', () {
+    Widget strip(List<MarkSpan> spans, {bool running = true}) => MaterialApp(
+      theme: BirdyTheme.dark(),
+      home: Scaffold(
+        body: DetectionMarks(
+          spans: spans,
+          displaySeconds: 10,
+          running: running,
+        ),
+      ),
+    );
+
+    DetectionMarksPainter painter(WidgetTester tester) =>
+        tester
+                .widget<CustomPaint>(
+                  find.descendant(
+                    of: find.byType(DetectionMarks),
+                    matching: find.byType(CustomPaint),
+                  ),
+                )
+                .painter!
+            as DetectionMarksPainter;
+
+    for (final pause in [false, true]) {
+      testWidgets('the end never goes back when the contact closes'
+          '${pause ? ' on pause' : ''}', (tester) async {
+        final start = DateTime.now().subtract(const Duration(seconds: 3));
+        final running = MarkSpan(scientificName: 'A', label: 'A', start: start);
+        await tester.pumpWidget(strip([running]));
+        await tester.pump(const Duration(milliseconds: 16));
+        await tester.pump(const Duration(milliseconds: 16));
+        final shownNow = painter(tester).now.value;
+
+        // The record closes at the end of its last window, before now.
+        final closed = MarkSpan(
+          scientificName: 'A',
+          label: 'A',
+          start: start,
+          end: shownNow.subtract(const Duration(milliseconds: 1500)),
+        );
+        await tester.pumpWidget(strip([closed], running: !pause));
+        await tester.pump(const Duration(milliseconds: 16));
+        final end = painter(tester).spans.single.end!;
+        expect(end.isBefore(shownNow), isFalse);
+        expect(end.difference(shownNow).inMilliseconds, lessThan(50));
+
+        // Rebuilt with the same record: the end stays.
+        await tester.pumpWidget(strip([closed], running: !pause));
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(painter(tester).spans.single.end, end);
+      });
+    }
   });
 }

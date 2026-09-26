@@ -196,9 +196,17 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
 - `live_table.dart` et `flip_move.dart` : entrée `BirdyEntrance` depuis 8 px au-dessus avec vibration
   légère, remontée de 250 ms (`BirdyMotion.move`) lue dans la mise en page de la colonne, donc
   valable pour des lignes de toute hauteur. Animations réduites : les lignes sautent à leur place.
-- `detection_marks.dart` : un trait par passage, de `timestamp − fenêtre d'analyse` à
-  `endTimestamp` (ou maintenant s'il chante encore), sur trois rangées au plus quand ils se
-  chevauchent. Noms sous les traits en mode agrandi. Jamais de cadre autour d'un son.
+- `detection_marks.dart` : un trait par passage, du début de la première fenêtre analysée
+  (`DetectionRecord.timestamp`, qui est déjà ce début) à `endTimestamp` (ou maintenant s'il chante
+  encore), sur trois rangées au plus quand ils se chevauchent. La fin ne recule jamais : quand le
+  contact se ferme, le trait garde l'instant où il s'est arrêté à l'écran si `endTimestamp` (fin de
+  la dernière fenêtre, une à deux secondes plus tôt) tombe avant. Noms sous les traits en mode
+  agrandi. Jamais de cadre autour d'un son.
+- En pause et pendant une réécoute, rien ne « chante » : le symbole s'éteint en fondu et le trait
+  en cours s'arrête. Le symbole a sa place réservée dans la ligne, qui ne bouge donc pas ; masqué,
+  il ne s'anime plus. Le tableau se trie sur les détections de la session, pas sur celles du cycle.
+- `live_header.dart` : statut sur une ligne (points de suspension), nouveau texte en fondu par-dessus
+  l'ancien, hauteur constante quel que soit le texte.
 - `live_spectrogram_panel.dart` : bande de 120 dp, ou 60 % du corps de l'écran avec l'échelle en kHz.
   En paysage : spectre à gauche sur toute la hauteur (moitié de la largeur, 65 % d'un appui), avec
   l'échelle et les noms ; tableau et barre à droite ; une ligne de résumé à la place des tuiles.

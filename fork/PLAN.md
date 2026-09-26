@@ -405,6 +405,22 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [ ] Sonothèque
       - [ ] Revue rapide
       - [ ] Envoi à la LPO
+- [ ] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections »).
+      - [x] Traits sous le spectre : départ au début de la fenêtre analysée (`DetectionRecord.timestamp`),
+            plus 3 s trop tôt ; la fin ne recule ni ne saute quand le contact se ferme (fin de chant,
+            pause, réécoute).
+      - [x] Tableau : « dernier entendu » calculé sur les détections de la session seulement, le tri
+            ne bouge plus à chaque cycle.
+      - [x] Symbole « chante » : place réservée, fondu à l'allumage et à l'extinction, animation
+            arrêtée quand il est masqué ; la ligne ne bouge plus.
+      - [x] En-tête : statut sur une ligne, changement de texte en fondu, hauteur constante.
+      - [x] En pause et pendant une réécoute : symbole « chante » et trait en cours éteints.
+      - [x] Mesure (journal hors version publiée) : p50 et p95 du temps d'analyse et du retard
+            entre la fin de la fenêtre et l'affichage.
+      - [x] Réglages d'inférence avancés visibles hors version publiée, pour essayer « Very-high
+            immediate threshold » à 0,90 puis 0,80 en `flutter run --profile` sur le Xiaomi.
+      À faire sur le Xiaomi : relever les lignes `[InferenceTiming]` (toutes les 30 analyses) en
+      `--profile`, et vérifier que symbole et trait s'éteignent en pause et pendant une réécoute.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -500,3 +516,5 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   (`getApplicationCacheDirectory`, non sauvegardé sur iCloud), en HTTPS : rien à régler dans ATS.
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
+- Live, corrections (J6c-bis-a) : aucun code natif. Mesures p50/p95 à refaire sur iPhone en
+  `--profile` (le temps d'analyse ONNX y sera différent).

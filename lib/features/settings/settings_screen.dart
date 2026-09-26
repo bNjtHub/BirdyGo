@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode; // FORK: J6c-bis-a
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,7 +44,8 @@ bool get _showOfflineMapDownloadSetting => false;
 ///
 /// These mirror `temporalPooling` in `assets/models/model_config.json` and the
 /// `scorePooling*Provider` defaults in `settings_providers.dart`.
-const bool _showAdvancedInferenceSettings = false;
+// FORK: tuning shown in debug and profile builds (J6c-bis-a).
+const bool _showAdvancedInferenceSettings = !kReleaseMode;
 
 String _detectedSpeciesSortHelp(AppLocalizations l10n, String sortMode) {
   switch (DetectedSpeciesSortMode.normalize(sortMode)) {
