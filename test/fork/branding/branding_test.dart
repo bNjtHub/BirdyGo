@@ -15,7 +15,7 @@ String _read(String path) => File(path).readAsStringSync();
 /// Top-level `on:` block of a GitHub Actions workflow.
 String _triggers(String workflow) =>
     RegExp(r'^on:\n((?:[ #].*\n|\n)*)', multiLine: true)
-        .firstMatch(workflow)!
+        .firstMatch(workflow.replaceAll('\r\n', '\n'))!
         .group(1)!;
 
 void main() {
@@ -121,6 +121,13 @@ void main() {
   });
 
   group('Workflows', () {
+    test('trigger parsing accepts LF and CRLF checkouts', () {
+      const workflow = 'name: CI\non:\n  pull_request:\n\njobs:\n  test:\n';
+      const expected = '  pull_request:\n\n';
+      expect(_triggers(workflow), expected);
+      expect(_triggers(workflow.replaceAll('\n', '\r\n')), expected);
+    });
+
     test('release and docs only run by hand', () {
       for (final path in [
         '.github/workflows/release.yml',
