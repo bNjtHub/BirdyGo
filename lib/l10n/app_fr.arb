@@ -1108,5 +1108,9 @@
   "aruCombinedSessionWarningTitle": "Conflit avec audio complet",
   "aruCombinedSessionWarningBody": "Les sessions combinées ne prennent pas en charge l'audio complet. Le système enregistrera des clips avec échantillonnage intelligent (Smart). Veuillez revenir à l'écran précédent pour vérifier vos paramètres d'enregistrement si vous souhaitez modifier cela.",
   "forkPoweredByBirdnet": "Propulsé par BirdNET",
-  "forkModifiedVersion": "Une version modifiée de BirdNET Live (licence MIT). Touche pour voir le projet d'origine."
+  "forkModifiedVersion": "Une version modifiée de BirdNET Live (licence MIT). Touche pour voir le projet d'origine.",
+  "forkRebuildIndex": "Reconstruire l'index des observations",
+  "forkRebuildIndexSubtitle": "Recompte toutes les détections de tes sessions enregistrées.",
+  "forkRebuildIndexRunning": "Reconstruction en cours…",
+  "forkRebuildIndexDone": "Index des observations reconstruit."
 }

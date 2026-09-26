@@ -4737,5 +4737,13 @@
   "forkPoweredByBirdnet": "Powered by BirdNET",
   "@forkPoweredByBirdnet": {"description": "BirdyGo fork: credit line under the app name on the About screen."},
   "forkModifiedVersion": "A modified version of BirdNET Live (MIT licence). Tap to see the original project.",
-  "@forkModifiedVersion": {"description": "BirdyGo fork: explains the app is a modified BirdNET Live; opens the upstream repository."}
+  "@forkModifiedVersion": {"description": "BirdyGo fork: explains the app is a modified BirdNET Live; opens the upstream repository."},
+  "forkRebuildIndex": "Rebuild the observation index",
+  "@forkRebuildIndex": {"description": "BirdyGo fork: settings entry that rebuilds the detection index from saved sessions."},
+  "forkRebuildIndexSubtitle": "Recounts every detection from your saved sessions.",
+  "@forkRebuildIndexSubtitle": {"description": "BirdyGo fork: subtitle of the rebuild index entry."},
+  "forkRebuildIndexRunning": "Rebuilding…",
+  "@forkRebuildIndexRunning": {"description": "BirdyGo fork: shown while the index is rebuilt."},
+  "forkRebuildIndexDone": "Observation index rebuilt.",
+  "@forkRebuildIndexDone": {"description": "BirdyGo fork: confirmation after rebuilding the index."}
 }

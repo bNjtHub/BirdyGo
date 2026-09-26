@@ -25,6 +25,7 @@ import '../survey/survey_setup_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import 'help_screen.dart';
+import '../../fork/data/observation_index_service.dart'; // FORK: observation index
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -91,6 +92,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _preload(ref.read(audioLabelsSetProvider.future), 'audio labels');
     _preload(ref.read(geoModelProvider.future), 'geo model');
     unawaited(_warmUpLocation());
+    // FORK: open (and fill once in the background) the observation index.
+    _preload(ref.read(observationIndexServiceProvider).ensureReady(), 'observation index');
   }
 
   /// Decode the logo into the image cache, so the header can paint it on the

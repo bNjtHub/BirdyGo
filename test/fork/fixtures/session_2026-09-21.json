@@ -1,0 +1,42 @@
+{
+  "id": "2026-09-21T19-00-00.000",
+  "type": "pointCount",
+  "startTime": "2026-09-21T17:00:00.000Z",
+  "endTime": "2026-09-21T17:20:00.000Z",
+  "detections": [
+    {
+      "scientificName": "Erithacus rubecula",
+      "commonName": "Rougegorge familier",
+      "confidence": 0.88,
+      "timestamp": "2026-09-21T17:05:00.000Z",
+      "endTimestamp": "2026-09-21T17:05:06.000Z",
+      "detLat": 47.3,
+      "detLon": -1.6,
+      "reviewStatus": "confirmed"
+    },
+    {
+      "scientificName": "Strix aluco",
+      "commonName": "Chouette hulotte",
+      "confidence": 0.77,
+      "timestamp": "2026-09-21T17:15:00.000Z",
+      "endTimestamp": "2026-09-21T17:15:06.000Z",
+      "detLat": 47.3,
+      "detLon": -1.6
+    }
+  ],
+  "settings": {
+    "windowDuration": 3,
+    "confidenceThreshold": 25,
+    "inferenceRate": 1.0,
+    "speciesFilterMode": "geo",
+    "clipContextSeconds": 0,
+    "alertMode": 0,
+    "alertRareThreshold": 0.05,
+    "alertWatchlistName": "",
+    "alertMinConfidence": 0.5,
+    "alertStartupGraceSeconds": 60,
+    "alertMinIntervalSeconds": 15,
+    "alertMaxPerMinute": 3,
+    "alertCoalesce": true
+  }
+}

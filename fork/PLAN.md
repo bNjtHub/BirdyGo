@@ -116,16 +116,16 @@ Lis CLAUDE.md et la section J0 de fork/PLAN.md. Mode plan : liste les fichiers �
 But : compter, classer et cartographier toutes les détections de toutes les sessions sans relire
 tous les JSON à chaque écran. C'est la fondation de J2 à J5.
 
-- [ ] `lib/fork/data/observation_index.dart` : base SQLite (sqflite, et sqflite_common_ffi pour les
+- [x] `lib/fork/data/observation_index.dart` : base SQLite (sqflite, et sqflite_common_ffi pour les
       tests) avec une table des sessions et une table des détections : id, session, espèce, début, fin,
       score, statut de revue, latitude, longitude, chemin du clip, favori.
-- [ ] Mise à jour de l'index à chaque sauvegarde, modification ou suppression de session, avec des
+- [x] Mise à jour de l'index à chaque sauvegarde, modification ou suppression de session, avec des
       points d'accroche minimaux dans SessionRepository, marqués FORK.
-- [ ] Remplissage initial en arrière-plan au premier lancement, sur le modèle de GlobalSpeciesHistory.
+- [x] Remplissage initial en arrière-plan au premier lancement, sur le modèle de GlobalSpeciesHistory.
       Bouton « Reconstruire l'index » dans les réglages.
-- [ ] Requêtes prêtes pour la suite : palmarès par période, points pour la carte, clips d'une espèce,
+- [x] Requêtes prêtes pour la suite : palmarès par période, points pour la carte, clips d'une espèce,
       activité par heure et par mois, file des détections à revoir.
-- [ ] Tests avec des sessions JSON d'exemple dans `test/fork/fixtures/`.
+- [x] Tests avec des sessions JSON d'exemple dans `test/fork/fixtures/`.
 
 Fini quand : les tests passent, et sur le téléphone l'index se remplit sans figer l'interface.
 

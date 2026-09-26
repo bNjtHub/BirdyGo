@@ -17,6 +17,7 @@ import '../audio/widgets/audio_source_tile.dart';
 import '../explore/explore_providers.dart';
 import '../spectrogram/color_maps.dart';
 import 'offline_map_download_tile.dart';
+import '../../fork/data/rebuild_index_tile.dart'; // FORK: observation index
 
 bool get _showOfflineMapDownloadSetting => false;
 
@@ -839,6 +840,7 @@ class SettingsScreen extends ConsumerWidget {
             // --- Danger Zone ---
             if (_showSection('general')) ...[
               const Divider(),
+              const RebuildObservationIndexTile(), // FORK: observation index
               _SectionHeader(
                 title: l10n.settingsDangerZone,
                 subtitle: l10n.settingsDangerZoneDescription,
