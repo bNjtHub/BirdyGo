@@ -7,9 +7,9 @@ ses couleurs dans la photo de l'oiseau (`ColorScheme.fromImageProvider`, calcul�
 cache). Le reste est calme, lisible en plein soleil et utilisable d'une main, parfois avec des gants.
 
 L'audace est concentrée sur les moments d'oiseaux : l'arrivée d'une espèce pendant une écoute, la
-toute première rencontre, l'oiseau rare, le passage à un nouveau statut. La carte se pose avec un
-ressort et le téléphone vibre légèrement ; pour une toute première espèce, une onde de la couleur de
-l'oiseau traverse l'écran. Ailleurs, pas d'effet gratuit.
+toute première rencontre, l'oiseau rare, le passage à un nouveau statut. La nouvelle espèce entre dans
+le tableau avec un ressort et le téléphone vibre légèrement ; pour une toute première espèce, une onde
+de la couleur de l'oiseau traverse l'écran. Ailleurs, pas d'effet gratuit.
 
 ## Les principes
 
@@ -17,13 +17,13 @@ Dans l'ordre, quand deux principes se contredisent :
 
 1. **Utile d'abord.** Chaque écran répond à une question de terrain : qu'est-ce que j'entends, est-ce
    sûr, je peux le réécouter, qui est cet oiseau, je l'envoie à la LPO.
-2. **Simple au point qu'un enfant s'en serve.** Une action principale par écran, des images plutôt
+2. **Assez simple pour qu'un enfant s'en serve.** Une action principale par écran, des images plutôt
    que des mots, de gros chiffres, des cibles d'au moins 48 dp.
-3. **Rapide et fluide.** Rien ne fige. 60 images par seconde, 120 quand l'écran le permet. L'écoute
+3. **Rapide et fluide.** Rien ne se fige. 60 images par seconde, 120 quand l'écran le permet. L'écoute
    démarre moins d'une seconde après l'appui.
 4. **Belle et colorée grâce aux oiseaux.** Le cadre reste sobre ; la couleur vient des oiseaux
    (icônes, photos, teinte de chaque fiche, célébrations) et de chaque statut du jeu.
-5. **Hi-tech à l'écoute.** Écran sombre, spectre lumineux qu'on agrandit ou réduit d'un appui,
+5. **High-tech à l'écoute.** Écran sombre, spectrogramme lumineux qu'on agrandit ou réduit d'un appui,
    tableau qui s'alimente en direct avec des compteurs animés.
 6. **Donne envie d'y revenir, sans pièges.** Collection à compléter, progrès, défis, belles surprises.
    Ni notification culpabilisante, ni punition pour un jour manqué.
@@ -35,7 +35,7 @@ Dans l'ordre, quand deux principes se contredisent :
 | Encre de nuit | #13233A | fond du thème sombre et de l'écoute, texte principal du thème clair |
 | Brume | #EEF1EC | fond du thème clair |
 | Martin-pêcheur | #19A7B3 | action : Écouter, lecture, liens. Sur fond clair, texte en #0E7C86 pour le contraste |
-| Loriot | #F4C542 | nouveauté : première espèce, nouvelle de l'année |
+| Loriot | #F4C542 | nouveauté et rareté : première espèce, nouvelle de l'année, oiseau rare |
 | Lichen | #9DB46A | confirmé, niveau Sûr |
 | Écorce | #6B5847 | textes secondaires et séparateurs du thème clair |
 
@@ -97,8 +97,9 @@ Live
 └─────────────────────────────┘
 ```
 
-Un appui sur le spectre (ou sur ⇕) l'agrandit à environ 60 % de l'écran, avec l'échelle en kHz et les
-cris détectés entourés, puis le réduit. Le tableau s'alimente en direct : une nouvelle espèce entre en
+Un appui sur le spectrogramme (ou sur ⇕) l'agrandit à environ 60 % de l'écran, avec l'échelle en kHz
+et un trait de la couleur de l'espèce sous chaque passage détecté ; un second appui le réduit. Le
+modèle dit quand un oiseau chante, pas à quelle fréquence : on ne dessine jamais de cadre autour d'un son. Le tableau s'alimente en direct : une nouvelle espèce entre en
 haut avec un ressort, une espèce déjà là fait monter son compteur de session (×3) d'un petit rebond,
 à côté de son total toutes sorties confondues.
 
@@ -124,8 +125,9 @@ Fiche espèce
 Palmarès : la première espèce en grande carte photo, puis une liste compacte avec rang, vignette,
 nom, barre proportionnelle et compteur.
 
-Carte : plein écran, hexagones Martin-pêcheur dont l'opacité suit le nombre de contacts, feuille du
-bas pour les filtres.
+Carte : plein écran. Aux petits zooms, hexagones Martin-pêcheur dont l'opacité suit le nombre de
+contacts ; aux grands zooms, les oiseaux en marqueurs ronds (photo, puis icône de J6d). Feuille du bas
+pour les filtres.
 
 ## Animations
 
@@ -144,7 +146,7 @@ ou la première de l'année : c'est là qu'on se fait plaisir.
 | Compteur qui augmente | 200 ms | le chiffre rebondit (échelle 1,15 vers 1), la ligne ne bouge pas |
 | Nouvelle espèce en Live | ressort | glisse de 12 px, échelle 0,96 vers 1, fondu, vibration légère |
 | Toute première espèce | 600 ms, une seule fois | onde de la couleur de l'oiseau, vibration moyenne |
-| Oiseau rare | 800 ms, puis attente | carte dorée (Loriot) qui scintille, anneaux ; la fête ne compte qu'après « C'est bien lui » |
+| Oiseau rare | attente, puis 800 ms | la carte dorée (Loriot) scintille doucement en attendant « C'est bien lui » ; les anneaux ne partent qu'après |
 | Nouveau statut | 900 ms, une seule fois | l'emblème du statut se pose, anneaux de sa couleur, vibration moyenne |
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
@@ -174,14 +176,15 @@ ou la première de l'année : c'est là qu'on se fait plaisir.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
-- Garde-fous : rien ne se gagne avec une détection non vérifiée, un oiseau rare se confirme avant la
-  fête, pas de notification culpabilisante, rien qui pousse à déranger les oiseaux (repasse) ou à
-  publier la position d'une espèce sensible.
+- Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
+  confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
+  pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.
 
 ## Logo
 
-Dans `fork/brand/` : `birdygo-logo.svg` (animé, pour le README et l'accueil), `birdygo-logo-static.svg`
-(même dessin sans animation, base de l'icône d'app), `birdygo-logo-small.svg` (simplifié, de 16 à 48 px).
+Dans `fork/brand/` : `birdygo-logo.svg` (animé en CSS, pour le README), `birdygo-logo-static.svg`
+(même dessin sans animation, base de l'icône d'app et du logo de l'accueil, dont l'animation se refait
+en Flutter), `birdygo-logo-small.svg` (simplifié, de 16 à 32 px).
 
 ## Textes
 

@@ -52,7 +52,7 @@ dans le temps et sur une carte, dans une interface pensée comme un carnet de te
   par espèce avec favoris.
 - **Palmarès** : espèces classées par contacts, jours ou dernière écoute, activité par heure et par mois.
 - **Fiches espèces** : taille, comportement, migration, anecdote, rédigées par IA à partir de Wikipédia,
-  vérifiées et relues, disponibles hors ligne.
+  vérifiées contre leurs sources, relues pour les plus courantes, disponibles hors ligne.
 - **Carte** : tous tes contacts sur une seule carte, avec les icônes des oiseaux et les fonds IGN.
 - **LPO** : envoi guidé des observations confirmées vers Faune-France, et un mode « Oiseaux des jardins ».
 - **Nouvelle interface** : simple, rapide et colorée grâce aux oiseaux, avec un jeu (statuts, badges,
