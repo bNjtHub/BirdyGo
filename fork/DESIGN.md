@@ -100,8 +100,9 @@ Live
 Un appui sur le spectrogramme (ou sur ⇕) l'agrandit à environ 60 % de l'écran, avec l'échelle en kHz
 et un trait de la couleur de l'espèce sous chaque passage détecté ; un second appui le réduit. Le
 modèle dit quand un oiseau chante, pas à quelle fréquence : on ne dessine jamais de cadre autour d'un son. Le tableau s'alimente en direct : une nouvelle espèce entre en
-haut avec un ressort, une espèce déjà là fait monter son compteur de session (×3) d'un petit rebond,
-à côté de son total toutes sorties confondues.
+haut avec un ressort ; une espèce déjà là remonte en tête de liste (déplacement de 250 ms) et son
+compteur de session (×3) fait un petit rebond, à côté de son total toutes sorties confondues. La
+liste ne s'efface jamais pendant l'écoute.
 
 Fiche espèce
 ```

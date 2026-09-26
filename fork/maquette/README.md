@@ -42,5 +42,7 @@ maquettes avec des données fictives, pas du code de l'app.
   `LiveSpectre.dc.html`.
 - Oiseau rare : `SPEC.md` fait partir des anneaux pendant l'attente. La bonne version est celle de
   `Rare.dc.html` : scintillement doux en attendant, fête seulement après « C'est bien lui ».
+- Tableau Live : les écrans gardent les lignes à leur place. Benjamin préfère que l'oiseau entendu
+  remonte en tête de liste (voir `fork/DESIGN.md`).
 - Texte Martin-pêcheur sur fond clair : la maquette utilise `#0B6E77`, car `#0E7C86` (DESIGN.md)
   n'atteint que 4,3:1 sur Brume. À trancher en J6a.

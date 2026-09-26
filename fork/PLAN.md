@@ -142,6 +142,11 @@ Fini quand : les tests passent, et sur le téléphone l'index se remplit sans fi
       lecture, mini spectrogramme, date et lieu. Étoile pour garder ses meilleurs enregistrements,
       filtre « favoris seulement ».
 - [ ] Rien n'est supprimé automatiquement.
+- [ ] Tableau Live : la liste ne s'efface pas pendant l'écoute et l'oiseau entendu remonte en tête.
+      Upstream le fait déjà avec deux réglages : les activer par défaut dans BirdyGo
+      (`showAllDetectedSpeciesProvider` à vrai, `detectedSpeciesSortModeProvider` sur « newest »,
+      dans `lib/shared/providers/settings_providers.dart`, modification minimale marquée FORK).
+      Ajouter à chaque ligne le total toutes sorties confondues, lu dans l'index de J1 (« ×3 · 142 »).
 - [ ] La réécoute sert à vérifier, jamais à attirer les oiseaux (la LPO déconseille la repasse) :
       volume modéré par défaut, et l'app le dit une fois, simplement.
 
