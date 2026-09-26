@@ -1289,5 +1289,16 @@
   "forkGallerySpecies": "Espèces",
   "forkGalleryPlayer": "Lecteur d'extrait",
   "forkGalleryMotion": "Animations",
-  "forkGalleryReplay": "Rejouer"
+  "forkGalleryReplay": "Rejouer",
+  "forkLiveDuration": "durée",
+  "forkLiveSpeciesLabel": "espèces",
+  "forkLiveContactsLabel": "contacts",
+  "forkLiveSummary": "{duration} · {species, plural, =1{1 espèce} other{{species} espèces}} · {contacts, plural, =1{1 contact} other{{contacts} contacts}}",
+  "forkLiveTotal": "{count} au total",
+  "forkLiveSessionCount": "{count, plural, =1{Entendu une fois pendant cette écoute} other{Entendu {count} fois pendant cette écoute}}",
+  "forkLiveSinging": "Chante maintenant",
+  "forkLiveSpectrumExpand": "Agrandir le spectre",
+  "forkLiveSpectrumShrink": "Réduire le spectre",
+  "forkLiveReplayToast": "Réécoute à faible volume. L'écoute continue.",
+  "forkLiveEmpty": "À l'écoute. Les oiseaux entendus s'afficheront ici."
 }

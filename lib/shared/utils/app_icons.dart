@@ -197,6 +197,8 @@ abstract final class AppIcons {
   static const IconData tune = Symbols.tune;
   static const IconData tuneRounded = Symbols.tune_rounded;
   static const IconData undo = Symbols.undo;
+  static const IconData unfoldLess = Symbols.unfold_less; // FORK: live spectrum (J6c)
+  static const IconData unfoldMore = Symbols.unfold_more; // FORK: live spectrum (J6c)
   static const IconData uploadFileRounded = Symbols.upload_file_rounded;
   static const IconData verifiedRounded = Symbols.verified_rounded;
   static const IconData vibrationRounded = Symbols.vibration_rounded;
