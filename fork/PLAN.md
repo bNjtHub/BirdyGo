@@ -353,6 +353,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             remontée en tête en 250 ms, ×N qui rebondit, total toutes sorties), barre Arrêter / Pause.
             En paysage : spectre à gauche, tableau et barre à droite. À mesurer en mode profile
             sur le Xiaomi : 60 images par seconde pendant l'agrandissement du spectre.
+            Les traits sous le spectre ne comptent pas le temps de pause (le spectre s'arrête aussi) :
+            ils restent sous leur passage après Pause puis Reprendre.
       - [x] Fin de sortie (« Bilan de l'écoute », `lib/fork/summary/`) : s'ouvre après « Arrêter »
             quand la session est enregistrée automatiquement (sinon la revue upstream, qui propose
             d'enregistrer). Titre selon l'heure, chiffres, « Première fois » (Sûr ou confirmée, jamais

@@ -122,5 +122,69 @@ void main() {
       );
       expect(a.single.left, b.single.left);
     });
+
+    test('a pause does not move the marks (the spectrogram stops too)', () {
+      final spans = [_span('A', 5, 7)];
+      final before =
+          layoutDetectionMarks(
+            spans: spans,
+            now: _at(10),
+            displaySeconds: 10,
+          ).single;
+      final pauses =
+          MarkPauses()
+            ..pause(_at(10))
+            ..resume(_at(70));
+      final after =
+          layoutDetectionMarks(
+            spans: spans,
+            now: _at(70),
+            displaySeconds: 10,
+            pauses: pauses,
+          ).single;
+      expect(after.left, closeTo(before.left, 1e-9));
+      expect(after.right, closeTo(before.right, 1e-9));
+
+      // Still paused: frozen, however long the pause.
+      final paused = MarkPauses()..pause(_at(10));
+      final during =
+          layoutDetectionMarks(
+            spans: spans,
+            now: _at(300),
+            displaySeconds: 10,
+            pauses: paused,
+          ).single;
+      expect(during.left, closeTo(before.left, 1e-9));
+    });
+
+    test('after a pause, marks scroll again with listening time', () {
+      final pauses =
+          MarkPauses()
+            ..pause(_at(10))
+            ..resume(_at(70));
+      final marks = layoutDetectionMarks(
+        spans: [_span('A', 5, 7)],
+        now: _at(72),
+        displaySeconds: 10,
+        pauses: pauses,
+      );
+      // 2 s of listening since the resume: same as now = 12 s without pause.
+      expect(marks.single.left, closeTo(0.3, 1e-9));
+      expect(marks.single.right, closeTo(0.5, 1e-9));
+    });
+
+    test('a passage older than the window, counting pauses, is dropped', () {
+      final pauses =
+          MarkPauses()
+            ..pause(_at(10))
+            ..resume(_at(70));
+      final marks = layoutDetectionMarks(
+        spans: [_span('A', 5, 7)],
+        now: _at(90),
+        displaySeconds: 10,
+        pauses: pauses,
+      );
+      expect(marks, isEmpty);
+    });
   });
 }
