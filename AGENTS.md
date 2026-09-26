@@ -1,0 +1,135 @@
+# BirdNET Live Agent Guide
+
+This file is for coding agents working in this repository.
+
+## Mission
+
+- Keep changes small, safe, and easy to review.
+- Prefer behavior-preserving updates unless a behavior change is requested.
+- Validate changes with focused checks, then run flutter analyze before finishing.
+
+## Communication Style
+
+- Be brief and high-signal.
+- Use American English in code, comments, docs, and user-facing strings.
+- Avoid long restatements; reference exact files and functions.
+
+## Product Snapshot
+
+- Flutter app for on-device wildlife sound identification with live spectrogram.
+- Platforms: Android, iOS, Windows.
+- Main modes: Live Mode, Point Count, Survey, File Analysis.
+- Additional modes present in UX: Batch Analysis, ARU Mode.
+
+## Project Structure
+
+- lib/core: app-wide constants, services, theme, and infrastructure.
+- lib/shared: shared models, providers, utilities, and widgets.
+- lib/features: feature modules (about, announcements, aru, audio, explore, file_analysis, history, home, inference, live, onboarding, point_count, recording, settings, spectrogram, survey).
+- lib/l10n: ARB localization source files and generated localization outputs.
+- docs: user/developer documentation.
+- dev and tools: maintenance scripts, model pipelines, and release helpers.
+
+## Core Rules
+
+- Always keep user-facing strings translated in all 12 locales: en, de, cs, es, fr, it, pt, nl, nb, pl, ru, zh (Simplified Chinese).
+- After ARB edits, run flutter gen-l10n and verify no missing keys.
+- Use l10n keys in UI; do not hardcode user-facing text.
+- Keep these technical terms in English across locales: Point Count, Survey, Session, Live Mode, WAV, FLAC, CSV, JSON, GPX, Smart.
+- A locale is not "added" until every surface below carries it — an ARB-only pass leaves the app speaking English in half the product:
+  - `lib/l10n/app_<loc>.arb` (UI strings)
+  - `assets/announcements/templates_<loc>.json` (spoken announcements; a missing file falls back to English silently)
+  - `assets/species_data/descriptions_<loc>.json.gz` + `SpeciesDescriptionService.availableLocales` + `DESCRIPTION_LOCALES` in `dev/build_species_bundle.py`. After adding to `DESCRIPTION_LOCALES`, re-run the whole bundle script — it is also what writes the `wikipedia_url_<loc>` column into `assets/models/taxonomy.csv`, and a partial run leaves descriptions updated but that column absent. No taxonomy API pull is needed; `dev/birdnet_taxonomy_*.json` already carries the URLs.
+  - the app-language dropdown in `lib/features/settings/settings_screen.dart`
+  - `AppConstants.policyDocsLocales` + `docs/privacy.<loc>.md` + `docs/acceptable-use.<loc>.md` + the `mkdocs.yml` locale block
+  - `docs/index.<loc>.md` + `docs/user/*.<loc>.md` (the MkDocs user guide) + the locale's `nav_translations` block in `mkdocs.yml`. The Developer Guide and API Reference stay English.
+  - `dev/store/store-desc.md` (all five sections: both subtitles, promo text, short description, keywords)
+  - `dev/mockups/`: slide titles/subtitles belong in `mockups.copy.md` (then run `node sync-copy.js`), not inline in `mockups.config.js` — copy.md is the source of truth and only overlays languages it defines. In `mockups.config.js` add the language's `name` plus an entry in both `featureGraphic.taglines` and `featureGraphicHomeSubtitles`; the feature graphic falls back to English silently when either is missing. Render with `node render-mockups.js --lang <loc>`, then again with `--ipad`, then `--feature-graphic --lang <loc>` (13 images per locale).
+  - the locale list in `dev/build_release.dart` so stubbed Play/App Store release notes include it
+  - the locale lists in `test/features/announcements/templates_*_test.dart`
+- Use AppIcons from lib/shared/utils/app_icons.dart, not raw Icons.* or Symbols.* in app code.
+- Do not hardcode thresholds or model config values when constants/config already exist.
+
+## UI and Theme Constraints
+
+- Support portrait and landscape.
+- Keep tablet layouts aligned with ContentWidthConstraint (600 dp intent).
+- Dynamic color semantics: live=error, point count=primary, survey=secondary, file analysis=tertiary.
+- Keep score ramps and spectrogram colormaps fixed; do not remap them to dynamic color.
+- Use error palette for destructive actions.
+
+## Settings and Docs Discipline
+
+- For new/changed settings:
+- Update PrefKeys and related providers/UI.
+- Document rationale in docs/user/settings.md.
+- Document user-visible behavior changes in CHANGELOG.md.
+- Prefer frequent, small documentation updates over large delayed updates.
+
+## Dev Folder Sync Rule
+
+- Do not sync or copy broad content from dev by default.
+- Only sync items from dev when the user explicitly requests it and names the specific files/folders.
+- Treat dev as tooling/working area; avoid accidental release/docs spillover from dev artifacts.
+
+## Species Bundle and Assets
+
+- `assets/species_images/dummy.webp` is the hand-crafted fallback image shown for species with no dedicated taxonomy image. It is NOT generated by the build pipeline and must never be deleted.
+- When rebuilding the species bundle (`dev/build_species_bundle.py`), the script clears `assets/species_images/` — `dummy.webp` is explicitly preserved. If you add other hand-crafted assets to that directory, add their filenames to `PRESERVED_OUTPUT_FILES` in the script.
+- To refresh the bundle with a new taxonomy version:
+  1. Download the latest taxonomy JSON from `https://birdnet.cornell.edu/taxonomy/api/download/json` and save to `dev/birdnet_taxonomy_{version}.json` (check `/taxonomy/docs` for current API version).
+  2. Update `DEFAULT_TAXONOMY_JSON` in `dev/build_species_bundle.py` to point to the new file.
+  3. Run `python dev/build_species_bundle.py` from the repo root with the `.venv` active.
+- The taxonomy API also provides `/api/download/csv` for the CSV format used by `dev/models/june2026/build_june2026.py`.
+
+## Audio, Maps, and Runtime Safety
+
+- Do not use Picture.toImageSync() for spectrogram rendering.
+- Avoid memory-heavy changes for long File Analysis recordings.
+- Use shared OSM tile layer settings and keep map behavior consistent.
+- OSM public tile policy: interactive use only, no offline/bulk/pre-seeded downloads.
+- Avoid Survey double-finalization paths; clear callbacks on dispose.
+
+## Data and Models
+
+- ONNX assets are managed with Git LFS.
+- Keep model behavior JSON-driven via assets/models/model_config.json.
+- ARM64 rule: sensitive compute may require FP32 casting for stable output.
+
+## Build and Release
+
+- Typical commands:
+- flutter pub get
+- flutter gen-l10n
+- flutter analyze
+- flutter test
+- Version source of truth is pubspec.yaml.
+- Never bump the version without explicit user consent in the current turn. Do not change pubspec.yaml version/build, version badges, or add a new CHANGELOG version header unless the user explicitly asks. Fold user-facing changes into the current unreleased version section instead.
+- For release bumps, increment patch and build together, then run dart dev/sync_version.dart.
+
+## Version Bumping Checklist
+
+- Update version in pubspec.yaml as patch+build (example: 0.16.10+178 -> 0.16.11+179).
+- Add/update release notes in CHANGELOG.md under the matching version header and prepare Play/App Store release notes for all 12 app locales: en, de, cs, es, fr, it, pt, nl, nb, pl, ru, zh. Release notes are UTF-8 with `<xx-XX>` tags — write zh-CN in Simplified Chinese characters, never pinyin.
+- Run dart dev/sync_version.dart to sync README/docs version badges.
+- If strings changed, run flutter gen-l10n and verify locale completeness.
+- Run flutter analyze (and flutter test when relevant) before committing.
+- Keep release commits focused and use a conventional commit message.
+
+## Search for All Affected Call Sites Before Implementing
+
+When a feature touches a shared function, setting, or data path, grep the full codebase for every place that function is called or that path is used — not just the location described in the request. Implement the change at **all** affected locations in the same pass.
+
+- Before writing code, grep for the function name, setting key, and provider name across `lib/`.
+- Check every call site and every parallel code path that handles the same data.
+- If multiple screens, services, or widgets do "the same thing" independently, update all of them.
+
+## Git Workflow
+
+- Use conventional one-line commit messages, for example:
+- feat(scope): ...
+- fix(scope): ...
+- docs(scope): ...
+- Group related changes; avoid mixed-purpose commits.
+- Never push unless explicitly requested in the current task.
+- Never run git push without explicit user consent in the current conversation.

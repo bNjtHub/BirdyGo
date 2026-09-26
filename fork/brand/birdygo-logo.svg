@@ -1,0 +1,67 @@
+<!-- BirdyGo logo — original artwork. Animated (CSS); respects prefers-reduced-motion. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="birdygo-title birdygo-desc">
+<!-- Palette (fork/DESIGN.md): Martin-pêcheur #19A7B3, its dark #0E7C86, Loriot #F4C542, Loriot ombre #E3A22B (lower mandible), Brume #EEF1EC, Martin-pêcheur clair #8CD3D9, Encre de nuit #13233A. -->
+<title id="birdygo-title">BirdyGo</title>
+<desc id="birdygo-desc">Un oiseau chanteur tout rond, bec ouvert, dont l’aile est un spectrogramme.</desc>
+<defs>
+<linearGradient id="plumage" gradientUnits="userSpaceOnUse" x1="165" y1="97.7" x2="361.7" y2="434.9"><stop offset="0" stop-color="#1CAEBA"/><stop offset="1" stop-color="#0E7C86"/></linearGradient>
+</defs>
+<style>
+/* Base styles are the finished logo; keyframes only describe the way to it.
+   Intro plays once (~1.8 s). Idle loops every 6.4 s from 2.4 s: one short sung phrase,
+   a blink, and stillness the rest of the time. Only transform, opacity and stroke-dashoffset move. */
+.guide{animation:trace 520ms cubic-bezier(.23,1,.32,1) both,guideOut 780ms linear both}.g2{animation-delay:70ms}
+#bird{transform-box:view-box;transform-origin:277.4px 423.7px;animation:land 760ms cubic-bezier(.23,1,.32,1) 340ms both,fade 320ms cubic-bezier(0,0,.58,1) 340ms both}
+#tail{transform-box:view-box;transform-origin:277.4px 286.9px;animation:tailIn 820ms 420ms both,tailFlick 6400ms 2400ms infinite}
+#eye{transform-box:fill-box;transform-origin:50% 50%;animation:eyeIn 420ms cubic-bezier(.23,1,.32,1) 600ms both,blink 6400ms cubic-bezier(.45,0,.55,1) 2400ms infinite}
+#glint{animation:glintBlink 6400ms linear 2400ms infinite}
+#upper,#lower{transform-box:view-box;transform-origin:118.1px 202.6px}
+#upper{animation:upOpen 680ms 760ms both,upSing 6400ms cubic-bezier(.77,0,.175,1) 2400ms infinite}
+#lower{animation:dnOpen 680ms 760ms both,dnSing 6400ms cubic-bezier(.77,0,.175,1) 2400ms infinite}
+.half path{stroke-dasharray:100 300}
+.b1{transform-box:view-box;transform-origin:217.4px 286.9px;animation:hidden 1625ms backwards,level1 6400ms cubic-bezier(.45,0,.55,1) 2400ms infinite}.b1h{animation:appear 640ms linear 985ms backwards}.b1h path{animation:drawOn 640ms cubic-bezier(.23,1,.32,1) 985ms backwards}
+.b2{transform-box:view-box;transform-origin:264.3px 294.4px;animation:hidden 1580ms backwards,level2 6400ms cubic-bezier(.45,0,.55,1) 2400ms infinite}.b2h{animation:appear 640ms linear 940ms backwards}.b2h path{animation:drawOn 640ms cubic-bezier(.23,1,.32,1) 940ms backwards}
+.b3{transform-box:view-box;transform-origin:311.1px 302.8px;animation:hidden 1670ms backwards,level3 6400ms cubic-bezier(.45,0,.55,1) 2400ms infinite}.b3h{animation:appear 640ms linear 1030ms backwards}.b3h path{animation:drawOn 640ms cubic-bezier(.23,1,.32,1) 1030ms backwards}
+.b4{transform-box:view-box;transform-origin:356.1px 311.3px;animation:hidden 1715ms backwards,level4 6400ms cubic-bezier(.45,0,.55,1) 2400ms infinite}.b4h{animation:appear 640ms linear 1075ms backwards}.b4h path{animation:drawOn 640ms cubic-bezier(.23,1,.32,1) 1075ms backwards}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}#bird{animation:fade 300ms cubic-bezier(.23,1,.32,1) both!important}}
+@keyframes trace{0%{stroke-dashoffset:1}100%{stroke-dashoffset:0}}
+@keyframes guideOut{0%,44%{opacity:.4}80%,100%{opacity:0}}
+@keyframes land{0%{transform:translateY(13.1px) scale(.95)}46%{transform:translateY(-2.8px) scale(1.012);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:none}}
+@keyframes fade{0%{opacity:0}}
+@keyframes tailIn{0%{transform:rotate(14deg);animation-timing-function:cubic-bezier(.23,1,.32,1)}52%{transform:rotate(-2.5deg);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:none}}
+@keyframes eyeIn{0%{opacity:0;transform:scale(.9)}}
+@keyframes upOpen{0%{transform:rotate(-15deg);animation-timing-function:cubic-bezier(.23,1,.32,1)}55%{transform:rotate(2.5deg);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:none}}
+@keyframes dnOpen{0%{transform:rotate(12deg);animation-timing-function:cubic-bezier(.23,1,.32,1)}55%{transform:rotate(-2deg);animation-timing-function:cubic-bezier(.45,0,.55,1)}100%{transform:none}}
+@keyframes appear{0%{opacity:0}8%,100%{opacity:1}}
+@keyframes drawOn{0%{stroke-dashoffset:100}100%{stroke-dashoffset:0}}
+@keyframes hidden{0%,100%{opacity:0}}
+@keyframes upSing{0%,9.38%,30.94%,100%{transform:none}11.72%{transform:rotate(4.4deg)}15.31%{transform:rotate(1.3deg)}17.66%{transform:rotate(2.5deg)}21.25%{transform:rotate(0.7deg)}23.59%{transform:rotate(3.9deg)}}
+@keyframes dnSing{0%,9.38%,30.94%,100%{transform:none}11.72%{transform:rotate(-3.6deg)}15.31%{transform:rotate(-1.1deg)}17.66%{transform:rotate(-2deg)}21.25%{transform:rotate(-0.6deg)}23.59%{transform:rotate(-3.1deg)}}
+@keyframes level1{0%,11.09%,32.66%,100%{transform:scaleY(1)}13.44%{transform:scaleY(1.06)}17.03%{transform:scaleY(1.018)}19.38%{transform:scaleY(0.965)}22.97%{transform:scaleY(0.99)}25.31%{transform:scaleY(1.05)}}
+@keyframes level2{0%,10.47%,32.03%,100%{transform:rotate(3deg) scaleY(1) rotate(-3deg)}12.81%{transform:rotate(3deg) scaleY(1.08) rotate(-3deg)}16.41%{transform:rotate(3deg) scaleY(1.024) rotate(-3deg)}18.75%{transform:rotate(3deg) scaleY(0.955) rotate(-3deg)}22.34%{transform:rotate(3deg) scaleY(0.986) rotate(-3deg)}24.69%{transform:rotate(3deg) scaleY(1.065) rotate(-3deg)}}
+@keyframes level3{0%,11.72%,33.28%,100%{transform:rotate(6deg) scaleY(1) rotate(-6deg)}14.06%{transform:rotate(6deg) scaleY(1.07) rotate(-6deg)}17.66%{transform:rotate(6deg) scaleY(1.021) rotate(-6deg)}20%{transform:rotate(6deg) scaleY(0.96) rotate(-6deg)}23.59%{transform:rotate(6deg) scaleY(0.988) rotate(-6deg)}25.94%{transform:rotate(6deg) scaleY(1.06) rotate(-6deg)}}
+@keyframes level4{0%,12.34%,33.91%,100%{transform:rotate(9deg) scaleY(1) rotate(-9deg)}14.69%{transform:rotate(9deg) scaleY(1.1) rotate(-9deg)}18.28%{transform:rotate(9deg) scaleY(1.03) rotate(-9deg)}20.62%{transform:rotate(9deg) scaleY(0.95) rotate(-9deg)}24.22%{transform:rotate(9deg) scaleY(0.985) rotate(-9deg)}26.56%{transform:rotate(9deg) scaleY(1.08) rotate(-9deg)}}
+@keyframes tailFlick{0%,21.25%,31.25%,100%{transform:none;animation-timing-function:cubic-bezier(.45,0,.55,1)}25.16%{transform:rotate(-3deg);animation-timing-function:cubic-bezier(.45,0,.55,1)}}
+@keyframes blink{0%,67.19%,70.94%,100%{transform:none}68.91%{transform:scaleY(.1)}}
+@keyframes glintBlink{0%,67.5%,70.6%,100%{opacity:1}68.2%,69.9%{opacity:0}}
+</style>
+<g id="construction">
+<circle class="guide g1" cx="277.4" cy="286.9" r="136.8" fill="none" stroke="#19A7B3" stroke-width="2.5" stroke-dasharray="1 2" pathLength="1" opacity="0"/>
+<circle class="guide g2" cx="200.6" cy="183.9" r="95.6" fill="none" stroke="#19A7B3" stroke-width="2.5" stroke-dasharray="1 2" pathLength="1" opacity="0"/>
+</g>
+<g id="bird">
+<path id="tail" d="M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z" fill="url(#plumage) #19A7B3"/>
+<g id="beak" stroke-linejoin="round" stroke-width="12">
+<path id="lower" d="M118.1 206.6L64.5 222.5L140 240.3Z" fill="#E3A22B" stroke="#E3A22B"/>
+<path id="upper" d="M145.9 149L50.6 160.9L118.1 196.6Z" fill="#F4C542" stroke="#F4C542"/>
+</g>
+<path id="body" d="M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z" fill="url(#plumage) #19A7B3"/>
+<g id="wing" fill="none" stroke-width="30" stroke-linecap="round">
+<g stroke="#EEF1EC"><path class="full b1" d="M217.4 333.7L217.4 240.1"/><g class="half b1h" opacity="0"><path d="M217.4 286.9l0 -46.8" pathLength="100"/><path d="M217.4 286.9l0 46.8" pathLength="100"/></g></g>
+<g stroke="#F4C542"><path class="full b2" d="M260.6 365.5L268 223.3"/><g class="half b2h" opacity="0"><path d="M264.3 294.4l3.7 -71.1" pathLength="100"/><path d="M264.3 294.4l-3.7 71.1" pathLength="100"/></g></g>
+<g stroke="#EEF1EC"><path class="full b3" d="M306.2 349.4L316 256.2"/><g class="half b3h" opacity="0"><path d="M311.1 302.8l4.9 -46.6" pathLength="100"/><path d="M311.1 302.8l-4.9 46.6" pathLength="100"/></g></g>
+<g stroke="#8CD3D9"><path class="full b4" d="M352.9 331.7L359.3 290.9"/><g class="half b4h" opacity="0"><path d="M356.1 311.3l3.2 -20.4" pathLength="100"/><path d="M356.1 311.3l-3.2 20.4" pathLength="100"/></g></g>
+</g>
+<g id="eye"><circle cx="176.2" cy="172.6" r="18.7" fill="#13233A"/><circle id="glint" cx="171" cy="166.6" r="5.4" fill="#FFFFFF"/></g>
+</g>
+</svg>

@@ -1,0 +1,121 @@
+name: birdnet_live
+description: "Real-time bird species identification using on-device ONNX inference"
+publish_to: 'none'
+version: 1.1.3+224
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  # 3.4.2+ required: earlier versions throw "markNeedsBuild called during
+  # build" when a dirty provider chain is first flushed from a widget build
+  # (e.g. Explore mounting after a location/language change).
+  flutter_riverpod: ^3.4.2
+
+  # Storage
+  shared_preferences: ^2.3.4
+  path_provider: ^2.1.5
+
+  # Permissions
+  permission_handler: ^12.0.1
+
+  # Audio
+  record: ^7.0.0
+  fftea: ^1.2.0
+  # Spoken detection announcements (TTS + audio session routing)
+  flutter_tts: ^4.2.0
+  audio_session: ^0.2.3
+  # Inference
+  #
+  # PINNED — do not widen to a caret range without re-testing on-device.
+  # 1.8.x bumps the Android native runtime from ONNX Runtime 1.22.0 to 1.23.0,
+  # which routes fp32 GEMM through Arm KleidiAI (`ArmKleidiAI::MlasGemmBatch`,
+  # SME/SME2 kernels). That path segfaults inside `OrtSession.run` on arm64 and
+  # shipped as the v1.0.2 "crashes when starting a recording" bug.
+  # See docs/developer/onnxruntime-pin.md before changing this line.
+  flutter_onnxruntime: 1.7.1
+
+  # UI & UX
+  url_launcher: ^6.3.1
+  # >=13.3.0 keeps the plugin's own iPad fallback (centre-of-screen anchor)
+  # as a backstop; before that, a missing sharePositionOrigin made the
+  # native share sheet refuse to present at all. See issue #203.
+  share_plus: ^13.3.0
+  package_info_plus: ^10.1.0
+
+  # Export
+  archive: ^4.0.2
+  crypto: ^3.0.3
+
+  # Localization
+  intl: any
+  just_audio: ^0.10.5
+  just_audio_windows: ^0.2.3
+
+  # Background service
+  flutter_foreground_task: ^10.0.0
+  battery_plus: ^7.0.0
+
+  # Notifications (heads-up species alerts during surveys)
+  flutter_local_notifications: ^22.0.1
+
+  # Location
+  geolocator: ^14.0.2
+
+  # Map
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+
+  # Icons
+  material_symbols_icons: ^4.2928.1
+
+  # Dynamic theming
+  dynamic_color: ^1.9.0
+
+  # Network & Images
+  http: ^1.2.2
+  path: ^1.9.0
+  file_picker: ^12.0.0-beta.5
+  flutter_map_marker_cluster: ^8.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/app-icon.png
+    - assets/images/dummy_species.png
+    - assets/images/icon-birdnet.png
+    - assets/images/icon-ebird.png
+    - assets/images/icon-inat.png
+    - assets/images/icon-wikipedia.png
+    - assets/images/logo-birdnet-circle.png
+    - assets/models/
+    - assets/species_images/
+    - assets/species_data/
+    - assets/announcements/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  windows:
+    generate: true
+    image_path: "assets/images/app-icon.png"
+  remove_alpha_ios: true
+  image_path: "assets/images/app-icon.png"
+  adaptive_icon_background: "assets/images/app-icon-background.png"
+  adaptive_icon_foreground: "assets/images/app-icon-foreground.png"

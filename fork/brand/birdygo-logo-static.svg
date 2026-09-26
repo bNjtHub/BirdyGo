@@ -1,0 +1,24 @@
+<!-- BirdyGo logo — original artwork. Static mark. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="birdygo-title birdygo-desc">
+<!-- Palette (fork/DESIGN.md): Martin-pêcheur #19A7B3, its dark #0E7C86, Loriot #F4C542, Loriot ombre #E3A22B (lower mandible), Brume #EEF1EC, Martin-pêcheur clair #8CD3D9, Encre de nuit #13233A. -->
+<title id="birdygo-title">BirdyGo</title>
+<desc id="birdygo-desc">Un oiseau chanteur tout rond, bec ouvert, dont l’aile est un spectrogramme.</desc>
+<defs>
+<linearGradient id="plumage" gradientUnits="userSpaceOnUse" x1="165" y1="97.7" x2="361.7" y2="434.9"><stop offset="0" stop-color="#1CAEBA"/><stop offset="1" stop-color="#0E7C86"/></linearGradient>
+</defs>
+<g id="bird">
+<path id="tail" d="M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z" fill="url(#plumage) #19A7B3"/>
+<g id="beak" stroke-linejoin="round" stroke-width="12">
+<path id="lower" d="M118.1 206.6L64.5 222.5L140 240.3Z" fill="#E3A22B" stroke="#E3A22B"/>
+<path id="upper" d="M145.9 149L50.6 160.9L118.1 196.6Z" fill="#F4C542" stroke="#F4C542"/>
+</g>
+<path id="body" d="M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z" fill="url(#plumage) #19A7B3"/>
+<g id="wing" fill="none" stroke-width="30" stroke-linecap="round">
+<path d="M217.4 333.7L217.4 240.1" stroke="#EEF1EC"/>
+<path d="M260.6 365.5L268 223.3" stroke="#F4C542"/>
+<path d="M306.2 349.4L316 256.2" stroke="#EEF1EC"/>
+<path d="M352.9 331.7L359.3 290.9" stroke="#8CD3D9"/>
+</g>
+<g id="eye"><circle cx="176.2" cy="172.6" r="18.7" fill="#13233A"/><circle cx="171" cy="166.6" r="5.4" fill="#FFFFFF"/></g>
+</g>
+</svg>
