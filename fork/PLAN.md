@@ -386,6 +386,9 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [ ] Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
+- [ ] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
+      exportés (`BirdNET_Live_…`), champ creator des exports GPX et JSON, rapport HTML. Adapter les
+      tests upstream concernés.
 - [ ] Quelques semaines d'usage réel avant de passer à iOS.
 
 Fini quand : la build de test interne s'installe depuis le Play Store et tient une matinée d'écoute
@@ -421,6 +424,10 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
+  posés dans le projet, jamais compilés. Créer l'App ID et l'App Group sur le portail Apple, renseigner
+  l'équipe (DEVELOPMENT_TEAM). L'App Group ne sert qu'à une ancienne extension de partage upstream : on
+  peut aussi le retirer de `Runner.entitlements` et d'`AppDelegate.swift`.
 - Envoi à la LPO (J5b) : aucun code natif ; NaturaList s'ouvre par sa page App Store
   (`LpoConfig.naturaListAppStore`, choisie selon la plateforme), à vérifier ; partage de l'extrait par
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
