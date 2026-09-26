@@ -348,6 +348,11 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       Carte, Sonothèque, Revue rapide, Envoi à la LPO. Carnet et Profil (statut, badges, série)
       viennent avec le jeu, en J6e. Le logo de l'accueil s'anime en Flutter à partir du logo statique
       (flutter_svg ne lit pas les animations CSS).
+      - [x] Live : thème sombre (dialogues compris), spectre agrandi ou réduit d'un appui avec un
+            trait de la couleur de l'espèce sous chaque passage, tableau en direct (entrée en haut,
+            remontée en tête en 250 ms, ×N qui rebondit, total toutes sorties), barre Arrêter / Pause.
+            En paysage : spectre à gauche, tableau et barre à droite. À mesurer en mode profile
+            sur le Xiaomi : 60 images par seconde pendant l'agrandissement du spectre.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
