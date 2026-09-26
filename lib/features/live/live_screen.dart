@@ -34,6 +34,8 @@ import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3
 import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
+import '../../fork/bilan/bilan_screen.dart'; // FORK: Bilan (J6c)
+import '../../fork/design/birdy_motion.dart'; // FORK: Bilan (J6c)
 import '../../fork/design/birdy_theme.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
@@ -653,6 +655,22 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       if (autoSave) {
         await repo.save(session);
         ref.invalidate(sessionListProvider);
+      }
+
+      // FORK: Bilan of the listening in place of the live screen (J6c). An
+      // unsaved session keeps the upstream review, where it can be saved.
+      if (mounted && autoSave) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder<void>(
+            transitionDuration: BirdyMotion.enter,
+            reverseTransitionDuration: BirdyMotion.exit,
+            pageBuilder: (a, b, c) => BilanScreen(session: session),
+            transitionsBuilder:
+                (context, animation, _, child) =>
+                    FadeTransition(opacity: animation, child: child),
+          ),
+        );
+        return;
       }
 
       // Replace the live screen with the session library (instantly,

@@ -45,6 +45,20 @@ void main() {
     );
   });
 
+  test('a session saved in UTC shows local day and times', () {
+    // Just after midnight: in UTC it is still Friday east of Greenwich.
+    final json =
+        morningSession().toJson()
+          ..['startTime'] = at(0, 30).toUtc().toIso8601String()
+          ..['endTime'] = at(1, 0).toUtc().toIso8601String();
+    final bilan = buildBilan(session: LiveSession.fromJson(json));
+    expect(bilan.start.isUtc, isTrue);
+    expect(
+      bilanDateLine(fr, 'fr', bilan),
+      'Samedi 26 septembre · 0 h 30 – 1 h 00',
+    );
+  });
+
   test('an empty outing has its own title', () {
     final session = morningSession()..detections.clear();
     expect(

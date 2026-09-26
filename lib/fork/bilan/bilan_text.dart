@@ -35,7 +35,10 @@ String bilanDateLine(
   BilanSummary summary, {
   String? place,
 }) {
-  final day = DateFormat('EEEE d MMMM', localeName).format(summary.start);
+  final day = DateFormat(
+    'EEEE d MMMM',
+    localeName,
+  ).format(summary.start.toLocal());
   return [
     day.isEmpty ? day : day[0].toUpperCase() + day.substring(1),
     '${bilanClock(l10n, summary.start)} – ${bilanClock(l10n, summary.end)}',
