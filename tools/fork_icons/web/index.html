@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BirdyGo · Atelier SVG</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="BirdyGo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M30 10 36 5 34 23C32 34 13 37 9 24 3 22 4 9 13 9 19 9 20 14 23 16Z" fill="#19A7B3"/><path d="m7 15-6 3 6 2" fill="#F4C542"/><circle cx="11" cy="14" r="2" fill="#13233A"/><path d="M21 21v6m5-9v11m5-8v4" stroke="#13233A" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <span>BirdyGo<small data-i18n="workshop">Atelier SVG</small></span>
+    </a>
+    <span class="local-tag" data-i18n="local">Sur ton ordinateur</span>
+    <nav aria-label="Exports">
+      <label class="sr-only" for="language">Language / Langue</label>
+      <select id="language"><option value="fr">Français</option><option value="en">English</option></select>
+      <button id="import-project" class="quiet" data-i18n="import">Ouvrir un projet</button>
+      <button id="save-project" class="quiet" data-i18n="project">Enregistrer le projet</button>
+      <button id="export-bundle" class="primary" data-i18n="bundle">Exporter le lot</button>
+      <input id="project-file" type="file" accept="application/json,.json" hidden>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <aside class="library" aria-labelledby="library-title">
+      <div class="section-heading"><h1 id="library-title" data-i18n="birds">Les oiseaux</h1><span id="species-count" class="count">…</span></div>
+      <label for="search" class="sr-only" data-i18n="search">Chercher un oiseau</label>
+      <input id="search" type="search" placeholder="Nom français ou scientifique" autocomplete="off" data-placeholder="searchPlaceholder">
+      <label for="family-filter" class="sr-only" data-i18n="template">Gabarit</label>
+      <select id="family-filter"><option value="" data-i18n="allFamilies">Tous les gabarits</option></select>
+      <div id="species-list" class="species-list" role="list" aria-label="Espèces"></div>
+      <button id="new-species" class="secondary" data-i18n="addSpecies">Ajouter une espèce</button>
+      <p class="hint" data-i18n="draftHint">Tes réglages restent dans ce navigateur. Enregistre le projet pour les retrouver ailleurs.</p>
+    </aside>
+
+    <section class="studio" aria-labelledby="bird-name">
+      <div class="bird-heading">
+        <div><p class="eyebrow" id="current-family">BIRDYGO / SVG</p><h2 id="bird-name">…</h2><p id="scientific-name" class="latin"></p></div>
+        <button id="download-svg" class="primary" data-i18n="svg">Exporter ce SVG</button>
+      </div>
+      <div class="canvas-pair">
+        <figure class="canvas light"><figcaption data-i18n="light">Brume · fond clair</figcaption><img class="bird-preview hero" alt=""><span class="canvas-caption">64 × 64 · SVG</span></figure>
+        <figure class="canvas dark"><figcaption data-i18n="dark">Encre · fond sombre</figcaption><img class="bird-preview hero" alt=""><span class="canvas-caption" data-i18n="vector">Vectoriel, à toutes les tailles</span></figure>
+      </div>
+      <section class="size-panel" aria-labelledby="size-title">
+        <div><h3 id="size-title" data-i18n="realSizes">À taille réelle</h3><p data-i18n="sizeHint">Vérifie le bec, l’œil et la silhouette.</p></div>
+        <div class="size-examples">
+          <figure><img class="bird-preview size34" alt=""><figcaption>34 px</figcaption></figure>
+          <figure><img class="bird-preview size48" alt=""><figcaption>48 px</figcaption></figure>
+          <figure><img class="bird-preview size64" alt=""><figcaption>64 px</figcaption></figure>
+          <figure><img class="bird-preview size48 muted" alt=""><figcaption data-i18n="heard">Entendu</figcaption></figure>
+        </div>
+      </section>
+      <section class="source-panel" aria-labelledby="source-title">
+        <div class="section-heading"><h3 id="source-title" data-i18n="reference">Planche de référence</h3><span id="review-status" class="status"></span></div>
+        <p id="source-description"></p><a id="source-link" target="_blank" rel="noopener noreferrer" hidden data-i18n="openSource">Consulter la source</a>
+        <p id="plumage-description" class="hint"></p>
+      </section>
+      <p id="message" role="status" aria-live="polite"></p>
+    </section>
+
+    <aside class="inspector" aria-labelledby="settings-title">
+      <div class="section-heading"><h2 id="settings-title" data-i18n="adjust">Ajuster</h2><button id="reset" class="text-button" data-i18n="reset">Réinitialiser</button></div>
+      <label for="template" data-i18n="template">Gabarit</label><select id="template"></select>
+      <p class="hint" data-i18n="templateHint">Proposé selon l’espèce, son genre ou sa famille.</p>
+      <fieldset><legend data-i18n="shape">Silhouette</legend><div id="morphology"></div></fieldset>
+      <fieldset><legend data-i18n="colors">Couleurs du plumage</legend><div id="colors" class="color-grid"></div></fieldset>
+      <details><summary data-i18n="referenceDetails">Noms et provenance</summary><div id="metadata" class="metadata"></div></details>
+      <p class="hint" data-i18n="legacyHint">Les 15 dessins d’origine sont conservés. Modifier une forme ou une couleur passe au gabarit paramétrable.</p>
+    </aside>
+  </main>
+
+  <dialog id="new-dialog">
+    <form id="new-form">
+      <h2 data-i18n="addSpecies">Ajouter une espèce</h2>
+      <label for="new-scientific" data-i18n="scientificName">Nom scientifique</label>
+      <input id="new-scientific" required maxlength="160" placeholder="Erithacus rubecula">
+      <label for="new-common" data-i18n="commonName">Nom courant</label><input id="new-common" maxlength="160">
+      <p class="hint" data-i18n="newHint">Un gabarit neutre sera proposé. Documente la source avant de choisir les couleurs.</p>
+      <div class="dialog-actions"><button id="cancel-new" type="button" class="quiet" data-i18n="cancel">Annuler</button><button type="submit" class="primary" data-i18n="create">Créer</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
