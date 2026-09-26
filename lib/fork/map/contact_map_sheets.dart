@@ -13,6 +13,10 @@ import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
+import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/species_accents.dart';
+import '../design/widgets/clip_play_button.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
 
@@ -112,7 +116,7 @@ class _AreaSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final contacts = species.fold<int>(0, (sum, s) => sum + s.contacts);
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -126,16 +130,14 @@ class _AreaSheet extends ConsumerWidget {
           children: [
             Text(
               l10n.forkMapAreaTitle(species.length, contacts),
-              style: theme.textTheme.titleLarge,
+              style: BirdyText.heading.copyWith(color: c.text1),
             ),
             const SizedBox(height: 2),
             Text(
               filterSummary,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: BirdyText.caption.copyWith(color: c.text2),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: BirdySpace.s),
             Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -148,25 +150,9 @@ class _AreaSheet extends ConsumerWidget {
                     s.commonName,
                   );
                   final clip = s.bestClip;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    minTileHeight: 56,
-                    leading: SpeciesAvatar(scientificName: s.scientificName),
-                    title: Text(name),
-                    subtitle: Text(
-                      l10n.forkMapContacts(s.contacts),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    trailing:
-                        clip == null
-                            ? null
-                            : IconButton.filledTonal(
-                              tooltip: '${l10n.forkReplay} : $name',
-                              icon: const Icon(AppIcons.playArrowRounded),
-                              onPressed: () => _play(context, clip, name),
-                            ),
+                  final tint = SpeciesAccents.tintOf(s.scientificName);
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(BirdyRadii.thumb),
                     onTap:
                         () => SpeciesInfoOverlay.show(
                           context,
@@ -174,25 +160,73 @@ class _AreaSheet extends ConsumerWidget {
                           scientificName: s.scientificName,
                           commonName: name,
                         ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: tint.cardBackground(
+                                  Theme.of(context).brightness,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: SpeciesAvatar(
+                                scientificName: s.scientificName,
+                                size: 40,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: BirdyText.species.copyWith(
+                                      color: c.text1,
+                                    ),
+                                  ),
+                                  Text(
+                                    l10n.forkMapContacts(s.contacts),
+                                    style: BirdyText.caption.copyWith(
+                                      color: c.text2,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (clip != null)
+                              ClipPlayButton(
+                                state: ClipPlayState.idle,
+                                semanticLabel: '${l10n.forkReplay} : $name',
+                                onPressed: () => _play(context, clip, name),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: BirdySpace.s),
             Row(
               children: [
-                Icon(
-                  AppIcons.lockOutline,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
+                Icon(AppIcons.lockOutline, size: 16, color: c.text2),
+                const SizedBox(width: BirdySpace.s),
                 Expanded(
                   child: Text(
                     l10n.forkMapPrivacyNote,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    style: BirdyText.caption.copyWith(color: c.text2),
                   ),
                 ),
               ],
