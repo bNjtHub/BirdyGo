@@ -208,6 +208,32 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
   et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
 
+## Mise en œuvre (J6c, Bilan)
+
+Code dans `lib/fork/bilan/`. Quand on arrête l'écoute et que la session est enregistrée, le Bilan
+remplace l'écran Live (fondu) ; ✕ ou retour mène à l'accueil. Si l'enregistrement automatique est
+coupé, la revue upstream s'ouvre comme avant, puisque c'est là qu'on enregistre. Le Bilan suit le
+thème de l'app (clair par défaut, comme la maquette).
+
+- `bilan_model.dart` : une ligne par espèce (détections rejetées et « espèce inconnue » exclues),
+  triée par contacts puis premier contact. Niveau d'une espèce = le meilleur de ses contacts, calculé
+  comme dans la revue (`reliabilityFor` avec la présence du géomodèle au lieu et à la semaine de la
+  session). En attente = rien de Sûr ni de confirmé : point `toCheck` sur le bandeau.
+- Nouveauté = espèce jamais entendue avant le début de l'écoute (index, rejets exclus). Sûre ou
+  confirmée : carte « Première fois » teintée de sa couleur ; sinon, ligne grisée avec son niveau
+  et « Inattendu ici ».
+- « Vérifier N détections » : détections non revues des espèces en attente, sans les « Je ne sais
+  pas ». Une espèce déjà Sûre dans la sortie n'est pas redemandée. La revue rapide s'ouvre sur ces
+  seules détections (`QuickReviewScreen(keys:)`), et le Bilan se recalcule au retour.
+- `bilan_loader.dart` relit la session, indexe la session s'il le faut, calcule présence et
+  nouveautés, et résout le nom du lieu comme la revue upstream (cache, ou réseau si autorisé).
+- Partager : résumé texte (titre, date, chiffres, espèces avec « à vérifier »), sans le lieu si une
+  espèce sensible a été entendue. L'export complet reste dans « Détail de l'écoute » (revue upstream).
+- Entrée des blocs en décalé (40 ms, 5 au plus). Les blocs qui dépendent des niveaux apparaissent
+  une fois chargés, pour qu'aucune pastille ne change sous le doigt. Colonne de 600 dp au plus.
+- Viennent avec le jeu (J6e) : carte de progression du statut, pastille du badge, « Ta 24e espèce ».
+  En attendant, la carte dit « Entendu pour la première fois, à 7 h 26. ».
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

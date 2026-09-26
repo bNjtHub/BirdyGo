@@ -353,6 +353,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             remontée en tête en 250 ms, ×N qui rebondit, total toutes sorties), barre Arrêter / Pause.
             En paysage : spectre à gauche, tableau et barre à droite. À mesurer en mode profile
             sur le Xiaomi : 60 images par seconde pendant l'agrandissement du spectre.
+      - [x] Fin de sortie (Bilan) : remplace l'écoute quand on arrête (session enregistrée) ; titre
+            selon le moment, date, heures et lieu, espèces · contacts · durée, cartes « Première
+            fois », nouvelles espèces à vérifier, bandeau des espèces (point si rien de Sûr),
+            « Vérifier N détections » sur la revue rapide limitée à la sortie, Faune-France, carte
+            centrée sur le lieu, partage d'un résumé texte, lien vers le détail upstream. À essayer
+            sur le Xiaomi : Arrêter → Bilan, puis Vérifier → retour, le Bilan se met à jour.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -372,6 +378,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau
       statut). Règles : seules les détections Sûr ou confirmées font progresser ; un oiseau rare se
       vérifie avant la fête ; ni notification culpabilisante ni série perdue pour un jour manqué.
+      Reste à brancher sur le Bilan (J6c) : carte de progression (statut, « +1 », barre, « Encore 11
+      pour devenir… »), pastille du badge gagné, et « Ta 24e espèce » sur la carte « Première fois »
+      (demande le décompte des espèces vérifiées).
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
@@ -438,5 +447,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
+- Bilan (J6c) : aucun code natif ; le partage passe par share_plus avec l'ancrage iPad
+  (`shareOriginFrom`).
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
