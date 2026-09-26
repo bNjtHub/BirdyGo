@@ -9,7 +9,6 @@ import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/widgets/content_width_constraint.dart';
-import '../../fork/brand/fork_info.dart'; // FORK: BirdyGo links
 
 /// Provider for app package info.
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
@@ -263,13 +262,7 @@ class AboutScreen extends ConsumerWidget {
                     '${AppConstants.docsUrl}${AppConstants.policyDocsLocalePrefix(Localizations.localeOf(context).languageCode)}/acceptable-use/',
                   ),
             ),
-            ListTile(
-              leading: const Icon(AppIcons.code),
-              title: Text(l10n.aboutGitHub),
-              trailing: const Icon(AppIcons.openInNew),
-              // FORK: "This app on GitHub" points to the BirdyGo repository.
-              onTap: () => openExternalUrl(context, ForkInfo.repositoryUrl),
-            ),
+            // FORK: no "This app on GitHub" tile, the BirdyGo repository is private.
             ListTile(
               leading: ColorFiltered(
                 colorFilter: ColorFilter.mode(

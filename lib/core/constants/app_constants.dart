@@ -17,9 +17,8 @@ abstract final class AppConstants {
   static const String packageName = 'fr.justcodeit.birdygo';
 
   /// Contactable User-Agent for public web services used by the app.
-  static const String networkUserAgent =
-      'BirdyGo (fr.justcodeit.birdygo; '
-      '+https://github.com/bNjtHub/BirdyGo)';
+  // FORK: identifies BirdyGo; no repository link, the repository is private.
+  static const String networkUserAgent = 'BirdyGo (fr.justcodeit.birdygo)';
 
   /// Documentation site URL.
   static const String docsUrl =
