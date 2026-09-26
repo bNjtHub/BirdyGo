@@ -7,6 +7,13 @@
 
 # The following line activates a set of recommended lints for Flutter apps,
 # packages, and plugins designed to encourage good coding practices.
+# FORK: skip build output and native folders (added by the cloud setup).
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
