@@ -121,4 +121,48 @@ void main() {
       expect(rankingValue(tally, RankingOrder.days), tally.days);
     });
   });
+
+  group('period texts (J6c)', () {
+    final now = DateTime(2026, 9, 26, 10);
+    final fr = AppLocalizationsFr();
+    final en = AppLocalizationsEn();
+
+    test('header phrase', () {
+      expect(periodPhrase(fr, RankingPeriod.last30Days, now), 'en 30 jours');
+      expect(periodPhrase(fr, RankingPeriod.season, now), 'cette saison');
+      expect(periodPhrase(fr, RankingPeriod.year, now), 'en 2026');
+      expect(periodPhrase(en, RankingPeriod.all, now), 'since the start');
+      expect(
+        fr.forkRankingSpeciesWord(
+          17,
+          periodPhrase(fr, RankingPeriod.last30Days, now),
+        ),
+        'espèces en 30 jours',
+      );
+      expect(fr.forkRankingSpeciesWord(1, 'en 2026'), 'espèce en 2026');
+    });
+
+    test('dates of the period', () {
+      expect(
+        periodDates(fr, 'fr', RankingPeriod.last30Days, now),
+        'du 27 août au 26 septembre',
+      );
+      expect(
+        periodDates(fr, 'fr', RankingPeriod.season, now),
+        'depuis le 1er septembre',
+      );
+      expect(periodDates(fr, 'fr', RankingPeriod.year, now), 'en 2026');
+      expect(periodDates(fr, 'fr', RankingPeriod.all, now), isNull);
+      expect(
+        periodDates(
+          en,
+          'en',
+          RankingPeriod.all,
+          now,
+          firstContact: DateTime(2025, 10, 4, 7),
+        ),
+        'since October 4, 2025',
+      );
+    });
+  });
 }
