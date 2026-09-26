@@ -34,6 +34,7 @@ import json
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 from io import BytesIO
 from pathlib import Path
@@ -211,23 +212,35 @@ def http_get(url: str) -> bytes:
 
 
 class InatClient:
-    """iNaturalist taxa and photos, cached on disk, one request per delay."""
+    """iNaturalist taxa and photos, cached on disk. API calls are spaced by
+    *delay* and wait *retry_wait* seconds on "too many requests"; photo
+    files come from a static host and are not throttled."""
 
     def __init__(self, cache_dir: Path, delay: float,
-                 get: Callable[[str], bytes] = http_get):
+                 get: Callable[[str], bytes] = http_get,
+                 retry_wait: float = 60.0, retries: int = 2):
         self.cache_dir = cache_dir
         self.delay = delay
+        self.retry_wait = retry_wait
+        self.retries = retries
         self._get = get
         self._last = 0.0
 
     def _throttled(self, url: str) -> bytes:
-        wait = self._last + self.delay - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
-        try:
-            return self._get(url)
-        finally:
-            self._last = time.monotonic()
+        for attempt in range(self.retries + 1):
+            wait = self._last + self.delay - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            try:
+                return self._get(url)
+            except urllib.error.HTTPError as exc:
+                if exc.code != 429 or attempt == self.retries:
+                    raise
+                print(f"  API busy, waiting {self.retry_wait:.0f} s ...")
+                time.sleep(self.retry_wait)
+            finally:
+                self._last = time.monotonic()
+        raise RuntimeError("unreachable")
 
     def taxon(self, inat_id: str) -> dict | None:
         path = self.cache_dir / "taxa" / f"{inat_id}.json"
@@ -244,7 +257,7 @@ class InatClient:
         path = self.cache_dir / "photos" / f"{photo['id']}_large.jpg"
         if path.exists():
             return path.read_bytes()
-        data = self._throttled(sized_url(photo, "large"))
+        data = self._get(sized_url(photo, "large"))
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
         return data

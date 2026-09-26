@@ -276,5 +276,34 @@ class ThrottleTest(unittest.TestCase):
         self.assertEqual(calls, ["https://api.inaturalist.org/v1/taxa/5"])
 
 
+    def test_retries_when_the_api_is_busy(self):
+        import urllib.error
+        answers = [urllib.error.HTTPError("u", 429, "busy", None, None),
+                   json.dumps({"results": [{"id": 6}]}).encode()]
+
+        def get(url):
+            answer = answers.pop(0)
+            if isinstance(answer, Exception):
+                raise answer
+            return answer
+
+        with tempfile.TemporaryDirectory() as tmp:
+            client = photos.InatClient(Path(tmp), delay=0, get=get,
+                                       retry_wait=0)
+            self.assertEqual(client.taxon("6"), {"id": 6})
+
+    def test_other_http_errors_are_raised(self):
+        import urllib.error
+
+        def get(url):
+            raise urllib.error.HTTPError(url, 500, "down", None, None)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            client = photos.InatClient(Path(tmp), delay=0, get=get,
+                                       retry_wait=0)
+            with self.assertRaises(urllib.error.HTTPError):
+                client.taxon("7")
+
+
 if __name__ == "__main__":
     unittest.main()
