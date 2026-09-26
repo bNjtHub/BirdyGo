@@ -11,6 +11,7 @@ Usage:
     python tools/download_taxonomy_json.py
     python tools/build_species_bundle.py
     python tools/build_species_bundle.py --quality 65
+    python tools/build_species_bundle.py --species-list tools/fork_sheets/region_species.csv --replace-reserved
 """
 
 import argparse
@@ -27,9 +28,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageOps  # FORK: ImageOps crops to 3:2 (J6b)
 except ImportError:
     sys.exit("Pillow is required: pip install Pillow")
+
+import fork_species_photos  # FORK: region photo pack (fork/PLAN.md J6b)
 
 # Ensure console output can't crash on non-ASCII (species names, arrows) on
 # Windows code pages like cp1252.
@@ -273,7 +276,8 @@ def process_image(
     """Resize a taxonomy API source image to target dimensions as WebP."""
     img = Image.open(io.BytesIO(raw_bytes))
     img = img.convert("RGB")
-    img = img.resize((target_w, target_h), Image.LANCZOS)
+    # FORK: crop instead of stretching, iNaturalist photos are not 3:2 (J6b)
+    img = ImageOps.fit(img, (target_w, target_h), Image.LANCZOS)
     buf = io.BytesIO()
     img.save(buf, format="WEBP", quality=quality)
     return buf.getvalue()
@@ -343,7 +347,8 @@ def download_and_resize_images(
         if not url:
             results[sci_name] = "no_url"
             continue
-        cp = IMAGE_CACHE_DIR / f"{cache_key(sci_name)}.dat"
+        # FORK: key by URL, so a replaced photo never reuses the old file (J6b)
+        cp = IMAGE_CACHE_DIR / f"{cache_key(url)}.dat"
         work.append((sci_name, birdnet_id, url, cp))
 
     print(f"Downloading/processing {len(work)} images ({workers} workers) ...")
@@ -615,6 +620,16 @@ def main():
     parser.add_argument("--image-height", type=int, default=DEFAULT_IMAGE_HEIGHT)
     parser.add_argument("--quality", type=int, default=DEFAULT_WEBP_QUALITY)
     parser.add_argument("--workers", type=int, default=DEFAULT_DOWNLOAD_WORKERS)
+    # FORK: region photo pack (fork/PLAN.md J6b)
+    parser.add_argument(
+        "--species-list", type=Path,
+        help="CSV with a scientific_name column: only these species get a "
+             "photo; taxonomy.csv keeps its rows, only their photo credits change",
+    )
+    parser.add_argument(
+        "--replace-reserved", action="store_true",
+        help="replace photos without an open license by iNaturalist ones",
+    )
     args = parser.parse_args()
 
     taxonomy_json = resolve_taxonomy_json(args.taxonomy_json)
@@ -636,6 +651,17 @@ def main():
     print(
         f"  Image output: {args.image_width}x{args.image_height} WebP @ quality {args.quality}"
     )
+    # FORK: region photo pack and open-license photos (fork/PLAN.md J6b)
+    image_species = model_species
+    if args.species_list:
+        image_species = fork_species_photos.select_image_species(
+            model_species, args.species_list
+        )
+    if args.replace_reserved:
+        fork_species_photos.replace_reserved_photos(
+            image_species,
+            lambda sci: resolve_taxonomy_entry(sci, taxonomy, norm_index),
+        )
     print()
 
     backups = backup_existing_outputs()
@@ -656,7 +682,7 @@ def main():
         # 3. Download and resize images
         print("Step 3: Images ...")
         image_results = download_and_resize_images(
-            model_species, taxonomy, norm_index,
+            image_species, taxonomy, norm_index,  # FORK: region pack (J6b)
             args.image_width, args.image_height, args.quality, args.workers,
         )
         print()
@@ -670,7 +696,16 @@ def main():
 
         # 5. Rebuild taxonomy.csv
         print("Step 5: Rebuilding taxonomy.csv ...")
-        csv_rows = rebuild_taxonomy_csv(model_species, taxonomy, norm_index)
+        # FORK: with --species-list, keep taxonomy.csv and update only the
+        # photo credits of the listed species (fork/PLAN.md J6b).
+        csv_source = backups.get(TAXONOMY_CSV_PATH)
+        if args.species_list and csv_source is not None:
+            csv_rows = fork_species_photos.update_photo_credits(
+                csv_source, TAXONOMY_CSV_PATH, image_species,
+                lambda sci: resolve_taxonomy_entry(sci, taxonomy, norm_index),
+            )
+        else:
+            csv_rows = rebuild_taxonomy_csv(model_species, taxonomy, norm_index)
         print()
 
         # 6. Report

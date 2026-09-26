@@ -1336,5 +1336,15 @@
   "forkHomeYesterdayAt": "hier, {time}",
   "forkHomeToVerify": "{count, plural, =1{1 détection à vérifier} other{{count} détections à vérifier}}",
   "forkHomeToVerifyHint": "Réécoute-les quand tu as un moment.",
-  "forkHomeMenu": "Menu"
+  "forkHomeMenu": "Menu",
+  "forkPhotoCredit": "Crédit photo",
+  "forkPhotoAuthor": "Photo : {author}",
+  "forkPhotoLicense": "Licence : {license}",
+  "forkPhotoSource": "Source : {source}",
+  "forkPhotoAllRightsReserved": "Tous droits réservés",
+  "forkPhotoPublicDomain": "Domaine public",
+  "forkPhotoNoCredit": "On ne connaît pas l'auteur de cette photo.",
+  "forkPhotoOpenPage": "Voir la photo en ligne",
+  "forkOnlinePhotos": "Photos en grand (en ligne)",
+  "forkOnlinePhotosHint": "Quand tu ouvres une fiche, une photo plus grande est chargée depuis iNaturalist et gardée sur le téléphone."
 }

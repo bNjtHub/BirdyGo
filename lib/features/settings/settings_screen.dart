@@ -20,6 +20,7 @@ import 'offline_map_download_tile.dart';
 import '../../fork/data/rebuild_index_tile.dart'; // FORK: observation index
 import '../../fork/design/design_gallery_screen.dart'; // FORK: design system (J6a)
 import '../../fork/map/blur_sensitive_tile.dart'; // FORK: export privacy (J5)
+import '../../fork/species_photo/online_photos_tile.dart'; // FORK: photos (J6b)
 
 bool get _showOfflineMapDownloadSetting => false;
 
@@ -817,6 +818,7 @@ class SettingsScreen extends ConsumerWidget {
                     (v) =>
                         ref.read(privacyAllowWeatherProvider.notifier).set(v),
               ),
+              const OnlinePhotosTile(), // FORK: photos (J6b)
               const Divider(),
             ],
 
