@@ -328,6 +328,36 @@ pour proposer un partenariat.
 Fini quand : une observation confirmée se reporte dans NaturaList en moins d'une minute, et aucune
 détection non confirmée ne peut partir.
 
+## J5c : écouter un enregistrement
+
+But : tester l'app avec des sons du web ou d'un CD sans fausser les données. Un son enregistré n'est
+pas une observation. Règle unique, dans `lib/fork/practice/` : **les sons enregistrés ne comptent
+pas**. Une sortie compte seulement si elle n'est pas marquée `practice` et n'est pas une analyse de
+fichier (`SessionType.fileUpload`, qui comptait partout jusqu'ici).
+
+- [ ] Entrée « Écouter un enregistrement » dans le menu de l'accueil (`lib/fork/home/`), pas
+      d'interrupteur sur l'écran d'écoute. Le mode n'est pas enregistré dans les préférences : il est
+      remis à zéro à chaque démarrage.
+- [ ] Pendant cette écoute : filtre d'espèces sur « off », pas de géomodèle (ni « Inattendu ici » ni
+      « Rare ici »), bandeau discret « Enregistrement » sur l'écran d'écoute.
+- [ ] Champ `practice` (FORK) dans `LiveSession`, écrit dans le JSON seulement quand il vaut vrai ;
+      les anciennes sessions se lisent sans lui (faux).
+- [ ] Index : une sortie qui ne compte pas n'y entre pas (ni détections, ni précision, ni
+      `verifiedSpecies`), et en sort si on la marque après coup. Schéma de l'index 2 → 3 pour
+      forcer une reconstruction qui retire les analyses de fichier déjà indexées (favoris gardés).
+- [ ] Rien au palmarès, sur la carte, sur l'accueil, dans la sonothèque ni la revue rapide (tous lus
+      dans l'index) ; la LPO renvoie une liste vide et son bouton disparaît. Jeu (J6e) : il lira
+      l'index, donc la règle s'applique d'office.
+- [ ] Bilan (`lib/fork/summary/`) : lien « C'était un enregistrement ? » pour marquer la sortie après
+      coup (et l'annuler) ; une sortie marquée n'a ni « Première fois », ni avis du géomodèle, ni
+      « Vérifier », ni bouton LPO.
+- [ ] Chaînes en français et en anglais.
+- [ ] Tests : sérialisation, exclusion de l'index, palmarès, carte et LPO vides, lien du Bilan,
+      reconstruction de l'index.
+
+Fini quand : une écoute d'un son du web ne laisse aucune trace au palmarès, sur la carte, sur
+l'accueil ni à la LPO, et une sortie marquée après coup disparaît partout.
+
 ## J6 : refonte visuelle (voir fork/DESIGN.md)
 
 Objectif : l'app la plus belle, la plus fluide et la plus utile de sa catégorie. Assez simple pour
