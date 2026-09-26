@@ -54,8 +54,9 @@ void main() {
       expect(container.read(ignoreCommonGeoScoreCutoffProvider), 1.0);
     });
 
-    test('showAllDetectedSpecies defaults to false', () {
-      expect(container.read(showAllDetectedSpeciesProvider), false);
+    // FORK: BirdyGo keeps every species of the session listed by default.
+    test('showAllDetectedSpecies defaults to true', () {
+      expect(container.read(showAllDetectedSpeciesProvider), true);
     });
 
     test('detectedSpeciesSortMode defaults to newest first', () {

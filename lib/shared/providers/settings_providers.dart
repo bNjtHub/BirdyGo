@@ -129,7 +129,8 @@ final speciesIgnoreSettingsProvider = Provider<SpeciesIgnoreSettings>((ref) {
 final showAllDetectedSpeciesProvider =
     StateNotifierProvider<BoolSettingNotifier, bool>((ref) {
       final prefs = ref.watch(sharedPreferencesProvider);
-      return BoolSettingNotifier(prefs, PrefKeys.showAllDetectedSpecies, false);
+      // FORK: BirdyGo keeps every species of the session listed by default.
+      return BoolSettingNotifier(prefs, PrefKeys.showAllDetectedSpecies, true);
     });
 
 abstract final class DetectedSpeciesSortMode {

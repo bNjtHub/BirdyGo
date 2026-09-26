@@ -173,6 +173,7 @@ abstract final class AppIcons {
   static const IconData speedRounded = Symbols.speed_rounded;
   static const IconData stickyNote2 = Symbols.sticky_note_2;
   static const IconData stop = Icons.stop;
+  static const IconData star = Symbols.star; // FORK: sound library favorites
   static const IconData stopCircle = Icons.stop_circle;
   static const IconData stopRounded = Icons.stop_rounded;
   static const IconData storage = Symbols.storage;

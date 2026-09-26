@@ -441,6 +441,30 @@ class ObservationIndex {
     return rows.map(IndexedDetection.fromRow).toList();
   }
 
+  /// Species that have at least one clip, with their clip and favorite
+  /// counts, most clips first.
+  Future<
+    List<({String scientificName, String commonName, int clips, int favorites})>
+  >
+  speciesWithClips() async {
+    final rows = await _db.rawQuery('''
+      SELECT d.scientific_name, MAX(d.common_name) AS common_name,
+             COUNT(*) AS clips, COUNT(f.key) AS favorites
+      FROM detections d LEFT JOIN favorites f ON f.key = d.key
+      WHERE d.clip_path IS NOT NULL AND d.review_status != 'rejected'
+      GROUP BY d.scientific_name
+      ORDER BY clips DESC, d.scientific_name''');
+    return [
+      for (final row in rows)
+        (
+          scientificName: row['scientific_name']! as String,
+          commonName: row['common_name']! as String,
+          clips: row['clips']! as int,
+          favorites: row['favorites']! as int,
+        ),
+    ];
+  }
+
   /// Keys of favorite detections.
   Future<Set<String>> favoriteKeys() async {
     final rows = await _db.query('favorites');

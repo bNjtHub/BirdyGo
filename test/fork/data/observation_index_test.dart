@@ -139,6 +139,19 @@ void main() {
       expect(await index.favoriteKeys(), isEmpty);
     });
 
+    test('species with clips, with clip and favorite counts', () async {
+      final robin = (await index.clipsForSpecies('Erithacus rubecula')).first;
+      await index.setFavorite(robin.key, favorite: true);
+      final species = await index.speciesWithClips();
+      expect(species.map((s) => s.scientificName), [
+        'Erithacus rubecula',
+        'Parus major',
+      ]);
+      expect(species.first.clips, 2);
+      expect(species.first.favorites, 1);
+      expect(species.last.favorites, 0);
+    });
+
     test('favorites survive a rebuild', () async {
       final key = indexRowsForSession(morning).first.key;
       await index.setFavorite(key, favorite: true);

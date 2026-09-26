@@ -131,24 +131,29 @@ Fini quand : les tests passent, et sur le téléphone l'index se remplit sans fi
 
 ## J2 : réécouter pendant l'écoute, et la sonothèque
 
-- [ ] En mode Live, un bouton lecture sur chaque détection joue son clip sans arrêter l'écoute.
+- [x] En mode Live, un bouton lecture sur chaque détection joue son clip sans arrêter l'écoute.
       Un deuxième appui arrête. Toucher le reste de la ligne ouvre toujours la fiche espèce.
-- [ ] Pendant la lecture, plus 0,5 s, l'inférence est suspendue pour que le modèle ne détecte pas le
+- [x] Pendant la lecture, plus 0,5 s, l'inférence est suspendue pour que le modèle ne détecte pas le
       haut-parleur. L'enregistrement continue. Le changement se fait dans le planificateur d'inférence
       commun aux modes Live, Point Count et Survey, avec le moins de lignes possible.
-- [ ] Si le clip est encore en cours d'écriture, le bouton l'indique et s'active dès qu'il est prêt.
-- [ ] Android : vérifier la lecture pendant l'enregistrement, haut-parleur et casque Bluetooth.
-- [ ] Écran Sonothèque : liste des espèces, puis tous leurs clips triés par score ou par date, avec
+- [x] Si le clip est encore en cours d'écriture, le bouton l'indique et s'active dès qu'il est prêt.
+- [ ] (Benjamin) Android : vérifier la lecture pendant l'enregistrement, haut-parleur et casque Bluetooth.
+- [x] Écran Sonothèque : liste des espèces, puis tous leurs clips triés par score ou par date, avec
       lecture, mini spectrogramme, date et lieu. Étoile pour garder ses meilleurs enregistrements,
       filtre « favoris seulement ».
-- [ ] Rien n'est supprimé automatiquement.
-- [ ] Tableau Live : la liste ne s'efface pas pendant l'écoute et l'oiseau entendu remonte en tête.
+- [x] Rien n'est supprimé automatiquement.
+- [x] Tableau Live : la liste ne s'efface pas pendant l'écoute et l'oiseau entendu remonte en tête.
       Upstream le fait déjà avec deux réglages : les activer par défaut dans BirdyGo
       (`showAllDetectedSpeciesProvider` à vrai, `detectedSpeciesSortModeProvider` sur « newest »,
       dans `lib/shared/providers/settings_providers.dart`, modification minimale marquée FORK).
       Ajouter à chaque ligne le total toutes sorties confondues, lu dans l'index de J1 (« ×3 · 142 »).
-- [ ] La réécoute sert à vérifier, jamais à attirer les oiseaux (la LPO déconseille la repasse) :
+- [x] La réécoute sert à vérifier, jamais à attirer les oiseaux (la LPO déconseille la repasse) :
       volume modéré par défaut, et l'app le dit une fois, simplement.
+- Notes de réalisation : en mode d'enregistrement « complet », BirdyGo garde aussi un extrait par
+  détection (upstream ne le faisait qu'en mode « extraits »). La réécoute utilise un lecteur qui ne
+  prend pas le focus audio, sinon Android met le micro en pause. Le crochet du pilote d'inférence
+  sert aussi au mode Survey, mais sa liste n'a pas encore le bouton de réécoute. Le mini
+  spectrogramme de la sonothèque est celui du lecteur d'extrait.
 
 Fini quand : rejouer un rougegorge pendant une écoute ne crée aucune nouvelle détection.
 

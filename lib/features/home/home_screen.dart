@@ -26,6 +26,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import 'help_screen.dart';
 import '../../fork/data/observation_index_service.dart'; // FORK: observation index
+import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -950,6 +951,20 @@ class _Footer extends StatelessWidget {
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const SessionLibraryScreen(),
+                ),
+              ),
+        ),
+        // FORK: sound library (fork/PLAN.md J2).
+        _FooterButton(
+          icon: AppIcons.graphicEqRounded,
+          label: l10n.forkSoundLibrary,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SoundLibraryScreen(),
                 ),
               ),
         ),

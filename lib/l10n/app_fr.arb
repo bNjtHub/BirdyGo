@@ -1112,5 +1112,21 @@
   "forkRebuildIndex": "Reconstruire l'index des observations",
   "forkRebuildIndexSubtitle": "Recompte toutes les détections de tes sessions enregistrées.",
   "forkRebuildIndexRunning": "Reconstruction en cours…",
-  "forkRebuildIndexDone": "Index des observations reconstruit."
+  "forkRebuildIndexDone": "Index des observations reconstruit.",
+  "forkReplay": "Réécouter",
+  "forkReplayStop": "Arrêter",
+  "forkReplayPending": "Extrait en préparation…",
+  "forkReplayNotice": "La réécoute joue doucement : elle sert à vérifier un oiseau, jamais à l'attirer.",
+  "forkSoundLibrary": "Sonothèque",
+  "forkSoundLibraryEmpty": "Pas encore d'enregistrement. Lance une écoute : chaque détection garde un court extrait.",
+  "forkSoundLibraryNoFavorites": "Pas encore de favori. Touche l'étoile à côté de tes meilleurs enregistrements.",
+  "forkSoundLibraryCounts": "{clips, plural, =1{1 enregistrement} other{{clips} enregistrements}}",
+  "forkSoundLibraryCountsWithFavorites": "{clips, plural, =1{1 enregistrement} other{{clips} enregistrements}} · {favorites} ★",
+  "forkSoundLibraryByScore": "Meilleur score",
+  "forkSoundLibraryByDate": "Plus récents",
+  "forkSoundLibraryFavoritesOnly": "Favoris seulement",
+  "forkSoundLibraryScore": "Score {score}",
+  "forkSoundLibraryFavorite": "Ajouter aux favoris",
+  "forkSoundLibraryUnfavorite": "Retirer des favoris",
+  "forkWestLetter": "O"
 }

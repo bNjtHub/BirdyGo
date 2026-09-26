@@ -44,7 +44,17 @@ class DetectionList extends StatelessWidget {
     this.emptyAlignment = Alignment.center,
     this.activeDetections,
     this.speciesDetectionCounts,
+    this.speciesTotalCounts,
+    this.trailingBuilder,
   });
+
+  /// FORK: all-time contact counts by scientific name, shown next to the
+  /// session count ("×3 · 142").
+  final Map<String, int>? speciesTotalCounts;
+
+  /// FORK: optional trailing widget per row (the replay button), used when
+  /// no [actionsBuilder] actions are set.
+  final Widget? Function(DetectionRecord detection)? trailingBuilder;
 
   /// Detections to display (newest first).
   final List<DetectionRecord> detections;
@@ -117,6 +127,8 @@ class DetectionList extends StatelessWidget {
           actions: actions,
           showConfidence: isActivelyDetected,
           detectionCount: speciesDetectionCounts?[det.scientificName],
+          totalCount: speciesTotalCounts?[det.scientificName], // FORK
+          trailing: trailingBuilder?.call(det), // FORK
         );
         // When the host wires a delete action, also expose it as a
         // horizontal swipe shortcut. The host's undo SnackBar covers
@@ -165,7 +177,15 @@ class DetectionTile extends ConsumerWidget {
     this.actions,
     this.showConfidence = true,
     this.detectionCount,
+    this.totalCount,
+    this.trailing,
   });
+
+  /// FORK: all-time contacts for this species, including this session.
+  final int? totalCount;
+
+  /// FORK: trailing widget shown instead of the chevron (replay button).
+  final Widget? trailing;
 
   final DetectionRecord detection;
   final VoidCallback? onTap;
@@ -237,19 +257,23 @@ class DetectionTile extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        if (detectionCount != null && detectionCount! > 1)
+                        // FORK: also show the chip when an all-time total is
+                        // known, as "×session · total".
+                        if ((detectionCount != null && detectionCount! > 1) ||
+                            totalCount != null)
                           Padding(
                             padding: const EdgeInsets.only(left: 6),
                             child: Tooltip(
                               message: l10n.sessionDetectionCount(
-                                detectionCount!,
+                                detectionCount ?? 1,
                               ),
                               child: Semantics(
                                 label: l10n.sessionDetectionCount(
-                                  detectionCount!,
+                                  detectionCount ?? 1,
                                 ),
                                 child: _DetectionCountChip(
-                                  count: detectionCount!,
+                                  count: detectionCount ?? 1,
+                                  total: totalCount, // FORK
                                 ),
                               ),
                             ),
@@ -359,6 +383,8 @@ class DetectionTile extends ConsumerWidget {
               // keep the lightweight chevron to signal tap-for-info.
               if (actions != null)
                 ..._trailingActions(context, theme, actions!)
+              else if (trailing != null) // FORK: replay button (J2)
+                trailing!
               else
                 Icon(
                   AppIcons.chevronRight,
@@ -432,9 +458,12 @@ class DetectionTile extends ConsumerWidget {
 }
 
 class _DetectionCountChip extends StatelessWidget {
-  const _DetectionCountChip({required this.count});
+  const _DetectionCountChip({required this.count, this.total});
 
   final int count;
+
+  /// FORK: all-time total, shown after the session count.
+  final int? total;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +476,7 @@ class _DetectionCountChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        '×$count',
+        total == null ? '×$count' : '×$count · $total', // FORK: total (J2)
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.w600,
