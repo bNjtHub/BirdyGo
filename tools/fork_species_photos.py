@@ -11,10 +11,16 @@ fork/PLAN.md J6b. Two options of the bundle script live here:
   the same taxon, and its credit follows in taxonomy.csv. The choice rule is
   the app's (lib/fork/species_photo/), so the online photo usually matches.
 
+With ``--species-list``, taxonomy.csv is not rebuilt: only the photo credit
+columns of the listed species change (``update_photo_credits``). Upstream
+edits the file by other means too (e.g. its ``wikipedia_url_zh`` column), so
+a full rebuild would drop them and rewrite every line.
+
 Standard library only, so the tests run without Pillow or network.
 """
 
 import csv
+import io
 import json
 import re
 import time
@@ -221,3 +227,72 @@ def replace_reserved_photos(
         shown = ", ".join(sorted(kept)[:10]) + (" ..." if len(kept) > 10 else "")
         print(f"  WARN: {len(kept)} reserved photos kept (no open photo found): {shown}")
     return {"replaced": replaced, "kept": sorted(kept)}
+
+
+# Photo columns of taxonomy.csv, as rebuild_taxonomy_csv() writes them.
+PHOTO_CREDIT_COLUMNS = ("image_url", "image_author", "image_license", "image_source")
+
+
+def photo_credit(entry: dict) -> dict[str, str]:
+    """Photo columns of taxonomy.csv for a taxonomy JSON entry."""
+    image = entry.get("image") or {}
+    return {
+        "image_url": image.get("medium", "") or "",
+        "image_author": entry.get("image_author", "") or "",
+        "image_license": entry.get("image_license", "") or "",
+        "image_source": entry.get("image_source", "") or "",
+    }
+
+
+def update_photo_credits(
+    source: Path,
+    target: Path,
+    species: Iterable[str],
+    resolve: Callable[[str], dict | None],
+) -> int:
+    """Copies taxonomy.csv from *source* to *target*, rewriting only the
+    photo credit columns of *species*.
+
+    Every other column (upstream's wikipedia_url_zh included), row, quoting
+    and line ending stays as it was, so git shows the new credits only.
+    Returns the number of rows written.
+    """
+    with open(source, encoding="utf-8", newline="") as f:
+        raw = f.read()
+    newline = "\r\n" if raw.split("\n", 1)[0].endswith("\r") else "\n"
+    reader = csv.DictReader(io.StringIO(raw, newline=""))
+    fields = reader.fieldnames or []
+    rows = list(reader)
+
+    credits = {}
+    for sci in species:
+        entry = resolve(sci)
+        if entry is not None:
+            credits[sci] = photo_credit(entry)
+
+    changed = 0
+    found = set()
+    for row in rows:
+        credit = credits.get(row.get("scientific_name", ""))
+        if credit is None:
+            continue
+        found.add(row["scientific_name"])
+        update = {c: v for c, v in credit.items() if c in fields}
+        if any(row.get(c, "") != v for c, v in update.items()):
+            changed += 1
+        row.update(update)
+
+    out = io.StringIO()
+    writer = csv.DictWriter(out, fieldnames=fields, lineterminator=newline)
+    writer.writeheader()
+    writer.writerows(rows)
+    with open(target, "w", encoding="utf-8", newline="") as f:
+        f.write(out.getvalue())
+
+    print(f"  taxonomy.csv kept: photo credits of {len(found)} listed species, "
+          f"{changed} changed")
+    missing = sorted(set(credits) - found)
+    if missing:
+        shown = ", ".join(missing[:10]) + (" ..." if len(missing) > 10 else "")
+        print(f"  WARN: {len(missing)} listed species have no taxonomy.csv row: {shown}")
+    return len(rows)

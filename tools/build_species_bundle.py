@@ -623,7 +623,8 @@ def main():
     # FORK: region photo pack (fork/PLAN.md J6b)
     parser.add_argument(
         "--species-list", type=Path,
-        help="CSV with a scientific_name column: only these species get a photo",
+        help="CSV with a scientific_name column: only these species get a "
+             "photo; taxonomy.csv keeps its rows, only their photo credits change",
     )
     parser.add_argument(
         "--replace-reserved", action="store_true",
@@ -695,7 +696,16 @@ def main():
 
         # 5. Rebuild taxonomy.csv
         print("Step 5: Rebuilding taxonomy.csv ...")
-        csv_rows = rebuild_taxonomy_csv(model_species, taxonomy, norm_index)
+        # FORK: with --species-list, keep taxonomy.csv and update only the
+        # photo credits of the listed species (fork/PLAN.md J6b).
+        csv_source = backups.get(TAXONOMY_CSV_PATH)
+        if args.species_list and csv_source is not None:
+            csv_rows = fork_species_photos.update_photo_credits(
+                csv_source, TAXONOMY_CSV_PATH, image_species,
+                lambda sci: resolve_taxonomy_entry(sci, taxonomy, norm_index),
+            )
+        else:
+            csv_rows = rebuild_taxonomy_csv(model_species, taxonomy, norm_index)
         print()
 
         # 6. Report

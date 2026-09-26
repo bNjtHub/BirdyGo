@@ -349,7 +349,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
         photo iNaturalist libre et réécrit leur crédit dans `taxonomy.csv` (source « iNaturalist
         <id> »). Code dans `tools/fork_species_photos.py`, tests dans `tools/test_fork_species_photos.py`.
         Les photos sont recadrées en 3:2 au lieu d'être étirées ; le cache de téléchargement est
-        indexé par URL.
+        indexé par URL. Avec `--species-list`, `taxonomy.csv` n'est pas reconstruit : seules les
+        colonnes de crédit photo des espèces de la liste changent. Une reconstruction complète
+        supprimait la colonne `wikipedia_url_zh` ajoutée par upstream et réécrivait les 9 790 lignes.
       - App : `lib/fork/species_photo/`. `SpeciesPhoto` remplace la photo de `SpeciesInfoOverlay`
         (point FORK) ; la ligne de crédit sous la photo devient une feuille ouverte d'un appui.
         Réglage « Photos en grand (en ligne) », désactivé par défaut (Confidentialité, et dans la
