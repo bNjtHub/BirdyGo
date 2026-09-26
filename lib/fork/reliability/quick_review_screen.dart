@@ -45,7 +45,10 @@ ReviewAnswer? answerForDrag(Offset offset, Offset velocity) {
 
 /// Quick review screen.
 class QuickReviewScreen extends ConsumerStatefulWidget {
-  const QuickReviewScreen({super.key});
+  const QuickReviewScreen({super.key, this.onlyKeys});
+
+  /// Detection keys to review; null reviews the whole queue.
+  final Set<String>? onlyKeys;
 
   @override
   ConsumerState<QuickReviewScreen> createState() => _QuickReviewScreenState();
@@ -67,7 +70,10 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen> {
 
   Future<void> _load() async {
     final index = await ref.read(observationIndexServiceProvider).ensureReady();
-    final queue = await index.reviewQueue(limit: 200);
+    final queue = await index.reviewQueue(
+      limit: 200,
+      onlyKeys: widget.onlyKeys,
+    );
     if (!mounted) return;
     setState(() {
       _queue = queue;
