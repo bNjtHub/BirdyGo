@@ -187,5 +187,80 @@ class ReplaceReservedTest(unittest.TestCase):
         self.assertTrue(urls[2].endswith("/taxa/61"))
 
 
+class UpdatePhotoCreditsTest(unittest.TestCase):
+    HEADER = ("birdnet_id,scientific_name,common_name,image_url,image_author,"
+              "image_license,image_source,wikipedia_url_zh")
+    ROWS = [
+        "BN1,Parus major,\"Tit, Great\",https://old/1,Old A,cc-by-nc,iNaturalist,https://zh/1",
+        "BN2,Erithacus rubecula,Robin,https://old/2,Ryan,© Macaulay Library,Macaulay Library ML1,https://zh/2",
+        "BN3,Turdus merula,Blackbird,https://same/3,Ann,cc-by,iNaturalist,",
+        "BN4,Pica pica,Magpie,https://old/4,Bob,cc-by,iNaturalist,https://zh/4",
+    ]
+    ENTRIES = {
+        "Parus major": {"image": {"medium": "https://new/1"}, "image_author": "New A",
+                        "image_license": "cc-by", "image_source": "iNaturalist"},
+        "Erithacus rubecula": {"image": {"medium": "https://inat/2"},
+                               "image_author": "Jane", "image_license": "cc-by-nc",
+                               "image_source": "iNaturalist 22"},
+        "Turdus merula": {"image": {"medium": "https://same/3"}, "image_author": "Ann",
+                          "image_license": "cc-by", "image_source": "iNaturalist"},
+        # Not listed: must stay as it is in taxonomy.csv.
+        "Pica pica": {"image": {"medium": "https://new/4"}, "image_author": "Zed",
+                      "image_license": "cc0", "image_source": "Wikimedia"},
+        "Not in csv": {"image": {"medium": "https://x"}},
+    }
+    LISTED = ["Parus major", "Erithacus rubecula", "Turdus merula",
+              "Unknown entry", "Not in csv"]
+
+    def run_update(self, newline, species=None):
+        tmp = Path(tempfile.mkdtemp())
+        source, target = tmp / "backup.csv", tmp / "taxonomy.csv"
+        source.write_bytes(newline.join([self.HEADER] + self.ROWS + [""]).encode())
+        rows = photos.update_photo_credits(
+            source, target, self.LISTED if species is None else species,
+            self.ENTRIES.get)
+        return rows, source.read_bytes().decode(), target.read_bytes().decode()
+
+    def test_only_listed_credits_change(self):
+        rows, before, after = self.run_update("\n")
+        self.assertEqual(rows, 4)
+        old, new = before.split("\n"), after.split("\n")
+        self.assertEqual(new[0], old[0])  # header, wikipedia_url_zh kept
+        self.assertEqual(
+            new[1], "BN1,Parus major,\"Tit, Great\",https://new/1,New A,cc-by,"
+                    "iNaturalist,https://zh/1")
+        self.assertEqual(
+            new[2], "BN2,Erithacus rubecula,Robin,https://inat/2,Jane,cc-by-nc,"
+                    "iNaturalist 22,https://zh/2")
+        self.assertEqual(new[3], old[3])  # listed, same credit
+        self.assertEqual(new[4], old[4])  # not listed
+        self.assertEqual(len(new), len(old))
+
+    def test_line_endings_are_kept(self):
+        for newline in ("\n", "\r\n"):
+            _, _, after = self.run_update(newline)
+            self.assertEqual(after.count(newline), 5)
+            if newline == "\n":
+                self.assertNotIn("\r", after)
+
+    def test_nothing_listed_rewrites_the_same_bytes(self):
+        _, before, after = self.run_update("\n", species=[])
+        self.assertEqual(after, before)
+
+    def test_real_taxonomy_csv_round_trips(self):
+        real = Path(__file__).resolve().parent.parent / "assets" / "models" / "taxonomy.csv"
+        if not real.exists():
+            self.skipTest("taxonomy.csv not present")
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "taxonomy.csv"
+            photos.update_photo_credits(real, target, [], lambda sci: None)
+            self.assertEqual(target.read_bytes(), real.read_bytes())
+
+    def test_photo_credit_of_an_entry(self):
+        self.assertEqual(photos.photo_credit({}), {
+            "image_url": "", "image_author": "", "image_license": "",
+            "image_source": ""})
+
+
 if __name__ == "__main__":
     unittest.main()

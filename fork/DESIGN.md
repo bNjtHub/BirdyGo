@@ -208,6 +208,24 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
   et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
 
+## Mise en œuvre (J6c, Bilan)
+
+Code dans `lib/fork/summary/`. `LiveScreen` l'ouvre après « Arrêter » (une ligne FORK), seulement
+quand la session est déjà enregistrée ; sinon la revue upstream s'ouvre comme avant.
+
+- `listening_summary.dart` : modèle pur. Niveau d'une espèce = le meilleur de ses contacts
+  (`reliabilityFor`, avec l'avis du géomodèle au lieu et à la semaine de la sortie). « Première fois » :
+  Sûr ou confirmée ici, jamais vérifiée dans une autre sortie (`ObservationIndex.verifiedSpecies` :
+  confirmée, ou non revue avec un score Sûr ; l'index ne garde pas l'avis du géomodèle). Les
+  détections à vérifier sont les contacts non revus des espèces qui ne sont pas Sûr.
+- `listening_summary_view.dart` : widgets sans providers ; `listening_summary_screen.dart` branche
+  l'index, le géomodèle, la revue rapide (filtrée sur les détections de la sortie), la fiche espèce,
+  la carte, le détail upstream et `LpoSendButton`. Au retour d'une revue, la session est relue.
+- Thème de l'app (clair ou sombre), colonne de 560 dp au plus en paysage et sur tablette, cinq blocs
+  qui entrent en décalé (fondu seul avec les animations réduites).
+- Écarts assumés avec la maquette : heures au format de la langue (07:26), pas de carte de statut ni
+  de puce de badge avant J6e, bandeau qui défile au lieu d'être coupé, partage sans lieu.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.
