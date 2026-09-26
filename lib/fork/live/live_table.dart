@@ -186,7 +186,7 @@ class LiveTableRow extends StatelessWidget {
         runSpacing: BirdySpace.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          if (entry.singing) SingingBars(color: c.accentText),
+          SingingIndicator(singing: entry.singing, color: c.accentText),
           if (badge != null) badge!,
           if (!compact)
             Text(
@@ -206,6 +206,48 @@ class LiveTableRow extends StatelessWidget {
       action: action,
     );
   }
+}
+
+/// [SingingBars] in a place kept for them: they fade in and out
+/// ([BirdyMotion.enter], [BirdyMotion.exit]) and the row never moves. The
+/// bars stop ticking once faded out.
+class SingingIndicator extends StatefulWidget {
+  const SingingIndicator({
+    super.key,
+    required this.singing,
+    required this.color,
+  });
+
+  final bool singing;
+  final Color color;
+
+  @override
+  State<SingingIndicator> createState() => _SingingIndicatorState();
+}
+
+class _SingingIndicatorState extends State<SingingIndicator> {
+  /// True while shown or fading out.
+  late bool _ticking = widget.singing;
+
+  @override
+  void didUpdateWidget(SingingIndicator old) {
+    super.didUpdateWidget(old);
+    if (widget.singing) _ticking = true;
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedOpacity(
+    opacity: widget.singing ? 1 : 0,
+    duration: widget.singing ? BirdyMotion.enter : BirdyMotion.exit,
+    curve: BirdyMotion.standard,
+    onEnd: () {
+      if (!widget.singing && _ticking) setState(() => _ticking = false);
+    },
+    child: TickerMode(
+      enabled: _ticking,
+      child: SingingBars(color: widget.color),
+    ),
+  );
 }
 
 /// Three small bars that rise and fall while a species sings (SPEC.md 5.5
