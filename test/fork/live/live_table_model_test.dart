@@ -99,6 +99,49 @@ void main() {
     expect(table.single.sessionCount, 1);
   });
 
+  test('current results stamped each cycle do not reorder the rows', () {
+    final session = _session([_rec('A', 0), _rec('B', 10)]);
+    // Each cycle stamps A's current result with its new window start.
+    for (final cycle in [12, 13, 14]) {
+      final table = buildLiveTable(
+        sessionDetections: session,
+        currentDetections: [_rec('A', cycle)],
+      );
+      expect(_names(table), ['B', 'A']);
+      expect(table.last.lastHeard, _t0);
+      expect(table.last.singing, isTrue);
+    }
+  });
+
+  test('a species only in the current results comes in on top', () {
+    final table = buildLiveTable(
+      sessionDetections: _session([_rec('A', 0)]),
+      currentDetections: [_rec('B', 5)],
+    );
+    expect(_names(table), ['B', 'A']);
+    expect(table.first.lastHeard, _t0.add(const Duration(seconds: 5)));
+  });
+
+  test('nothing sings while paused or replaying', () {
+    final current = [_rec('A', 0)];
+    expect(
+      singingDetections(current, paused: false, replaying: false),
+      current,
+    );
+    expect(singingDetections(current, paused: true, replaying: false), isEmpty);
+    expect(singingDetections(current, paused: false, replaying: true), isEmpty);
+    final table = buildLiveTable(
+      sessionDetections: _session([_rec('A', 0)]),
+      currentDetections: singingDetections(
+        current,
+        paused: true,
+        replaying: false,
+      ),
+    );
+    expect(_names(table), ['A']);
+    expect(table.single.singing, isFalse);
+  });
+
   test('equal times keep a stable order', () {
     final table = buildLiveTable(
       sessionDetections: [_rec('B', 0), _rec('A', 0)],

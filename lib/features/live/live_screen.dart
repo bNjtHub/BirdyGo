@@ -869,8 +869,50 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
   // layout after it is not reported as dead code.
   bool get _forkListeningLayout => true;
 
-  // FORK: listening screen (J6c, fork/DESIGN.md « Live »).
+  // FORK: listening screen (J6c-bis-a). Nothing sings while paused or while
+  // a clip is replayed: the « chante » bars and the running marks go out.
   Widget _forkListeningScreen(
+    BuildContext context, {
+    required LiveState liveState,
+    required bool isActive,
+    required bool isPaused,
+    required bool isCapturing,
+    required List<DetectionRecord> currentDetections,
+    required List<DetectionRecord> allDetections,
+    required Map<String, int> totals,
+    required Map<String, String> clips,
+    required bool recordsClips,
+    required Map<String, GeoCommonnessEntry>? commonness,
+    required String Function(DetectionRecord detection) localizedName,
+    required String? Function(String scientificName) imagePath,
+  }) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: ref.read(liveControllerProvider).replayingClip,
+      builder:
+          (context, replayingClip, _) => _forkListeningBody(
+            context,
+            liveState: liveState,
+            isActive: isActive,
+            isPaused: isPaused,
+            isCapturing: isCapturing,
+            currentDetections: singingDetections(
+              currentDetections,
+              paused: isPaused,
+              replaying: replayingClip != null,
+            ),
+            allDetections: allDetections,
+            totals: totals,
+            clips: clips,
+            recordsClips: recordsClips,
+            commonness: commonness,
+            localizedName: localizedName,
+            imagePath: imagePath,
+          ),
+    );
+  }
+
+  // FORK: listening screen (J6c, fork/DESIGN.md « Live »).
+  Widget _forkListeningBody(
     BuildContext context, {
     required LiveState liveState,
     required bool isActive,
