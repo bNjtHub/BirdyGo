@@ -434,7 +434,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
         feuille de crédit). Photo `large` d'iNaturalist, licence ouverte sans « nd », format paysage,
         même règle que le script ; cache disque de 50 Mo ; valeurs dans `species_photo_config.dart`.
       - Vérifié sur le Xiaomi : photos hors ligne, crédit, grande photo en fondu, mode avion.
-- [ ] J6c Écrans, un par session : Accueil, Live (spectrogramme agrandi ou réduit, tableau en direct
+- [x] J6c Écrans, un par session : Accueil, Live (spectrogramme agrandi ou réduit, tableau en direct
       avec compteurs de session et totaux), Fin de sortie (résumé de l'écoute), Fiche espèce, Palmarès,
       Carte, Sonothèque, Revue rapide, Envoi à la LPO. Carnet et Profil (statut, badges, série)
       viennent avec le jeu, en J6e. Le logo de l'accueil s'anime en Flutter à partir du logo statique
@@ -510,7 +510,13 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Réviseur (J6e), pas de lieu (géocodage en ligne), pas de rotation de la carte (DESIGN.md).
             À vérifier sur le Xiaomi : balayage fluide à 60 images par seconde, extrait joué à
             l'arrivée de chaque carte.
-      - [ ] Envoi à la LPO
+      - [x] Envoi à la LPO (`lib/fork/lpo/lpo_send_screen.dart`) : pas de maquette dédiée (le Bilan
+            n'en montre que le bouton) ; même langage que les autres écrans J6c. Barre retour + titre,
+            introduction et notes discrètes, carte par observation avec photo sur la teinte de
+            l'espèce, nom, nom latin et heure ; alertes « rare » et « hors saison » en Loriot,
+            « espèce sensible » en bleu Probable ; questions et fiche à copier inchangées ; boutons
+            du design system (Copier en principal, les autres en secondaire). Aucun changement de
+            règle : seules les détections confirmées sont proposées.
 - [ ] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections »).
       - [x] Traits sous le spectre : départ au début de la fenêtre analysée (`DetectionRecord.timestamp`),
             plus 3 s trop tôt ; la fin ne recule ni ne saute quand le contact se ferme (fin de chant,

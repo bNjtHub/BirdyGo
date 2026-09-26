@@ -3,6 +3,7 @@
 ///
 /// Nothing leaves the phone from here except what the observer copies,
 /// shares or opens: no network call, no account, no password.
+/// Look of J6c: BirdyGo top bar, cards, alerts and buttons.
 library;
 
 import 'dart:io';
@@ -20,8 +21,14 @@ import '../../features/history/services/share_file_params.dart';
 import '../../features/inference/geo_model.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/services/link_launcher.dart';
+import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/share_sheet.dart';
+import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/species_accents.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/species_avatar.dart';
 import '../reliability/geo_presence_service.dart';
 import 'atlas_codes.dart';
 import 'lpo_config.dart';
@@ -43,6 +50,11 @@ class LpoSendScreen extends ConsumerStatefulWidget {
 }
 
 class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
+  static ImageProvider? _imageOf(TaxonomyService? taxonomy, String name) {
+    final path = taxonomy?.assetImagePath(name);
+    return path == null ? null : AssetImage(path);
+  }
+
   late final List<LpoObservation> _observations;
   late final int _notConfirmed;
   final Map<int, LpoGeoStatus?> _geoAtPlace = {};
@@ -76,7 +88,7 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final now = DateTime.now();
     // The current-place map only applies to this week's observations: don't
@@ -92,57 +104,101 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
     final here = mayBeHere ? ref.watch(currentLocationProvider).value : null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.forkLpoTitle)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          Text(l10n.forkLpoIntro, style: theme.textTheme.bodyLarge),
-          const SizedBox(height: 8),
-          _Note(icon: AppIcons.lockOutline, text: l10n.forkLpoNoPassword),
-          if (_notConfirmed > 0)
-            _Note(
-              icon: AppIcons.infoOutline,
-              text: l10n.forkLpoNotConfirmed(_notConfirmed),
-            ),
-          const SizedBox(height: 12),
-          if (_observations.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Text(
-                l10n.forkLpoEmpty,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge,
+      backgroundColor: c.background,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                BirdySpace.gutter,
+                0,
+                BirdySpace.gutter,
+                BirdySpace.xxxl,
               ),
-            ),
-          for (var i = 0; i < _observations.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: LpoObservationCard(
-                key: ValueKey('lpo-${_observations[i].scientificName}-$i'),
-                observation: _observations[i],
-                frenchName:
-                    taxonomy
-                        ?.lookup(_observations[i].scientificName)
-                        ?.commonNameForLocale('fr') ??
-                    _observations[i].commonName,
-                alerts: lpoAlerts(
-                  _observations[i].scientificName,
-                  (isHereAndNow(
-                            _observations[i],
-                            hereLatitude: here?.latitude,
-                            hereLongitude: here?.longitude,
-                            now: now,
-                          )
-                          ? geoStatusFromCommonness(
-                            commonness,
-                            _observations[i].scientificName,
-                          )
-                          : null) ??
-                      _geoAtPlace[i],
+              children: [
+                SizedBox(
+                  height: BirdySizes.topBar,
+                  child: Row(
+                    children: [
+                      BirdyIconButton(
+                        icon: AppIcons.arrowBackRounded,
+                        semanticLabel:
+                            MaterialLocalizations.of(context).backButtonTooltip,
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(width: BirdySpace.m),
+                      Expanded(
+                        child: Text(
+                          l10n.forkLpoTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: BirdyText.heading.copyWith(color: c.text1),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: BirdySpace.s),
+                Text(
+                  l10n.forkLpoIntro,
+                  style: BirdyText.body.copyWith(color: c.text1),
+                ),
+                const SizedBox(height: 8),
+                _Note(icon: AppIcons.lockOutline, text: l10n.forkLpoNoPassword),
+                if (_notConfirmed > 0)
+                  _Note(
+                    icon: AppIcons.infoOutline,
+                    text: l10n.forkLpoNotConfirmed(_notConfirmed),
+                  ),
+                const SizedBox(height: 12),
+                if (_observations.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(
+                      l10n.forkLpoEmpty,
+                      textAlign: TextAlign.center,
+                      style: BirdyText.body.copyWith(color: c.text2),
+                    ),
+                  ),
+                for (var i = 0; i < _observations.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: LpoObservationCard(
+                      key: ValueKey(
+                        'lpo-${_observations[i].scientificName}-$i',
+                      ),
+                      observation: _observations[i],
+                      frenchName:
+                          taxonomy
+                              ?.lookup(_observations[i].scientificName)
+                              ?.commonNameForLocale('fr') ??
+                          _observations[i].commonName,
+                      image: _imageOf(
+                        taxonomy,
+                        _observations[i].scientificName,
+                      ),
+                      alerts: lpoAlerts(
+                        _observations[i].scientificName,
+                        (isHereAndNow(
+                                  _observations[i],
+                                  hereLatitude: here?.latitude,
+                                  hereLongitude: here?.longitude,
+                                  now: now,
+                                )
+                                ? geoStatusFromCommonness(
+                                  commonness,
+                                  _observations[i].scientificName,
+                                )
+                                : null) ??
+                            _geoAtPlace[i],
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -155,11 +211,15 @@ class LpoObservationCard extends StatefulWidget {
     required this.observation,
     required this.frenchName,
     required this.alerts,
+    this.image,
   });
 
   final LpoObservation observation;
   final String frenchName;
   final Set<LpoAlert> alerts;
+
+  /// Species photo from the bundle.
+  final ImageProvider? image;
 
   @override
   State<LpoObservationCard> createState() => _LpoObservationCardState();
@@ -206,38 +266,47 @@ class _LpoObservationCardState extends State<LpoObservationCard>
     super.build(context);
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final o = widget.observation;
     final time = TimeOfDay.fromDateTime(o.time.toLocal()).format(context);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    // A Material, not a DecoratedBox: the sensitive-species switch tile
+    // paints its ink on it.
+    return Material(
+      color: c.surface1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+        side: BorderSide(color: c.line),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(BirdySpace.l),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SpeciesAvatar(
+                  image: widget.image,
+                  tint: SpeciesAccents.tintOf(o.scientificName),
+                  size: 48,
+                ),
+                const SizedBox(width: BirdySpace.m),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         widget.frenchName,
-                        style: theme.textTheme.titleLarge,
+                        style: BirdyText.species.copyWith(color: c.text1),
                       ),
                       Text(
                         o.scientificName,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                        style: BirdyText.latin.copyWith(color: c.text2),
                       ),
                     ],
                   ),
                 ),
-                Text(time, style: theme.textTheme.titleMedium),
+                Text(time, style: BirdyText.numberM.copyWith(color: c.text1)),
               ],
             ),
             if (widget.alerts.contains(LpoAlert.sensitive)) ...[
@@ -245,6 +314,8 @@ class _LpoObservationCardState extends State<LpoObservationCard>
               _Alert(
                 icon: AppIcons.lockOutline,
                 text: l10n.forkLpoAlertSensitive,
+                background: c.probable.background,
+                foreground: c.probable.foreground,
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -256,8 +327,10 @@ class _LpoObservationCardState extends State<LpoObservationCard>
             if (widget.alerts.contains(LpoAlert.rare)) ...[
               const SizedBox(height: 8),
               _Alert(
-                icon: AppIcons.warningAmberRounded,
+                icon: AppIcons.diamond,
                 text: l10n.forkLpoAlertRare,
+                background: c.orioleContainer,
+                foreground: c.orioleText,
               ),
             ],
             if (widget.alerts.contains(LpoAlert.outOfSeason)) ...[
@@ -265,6 +338,8 @@ class _LpoObservationCardState extends State<LpoObservationCard>
               _Alert(
                 icon: AppIcons.calendarTodayRounded,
                 text: l10n.forkLpoAlertOutOfSeason,
+                background: c.orioleContainer,
+                foreground: c.orioleText,
               ),
             ],
             const SizedBox(height: 16),
@@ -286,7 +361,10 @@ class _LpoObservationCardState extends State<LpoObservationCard>
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
-                style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, BirdySizes.target),
+                  foregroundColor: c.accentText,
+                ),
                 icon: const Icon(AppIcons.openInNew),
                 label: Text(l10n.forkLpoCompareXenoCanto),
                 onPressed:
@@ -297,16 +375,19 @@ class _LpoObservationCardState extends State<LpoObservationCard>
               ),
             ),
             if (_knowsSong == false && !_compared) ...[
-              Text(l10n.forkLpoCompareFirst, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+              Text(
+                l10n.forkLpoCompareFirst,
+                style: BirdyText.bodyCompact.copyWith(color: c.text1),
+              ),
+              const SizedBox(height: BirdySpace.s),
+              FilledButton(
+                style: BirdyButtonStyles.tonal(context),
                 onPressed: () => setState(() => _compared = true),
                 child: Text(l10n.forkLpoCompared),
               ),
             ],
             if (_ready) ...[
-              const Divider(height: 32),
+              Divider(height: BirdySpace.xxxl, color: c.line),
               _buildReadyCard(context, l10n, theme),
             ],
           ],
@@ -320,6 +401,7 @@ class _LpoObservationCardState extends State<LpoObservationCard>
     AppLocalizations l10n,
     ThemeData theme,
   ) {
+    final c = BirdyColors.of(context);
     final o = widget.observation;
     final lines = lpoReportLines(
       l10n,
@@ -333,19 +415,17 @@ class _LpoObservationCardState extends State<LpoObservationCard>
         Row(
           children: [
             Expanded(
-              child: Text(l10n.forkLpoCount, style: theme.textTheme.titleSmall),
+              child: Text(
+                l10n.forkLpoCount,
+                style: BirdyText.label.copyWith(color: c.text1),
+              ),
             ),
             IconButton(
               tooltip: l10n.forkLpoCountLess,
               icon: const Icon(AppIcons.remove),
               onPressed: _count > 1 ? () => setState(() => _count--) : null,
             ),
-            Text(
-              '$_count',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
+            Text('$_count', style: BirdyText.numberM.copyWith(color: c.text1)),
             IconButton(
               tooltip: l10n.forkLpoCountMore,
               icon: const Icon(AppIcons.add),
@@ -358,7 +438,10 @@ class _LpoObservationCardState extends State<LpoObservationCard>
         ),
         if (_atlasCodes.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Text(l10n.forkLpoAtlasTitle, style: theme.textTheme.titleSmall),
+          Text(
+            l10n.forkLpoAtlasTitle,
+            style: BirdyText.label.copyWith(color: c.text1),
+          ),
           const SizedBox(height: 4),
           Wrap(
             spacing: 8,
@@ -378,19 +461,22 @@ class _LpoObservationCardState extends State<LpoObservationCard>
             ],
           ),
           const SizedBox(height: 4),
-          Text(l10n.forkLpoAtlasHint, style: theme.textTheme.bodySmall),
+          Text(
+            l10n.forkLpoAtlasHint,
+            style: BirdyText.caption.copyWith(color: c.text2),
+          ),
         ],
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+            color: c.surface2,
+            borderRadius: BorderRadius.circular(BirdyRadii.thumb),
           ),
           child: SelectableText(
             lines.join('\n'),
-            style: theme.textTheme.bodyMedium,
+            style: BirdyText.bodyCompact.copyWith(color: c.text1),
           ),
         ),
         const SizedBox(height: 12),
@@ -399,7 +485,7 @@ class _LpoObservationCardState extends State<LpoObservationCard>
           runSpacing: 8,
           children: [
             FilledButton.icon(
-              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+              style: BirdyButtonStyles.primary(context),
               icon: const Icon(AppIcons.contentCopy),
               label: Text(l10n.forkLpoCopy),
               onPressed: () => _copy(context, l10n),
@@ -408,16 +494,14 @@ class _LpoObservationCardState extends State<LpoObservationCard>
               Builder(
                 builder:
                     (buttonContext) => OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(48, 48),
-                      ),
+                      style: BirdyButtonStyles.secondary(context),
                       icon: const Icon(AppIcons.share),
                       label: Text(l10n.forkLpoShareClip),
                       onPressed: () => _shareClip(buttonContext, l10n),
                     ),
               ),
             OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+              style: BirdyButtonStyles.secondary(context),
               icon: const Icon(AppIcons.openInNew),
               label: Text(l10n.forkLpoOpenNaturaList),
               onPressed:
@@ -427,7 +511,7 @@ class _LpoObservationCardState extends State<LpoObservationCard>
                   ),
             ),
             OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+              style: BirdyButtonStyles.secondary(context),
               icon: const Icon(AppIcons.openInNew),
               label: Text(l10n.forkLpoOpenFauneFrance),
               onPressed: () => openExternalUrl(context, LpoConfig.fauneFrance),
@@ -495,7 +579,10 @@ class _Question extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          label,
+          style: BirdyText.label.copyWith(color: BirdyColors.of(context).text1),
+        ),
         const SizedBox(height: 6),
         SegmentedButton<bool>(
           segments: [
@@ -516,31 +603,35 @@ class _Question extends StatelessWidget {
 
 /// Tinted warning line.
 class _Alert extends StatelessWidget {
-  const _Alert({required this.icon, required this.text});
+  const _Alert({
+    required this.icon,
+    required this.text,
+    required this.background,
+    required this.foreground,
+  });
 
   final IconData icon;
   final String text;
+  final Color background;
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(BirdySpace.m),
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        color: background,
+        borderRadius: BorderRadius.circular(BirdyRadii.thumb),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: theme.colorScheme.onTertiaryContainer),
+          Icon(icon, size: 20, fill: 1, color: foreground),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onTertiaryContainer,
-              ),
+              style: BirdyText.bodyCompact.copyWith(color: foreground),
             ),
           ),
         ],
@@ -558,20 +649,18 @@ class _Note extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: BirdySpace.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: c.text2),
+          const SizedBox(width: BirdySpace.s),
           Expanded(
             child: Text(
               text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: BirdyText.caption.copyWith(color: c.text2),
             ),
           ),
         ],

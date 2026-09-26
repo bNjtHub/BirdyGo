@@ -1,6 +1,7 @@
 import 'package:birdnet_live/features/announcements/geo_commonness_provider.dart';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
+import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/lpo/lpo_send_button.dart';
 import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
@@ -62,7 +63,16 @@ void main() {
         });
   });
 
-  Future<void> pump(WidgetTester tester, Widget home) async {
+  Future<void> pump(
+    WidgetTester tester,
+    Widget home, {
+    bool dark = false,
+    double textScale = 1,
+  }) async {
+    // Tall enough for two observation cards (J6c look).
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -74,9 +84,17 @@ void main() {
           geoPresenceServiceProvider.overrideWith(_NoGeo.new),
         ],
         child: MaterialApp(
+          theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                child: child!,
+              ),
           home: home,
         ),
       ),
@@ -170,5 +188,17 @@ void main() {
     expect(find.textContaining('Espèce sensible'), findsOneWidget);
     final toggle = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
     expect(toggle.value, isTrue);
+  });
+
+  testWidgets('dark at 130 %: the cards lay out (J6c)', (tester) async {
+    final session = _session();
+    await pump(
+      tester,
+      LpoSendScreen(session: session),
+      dark: true,
+      textScale: 1.3,
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('Envoyer à la LPO'), findsOneWidget);
   });
 }
