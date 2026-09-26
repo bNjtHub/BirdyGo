@@ -11,6 +11,8 @@ Usage:
     python tools/download_taxonomy_json.py
     python tools/build_species_bundle.py
     python tools/build_species_bundle.py --quality 65
+    # FORK: images of the region only (BirdyGo J6b)
+    python tools/build_species_bundle.py --only-species tools/fork_sheets/region_species.csv
 """
 
 import argparse
@@ -301,6 +303,18 @@ def load_model_species(labels_csv: Path) -> dict[str, dict]:
                 "order": row["order"],
             }
     return species
+
+
+# FORK: species subset for the images (BirdyGo J6b). The CSV needs a
+# scientific_name column, as written by tools/fork_region_species.py.
+def load_species_subset(csv_path: Path) -> set[str]:
+    """Scientific names listed in *csv_path*."""
+    with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+        return {
+            row["scientific_name"].strip()
+            for row in csv.DictReader(f)
+            if (row.get("scientific_name") or "").strip()
+        }
 
 
 def load_taxonomy_json(json_path: Path) -> dict[str, dict]:
@@ -615,6 +629,12 @@ def main():
     parser.add_argument("--image-height", type=int, default=DEFAULT_IMAGE_HEIGHT)
     parser.add_argument("--quality", type=int, default=DEFAULT_WEBP_QUALITY)
     parser.add_argument("--workers", type=int, default=DEFAULT_DOWNLOAD_WORKERS)
+    # FORK: bundle the images of these species only (BirdyGo J6b).
+    # Descriptions and taxonomy.csv still cover every model species.
+    parser.add_argument(
+        "--only-species", type=Path, default=None,
+        help="CSV with a scientific_name column: images for these species only",
+    )
     args = parser.parse_args()
 
     taxonomy_json = resolve_taxonomy_json(args.taxonomy_json)
@@ -636,6 +656,12 @@ def main():
     print(
         f"  Image output: {args.image_width}x{args.image_height} WebP @ quality {args.quality}"
     )
+    image_species = model_species  # FORK: region subset (BirdyGo J6b)
+    if args.only_species:  # FORK: region subset (BirdyGo J6b)
+        subset = load_species_subset(args.only_species)
+        image_species = {s: v for s, v in model_species.items() if s in subset}
+        print(f"  Images limited to {len(image_species)} species of {args.only_species}"
+              f" ({len(subset - model_species.keys())} not in the model)")
     print()
 
     backups = backup_existing_outputs()
@@ -656,7 +682,7 @@ def main():
         # 3. Download and resize images
         print("Step 3: Images ...")
         image_results = download_and_resize_images(
-            model_species, taxonomy, norm_index,
+            image_species, taxonomy, norm_index,  # FORK: region subset (J6b)
             args.image_width, args.image_height, args.quality, args.workers,
         )
         print()
