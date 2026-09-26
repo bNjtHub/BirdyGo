@@ -13,6 +13,7 @@ import '../../features/live/live_session.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import 'live_heard.dart';
 
 /// Time span of one detected passage.
 @immutable
@@ -39,11 +40,15 @@ class MarkSpan {
 /// the start of the first analysis window, so a span runs from there to the
 /// record's end. Only the newest record of a species in [singing] is still
 /// running; a closed record without an end covers its first [window].
+/// [heardUntil] (J6c-bis-b), when it knows the contact, gives the end of a
+/// mark that no longer runs: the end of its last window at or above the
+/// support threshold, before [DetectionRecord.endTimestamp].
 /// Sorted by start.
 List<MarkSpan> markSpansFrom({
   required List<DetectionRecord> records,
   required Set<String> singing,
   required Duration window,
+  Map<ContactKey, DateTime> heardUntil = const {},
   String Function(DetectionRecord record)? labelOf,
 }) {
   final newest = <String, DetectionRecord>{};
@@ -60,11 +65,13 @@ List<MarkSpan> markSpansFrom({
         label: labelOf?.call(r) ?? r.commonName,
         start: r.timestamp,
         end:
-            r.endTimestamp ??
-            (singing.contains(r.scientificName) &&
+            r.endTimestamp == null &&
+                    singing.contains(r.scientificName) &&
                     identical(newest[r.scientificName], r)
                 ? null
-                : r.timestamp.add(window)),
+                : heardUntil[(r.scientificName, r.timestamp)] ??
+                    r.endTimestamp ??
+                    r.timestamp.add(window),
       ),
   ];
   spans.sort((a, b) => a.start.compareTo(b.start));

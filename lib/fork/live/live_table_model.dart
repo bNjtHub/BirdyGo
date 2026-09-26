@@ -17,7 +17,8 @@ class LiveTableEntry {
     required this.lastHeard,
     required this.record,
     required this.singing,
-  });
+    bool? singingVisual,
+  }) : singingVisual = singingVisual ?? singing;
 
   final String scientificName;
 
@@ -39,6 +40,10 @@ class LiveTableEntry {
 
   /// The species is in the current inference results.
   final bool singing;
+
+  /// The « chante » symbol is on: [singing], until the last windows fall
+  /// under the support threshold (J6c-bis-b, `live_heard.dart`).
+  final bool singingVisual;
 }
 
 /// Totals of the header.
@@ -62,10 +67,12 @@ class LiveStats {
 /// goes back to the top; a contact that goes on does not move its row.
 /// Every species of the outing stays in the table, singing or not.
 /// [totals] are the all-time counts including this outing; missing species
-/// fall back to their session count.
+/// fall back to their session count. [singingVisual] puts out the symbol of
+/// singing species missing from it; null keeps it on while they sing.
 List<LiveTableEntry> buildLiveTable({
   required List<DetectionRecord> sessionDetections,
   required List<DetectionRecord> currentDetections,
+  Set<String>? singingVisual,
   Map<String, int> totals = const {},
   String Function(DetectionRecord record)? localizedName,
 }) {
@@ -105,6 +112,9 @@ List<LiveTableEntry> buildLiveTable({
         lastHeard: last.timestamp,
         record: current[name] ?? last,
         singing: current.containsKey(name),
+        singingVisual:
+            current.containsKey(name) &&
+            (singingVisual?.contains(name) ?? true),
       ),
   ];
   entries.sort((a, b) {

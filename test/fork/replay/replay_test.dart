@@ -21,6 +21,22 @@ DetectionRecord _record(String sci, {String? clip, int minute = 0}) =>
 
 void main() {
   group('ReplayGuard', () {
+    test('heard() has no side effect', () {
+      final guard =
+          ReplayGuard()
+            ..begin(1000)
+            ..end(2000, paddingSamples: 500);
+      // A later window: overlaps() would forget the range, heard() keeps it.
+      expect(guard.heard(5000, 6000), isFalse);
+      expect(guard.heard(1500, 1600), isTrue);
+      expect(guard.heard(2400, 3000), isTrue, reason: 'within the padding');
+      expect(guard.heard(2500, 3000), isFalse);
+      expect(guard.overlaps(1500, 1600), isTrue, reason: 'nothing purged');
+      guard.begin(8000);
+      expect(guard.heard(7000, 8001), isTrue, reason: 'replay playing');
+      expect(guard.heard(7000, 8000), isFalse);
+    });
+
     test('no replay: nothing is skipped', () {
       final guard = ReplayGuard();
       expect(guard.overlaps(0, 96000), isFalse);
