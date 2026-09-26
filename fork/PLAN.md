@@ -479,7 +479,16 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [ ] Palmarès
       - [ ] Carte
       - [ ] Sonothèque
-      - [ ] Revue rapide
+      - [x] Revue rapide (`lib/fork/reliability/quick_review_*.dart`) : barre « Revue rapide · N sur M »
+            (fermer, écran Fiabilité), barre de progression et « Tu as trié N détections », pile de
+            cartes (deux cartes derrière), carte avec badge de niveau (« Rare ici · à confirmer »
+            compris), photo, nom, heure, score, spectrogramme de l'extrait, réécoute et chant de
+            référence eBird, « Au casque ou à faible volume ». La carte suit le doigt, part avec la
+            vitesse du geste ou revient en ressort ; les trois boutons de verdict (104 dp) la font
+            partir aussi. Animations réduites : fondu seul. Écarts : pas de mention du badge
+            Réviseur (J6e), pas de lieu (géocodage en ligne), pas de rotation de la carte (DESIGN.md).
+            À vérifier sur le Xiaomi : balayage fluide à 60 images par seconde, extrait joué à
+            l'arrivée de chaque carte.
       - [ ] Envoi à la LPO
 - [ ] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections »).
       - [x] Traits sous le spectre : départ au début de la fenêtre analysée (`DetectionRecord.timestamp`),
