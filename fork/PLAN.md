@@ -476,7 +476,14 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             « il chante aussi en automne » (le géomodèle ne le dit pas), pas de Hero (aucun appelant
             ne donne de photo de départ). À vérifier sur le Xiaomi : réécoute depuis la feuille
             pendant une écoute, défilement fluide avec la mini-carte.
-      - [ ] Palmarès
+      - [x] Palmarès (`lib/fork/ranking/`) : barre retour + « Palmarès », en-tête « 17 espèces en
+            30 jours » et « N nouvelles en 2026 · du 27 août au 26 septembre », puces de période,
+            interrupteur « Confirmées seulement », menu « Classées par … » (contacts, jours, dernière
+            écoute, « Oiseaux seulement »), podium des trois premiers sur la teinte de chaque espèce
+            (disques or, argent, bronze, photo), puis rangs 4 et suivants avec photo, barre de la
+            couleur `deep` de l'espèce et pastille « Nouveau cette année ». Un appui ouvre la fiche.
+            Écarts : « Confirmées seulement » reste désactivé par défaut (peu de détections sont
+            confirmées au début) ; tri et filtre oiseaux dans un menu plutôt qu'en puces.
       - [ ] Carte
       - [ ] Sonothèque
       - [x] Revue rapide (`lib/fork/reliability/quick_review_*.dart`) : barre « Revue rapide · N sur M »

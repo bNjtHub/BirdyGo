@@ -314,6 +314,19 @@ et 5.11.
   « À vérifier », bleu de « Probable »).
 - Animations réduites : pas de déplacement, la carte s'efface en 150 ms.
 
+## Mise en œuvre (J6c, Palmarès)
+
+Code dans `lib/fork/ranking/ranking_screen.dart` (données, période, options) et
+`ranking_widgets.dart` (en-tête, podium, lignes). On suit SPEC.md 9.12.
+
+- Podium : 2e à gauche (150 dp), 1er au centre (184 dp), 3e à droite (136 dp), fond `tintLight` ou
+  `tintDark` de l'espèce, disque de rang or (Loriot), argent (`line`) ou bronze (Écorce à 25 %).
+  Avec une ou deux espèces, le podium n'a qu'une ou deux marches.
+- Lignes : rang en Écorce, photo 36, nom et barre de 8 dp (couleur `deep`, relative au premier),
+  nombre en chiffres tabulaires.
+- Dates de la période : « du 27 août au 26 septembre », « depuis le 1er septembre », « en 2026 »,
+  « depuis le 4 octobre 2025 » (premier contact de la liste).
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

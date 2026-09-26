@@ -1376,5 +1376,19 @@
   "forkQuickReviewDontKnowNote": "« Je ne sais pas » est une bonne réponse : la détection reste de côté, sans compter.",
   "forkQuickReviewScore": "Score {score}",
   "forkQuickReviewPlaying": "Lecture de l'extrait",
-  "forkQuickReviewClose": "Fermer la revue"
+  "forkQuickReviewClose": "Fermer la revue",
+  "forkRankingSpeciesWord": "{count, plural, =1{espèce} other{espèces}} {period}",
+  "forkRankingIn30Days": "en 30 jours",
+  "forkRankingThisSeason": "cette saison",
+  "forkRankingInYear": "en {year}",
+  "forkRankingSinceStart": "depuis le début",
+  "forkRankingFromTo": "du {from} au {to}",
+  "forkRankingSince": "depuis le {date}",
+  "forkRankingSortedBy": "Classées par {order}",
+  "forkRankingByContacts": "contacts",
+  "forkRankingByDays": "jours",
+  "forkRankingByLastHeard": "dernière écoute",
+  "forkRankingUnitContacts": "{count, plural, =1{contact} other{contacts}}",
+  "forkRankingUnitDays": "{count, plural, =1{jour} other{jours}}",
+  "forkRankingSortMenu": "Trier et filtrer"
 }
