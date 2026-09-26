@@ -1,0 +1,37 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-09-26T02:12:56Z"},
+  "title": "BirdyGo – Interface",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "Accueil"},
+    "Live.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "Écoute en direct", "is_interactive": true},
+    "LiveSpectre.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "Écoute, spectrogramme agrandi", "is_interactive": true},
+    "Resume.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "Bilan de l'écoute"},
+    "Arrivee.dc.html": {"x": 0, "y": 1250, "w": 390, "h": 844, "title": "Un oiseau arrive", "is_interactive": true},
+    "Premiere.dc.html": {"x": 470, "y": 1250, "w": 390, "h": 844, "title": "Première fois", "is_interactive": true},
+    "Rare.dc.html": {"x": 940, "y": 1250, "w": 390, "h": 844, "title": "Oiseau rare", "is_interactive": true},
+    "Niveau.dc.html": {"x": 1410, "y": 1250, "w": 390, "h": 844, "title": "Nouveau statut"},
+    "Carnet.dc.html": {"x": 0, "y": 2500, "w": 390, "h": 844, "title": "Mon carnet", "is_interactive": true},
+    "Profil.dc.html": {"x": 470, "y": 2500, "w": 390, "h": 844, "title": "Profil, statut et badges", "is_interactive": true},
+    "Palmares.dc.html": {"x": 940, "y": 2500, "w": 390, "h": 844, "title": "Palmarès", "is_interactive": true},
+    "Carte.dc.html": {"x": 0, "y": 3750, "w": 390, "h": 844, "title": "Carte des contacts", "is_interactive": true},
+    "Fiche.dc.html": {"x": 470, "y": 3750, "w": 390, "h": 844, "title": "Fiche espèce", "is_interactive": true},
+    "Revue.dc.html": {"x": 940, "y": 3750, "w": 390, "h": 844, "title": "Revue rapide", "is_interactive": true},
+    "Especes.dc.html": {"x": 1410, "y": 3750, "w": 880, "h": 640, "title": "Icônes d'espèces"}
+  },
+  "order": [
+    "Main.dc.html", "Live.dc.html", "LiveSpectre.dc.html", "Resume.dc.html",
+    "Arrivee.dc.html", "Premiere.dc.html", "Rare.dc.html", "Niveau.dc.html",
+    "Carnet.dc.html", "Profil.dc.html", "Palmares.dc.html",
+    "Carte.dc.html", "Fiche.dc.html", "Revue.dc.html", "Especes.dc.html"
+  ],
+  "notes": {
+    "row_ecouter": {"x": 0, "y": -280, "text": "Écouter", "kind": "title1", "maxW": 1800},
+    "row_moments": {"x": 0, "y": 970, "text": "Les grands moments", "kind": "title1", "maxW": 1800},
+    "row_jeu": {"x": 0, "y": 2220, "text": "Le jeu", "kind": "title1", "maxW": 1330},
+    "row_explorer": {"x": 0, "y": 3470, "text": "Explorer et apprendre", "kind": "title1", "maxW": 2290}
+  },
+  "designSystems": []
+}

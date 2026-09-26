@@ -53,6 +53,7 @@ import '../inference/model_config.dart';
 import '../inference/models/detection.dart';
 import '../inference/species_filter.dart';
 import '../inference/species_ignore_filter.dart';
+import '../../fork/replay/replay_guard.dart'; // FORK: replay during listening
 import '../recording/recording_service.dart';
 import 'live_session.dart';
 
@@ -108,7 +109,19 @@ class LiveController {
   late final InferenceWindowDriver _windowDriver = InferenceWindowDriver(
     ringBuffer: ringBuffer,
     debugLabel: 'LiveController',
+  )..skipWindow = _replayGuard.overlaps; // FORK: skip replayed audio (J2)
+
+  // FORK: replay a detection clip while listening (fork/PLAN.md J2). This
+  // player never requests audio focus, so Android keeps the mic capturing.
+  final ReplayGuard _replayGuard = ReplayGuard();
+  final AudioPlayer _replayPlayer = AudioPlayer(
+    handleInterruptions: false,
+    handleAudioSessionActivation: false,
   );
+  StreamSubscription<PlayerState>? _replaySubscription;
+
+  /// FORK: path of the clip being replayed, or null.
+  final ValueNotifier<String?> replayingClip = ValueNotifier<String?>(null);
   LiveState _state = LiveState.idle;
   String? _errorMessage;
 
@@ -467,6 +480,7 @@ class LiveController {
       records: startingSession.detections,
     );
     _clipWriter.reset();
+    _replayGuard.reset(); // FORK: replay (J2)
     _sessionGeneration++;
     _confidenceThreshold = confidenceThreshold;
     _sensitivity = sensitivity;
@@ -511,7 +525,9 @@ class LiveController {
     };
 
     // Recording: respect the user’s choice (full / clips / off).
-    _saveDetectionClips = recordingMode == RecordingMode.detectionsOnly;
+    // FORK: BirdyGo also keeps a clip per detection in full mode, for replay
+    // during listening and the sound library (J2).
+    _saveDetectionClips = recordingMode != RecordingMode.off;
     // Clips cover the window the model scored, whichever length this session
     // analyzes with.
     recordingService.setWindowSeconds(windowDuration);
@@ -558,7 +574,8 @@ class LiveController {
     _windowDriver.cancelPendingWakeup();
 
     _sessionGeneration++;
-    for (final closed in _accumulator?.closeAll() ?? const <DetectionRecord>[]) {
+    for (final closed
+        in _accumulator?.closeAll() ?? const <DetectionRecord>[]) {
       _clipWriter.forget(closed);
     }
     _syncSessionDetections();
@@ -649,6 +666,7 @@ class LiveController {
     _accumulator = null;
     _windowDriver.stop();
     _clipWriter.reset();
+    unawaited(stopReplay()); // FORK: replay (J2)
 
     _state = LiveState.ready;
     _notifyListeners();
@@ -674,6 +692,54 @@ class LiveController {
   /// Stop any ongoing playback.
   Future<void> stopPlayback() async {
     await _player.stop();
+  }
+
+  // FORK: replay during listening (fork/PLAN.md J2) ────────────────────
+
+  /// Silence kept after a replay ends before windows are scored again.
+  static const Duration replayTail = Duration(milliseconds: 500);
+
+  /// Volume of replays: loud enough to compare, too soft to lure birds.
+  static const double replayVolume = 0.6;
+
+  /// Replay [clipPath] without stopping the session. Inference skips every
+  /// window that overlaps the replay plus [replayTail]; recording continues.
+  Future<void> replayClip(String clipPath) async {
+    await stopReplay();
+    _replayGuard.begin(ringBuffer.totalWritten);
+    replayingClip.value = clipPath;
+    try {
+      await _replayPlayer.setFilePath(clipPath);
+      await _replayPlayer.setVolume(replayVolume);
+      _replaySubscription = _replayPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          unawaited(stopReplay());
+        }
+      });
+      unawaited(_replayPlayer.play());
+    } catch (error) {
+      debugPrint('[LiveController] replay failed: $error');
+      await stopReplay();
+    }
+  }
+
+  /// Stop the current replay, if any.
+  Future<void> stopReplay() async {
+    await _replaySubscription?.cancel();
+    _replaySubscription = null;
+    if (_replayGuard.isReplaying) {
+      final sampleRate = _config?.audio.sampleRate ?? AppConstants.sampleRate;
+      _replayGuard.end(
+        ringBuffer.totalWritten,
+        paddingSamples: sampleRate * replayTail.inMilliseconds ~/ 1000,
+      );
+    }
+    replayingClip.value = null;
+    try {
+      await _replayPlayer.stop();
+    } catch (_) {
+      // Stopping an idle player is harmless.
+    }
   }
 
   // ── Live setting hot-apply ────────────────────────────────────────────
@@ -739,6 +805,9 @@ class LiveController {
     _windowDriver.stop();
     await _isolate.stop();
     await _player.dispose();
+    await _replaySubscription?.cancel(); // FORK: replay (J2)
+    await _replayPlayer.dispose(); // FORK: replay (J2)
+    replayingClip.dispose(); // FORK: replay (J2)
     recordingService.dispose();
   }
 

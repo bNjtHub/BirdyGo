@@ -1,0 +1,70 @@
+{
+  "id": "2026-09-20T07-10-00.000",
+  "startTime": "2026-09-20T05:10:00.000Z",
+  "endTime": "2026-09-20T05:55:00.000Z",
+  "detections": [
+    {
+      "scientificName": "Erithacus rubecula",
+      "commonName": "Rougegorge familier",
+      "confidence": 0.93,
+      "timestamp": "2026-09-20T05:12:00.000Z",
+      "endTimestamp": "2026-09-20T05:12:06.000Z",
+      "audioClipPath": "recordings/2026-09-20T07-10-00.000/c1.flac",
+      "detLat": 47.2101,
+      "detLon": -1.5502,
+      "reviewStatus": "confirmed"
+    },
+    {
+      "scientificName": "Erithacus rubecula",
+      "commonName": "Rougegorge familier",
+      "confidence": 0.81,
+      "timestamp": "2026-09-20T05:30:00.000Z",
+      "endTimestamp": "2026-09-20T05:30:06.000Z",
+      "audioClipPath": "recordings/2026-09-20T07-10-00.000/c2.flac",
+      "detLat": 47.2103,
+      "detLon": -1.5504
+    },
+    {
+      "scientificName": "Parus major",
+      "commonName": "Mésange charbonnière",
+      "confidence": 0.64,
+      "timestamp": "2026-09-20T05:20:00.000Z",
+      "endTimestamp": "2026-09-20T05:20:06.000Z",
+      "audioClipPath": "recordings/2026-09-20T07-10-00.000/c3.flac"
+    },
+    {
+      "scientificName": "Upupa epops",
+      "commonName": "Huppe fasciée",
+      "confidence": 0.41,
+      "timestamp": "2026-09-20T05:40:00.000Z",
+      "endTimestamp": "2026-09-20T05:40:06.000Z",
+      "detLat": 47.211,
+      "detLon": -1.549
+    },
+    {
+      "scientificName": "Turdus merula",
+      "commonName": "Merle noir",
+      "confidence": 0.52,
+      "timestamp": "2026-09-20T05:45:00.000Z",
+      "endTimestamp": "2026-09-20T05:45:06.000Z",
+      "reviewStatus": "rejected"
+    }
+  ],
+  "settings": {
+    "windowDuration": 3,
+    "confidenceThreshold": 25,
+    "inferenceRate": 1.0,
+    "speciesFilterMode": "geo",
+    "clipContextSeconds": 0,
+    "alertMode": 0,
+    "alertRareThreshold": 0.05,
+    "alertWatchlistName": "",
+    "alertMinConfidence": 0.5,
+    "alertStartupGraceSeconds": 60,
+    "alertMinIntervalSeconds": 15,
+    "alertMaxPerMinute": 3,
+    "alertCoalesce": true
+  },
+  "latitude": 47.21,
+  "longitude": -1.55
+}

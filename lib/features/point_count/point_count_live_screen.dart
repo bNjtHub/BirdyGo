@@ -52,6 +52,12 @@ import '../live/live_detection_display.dart';
 import '../live/live_providers.dart';
 import '../live/live_session.dart';
 import '../live/widgets/detection_list_widget.dart';
+import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
+import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
+import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
 
 /// Timed point-count survey screen with countdown and auto-stop.
 class PointCountLiveScreen extends ConsumerStatefulWidget {
@@ -460,6 +466,38 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         showAllDetectedSpecies
             ? buildSpeciesDetectionCounts(allDetections)
             : null;
+    // FORK: all-time totals ("×3 · 142") and replay buttons (J2).
+    final forkSessionCounts = buildSpeciesDetectionCounts(allDetections);
+    final forkTotals = liveTotals(
+      saved: ref.watch(savedSpeciesTotalsProvider).value ?? const {},
+      sessionCounts: forkSessionCounts,
+    );
+    final forkClips = latestClipBySpecies(allDetections);
+    final forkActiveSpecies = {
+      for (final d in currentDetections) d.scientificName,
+    };
+    final forkRecordsClips = ref.watch(recordingModeProvider) != 'off';
+    final forkController = ref.read(liveControllerProvider);
+    final forkCommonness = ref.watch(geoCommonnessProvider).value;
+    Widget? forkTrailing(DetectionRecord detection) {
+      final presence = livePresence(forkCommonness, detection.scientificName);
+      return buildReplayTrailing(
+        controller: forkController,
+        clipPath: forkClips[detection.scientificName],
+        clipPending:
+            forkRecordsClips &&
+            forkActiveSpecies.contains(detection.scientificName),
+        badge: ReliabilityBadge(
+          level: reliabilityFor(
+            score: detection.confidence,
+            review: detection.reviewStatus,
+            presence: presence,
+          ),
+          unexpected: presence?.unexpected ?? false,
+          compact: true,
+        ),
+      );
+    }
 
     // Hot-apply tunable settings to the running point count: changes
     // made on the Settings screen mid-count are pushed straight to the
@@ -519,6 +557,8 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
             activeDetections,
             speciesDetectionCounts,
             detections,
+            forkTotals, // FORK: totals (J2)
+            forkTrailing, // FORK: replay (J2)
           ),
         ),
       ),
@@ -535,6 +575,9 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
     Set<DetectionRecord>? activeDetections,
     Map<String, int>? speciesDetectionCounts,
     List<DetectionRecord> detections,
+    Map<String, int> forkTotals, // FORK: totals (J2)
+    Widget? Function(DetectionRecord detection)
+    forkTrailing, // FORK: replay (J2)
   ) {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -577,6 +620,8 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
           isActive: isActive,
           activeDetections: activeDetections,
           speciesDetectionCounts: speciesDetectionCounts,
+          speciesTotalCounts: forkTotals, // FORK: totals (J2)
+          trailingBuilder: forkTrailing, // FORK: replay (J2)
           onDetectionTap: (detection) {
             SpeciesInfoOverlay.show(
               context,

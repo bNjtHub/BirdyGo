@@ -1,11 +1,7 @@
 name: Documentation
 
+# FORK: disabled in BirdyGo (upstream docs site); manual run only.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
   workflow_dispatch:
 
 permissions:

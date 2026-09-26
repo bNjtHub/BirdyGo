@@ -32,6 +32,10 @@ import '../../inference/geo_model.dart';
 import '../../history/global_species_history.dart';
 import '../../live/live_providers.dart';
 import 'pick_wikipedia_url.dart';
+import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (J3)
+import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
+import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
+import '../../../fork/species_sheet/species_sheet_section.dart'; // FORK: AI sheet (J4b)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -275,6 +279,20 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
               // this species. Skipped entirely when the species has never
               // been detected — there's nothing useful to show.
               _DetectionStatsTile(scientificName: widget.scientificName),
+              // FORK: measured precision from the user's reviews (J3).
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SpeciesPrecisionLine(
+                  scientificName: widget.scientificName,
+                ),
+              ),
+              // FORK: "Entendu 23 fois sur 9 jours…" and activity charts (J4).
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SpeciesActivitySection(
+                  scientificName: widget.scientificName,
+                ),
+              ),
 
               // ── Loading skeleton (shimmer placeholder for the bio paragraph) ─
               if (_loading)
@@ -285,7 +303,10 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
 
               // ── Description ─────────────────────────────────
               if (!_loading) ...[
-                if (_description != null) ...[
+                // FORK: an AI species sheet (J4b) replaces the description.
+                SpeciesSheetSection(scientificName: widget.scientificName),
+                if (_description != null &&
+                    watchSpeciesSheet(ref, widget.scientificName) == null) ...[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                     child: Text(

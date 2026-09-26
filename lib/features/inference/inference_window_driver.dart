@@ -70,6 +70,11 @@ class InferenceWindowDriver {
   int _sampleBase = 0;
   int _ringBufferResetGeneration = 0;
 
+  /// FORK: optional veto on a window, given its `[start, end)` on the
+  /// [RingBuffer.totalWritten] timeline. A vetoed window is consumed and not
+  /// scored (BirdyGo skips audio heard while a clip is replayed, J2).
+  bool Function(int windowStartSample, int windowEndSample)? skipWindow;
+
   bool get isRunning => _scheduler != null;
 
   int get windowDurationSeconds => _scheduler?.windowDurationSeconds ?? 0;
@@ -181,6 +186,14 @@ class InferenceWindowDriver {
     if (window == null) return null;
 
     final windowEndSample = _sampleBase + window.endSample;
+    // FORK: drop windows that overlap a clip replay (fork/PLAN.md J2).
+    if (skipWindow?.call(
+          windowEndSample - scheduler.windowSamples,
+          windowEndSample,
+        ) ??
+        false) {
+      return null;
+    }
     return InferenceWindowAudio(
       samples: ringBuffer.readEndingAt(
         scheduler.windowSamples,

@@ -28,6 +28,7 @@ import 'dart:isolate';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../fork/data/fork_session_hooks.dart'; // FORK: observation index
 import '../live/live_session.dart';
 import 'session_path_codec.dart';
 
@@ -66,6 +67,7 @@ class SessionRepository {
       ).convert(sessionJsonForStorage(session, documentsPath: documentsPath)),
     );
     await file.writeAsString(jsonString, flush: true);
+    ForkSessionHooks.saved(session); // FORK: keep observation index in sync
   }
 
   /// Load a session by ID.
@@ -148,6 +150,7 @@ class SessionRepository {
     if (await file.exists()) {
       await file.delete();
     }
+    ForkSessionHooks.deleted(id); // FORK: keep observation index in sync
   }
 
   /// Delete all saved sessions.
@@ -158,6 +161,7 @@ class SessionRepository {
       await dir.delete(recursive: true);
       await dir.create(recursive: true);
     }
+    ForkSessionHooks.allDeleted(); // FORK: keep observation index in sync
   }
 
   /// Count of saved sessions.

@@ -1,0 +1,4 @@
+# BirdyGo species sheets (tools/fork_region_species.py, tools/fork_species_sheets.py)
+anthropic>=1.8,<2
+numpy>=1.26
+onnxruntime>=1.18

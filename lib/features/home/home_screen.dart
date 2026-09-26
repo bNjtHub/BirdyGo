@@ -25,6 +25,11 @@ import '../survey/survey_setup_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import 'help_screen.dart';
+import '../../fork/data/observation_index_service.dart'; // FORK: observation index
+import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
+import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
+import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
+import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -91,6 +96,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _preload(ref.read(audioLabelsSetProvider.future), 'audio labels');
     _preload(ref.read(geoModelProvider.future), 'geo model');
     unawaited(_warmUpLocation());
+    // FORK: open (and fill once in the background) the observation index,
+    // and load the AI species sheets (J4b).
+    _preload(
+      ref.read(observationIndexServiceProvider).ensureReady(),
+      'observation index',
+    );
+    _preload(ref.read(speciesSheetsProvider.future), 'species sheets');
   }
 
   /// Decode the logo into the image cache, so the header can paint it on the
@@ -947,6 +959,46 @@ class _Footer extends StatelessWidget {
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const SessionLibraryScreen(),
+                ),
+              ),
+        ),
+        // FORK: palmarès (fork/PLAN.md J4).
+        _FooterButton(
+          icon: AppIcons.sort,
+          label: l10n.forkRanking,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const RankingScreen()),
+              ),
+        ),
+        // FORK: quick review of doubtful detections (fork/PLAN.md J3).
+        _FooterButton(
+          icon: AppIcons.verifiedRounded,
+          label: l10n.forkQuickReview,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const QuickReviewScreen(),
+                ),
+              ),
+        ),
+        // FORK: sound library (fork/PLAN.md J2).
+        _FooterButton(
+          icon: AppIcons.graphicEqRounded,
+          label: l10n.forkSoundLibrary,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SoundLibraryScreen(),
                 ),
               ),
         ),

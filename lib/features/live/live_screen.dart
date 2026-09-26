@@ -28,6 +28,12 @@ import 'live_detection_display.dart';
 import 'live_providers.dart';
 import 'live_session.dart';
 import 'widgets/detection_list_widget.dart';
+import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
+import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
+import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
+import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -688,6 +694,38 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         showAllDetectedSpecies
             ? buildSpeciesDetectionCounts(allDetections)
             : null;
+    // FORK: all-time totals ("×3 · 142") and replay buttons (J2).
+    final forkSessionCounts = buildSpeciesDetectionCounts(allDetections);
+    final forkTotals = liveTotals(
+      saved: ref.watch(savedSpeciesTotalsProvider).value ?? const {},
+      sessionCounts: forkSessionCounts,
+    );
+    final forkClips = latestClipBySpecies(allDetections);
+    final forkActiveSpecies = {
+      for (final d in currentDetections) d.scientificName,
+    };
+    final forkRecordsClips = ref.watch(recordingModeProvider) != 'off';
+    final forkController = ref.read(liveControllerProvider);
+    final forkCommonness = ref.watch(geoCommonnessProvider).value;
+    Widget? forkTrailing(DetectionRecord detection) {
+      final presence = livePresence(forkCommonness, detection.scientificName);
+      return buildReplayTrailing(
+        controller: forkController,
+        clipPath: forkClips[detection.scientificName],
+        clipPending:
+            forkRecordsClips &&
+            forkActiveSpecies.contains(detection.scientificName),
+        badge: ReliabilityBadge(
+          level: reliabilityFor(
+            score: detection.confidence,
+            review: detection.reviewStatus,
+            presence: presence,
+          ),
+          unexpected: presence?.unexpected ?? false,
+          compact: true,
+        ),
+      );
+    }
 
     // Hot-apply tunable settings to the running session: when the user
     // tweaks the confidence threshold or pooling window count from the
@@ -757,6 +795,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             currentDetectionCount: currentDetections.length,
             activeDetections: activeDetections,
             speciesDetectionCounts: speciesDetectionCounts,
+            forkTotals: forkTotals,
+            forkTrailing: forkTrailing,
             detections: detections,
           ),
         ),
@@ -776,6 +816,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     required int currentDetectionCount,
     required Set<DetectionRecord>? activeDetections,
     required Map<String, int>? speciesDetectionCounts,
+    required Map<String, int> forkTotals, // FORK: totals (J2)
+    required Widget? Function(DetectionRecord detection)
+    forkTrailing, // FORK: replay (J2)
     required List<DetectionRecord> detections,
   }) {
     final isLandscape =
@@ -805,6 +848,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
           showTips: true,
           activeDetections: activeDetections,
           speciesDetectionCounts: speciesDetectionCounts,
+          speciesTotalCounts: forkTotals, // FORK: totals (J2)
+          trailingBuilder: forkTrailing, // FORK: replay (J2)
           onDetectionTap: (detection) {
             SpeciesInfoOverlay.show(
               context,

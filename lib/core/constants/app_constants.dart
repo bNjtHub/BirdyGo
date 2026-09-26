@@ -6,19 +6,20 @@ library;
 /// App-wide string constants.
 abstract final class AppConstants {
   /// Application display name.
-  static const String appName = 'BirdNET Live';
+  // FORK: BirdyGo app name and id.
+  static const String appName = 'BirdyGo';
 
   /// GitHub repository URL.
   static const String githubUrl =
       'https://github.com/birdnet-team/birdnet-live-app';
 
   /// Mobile application package identifier.
-  static const String packageName = 'de.tu_chemnitz.mi.kahst.birdnet_live';
+  static const String packageName = 'fr.justcodeit.birdygo';
 
   /// Contactable User-Agent for public web services used by the app.
   static const String networkUserAgent =
-      'BirdNETLive (de.tu_chemnitz.mi.kahst.birdnet_live; '
-      '+https://github.com/birdnet-team/birdnet-live-app)';
+      'BirdyGo (fr.justcodeit.birdygo; '
+      '+https://github.com/bNjtHub/BirdyGo)';
 
   /// Documentation site URL.
   static const String docsUrl =
