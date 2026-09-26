@@ -70,10 +70,16 @@ class LiveTable extends StatefulWidget {
 
 class _LiveTableState extends State<LiveTable> {
   /// Species already shown: only later ones play the entrance.
-  late Set<String> _known = {for (final e in widget.entries) e.scientificName};
+  Set<String> _known = const {};
 
   /// Species that entered during this screen's life.
   final Set<String> _arrived = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _known = {for (final e in widget.entries) e.scientificName};
+  }
 
   @override
   void didUpdateWidget(LiveTable old) {
@@ -95,38 +101,42 @@ class _LiveTableState extends State<LiveTable> {
       return Padding(padding: widget.padding, child: widget.empty);
     }
     final gap = widget.compact ? 6.0 : BirdySpace.s;
-    return SingleChildScrollView(
-      padding: widget.padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (i, entry) in widget.entries.indexed)
-            FlipMove(
-              key: ValueKey(entry.scientificName),
-              child: Padding(
-                padding: EdgeInsets.only(top: i == 0 ? 0 : gap),
-                child: _maybeEnter(
-                  entry,
-                  RepaintBoundary(
-                    child: LiveTableRow(
-                      entry: entry,
-                      compact: widget.compact,
-                      image: widget.imageFor?.call(entry.scientificName),
-                      badge: widget.badgeFor?.call(
-                        entry,
+    // Moves repaint the table only, not the header or the spectrogram.
+    return RepaintBoundary(
+      child: SingleChildScrollView(
+        padding: widget.padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final entry in widget.entries)
+              FlipMove(
+                key: ValueKey(entry.scientificName),
+                child: Padding(
+                  // Same gap under every row: a moved row keeps its inner layout.
+                  padding: EdgeInsets.only(bottom: gap),
+                  child: _maybeEnter(
+                    entry,
+                    RepaintBoundary(
+                      child: LiveTableRow(
+                        entry: entry,
                         compact: widget.compact,
+                        image: widget.imageFor?.call(entry.scientificName),
+                        badge: widget.badgeFor?.call(
+                          entry,
+                          compact: widget.compact,
+                        ),
+                        action: widget.actionFor?.call(entry),
+                        onTap:
+                            widget.onOpen == null
+                                ? null
+                                : () => widget.onOpen!(entry),
                       ),
-                      action: widget.actionFor?.call(entry),
-                      onTap:
-                          widget.onOpen == null
-                              ? null
-                              : () => widget.onOpen!(entry),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
