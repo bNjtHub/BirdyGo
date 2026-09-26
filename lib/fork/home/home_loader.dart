@@ -48,8 +48,10 @@ class HomeLoader {
     final now = _now();
     final dayStart = DateTime(now.year, now.month, now.day);
     final today = await index.detectionsSince(dayStart);
-    final names = {for (final d in today) d.scientificName};
-    final heardBefore = await index.speciesHeardBefore(dayStart, among: names);
+    final verifiedBefore = await index.verifiedSpecies(
+      minScore: ReliabilityConfig.sureMinScore,
+      before: dayStart,
+    );
 
     // Presence of each species where it was first heard today.
     final presence = <String, GeoPresence>{};
@@ -80,7 +82,7 @@ class HomeLoader {
       today: buildDaySummary(
         detections: today,
         presence: presence,
-        heardBefore: heardBefore,
+        verifiedBefore: verifiedBefore,
       ),
       last: last,
       toVerify: await index.reviewQueueLength(),

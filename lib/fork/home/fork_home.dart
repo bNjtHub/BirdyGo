@@ -32,7 +32,6 @@ import '../../features/survey/survey_setup_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/session_type_visuals.dart';
-import '../bilan/bilan_widgets.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -210,7 +209,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final head = <(String, Widget)>[
       (
         'greeting',
-        BilanHero(
+        HomeGreeting(
           title: homeGreeting(l10n, now),
           dateLine: homeDateLine(localeName, now, place: _place),
         ),

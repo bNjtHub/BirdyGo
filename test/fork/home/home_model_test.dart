@@ -66,11 +66,11 @@ void main() {
       expect(day.isEmpty, isFalse);
     });
 
-    test('new = never heard before and Sûr or confirmed', () {
+    test('new = never verified before and Sûr or confirmed today', () {
       final day = buildDaySummary(
         detections: today,
         presence: presence,
-        heardBefore: {'Erithacus rubecula'},
+        verifiedBefore: {'Erithacus rubecula'},
       );
       // Pic épeiche (Sûr), Chouette (confirmed); not the Huppe (to check).
       expect(day.newSpecies, 2);
@@ -79,7 +79,7 @@ void main() {
     test('unknown history or plausibility: nothing new', () {
       expect(buildDaySummary(detections: today).newSpecies, 0);
       expect(
-        buildDaySummary(detections: today, heardBefore: const {}).newSpecies,
+        buildDaySummary(detections: today, verifiedBefore: const {}).newSpecies,
         1, // only the confirmed Chouette
       );
     });
@@ -113,15 +113,15 @@ void main() {
       final now = DateTime(2026, 9, 26, 8, 5);
       expect(
         homeHeardWhen(fr, 'fr', DateTime(2026, 9, 26, 7, 52), now),
-        '7 h 52',
+        '07:52',
       );
       expect(
         homeHeardWhen(fr, 'fr', DateTime(2026, 9, 25, 19, 3), now),
-        'hier, 19 h 03',
+        'hier, 19:03',
       );
       expect(
         homeHeardWhen(fr, 'fr', DateTime(2026, 9, 24, 7, 30), now),
-        '24 sept., 7 h 30',
+        '24 sept., 07:30',
       );
       // Across the spring clock change (a 23-hour day).
       expect(
@@ -131,7 +131,7 @@ void main() {
           DateTime(2026, 3, 28, 7),
           DateTime(2026, 3, 29, 8),
         ),
-        'hier, 7 h 00',
+        'hier, 07:00',
       );
     });
   });

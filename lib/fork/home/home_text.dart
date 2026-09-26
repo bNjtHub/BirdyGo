@@ -5,18 +5,18 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-import '../bilan/bilan_model.dart';
-import '../bilan/bilan_text.dart';
+import '../summary/listening_summary.dart';
+import '../summary/summary_text.dart';
 
 /// « Bonjour », « Bon après-midi », « Bonsoir », « Bonne nuit » (same hours
-/// as the Bilan's title).
-String homeGreeting(AppLocalizations l10n, DateTime now) => switch (momentOf(
+/// as the listening summary's headline).
+String homeGreeting(AppLocalizations l10n, DateTime now) => switch (dayPartOf(
   now,
 )) {
-  BilanMoment.morning => l10n.forkHomeMorning,
-  BilanMoment.afternoon => l10n.forkHomeAfternoon,
-  BilanMoment.evening => l10n.forkHomeEvening,
-  BilanMoment.night => l10n.forkHomeNight,
+  DayPart.morning => l10n.forkHomeMorning,
+  DayPart.afternoon => l10n.forkHomeAfternoon,
+  DayPart.evening => l10n.forkHomeEvening,
+  DayPart.night => l10n.forkHomeNight,
 };
 
 /// « Samedi 26 septembre · Beaulieu-sur-Brenne ».
@@ -28,7 +28,7 @@ String homeDateLine(String localeName, DateTime now, {String? place}) {
   ].join(' · ');
 }
 
-/// « 7 h 52 » today, « hier, 7 h 52 », else « 24 sept., 7 h 52 ».
+/// « 07:52 » today, « hier, 07:52 », else « 24 sept., 07:52 ».
 String homeHeardWhen(
   AppLocalizations l10n,
   String localeName,
@@ -36,7 +36,7 @@ String homeHeardWhen(
   DateTime now,
 ) {
   final local = time.toLocal();
-  final clock = bilanClock(l10n, local);
+  final clock = summaryTime(l10n, local);
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(local.year, local.month, local.day);
   // Rounded: a day is 23 or 25 hours long when the clocks change.

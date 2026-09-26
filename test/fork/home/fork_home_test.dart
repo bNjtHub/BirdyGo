@@ -185,7 +185,7 @@ void main() {
     await tester.tap(find.text('12 détections à vérifier'));
     final screen = await pushedScreen(tester, pushes);
     expect(screen, isA<QuickReviewScreen>());
-    expect((screen as QuickReviewScreen).keys, isNull);
+    expect((screen as QuickReviewScreen).onlyKeys, isNull);
   });
 
   testWidgets('nothing to check: no card', (tester) async {

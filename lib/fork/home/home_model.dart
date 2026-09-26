@@ -25,8 +25,8 @@ class DaySummary {
   final int species;
   final int contacts;
 
-  /// Species never heard before today, with a Sûr or confirmed contact
-  /// (the same rule as the Bilan's « Première fois »).
+  /// Species Sûr or confirmed today and never verified before (the same
+  /// rule as the listening summary's « Première fois »).
   final int newSpecies;
 
   bool get isEmpty => contacts == 0;
@@ -37,12 +37,13 @@ class DaySummary {
 ///
 /// - [presence]: geo presence per species; a missing species has an
 ///   unknown plausibility (never Sûr without a confirmation).
-/// - [heardBefore]: species heard before today; null when unknown, and then
+/// - [verifiedBefore]: species verified before today
+///   ([ObservationIndex.verifiedSpecies]); null when unknown, and then
 ///   nothing is new.
 DaySummary buildDaySummary({
   required List<IndexedDetection> detections,
   Map<String, GeoPresence> presence = const {},
-  Set<String>? heardBefore,
+  Set<String>? verifiedBefore,
 }) {
   final levels = <String, List<ReliabilityLevel>>{};
   for (final d in detections) {
@@ -57,9 +58,9 @@ DaySummary buildDaySummary({
         );
   }
   var newSpecies = 0;
-  if (heardBefore != null) {
+  if (verifiedBefore != null) {
     for (final MapEntry(key: name, value: list) in levels.entries) {
-      if (!heardBefore.contains(name) &&
+      if (!verifiedBefore.contains(name) &&
           bestLevel(list) == ReliabilityLevel.sure) {
         newSpecies++;
       }

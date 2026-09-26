@@ -51,6 +51,27 @@ class HomeTopBar extends StatelessWidget {
   }
 }
 
+/// « Bonjour » and the date line.
+class HomeGreeting extends StatelessWidget {
+  const HomeGreeting({super.key, required this.title, required this.dateLine});
+
+  final String title;
+  final String dateLine;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: BirdyText.display.copyWith(color: c.text1)),
+        const SizedBox(height: BirdySpace.xs),
+        Text(dateLine, style: BirdyText.caption.copyWith(color: c.text2)),
+      ],
+    );
+  }
+}
+
 /// « 13 espèces aujourd'hui · 52 contacts · 1 nouvelle ».
 class DayTiles extends StatelessWidget {
   const DayTiles({super.key, required this.today});
