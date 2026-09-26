@@ -30,6 +30,7 @@ import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound libr
 import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
 import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
 import '../../fork/map/contact_map_screen.dart'; // FORK: contact map (J5)
+import '../../fork/garden/garden_count_screen.dart'; // FORK: garden count (J5b)
 import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
 
 // =============================================================================
@@ -986,6 +987,20 @@ class _Footer extends StatelessWidget {
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const ContactMapScreen(),
+                ),
+              ),
+        ),
+        // FORK: "Oiseaux des jardins" garden count (fork/PLAN.md J5b).
+        _FooterButton(
+          icon: AppIcons.parkRounded,
+          label: l10n.forkGardenTitle,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const GardenCountScreen(),
                 ),
               ),
         ),
