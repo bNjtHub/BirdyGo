@@ -534,15 +534,48 @@ class ObservationIndex {
 
   /// Unreviewed detections waiting for the quick review, lowest score first
   /// (the most doubtful come first), capped at [limit]. Detections answered
-  /// "Je ne sais pas" leave the queue.
-  Future<List<IndexedDetection>> reviewQueue({int limit = 50}) async {
+  /// "Je ne sais pas" leave the queue. [onlyKeys] narrows the queue to some
+  /// detections (the listening summary's « Vérifier 3 détections »).
+  Future<List<IndexedDetection>> reviewQueue({
+    int limit = 50,
+    Set<String>? onlyKeys,
+  }) async {
+    if (onlyKeys != null && onlyKeys.isEmpty) return const [];
+    // Filtered in Dart: a long session can have more keys than SQLite
+    // accepts as query variables (999 on older Android versions).
     final rows = await _db.rawQuery(
       "SELECT * FROM detections WHERE review_status = 'unreviewed' "
       'AND key NOT IN (SELECT key FROM review_skipped) '
-      'ORDER BY confidence ASC, start_ms DESC LIMIT ?',
-      [limit],
+      'ORDER BY confidence ASC, start_ms DESC'
+      '${onlyKeys == null ? ' LIMIT ?' : ''}',
+      [if (onlyKeys == null) limit],
     );
+    if (onlyKeys != null) {
+      return rows
+          .where((row) => onlyKeys.contains(row['key']))
+          .take(limit)
+          .map(IndexedDetection.fromRow)
+          .toList();
+    }
     return rows.map(IndexedDetection.fromRow).toList();
+  }
+
+  /// Species verified at least once outside session [excludeSessionId]:
+  /// confirmed by the user, or unreviewed with a score of at least
+  /// [minScore]. The index does not keep the geo-model's opinion, so a past
+  /// high-score detection counts even if the species was unexpected there.
+  Future<Set<String>> verifiedSpecies({
+    required double minScore,
+    String? excludeSessionId,
+  }) async {
+    final rows = await _db.rawQuery(
+      'SELECT DISTINCT scientific_name FROM detections WHERE '
+      "(review_status = 'confirmed' OR "
+      "(review_status = 'unreviewed' AND confidence >= ?))"
+      '${excludeSessionId == null ? '' : ' AND session_id != ?'}',
+      [minScore, if (excludeSessionId != null) excludeSessionId],
+    );
+    return {for (final row in rows) row['scientific_name']! as String};
   }
 
   /// Number of detections waiting in the quick review.
