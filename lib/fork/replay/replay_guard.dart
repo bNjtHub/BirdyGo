@@ -43,6 +43,18 @@ class ReplayGuard {
     return false;
   }
 
+  /// Whether the window `[windowStart, windowEnd)` heard a replay, like
+  /// [overlaps] but without forgetting any range: safe to ask at any time,
+  /// in any order (J6c-bis-b).
+  bool heard(int windowStart, int windowEnd) {
+    final open = _openStart;
+    if (open != null && windowEnd > open) return true;
+    for (final (start, end) in _closed) {
+      if (windowStart < end && windowEnd > start) return true;
+    }
+    return false;
+  }
+
   /// Forget every range (new session).
   void reset() {
     _openStart = null;

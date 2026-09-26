@@ -71,6 +71,10 @@ class InferenceService {
   /// Class indexes that were emitted on the previous cycle.
   final Set<int> _confirmedDetectionIndexes = {};
 
+  // FORK: read-only scores of the last window for the Live screen (J6c-bis-b).
+  List<double>? _lastWindowScores;
+  List<double>? get lastWindowScores => _lastWindowScores; // FORK: J6c-bis-b
+
   /// Whether the service has been successfully initialized.
   bool get isReady => _model.isLoaded && _labels.isNotEmpty && _config != null;
 
@@ -162,6 +166,9 @@ class InferenceService {
     if (threshold > 1.0) return 1.0;
     return threshold;
   }
+
+  // FORK: read-only access to the per-window support threshold (J6c-bis-b).
+  double supportThresholdFor(double t) => _supportThresholdFor(t);
 
   /// Apply the advanced temporal-pooling overrides from a user setting. Each
   /// `null` field reverts that knob to the model-config default. Takes effect
@@ -427,6 +434,11 @@ class InferenceService {
     final currentScores = _applySpeciesIgnoreFilter(
       PostProcessor.applySensitivityAll(rawProbs, sens),
     );
+    // FORK: keep the unpooled window scores for the Live screen (J6c-bis-b).
+    _lastWindowScores = ScoreBlacklist.applyMultipliers(
+      scores: currentScores,
+      multipliers: _scoreMultipliers,
+    );
 
     // Temporal pooling (optional).
     //
@@ -623,6 +635,7 @@ class InferenceService {
   void resetPooling() {
     _recentScores.clear();
     _confirmedDetectionIndexes.clear();
+    _lastWindowScores = null; // FORK: J6c-bis-b
   }
 }
 

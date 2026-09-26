@@ -1291,6 +1291,7 @@
   "forkGalleryMotion": "Animations",
   "forkGalleryReplay": "Rejouer",
   "forkLiveListening": "En écoute",
+  "forkLiveAnalysing": "Analyse…",
   "forkLiveDuration": "durée",
   "forkLiveSpeciesStat": "{count, plural, =1{espèce} other{espèces}}",
   "forkLiveContactsStat": "{count, plural, =1{contact} other{contacts}}",

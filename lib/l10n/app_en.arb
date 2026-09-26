@@ -5102,6 +5102,8 @@
   "@forkGalleryReplay": {"description": "BirdyGo fork: design system (J6a)."},
   "forkLiveListening": "Listening",
   "@forkLiveListening": {"description": "BirdyGo fork: listening screen (J6c)."},
+  "forkLiveAnalysing": "Analysing…",
+  "@forkLiveAnalysing": {"description": "BirdyGo fork: live header while the last window holds a bird not confirmed yet (J6c-bis-b)."},
   "forkLiveDuration": "duration",
   "@forkLiveDuration": {"description": "BirdyGo fork: listening screen (J6c)."},
   "forkLiveSpeciesStat": "{count, plural, =1{species} other{species}}",
