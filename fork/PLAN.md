@@ -424,19 +424,19 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
 - [ ] J6c-bis-b Live : « Analyse… » et fin rapide (`lib/fork/live/`, PR « J6c-bis-b Live : … »).
       Lecture seule dans `lib/features/inference` (quelques lignes `// FORK`, `infer()` et le lissage
       inchangés).
-      - [ ] Upstream : `lastWindowScores` (scores de la dernière fenêtre × multiplicateurs) et
+      - [x] Upstream : `lastWindowScores` (scores de la dernière fenêtre × multiplicateurs) et
             `supportThresholdFor` dans `InferenceService`, un getter dans `InferenceIsolate`, un
             `ValueNotifier` du cycle dans `LiveController`, publié avec les détections, vidé en pause et
             en réécoute ; `ReplayGuard.heard` sans effet de bord.
-      - [ ] « Analyse… » : l'en-tête passe en fondu de « En écoute » à « Analyse… » quand la dernière
+      - [x] « Analyse… » : l'en-tête passe en fondu de « En écoute » à « Analyse… » quand la dernière
             fenêtre contient un candidat (Aves, dans le filtre d'espèces et l'intersection géo, score de
             fenêtre au moins égal au seuil de support, pas déjà confirmé). Rien en lissage off, avg ou
             max. Reste un cycle de plus après la confirmation. Ni nom, ni ligne, ni vibration.
-      - [ ] Fin rapide : le symbole « chante » s'allume à l'ouverture du contact et s'éteint après
+      - [x] Fin rapide : le symbole « chante » s'allume à l'ouverture du contact et s'éteint après
             2 fenêtres de suite sous le seuil de support (`LiveTableEntry.singingVisual`) ; `singing`
             garde son sens. Fin du trait : `heardUntil` (fin de la dernière fenêtre au-dessus du seuil de
             support), jamais en recul.
-      - [ ] Seuils `liveSingingHoldWindows` et `analysingHoldWindows` dans `reliability_config.dart`.
+      - [x] Seuils `liveSingingHoldWindows` et `analysingHoldWindows` dans `reliability_config.dart`.
       À faire sur le Xiaomi : à l'aube, noter si « Analyse… » reste allumé presque tout le temps ;
       vérifier le coût du cycle dans `[InferenceTiming]` ; réécoute par le haut-parleur sans
       « Analyse… » ni symbole.
