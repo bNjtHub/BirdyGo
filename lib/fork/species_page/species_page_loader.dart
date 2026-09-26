@@ -1,0 +1,110 @@
+/// Loads the species page's data: the user's contacts from the observation
+/// index, and the geo-model's year at the phone's place (J6c).
+library;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../features/explore/explore_providers.dart';
+import '../../shared/providers/settings_providers.dart';
+import '../data/observation_index.dart';
+import '../data/observation_index_service.dart';
+import '../reliability/reliability_config.dart';
+import 'species_page_config.dart';
+import 'species_page_model.dart';
+
+class SpeciesPageLoader {
+  SpeciesPageLoader({
+    required Future<ObservationIndex> Function() index,
+    required Future<Map<String, List<double>>?> Function() yearScores,
+  }) : _index = index,
+       _yearScores = yearScores;
+
+  final Future<ObservationIndex> Function() _index;
+  final Future<Map<String, List<double>>?> Function() _yearScores;
+
+  /// The user's contacts with [scientificName]. An index that cannot open
+  /// gives an empty record, never an error.
+  Future<SpeciesRecord> record(String scientificName) async {
+    final ObservationIndex index;
+    try {
+      index = await _index();
+    } catch (_) {
+      return SpeciesRecord.empty;
+    }
+    final tally = await index.speciesTally(scientificName);
+    if (tally == null) return SpeciesRecord.empty;
+
+    final precision = await index.speciesPrecision(scientificName);
+    final verified = await index.verifiedSpecies(
+      minScore: ReliabilityConfig.sureMinScore,
+    );
+    final favorites = await index.favoriteKeys();
+    final clips = await index.clipsForSpecies(scientificName);
+    final shown = pageClips(
+      clips,
+      favorites,
+      limit: SpeciesPageConfig.clipsShown,
+    );
+    final points = await index.mapPoints(scientificName: scientificName);
+    return SpeciesRecord(
+      tally: tally,
+      confirmed: precision.confirmed,
+      reviewed: precision.reviewed,
+      verified: verified.contains(scientificName),
+      clips: shown,
+      clipCount: clips.length,
+      favorites: {
+        for (final c in shown)
+          if (favorites.contains(c.key)) c.key,
+      },
+      hours: await index.activityByHour(scientificName: scientificName),
+      spots: distinctSpots(
+        points,
+        limit: SpeciesPageConfig.mapSpots,
+        decimals: SpeciesPageConfig.spotDecimals,
+      ),
+    );
+  }
+
+  /// The geo-model's year for [scientificName] where the phone is. Null
+  /// without a position or a model, or for a species the model ignores.
+  Future<YearPresence?> presence(String scientificName) async {
+    try {
+      final weeks = (await _yearScores())?[scientificName];
+      return weeks == null ? null : YearPresence.fromWeeks(weeks);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Marks or unmarks a recording as favorite (same list as the sound
+  /// library).
+  Future<void> setFavorite(String key, {required bool favorite}) async =>
+      (await _index()).setFavorite(key, favorite: favorite);
+}
+
+/// 48 weekly geo-model scores of every species at the phone's place,
+/// computed once per app run. Null without a position; never asks for the
+/// location permission (same care as the home screen).
+final speciesYearScoresProvider = FutureProvider<Map<String, List<double>>?>((
+  ref,
+) async {
+  if (ref.read(useGpsProvider) &&
+      !await ref.read(locationServiceProvider).hasPermission()) {
+    return null;
+  }
+  final location = await ref.read(currentLocationProvider.future);
+  if (location == null) return null;
+  final model = await ref.read(geoModelProvider.future);
+  return model.predictAllWeeks(
+    latitude: location.latitude,
+    longitude: location.longitude,
+  );
+});
+
+final speciesPageLoaderProvider = Provider<SpeciesPageLoader>(
+  (ref) => SpeciesPageLoader(
+    index: () => ref.read(observationIndexServiceProvider).ensureReady(),
+    yearScores: () => ref.read(speciesYearScoresProvider.future),
+  ),
+);

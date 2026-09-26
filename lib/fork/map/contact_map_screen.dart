@@ -41,7 +41,10 @@ const double _defaultZoom = 5;
 
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
-  const ContactMapScreen({super.key});
+  const ContactMapScreen({super.key, this.initialSpecies});
+
+  /// Opens filtered on this species, over every period (species page).
+  final SpeciesChoice? initialSpecies;
 
   @override
   ConsumerState<ContactMapScreen> createState() => _ContactMapScreenState();
@@ -50,9 +53,13 @@ class ContactMapScreen extends ConsumerStatefulWidget {
 class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
   final MapController _mapController = MapController();
 
-  RankingPeriod _period = RankingPeriod.last30Days;
+  late RankingPeriod _period =
+      widget.initialSpecies == null
+          ? RankingPeriod.last30Days
+          : RankingPeriod.all;
   bool _confirmedOnly = false;
-  SpeciesChoice _species = const SpeciesChoice.all();
+  late SpeciesChoice _species =
+      widget.initialSpecies ?? const SpeciesChoice.all();
   late MapBaseLayer _layer;
   TileLayer? _tileLayer;
 

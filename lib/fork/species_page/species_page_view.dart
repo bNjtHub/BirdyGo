@@ -1,0 +1,728 @@
+/// Blocks of the species page (J6c « Fiche espèce »,
+/// fork/maquette/SPEC.md 9.13). Widgets only, no providers: the screen
+/// wires them to the index, the geo-model and the other screens.
+library;
+
+import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+import '../../shared/utils/app_icons.dart';
+import '../data/observation_index.dart';
+import '../design/birdy_motion.dart';
+import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/species_tint.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/clip_play_button.dart';
+import '../ranking/activity_bars.dart';
+import '../reliability/reliability_badge.dart';
+import '../reliability/reliability_config.dart';
+import '../reliability/reliability_screen.dart';
+import '../species_sheet/species_sheet.dart';
+import '../species_sheet/species_sheet_section.dart';
+import 'species_page_model.dart';
+
+/// Widest column on tablets and in landscape.
+const double kSpeciesPageMaxWidth = 600;
+
+/// Tinted header: photo edge to edge, then the names.
+class SpeciesPageHeader extends StatelessWidget {
+  const SpeciesPageHeader({
+    super.key,
+    required this.name,
+    required this.latin,
+    required this.tint,
+    required this.photo,
+    required this.onShare,
+    this.onBack,
+  });
+
+  final String name;
+
+  /// Null when the user hides scientific names.
+  final String? latin;
+  final SpeciesTint tint;
+
+  /// Fills a 3:2 frame.
+  final Widget photo;
+  final VoidCallback onShare;
+
+  /// Null inside a sheet (the sheet has its drag handle).
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final background = c.isDark ? tint.tintDark : tint.tintLight;
+    final ink = c.isDark ? c.text1 : BirdyBrand.ink;
+    const radius = BorderRadius.vertical(
+      bottom: Radius.circular(BirdyRadii.hero),
+    );
+    return ClipRRect(
+      borderRadius: radius,
+      child: ColoredBox(
+        color: background,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 3 / 2,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  photo,
+                  Positioned(
+                    top: BirdySpace.l + MediaQuery.paddingOf(context).top,
+                    left: BirdySpace.l,
+                    right: BirdySpace.l,
+                    child: Row(
+                      children: [
+                        if (onBack != null)
+                          BirdyIconButton(
+                            icon: AppIcons.arrowBackRounded,
+                            semanticLabel:
+                                MaterialLocalizations.of(
+                                  context,
+                                ).backButtonTooltip,
+                            onPressed: onBack,
+                          ),
+                        const Spacer(),
+                        BirdyIconButton(
+                          icon: AppIcons.share,
+                          semanticLabel: l10n.forkSummaryShare,
+                          onPressed: onShare,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BirdySpace.gutter,
+                BirdySpace.m,
+                BirdySpace.gutter,
+                BirdySpace.l,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      name,
+                      style: BirdyText.display.copyWith(color: ink),
+                    ),
+                  ),
+                  if (latin != null)
+                    Text(
+                      latin!,
+                      style: BirdyText.latin.copyWith(
+                        color: c.isDark ? c.text2 : BirdyBrand.bark,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// « Entendu 142 fois sur 38 jours… », then the level and the reviews.
+class HeardBlock extends StatelessWidget {
+  const HeardBlock({super.key, required this.record, required this.heard});
+
+  final SpeciesRecord record;
+
+  /// The sentence, null when never heard.
+  final String? heard;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final precision = precisionLine(l10n, record.confirmed, record.reviewed);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          heard ?? l10n.forkFicheNeverHeard,
+          style: BirdyText.body.copyWith(color: c.text1),
+        ),
+        if (record.verified || precision != null) ...[
+          const SizedBox(height: BirdySpace.s),
+          Wrap(
+            spacing: BirdySpace.s,
+            runSpacing: BirdySpace.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (record.verified)
+                const ReliabilityBadge(level: ReliabilityLevel.sure),
+              if (precision != null)
+                Text(
+                  precision,
+                  style: BirdyText.caption.copyWith(color: c.text2),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// « Ici en ce moment »: the geo-model's sentence and twelve month bars.
+class HereNowCard extends StatelessWidget {
+  const HereNowCard({
+    super.key,
+    required this.year,
+    required this.sentence,
+    required this.monthsCaption,
+    required this.currentMonth,
+  });
+
+  final YearPresence year;
+  final String sentence;
+  final String monthsCaption;
+
+  /// 1 to 12, highlighted.
+  final int currentMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final bars = year.bars;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: BirdySpace.l,
+          vertical: BirdySpace.m,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.forkFicheHereNow,
+                    style: BirdyText.label.copyWith(color: c.text1),
+                  ),
+                  const SizedBox(height: BirdySpace.xs),
+                  Text(
+                    sentence,
+                    style: BirdyText.bodyCompact.copyWith(color: c.text1),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: BirdySpace.m),
+            Semantics(
+              label: l10n.forkFichePresenceChart,
+              excludeSemantics: true,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 36,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (var m = 0; m < 12; m++) ...[
+                          if (m > 0) const SizedBox(width: 3),
+                          Container(
+                            key: ValueKey('month-bar-$m'),
+                            width: 6,
+                            height: (36 * bars[m]).clamp(3, 36).toDouble(),
+                            decoration: BoxDecoration(
+                              color:
+                                  m + 1 == currentMonth
+                                      ? BirdyBrand.kingfisher
+                                      : c.line,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: BirdySpace.xs),
+                  Text(
+                    monthsCaption,
+                    style: BirdyText.caption.copyWith(color: c.text2),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// « Mes sons »: the reference song and the best recordings.
+class MySoundsBlock extends StatelessWidget {
+  const MySoundsBlock({
+    super.key,
+    required this.clips,
+    required this.favorites,
+    required this.playing,
+    required this.lineOf,
+    required this.onPlay,
+    required this.onFavorite,
+    this.onReference,
+    this.moreCount = 0,
+    this.onMore,
+  });
+
+  final List<IndexedDetection> clips;
+  final Set<String> favorites;
+
+  /// Path of the clip playing, or null.
+  final String? playing;
+  final String Function(IndexedDetection clip) lineOf;
+  final ValueChanged<IndexedDetection> onPlay;
+  final void Function(IndexedDetection clip, bool favorite) onFavorite;
+
+  /// Opens the reference song (eBird). Null without one.
+  final VoidCallback? onReference;
+
+  /// Every recording of the species, for the « Voir les N » link.
+  final int moreCount;
+  final VoidCallback? onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.forkFicheMySounds,
+                style: BirdyText.heading.copyWith(color: c.text1),
+              ),
+            ),
+            if (onReference != null)
+              FilledButton.icon(
+                style: BirdyButtonStyles.tonal(context),
+                onPressed: onReference,
+                icon: const Icon(AppIcons.openInNew, size: 18),
+                label: Text(l10n.forkFicheReference),
+              ),
+          ],
+        ),
+        for (final clip in clips)
+          Padding(
+            padding: const EdgeInsets.only(top: BirdySpace.s),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Row(
+                children: [
+                  ClipPlayButton(
+                    state:
+                        playing == clip.clipPath
+                            ? ClipPlayState.playing
+                            : ClipPlayState.idle,
+                    semanticLabel:
+                        playing == clip.clipPath
+                            ? l10n.forkReplayStop
+                            : l10n.forkReplay,
+                    onPressed: () => onPlay(clip),
+                  ),
+                  const SizedBox(width: BirdySpace.m),
+                  Expanded(
+                    child: Text(
+                      lineOf(clip),
+                      style: BirdyText.bodyCompact.copyWith(
+                        color: c.text1,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                  _FavoriteButton(
+                    favorite: favorites.contains(clip.key),
+                    onPressed:
+                        () => onFavorite(clip, !favorites.contains(clip.key)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (onMore != null && moreCount > clips.length)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: onMore,
+              child: Text(l10n.forkFicheAllSounds(moreCount)),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _FavoriteButton extends StatelessWidget {
+  const _FavoriteButton({required this.favorite, required this.onPressed});
+
+  final bool favorite;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return IconButton(
+      onPressed: onPressed,
+      tooltip:
+          favorite
+              ? l10n.forkSoundLibraryUnfavorite
+              : l10n.forkSoundLibraryFavorite,
+      isSelected: favorite,
+      style: IconButton.styleFrom(
+        minimumSize: const Size.square(BirdySizes.target),
+      ),
+      icon: Icon(
+        AppIcons.star,
+        fill: favorite ? 1 : 0,
+        color: favorite ? BirdyBrand.oriole : c.text2,
+      ),
+    );
+  }
+}
+
+/// The AI sheet: summary as lead, one chip per section, the chosen
+/// paragraph, and the AI notice.
+class SheetChipsBlock extends StatefulWidget {
+  const SheetChipsBlock({super.key, required this.sheet});
+
+  final SpeciesSheet sheet;
+
+  @override
+  State<SheetChipsBlock> createState() => _SheetChipsBlockState();
+}
+
+class _SheetChipsBlockState extends State<SheetChipsBlock> {
+  SheetSection? _selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final chips = sheetChips(widget.sheet);
+    final selected = chips.contains(_selected) ? _selected! : chips.firstOrNull;
+    final summary = widget.sheet.sections[SheetSection.summary];
+    final text = selected == null ? null : widget.sheet.sections[selected];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (summary != null) ...[
+          Text(summary, style: BirdyText.body.copyWith(color: c.text1)),
+          const SizedBox(height: BirdySpace.m),
+        ],
+        if (chips.isNotEmpty)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            // Cut at the edge on purpose: it tells the row scrolls.
+            clipBehavior: Clip.none,
+            child: Row(
+              children: [
+                for (final section in chips) ...[
+                  if (section != chips.first)
+                    const SizedBox(width: BirdySpace.s),
+                  _SheetChip(
+                    label: sheetSectionTitle(l10n, section),
+                    selected: section == selected,
+                    onPressed: () => setState(() => _selected = section),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        if (text != null) ...[
+          const SizedBox(height: BirdySpace.m),
+          AnimatedSwitcher(
+            duration:
+                BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.exit,
+            layoutBuilder:
+                (current, previous) => Stack(
+                  alignment: Alignment.topLeft,
+                  children: [...previous, if (current != null) current],
+                ),
+            child: Text(
+              text,
+              key: ValueKey(selected),
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
+            ),
+          ),
+        ],
+        const SizedBox(height: BirdySpace.s),
+        Text(
+          l10n.forkSheetFooter,
+          style: BirdyText.caption.copyWith(color: c.text2),
+        ),
+      ],
+    );
+  }
+}
+
+/// Filter chip of SPEC.md 5.10: ink fill and check when selected.
+class _SheetChip extends StatelessWidget {
+  const _SheetChip({
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    final background = selected ? c.text1 : c.surface1;
+    final foreground = selected ? c.background : c.text1;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: background,
+        shape: StadiumBorder(
+          side: BorderSide(color: selected ? c.text1 : c.border),
+        ),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onPressed,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: BirdySizes.target),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: selected ? BirdySpace.m : BirdySpace.l,
+                right: BirdySpace.l,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (selected) ...[
+                    Icon(AppIcons.check, size: 18, color: foreground),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    label,
+                    style: BirdyText.label.copyWith(color: foreground),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Upstream description when there is no AI sheet (other languages, or a
+/// species without one), with its source.
+class DescriptionBlock extends StatelessWidget {
+  const DescriptionBlock({super.key, required this.text, this.source});
+
+  final String text;
+  final String? source;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(text, style: BirdyText.bodyCompact.copyWith(color: c.text1)),
+        if (source != null) ...[
+          const SizedBox(height: BirdySpace.xs),
+          Text(
+            l10n.speciesDescriptionSource(source!),
+            style: BirdyText.caption.copyWith(color: c.text2),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Activity by hour and the mini map, side by side (or stacked when narrow
+/// or with large text).
+class ActivityAndMap extends StatelessWidget {
+  const ActivityAndMap({
+    super.key,
+    required this.hours,
+    required this.barColor,
+    this.map,
+    this.onSeeOnMap,
+  });
+
+  /// 24 values, or empty.
+  final List<int> hours;
+  final Color barColor;
+
+  /// The mini map, null without positioned contacts.
+  final Widget? map;
+  final VoidCallback? onSeeOnMap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final activity =
+        hours.any((h) => h > 0)
+            ? DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.surface1,
+                borderRadius: BorderRadius.circular(BirdyRadii.card),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(BirdySpace.m),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.forkActivityByHour,
+                      style: BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                    const SizedBox(height: BirdySpace.s),
+                    ActivityBars(
+                      values: hours,
+                      height: 52,
+                      color: barColor,
+                      labels: const {0: '0 h', 12: '12 h'},
+                      semanticLabel: l10n.forkActivityByHour,
+                    ),
+                  ],
+                ),
+              ),
+            )
+            : null;
+    final mapColumn =
+        map == null
+            ? null
+            : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 96, child: map),
+                if (onSeeOnMap != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: onSeeOnMap,
+                      child: Text(l10n.forkFicheSeeOnMap),
+                    ),
+                  ),
+              ],
+            );
+    if (activity == null && mapColumn == null) return const SizedBox.shrink();
+    if (activity == null) return mapColumn!;
+    if (mapColumn == null) return activity;
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (large || constraints.maxWidth < 320) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              activity,
+              const SizedBox(height: BirdySpace.m),
+              mapColumn,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: activity),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(child: mapColumn),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Last lines: the ethics reminder.
+class SpeciesPageFooter extends StatelessWidget {
+  const SpeciesPageFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Text(
+      l10n.forkFicheEthics,
+      style: BirdyText.caption.copyWith(color: c.text2),
+    );
+  }
+}
+
+/// An external page about the species (eBird, iNaturalist, Wikipédia).
+typedef SpeciesLink = ({String label, String iconAsset, String url});
+
+/// « En savoir plus sur cette espèce » and one chip per page.
+class LinksBlock extends StatelessWidget {
+  const LinksBlock({super.key, required this.links, required this.onOpen});
+
+  final List<SpeciesLink> links;
+  final ValueChanged<String> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.speciesLearnMore,
+          style: BirdyText.label.copyWith(color: c.text1),
+        ),
+        const SizedBox(height: BirdySpace.s),
+        Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.s,
+          children: [
+            for (final link in links)
+              ActionChip(
+                avatar: Image.asset(
+                  link.iconAsset,
+                  width: 18,
+                  height: 18,
+                  errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+                ),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(link.label),
+                    const SizedBox(width: BirdySpace.xs),
+                    Icon(AppIcons.openInNew, size: 14, color: c.text2),
+                  ],
+                ),
+                onPressed: () => onOpen(link.url),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
