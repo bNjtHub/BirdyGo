@@ -18,15 +18,26 @@ String heardSentence(
   required int days,
   required DateTime last,
   required DateTime now,
+}) => l10n.forkHeardSentence(
+  contacts,
+  days,
+  lastHeardWhen(l10n, languageCode, last, now: now),
+);
+
+/// « aujourd'hui à 7 h 42 », « hier à 7 h 42 », « le 12 sept. à 8 h 03 ».
+String lastHeardWhen(
+  AppLocalizations l10n,
+  String languageCode,
+  DateTime time, {
+  required DateTime now,
 }) {
-  final local = last.toLocal();
-  final time = shortTime(local, languageCode);
-  final when = switch (relativeDay(local, now)) {
-    0 => l10n.forkLastToday(time),
-    1 => l10n.forkLastYesterday(time),
-    _ => l10n.forkLastOn(DateFormat.MMMd(languageCode).format(local), time),
+  final local = time.toLocal();
+  final clock = shortTime(local, languageCode);
+  return switch (relativeDay(local, now)) {
+    0 => l10n.forkLastToday(clock),
+    1 => l10n.forkLastYesterday(clock),
+    _ => l10n.forkLastOn(DateFormat.MMMd(languageCode).format(local), clock),
   };
-  return l10n.forkHeardSentence(contacts, days, when);
 }
 
 /// Sentence plus hour and month charts for one species; empty if never

@@ -37,6 +37,7 @@ import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity 
 import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
 import '../../../fork/species_sheet/species_sheet_section.dart'; // FORK: AI sheet (J4b)
 import '../../../fork/species_photo/species_photo.dart'; // FORK: photos (J6b)
+import '../../../fork/species_page/species_page_screen.dart'; // FORK: species page (J6c)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -49,6 +50,16 @@ class SpeciesInfoOverlay {
     required String scientificName,
     required String commonName,
   }) {
+    // FORK: the BirdyGo species page replaces this sheet (J6c).
+    if (kForkSpeciesPage) {
+      showSpeciesPage(
+        context,
+        ref,
+        scientificName: scientificName,
+        commonName: commonName,
+      );
+      return;
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

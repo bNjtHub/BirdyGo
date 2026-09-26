@@ -14,6 +14,7 @@ class ActivityBars extends StatelessWidget {
     required this.labels,
     required this.semanticLabel,
     this.height = 64,
+    this.color,
   });
 
   final List<int> values;
@@ -22,6 +23,9 @@ class ActivityBars extends StatelessWidget {
   final Map<int, String> labels;
   final String semanticLabel;
   final double height;
+
+  /// Bar color; the theme's primary by default.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +43,7 @@ class ActivityBars extends StatelessWidget {
             child: CustomPaint(
               painter: _BarsPainter(
                 values: values,
-                color: theme.colorScheme.primary,
+                color: color ?? theme.colorScheme.primary,
                 emptyColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),

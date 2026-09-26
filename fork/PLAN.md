@@ -388,7 +388,18 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       commencer, vérifier dans les PR ouvertes que l'écran n'est pas déjà pris. Deux sessions à la
       fois, dans cet ordre : Fiche espèce et Revue rapide, puis Palmarès et Carte, puis Sonothèque
       et Envoi à la LPO.
-      - [ ] Fiche espèce (photo de J6b en tête)
+      - [x] Fiche espèce (`lib/fork/species_page/`) : page plein écran qui remplace la feuille upstream
+            (un point FORK dans `SpeciesInfoOverlay.show`, donc tous les appelants), feuille sombre
+            pendant une écoute. Photo de J6b en tête sur la teinte de l'espèce, « Entendu N fois… »,
+            badge Sûr et nombre de bonnes, « Ici en ce moment » (géomodèle au lieu du téléphone, 12
+            barres, jamais de demande de localisation), « Mes sons » (3 meilleurs, favoris d'abord,
+            réécoute par le lecteur du Live donc sans fausse détection pendant une écoute, lien vers la
+            sonothèque), chant de référence vers eBird, fiche IA en puces (le résumé en tête), sinon
+            la description upstream, activité par heure et mini-carte vers la carte filtrée, liens.
+            Écarts : photo au lieu de l'icône (J6d), pas d'étoile « favori » pour l'espèce, pas de
+            « il chante aussi en automne » (le géomodèle ne le dit pas), pas de Hero (aucun appelant
+            ne donne de photo de départ). À vérifier sur le Xiaomi : réécoute depuis la feuille
+            pendant une écoute, défilement fluide avec la mini-carte.
       - [ ] Palmarès
       - [ ] Carte
       - [ ] Sonothèque
@@ -481,6 +492,8 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
 - Accueil (J6c) : aucun code natif ; logo dessiné en Flutter.
+- Fiche espèce (J6c) : aucun code natif ; partage par share_plus (ancrage iPad par
+  `shareOriginFrom`), liens externes par url_launcher, réécoute par just_audio comme le Live.
 - Bilan de l'écoute (J6c) : aucun code natif ; partage du texte par share_plus (ancrage iPad par
   `shareOriginFrom`).
 - Photos (J6b) : aucun code natif. Grandes photos par `http`, cache dans le dossier cache de l'app
