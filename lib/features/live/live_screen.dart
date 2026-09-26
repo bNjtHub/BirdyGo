@@ -34,6 +34,12 @@ import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3
 import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
+import '../../fork/design/birdy_theme.dart'; // FORK: BirdyGo live screen (J6c)
+import '../../fork/design/species_accents.dart'; // FORK: BirdyGo live screen (J6c)
+import '../../fork/live/birdy_live_layout.dart'; // FORK: BirdyGo live screen (J6c)
+import '../../fork/live/live_board_model.dart'; // FORK: BirdyGo live screen (J6c)
+import '../../fork/live/live_control_bar.dart'; // FORK: BirdyGo live screen (J6c)
+import '../../fork/live/spectrum_marks.dart'; // FORK: BirdyGo live screen (J6c)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -439,6 +445,29 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     await _finalizeAndReview();
   }
 
+  // FORK: user pause from the live control bar (J6c). Same steps as the
+  // background pause, serialized with it; a user pause is not undone when
+  // the app comes back to the foreground (_pausedByLifecycle stays false).
+  void _forkTogglePause() {
+    _enqueueLifecycleTransition(() async {
+      if (_finalizing) return;
+      final controller = ref.read(liveControllerProvider);
+      final captureNotifier = ref.read(captureStateProvider.notifier);
+      if (controller.state == LiveState.active) {
+        _sessionTimer?.cancel();
+        await captureNotifier.stop();
+        await controller.pauseSession();
+        _onControllerStateChanged();
+      } else if (controller.state == LiveState.paused) {
+        await captureNotifier.start(source: ref.read(audioSourceProvider));
+        await controller.resumeSession();
+        _pausedByLifecycle = false;
+        _onControllerStateChanged();
+        _startSessionTimer();
+      }
+    });
+  }
+
   @override
   void dispose() {
     final presenceRoute = _presenceRoute;
@@ -727,6 +756,29 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       );
     }
 
+    // FORK: BirdyGo live screen in portrait (J6c); landscape stays upstream.
+    final forkBody =
+        MediaQuery.orientationOf(context) == Orientation.portrait
+            ? _forkBuildPortrait(
+              context,
+              liveState: liveState,
+              isCapturing: isCapturing,
+              currentDetections: currentDetections,
+              allDetections: allDetections,
+              taxonomyName:
+                  (d) =>
+                      taxonomy
+                          ?.lookup(d.scientificName)
+                          ?.commonNameForLocale(speciesLocale) ??
+                      d.commonName,
+              imagePath: taxonomy?.assetImagePath,
+              commonness: forkCommonness,
+              clipPending:
+                  (name) =>
+                      forkRecordsClips && forkActiveSpecies.contains(name),
+            )
+            : null;
+
     // Hot-apply tunable settings to the running session: when the user
     // tweaks the confidence threshold or pooling window count from the
     // Settings screen mid-session, push the new value straight to the
@@ -764,7 +816,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       ref.read(audioCaptureServiceProvider).setHighPassCutoff(next);
     });
 
-    return PopScope(
+    // FORK: themed below (J6c).
+    final Widget screen = PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
@@ -777,6 +830,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       child: Scaffold(
         // ── Bottom-center capture button ─────────────────────────
         floatingActionButton: _CaptureButton(
+          forkHidden: forkBody != null, // FORK: BirdyGo control bar (J6c)
           isActive: isActive,
           isPaused: isPaused,
           isLoading: liveState == LiveState.loading || _isStarting,
@@ -787,6 +841,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
           bottom: false,
           child: _buildBody(
             context,
+            forkBody: forkBody, // FORK: BirdyGo layout (J6c)
             theme: theme,
             liveState: liveState,
             isActive: isActive,
@@ -802,6 +857,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         ),
       ),
     );
+    return ListeningTheme(child: screen); // FORK: listening opens dark (J6c)
   }
 
   /// Builds the main body, switching between portrait (vertical stack)
@@ -820,7 +876,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     required Widget? Function(DetectionRecord detection)
     forkTrailing, // FORK: replay (J2)
     required List<DetectionRecord> detections,
+    Widget? forkBody, // FORK: BirdyGo layout (J6c)
   }) {
+    if (forkBody != null) return forkBody; // FORK: BirdyGo layout (J6c)
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -897,6 +955,102 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         Expanded(flex: 3, child: detectionList),
         const SizedBox(height: 72),
       ],
+    );
+  }
+
+  // FORK: BirdyGo live screen in portrait (J6c): counters, spectrogram that
+  // grows with one tap and marks each detected passage, live table, and the
+  // Arrêter / Pause bar. Session logic stays in this screen.
+  Widget _forkBuildPortrait(
+    BuildContext context, {
+    required LiveState liveState,
+    required bool isCapturing,
+    required List<DetectionRecord> currentDetections,
+    required List<DetectionRecord> allDetections,
+    required String Function(DetectionRecord detection) taxonomyName,
+    required String Function(String scientificName)? imagePath,
+    required Map<String, GeoCommonnessEntry>? commonness,
+    required bool Function(String scientificName) clipPending,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(liveControllerProvider);
+    final running =
+        liveState == LiveState.active || liveState == LiveState.paused;
+    final currentSpecies = {
+      for (final d in currentDetections) d.scientificName,
+    };
+    final entries = buildLiveBoard(
+      sessionDetections: allDetections,
+      currentSpecies: currentSpecies,
+      savedTotals: ref.watch(savedSpeciesTotalsProvider).value ?? const {},
+      presenceOf: (name) => livePresence(commonness, name),
+      localizedName: taxonomyName,
+    );
+    final marks = buildSpectrumMarks(
+      records: allDetections,
+      currentSpecies: currentSpecies,
+      window: Duration(seconds: ref.watch(windowDurationProvider)),
+      colorOf: speciesAccentFor,
+    );
+    final LiveBarState barState;
+    if (liveState == LiveState.active) {
+      barState = LiveBarState.active;
+    } else if (liveState == LiveState.paused) {
+      barState = LiveBarState.paused;
+    } else if (_isStarting || liveState == LiveState.loading) {
+      barState = LiveBarState.starting;
+    } else {
+      barState = LiveBarState.idle;
+    }
+
+    return BirdyLiveLayout(
+      statusBar: _CompactStatusBar(liveState: liveState, ref: ref),
+      errorBanner:
+          liveState == LiveState.error
+              ? _StatusBanner(liveState: liveState, ref: ref)
+              : null,
+      spectrogram: _LiveSpectrogram(isCapturing: isCapturing),
+      isCapturing: isCapturing,
+      displaySeconds: ref.watch(spectrogramDurationProvider).toDouble(),
+      marks: marks,
+      sessionRunning: running,
+      elapsed: () => controller.session?.duration ?? Duration.zero,
+      entries: entries,
+      contacts: allDetections.length,
+      idleBody: DetectionList(
+        detections: const [],
+        isActive: false,
+        showTips: true,
+      ),
+      emptyBody: LiveEmptyState(text: l10n.forkLiveEmpty),
+      controlBar: LiveControlBar(
+        state: barState,
+        onStart: () {
+          HapticFeedback.lightImpact();
+          _toggleSession();
+        },
+        onStop: _confirmStop,
+        onPauseToggle: _forkTogglePause,
+        replaying: controller.replayingClip,
+      ),
+      onTapSpecies:
+          (entry) => SpeciesInfoOverlay.show(
+            context,
+            ref,
+            scientificName: entry.scientificName,
+            commonName: entry.commonName,
+          ),
+      actionBuilder:
+          (entry) => buildReplayTrailing(
+            controller: controller,
+            clipPath: entry.clipPath,
+            clipPending: clipPending(entry.scientificName),
+          ),
+      imageOf: (name) {
+        final path = imagePath?.call(name);
+        if (path == null || path.endsWith('dummy_species.png')) return null;
+        return AssetImage(path);
+      },
     );
   }
 }
@@ -1043,6 +1197,7 @@ void _showLiveHelp(BuildContext context) {
 /// Circular microphone / stop button — bottom-center FAB (56×56).
 class _CaptureButton extends StatelessWidget {
   const _CaptureButton({
+    this.forkHidden = false, // FORK: BirdyGo control bar (J6c)
     required this.isActive,
     required this.isPaused,
     required this.isLoading,
@@ -1053,9 +1208,11 @@ class _CaptureButton extends StatelessWidget {
   final bool isPaused;
   final bool isLoading;
   final VoidCallback onPressed;
+  final bool forkHidden; // FORK: BirdyGo control bar (J6c)
 
   @override
   Widget build(BuildContext context) {
+    if (forkHidden) return const SizedBox.shrink(); // FORK (J6c)
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
