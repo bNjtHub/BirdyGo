@@ -24,3 +24,8 @@ species assets without relying on ignored `dev/` files.
    ```
 
 Full documentation: `docs/developer/species-bundle.md`.
+
+<!-- FORK: region photo pack (fork/PLAN.md J6b) -->
+BirdyGo: `--species-list tools/fork_sheets/region_species.csv` bundles photos
+for the region's species only, and `--replace-reserved` swaps photos without
+an open license for iNaturalist ones (see `tools/fork_species_photos.py`).

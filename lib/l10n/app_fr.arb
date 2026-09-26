@@ -1323,5 +1323,15 @@
   "forkSummaryToCheck": "{count, plural, =1{Vérifier 1 détection} other{Vérifier {count} détections}}",
   "forkSummaryDetails": "Voir le détail de l'écoute",
   "forkSummaryShareHeader": "{species, plural, =1{1 espèce} other{{species} espèces}} et {contacts, plural, =1{1 contact} other{{contacts} contacts}} en {duration}, avec BirdyGo.",
-  "forkSummaryShareToCheck": "{count, plural, =1{Et 1 espèce encore à vérifier.} other{Et {count} espèces encore à vérifier.}}"
+  "forkSummaryShareToCheck": "{count, plural, =1{Et 1 espèce encore à vérifier.} other{Et {count} espèces encore à vérifier.}}",
+  "forkPhotoCredit": "Crédit photo",
+  "forkPhotoAuthor": "Photo : {author}",
+  "forkPhotoLicense": "Licence : {license}",
+  "forkPhotoSource": "Source : {source}",
+  "forkPhotoAllRightsReserved": "Tous droits réservés",
+  "forkPhotoPublicDomain": "Domaine public",
+  "forkPhotoNoCredit": "On ne connaît pas l'auteur de cette photo.",
+  "forkPhotoOpenPage": "Voir la photo en ligne",
+  "forkOnlinePhotos": "Photos en grand (en ligne)",
+  "forkOnlinePhotosHint": "Quand tu ouvres une fiche, une photo plus grande est chargée depuis iNaturalist et gardée sur le téléphone."
 }

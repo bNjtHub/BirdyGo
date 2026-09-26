@@ -36,6 +36,7 @@ import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (
 import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
 import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
 import '../../../fork/species_sheet/species_sheet_section.dart'; // FORK: AI sheet (J4b)
+import '../../../fork/species_photo/species_photo.dart'; // FORK: photos (J6b)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -134,7 +135,7 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final highContrast = AppTheme.isHighContrastTheme(theme);
+    // FORK: highContrast only served the photo credit line (J6b)
     final l10n = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
@@ -170,16 +171,7 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      _detail?.assetImagePath ??
-                          'assets/images/dummy_species.png',
-                      fit: BoxFit.contain,
-                      errorBuilder:
-                          (a, b, c) => Image.asset(
-                            'assets/images/dummy_species.png',
-                            fit: BoxFit.contain,
-                          ),
-                    ),
+                    SpeciesPhoto(species: _detail), // FORK: photos (J6b)
                     if (ref
                         .watch(detectedSpeciesSetProvider)
                         .contains(widget.scientificName))
@@ -192,21 +184,7 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
                 ),
               ),
 
-              // ── Image credit (below photo) ────────────────────
-              if (_detail?.imageAuthor != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                  child: Text(
-                    '${l10n.speciesPhotoCreditLabel}: ${_detail!.imageAuthor}'
-                    '${_detail!.imageSource != null ? ' — ${_detail!.imageSource}' : ''}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          highContrast
-                              ? theme.colorScheme.onSurface
-                              : theme.colorScheme.onSurface.withAlpha(100),
-                    ),
-                  ),
-                ),
+              // FORK: the photo credit opens with a tap on the photo (J6b)
 
               // ── Names ────────────────────────────────────────
               Padding(
