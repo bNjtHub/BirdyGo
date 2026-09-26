@@ -35,10 +35,11 @@ class MarkSpan {
   final DateTime? end;
 }
 
-/// Spans of [records] (any order). A record covers its first analysis
-/// window, [window] before [DetectionRecord.timestamp], up to its end. Only
-/// the newest record of a species in [singing] is still running. Sorted by
-/// start.
+/// Spans of [records] (any order). [DetectionRecord.timestamp] is already
+/// the start of the first analysis window, so a span runs from there to the
+/// record's end. Only the newest record of a species in [singing] is still
+/// running; a closed record without an end covers its first [window].
+/// Sorted by start.
 List<MarkSpan> markSpansFrom({
   required List<DetectionRecord> records,
   required Set<String> singing,
@@ -57,17 +58,69 @@ List<MarkSpan> markSpansFrom({
       MarkSpan(
         scientificName: r.scientificName,
         label: labelOf?.call(r) ?? r.commonName,
-        start: r.timestamp.subtract(window),
+        start: r.timestamp,
         end:
             r.endTimestamp ??
             (singing.contains(r.scientificName) &&
                     identical(newest[r.scientificName], r)
                 ? null
-                : r.timestamp),
+                : r.timestamp.add(window)),
       ),
   ];
   spans.sort((a, b) => a.start.compareTo(b.start));
   return spans;
+}
+
+/// Keeps the end of a mark from going back when its passage closes.
+///
+/// A running mark reaches now, but the record then closes at the end of the
+/// last analysed window, one or two seconds earlier (or earlier still when a
+/// pause or a replay closes it). The mark keeps the instant it closed on
+/// screen when that is later than its recorded end.
+class MarkEndHold {
+  final Map<(String, DateTime), DateTime> _held = {};
+
+  /// [next] with the held ends applied. [previous] are the spans shown up to
+  /// [now]; a span running there and closed in [next] holds [now].
+  List<MarkSpan> apply({
+    required List<MarkSpan> previous,
+    required List<MarkSpan> next,
+    required DateTime now,
+  }) {
+    final running = {
+      for (final s in previous)
+        if (s.end == null) (s.scientificName, s.start),
+    };
+    final keys = <(String, DateTime)>{};
+    final out = <MarkSpan>[];
+    for (final s in next) {
+      final key = (s.scientificName, s.start);
+      keys.add(key);
+      final end = s.end;
+      if (end == null) {
+        _held.remove(key);
+        out.add(s);
+        continue;
+      }
+      if (running.contains(key)) {
+        final held = _held[key];
+        _held[key] = held != null && held.isAfter(now) ? held : now;
+      }
+      final held = _held[key];
+      out.add(
+        held != null && held.isAfter(end)
+            ? MarkSpan(
+              scientificName: s.scientificName,
+              label: s.label,
+              start: s.start,
+              end: held,
+            )
+            : s,
+      );
+    }
+    _held.removeWhere((key, _) => !keys.contains(key));
+    return out;
+  }
 }
 
 /// Pauses of the capture. The spectrogram stops scrolling while paused and
@@ -204,6 +257,14 @@ class _DetectionMarksState extends State<DetectionMarks>
   late final ValueNotifier<DateTime> _now = ValueNotifier(DateTime.now());
   late final Ticker _ticker = createTicker((_) => _now.value = DateTime.now());
   final MarkPauses _pauses = MarkPauses();
+  final MarkEndHold _endHold = MarkEndHold();
+
+  /// [DetectionMarks.spans] with the held ends.
+  late List<MarkSpan> _spans = _endHold.apply(
+    previous: const [],
+    next: widget.spans,
+    now: _now.value,
+  );
 
   /// Laid-out species names, kept across frames and rebuilds.
   final Map<String, TextPainter> _labels = {};
@@ -220,6 +281,14 @@ class _DetectionMarksState extends State<DetectionMarks>
   @override
   void didUpdateWidget(DetectionMarks old) {
     super.didUpdateWidget(old);
+    if (!identical(widget.spans, old.spans)) {
+      // The last painted instant: a passage closing now ends where it is.
+      _spans = _endHold.apply(
+        previous: _spans,
+        next: widget.spans,
+        now: _now.value,
+      );
+    }
     if (widget.running != old.running) {
       final at = DateTime.now();
       widget.running ? _pauses.resume(at) : _pauses.pause(at);
@@ -276,7 +345,7 @@ class _DetectionMarksState extends State<DetectionMarks>
         painter: DetectionMarksPainter(
           now: _now,
           pauses: _pauses,
-          spans: widget.spans,
+          spans: _spans,
           displaySeconds: widget.displaySeconds,
           showLabels: widget.showLabels,
           labelStyle: labelStyle,
