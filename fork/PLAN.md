@@ -494,7 +494,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Écarts : pas de halo animé autour de la position (pas d'animation sans fin sur la
             carte), pas de barre de navigation (elle vient avec J6e), marqueurs avec photo tant que
             les icônes de J6d manquent.
-      - [ ] Sonothèque
+      - [x] Sonothèque (`lib/fork/sound_library/`) : pas de maquette ; même langage que les autres
+            écrans J6c. Barre retour + titre, liste des espèces avec photo sur la teinte de l'espèce et
+            « N enregistrements · N ★ », puis les extraits d'une espèce : puces « Meilleur score » /
+            « Plus récents » et « Favoris seulement », bouton de réécoute du design system, date,
+            score, lieu, badge de fiabilité, étoile Loriot. Corrigé : trier ou marquer un favori
+            levait une assertion en mode debug (`setState` qui renvoyait un Future).
       - [x] Revue rapide (`lib/fork/reliability/quick_review_*.dart`) : barre « Revue rapide · N sur M »
             (fermer, écran Fiabilité), barre de progression et « Tu as trié N détections », pile de
             cartes (deux cartes derrière), carte avec badge de niveau (« Rare ici · à confirmer »
