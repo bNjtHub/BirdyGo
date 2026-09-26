@@ -14,6 +14,7 @@ import re
 from typing import Mapping
 
 from fork.maquette import icons_gen as legacy
+from tools.fork_icons.species_patterns import species_marks
 
 
 ZONES = (
@@ -229,6 +230,7 @@ def render_template(
     label: str,
     slug: str,
     adjustments: Mapping[str, object] | None = None,
+    scientific_name: str | None = None,
 ) -> str:
     """Render one family silhouette with explicit named color zones."""
     try:
@@ -240,16 +242,93 @@ def render_template(
         raise ValueError(f"Missing palette zones: {', '.join(missing)}")
     a = bounded_adjustments(adjustments)
 
+    name_parts = (scientific_name or "").split(maxsplit=1)
+    genus = name_parts[0].casefold() if name_parts else ""
+    morphotype = template.kind
+    if template.id == "anatidae":
+        morphotype = "swan" if genus == "cygnus" else "goose" if genus in {"anser", "branta"} else "duck"
+
     hx, hy = template.head_x, template.head_y
     bx, by = template.body_x, template.body_y
     hr = template.head_r * a["head_scale"]
     br = template.body_r * a["body_scale"]
+    # The family table remains the source of proportions, while these strong
+    # field-shape overrides make the major groups legible at map-marker size.
+    if morphotype == "duck":
+        hx, hy, bx, by = 17, 28, 37, 40
+        hr, br = 9 * a["head_scale"], 15 * a["body_scale"]
+    elif morphotype == "goose":
+        hx, hy, bx, by = 16, 20, 38, 42
+        hr, br = 8 * a["head_scale"], 15 * a["body_scale"]
+    elif morphotype == "swan":
+        hx, hy, bx, by = 15, 13, 39, 43
+        hr, br = 7 * a["head_scale"], 15 * a["body_scale"]
+    elif morphotype == "wader":
+        hx, hy, bx, by = template.head_x, template.head_y, 38, 39
+        hr, br = template.head_r * a["head_scale"], 14 * a["body_scale"]
+    elif morphotype == "shorebird":
+        hx, hy, bx, by = 17, 27, 37, 38
+        hr, br = template.head_r * a["head_scale"], 13 * a["body_scale"]
+    elif morphotype == "aerial":
+        hx, hy, bx, by = 18, 32, 35, 35
+        hr, br = 7 * a["head_scale"], 9.5 * a["body_scale"]
+    elif morphotype == "owl":
+        hx, hy, bx, by = 30, 23, 33, 42
+        hr, br = 15 * a["head_scale"], 16 * a["body_scale"]
+    elif morphotype == "pigeon":
+        hx, hy, bx, by = 20, 25, 36, 40
+        hr, br = 9 * a["head_scale"], 18 * a["body_scale"]
     # Both fillet circles must intersect. A fixed radius produces invalid
     # tangencies (and disappearing bodies) on long-necked birds or small heads.
     distance = math.hypot(bx - hx, by - hy)
     neck_radius = max(0, (distance - hr - br) / 2) + 1
     body_d = legacy.blob((hx, hy), hr, (bx, by), br,
                          max(6, neck_radius), max(3.5, neck_radius))
+    body_extra = ""
+    clip_extra = ""
+    shade_extra = ""
+    silhouette_back = ""
+    if morphotype in {"duck", "goose", "swan"}:
+        # Low horizontal hull, broad chest, and a visible neck.  Swans and
+        # geese deliberately stop looking like recoloured ducks.
+        body_d = legacy.capsule((bx - br * .62, by), br * .82,
+                                (bx + br * .48, by), br)
+        if morphotype == "duck":
+            neck_d = f'M{legacy.pt((hx + 4, hy + 5))}Q25 36 {legacy.pt((bx - br * .45, by - 2))}'
+            neck_w = 9 * a["head_scale"]
+        elif morphotype == "goose":
+            neck_d = f'M{legacy.pt((hx + 3, hy + 4))}C20 27 21 38 {legacy.pt((bx - br * .48, by - 3))}'
+            neck_w = 8 * a["head_scale"]
+        else:
+            neck_d = f'M{legacy.pt((hx + 3, hy + 3))}C28 17 12 38 {legacy.pt((bx - br * .44, by - 2))}'
+            neck_w = 7 * a["head_scale"]
+        neck = f'<path d="{neck_d}" fill="none" stroke="{{fill}}" stroke-width="{legacy.n(neck_w)}" stroke-linecap="round"/>'
+        head = '<circle cx="%s" cy="%s" r="%s" fill="{fill}"/>' % (legacy.n(hx), legacy.n(hy), legacy.n(hr))
+        body_extra = neck.format(fill=palette["belly"]) + head.format(fill=palette["belly"])
+        clip_extra = neck.format(fill="#fff") + head.format(fill="#fff")
+        shade_extra = neck.format(fill=f'url(#{slug}-s)') + head.format(fill=f'url(#{slug}-s)')
+    elif morphotype in {"wader", "shorebird"}:
+        body_d = legacy.capsule((bx - br * .65, by), br * .80,
+                                (bx + br * .38, by), br)
+        if morphotype == "wader":
+            neck_d = f'M{legacy.pt((hx + 2, hy + hr * .65))}C30 19 20 35 {legacy.pt((bx - br * .48, by - 2))}'
+            neck_w = max(5.2, hr * .82)
+        else:
+            neck_d = f'M{legacy.pt((hx + 3, hy + hr * .55))}Q25 32 {legacy.pt((bx - br * .50, by - 1))}'
+            neck_w = max(4.8, hr * .72)
+        neck = f'<path d="{neck_d}" fill="none" stroke="{{fill}}" stroke-width="{legacy.n(neck_w)}" stroke-linecap="round"/>'
+        head = '<circle cx="%s" cy="%s" r="%s" fill="{fill}"/>' % (legacy.n(hx), legacy.n(hy), legacy.n(hr))
+        body_extra = neck.format(fill=palette["breast"]) + head.format(fill=palette["belly"])
+        clip_extra = neck.format(fill="#fff") + head.format(fill="#fff")
+        shade_extra = neck.format(fill=f'url(#{slug}-s)') + head.format(fill=f'url(#{slug}-s)')
+    elif morphotype == "aerial":
+        body_d = legacy.capsule((hx, hy), hr, (bx + 5, by + 2), br)
+        # Sickle wings are silhouette, the spectrogram bars remain the inner
+        # wing signature rather than pretending to be the whole wing.
+        silhouette_back = (
+            f'<path d="M27 34C19 23 12 15 5 9C18 11 31 20 39 34Z" fill="{palette["back"]}"/>'
+            f'<path d="M33 36C43 25 52 19 61 18C54 29 48 39 39 42Z" fill="{palette["wing"]}"/>'
+        )
 
     tail_length = template.tail_length * a["tail_length"]
     radians = math.radians(template.tail_angle)
@@ -264,8 +343,24 @@ def render_template(
     beak_depth = template.beak_depth
     beak_base_x = hx - hr * .82
     beak_y = hy
-    upper = [(beak_base_x, beak_y - beak_depth * .50), (beak_base_x - beak_length, beak_y), (beak_base_x, beak_y + .25)]
-    lower = [(beak_base_x, beak_y + .45), (beak_base_x - beak_length * .82, beak_y + beak_depth * .35), (beak_base_x, beak_y + beak_depth * .72)]
+    if morphotype == "duck":
+        beak_length = 10 * a["beak_length"]
+        beak_depth = 6
+    elif morphotype in {"goose", "swan"}:
+        beak_length = 9 * a["beak_length"]
+        beak_depth = 4.5
+    if morphotype == "duck":
+        upper = [(beak_base_x, beak_y - 2.8),
+                 (beak_base_x - beak_length, beak_y - 1.8),
+                 (beak_base_x - beak_length - 1, beak_y),
+                 (beak_base_x, beak_y + .2)]
+        lower = [(beak_base_x, beak_y + .5),
+                 (beak_base_x - beak_length - 1, beak_y + .4),
+                 (beak_base_x - beak_length, beak_y + 2.2),
+                 (beak_base_x, beak_y + 2.6)]
+    else:
+        upper = [(beak_base_x, beak_y - beak_depth * .50), (beak_base_x - beak_length, beak_y), (beak_base_x, beak_y + .25)]
+        lower = [(beak_base_x, beak_y + .45), (beak_base_x - beak_length * .82, beak_y + beak_depth * .35), (beak_base_x, beak_y + beak_depth * .72)]
 
     wing_scale = template.wing_scale * a["wing_scale"]
     halves = [4.2 * wing_scale, 6.2 * wing_scale, 4.7 * wing_scale, 2.7 * wing_scale]
@@ -280,9 +375,16 @@ def render_template(
             tail_base, template.tail_width,
             (tail_tip[0], tail_tip[1] + offset), 1.3), palette["tail"])
             for offset in (-3.5, 3.5))
+    if morphotype == "duck":
+        tail_art = legacy.path(legacy.capsule((bx + br * .55, by - 2), 3.8, (bx + br + 5, by - 5), 1.8), palette["tail"])
+    elif morphotype in {"goose", "swan"}:
+        tail_art = legacy.path(legacy.capsule((bx + br * .55, by), 3.8, (bx + br + 5, by - 2), 1.8), palette["tail"])
+    beak_art = "" if morphotype == "owl" else legacy.beak(
+        upper, lower, palette["beak"], _darken(palette["beak"]), 1.1)
     back = (
+        f'<g data-morphotype="{morphotype}">{silhouette_back}</g>'
         f'<g data-zone="tail">{tail_art}</g>'
-        f'<g data-zone="beak">{legacy.beak(upper, lower, palette["beak"], _darken(palette["beak"]), 1.1)}</g>'
+        f'<g data-zone="beak">{beak_art}</g>'
     )
     marks = (
         f'<g data-zone="back">{legacy.circle((bx + br * .48, by - br * .48), br * .82, palette["back"])}</g>'
@@ -299,14 +401,46 @@ def render_template(
         legacy.line((bx - 4, by + br * .76), (bx - 6, by + br * .76 + leg_length), 1.8, palette["legs"])
         + legacy.line((bx + 2, by + br * .82), (bx + 3, by + br * .82 + leg_length), 1.8, palette["legs"])
     )
+    if morphotype in {"duck", "goose", "swan", "aerial"}:
+        legs = ""
+    elif morphotype in {"wader", "shorebird"}:
+        # Long separated legs and forward/back toes remain readable at 34 px.
+        ankle_y = by + br * .65 + leg_length
+        legs = ""
+        for x, lean in ((bx - 5, -1.5), (bx + 3, 1.2)):
+            legs += legacy.line((x, by + br * .60), (x + lean, ankle_y), 1.55, palette["legs"])
+            legs += legacy.line((x + lean, ankle_y), (x + lean - 3.5, ankle_y + 1.5), 1.25, palette["legs"])
+            legs += legacy.line((x + lean, ankle_y), (x + lean + 4, ankle_y + 1), 1.25, palette["legs"])
     feature = ""
     face = ""
-    if template.kind == "owl":
-        face = legacy.circle((hx - 4.5, hy), hr * .42, palette["cheek"]) + legacy.circle((hx + 4.5, hy), hr * .42, palette["cheek"])
+    eye_art = legacy.eye(eye_at, 2.2, palette["eye"])
+    if morphotype == "owl":
+        face = (legacy.circle((hx - 5.2, hy), hr * .43, palette["cheek"])
+                + legacy.circle((hx + 5.2, hy), hr * .43, palette["cheek"])
+                + legacy.beak([(hx - 1.5, hy + 3), (hx, hy + 7), (hx + 1.5, hy + 3)], [], palette["beak"], palette["beak"], .8))
+        eye_art = (legacy.eye((hx - 5, hy - .5), 2.35, palette["eye"])
+                   + legacy.eye((hx + 5, hy - .5), 2.35, palette["eye"]))
     elif template.kind == "crested":
         feature = "".join(legacy.line((hx + 1, hy - hr * .65), (hx + dx, hy - hr - dy), 2.8, palette["crown"]) for dx, dy in ((-8, 5), (-3, 8), (3, 9), (8, 6)))
     elif template.kind == "climber":
         feature = '<rect x="3" y="2" width="7" height="60" rx="3.5" fill="#6B5847"/>'
+    elif template.kind == "raptor":
+        # Hooked bill tip and grasping toes are the raptor's field marks.
+        feature = (f'<path d="M{legacy.n(beak_base_x - beak_length)} {legacy.n(beak_y)}q-.8 2.2 .8 3.4" '
+                   f'fill="none" stroke="{_darken(palette["beak"])}" stroke-width="1.5" stroke-linecap="round"/>')
+        foot_y = by + br * .76 + leg_length
+        legs += (legacy.line((bx - 5, foot_y), (bx - 9, foot_y + 2), 1.6, palette["legs"])
+                 + legacy.line((bx - 5, foot_y), (bx - 2, foot_y + 3), 1.6, palette["legs"])
+                 + legacy.line((bx + 2, foot_y), (bx + 6, foot_y + 2), 1.6, palette["legs"]))
+
+    diagnostic_marks = species_marks(
+        scientific_name,
+        template_id,
+        palette,
+        head=(hx, hy, hr),
+        body=(bx, by, br),
+        morphotype=morphotype,
+    )
 
     # Fit the whole drawing, including tail caps and legs, inside the icon.
     # Bounds deliberately include stroke margins; rounding the scale downward
@@ -325,6 +459,12 @@ def render_template(
         min_y = min(min_y, hy - hr - 11)
     elif template.kind == "climber":
         min_x, min_y, max_y = min(min_x, 2), min(min_y, 1), max(max_y, 63)
+    if morphotype == "aerial":
+        min_x, min_y, max_x, max_y = min(min_x, 4), min(min_y, 8), max(max_x, 62), max(max_y, 48)
+    elif morphotype in {"wader", "shorebird"}:
+        max_y = max(max_y, by + br * .65 + leg_length + 3)
+    elif morphotype == "swan":
+        min_y = min(min_y, 5)
     scale = min(1.0, math.floor(min(60 / (max_x - min_x), 60 / (max_y - min_y)) * 10) / 10)
     tx = 32 - (min_x + max_x) * scale / 2
     ty = 32 - (min_y + max_y) * scale / 2
@@ -333,13 +473,13 @@ def render_template(
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" '
         f'role="img" aria-label="{html.escape(label, quote=True)}">'
-        f'<defs><clipPath id="{clip_id}"><path d="{body_d}"/></clipPath>'
+        f'<defs><clipPath id="{clip_id}"><path d="{body_d}"/>{clip_extra}</clipPath>'
         f'{legacy.SHADE.format(k=slug)}</defs><g transform="{transform}">{feature}{back}'
-        f'<path d="{body_d}" fill="{palette["belly"]}"/>'
-        f'<g clip-path="url(#{clip_id})">{marks}</g>'
-        f'<path d="{body_d}" fill="url(#{shade_id})"/>'
+        f'<path d="{body_d}" fill="{palette["belly"]}"/>{body_extra}'
+        f'<g clip-path="url(#{clip_id})">{marks}{diagnostic_marks}</g>'
+        f'<path d="{body_d}" fill="url(#{shade_id})"/>{shade_extra}'
         f'{face}<g data-zone="wing"><g data-zone="wing_bar">{wing}</g></g>'
         f'<g data-zone="legs">{legs}</g>'
-        f'<g data-zone="eye">{legacy.eye(eye_at, 2.2, palette["eye"])}</g>'
+        f'<g data-zone="eye">{eye_art}</g>'
         '</g></svg>'
     )

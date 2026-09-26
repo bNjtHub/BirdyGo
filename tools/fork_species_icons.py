@@ -277,6 +277,7 @@ def render_species(row: Mapping[str, object], adjustments: Mapping[str, object] 
         label=label,
         slug=slug,
         adjustments=adjustments,
+        scientific_name=scientific_name,
     )
 
 

@@ -110,6 +110,23 @@ class TemplateTests(unittest.TestCase):
         self.assertIn("#123456", svg)
         self.assertIn('data-zone="crown"', svg)
 
+    def test_anatidae_genus_selects_duck_goose_and_swan_shapes(self) -> None:
+        palette = icons.NEUTRAL_PALETTE
+        drawings = {
+            genus: templates.render_template(
+                "anatidae",
+                palette,
+                label=genus,
+                slug=genus.casefold(),
+                scientific_name=f"{genus} example",
+            )
+            for genus in ("Anas", "Anser", "Cygnus")
+        }
+        self.assertEqual(3, len(set(drawings.values())))
+        for expected, genus in (("duck", "Anas"), ("goose", "Anser"), ("swan", "Cygnus")):
+            self.assertIn(f'data-morphotype="{expected}"', drawings[genus])
+            ET.fromstring(drawings[genus])
+
 
 class DataAndBundleTests(unittest.TestCase):
     def test_palette_validation_does_not_fill_missing_species_colors(self) -> None:
