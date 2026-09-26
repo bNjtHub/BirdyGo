@@ -39,6 +39,7 @@ import '../live/live_session.dart';
 import '../recording/audio_decoder.dart';
 import '../recording/native_audio_decoder.dart';
 import '../recording/wav_writer.dart';
+import '../../fork/map/sensitive_species.dart'; // FORK: export privacy (J5)
 import 'html_report.dart';
 import 'services/audio_share_extension.dart';
 import 'services/detection_audio_window.dart';
@@ -930,6 +931,8 @@ Future<String?> buildSessionExport(
   // Resolve the active format set; tokens outside the known list are
   // ignored. An empty result is now allowed so users can share the raw
   // audio file without any companion documents.
+  // FORK: blur sensitive species' positions (fork/PLAN.md J5).
+  session = await applyExportPrivacy(session);
   const allFormats = {'raven', 'csv', 'json', 'gpx'};
   final selected = formats.where(allFormats.contains).toSet();
 

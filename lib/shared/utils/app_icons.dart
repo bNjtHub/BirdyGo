@@ -99,6 +99,7 @@ abstract final class AppIcons {
   static const IconData locationOn = Symbols.location_on;
   static const IconData locationOnFilled = Icons.location_on;
   static const IconData locationOnRounded = Symbols.location_on_rounded;
+  static const IconData layers = Symbols.layers; // FORK: map base layers (J5)
   static const IconData lockOutline = Symbols.lock;
   static const IconData map = Symbols.location_on;
   static const IconData mapSheet = Symbols.map;
