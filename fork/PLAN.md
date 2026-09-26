@@ -343,6 +343,19 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       région. Ajouter à `tools/build_species_bundle.py` une option pour ne traiter que cette liste, à
       lancer sur le PC (birdnet.cornell.edu n'est pas joignable depuis le cloud). En ligne, photos plus
       grandes via iNaturalist (inat_id), mises en cache. Crédit et licence accessibles d'un appui.
+      - [x] `build_species_bundle.py --only-species` : images des seules espèces de la région.
+      - [x] `tools/fork_species_photos.py` : une photo iNaturalist par espèce, sous licence
+            réutilisable (CC0, CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA ; jamais ND ni « tous droits
+            réservés », donc aucune photo Macaulay), recadrée en 480×320, crédit et URL de la grande
+            version dans `assets/fork/species_photos.json`. Si l'app devient payante ou affiche de la
+            publicité : relancer avec `--no-nc`.
+      - [x] App : photo embarquée, grande version en fondu par-dessus (cache disque de 100 Mo, sans
+            nouvelle dépendance), crédit et licence d'un appui, silhouette sans photo. Branché sur la
+            fiche espèce upstream (`SpeciesInfoOverlay`) en attendant la fiche de J6c.
+      - [ ] Sur le PC : lancer les trois scripts (voir `tools/fork_species_photos.py`), commiter
+            `assets/fork/species_photos.json`.
+      - [ ] Sur le Xiaomi : fiche espèce hors ligne (photo embarquée), en ligne (fondu sans saut),
+            crédit d'un appui ; taille de l'APK.
 - [ ] J6c Écrans, un par session : Accueil, Live (spectrogramme agrandi ou réduit, tableau en direct
       avec compteurs de session et totaux), Fin de sortie (résumé de l'écoute), Fiche espèce, Palmarès,
       Carte, Sonothèque, Revue rapide, Envoi à la LPO. Carnet et Profil (statut, badges, série)
@@ -440,3 +453,6 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
   `HapticFeedback` (sur iPhone, vérifier qu'elle se sent sans être trop forte).
+- Photos (J6b) : aucun code natif. Grandes photos en https (pas d'exception ATS), cache dans le
+  dossier de cache de l'app (`getApplicationCacheDirectory`), qu'iOS peut vider : la photo embarquée
+  reste alors affichée.

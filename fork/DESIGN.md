@@ -218,6 +218,12 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   direct, carnet. La photo reste sur la fiche.
 - Silhouette sobre quand il n'y a ni photo ni icône.
 
+Mise en œuvre (J6b), dans `lib/fork/photos/` : `SpeciesPhoto` (cadre de taille fixe, 3:2 par défaut
+ou la taille du parent ; photo embarquée et grande version en `BoxFit.cover` avec le même recadrage
+centré ; fondu `BirdyMotion.enter`, gardé avec les animations réduites ; pastille « © » de 48 dp),
+`PhotoCreditSheet` et `PhotoCreditLine` pour le crédit. Les listes passent `loadLarge: false` : la
+grande version ne se charge que sur la fiche.
+
 ## Jeu
 
 - Statuts selon le nombre d'espèces découvertes (confirmées ou Sûr), à thème oiseau, chacun avec sa
