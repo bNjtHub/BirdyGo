@@ -34,6 +34,12 @@ import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3
 import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
+import '../../fork/design/birdy_theme.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
+import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -539,6 +545,29 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     _startSessionTimer();
   }
 
+  // FORK: « Pause » / « Reprendre » of the listening screen (J6c). Same steps
+  // as the lifecycle pause and resume, queued behind them, but without
+  // [_pausedByLifecycle]: a pause chosen by the user is not lifted when the
+  // app comes back to the foreground.
+  void _forkTogglePause() {
+    _enqueueLifecycleTransition(() async {
+      if (_finalizing) return;
+      final controller = ref.read(liveControllerProvider);
+      final captureNotifier = ref.read(captureStateProvider.notifier);
+      if (controller.state == LiveState.active) {
+        _sessionTimer?.cancel();
+        await captureNotifier.stop();
+        await controller.pauseSession();
+      } else if (controller.state == LiveState.paused) {
+        _pausedByLifecycle = false;
+        await captureNotifier.start(source: ref.read(audioSourceProvider));
+        await controller.resumeSession();
+        _startSessionTimer();
+      }
+      _onControllerStateChanged();
+    });
+  }
+
   // ── Session duration timer ────────────────────────────────────────────
 
   void _startSessionTimer() {
@@ -764,6 +793,31 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       ref.read(audioCaptureServiceProvider).setHighPassCutoff(next);
     });
 
+    // FORK: listening screen (J6c), dark portrait layout. Landscape keeps
+    // the upstream layout below.
+    if (MediaQuery.orientationOf(context) == Orientation.portrait) {
+      return _forkListeningScreen(
+        context,
+        liveState: liveState,
+        isActive: isActive,
+        isPaused: isPaused,
+        isCapturing: isCapturing,
+        currentDetections: currentDetections,
+        allDetections: allDetections,
+        totals: forkTotals,
+        clips: forkClips,
+        recordsClips: forkRecordsClips,
+        commonness: forkCommonness,
+        localizedName:
+            (detection) =>
+                taxonomy
+                    ?.lookup(detection.scientificName)
+                    ?.commonNameForLocale(speciesLocale) ??
+                detection.commonName,
+        imagePath: (name) => taxonomy?.assetImagePath(name),
+      );
+    }
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -798,6 +852,146 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             forkTotals: forkTotals,
             forkTrailing: forkTrailing,
             detections: detections,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // FORK: listening screen (J6c, fork/DESIGN.md « Live »).
+  Widget _forkListeningScreen(
+    BuildContext context, {
+    required LiveState liveState,
+    required bool isActive,
+    required bool isPaused,
+    required bool isCapturing,
+    required List<DetectionRecord> currentDetections,
+    required List<DetectionRecord> allDetections,
+    required Map<String, int> totals,
+    required Map<String, String> clips,
+    required bool recordsClips,
+    required Map<String, GeoCommonnessEntry>? commonness,
+    required String Function(DetectionRecord detection) localizedName,
+    required String? Function(String scientificName) imagePath,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(liveControllerProvider);
+    final inSession = isActive || isPaused;
+    final entries =
+        inSession
+            ? buildLiveTable(
+              sessionDetections: allDetections,
+              currentDetections: currentDetections,
+              totals: totals,
+              localizedName: localizedName,
+            )
+            : const <LiveTableEntry>[];
+    final spans =
+        inSession
+            ? markSpansFrom(
+              records: allDetections,
+              singing: {for (final d in currentDetections) d.scientificName},
+              window: Duration(
+                seconds:
+                    controller.session?.settings.windowDuration ??
+                    ref.read(windowDurationProvider),
+              ),
+              labelOf: localizedName,
+            )
+            : const <MarkSpan>[];
+    final phase =
+        isActive
+            ? LiveControlPhase.active
+            : isPaused
+            ? LiveControlPhase.paused
+            : liveState == LiveState.loading || _isStarting
+            ? LiveControlPhase.starting
+            : LiveControlPhase.idle;
+    final statusText = switch (liveState) {
+      LiveState.active => l10n.forkLiveListening,
+      LiveState.paused => l10n.statusPaused,
+      LiveState.loading => l10n.statusLoadingModel,
+      LiveState.error => l10n.statusError,
+      LiveState.ready => l10n.statusReady,
+      _ => l10n.statusInitializing,
+    };
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (inSession) {
+          await _confirmStop();
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: ListeningTheme(
+        child: Scaffold(
+          body: LiveListeningLayout(
+            statusText: statusText,
+            live: isActive,
+            capturing: isCapturing,
+            elapsed: () => controller.session?.duration ?? Duration.zero,
+            entries: entries,
+            spans: spans,
+            displaySeconds:
+                ref.watch(spectrogramDurationProvider).toDouble(),
+            spectrogramBuilder:
+                (expanded) => _LiveSpectrogram(
+                  isCapturing: isCapturing,
+                  showFrequencyAxis: expanded,
+                ),
+            phase: phase,
+            onStart: _toggleSession,
+            onStop: _confirmStop,
+            onTogglePause: _forkTogglePause,
+            onBack: () => Navigator.of(context).maybePop(),
+            onSettings:
+                () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder:
+                        (_) => const SettingsScreen(
+                          settingsContext: SettingsContext.live,
+                        ),
+                  ),
+                ),
+            onHelp: () => _showLiveHelp(context),
+            replaying: controller.replayingClip,
+            imageFor: (name) {
+              final path = imagePath(name);
+              return path == null ? null : AssetImage(path);
+            },
+            badgeFor: (entry, {required compact}) {
+              final presence = livePresence(commonness, entry.scientificName);
+              return ReliabilityBadge(
+                level: reliabilityFor(
+                  score: entry.record.confidence,
+                  review: entry.record.reviewStatus,
+                  presence: presence,
+                ),
+                unexpected: presence?.unexpected ?? false,
+                compact: compact,
+              );
+            },
+            actionFor:
+                (entry) => buildReplayTrailing(
+                  controller: controller,
+                  clipPath: clips[entry.scientificName],
+                  clipPending: recordsClips && entry.singing,
+                ),
+            onOpen:
+                (entry) => SpeciesInfoOverlay.show(
+                  context,
+                  ref,
+                  scientificName: entry.scientificName,
+                  commonName: entry.record.commonName,
+                ),
+            empty: const LiveTipsCarousel(),
+            banner:
+                liveState == LiveState.error
+                    ? _StatusBanner(liveState: liveState, ref: ref)
+                    : null,
           ),
         ),
       ),
@@ -1324,7 +1518,12 @@ class _SessionInfoBar extends ConsumerWidget {
 /// When capture is inactive the spectrogram remains visible (frozen on the
 /// last frame) but the FFT ticker is paused to conserve CPU.
 class _LiveSpectrogram extends ConsumerWidget {
-  const _LiveSpectrogram({required this.isCapturing});
+  const _LiveSpectrogram({
+    required this.isCapturing,
+    this.showFrequencyAxis = false, // FORK: kHz scale when enlarged (J6c)
+  });
+
+  final bool showFrequencyAxis; // FORK: kHz scale when enlarged (J6c)
 
   final bool isCapturing;
 
@@ -1350,7 +1549,7 @@ class _LiveSpectrogram extends ConsumerWidget {
         dbFloor: dbFloor,
         dbCeiling: dbCeiling,
         displaySeconds: durationSec.toDouble(),
-        showFrequencyAxis: false,
+        showFrequencyAxis: showFrequencyAxis, // FORK: J6c
         showTimeAxis: false,
         maxDisplayFrequency: maxFreq,
         logAmplitude: logAmplitude,
