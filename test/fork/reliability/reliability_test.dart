@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:birdnet_live/features/announcements/domain/announcement_signals.dart';
 import 'package:birdnet_live/features/announcements/geo_commonness_provider.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/inference/geo_abundance.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/fork_session_hooks.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
@@ -90,23 +91,74 @@ void main() {
     });
 
     test('live presence from the commonness map', () {
-      GeoCommonnessEntry entry(CommonnessBin bin, {bool off = false}) =>
-          GeoCommonnessEntry(
-            commonness: bin,
-            isOutOfSeason: off,
-            currentScore: 0.3,
-            annualMax: 0.5,
-          );
+      GeoCommonnessEntry entry(
+        CommonnessBin bin, {
+        bool off = false,
+        double score = 0.3,
+      }) => GeoCommonnessEntry(
+        commonness: bin,
+        isOutOfSeason: off,
+        currentScore: score,
+        annualMax: 0.5,
+      );
       final map = {
         'common': entry(CommonnessBin.common),
         'rare': entry(CommonnessBin.rare),
         'late': entry(CommonnessBin.common, off: true),
+        'faint': entry(CommonnessBin.scarce, score: 0.01),
       };
       expect(livePresence(map, 'common')!.unexpected, isFalse);
       expect(livePresence(map, 'rare')!.unexpected, isTrue);
-      expect(livePresence(map, 'late')!.unexpected, isTrue);
+      // J3b: out of season alone no longer makes it unexpected.
+      expect(livePresence(map, 'late')!.unexpected, isFalse);
+      expect(livePresence(map, 'faint')!.unexpected, isTrue);
       expect(livePresence(map, 'missing')!.unexpected, isTrue);
       expect(livePresence(null, 'common'), isNull);
+
+      expect(liveUnexpectedCause(map['common']), isNull);
+      expect(liveUnexpectedCause(map['late']), isNull);
+      expect(liveUnexpectedCause(map['rare']), LiveUnexpectedCause.rare);
+      expect(
+        liveUnexpectedCause(map['faint']),
+        LiveUnexpectedCause.belowInclusion,
+      );
+      expect(liveUnexpectedCause(null), LiveUnexpectedCause.absent);
+    });
+
+    test('Live and the listening summary agree on the same week', () {
+      // Same population and tier scale as geoCommonnessProvider and
+      // presenceFromWeekScores; half of the species out of season.
+      final scores = <String, double>{
+        for (var i = 0; i < 40; i++) 'sp$i': 0.05 + i * 0.02,
+        'vagrant': 0.001,
+      };
+      final labels = scores.keys.toSet();
+      final summary = presenceFromWeekScores(scores, audioLabels: labels);
+      final scale = ExploreTierScale.fromScores([
+        for (final s in scores.values)
+          if (s >= kAbundanceInclusionThreshold) s,
+      ]);
+      final live = {
+        for (final (i, MapEntry(:key, :value)) in scores.entries.indexed)
+          key: GeoCommonnessEntry(
+            commonness:
+                scale.tierFor(value) == ExploreTier.rare
+                    ? CommonnessBin.rare
+                    : CommonnessBin.common,
+            isOutOfSeason: i.isEven,
+            currentScore: value,
+            annualMax: 1,
+          ),
+      };
+      for (final name in scores.keys) {
+        expect(
+          livePresence(live, name)!.unexpected,
+          summary[name]!.unexpected,
+          reason: name,
+        );
+      }
+      expect(summary['sp0']!.unexpected, isTrue);
+      expect(summary['sp39']!.unexpected, isFalse);
     });
   });
 

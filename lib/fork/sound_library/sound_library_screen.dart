@@ -312,6 +312,7 @@ class _ClipLevel extends ConsumerWidget {
               presence: snapshot.data,
             ),
             unexpected: snapshot.data?.unexpected ?? false,
+            score: clip.confidence,
           ),
     );
   }

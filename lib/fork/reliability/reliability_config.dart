@@ -63,6 +63,19 @@ ReliabilityLevel reliabilityFor({
   return ReliabilityLevel.toCheck;
 }
 
+/// True when [presence] alone makes a detection « À vérifier »: the score
+/// would reach « Probable » or « Sûr », but the species is unexpected here
+/// (J3b). The level stays [ReliabilityLevel.toCheck]; only its label and
+/// explanation change (« Rare ici · à confirmer »).
+bool placeOnlyToCheck({
+  required double score,
+  ReviewStatus review = ReviewStatus.unreviewed,
+  GeoPresence? presence,
+}) =>
+    review != ReviewStatus.confirmed &&
+    (presence?.unexpected ?? false) &&
+    score >= ReliabilityConfig.probableMinScore;
+
 /// Most trusted of [levels] (the level of a species over several contacts);
 /// [ReliabilityLevel.toCheck] when there is none.
 ReliabilityLevel bestLevel(Iterable<ReliabilityLevel> levels) {

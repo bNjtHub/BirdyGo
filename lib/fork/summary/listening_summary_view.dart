@@ -431,6 +431,7 @@ class _MaybeFirstRow extends StatelessWidget {
                         ReliabilityBadge(
                           level: species.level,
                           unexpected: species.unexpected,
+                          score: species.bestScore,
                         ),
                       ],
                     ),

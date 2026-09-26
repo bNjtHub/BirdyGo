@@ -494,6 +494,7 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
             presence: presence,
           ),
           unexpected: presence?.unexpected ?? false,
+          score: detection.confidence, // FORK: « Rare ici · à confirmer » (J3b)
           compact: true,
         ),
       );

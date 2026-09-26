@@ -186,6 +186,37 @@ Fini quand : rejouer un rougegorge pendant une écoute ne crée aucune nouvelle 
 
 Fini quand : les niveaux sont cohérents d'un écran à l'autre et chaque balayage est bien enregistré.
 
+## J3b : « Rare ici » expliqué
+
+Problème : un chant bien reconnu mais inattendu ici (lieu ou saison) s'affichait « À vérifier » +
+« Inattendu ici », comme si l'identification était douteuse. La règle ne change pas : un oiseau
+inattendu reste « À vérifier » et doit être confirmé avant de compter. Seul l'affichage change.
+
+- [x] Comprendre : en Live, `livePresence` comptait aussi le « hors saison » (score de la semaine
+      sous 40 % du pic annuel), alors que `presenceAt` (Bilan, revue, sonothèque, Accueil) n'utilise
+      que le palier rare et le seuil d'inclusion. Un `debugPrint` `[GeoPresence]` (une fois par
+      espèce, attendue ou non, en debug et en profile) dit quel critère a joué et si le hors-saison
+      aurait joué ; une ligne « no commonness map » si le Live n'a ni position ni géomodèle.
+- [x] Aligner le Live sur `presenceAt` : palier rare, sous le seuil d'inclusion ou absent de la carte.
+      Le hors-saison seul ne rend plus une espèce inattendue ; il reste dans les annonces vocales et
+      dans `LpoGeoStatus.outOfSeason`.
+- [x] Une seule pastille Loriot, bord pointillé, « Rare ici · à confirmer » à la place de « À
+      vérifier » + « Inattendu ici » quand le lieu seul déclenche (`placeOnlyToCheck` : score au
+      moins Probable, non confirmé). Un appui ouvre l'explication (`rare_here_sheet.dart`). En
+      compact (lignes du Live), pas d'appui : libellé pour l'infobulle et le lecteur d'écran.
+- [x] Fiche espèce : la même phrase sous « Ici en ce moment » quand l'espèce est inattendue au lieu
+      du téléphone cette semaine (même règle, à partir des scores déjà chargés).
+- [x] Cohérence vérifiée : Bilan (« Vérifier N », point sur les espèces), Accueil (compteur à
+      vérifier), revue rapide (toutes les détections non revues) et LPO (confirmées seulement)
+      restent calculés sur le niveau ou le statut de revue, pas sur le libellé.
+- [x] (Benjamin) Sur le Xiaomi : passer un chant de Rougegorge depuis le web pendant une écoute,
+      relever la ligne `[GeoPresence]`, vérifier Live et Bilan. Résultat : Rougegorge « abundant »,
+      ni rare ni hors saison, « Sûr » en Live et au Bilan. Le « À vérifier » d'origine venait donc
+      d'un score bas (son de haut-parleur), pas du lieu.
+- Limite connue, inchangée : l'index ne garde pas l'avis du géomodèle, donc une ancienne détection
+  non revue à score élevé compte comme « déjà vérifiée » même si l'espèce était inattendue
+  (`ObservationIndex.verifiedSpecies`, « Première fois » et « nouvelles »). À traiter avec le jeu (J6e).
+
 ## J4 : palmarès
 
 - [x] Classement des espèces par nombre de contacts, par nombre de jours ou par dernière écoute.

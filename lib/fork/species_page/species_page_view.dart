@@ -184,6 +184,7 @@ class HereNowCard extends StatelessWidget {
     required this.sentence,
     required this.monthsCaption,
     required this.currentMonth,
+    this.rareNote,
   });
 
   final YearPresence year;
@@ -192,6 +193,10 @@ class HereNowCard extends StatelessWidget {
 
   /// 1 to 12, highlighted.
   final int currentMonth;
+
+  /// Why a detection is « Rare ici · à confirmer », shown when the species
+  /// is unexpected here this week (J3b).
+  final String? rareNote;
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +228,32 @@ class HereNowCard extends StatelessWidget {
                     sentence,
                     style: BirdyText.bodyCompact.copyWith(color: c.text1),
                   ),
+                  if (rareNote != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(
+                            AppIcons.diamond,
+                            size: 14,
+                            fill: 1,
+                            color: c.orioleText,
+                          ),
+                        ),
+                        const SizedBox(width: BirdySpace.xs),
+                        Expanded(
+                          child: Text(
+                            rareNote!,
+                            style: BirdyText.bodyCompact.copyWith(
+                              color: c.orioleText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

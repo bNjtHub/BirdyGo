@@ -46,9 +46,11 @@ void main() {
     bool indexFails = false,
     Map<String, List<double>>? year,
     bool yearFails = false,
+    Set<String>? labels,
   }) => SpeciesPageLoader(
     index: () async => indexFails ? throw StateError('no index') : index,
     yearScores: () async => yearFails ? throw StateError('no model') : year,
+    audioLabels: labels == null ? null : () async => labels,
   );
 
   setUp(() async {
@@ -133,6 +135,35 @@ void main() {
     expect(
       await loader(yearFails: true).presence('Erithacus rubecula'),
       isNull,
+    );
+  });
+
+  test('unexpected here this week, with the reliability rule (J3b)', () async {
+    // 40 species with flat years, the rarest one in the bottom tier.
+    final year = {
+      for (var i = 0; i < 40; i++)
+        'sp$i': List<double>.filled(48, 0.05 + i * 0.02),
+      'vagrant': List<double>.filled(48, 0.001),
+    };
+    final labels = year.keys.toSet();
+    final now = DateTime(2026, 9, 26);
+    final l = loader(year: year, labels: labels);
+    expect(await l.unexpectedNow('sp0', now: now), isTrue);
+    expect(await l.unexpectedNow('vagrant', now: now), isTrue);
+    expect(await l.unexpectedNow('unknown', now: now), isTrue);
+    expect(await l.unexpectedNow('sp39', now: now), isFalse);
+    // Unknown without a position, a model or the audio labels.
+    expect(
+      await loader(labels: labels).unexpectedNow('sp0', now: now),
+      isFalse,
+    );
+    expect(await loader(year: year).unexpectedNow('sp0', now: now), isFalse);
+    expect(
+      await loader(
+        yearFails: true,
+        labels: labels,
+      ).unexpectedNow('sp0', now: now),
+      isFalse,
     );
   });
 }

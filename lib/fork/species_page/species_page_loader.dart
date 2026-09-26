@@ -5,6 +5,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
+import '../../features/inference/geo_model.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
@@ -16,11 +17,16 @@ class SpeciesPageLoader {
   SpeciesPageLoader({
     required Future<ObservationIndex> Function() index,
     required Future<Map<String, List<double>>?> Function() yearScores,
+    Future<Set<String>> Function()? audioLabels,
   }) : _index = index,
-       _yearScores = yearScores;
+       _yearScores = yearScores,
+       _audioLabels = audioLabels;
 
   final Future<ObservationIndex> Function() _index;
   final Future<Map<String, List<double>>?> Function() _yearScores;
+
+  /// Audio-detectable species: the population of the rarity scale.
+  final Future<Set<String>> Function()? _audioLabels;
 
   /// The user's contacts with [scientificName]. An index that cannot open
   /// gives an empty record, never an error.
@@ -77,6 +83,30 @@ class SpeciesPageLoader {
     }
   }
 
+  /// Whether the geo-model finds [scientificName] unexpected where the
+  /// phone is, during the week of [now]: same rule as the reliability
+  /// levels (`presenceFromWeekScores`), so the page explains the
+  /// « Rare ici · à confirmer » badge (J3b). False when unknown.
+  Future<bool> unexpectedNow(
+    String scientificName, {
+    required DateTime now,
+  }) async {
+    try {
+      final all = await _yearScores();
+      final labels = await _audioLabels?.call();
+      if (all == null || labels == null) return false;
+      final week = GeoModel.dateTimeToWeek(now.toLocal());
+      final map = presenceFromWeekScores({
+        for (final MapEntry(:key, :value) in all.entries)
+          if (value.length >= week) key: value[week - 1],
+      }, audioLabels: labels);
+      if (map.isEmpty) return false;
+      return (map[scientificName] ?? kAbsentHere).unexpected;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Marks or unmarks a recording as favorite (same list as the sound
   /// library).
   Future<void> setFavorite(String key, {required bool favorite}) async =>
@@ -106,5 +136,6 @@ final speciesPageLoaderProvider = Provider<SpeciesPageLoader>(
   (ref) => SpeciesPageLoader(
     index: () => ref.read(observationIndexServiceProvider).ensureReady(),
     yearScores: () => ref.read(speciesYearScoresProvider.future),
+    audioLabels: () => ref.read(audioLabelsSetProvider.future),
   ),
 );

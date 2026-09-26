@@ -780,6 +780,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             presence: presence,
           ),
           unexpected: presence?.unexpected ?? false,
+          score: detection.confidence, // FORK: « Rare ici · à confirmer » (J3b)
           compact: true,
         ),
       );
@@ -1074,6 +1075,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                         presence: presence,
                       ),
                       unexpected: presence?.unexpected ?? false,
+                      // FORK: « Rare ici · à confirmer » (J3b)
+                      score: entry.record.confidence,
                       compact: compact,
                     );
                   },
