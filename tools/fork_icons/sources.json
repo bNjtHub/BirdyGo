@@ -1,0 +1,2882 @@
+{
+  "schema_version": 1,
+  "selection": {
+    "input": "tools/fork_sheets/region_species.csv",
+    "filter": "is_bird == 1",
+    "sort": "mean_share descending; stable input order for ties",
+    "count": 100,
+    "additional": [
+      "Oriolus oriolus"
+    ]
+  },
+  "review_policy": "draft means the public-domain plate was viewed and a stylized palette was prepared; it is not ornithological or Benjamin approval. reviewed is reserved for explicit human review.",
+  "species": {
+    "Gallus gallus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male; Bankiva Cock",
+      "image_url": "https://archive.org/download/gallinaceousbird00jardrich/page/n8.jpg",
+      "image_sha256": "869cf6eadd40093498408b9eaee2e9738fdd0631e05cd4db1a6f5c23314dfc2c",
+      "source_url": "https://archive.org/details/gallinaceousbird00jardrich/page/n8/mode/1up",
+      "source_title": "Gallinaceous Birds (19th-century Henry G. Bohn reprint; catalog circa 1845)",
+      "source_author": "William Jardine; William Home Lizars (engraver)",
+      "source_license": "Public domain (19th-century original)",
+      "source_plate": "Vignette title page; Bankiva Cock",
+      "edition_note": "The digitized vignette names Henry G. Bohn. Internet Archive dates this copy [1845?] and marks NOT_IN_COPYRIGHT; the exact reprint year is uncertain.",
+      "figure_used": "Named species in the historical caption; adult male; Bankiva Cock."
+    },
+    "Phalacrocorax carbo": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_62.jpg",
+      "image_sha256": "90477f27d20cb61fc24b513baa09eeda68e31da403bc139238cc7315322d6e54",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Kormoran, Krähenscharbe.... Phalacrocorax carbo - Kormoran Phalacrocorax aristotelis - Krähenscharbe Phalacrocorus pygmaeus - Zwergscharbe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band XI, Tafel 5 - Gera, 1903 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_62.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume XI, plate 5",
+      "figure_used": "Named species in the historical caption; adult breeding."
+    },
+    "Chroicocephalus ridibundus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult summer",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp360.jpg",
+      "image_sha256": "3a6fac14367b9eb590735b3854b67b0dead85fe8d5ddf5bd79c68b2b0940c225",
+      "historical_caption": "BLACK-HEADED GULL Larus ridibundus Summer",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig90",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 90",
+      "figure_used": "Adult summer bird."
+    },
+    "Larus michahellis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult; foreground yellow-legged bird; historical Larus leucophaeus",
+      "image_url": "https://archive.org/download/historyofbirdsof18dres/page/n531.jpg",
+      "image_sha256": "270c16447ec0367569b386fa31b40107fea36089d4827ffed07182a3da1fe9a2",
+      "source_url": "https://archive.org/details/historyofbirdsof18dres/page/n531/mode/1up",
+      "source_title": "A History of the Birds of Europe, volume VIII (1871-1881)",
+      "source_author": "H. E. Dresser; J. G. Keulemans (illustrator)",
+      "source_license": "Public domain (19th-century original)",
+      "source_plate": "Plate 602; foreground Larus leucophaeus",
+      "figure_used": "Large yellow-legged gull in foreground; smaller pink-legged Larus argentatus behind is excluded."
+    },
+    "Larus fuscus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult; upper bird on shared plate",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_81.jpg",
+      "image_sha256": "2d37a371592ae204aec262ed186ca0978a76e9d6e184bd69a5d5c0e35764392a",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Heringsmöve, Mantelmöve, Eismöve Larus fuscus - Heringsmöve Larus marinus - Mantelmöve Larus hyperboreus - Eismöve aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band XI, Tafel 24 - Gera, 1903 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_81.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume XI, plate 24",
+      "figure_used": "Upper bird with yellow legs; the lower Larus marinus has pink legs."
+    },
+    "Ardea cinerea": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_38.jpg",
+      "image_sha256": "b40cf7045c7903ad95232ab3a211a99d080de8b8802f253c4c7d482777660b45",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Fischreiher Ardea cinerea - Fischreiher aus: NAUMANN : Naturgeschichte der Vögel Mitteleuropas, Band VI, Tafel 20 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_38.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 20",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Sturnus vulgaris": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult spotted plumage",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp152.jpg",
+      "image_sha256": "a28a0c9e7810a9a772b7b82b90cad6acc727d281d712b84abd4ae59e68cd8154",
+      "historical_caption": "STARLING Sturnus vulgaris Adult (right). Young (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig46",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 46",
+      "figure_used": "Adult at right."
+    },
+    "Erithacus rubecula": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp036.jpg",
+      "image_sha256": "a58dc11a5edc76eef2e430850b02bac02dae417e441cea11de70241426810e64",
+      "historical_caption": "ROBIN Erithacus rubecula Adult (right). Young (left)",
+      "legacy_reference": "fork/maquette/icons.json#rougegorge",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig9",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 9",
+      "figure_used": "Adult at right."
+    },
+    "Phylloscopus collybita": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp054.jpg",
+      "image_sha256": "e7617b95424586fe8bd50737de5088b8e60797cab9dcea098655c42a1811f89f",
+      "historical_caption": "CHIFFCHAFF Phylloscopus collybita [Vieillot] (above) WILLOW WREN Phylloscopus trochilus (below)",
+      "legacy_reference": "fork/maquette/icons.json#pouillot",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig16",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 16",
+      "figure_used": "Upper bird; historical Phylloscopus rufus."
+    },
+    "Motacilla alba": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_64.jpg",
+      "image_sha256": "22298e76fcb27869b02d89de41634bbbe3aff448a38e3ef2650010a72cd4097c",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Bachstelze Motacilla alba - Bachstelze aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 9 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_64.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 9",
+      "figure_used": "Adult male in foreground."
+    },
+    "Phoenicurus ochruros": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_03.jpg",
+      "image_sha256": "8e23033fa853bd3fd110dd67a42f996061efcf7ea25e2382e18734cd46b06298",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Gartenrotschwanz - Hausrotschwanz Phoenicurus phoenicurus - Gartenrotschwanz Phoenicurus ochruros Hausrotschwanz aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band I, Tafel 6 - Gera, 1905 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_03.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume I, plate 6",
+      "figure_used": "Black/gray redstart with pale wing patch; the common redstart on the shared plate has orange underparts."
+    },
+    "Turdus philomelos": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp004.jpg",
+      "image_sha256": "40c75c35291365771e42cabd1012761ba363aa12c18907662d1185bc0a2d3b55",
+      "historical_caption": "SONG THRUSH Turdus musicus",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig2",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 2",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Fringilla coelebs": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp126.jpg",
+      "image_sha256": "b22be7cb4f6fa5c71fdfdd7e3e094a062743da06847fa2469ca50cde1c2bab14",
+      "historical_caption": "CHAFFINCH Fringilla cœlebs",
+      "legacy_reference": "fork/maquette/icons.json#pinson",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig38",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 38",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Alauda arvensis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp168.jpg",
+      "image_sha256": "7188e4366f8fb24cef0c171c5ec02d0cc42a4ff935b8a0b0f3bff4d5e8601eec",
+      "historical_caption": "SKYLARK Alauda arvensis Adult (left). Young (right)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig51",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 51",
+      "figure_used": "Adult at left."
+    },
+    "Coloeus monedula": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp160.jpg",
+      "image_sha256": "03f38dad89faed58ccf1ebc697429ed3851664495f517e2b798f46ac632c2079",
+      "historical_caption": "JACKDAW Corvus monedula",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig49",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 49",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Sylvia atricapilla": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp046.jpg",
+      "image_sha256": "03c05f967ee2e699857aeecd15bab8c750be48845e18cb64fbf76072d3c752bb",
+      "historical_caption": "BLACKCAP Sylvia atricapilla Female (above). Male (below)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig13",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 13",
+      "figure_used": "Male below."
+    },
+    "Falco tinnunculus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp216.jpg",
+      "image_sha256": "ed3fc90517e9d45cb39202ed4fb8250c62669854c59f0104f3f8c7d67829a448",
+      "historical_caption": "KESTREL Falco tinnunculus Male (below). Female (above)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig62",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 62",
+      "figure_used": "Male below."
+    },
+    "Anas platyrhynchos": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp242.jpg",
+      "image_sha256": "b696e085da1b3059a4a0f5d3e4e6297dc793c862a6b4c79026535c51826dde15",
+      "historical_caption": "MALLARD OR WILD DUCK Anas boschas",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig66",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 66",
+      "figure_used": "Adult male; historical Anas boschas."
+    },
+    "Columba livia": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult wild-type; domestic forms vary",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_19.jpg",
+      "image_sha256": "204ca6bf828efaada832085a3e1dfef78eca968f421439ee989df05c44b9ff28",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Felsentaube Columba livia - Felsentaube aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band VI, Tafel 1 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_19.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 1",
+      "figure_used": "Named species in the historical caption; adult wild-type; domestic forms vary."
+    },
+    "Turdus merula": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp016.jpg",
+      "image_sha256": "2a7526f3b4dd08f7e087abc9c448d05463ea0e9de0ef892713b01da598ee3bb9",
+      "historical_caption": "BLACKBIRD Turdus merula Adult male (centre). Adult female (right). Young (left)",
+      "legacy_reference": "fork/maquette/icons.json#merle",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig4",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 4",
+      "figure_used": "Adult male (central bird)."
+    },
+    "Columba palumbus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_20.jpg",
+      "image_sha256": "c0cad695cde744ecd94d1f526932d75328425d7535d7ef9f1501447ce7c80d76",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Ringeltaube Columba palumbus - Ringeltaube aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band VI, Tafel 2 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_20.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 2",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Streptopelia decaocto": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male; historical Turkestan specimen Turtur stoliczkae",
+      "image_url": "https://archive.org/download/Aves00Shar/page/n206.jpg",
+      "image_sha256": "50860f6038ed10f80f36caf67c9fa45f118727298bd2b2e2ff24a0292490441e",
+      "source_url": "https://archive.org/details/Aves00Shar/page/n206/mode/1up",
+      "source_title": "Scientific Results of the Second Yarkand Mission: Aves (1891)",
+      "source_author": "R. Bowdler Sharpe; J. G. Keulemans (illustrator)",
+      "source_license": "Public domain (1891 original; BHL No Known Copyright Issues)",
+      "source_plate": "Plate XIV; Turtur stoliczkae",
+      "additional_references": [
+        {
+          "source_url": "https://www.biodiversitylibrary.org/page/11520319",
+          "source_title": "Kiralyi Magyar Termeszettudomanyi Tarsulat evkonyvei 3(3) (1838)",
+          "source_author": "Imre Frivaldszky (1799-1870)",
+          "source_license": "Public domain; PD-old-100-expired; PD-Art",
+          "source_plate": "Plate VIII; Columba risoria var. C. decaocto",
+          "image_url": "https://www.biodiversitylibrary.org/pageimage/11520319",
+          "image_sha256": "b13ffbd6b619f0f058cb11c76dcb5048079e1df1582b0e0464229290e14fc8d9",
+          "rights_url": "https://commons.wikimedia.org/wiki/File:Columba_decaocto_Frivaldski.jpg",
+          "note": "Monochrome 1838 plate: collar and shape cross-check only."
+        }
+      ],
+      "taxon_note": "The historical Turtur stoliczkae is now a junior synonym of Streptopelia decaocto. A Turkestan specimen is shown; regional variation and historical hand-coloring require review.",
+      "taxon_reference_url": "https://birdnet.cornell.edu/taxonomy/species/Streptopelia%20decaocto",
+      "taxon_research_url": "https://www.jenskjeld.info/artikler/Eurasian_Collared_Dove_bboc.v142i2.2022.a3.pdf",
+      "rights_url": "https://www.biodiversitylibrary.org/item/109484",
+      "figure_used": "Adult male type specimen of Turtur stoliczkae (historical name), single bird."
+    },
+    "Egretta garzetta": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_41.jpg",
+      "image_sha256": "cae1e527670d752f6be3c24d45c6e0c385e59deac74c5530553b6f4e493f09fb",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Seidenreiher Egretta garzetta - Seidenreiher aus: NAUMANN : Naturgeschichte der Vögel Mitteleuropas, Band VI, Tafel 23 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_41.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 23",
+      "figure_used": "Named species in the historical caption; adult breeding."
+    },
+    "Falco peregrinus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp212.jpg",
+      "image_sha256": "4b5129ab9e2ecca5d8ad27697082e13e44afccf3b9316cbca36f4999f668a978",
+      "historical_caption": "PEREGRINE Falco peregrinus Adult (left). Young (right)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig61",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 61",
+      "figure_used": "Adult at left."
+    },
+    "Hirundo rustica": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_21.jpg",
+      "image_sha256": "790440736dc56921826439585e1194ac81cea2934edf2b6181fe8e8d89baeca1",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Rauchschwalbe, Rötelschwalbe Hirundo rustica - Rauchschwalbe Cercropis daurica - Rötelschwalbe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 23 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_21.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 23",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Anthus pratensis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp092.jpg",
+      "image_sha256": "3179a45d9357efc7d53e31c16578fcad40f1d08b80ca2bc229190b699403a94f",
+      "historical_caption": "TREE PIPIT Anthus trivialis (left) MEADOW PIPIT Anthus pratensis (right)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig30",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 30",
+      "figure_used": "Right bird."
+    },
+    "Accipiter nisus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_03.jpg",
+      "image_sha256": "e6b8b9dba7e0af6d15ef1424bf5bd86e3e9bfc654cfbb0682cbd3ecc9ef5e4a7",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Sperber Accipiter nisus - Sperber aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 51 - Gera, 1999 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_03.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 51",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Carduelis carduelis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp118.jpg",
+      "image_sha256": "8cb9e4e6e8ec2ffcb9b8dbe949c8bef7e859d73207470051a79878850f6c1872",
+      "historical_caption": "GOLDFINCH Carduelis elegans Male (left). Female (centre). Young (right)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig36",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 36",
+      "figure_used": "Male at left."
+    },
+    "Linaria cannabina": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp130.jpg",
+      "image_sha256": "6b1ffd215e6d8b17a3eb5735cadb152fc1cbd02a0139b5ae562d8434021e241b",
+      "historical_caption": "LINNET Linota cannabina Male (above). Female (below)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig39",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 39",
+      "figure_used": "Male above."
+    },
+    "Troglodytes troglodytes": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp082.jpg",
+      "image_sha256": "00d3cfa2916846832a8791e056ff618f35de26739c70f1feff7c8804a0d321f9",
+      "historical_caption": "COMMON WREN Troglodytes parvulus Lower figure St. Kilda variety",
+      "legacy_reference": "fork/maquette/icons.json#troglodyte",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig25",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 25",
+      "figure_used": "Upper bird; the lower bird is the St Kilda form."
+    },
+    "Pica pica": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp158.jpg",
+      "image_sha256": "6666865b5297ee4e2d73888bdcfa726504e445ad358f706c91492cd03803a84d",
+      "historical_caption": "MAGPIE Pica rustica",
+      "legacy_reference": "fork/maquette/icons.json#pie",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig48",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 48",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Buteo buteo": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult brown morph",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_86.jpg",
+      "image_sha256": "3798a9722fe3db85994d52ef3fd2ae85aee886bd144f5f4be12d0bf5dac774ce",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Mäusebussard Buteo buteo - Mäusebussard aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 34 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_86.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 34",
+      "figure_used": "Named species in the historical caption; adult brown morph."
+    },
+    "Chloris chloris": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp114.jpg",
+      "image_sha256": "70db7cf6768c7fffac2e607d9baffd0c72883a07b6abdb9eb16ac7d187c22e5f",
+      "historical_caption": "GREENFINCH Ligurinus chloris Male (below). Female (above)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig35",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 35",
+      "figure_used": "Male below."
+    },
+    "Regulus regulus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp050.jpg",
+      "image_sha256": "ae15bd1d867829cad2e588554708be58287439f46b3697c8693ac734298329a8",
+      "historical_caption": "FIRE-CRESTED WREN Regulus ignicapillus (above) GOLDEN-CRESTED WREN Regulus cristatus (below)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig15",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 15",
+      "figure_used": "Lower bird; the upper bird is Regulus ignicapilla."
+    },
+    "Motacilla cinerea": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male breeding",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp088.jpg",
+      "image_sha256": "4b3b729ee188e8a0cfa95607b5e9acd58d585eb650c024d7ad61f5a10021e024",
+      "historical_caption": "GREY WAGTAIL Motacilla melanope",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig28",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 28",
+      "figure_used": "Named species in the historical caption; adult male breeding."
+    },
+    "Actitis hypoleucos": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_95.jpg",
+      "image_sha256": "f383dca99f89f772e9bdd35e4febd37af291705923fa4098f2e18c81b710ee25",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Wasserläufer, Flußuferläufer Tringa ochropus - Waldwasserläufer Tringa glareola - Bruchwasserläufer Actitis hypoleucus - Flußuferläufer aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 1 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_95.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 1",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Parus major": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp076.jpg",
+      "image_sha256": "909d3d3657d916d2a20a5668ba74153509825254a2c968598e3c5be7a29814e1",
+      "historical_caption": "GREAT TIT Parus major",
+      "legacy_reference": "fork/maquette/icons.json#mesange-charbonniere",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig22",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 22",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Gallinula chloropus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp288.jpg",
+      "image_sha256": "691a2c16d4c6d1212bcdfc9562aaefaf81ccd089e48347dcad28adade9630962",
+      "historical_caption": "MOOR-HEN Gallinula chloropus",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig78",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 78",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Saxicola rubicola": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp030.jpg",
+      "image_sha256": "77c1b5a65f6e00848ecb1e02bf79181d1abb5d191ec486f406fec3e917fa222d",
+      "historical_caption": "STONECHAT Pratincola rubicola Male (right). Female (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig7",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 7",
+      "figure_used": "Male at right; historical Pratincola rubicola."
+    },
+    "Passer domesticus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_97.jpg",
+      "image_sha256": "52f9168eb9a0c852ef4321531236e92ec76bf17520c6547e5145caeeab3e3703",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Haussperling, Feldsperling Passer domesticus - Haussperling Passer montanus - Feldsperling aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 42 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "legacy_reference": "fork/maquette/icons.json#moineau",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_97.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 42",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Cyanistes caeruleus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_48.jpg",
+      "image_sha256": "0d11426b1cd35bd9546b1779b55642202dc40567b3d4af97423eea3ea4670fc6",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Blaumeise, Schwanzmeise Parus ceeruleus - Blaumeise Aegithalus caudatus - Weißköpfige Schwanzmeise Aegithalus caudatus vagans* - Schwarzbrauige Schwanzmeise Aegithalus caudatus irbyi* - Südliche Schwanzmeise Parus cyanus - Lasurmeise Parus pleskei* - Russische Blaumeise aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band II, Tafel 18 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "legacy_reference": "fork/maquette/icons.json#mesange-bleue",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_48.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume II, plate 18",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Vanellus vanellus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp308.jpg",
+      "image_sha256": "ddb8eac948b5cab639f6d05467d2293e8c935fe315d126c823563bec3dcb5a11",
+      "historical_caption": "LAPWING Vanellus vulgaris Adult, summer (right). Young (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig82",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 82",
+      "figure_used": "Adult summer bird at right."
+    },
+    "Podiceps cristatus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp388.jpg",
+      "image_sha256": "83fdbf950a409f4d0bf2b8f8f80265104c5f2b786b6c285072eff6a8af339648",
+      "historical_caption": "GREAT CRESTED GREBE Podicipes cristatus Adult, summer (right). Young (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig99",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 99",
+      "figure_used": "Adult summer bird at right."
+    },
+    "Corvus corax": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_09.jpg",
+      "image_sha256": "a4512a8e9734c96462581170ba3e5e54d7760d29805e56589dd4e9ddb3cc7eb5",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Kolkrabe Corvus corax - Kolkrabe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 11 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_09.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 11",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Fulica atra": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_59.jpg",
+      "image_sha256": "bba825a223b017cc243b98c4c51a5d91d5f3b8711f2af9050926b8ebce18c761",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Bläßhuhn Fulica atra - Bläßhuhn aus: NAUMANN : Naturgeschichte der Vögel Mitteleuropas, Band VII, Tafel 10 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_59.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VII, plate 10",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Circus aeruginosus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/4274_02.jpg",
+      "image_sha256": "11fe02f2ef5914ae1bb9e103af2f75fa215643c53fffbae5e9bb5d9cfe687ac7",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Rohrweihe Circus aeruginosus - Rohrweihe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 54 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/4274_02.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 54",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Regulus ignicapilla": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp050.jpg",
+      "image_sha256": "ae15bd1d867829cad2e588554708be58287439f46b3697c8693ac734298329a8",
+      "historical_caption": "FIRE-CRESTED WREN Regulus ignicapillus (above) GOLDEN-CRESTED WREN Regulus cristatus (below)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig15",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 15",
+      "figure_used": "Upper bird; the lower bird is Regulus regulus."
+    },
+    "Ardea alba": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult nonbreeding; rear bird with yellow bill",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_40.jpg",
+      "image_sha256": "904896e25f57f3b1403d94b1234affa7c6692570a56a0df0dd6a8f6d2dbb8a8c",
+      "historical_caption": "Band VI, Tafel 22 - Gera, 1897; Herodias alba",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_40.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 22",
+      "figure_used": "Rear bird with yellow bill; nonbreeding colors."
+    },
+    "Tachybaptus ruficollis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1613_11.jpg",
+      "image_sha256": "40cc155383a7d5bb97860651109fd5991fa1a3c28bca67fccb480e512464d5b3",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Zwergtaucher Tachybaptus ruficollis - Zwergtaucher aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band XII, Tafel 12 - Gera, 1903 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1613_11.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume XII, plate 12",
+      "figure_used": "Named species in the historical caption; adult breeding."
+    },
+    "Garrulus glandarius": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp156.jpg",
+      "image_sha256": "f916ec49be62a577a558b8a17dc8035caf6040ba6ecdea590a774eac5a2791ae",
+      "historical_caption": "JAY Garrulus glandarius",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig47",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 47",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Dendrocopos major": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp180.jpg",
+      "image_sha256": "ad580b14ddf100c8cdfafa0bf2d9d2f894cfa3253d383cf938ace1a5d5d8d431",
+      "historical_caption": "GREATER SPOTTED WOODPECKER Dendrocopus major Male (right). Female (centre). Young (left)",
+      "legacy_reference": "fork/maquette/icons.json#pic-epeiche",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig54",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 54",
+      "figure_used": "Male at right."
+    },
+    "Aegithalos caudatus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult; dark head stripe form",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp074.jpg",
+      "image_sha256": "455aa2f8e319e8f08c0a87c709864d873a47896629c96a98cfdeaf39aadc3978",
+      "historical_caption": "LONG-TAILED TIT Acredula caudata",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig21",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 21",
+      "figure_used": "Named species in the historical caption; adult; dark head stripe form."
+    },
+    "Rallus aquaticus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp286.jpg",
+      "image_sha256": "ffe514b1f72356cac2d1495b0c0691116ad2a9f0914aa45e0907fde7f1786434",
+      "historical_caption": "WATER-RAIL Rallus aquaticus",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig77",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 77",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Anser anser": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_16.jpg",
+      "image_sha256": "ebd384a9b154df903882a93acf647b2f3e960277e7b789c7ee737a70e191d21f",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Graugans Anser anser - Graugans aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 22 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_16.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 22",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Alcedo atthis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp182.jpg",
+      "image_sha256": "dfcf7b6d53998abfa07bba9895813a1218944d089fe67fd85d59a07f076ddb8c",
+      "historical_caption": "KINGFISHER Alcedo ispida",
+      "legacy_reference": "fork/maquette/icons.json#martin-pecheur",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig55",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 55",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Periparus ater": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_50.jpg",
+      "image_sha256": "10c02645cc5b8656f3bd6a2467a419dc26b96119e4ec3843b503e39683532070",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Haubenmeise, Tannenmeise, Kohlmeise Parus mitratus* - Mitteldeutsche Haubenmeise Parus ater - Tannenmeise Parus major - Kohlmeise Parus subpalustris* - Mitteldeutsche Nonnenmeise aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band II, Tafel 20 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_50.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume II, plate 20",
+      "figure_used": "Coal tit in middle left/center; white cheek and black crown."
+    },
+    "Prunella modularis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp068.jpg",
+      "image_sha256": "3638e3ca473586520d0bdcdefbc870c9c8798ef0612d33efdd8c56cd5c41d199",
+      "historical_caption": "HEDGE ACCENTOR (HEDGE SPARROW) Accentor modularis",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig19",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 19",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Turdus viscivorus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_01a.jpg",
+      "image_sha256": "4a38951dd4ce6739da9cc6f13e98c580b11dbc7053ef38c72fb3e5e0980020bf",
+      "historical_caption": "MISSEL THRUSH Turdus viscivorus Adult (right). Young (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig1",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 1",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Serinus serinus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_89.jpg",
+      "image_sha256": "bc8c96d739809303fff398a2cfede806254a389e54d2214fe1d714c249bab210",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Girlitz, Rotköpfiger Girlitz Serinus serinus - Girlitz Serinus pusillus* - Rotköpfiger Girlitz aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 34 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_89.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 34",
+      "figure_used": "Yellow birds in upper group; the red-fronted birds below are another species."
+    },
+    "Anas crecca": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_32.jpg",
+      "image_sha256": "b0b8caa521176807a37e4d4ef47c0d1a5cc8bb3d6e8b99aa8118c95761943998",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Knäkente, Krickente, Sichelente Anas querquedula - Knäkente Anas crecca - Krickente Anas falcata - Sichelente aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band X, Tafel 4 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_32.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume X, plate 4",
+      "figure_used": "Red-headed male with green face at left; the right bird is a falcated duck."
+    },
+    "Milvus milvus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_75.jpg",
+      "image_sha256": "35f002a9d8a76a700c248f7a6f326872e320f1b53985ebe454159f6057f6ffd4",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Roter Milan, Schwarzer Milan Milvus milvus - Roter Milan Milvus migrans - Schwarzer Milan aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 23 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_75.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 23",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Corvus corone": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult all-black carrion crow; left bird",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_10.jpg",
+      "image_sha256": "e16c81acf7bbd8b9f9cd956bec0b5d32e34df0263c801c7e733e98b3630c72d9",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Rabenkrähe, Nebelkrähe Corvus corone corone - Rabenkrähe Corvus corone cornix - Nebelkrähe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 12 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_10.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 12",
+      "figure_used": "All-black bird at left; the gray hooded crow at right is excluded."
+    },
+    "Tadorna tadorna": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp240.jpg",
+      "image_sha256": "6b90bc0b7e7ff2485feb65b45d286e2bdaf10bc8b976195ca24ddb8ee040a2d4",
+      "historical_caption": "SHELD-DUCK Tadorna cornuta",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig65",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 65",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Phasianus colchicus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_36.jpg",
+      "image_sha256": "54a1e38681b4042b3b073038aec2a13853df2d45b2df3577df8cf5e5c72d08d1",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Fasan Phasianus colchicus - Fasan aus: NAUMANN : Naturgeschichte der Vögel Mitteleuropas, Band VI, Tafel 18 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_36.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 18",
+      "figure_used": "Adult male below."
+    },
+    "Gallinago gallinago": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_09.jpg",
+      "image_sha256": "8d504a97c5d7a3de6058de2d608aa945eef3c54634561a55b9f6976e42738b18",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Bekassine Gallinago gallinago - Bekassine aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 15 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_09.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 15",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Tringa ochropus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_95.jpg",
+      "image_sha256": "f383dca99f89f772e9bdd35e4febd37af291705923fa4098f2e18c81b710ee25",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Wasserläufer, Flußuferläufer Tringa ochropus - Waldwasserläufer Tringa glareola - Bruchwasserläufer Actitis hypoleucus - Flußuferläufer aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 1 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_95.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 1",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Ardea ibis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding; figure 1 buff-backed heron",
+      "image_url": "https://archive.org/download/historyofbirdsof16dres/page/n333.jpg",
+      "image_sha256": "48cca2eb8b7d086c4147458fc847057da4e9e5d6410529f65f464a9bcd87aeb9",
+      "source_url": "https://archive.org/details/historyofbirdsof16dres/page/n333/mode/1up",
+      "source_title": "A History of the Birds of Europe, volume VI (1871-1881)",
+      "source_author": "H. E. Dresser; J. G. Keulemans (lithographer)",
+      "source_license": "Public domain (19th-century original)",
+      "source_plate": "Plate 400, figure 1; Ardea bubulcus",
+      "figure_used": "Figure1 at left; figure2 at right is a squacco heron."
+    },
+    "Cygnus olor": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_12.jpg",
+      "image_sha256": "ee455ed651f197ca3216b9b63ebdcb984dea8ca4d0da8e42b6448846db0033e9",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Höckerschwan Cygnus olor - Höckerschwan aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 18 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_12.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 18",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Emberiza schoeniclus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_80.jpg",
+      "image_sha256": "f257c0879fdad4f80bfc3a5ca31c219aa05c24260553499171b01cae2adbf674",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Rohrammer Emberiza schoeniclus - Rohrammer aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 25 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_80.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 25",
+      "figure_used": "Adult male above."
+    },
+    "Passer montanus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp124.jpg",
+      "image_sha256": "d994ff9277f2e9d85cba8620e57fe8093233ca63c759a1e96ca885564a7d511b",
+      "historical_caption": "TREE-SPARROW Passer montanus",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig37",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 37",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Aythya ferina": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_38.jpg",
+      "image_sha256": "13870f949e27e7bf67ce0be423c8e7f5860d7ad1ceeb4304c476f4730fecf876",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Reiherente, Bergente, Tafelente, Moorente, Kolbenente Aythya fuligula - Reiherente Aythya marila - Bergente Aythya ferina - Tafelente Aythya nyroca - Moorente Aythya rufina - Kolbenente aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band X, Tafel 10 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_38.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume X, plate 10",
+      "figure_used": "Red-headed male at left; the tufted duck in foreground is excluded."
+    },
+    "Emberiza calandra": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_74.jpg",
+      "image_sha256": "4c4087fb3b9db53a7d2dade35eb795bf66582fb59f336fe2a7ec77a710900139",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Grauammer, Kappenammer Emberiza calandra - Grauammer Emberiza melanocephala - Kappenammer aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 19 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_74.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 19",
+      "figure_used": "Upper streaked bird; the lower black-headed bunting is excluded."
+    },
+    "Tyto alba": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult pale-breasted form",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp190.jpg",
+      "image_sha256": "ea6e7d140c33412cdf61d05909e8befc3863504ce5c061df38e1bcce351951d4",
+      "historical_caption": "BARN OWL Strix flammea",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig57",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 57",
+      "figure_used": "Named species in the historical caption; adult pale-breasted form."
+    },
+    "Spatula clypeata": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp246.jpg",
+      "image_sha256": "c523af06280803671df7a4bc7460a767f8927b33ce0fa99e0c7a0f69f2fe4be5",
+      "historical_caption": "SHOVELLER Spatula clypeata",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig67",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 67",
+      "figure_used": "Adult male."
+    },
+    "Loxia curvirostra": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp138.jpg",
+      "image_sha256": "eaaa189433d66ce9d286ce89604f241401ee92f8e70052e9eda547c1d5fb8642",
+      "historical_caption": "CROSSBILL Loxia curvirostra Male (below). Young (left). Female (above)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig42",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 42",
+      "figure_used": "Male below."
+    },
+    "Athene noctua": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_54.jpg",
+      "image_sha256": "32d4dbf2ae6d33cc6d607d89febc514d3bc58b8852a119751c84cb1ff889852a",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Steinkauz. Tengmalmskauz Athene noctua - Steinkauz Nyctala tengmalmi* - Tengmalmskauz aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 2 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_54.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 2",
+      "figure_used": "Smaller owl at upper right; the larger lower-left owl is another species."
+    },
+    "Ichthyaetus melanocephalus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_75.jpg",
+      "image_sha256": "23a2db1025c426722f039191df2a212f265886ea134bceff09ab2579590e5b7a",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Zwergmöve, Schwarzkopfmöve, Lachmöve Larus minutus - Zwergmöve Larus melanocephalus - Schwarzkopfmöve Larus ridibundus - Lachmöve aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band XI, Tafel 18 - Gera, 1903 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_75.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume XI, plate 18",
+      "figure_used": "Adult black-headed bird with white primaries on the shared gull plate."
+    },
+    "Podiceps nigricollis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1613_10.jpg",
+      "image_sha256": "cde7e156a87072b12bfc3545c7cd2fd026e9b9d2698a485d250eb57b993cfba2",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Schwarzhalstaucher Podiceps nigricollis - Schwarzhalstaucher aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band XII, Tafel 11 - Gera, 1903 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1613_10.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume XII, plate 11",
+      "figure_used": "Named species in the historical caption; adult breeding."
+    },
+    "Sitta europaea": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp080.jpg",
+      "image_sha256": "af05816c1771ef8dac4ae19849fd660071f079189cfce07db8fa46cfb9ede226",
+      "historical_caption": "NUTHATCH Sitta cæsia",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig24",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 24",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Numenius arquata": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp348.jpg",
+      "image_sha256": "977e48838eb054d5d165c68087c76c0f3c0681ff3129f0d5c7bb79d767568af5",
+      "historical_caption": "CURLEW Numenius arquata",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig88",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 88",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Strix aluco": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult rufous morph",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp194.jpg",
+      "image_sha256": "7ef2aea30f67d9e598695a1030510c1d9290ccb029954e3290d5e73dceb4e71d",
+      "historical_caption": "TAWNY OWL Syrnium aluco",
+      "legacy_reference": "fork/maquette/icons.json#chouette-hulotte",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig59",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 59",
+      "figure_used": "Named species in the historical caption; adult rufous morph."
+    },
+    "Picus viridis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_27.jpg",
+      "image_sha256": "8041af6b32c0a181328cec484d67cb40b21963c772ec3a43f366761773006a4a",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Grünspecht Picus viridis - Grünspecht aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 29 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_27.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 29",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Mareca strepera": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_31.jpg",
+      "image_sha256": "e16308a37a30595fd94aca4b56f4ec6f58b8fe616b283f2f0dfa251b43ee5c47",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Stockente, Pfeifente, Schnatterente Anas platyrhynchos - Stockente Anas penelope - Pfeifente Anas strepera - Schnatterente aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band X, Tafel 3 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_31.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume X, plate 3",
+      "figure_used": "Gray-headed male at upper right, with black rear."
+    },
+    "Lullula arborea": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_57.jpg",
+      "image_sha256": "25f98a9994b8156f7785f4b231e3c5c415078f88ab67bcd441b728511ea7248c",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Kalanderlerche, Heidelerche Melanocorypha calandra - Kalanderlerche Lullula arborea - Heidelerche aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 2 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_57.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 2",
+      "figure_used": "Upper bird; the lower bird is a calandra lark."
+    },
+    "Spinus spinus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_90.jpg",
+      "image_sha256": "45b5b5087eb0fbef172145bafa6826dd1aea34301b745d129a6bde97f3d34e30",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Erlenzeisig, Zitronenzeisig Spinus spinus - Erlenzeisig Spinus citrinella - Zitronenzeisig Spinus citrinella corsicianus - Korsikanischer Zitronenzeisig aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 35 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_90.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 35",
+      "figure_used": "Black-capped male in upper left/center."
+    },
+    "Coccothraustes coccothraustes": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_88.jpg",
+      "image_sha256": "b0b6340994dfac395bb0fccaaece63544b8f20cd9e5e166582509f949a8924d7",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Kirschkernbeißer Coccothraustes coccothraustes - Kirschkernbeißer aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band III, Tafel 33 - Gera, 1900 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2181_88.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume III, plate 33",
+      "figure_used": "Named species in the historical caption; adult male."
+    },
+    "Pandion haliaetus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_79.jpg",
+      "image_sha256": "a8f464cd1925c47176e682c61b8c6d98ee8864e4c9776f6e5fb033aad1a04fb8",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS - Fischadler Pandion haliaetus - Fischadler aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 27 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_79.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 27",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Asio otus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp192.jpg",
+      "image_sha256": "f662132c0211766c19d6052d3333e49da0114280619142f2861c87b6a7c56c32",
+      "historical_caption": "LONG-EARED OWL Asio otus",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig58",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 58",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Aythya fuligula": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp256.jpg",
+      "image_sha256": "c7869d8df6cb44bf4e8626cc216150810bf79d5cc3d3bb26e5dbec9045367e5f",
+      "historical_caption": "TUFTED DUCK Fuligula cristata",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig69",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 69",
+      "figure_used": "Adult male."
+    },
+    "Ciconia ciconia": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_47.jpg",
+      "image_sha256": "c5e7116f8ebf029da044a4f9dac0ec28c9b7737666d0f65433f2934d8ad84678",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Weißer Storch Ciconia ciconia - Weißer Storch aus: NAUMANN : Naturgeschichte der Vögel Mitteleuropas, Band VI, Tafel 30 - Gera, 1897 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_47.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume VI, plate 30",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Columba oenas": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp270.jpg",
+      "image_sha256": "6cb277f2125aebb6fbdcdd24346b308e100d87f30714f7c4de7b7c8141e14727",
+      "historical_caption": "STOCK DOVE Columba œnas",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig72",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 72",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Emberiza cirlus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp144.jpg",
+      "image_sha256": "69c44565dd9afd62b4003a26b5058af0204bd9ee7aeaeaa26a5fe3f1f971766a",
+      "historical_caption": "CIRL BUNTING Emberiza cirlus Male (left). Young (right)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig44",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 44",
+      "figure_used": "Male at left."
+    },
+    "Circus cyaneus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_09.jpg",
+      "image_sha256": "074a44c048e118218ef8fe371e6eff9d2e1c9bd4881f9915aae43f2d2d681c12",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Kornweihe Circus cyaneus - Kornweihe aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 57 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_09.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 57",
+      "figure_used": "Gray adult male in foreground."
+    },
+    "Emberiza citrinella": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp142.jpg",
+      "image_sha256": "cc3b40a6ab3e1bfaa7cca8843a0665ec933908cffef0aa915f8d5d3a68d69b82",
+      "historical_caption": "YELLOW BUNTING (YELLOW HAMMER) Emberiza citrinella Male (below). Young (above)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig43",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 43",
+      "figure_used": "Male below."
+    },
+    "Calidris alpina": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult summer",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp324.jpg",
+      "image_sha256": "b700d67c1430775c4e708609ce52869437a3b0d17f6f3ae5d0ce0ad6e27f3269",
+      "historical_caption": "DUNLIN Tringa alpina Winter (above). Summer (below)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig86",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 86",
+      "figure_used": "Adult summer bird below."
+    },
+    "Tringa totanus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult summer",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp342.jpg",
+      "image_sha256": "ed3b780aba0c263439191c34c0e67160eca684983ee632ebd216f77ed42969a5",
+      "historical_caption": "REDSHANK Totanus calidris Adult, summer (right) SPOTTED REDSHANK Totanus fuscus (Linnæus) Young in autumn (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig87",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 87",
+      "figure_used": "Adult summer bird at right."
+    },
+    "Pyrrhula pyrrhula": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult male",
+      "image_url": "https://www.gutenberg.org/cache/epub/56397/images/i_fp136.jpg",
+      "image_sha256": "97c7924b012bdc56cbd2c6fd10ffcad4dfd652af53bcecd7e118482ac09df764",
+      "historical_caption": "BULLFINCH Pyrrhula europæa Male (right). Female (left)",
+      "source_url": "https://www.gutenberg.org/cache/epub/56397/pg56397-images.html#fig41",
+      "source_title": "Birds of Britain (1907)",
+      "source_author": "J. Lewis Bonhote; plates selected by H. E. Dresser from Birds of Europe",
+      "source_license": "Public domain (1907 original; Project Gutenberg)",
+      "source_plate": "Plate 41",
+      "figure_used": "Male at right."
+    },
+    "Astur gentilis": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_06.jpg",
+      "image_sha256": "0b1bd42098fc7d660d096fa1dc3698965259cfb9aac174dd4d0a91f0a439a14d",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Habicht Accipiter gentilis - Habicht aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band V, Tafel 54 - Gera, 1899 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1617_06.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume V, plate 54",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Upupa epops": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_39.jpg",
+      "image_sha256": "b2374d07eeba5cda5eb1515f50ed89399a0e5974e5da4b94dc9eb46453a546ed",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Wiedehopf Upupa epops - Wiedehopf aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 41 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "legacy_reference": "fork/maquette/icons.json#huppe",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_39.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 41",
+      "figure_used": "Named species in the historical caption; adult."
+    },
+    "Tringa nebularia": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Manual stylization after visual inspection; not measured color extraction",
+      "plumage": "adult breeding",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_01.jpg",
+      "image_sha256": "016f33e5b5beb56d41bd4ae30cc1ba8fbd1a5830b244f91b4ec4e39ad6ad68e2",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Dunkelwasserläufer, Grünschenkel Tringa erythrops - Dunkelwasserläufer Tringa nebularia - Grünschenkel aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IX, Tafel 7 - Gera, 1902 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/1615_01.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IX, plate 7",
+      "figure_used": "Pale bird in front; the darker spotted redshank behind is excluded."
+    },
+    "Oriolus oriolus": {
+      "source_viewed": true,
+      "verification_date": "2026-09-27",
+      "palette_method": "Legacy brand palette retained; cross-checked against viewed public-domain plate. Exact original SVG is retained by the generator.",
+      "plumage": "adult male",
+      "image_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_03.jpg",
+      "image_sha256": "e6e0b7fd50d885c5a58b3f27e843568fdfcf46e2140595bd68f7af15fc953152",
+      "historical_caption": "NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: - Pirol Oriolus oriolus - Pirol aus: NAUMANN, NATURGESCHICHTE DER VÖGEL MITTELEUROPAS: Band IV, Tafel 5 - Gera, 1901 digitale Bearbeitung : Peter v. Sengbusch - b-online",
+      "digitization_credit": "Peter v. Sengbusch; University of Hamburg b-online",
+      "legacy_reference": "fork/maquette/icons.json#loriot",
+      "source_url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/2180_03.htm",
+      "source_title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "source_author": "Naumann collection; Carl R. Hennicke (editor)",
+      "source_license": "Public domain (historical original; Hamburg b-online PUBLIC DOMAIN archive)",
+      "source_plate": "Volume IV, plate 5",
+      "figure_used": "Yellow adult male in foreground."
+    }
+  },
+  "taxonomy": {
+    "source": "GBIF Secretariat (2023). GBIF Backbone Taxonomy. https://doi.org/10.15468/39omei",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "retrieved": "2026-09-27",
+    "api_pattern": "https://api.gbif.org/v1/species/match?name={genus}&rank=GENUS&class=Aves",
+    "genera": {
+      "Acanthis": {
+        "family": "Fringillidae",
+        "usage_key": 6782561,
+        "match_type": "EXACT"
+      },
+      "Accipiter": {
+        "family": "Accipitridae",
+        "usage_key": 9405810,
+        "match_type": "EXACT"
+      },
+      "Acrocephalus": {
+        "family": "Acrocephalidae",
+        "usage_key": 2493112,
+        "match_type": "EXACT"
+      },
+      "Actitis": {
+        "family": "Scolopacidae",
+        "usage_key": 2481797,
+        "match_type": "EXACT"
+      },
+      "Aegithalos": {
+        "family": "Aegithalidae",
+        "usage_key": 9270076,
+        "match_type": "EXACT"
+      },
+      "Aegolius": {
+        "family": "Strigidae",
+        "usage_key": 8095667,
+        "match_type": "EXACT"
+      },
+      "Aegypius": {
+        "family": "Accipitridae",
+        "usage_key": 2480441,
+        "match_type": "EXACT"
+      },
+      "Aix": {
+        "family": "Anatidae",
+        "usage_key": 2498386,
+        "match_type": "EXACT"
+      },
+      "Alauda": {
+        "family": "Alaudidae",
+        "usage_key": 2490696,
+        "match_type": "EXACT"
+      },
+      "Alaudala": {
+        "family": "Alaudidae",
+        "usage_key": 4850365,
+        "match_type": "EXACT"
+      },
+      "Alca": {
+        "family": "Alcidae",
+        "usage_key": 2481308,
+        "match_type": "EXACT"
+      },
+      "Alcedo": {
+        "family": "Alcedinidae",
+        "usage_key": 2475493,
+        "match_type": "EXACT"
+      },
+      "Alectoris": {
+        "family": "Phasianidae",
+        "usage_key": 2474025,
+        "match_type": "EXACT"
+      },
+      "Alle": {
+        "family": "Alcidae",
+        "usage_key": 2481298,
+        "match_type": "EXACT"
+      },
+      "Alopochen": {
+        "family": "Anatidae",
+        "usage_key": 2498251,
+        "match_type": "EXACT"
+      },
+      "Anarhynchus": {
+        "family": "Charadriidae",
+        "usage_key": 2480251,
+        "match_type": "EXACT"
+      },
+      "Anas": {
+        "family": "Anatidae",
+        "usage_key": 2498056,
+        "match_type": "EXACT"
+      },
+      "Anser": {
+        "family": "Anatidae",
+        "usage_key": 2498016,
+        "match_type": "EXACT"
+      },
+      "Anthus": {
+        "family": "Motacillidae",
+        "usage_key": 2490241,
+        "match_type": "EXACT"
+      },
+      "Apus": {
+        "family": "Apodidae",
+        "usage_key": 2235048,
+        "match_type": "EXACT"
+      },
+      "Aquila": {
+        "family": "Accipitridae",
+        "usage_key": 2480498,
+        "match_type": "EXACT"
+      },
+      "Ardea": {
+        "family": "Ardeidae",
+        "usage_key": 2480922,
+        "match_type": "EXACT"
+      },
+      "Ardenna": {
+        "family": "Procellariidae",
+        "usage_key": 4847365,
+        "match_type": "EXACT"
+      },
+      "Ardeola": {
+        "family": "Ardeidae",
+        "usage_key": 2480901,
+        "match_type": "EXACT"
+      },
+      "Arenaria": {
+        "family": "Scolopacidae",
+        "usage_key": 2481774,
+        "match_type": "EXACT"
+      },
+      "Asio": {
+        "family": "Strigidae",
+        "usage_key": 8373955,
+        "match_type": "EXACT"
+      },
+      "Astur": {
+        "family": "Accipitridae",
+        "usage_key": 3242735,
+        "match_type": "EXACT"
+      },
+      "Athene": {
+        "family": "Strigidae",
+        "usage_key": 2497239,
+        "match_type": "EXACT"
+      },
+      "Aythya": {
+        "family": "Anatidae",
+        "usage_key": 2498254,
+        "match_type": "EXACT"
+      },
+      "Bombycilla": {
+        "family": "Bombycillidae",
+        "usage_key": 2484604,
+        "match_type": "EXACT"
+      },
+      "Botaurus": {
+        "family": "Ardeidae",
+        "usage_key": 2480909,
+        "match_type": "EXACT"
+      },
+      "Branta": {
+        "family": "Anatidae",
+        "usage_key": 2498190,
+        "match_type": "EXACT"
+      },
+      "Bubo": {
+        "family": "Strigidae",
+        "usage_key": 5959091,
+        "match_type": "EXACT"
+      },
+      "Bucephala": {
+        "family": "Anatidae",
+        "usage_key": 2498324,
+        "match_type": "EXACT"
+      },
+      "Burhinus": {
+        "family": "Burhinidae",
+        "usage_key": 2482094,
+        "match_type": "EXACT"
+      },
+      "Buteo": {
+        "family": "Accipitridae",
+        "usage_key": 2480517,
+        "match_type": "EXACT"
+      },
+      "Cairina": {
+        "family": "Anatidae",
+        "usage_key": 2498282,
+        "match_type": "EXACT"
+      },
+      "Calandrella": {
+        "family": "Alaudidae",
+        "usage_key": 2490675,
+        "match_type": "EXACT"
+      },
+      "Calcarius": {
+        "family": "Calcariidae",
+        "usage_key": 2491676,
+        "match_type": "EXACT"
+      },
+      "Calidris": {
+        "family": "Scolopacidae",
+        "usage_key": 2481739,
+        "match_type": "EXACT"
+      },
+      "Callonetta": {
+        "family": "Anatidae",
+        "usage_key": 2498383,
+        "match_type": "EXACT"
+      },
+      "Calonectris": {
+        "family": "Procellariidae",
+        "usage_key": 2481517,
+        "match_type": "EXACT"
+      },
+      "Caprimulgus": {
+        "family": "Caprimulgidae",
+        "usage_key": 2496826,
+        "match_type": "EXACT"
+      },
+      "Carduelis": {
+        "family": "Fringillidae",
+        "usage_key": 2494621,
+        "match_type": "EXACT"
+      },
+      "Carpodacus": {
+        "family": "Fringillidae",
+        "usage_key": 2494445,
+        "match_type": "EXACT"
+      },
+      "Cecropis": {
+        "family": "Hirundinidae",
+        "usage_key": 6085729,
+        "match_type": "EXACT"
+      },
+      "Cepphus": {
+        "family": "Alcidae",
+        "usage_key": 3241982,
+        "match_type": "EXACT"
+      },
+      "Cercotrichas": {
+        "family": "Muscicapidae",
+        "usage_key": 2492468,
+        "match_type": "EXACT"
+      },
+      "Certhia": {
+        "family": "Certhiidae",
+        "usage_key": 2487601,
+        "match_type": "EXACT"
+      },
+      "Cettia": {
+        "family": "Cettiidae",
+        "usage_key": 2492997,
+        "match_type": "EXACT"
+      },
+      "Charadrius": {
+        "family": "Charadriidae",
+        "usage_key": 2480277,
+        "match_type": "EXACT"
+      },
+      "Chenonetta": {
+        "family": "Anatidae",
+        "usage_key": 2498045,
+        "match_type": "EXACT"
+      },
+      "Chersophilus": {
+        "family": "Alaudidae",
+        "usage_key": 2490673,
+        "match_type": "EXACT"
+      },
+      "Chlidonias": {
+        "family": "Laridae",
+        "usage_key": 2481118,
+        "match_type": "EXACT"
+      },
+      "Chloris": {
+        "family": "Fringillidae",
+        "usage_key": 3241514,
+        "match_type": "EXACT"
+      },
+      "Chroicocephalus": {
+        "family": "Laridae",
+        "usage_key": 4848452,
+        "match_type": "EXACT"
+      },
+      "Chrysolophus": {
+        "family": "Phasianidae",
+        "usage_key": 10405331,
+        "match_type": "EXACT"
+      },
+      "Ciconia": {
+        "family": "Ciconiidae",
+        "usage_key": 2481908,
+        "match_type": "EXACT"
+      },
+      "Cinclus": {
+        "family": "Cinclidae",
+        "usage_key": 2495086,
+        "match_type": "EXACT"
+      },
+      "Circaetus": {
+        "family": "Accipitridae",
+        "usage_key": 2480661,
+        "match_type": "EXACT"
+      },
+      "Circus": {
+        "family": "Accipitridae",
+        "usage_key": 2480481,
+        "match_type": "EXACT"
+      },
+      "Cisticola": {
+        "family": "Cisticolidae",
+        "usage_key": 2492786,
+        "match_type": "EXACT"
+      },
+      "Clamator": {
+        "family": "Cuculidae",
+        "usage_key": 2496463,
+        "match_type": "EXACT"
+      },
+      "Clangula": {
+        "family": "Anatidae",
+        "usage_key": 2498272,
+        "match_type": "EXACT"
+      },
+      "Coccothraustes": {
+        "family": "Fringillidae",
+        "usage_key": 2494310,
+        "match_type": "EXACT"
+      },
+      "Coloeus": {
+        "family": "Corvidae",
+        "usage_key": 4852454,
+        "match_type": "EXACT"
+      },
+      "Columba": {
+        "family": "Columbidae",
+        "usage_key": 2495404,
+        "match_type": "EXACT"
+      },
+      "Coracias": {
+        "family": "Coraciidae",
+        "usage_key": 2475359,
+        "match_type": "EXACT"
+      },
+      "Corvus": {
+        "family": "Corvidae",
+        "usage_key": 2482468,
+        "match_type": "EXACT"
+      },
+      "Coturnix": {
+        "family": "Phasianidae",
+        "usage_key": 8725725,
+        "match_type": "EXACT"
+      },
+      "Crex": {
+        "family": "Rallidae",
+        "usage_key": 3242956,
+        "match_type": "EXACT"
+      },
+      "Cuculus": {
+        "family": "Cuculidae",
+        "usage_key": 2336662,
+        "match_type": "EXACT"
+      },
+      "Curruca": {
+        "family": "Sylviidae",
+        "usage_key": 7988924,
+        "match_type": "EXACT"
+      },
+      "Cyanistes": {
+        "family": "Paridae",
+        "usage_key": 2487875,
+        "match_type": "EXACT"
+      },
+      "Cyanopica": {
+        "family": "Corvidae",
+        "usage_key": 2482433,
+        "match_type": "EXACT"
+      },
+      "Cygnus": {
+        "family": "Anatidae",
+        "usage_key": 8996942,
+        "match_type": "EXACT"
+      },
+      "Delichon": {
+        "family": "Hirundinidae",
+        "usage_key": 2489213,
+        "match_type": "EXACT"
+      },
+      "Dendrocopos": {
+        "family": "Picidae",
+        "usage_key": 2477899,
+        "match_type": "EXACT"
+      },
+      "Dendrocoptes": {
+        "family": "Picidae",
+        "usage_key": 4850317,
+        "match_type": "EXACT"
+      },
+      "Dryobates": {
+        "family": "Picidae",
+        "usage_key": 8399994,
+        "match_type": "EXACT"
+      },
+      "Dryocopus": {
+        "family": "Picidae",
+        "usage_key": 2477865,
+        "match_type": "EXACT"
+      },
+      "Egretta": {
+        "family": "Ardeidae",
+        "usage_key": 2480872,
+        "match_type": "EXACT"
+      },
+      "Elanus": {
+        "family": "Accipitridae",
+        "usage_key": 2480366,
+        "match_type": "EXACT"
+      },
+      "Emberiza": {
+        "family": "Emberizidae",
+        "usage_key": 2491468,
+        "match_type": "EXACT"
+      },
+      "Eremophila": {
+        "family": "Alaudidae",
+        "usage_key": 2490615,
+        "match_type": "EXACT"
+      },
+      "Erithacus": {
+        "family": "Muscicapidae",
+        "usage_key": 2492460,
+        "match_type": "EXACT"
+      },
+      "Estrilda": {
+        "family": "Estrildidae",
+        "usage_key": 2493650,
+        "match_type": "EXACT"
+      },
+      "Eudromias": {
+        "family": "Charadriidae",
+        "usage_key": 2480276,
+        "match_type": "EXACT"
+      },
+      "Euplectes": {
+        "family": "Ploceidae",
+        "usage_key": 2494085,
+        "match_type": "EXACT"
+      },
+      "Falco": {
+        "family": "Falconidae",
+        "usage_key": 2480996,
+        "match_type": "EXACT"
+      },
+      "Ficedula": {
+        "family": "Muscicapidae",
+        "usage_key": 2492596,
+        "match_type": "EXACT"
+      },
+      "Fratercula": {
+        "family": "Alcidae",
+        "usage_key": 2481352,
+        "match_type": "EXACT"
+      },
+      "Fringilla": {
+        "family": "Fringillidae",
+        "usage_key": 2494421,
+        "match_type": "EXACT"
+      },
+      "Fulica": {
+        "family": "Rallidae",
+        "usage_key": 2474376,
+        "match_type": "EXACT"
+      },
+      "Fulmarus": {
+        "family": "Procellariidae",
+        "usage_key": 2481431,
+        "match_type": "EXACT"
+      },
+      "Galerida": {
+        "family": "Alaudidae",
+        "usage_key": 2490666,
+        "match_type": "EXACT"
+      },
+      "Gallinago": {
+        "family": "Scolopacidae",
+        "usage_key": 2481808,
+        "match_type": "EXACT"
+      },
+      "Gallinula": {
+        "family": "Rallidae",
+        "usage_key": 7918617,
+        "match_type": "EXACT"
+      },
+      "Gallus": {
+        "family": "Phasianidae",
+        "usage_key": 2473720,
+        "match_type": "EXACT"
+      },
+      "Garrulus": {
+        "family": "Corvidae",
+        "usage_key": 2482462,
+        "match_type": "EXACT"
+      },
+      "Gavia": {
+        "family": "Gaviidae",
+        "usage_key": 2481954,
+        "match_type": "EXACT"
+      },
+      "Gelochelidon": {
+        "family": "Laridae",
+        "usage_key": 2481216,
+        "match_type": "EXACT"
+      },
+      "Geronticus": {
+        "family": "Threskiornithidae",
+        "usage_key": 2480768,
+        "match_type": "EXACT"
+      },
+      "Glareola": {
+        "family": "Glareolidae",
+        "usage_key": 2480753,
+        "match_type": "EXACT"
+      },
+      "Glaucidium": {
+        "family": "Strigidae",
+        "usage_key": 2497151,
+        "match_type": "EXACT"
+      },
+      "Grus": {
+        "family": "Gruidae",
+        "usage_key": 2474940,
+        "match_type": "EXACT"
+      },
+      "Gulosus": {
+        "family": "Phalacrocoracidae",
+        "usage_key": 4847034,
+        "match_type": "EXACT"
+      },
+      "Gypaetus": {
+        "family": "Accipitridae",
+        "usage_key": 2480648,
+        "match_type": "EXACT"
+      },
+      "Gyps": {
+        "family": "Accipitridae",
+        "usage_key": 2480382,
+        "match_type": "EXACT"
+      },
+      "Haematopus": {
+        "family": "Haematopodidae",
+        "usage_key": 2480260,
+        "match_type": "EXACT"
+      },
+      "Haliaeetus": {
+        "family": "Accipitridae",
+        "usage_key": 2480444,
+        "match_type": "EXACT"
+      },
+      "Hieraaetus": {
+        "family": "Accipitridae",
+        "usage_key": 2480683,
+        "match_type": "EXACT"
+      },
+      "Himantopus": {
+        "family": "Recurvirostridae",
+        "usage_key": 2480217,
+        "match_type": "EXACT"
+      },
+      "Hippolais": {
+        "family": "Acrocephalidae",
+        "usage_key": 2493213,
+        "match_type": "EXACT"
+      },
+      "Hirundo": {
+        "family": "Hirundinidae",
+        "usage_key": 2489222,
+        "match_type": "EXACT"
+      },
+      "Hydrobates": {
+        "family": "Hydrobatidae",
+        "usage_key": 2481972,
+        "match_type": "EXACT"
+      },
+      "Hydrocoloeus": {
+        "family": "Laridae",
+        "usage_key": 4848514,
+        "match_type": "EXACT"
+      },
+      "Hydroprogne": {
+        "family": "Laridae",
+        "usage_key": 2481219,
+        "match_type": "EXACT"
+      },
+      "Ichthyaetus": {
+        "family": "Laridae",
+        "usage_key": 7237184,
+        "match_type": "EXACT"
+      },
+      "Iduna": {
+        "family": "Acrocephalidae",
+        "usage_key": 3241698,
+        "match_type": "EXACT"
+      },
+      "Jynx": {
+        "family": "Picidae",
+        "usage_key": 2478152,
+        "match_type": "EXACT"
+      },
+      "Lagopus": {
+        "family": "Phasianidae",
+        "usage_key": 2473369,
+        "match_type": "EXACT"
+      },
+      "Lanius": {
+        "family": "Laniidae",
+        "usage_key": 2483315,
+        "match_type": "EXACT"
+      },
+      "Larus": {
+        "family": "Laridae",
+        "usage_key": 2481126,
+        "match_type": "EXACT"
+      },
+      "Leiothrix": {
+        "family": "Leiothrichidae",
+        "usage_key": 2493374,
+        "match_type": "EXACT"
+      },
+      "Limnodromus": {
+        "family": "Scolopacidae",
+        "usage_key": 2481669,
+        "match_type": "EXACT"
+      },
+      "Limosa": {
+        "family": "Scolopacidae",
+        "usage_key": 2481679,
+        "match_type": "EXACT"
+      },
+      "Linaria": {
+        "family": "Fringillidae",
+        "usage_key": 8741507,
+        "match_type": "EXACT"
+      },
+      "Locustella": {
+        "family": "Locustellidae",
+        "usage_key": 2493547,
+        "match_type": "EXACT"
+      },
+      "Lophodytes": {
+        "family": "Anatidae",
+        "usage_key": 2498407,
+        "match_type": "EXACT"
+      },
+      "Lophophanes": {
+        "family": "Paridae",
+        "usage_key": 2487881,
+        "match_type": "EXACT"
+      },
+      "Loxia": {
+        "family": "Fringillidae",
+        "usage_key": 2494150,
+        "match_type": "EXACT"
+      },
+      "Lullula": {
+        "family": "Alaudidae",
+        "usage_key": 2490603,
+        "match_type": "EXACT"
+      },
+      "Luscinia": {
+        "family": "Muscicapidae",
+        "usage_key": 5429330,
+        "match_type": "EXACT"
+      },
+      "Lymnocryptes": {
+        "family": "Scolopacidae",
+        "usage_key": 2481834,
+        "match_type": "EXACT"
+      },
+      "Lyrurus": {
+        "family": "Phasianidae",
+        "usage_key": 8692256,
+        "match_type": "EXACT"
+      },
+      "Mareca": {
+        "family": "Anatidae",
+        "usage_key": 2498314,
+        "match_type": "EXACT"
+      },
+      "Melanitta": {
+        "family": "Anatidae",
+        "usage_key": 2498237,
+        "match_type": "EXACT"
+      },
+      "Melanocorypha": {
+        "family": "Alaudidae",
+        "usage_key": 2490608,
+        "match_type": "EXACT"
+      },
+      "Melopsittacus": {
+        "family": "Psittacidae",
+        "usage_key": 2479797,
+        "match_type": "EXACT"
+      },
+      "Mergellus": {
+        "family": "Anatidae",
+        "usage_key": 2498284,
+        "match_type": "EXACT"
+      },
+      "Mergus": {
+        "family": "Anatidae",
+        "usage_key": 2498368,
+        "match_type": "EXACT"
+      },
+      "Merops": {
+        "family": "Meropidae",
+        "usage_key": 2475391,
+        "match_type": "EXACT"
+      },
+      "Microcarbo": {
+        "family": "Phalacrocoracidae",
+        "usage_key": 8296977,
+        "match_type": "EXACT"
+      },
+      "Milvus": {
+        "family": "Accipitridae",
+        "usage_key": 5229166,
+        "match_type": "EXACT"
+      },
+      "Monticola": {
+        "family": "Muscicapidae",
+        "usage_key": 8156917,
+        "match_type": "EXACT"
+      },
+      "Montifringilla": {
+        "family": "Passeridae",
+        "usage_key": 2492365,
+        "match_type": "EXACT"
+      },
+      "Morus": {
+        "family": "Sulidae",
+        "usage_key": 2480962,
+        "match_type": "EXACT"
+      },
+      "Motacilla": {
+        "family": "Motacillidae",
+        "usage_key": 2490295,
+        "match_type": "EXACT"
+      },
+      "Muscicapa": {
+        "family": "Muscicapidae",
+        "usage_key": 2483240,
+        "match_type": "EXACT"
+      },
+      "Myiopsitta": {
+        "family": "Psittacidae",
+        "usage_key": 2479406,
+        "match_type": "EXACT"
+      },
+      "Neophron": {
+        "family": "Accipitridae",
+        "usage_key": 2480695,
+        "match_type": "EXACT"
+      },
+      "Netta": {
+        "family": "Anatidae",
+        "usage_key": 2498176,
+        "match_type": "EXACT"
+      },
+      "Nucifraga": {
+        "family": "Corvidae",
+        "usage_key": 2482612,
+        "match_type": "EXACT"
+      },
+      "Numenius": {
+        "family": "Scolopacidae",
+        "usage_key": 2481781,
+        "match_type": "EXACT"
+      },
+      "Numida": {
+        "family": "Numididae",
+        "usage_key": 2473340,
+        "match_type": "EXACT"
+      },
+      "Nycticorax": {
+        "family": "Ardeidae",
+        "usage_key": 2480856,
+        "match_type": "EXACT"
+      },
+      "Nymphicus": {
+        "family": "Psittacidae",
+        "usage_key": 2479976,
+        "match_type": "EXACT"
+      },
+      "Oceanites": {
+        "family": "Hydrobatidae",
+        "usage_key": 2481963,
+        "match_type": "EXACT"
+      },
+      "Oenanthe": {
+        "family": "Muscicapidae",
+        "usage_key": 2492483,
+        "match_type": "EXACT"
+      },
+      "Oriolus": {
+        "family": "Oriolidae",
+        "usage_key": 2488947,
+        "match_type": "EXACT"
+      },
+      "Otis": {
+        "family": "Otididae",
+        "usage_key": 9715249,
+        "match_type": "EXACT"
+      },
+      "Otus": {
+        "family": "Strigidae",
+        "usage_key": 2497654,
+        "match_type": "EXACT"
+      },
+      "Oxyura": {
+        "family": "Anatidae",
+        "usage_key": 2498299,
+        "match_type": "EXACT"
+      },
+      "Pandion": {
+        "family": "Pandionidae",
+        "usage_key": 2480725,
+        "match_type": "EXACT"
+      },
+      "Panurus": {
+        "family": "Panuridae",
+        "usage_key": 2493366,
+        "match_type": "EXACT"
+      },
+      "Parus": {
+        "family": "Paridae",
+        "usage_key": 2487923,
+        "match_type": "EXACT"
+      },
+      "Passer": {
+        "family": "Passeridae",
+        "usage_key": 2492321,
+        "match_type": "EXACT"
+      },
+      "Pastor": {
+        "family": "Sturnidae",
+        "usage_key": 7799469,
+        "match_type": "EXACT"
+      },
+      "Pavo": {
+        "family": "Phasianidae",
+        "usage_key": 2473598,
+        "match_type": "EXACT"
+      },
+      "Perdix": {
+        "family": "Phasianidae",
+        "usage_key": 2473953,
+        "match_type": "EXACT"
+      },
+      "Periparus": {
+        "family": "Paridae",
+        "usage_key": 7736104,
+        "match_type": "EXACT"
+      },
+      "Pernis": {
+        "family": "Accipitridae",
+        "usage_key": 2480419,
+        "match_type": "EXACT"
+      },
+      "Petronia": {
+        "family": "Passeridae",
+        "usage_key": 2492345,
+        "match_type": "EXACT"
+      },
+      "Phalacrocorax": {
+        "family": "Phalacrocoracidae",
+        "usage_key": 2481854,
+        "match_type": "EXACT"
+      },
+      "Phalaropus": {
+        "family": "Scolopacidae",
+        "usage_key": 9549339,
+        "match_type": "EXACT"
+      },
+      "Phasianus": {
+        "family": "Phasianidae",
+        "usage_key": 2473738,
+        "match_type": "EXACT"
+      },
+      "Phoenicopterus": {
+        "family": "Phoenicopteridae",
+        "usage_key": 2481102,
+        "match_type": "EXACT"
+      },
+      "Phoenicurus": {
+        "family": "Muscicapidae",
+        "usage_key": 5429347,
+        "match_type": "EXACT"
+      },
+      "Phylloscopus": {
+        "family": "Phylloscopidae",
+        "usage_key": 2493047,
+        "match_type": "EXACT"
+      },
+      "Pica": {
+        "family": "Corvidae",
+        "usage_key": 7237083,
+        "match_type": "EXACT"
+      },
+      "Picoides": {
+        "family": "Picidae",
+        "usage_key": 2477732,
+        "match_type": "EXACT"
+      },
+      "Picus": {
+        "family": "Picidae",
+        "usage_key": 2478487,
+        "match_type": "EXACT"
+      },
+      "Platalea": {
+        "family": "Threskiornithidae",
+        "usage_key": 2480798,
+        "match_type": "EXACT"
+      },
+      "Plectrophenax": {
+        "family": "Calcariidae",
+        "usage_key": 2491717,
+        "match_type": "EXACT"
+      },
+      "Plegadis": {
+        "family": "Threskiornithidae",
+        "usage_key": 8171676,
+        "match_type": "EXACT"
+      },
+      "Pluvialis": {
+        "family": "Charadriidae",
+        "usage_key": 2480326,
+        "match_type": "EXACT"
+      },
+      "Podiceps": {
+        "family": "Podicipedidae",
+        "usage_key": 2482049,
+        "match_type": "EXACT"
+      },
+      "Poecile": {
+        "family": "Paridae",
+        "usage_key": 2487782,
+        "match_type": "EXACT"
+      },
+      "Porphyrio": {
+        "family": "Rallidae",
+        "usage_key": 3242186,
+        "match_type": "EXACT"
+      },
+      "Porzana": {
+        "family": "Rallidae",
+        "usage_key": 2474604,
+        "match_type": "EXACT"
+      },
+      "Prunella": {
+        "family": "Prunellidae",
+        "usage_key": 2495070,
+        "match_type": "EXACT"
+      },
+      "Psittacula": {
+        "family": "Psittacidae",
+        "usage_key": 2479192,
+        "match_type": "EXACT"
+      },
+      "Pterocles": {
+        "family": "Pteroclididae",
+        "usage_key": 2480192,
+        "match_type": "EXACT"
+      },
+      "Ptyonoprogne": {
+        "family": "Hirundinidae",
+        "usage_key": 7340277,
+        "match_type": "EXACT"
+      },
+      "Puffinus": {
+        "family": "Procellariidae",
+        "usage_key": 5229335,
+        "match_type": "EXACT"
+      },
+      "Pyrrhocorax": {
+        "family": "Corvidae",
+        "usage_key": 2482551,
+        "match_type": "EXACT"
+      },
+      "Pyrrhula": {
+        "family": "Fringillidae",
+        "usage_key": 2494529,
+        "match_type": "EXACT"
+      },
+      "Rallus": {
+        "family": "Rallidae",
+        "usage_key": 2474794,
+        "match_type": "EXACT"
+      },
+      "Recurvirostra": {
+        "family": "Recurvirostridae",
+        "usage_key": 2480255,
+        "match_type": "EXACT"
+      },
+      "Regulus": {
+        "family": "Regulidae",
+        "usage_key": 2484589,
+        "match_type": "EXACT"
+      },
+      "Remiz": {
+        "family": "Remizidae",
+        "usage_key": 2487382,
+        "match_type": "EXACT"
+      },
+      "Riparia": {
+        "family": "Hirundinidae",
+        "usage_key": 2489158,
+        "match_type": "EXACT"
+      },
+      "Rissa": {
+        "family": "Laridae",
+        "usage_key": 2481203,
+        "match_type": "EXACT"
+      },
+      "Saxicola": {
+        "family": "Muscicapidae",
+        "usage_key": 2492516,
+        "match_type": "EXACT"
+      },
+      "Scolopax": {
+        "family": "Scolopacidae",
+        "usage_key": 2481693,
+        "match_type": "EXACT"
+      },
+      "Serinus": {
+        "family": "Fringillidae",
+        "usage_key": 8215044,
+        "match_type": "EXACT"
+      },
+      "Sitta": {
+        "family": "Sittidae",
+        "usage_key": 2484878,
+        "match_type": "EXACT"
+      },
+      "Somateria": {
+        "family": "Anatidae",
+        "usage_key": 2498349,
+        "match_type": "EXACT"
+      },
+      "Spatula": {
+        "family": "Anatidae",
+        "usage_key": 4850990,
+        "match_type": "EXACT"
+      },
+      "Spilopelia": {
+        "family": "Columbidae",
+        "usage_key": 4848012,
+        "match_type": "EXACT"
+      },
+      "Spinus": {
+        "family": "Fringillidae",
+        "usage_key": 8051475,
+        "match_type": "EXACT"
+      },
+      "Stercorarius": {
+        "family": "Stercorariidae",
+        "usage_key": 2481608,
+        "match_type": "EXACT"
+      },
+      "Sterna": {
+        "family": "Laridae",
+        "usage_key": 2481227,
+        "match_type": "EXACT"
+      },
+      "Sternula": {
+        "family": "Laridae",
+        "usage_key": 4849628,
+        "match_type": "EXACT"
+      },
+      "Streptopelia": {
+        "family": "Columbidae",
+        "usage_key": 2495657,
+        "match_type": "EXACT"
+      },
+      "Strix": {
+        "family": "Strigidae",
+        "usage_key": 2497486,
+        "match_type": "EXACT"
+      },
+      "Sturnus": {
+        "family": "Sturnidae",
+        "usage_key": 2489099,
+        "match_type": "EXACT"
+      },
+      "Sylvia": {
+        "family": "Sylviidae",
+        "usage_key": 2492941,
+        "match_type": "EXACT"
+      },
+      "Syrmaticus": {
+        "family": "Phasianidae",
+        "usage_key": 2473476,
+        "match_type": "EXACT"
+      },
+      "Tachybaptus": {
+        "family": "Podicipedidae",
+        "usage_key": 2482040,
+        "match_type": "EXACT"
+      },
+      "Tachymarptis": {
+        "family": "Apodidae",
+        "usage_key": 8540301,
+        "match_type": "EXACT"
+      },
+      "Tadorna": {
+        "family": "Anatidae",
+        "usage_key": 2498006,
+        "match_type": "EXACT"
+      },
+      "Tetrao": {
+        "family": "Phasianidae",
+        "usage_key": 2473573,
+        "match_type": "EXACT"
+      },
+      "Tetrastes": {
+        "family": "Phasianidae",
+        "usage_key": 2473658,
+        "match_type": "EXACT"
+      },
+      "Tetrax": {
+        "family": "Otididae",
+        "usage_key": 5228227,
+        "match_type": "EXACT"
+      },
+      "Thalasseus": {
+        "family": "Laridae",
+        "usage_key": 9109074,
+        "match_type": "EXACT"
+      },
+      "Thinornis": {
+        "family": "Charadriidae",
+        "usage_key": 2480339,
+        "match_type": "EXACT"
+      },
+      "Threskiornis": {
+        "family": "Threskiornithidae",
+        "usage_key": 2480763,
+        "match_type": "EXACT"
+      },
+      "Tichodroma": {
+        "family": "Tichodromidae",
+        "usage_key": 2484917,
+        "match_type": "EXACT"
+      },
+      "Tringa": {
+        "family": "Scolopacidae",
+        "usage_key": 2481709,
+        "match_type": "EXACT"
+      },
+      "Troglodytes": {
+        "family": "Troglodytidae",
+        "usage_key": 2493899,
+        "match_type": "EXACT"
+      },
+      "Turdus": {
+        "family": "Turdidae",
+        "usage_key": 2490714,
+        "match_type": "EXACT"
+      },
+      "Tyto": {
+        "family": "Tytonidae",
+        "usage_key": 2497905,
+        "match_type": "EXACT"
+      },
+      "Upupa": {
+        "family": "Upupidae",
+        "usage_key": 8349133,
+        "match_type": "EXACT"
+      },
+      "Uria": {
+        "family": "Alcidae",
+        "usage_key": 2481338,
+        "match_type": "EXACT"
+      },
+      "Vanellus": {
+        "family": "Charadriidae",
+        "usage_key": 3242344,
+        "match_type": "EXACT"
+      },
+      "Xema": {
+        "family": "Laridae",
+        "usage_key": 2481220,
+        "match_type": "EXACT"
+      },
+      "Zapornia": {
+        "family": "Rallidae",
+        "usage_key": 9469275,
+        "match_type": "EXACT"
+      }
+    },
+    "overrides": {
+      "Clanga": {
+        "family": "Accipitridae",
+        "source_url": "https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=1253594",
+        "reason": "GBIF match returned only class Aves; family verified against ITIS genus record."
+      }
+    },
+    "visual_family_fallbacks": {
+      "Bombycillidae": "sturnidae",
+      "Burhinidae": "charadriidae",
+      "Calcariidae": "emberizidae",
+      "Cettiidae": "sylviidae",
+      "Cinclidae": "muscicapidae",
+      "Cisticolidae": "sylviidae",
+      "Estrildidae": "fringillidae",
+      "Gaviidae": "podicipedidae",
+      "Glareolidae": "charadriidae",
+      "Haematopodidae": "charadriidae",
+      "Hydrobatidae": "laridae",
+      "Laniidae": "muscicapidae",
+      "Leiothrichidae": "muscicapidae",
+      "Locustellidae": "acrocephalidae",
+      "Numididae": "phasianidae",
+      "Otididae": "gruidae",
+      "Pandionidae": "accipitridae",
+      "Panuridae": "aegithalidae",
+      "Ploceidae": "passeridae",
+      "Procellariidae": "laridae",
+      "Pteroclididae": "columbidae",
+      "Remizidae": "paridae",
+      "Stercorariidae": "laridae",
+      "Sulidae": "phalacrocoracidae",
+      "Threskiornithidae": "ardeidae",
+      "Tichodromidae": "certhiidae",
+      "Turdidae": "muscicapidae",
+      "Tytonidae": "strigidae"
+    },
+    "aliases_note": "Current assets/models/taxonomy.csv has no rows with differing scientific_name and canonical_scientific_name; the map is intentionally empty.",
+    "regional_species_count": 443,
+    "regional_genus_count": 240
+  },
+  "collections": {
+    "bonhote1907": {
+      "title": "Birds of Britain (1907)",
+      "url": "https://www.gutenberg.org/ebooks/56397",
+      "rights": "Project Gutenberg: public domain in the USA; historical Dresser plates selected for this volume.",
+      "artist_note": "The volume credits H. E. Dresser for plate selection, not authorship of every painting. Individual artist attribution is not inferred where a signature is unclear."
+    },
+    "naumann": {
+      "title": "Naturgeschichte der Voegel Mitteleuropas (1897-1905)",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/b-online/birds/naumann.htm",
+      "rights": "University of Hamburg b-online PUBLIC DOMAIN historical classics archive.",
+      "artist_note": "Carl R. Hennicke is credited as editor. Individual painters are not attributed solely from the collection name.",
+      "archive_caveats": [
+        "Accipiter nisus page transcribes year 1999; the historical volume V is 1899.",
+        "Astur gentilis and Circus aeruginosus archive pages both label plate 54. Exact page URLs and image hashes identify the actual viewed images; plate numbering should be independently checked."
+      ]
+    },
+    "dresser": {
+      "title": "A History of the Birds of Europe (1871-1881)",
+      "url": "https://www.biodiversitylibrary.org/bibliography/53765",
+      "rights": "BHL identifies this historical work as public domain; scans held by Smithsonian Libraries and Archives."
+    },
+    "yarkand1891": {
+      "title": "Scientific Results of the Second Yarkand Mission: Aves (1891)",
+      "url": "https://www.biodiversitylibrary.org/item/109484",
+      "rights": "BHL: No Known Copyright Issues; Sharpe died1909 and Keulemans died1912."
+    },
+    "jardine": {
+      "title": "Gallinaceous Birds",
+      "url": "https://archive.org/details/gallinaceousbird00jardrich",
+      "rights": "Internet Archive metadata: NOT_IN_COPYRIGHT; author William Jardine died1874, engraver William Home Lizars died1859."
+    }
+  }
+}

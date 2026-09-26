@@ -1,0 +1,1025 @@
+{
+  "aliases": {},
+  "fallback": "mystere.svg",
+  "families": {
+    "Accipitridae": "accipitridae",
+    "Acrocephalidae": "acrocephalidae",
+    "Aegithalidae": "aegithalidae",
+    "Alaudidae": "alaudidae",
+    "Alcedinidae": "alcedinidae",
+    "Alcidae": "alcidae",
+    "Anatidae": "anatidae",
+    "Apodidae": "apodidae",
+    "Ardeidae": "ardeidae",
+    "Bombycillidae": "sturnidae",
+    "Burhinidae": "charadriidae",
+    "Calcariidae": "emberizidae",
+    "Caprimulgidae": "caprimulgidae",
+    "Certhiidae": "certhiidae",
+    "Cettiidae": "sylviidae",
+    "Charadriidae": "charadriidae",
+    "Ciconiidae": "ciconiidae",
+    "Cinclidae": "muscicapidae",
+    "Cisticolidae": "sylviidae",
+    "Columbidae": "columbidae",
+    "Coraciidae": "coraciidae",
+    "Corvidae": "corvidae",
+    "Cuculidae": "cuculidae",
+    "Emberizidae": "emberizidae",
+    "Estrildidae": "fringillidae",
+    "Falconidae": "falconidae",
+    "Fringillidae": "fringillidae",
+    "Gaviidae": "podicipedidae",
+    "Glareolidae": "charadriidae",
+    "Gruidae": "gruidae",
+    "Haematopodidae": "charadriidae",
+    "Hirundinidae": "hirundinidae",
+    "Hydrobatidae": "laridae",
+    "Laniidae": "muscicapidae",
+    "Laridae": "laridae",
+    "Leiothrichidae": "muscicapidae",
+    "Locustellidae": "acrocephalidae",
+    "Meropidae": "meropidae",
+    "Motacillidae": "motacillidae",
+    "Muscicapidae": "muscicapidae",
+    "Numididae": "phasianidae",
+    "Oriolidae": "oriolidae",
+    "Otididae": "gruidae",
+    "Pandionidae": "accipitridae",
+    "Panuridae": "aegithalidae",
+    "Paridae": "paridae",
+    "Passeridae": "passeridae",
+    "Pelecanidae": "pelecanidae",
+    "Phalacrocoracidae": "phalacrocoracidae",
+    "Phasianidae": "phasianidae",
+    "Phoenicopteridae": "phoenicopteridae",
+    "Phylloscopidae": "phylloscopidae",
+    "Picidae": "picidae",
+    "Ploceidae": "passeridae",
+    "Podicipedidae": "podicipedidae",
+    "Procellariidae": "laridae",
+    "Prunellidae": "prunellidae",
+    "Psittacidae": "psittacidae",
+    "Pteroclididae": "columbidae",
+    "Rallidae": "rallidae",
+    "Recurvirostridae": "recurvirostridae",
+    "Regulidae": "regulidae",
+    "Remizidae": "paridae",
+    "Scolopacidae": "scolopacidae",
+    "Sittidae": "sittidae",
+    "Stercorariidae": "laridae",
+    "Sternidae": "sternidae",
+    "Strigidae": "strigidae",
+    "Sturnidae": "sturnidae",
+    "Sulidae": "phalacrocoracidae",
+    "Sylviidae": "sylviidae",
+    "Threskiornithidae": "ardeidae",
+    "Tichodromidae": "certhiidae",
+    "Troglodytidae": "troglodytidae",
+    "Turdidae": "muscicapidae",
+    "Tytonidae": "strigidae",
+    "Upupidae": "upupidae"
+  },
+  "genera": {
+    "Acanthis": "fringillidae",
+    "Accipiter": "accipitridae",
+    "Acrocephalus": "acrocephalidae",
+    "Actitis": "scolopacidae",
+    "Aegithalos": "aegithalidae",
+    "Aegolius": "strigidae",
+    "Aegypius": "accipitridae",
+    "Aix": "anatidae",
+    "Alauda": "alaudidae",
+    "Alaudala": "alaudidae",
+    "Alca": "alcidae",
+    "Alcedo": "alcedinidae",
+    "Alectoris": "phasianidae",
+    "Alle": "alcidae",
+    "Alopochen": "anatidae",
+    "Anarhynchus": "charadriidae",
+    "Anas": "anatidae",
+    "Anser": "anatidae",
+    "Anthus": "motacillidae",
+    "Apus": "apodidae",
+    "Aquila": "accipitridae",
+    "Ardea": "ardeidae",
+    "Ardenna": "laridae",
+    "Ardeola": "ardeidae",
+    "Arenaria": "scolopacidae",
+    "Asio": "strigidae",
+    "Astur": "accipitridae",
+    "Athene": "strigidae",
+    "Aythya": "anatidae",
+    "Bombycilla": "sturnidae",
+    "Botaurus": "ardeidae",
+    "Branta": "anatidae",
+    "Bubo": "strigidae",
+    "Bucephala": "anatidae",
+    "Burhinus": "charadriidae",
+    "Buteo": "accipitridae",
+    "Cairina": "anatidae",
+    "Calandrella": "alaudidae",
+    "Calcarius": "emberizidae",
+    "Calidris": "scolopacidae",
+    "Callonetta": "anatidae",
+    "Calonectris": "laridae",
+    "Caprimulgus": "caprimulgidae",
+    "Carduelis": "fringillidae",
+    "Carpodacus": "fringillidae",
+    "Cecropis": "hirundinidae",
+    "Cepphus": "alcidae",
+    "Cercotrichas": "muscicapidae",
+    "Certhia": "certhiidae",
+    "Cettia": "sylviidae",
+    "Charadrius": "charadriidae",
+    "Chenonetta": "anatidae",
+    "Chersophilus": "alaudidae",
+    "Chlidonias": "sternidae",
+    "Chloris": "fringillidae",
+    "Chroicocephalus": "laridae",
+    "Chrysolophus": "phasianidae",
+    "Ciconia": "ciconiidae",
+    "Cinclus": "muscicapidae",
+    "Circaetus": "accipitridae",
+    "Circus": "accipitridae",
+    "Cisticola": "sylviidae",
+    "Clamator": "cuculidae",
+    "Clanga": "accipitridae",
+    "Clangula": "anatidae",
+    "Coccothraustes": "fringillidae",
+    "Coloeus": "corvidae",
+    "Columba": "columbidae",
+    "Coracias": "coraciidae",
+    "Corvus": "corvidae",
+    "Coturnix": "phasianidae",
+    "Crex": "rallidae",
+    "Cuculus": "cuculidae",
+    "Curruca": "sylviidae",
+    "Cyanistes": "paridae",
+    "Cyanopica": "corvidae",
+    "Cygnus": "anatidae",
+    "Delichon": "hirundinidae",
+    "Dendrocopos": "picidae",
+    "Dendrocoptes": "picidae",
+    "Dryobates": "picidae",
+    "Dryocopus": "picidae",
+    "Egretta": "ardeidae",
+    "Elanus": "accipitridae",
+    "Emberiza": "emberizidae",
+    "Eremophila": "alaudidae",
+    "Erithacus": "muscicapidae",
+    "Estrilda": "fringillidae",
+    "Eudromias": "charadriidae",
+    "Euplectes": "passeridae",
+    "Falco": "falconidae",
+    "Ficedula": "muscicapidae",
+    "Fratercula": "alcidae",
+    "Fringilla": "fringillidae",
+    "Fulica": "rallidae",
+    "Fulmarus": "laridae",
+    "Galerida": "alaudidae",
+    "Gallinago": "scolopacidae",
+    "Gallinula": "rallidae",
+    "Gallus": "phasianidae",
+    "Garrulus": "corvidae",
+    "Gavia": "podicipedidae",
+    "Gelochelidon": "sternidae",
+    "Geronticus": "ardeidae",
+    "Glareola": "charadriidae",
+    "Glaucidium": "strigidae",
+    "Grus": "gruidae",
+    "Gulosus": "phalacrocoracidae",
+    "Gypaetus": "accipitridae",
+    "Gyps": "accipitridae",
+    "Haematopus": "charadriidae",
+    "Haliaeetus": "accipitridae",
+    "Hieraaetus": "accipitridae",
+    "Himantopus": "recurvirostridae",
+    "Hippolais": "acrocephalidae",
+    "Hirundo": "hirundinidae",
+    "Hydrobates": "laridae",
+    "Hydrocoloeus": "laridae",
+    "Hydroprogne": "sternidae",
+    "Ichthyaetus": "laridae",
+    "Iduna": "acrocephalidae",
+    "Jynx": "picidae",
+    "Lagopus": "phasianidae",
+    "Lanius": "muscicapidae",
+    "Larus": "laridae",
+    "Leiothrix": "muscicapidae",
+    "Limnodromus": "scolopacidae",
+    "Limosa": "scolopacidae",
+    "Linaria": "fringillidae",
+    "Locustella": "acrocephalidae",
+    "Lophodytes": "anatidae",
+    "Lophophanes": "paridae",
+    "Loxia": "fringillidae",
+    "Lullula": "alaudidae",
+    "Luscinia": "muscicapidae",
+    "Lymnocryptes": "scolopacidae",
+    "Lyrurus": "phasianidae",
+    "Mareca": "anatidae",
+    "Melanitta": "anatidae",
+    "Melanocorypha": "alaudidae",
+    "Melopsittacus": "psittacidae",
+    "Mergellus": "anatidae",
+    "Mergus": "anatidae",
+    "Merops": "meropidae",
+    "Microcarbo": "phalacrocoracidae",
+    "Milvus": "accipitridae",
+    "Monticola": "muscicapidae",
+    "Montifringilla": "passeridae",
+    "Morus": "phalacrocoracidae",
+    "Motacilla": "motacillidae",
+    "Muscicapa": "muscicapidae",
+    "Myiopsitta": "psittacidae",
+    "Neophron": "accipitridae",
+    "Netta": "anatidae",
+    "Nucifraga": "corvidae",
+    "Numenius": "scolopacidae",
+    "Numida": "phasianidae",
+    "Nycticorax": "ardeidae",
+    "Nymphicus": "psittacidae",
+    "Oceanites": "laridae",
+    "Oenanthe": "muscicapidae",
+    "Oriolus": "oriolidae",
+    "Otis": "gruidae",
+    "Otus": "strigidae",
+    "Oxyura": "anatidae",
+    "Pandion": "accipitridae",
+    "Panurus": "aegithalidae",
+    "Parus": "paridae",
+    "Passer": "passeridae",
+    "Pastor": "sturnidae",
+    "Pavo": "phasianidae",
+    "Perdix": "phasianidae",
+    "Periparus": "paridae",
+    "Pernis": "accipitridae",
+    "Petronia": "passeridae",
+    "Phalacrocorax": "phalacrocoracidae",
+    "Phalaropus": "scolopacidae",
+    "Phasianus": "phasianidae",
+    "Phoenicopterus": "phoenicopteridae",
+    "Phoenicurus": "muscicapidae",
+    "Phylloscopus": "phylloscopidae",
+    "Pica": "corvidae",
+    "Picoides": "picidae",
+    "Picus": "picidae",
+    "Platalea": "ardeidae",
+    "Plectrophenax": "emberizidae",
+    "Plegadis": "ardeidae",
+    "Pluvialis": "charadriidae",
+    "Podiceps": "podicipedidae",
+    "Poecile": "paridae",
+    "Porphyrio": "rallidae",
+    "Porzana": "rallidae",
+    "Prunella": "prunellidae",
+    "Psittacula": "psittacidae",
+    "Pterocles": "columbidae",
+    "Ptyonoprogne": "hirundinidae",
+    "Puffinus": "laridae",
+    "Pyrrhocorax": "corvidae",
+    "Pyrrhula": "fringillidae",
+    "Rallus": "rallidae",
+    "Recurvirostra": "recurvirostridae",
+    "Regulus": "regulidae",
+    "Remiz": "paridae",
+    "Riparia": "hirundinidae",
+    "Rissa": "laridae",
+    "Saxicola": "muscicapidae",
+    "Scolopax": "scolopacidae",
+    "Serinus": "fringillidae",
+    "Sitta": "sittidae",
+    "Somateria": "anatidae",
+    "Spatula": "anatidae",
+    "Spilopelia": "columbidae",
+    "Spinus": "fringillidae",
+    "Stercorarius": "laridae",
+    "Sterna": "sternidae",
+    "Sternula": "sternidae",
+    "Streptopelia": "columbidae",
+    "Strix": "strigidae",
+    "Sturnus": "sturnidae",
+    "Sylvia": "sylviidae",
+    "Syrmaticus": "phasianidae",
+    "Tachybaptus": "podicipedidae",
+    "Tachymarptis": "apodidae",
+    "Tadorna": "anatidae",
+    "Tetrao": "phasianidae",
+    "Tetrastes": "phasianidae",
+    "Tetrax": "gruidae",
+    "Thalasseus": "sternidae",
+    "Thinornis": "charadriidae",
+    "Threskiornis": "ardeidae",
+    "Tichodroma": "certhiidae",
+    "Tringa": "scolopacidae",
+    "Troglodytes": "troglodytidae",
+    "Turdus": "muscicapidae",
+    "Tyto": "strigidae",
+    "Upupa": "upupidae",
+    "Uria": "alcidae",
+    "Vanellus": "charadriidae",
+    "Xema": "laridae",
+    "Zapornia": "rallidae"
+  },
+  "genusFamilies": {
+    "Acanthis": "Fringillidae",
+    "Accipiter": "Accipitridae",
+    "Acrocephalus": "Acrocephalidae",
+    "Actitis": "Scolopacidae",
+    "Aegithalos": "Aegithalidae",
+    "Aegolius": "Strigidae",
+    "Aegypius": "Accipitridae",
+    "Aix": "Anatidae",
+    "Alauda": "Alaudidae",
+    "Alaudala": "Alaudidae",
+    "Alca": "Alcidae",
+    "Alcedo": "Alcedinidae",
+    "Alectoris": "Phasianidae",
+    "Alle": "Alcidae",
+    "Alopochen": "Anatidae",
+    "Anarhynchus": "Charadriidae",
+    "Anas": "Anatidae",
+    "Anser": "Anatidae",
+    "Anthus": "Motacillidae",
+    "Apus": "Apodidae",
+    "Aquila": "Accipitridae",
+    "Ardea": "Ardeidae",
+    "Ardenna": "Procellariidae",
+    "Ardeola": "Ardeidae",
+    "Arenaria": "Scolopacidae",
+    "Asio": "Strigidae",
+    "Astur": "Accipitridae",
+    "Athene": "Strigidae",
+    "Aythya": "Anatidae",
+    "Bombycilla": "Bombycillidae",
+    "Botaurus": "Ardeidae",
+    "Branta": "Anatidae",
+    "Bubo": "Strigidae",
+    "Bucephala": "Anatidae",
+    "Burhinus": "Burhinidae",
+    "Buteo": "Accipitridae",
+    "Cairina": "Anatidae",
+    "Calandrella": "Alaudidae",
+    "Calcarius": "Calcariidae",
+    "Calidris": "Scolopacidae",
+    "Callonetta": "Anatidae",
+    "Calonectris": "Procellariidae",
+    "Caprimulgus": "Caprimulgidae",
+    "Carduelis": "Fringillidae",
+    "Carpodacus": "Fringillidae",
+    "Cecropis": "Hirundinidae",
+    "Cepphus": "Alcidae",
+    "Cercotrichas": "Muscicapidae",
+    "Certhia": "Certhiidae",
+    "Cettia": "Cettiidae",
+    "Charadrius": "Charadriidae",
+    "Chenonetta": "Anatidae",
+    "Chersophilus": "Alaudidae",
+    "Chlidonias": "Laridae",
+    "Chloris": "Fringillidae",
+    "Chroicocephalus": "Laridae",
+    "Chrysolophus": "Phasianidae",
+    "Ciconia": "Ciconiidae",
+    "Cinclus": "Cinclidae",
+    "Circaetus": "Accipitridae",
+    "Circus": "Accipitridae",
+    "Cisticola": "Cisticolidae",
+    "Clamator": "Cuculidae",
+    "Clanga": "Accipitridae",
+    "Clangula": "Anatidae",
+    "Coccothraustes": "Fringillidae",
+    "Coloeus": "Corvidae",
+    "Columba": "Columbidae",
+    "Coracias": "Coraciidae",
+    "Corvus": "Corvidae",
+    "Coturnix": "Phasianidae",
+    "Crex": "Rallidae",
+    "Cuculus": "Cuculidae",
+    "Curruca": "Sylviidae",
+    "Cyanistes": "Paridae",
+    "Cyanopica": "Corvidae",
+    "Cygnus": "Anatidae",
+    "Delichon": "Hirundinidae",
+    "Dendrocopos": "Picidae",
+    "Dendrocoptes": "Picidae",
+    "Dryobates": "Picidae",
+    "Dryocopus": "Picidae",
+    "Egretta": "Ardeidae",
+    "Elanus": "Accipitridae",
+    "Emberiza": "Emberizidae",
+    "Eremophila": "Alaudidae",
+    "Erithacus": "Muscicapidae",
+    "Estrilda": "Estrildidae",
+    "Eudromias": "Charadriidae",
+    "Euplectes": "Ploceidae",
+    "Falco": "Falconidae",
+    "Ficedula": "Muscicapidae",
+    "Fratercula": "Alcidae",
+    "Fringilla": "Fringillidae",
+    "Fulica": "Rallidae",
+    "Fulmarus": "Procellariidae",
+    "Galerida": "Alaudidae",
+    "Gallinago": "Scolopacidae",
+    "Gallinula": "Rallidae",
+    "Gallus": "Phasianidae",
+    "Garrulus": "Corvidae",
+    "Gavia": "Gaviidae",
+    "Gelochelidon": "Laridae",
+    "Geronticus": "Threskiornithidae",
+    "Glareola": "Glareolidae",
+    "Glaucidium": "Strigidae",
+    "Grus": "Gruidae",
+    "Gulosus": "Phalacrocoracidae",
+    "Gypaetus": "Accipitridae",
+    "Gyps": "Accipitridae",
+    "Haematopus": "Haematopodidae",
+    "Haliaeetus": "Accipitridae",
+    "Hieraaetus": "Accipitridae",
+    "Himantopus": "Recurvirostridae",
+    "Hippolais": "Acrocephalidae",
+    "Hirundo": "Hirundinidae",
+    "Hydrobates": "Hydrobatidae",
+    "Hydrocoloeus": "Laridae",
+    "Hydroprogne": "Laridae",
+    "Ichthyaetus": "Laridae",
+    "Iduna": "Acrocephalidae",
+    "Jynx": "Picidae",
+    "Lagopus": "Phasianidae",
+    "Lanius": "Laniidae",
+    "Larus": "Laridae",
+    "Leiothrix": "Leiothrichidae",
+    "Limnodromus": "Scolopacidae",
+    "Limosa": "Scolopacidae",
+    "Linaria": "Fringillidae",
+    "Locustella": "Locustellidae",
+    "Lophodytes": "Anatidae",
+    "Lophophanes": "Paridae",
+    "Loxia": "Fringillidae",
+    "Lullula": "Alaudidae",
+    "Luscinia": "Muscicapidae",
+    "Lymnocryptes": "Scolopacidae",
+    "Lyrurus": "Phasianidae",
+    "Mareca": "Anatidae",
+    "Melanitta": "Anatidae",
+    "Melanocorypha": "Alaudidae",
+    "Melopsittacus": "Psittacidae",
+    "Mergellus": "Anatidae",
+    "Mergus": "Anatidae",
+    "Merops": "Meropidae",
+    "Microcarbo": "Phalacrocoracidae",
+    "Milvus": "Accipitridae",
+    "Monticola": "Muscicapidae",
+    "Montifringilla": "Passeridae",
+    "Morus": "Sulidae",
+    "Motacilla": "Motacillidae",
+    "Muscicapa": "Muscicapidae",
+    "Myiopsitta": "Psittacidae",
+    "Neophron": "Accipitridae",
+    "Netta": "Anatidae",
+    "Nucifraga": "Corvidae",
+    "Numenius": "Scolopacidae",
+    "Numida": "Numididae",
+    "Nycticorax": "Ardeidae",
+    "Nymphicus": "Psittacidae",
+    "Oceanites": "Hydrobatidae",
+    "Oenanthe": "Muscicapidae",
+    "Oriolus": "Oriolidae",
+    "Otis": "Otididae",
+    "Otus": "Strigidae",
+    "Oxyura": "Anatidae",
+    "Pandion": "Pandionidae",
+    "Panurus": "Panuridae",
+    "Parus": "Paridae",
+    "Passer": "Passeridae",
+    "Pastor": "Sturnidae",
+    "Pavo": "Phasianidae",
+    "Perdix": "Phasianidae",
+    "Periparus": "Paridae",
+    "Pernis": "Accipitridae",
+    "Petronia": "Passeridae",
+    "Phalacrocorax": "Phalacrocoracidae",
+    "Phalaropus": "Scolopacidae",
+    "Phasianus": "Phasianidae",
+    "Phoenicopterus": "Phoenicopteridae",
+    "Phoenicurus": "Muscicapidae",
+    "Phylloscopus": "Phylloscopidae",
+    "Pica": "Corvidae",
+    "Picoides": "Picidae",
+    "Picus": "Picidae",
+    "Platalea": "Threskiornithidae",
+    "Plectrophenax": "Calcariidae",
+    "Plegadis": "Threskiornithidae",
+    "Pluvialis": "Charadriidae",
+    "Podiceps": "Podicipedidae",
+    "Poecile": "Paridae",
+    "Porphyrio": "Rallidae",
+    "Porzana": "Rallidae",
+    "Prunella": "Prunellidae",
+    "Psittacula": "Psittacidae",
+    "Pterocles": "Pteroclididae",
+    "Ptyonoprogne": "Hirundinidae",
+    "Puffinus": "Procellariidae",
+    "Pyrrhocorax": "Corvidae",
+    "Pyrrhula": "Fringillidae",
+    "Rallus": "Rallidae",
+    "Recurvirostra": "Recurvirostridae",
+    "Regulus": "Regulidae",
+    "Remiz": "Remizidae",
+    "Riparia": "Hirundinidae",
+    "Rissa": "Laridae",
+    "Saxicola": "Muscicapidae",
+    "Scolopax": "Scolopacidae",
+    "Serinus": "Fringillidae",
+    "Sitta": "Sittidae",
+    "Somateria": "Anatidae",
+    "Spatula": "Anatidae",
+    "Spilopelia": "Columbidae",
+    "Spinus": "Fringillidae",
+    "Stercorarius": "Stercorariidae",
+    "Sterna": "Laridae",
+    "Sternula": "Laridae",
+    "Streptopelia": "Columbidae",
+    "Strix": "Strigidae",
+    "Sturnus": "Sturnidae",
+    "Sylvia": "Sylviidae",
+    "Syrmaticus": "Phasianidae",
+    "Tachybaptus": "Podicipedidae",
+    "Tachymarptis": "Apodidae",
+    "Tadorna": "Anatidae",
+    "Tetrao": "Phasianidae",
+    "Tetrastes": "Phasianidae",
+    "Tetrax": "Otididae",
+    "Thalasseus": "Laridae",
+    "Thinornis": "Charadriidae",
+    "Threskiornis": "Threskiornithidae",
+    "Tichodroma": "Tichodromidae",
+    "Tringa": "Scolopacidae",
+    "Troglodytes": "Troglodytidae",
+    "Turdus": "Turdidae",
+    "Tyto": "Tytonidae",
+    "Upupa": "Upupidae",
+    "Uria": "Alcidae",
+    "Vanellus": "Charadriidae",
+    "Xema": "Laridae",
+    "Zapornia": "Rallidae"
+  },
+  "species": {
+    "Accipiter nisus": {
+      "file": "accipiter-nisus.svg",
+      "template": "accipitridae"
+    },
+    "Actitis hypoleucos": {
+      "file": "actitis-hypoleucos.svg",
+      "template": "scolopacidae"
+    },
+    "Aegithalos caudatus": {
+      "file": "aegithalos-caudatus.svg",
+      "template": "aegithalidae"
+    },
+    "Alauda arvensis": {
+      "file": "alauda-arvensis.svg",
+      "template": "alaudidae"
+    },
+    "Alcedo atthis": {
+      "file": "alcedo-atthis.svg",
+      "template": "alcedinidae"
+    },
+    "Anas crecca": {
+      "file": "anas-crecca.svg",
+      "template": "anatidae"
+    },
+    "Anas platyrhynchos": {
+      "file": "anas-platyrhynchos.svg",
+      "template": "anatidae"
+    },
+    "Anser anser": {
+      "file": "anser-anser.svg",
+      "template": "anatidae"
+    },
+    "Anthus pratensis": {
+      "file": "anthus-pratensis.svg",
+      "template": "motacillidae"
+    },
+    "Ardea alba": {
+      "file": "ardea-alba.svg",
+      "template": "ardeidae"
+    },
+    "Ardea cinerea": {
+      "file": "ardea-cinerea.svg",
+      "template": "ardeidae"
+    },
+    "Ardea ibis": {
+      "file": "ardea-ibis.svg",
+      "template": "ardeidae"
+    },
+    "Asio otus": {
+      "file": "asio-otus.svg",
+      "template": "strigidae"
+    },
+    "Astur gentilis": {
+      "file": "astur-gentilis.svg",
+      "template": "accipitridae"
+    },
+    "Athene noctua": {
+      "file": "athene-noctua.svg",
+      "template": "strigidae"
+    },
+    "Aythya ferina": {
+      "file": "aythya-ferina.svg",
+      "template": "anatidae"
+    },
+    "Aythya fuligula": {
+      "file": "aythya-fuligula.svg",
+      "template": "anatidae"
+    },
+    "Buteo buteo": {
+      "file": "buteo-buteo.svg",
+      "template": "accipitridae"
+    },
+    "Calidris alpina": {
+      "file": "calidris-alpina.svg",
+      "template": "scolopacidae"
+    },
+    "Carduelis carduelis": {
+      "file": "carduelis-carduelis.svg",
+      "template": "fringillidae"
+    },
+    "Chloris chloris": {
+      "file": "chloris-chloris.svg",
+      "template": "fringillidae"
+    },
+    "Chroicocephalus ridibundus": {
+      "file": "chroicocephalus-ridibundus.svg",
+      "template": "laridae"
+    },
+    "Ciconia ciconia": {
+      "file": "ciconia-ciconia.svg",
+      "template": "ciconiidae"
+    },
+    "Circus aeruginosus": {
+      "file": "circus-aeruginosus.svg",
+      "template": "accipitridae"
+    },
+    "Circus cyaneus": {
+      "file": "circus-cyaneus.svg",
+      "template": "accipitridae"
+    },
+    "Coccothraustes coccothraustes": {
+      "file": "coccothraustes-coccothraustes.svg",
+      "template": "fringillidae"
+    },
+    "Coloeus monedula": {
+      "file": "coloeus-monedula.svg",
+      "template": "corvidae"
+    },
+    "Columba livia": {
+      "file": "columba-livia.svg",
+      "template": "columbidae"
+    },
+    "Columba oenas": {
+      "file": "columba-oenas.svg",
+      "template": "columbidae"
+    },
+    "Columba palumbus": {
+      "file": "columba-palumbus.svg",
+      "template": "columbidae"
+    },
+    "Corvus corax": {
+      "file": "corvus-corax.svg",
+      "template": "corvidae"
+    },
+    "Corvus corone": {
+      "file": "corvus-corone.svg",
+      "template": "corvidae"
+    },
+    "Cyanistes caeruleus": {
+      "file": "cyanistes-caeruleus.svg",
+      "template": "paridae"
+    },
+    "Cygnus olor": {
+      "file": "cygnus-olor.svg",
+      "template": "anatidae"
+    },
+    "Dendrocopos major": {
+      "file": "dendrocopos-major.svg",
+      "template": "picidae"
+    },
+    "Egretta garzetta": {
+      "file": "egretta-garzetta.svg",
+      "template": "ardeidae"
+    },
+    "Emberiza calandra": {
+      "file": "emberiza-calandra.svg",
+      "template": "emberizidae"
+    },
+    "Emberiza cirlus": {
+      "file": "emberiza-cirlus.svg",
+      "template": "emberizidae"
+    },
+    "Emberiza citrinella": {
+      "file": "emberiza-citrinella.svg",
+      "template": "emberizidae"
+    },
+    "Emberiza schoeniclus": {
+      "file": "emberiza-schoeniclus.svg",
+      "template": "emberizidae"
+    },
+    "Erithacus rubecula": {
+      "file": "erithacus-rubecula.svg",
+      "template": "muscicapidae"
+    },
+    "Falco peregrinus": {
+      "file": "falco-peregrinus.svg",
+      "template": "falconidae"
+    },
+    "Falco tinnunculus": {
+      "file": "falco-tinnunculus.svg",
+      "template": "falconidae"
+    },
+    "Fringilla coelebs": {
+      "file": "fringilla-coelebs.svg",
+      "template": "fringillidae"
+    },
+    "Fulica atra": {
+      "file": "fulica-atra.svg",
+      "template": "rallidae"
+    },
+    "Gallinago gallinago": {
+      "file": "gallinago-gallinago.svg",
+      "template": "scolopacidae"
+    },
+    "Gallinula chloropus": {
+      "file": "gallinula-chloropus.svg",
+      "template": "rallidae"
+    },
+    "Gallus gallus": {
+      "file": "gallus-gallus.svg",
+      "template": "phasianidae"
+    },
+    "Garrulus glandarius": {
+      "file": "garrulus-glandarius.svg",
+      "template": "corvidae"
+    },
+    "Hirundo rustica": {
+      "file": "hirundo-rustica.svg",
+      "template": "hirundinidae"
+    },
+    "Ichthyaetus melanocephalus": {
+      "file": "ichthyaetus-melanocephalus.svg",
+      "template": "laridae"
+    },
+    "Larus fuscus": {
+      "file": "larus-fuscus.svg",
+      "template": "laridae"
+    },
+    "Larus michahellis": {
+      "file": "larus-michahellis.svg",
+      "template": "laridae"
+    },
+    "Linaria cannabina": {
+      "file": "linaria-cannabina.svg",
+      "template": "fringillidae"
+    },
+    "Loxia curvirostra": {
+      "file": "loxia-curvirostra.svg",
+      "template": "fringillidae"
+    },
+    "Lullula arborea": {
+      "file": "lullula-arborea.svg",
+      "template": "alaudidae"
+    },
+    "Mareca strepera": {
+      "file": "mareca-strepera.svg",
+      "template": "anatidae"
+    },
+    "Milvus milvus": {
+      "file": "milvus-milvus.svg",
+      "template": "accipitridae"
+    },
+    "Motacilla alba": {
+      "file": "motacilla-alba.svg",
+      "template": "motacillidae"
+    },
+    "Motacilla cinerea": {
+      "file": "motacilla-cinerea.svg",
+      "template": "motacillidae"
+    },
+    "Numenius arquata": {
+      "file": "numenius-arquata.svg",
+      "template": "scolopacidae"
+    },
+    "Oriolus oriolus": {
+      "file": "oriolus-oriolus.svg",
+      "template": "oriolidae"
+    },
+    "Pandion haliaetus": {
+      "file": "pandion-haliaetus.svg",
+      "template": "accipitridae"
+    },
+    "Parus major": {
+      "file": "parus-major.svg",
+      "template": "paridae"
+    },
+    "Passer domesticus": {
+      "file": "passer-domesticus.svg",
+      "template": "passeridae"
+    },
+    "Passer montanus": {
+      "file": "passer-montanus.svg",
+      "template": "passeridae"
+    },
+    "Periparus ater": {
+      "file": "periparus-ater.svg",
+      "template": "paridae"
+    },
+    "Phalacrocorax carbo": {
+      "file": "phalacrocorax-carbo.svg",
+      "template": "phalacrocoracidae"
+    },
+    "Phasianus colchicus": {
+      "file": "phasianus-colchicus.svg",
+      "template": "phasianidae"
+    },
+    "Phoenicurus ochruros": {
+      "file": "phoenicurus-ochruros.svg",
+      "template": "muscicapidae"
+    },
+    "Phylloscopus collybita": {
+      "file": "phylloscopus-collybita.svg",
+      "template": "phylloscopidae"
+    },
+    "Pica pica": {
+      "file": "pica-pica.svg",
+      "template": "corvidae"
+    },
+    "Picus viridis": {
+      "file": "picus-viridis.svg",
+      "template": "picidae"
+    },
+    "Podiceps cristatus": {
+      "file": "podiceps-cristatus.svg",
+      "template": "podicipedidae"
+    },
+    "Podiceps nigricollis": {
+      "file": "podiceps-nigricollis.svg",
+      "template": "podicipedidae"
+    },
+    "Prunella modularis": {
+      "file": "prunella-modularis.svg",
+      "template": "prunellidae"
+    },
+    "Pyrrhula pyrrhula": {
+      "file": "pyrrhula-pyrrhula.svg",
+      "template": "fringillidae"
+    },
+    "Rallus aquaticus": {
+      "file": "rallus-aquaticus.svg",
+      "template": "rallidae"
+    },
+    "Regulus ignicapilla": {
+      "file": "regulus-ignicapilla.svg",
+      "template": "regulidae"
+    },
+    "Regulus regulus": {
+      "file": "regulus-regulus.svg",
+      "template": "regulidae"
+    },
+    "Saxicola rubicola": {
+      "file": "saxicola-rubicola.svg",
+      "template": "muscicapidae"
+    },
+    "Serinus serinus": {
+      "file": "serinus-serinus.svg",
+      "template": "fringillidae"
+    },
+    "Sitta europaea": {
+      "file": "sitta-europaea.svg",
+      "template": "sittidae"
+    },
+    "Spatula clypeata": {
+      "file": "spatula-clypeata.svg",
+      "template": "anatidae"
+    },
+    "Spinus spinus": {
+      "file": "spinus-spinus.svg",
+      "template": "fringillidae"
+    },
+    "Streptopelia decaocto": {
+      "file": "streptopelia-decaocto.svg",
+      "template": "columbidae"
+    },
+    "Strix aluco": {
+      "file": "strix-aluco.svg",
+      "template": "strigidae"
+    },
+    "Sturnus vulgaris": {
+      "file": "sturnus-vulgaris.svg",
+      "template": "sturnidae"
+    },
+    "Sylvia atricapilla": {
+      "file": "sylvia-atricapilla.svg",
+      "template": "sylviidae"
+    },
+    "Tachybaptus ruficollis": {
+      "file": "tachybaptus-ruficollis.svg",
+      "template": "podicipedidae"
+    },
+    "Tadorna tadorna": {
+      "file": "tadorna-tadorna.svg",
+      "template": "anatidae"
+    },
+    "Tringa nebularia": {
+      "file": "tringa-nebularia.svg",
+      "template": "scolopacidae"
+    },
+    "Tringa ochropus": {
+      "file": "tringa-ochropus.svg",
+      "template": "scolopacidae"
+    },
+    "Tringa totanus": {
+      "file": "tringa-totanus.svg",
+      "template": "scolopacidae"
+    },
+    "Troglodytes troglodytes": {
+      "file": "troglodytes-troglodytes.svg",
+      "template": "troglodytidae"
+    },
+    "Turdus merula": {
+      "file": "turdus-merula.svg",
+      "template": "muscicapidae"
+    },
+    "Turdus philomelos": {
+      "file": "turdus-philomelos.svg",
+      "template": "muscicapidae"
+    },
+    "Turdus viscivorus": {
+      "file": "turdus-viscivorus.svg",
+      "template": "muscicapidae"
+    },
+    "Tyto alba": {
+      "file": "tyto-alba.svg",
+      "template": "strigidae"
+    },
+    "Upupa epops": {
+      "file": "upupa-epops.svg",
+      "template": "upupidae"
+    },
+    "Vanellus vanellus": {
+      "file": "vanellus-vanellus.svg",
+      "template": "charadriidae"
+    }
+  },
+  "templates": {
+    "accipitridae": "template-accipitridae.svg",
+    "acrocephalidae": "template-acrocephalidae.svg",
+    "aegithalidae": "template-aegithalidae.svg",
+    "alaudidae": "template-alaudidae.svg",
+    "alcedinidae": "template-alcedinidae.svg",
+    "alcidae": "template-alcidae.svg",
+    "anatidae": "template-anatidae.svg",
+    "apodidae": "template-apodidae.svg",
+    "ardeidae": "template-ardeidae.svg",
+    "caprimulgidae": "template-caprimulgidae.svg",
+    "certhiidae": "template-certhiidae.svg",
+    "charadriidae": "template-charadriidae.svg",
+    "ciconiidae": "template-ciconiidae.svg",
+    "columbidae": "template-columbidae.svg",
+    "coraciidae": "template-coraciidae.svg",
+    "corvidae": "template-corvidae.svg",
+    "cuculidae": "template-cuculidae.svg",
+    "emberizidae": "template-emberizidae.svg",
+    "falconidae": "template-falconidae.svg",
+    "fringillidae": "template-fringillidae.svg",
+    "gruidae": "template-gruidae.svg",
+    "hirundinidae": "template-hirundinidae.svg",
+    "laridae": "template-laridae.svg",
+    "meropidae": "template-meropidae.svg",
+    "motacillidae": "template-motacillidae.svg",
+    "muscicapidae": "template-muscicapidae.svg",
+    "oriolidae": "template-oriolidae.svg",
+    "paridae": "template-paridae.svg",
+    "passeridae": "template-passeridae.svg",
+    "pelecanidae": "template-pelecanidae.svg",
+    "phalacrocoracidae": "template-phalacrocoracidae.svg",
+    "phasianidae": "template-phasianidae.svg",
+    "phoenicopteridae": "template-phoenicopteridae.svg",
+    "phylloscopidae": "template-phylloscopidae.svg",
+    "picidae": "template-picidae.svg",
+    "podicipedidae": "template-podicipedidae.svg",
+    "prunellidae": "template-prunellidae.svg",
+    "psittacidae": "template-psittacidae.svg",
+    "rallidae": "template-rallidae.svg",
+    "recurvirostridae": "template-recurvirostridae.svg",
+    "regulidae": "template-regulidae.svg",
+    "scolopacidae": "template-scolopacidae.svg",
+    "sittidae": "template-sittidae.svg",
+    "sternidae": "template-sternidae.svg",
+    "strigidae": "template-strigidae.svg",
+    "sturnidae": "template-sturnidae.svg",
+    "sylviidae": "template-sylviidae.svg",
+    "troglodytidae": "template-troglodytidae.svg",
+    "upupidae": "template-upupidae.svg"
+  },
+  "version": 1
+}
