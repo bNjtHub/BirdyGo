@@ -434,4 +434,5 @@ def main():
     for k in ORDER:
         print(f"{k:22s} {len(ICONS[k]['svg'].encode()):5d} B")
 
-main()
+if __name__ == "__main__":
+    main()
