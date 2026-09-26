@@ -1,8 +1,8 @@
 name: Release
 
+# FORK: disabled in BirdyGo (upstream release pipeline); manual run only.
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write

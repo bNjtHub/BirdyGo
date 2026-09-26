@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "BirdNET Live",
+  "appTitle": "BirdyGo",
   "liveMode": "En direct",
   "surveyMode": "Relevé",
   "pointCountMode": "Point d'écoute",
@@ -1106,5 +1106,7 @@
   "permissionRequestIOS": "Continuer",
   "openInAppleMaps": "Ouvrir dans Apple Maps",
   "aruCombinedSessionWarningTitle": "Conflit avec audio complet",
-  "aruCombinedSessionWarningBody": "Les sessions combinées ne prennent pas en charge l'audio complet. Le système enregistrera des clips avec échantillonnage intelligent (Smart). Veuillez revenir à l'écran précédent pour vérifier vos paramètres d'enregistrement si vous souhaitez modifier cela."
+  "aruCombinedSessionWarningBody": "Les sessions combinées ne prennent pas en charge l'audio complet. Le système enregistrera des clips avec échantillonnage intelligent (Smart). Veuillez revenir à l'écran précédent pour vérifier vos paramètres d'enregistrement si vous souhaitez modifier cela.",
+  "forkPoweredByBirdnet": "Propulsé par BirdNET",
+  "forkModifiedVersion": "Une version modifiée de BirdNET Live (licence MIT). Touche pour voir le projet d'origine."
 }

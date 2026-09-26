@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "BirdNET Live",
+  "appTitle": "BirdyGo",
   "@appTitle": {
     "description": "The application title"
   },
@@ -4733,5 +4733,9 @@
   "aruCombinedSessionWarningBody": "Combined sessions do not support Full Audio. The system will fall back to saving clips with Smart sampling. Go to the previous screen to review recording settings if you wish to change this.",
   "@aruCombinedSessionWarningBody": {
     "description": "Body of the warning shown when a combined ARU session is configured with full audio recording mode"
-  }
+  },
+  "forkPoweredByBirdnet": "Powered by BirdNET",
+  "@forkPoweredByBirdnet": {"description": "BirdyGo fork: credit line under the app name on the About screen."},
+  "forkModifiedVersion": "A modified version of BirdNET Live (MIT licence). Tap to see the original project.",
+  "@forkModifiedVersion": {"description": "BirdyGo fork: explains the app is a modified BirdNET Live; opens the upstream repository."}
 }

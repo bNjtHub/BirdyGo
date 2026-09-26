@@ -9,6 +9,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/widgets/content_width_constraint.dart';
+import '../../fork/brand/fork_info.dart'; // FORK: BirdyGo links
 
 /// Provider for app package info.
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
@@ -50,6 +51,32 @@ class AboutScreen extends ConsumerWidget {
                     AppConstants.appName,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // FORK: BirdyGo credits BirdNET and links the original project.
+                  const SizedBox(height: 4),
+                  InkWell(
+                    onTap: () => openExternalUrl(context, AppConstants.githubUrl),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            l10n.forkPoweredByBirdnet,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          Text(
+                            l10n.forkModifiedVersion,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -240,7 +267,8 @@ class AboutScreen extends ConsumerWidget {
               leading: const Icon(AppIcons.code),
               title: Text(l10n.aboutGitHub),
               trailing: const Icon(AppIcons.openInNew),
-              onTap: () => openExternalUrl(context, AppConstants.githubUrl),
+              // FORK: "This app on GitHub" points to the BirdyGo repository.
+              onTap: () => openExternalUrl(context, ForkInfo.repositoryUrl),
             ),
             ListTile(
               leading: ColorFiltered(

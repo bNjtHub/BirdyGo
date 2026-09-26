@@ -96,13 +96,13 @@ Bug sur le téléphone, branche <nom>. J'ai fait : <étapes>. Résultat : <ce qu
 
 ## J0 : faire du fork une app à part
 
-- [ ] Nom affiché « BirdyGo », applicationId Android `fr.justcodeit.birdygo`, pour que l'app s'installe
+- [x] Nom affiché « BirdyGo », applicationId Android `fr.justcodeit.birdygo`, pour que l'app s'installe
       à côté de BirdNET Live. Mettre aussi le bundle id iOS au même nom, sans rien tester côté iOS.
-- [ ] Icône provisoire simple, refaite en J6.
-- [ ] Écran À propos : « Propulsé par BirdNET » avec le lien vers le dépôt d'origine. Garder LICENSE,
+- [x] Icône provisoire simple, refaite en J6.
+- [x] Écran À propos : « Propulsé par BirdNET » avec le lien vers le dépôt d'origine. Garder LICENSE,
       MODEL_LICENSE et ACCEPTABLE_USE.md, ajouter un fichier NOTICE qui dit que c'est une version modifiée.
-- [ ] Ne pas mettre le nom BirdNET dans le nom de l'app.
-- [ ] Désactiver `release.yml` et `docs.yml` dans `.github/workflows`, garder `ci.yml`.
+- [x] Ne pas mettre le nom BirdNET dans le nom de l'app.
+- [x] Désactiver `release.yml` et `docs.yml` dans `.github/workflows`, garder `ci.yml`.
 
 Fini quand : analyze et tests passent, l'app s'installe sur le Xiaomi à côté de BirdNET Live.
 
