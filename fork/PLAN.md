@@ -209,8 +209,10 @@ inattendu reste « À vérifier » et doit être confirmé avant de compter. Seu
 - [x] Cohérence vérifiée : Bilan (« Vérifier N », point sur les espèces), Accueil (compteur à
       vérifier), revue rapide (toutes les détections non revues) et LPO (confirmées seulement)
       restent calculés sur le niveau ou le statut de revue, pas sur le libellé.
-- [ ] (Benjamin) Sur le Xiaomi : passer un chant de Rougegorge depuis le web pendant une écoute,
-      relever la ligne `[GeoPresence]`, vérifier Live et Bilan.
+- [x] (Benjamin) Sur le Xiaomi : passer un chant de Rougegorge depuis le web pendant une écoute,
+      relever la ligne `[GeoPresence]`, vérifier Live et Bilan. Résultat : Rougegorge « abundant »,
+      ni rare ni hors saison, « Sûr » en Live et au Bilan. Le « À vérifier » d'origine venait donc
+      d'un score bas (son de haut-parleur), pas du lieu.
 - Limite connue, inchangée : l'index ne garde pas l'avis du géomodèle, donc une ancienne détection
   non revue à score élevé compte comme « déjà vérifiée » même si l'espèce était inattendue
   (`ObservationIndex.verifiedSpecies`, « Première fois » et « nouvelles »). À traiter avec le jeu (J6e).
