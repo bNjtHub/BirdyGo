@@ -363,6 +363,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             détections » qui ouvre la revue rapide sur ces seules détections, détail de la session,
             envoi à la LPO. La croix et le retour ramènent à l'Accueil. Partage en texte, sans lieu.
             Reportés en J6e : carte de statut, puce de badge, célébration de nouveau statut.
+      - [x] Accueil (`lib/fork/home/`) : logo BirdyGo dessiné en Flutter (l'aile se dessine une fois),
+            salutation, date et lieu, tuiles du jour (espèces, contacts, nouvelles), dernier oiseau
+            entendu, détections à vérifier, « Écouter » en bas ; menu avec toutes les entrées upstream.
+            Reportés en J6e : pastille de série, carte de statut, défi de la semaine, barre de
+            navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
+            mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -448,6 +454,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   share_plus (ancrage iPad déjà géré par `shareOriginFrom`).
 - Carte (J5) : aucun code natif ajouté ; « Me localiser » passe par le LocationService existant
   (geolocator), vérifier le texte d'autorisation de localisation dans `Info.plist`.
+- Accueil (J6c) : aucun code natif ; logo dessiné en Flutter.
 - Bilan de l'écoute (J6c) : aucun code natif ; partage du texte par share_plus (ancrage iPad par
   `shareOriginFrom`).
 - Design system (J6a) : aucun code natif. Polices embarquées en assets Flutter, vibration légère via
