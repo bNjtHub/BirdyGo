@@ -106,6 +106,7 @@ abstract final class AppIcons {
   static const IconData map = Symbols.location_on;
   static const IconData mapSheet = Symbols.map;
   static const IconData memory = Symbols.memory;
+  static const IconData menu = Symbols.menu; // FORK: home menu (J6c)
   static const IconData menuBook = Symbols.menu_book;
   static const IconData mic = Symbols.mic;
   static const IconData micExternalOnRounded = Symbols.mic_external_on_rounded;
@@ -139,6 +140,7 @@ abstract final class AppIcons {
   static const IconData privacyTip = Symbols.privacy_tip;
   static const IconData public = Symbols.public;
   static const IconData publicOffRounded = Symbols.public_off_rounded;
+  static const IconData question = Symbols.question_mark; // FORK: home (J6c)
   static const IconData radioButtonUnchecked = Symbols.radio_button_unchecked;
   static const IconData redo = Symbols.redo;
   static const IconData refresh = Symbols.refresh;

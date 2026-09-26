@@ -32,6 +32,7 @@ import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
 import '../../fork/map/contact_map_screen.dart'; // FORK: contact map (J5)
 import '../../fork/garden/garden_count_screen.dart'; // FORK: garden count (J5b)
 import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
+import '../../fork/home/fork_home.dart'; // FORK: BirdyGo home (J6c)
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -152,8 +153,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }());
   }
 
+  // FORK: BirdyGo home (J6c). A getter, not a constant, so the upstream
+  // layout below is not reported as dead code.
+  bool get _forkHome => true;
+
   @override
   Widget build(BuildContext context) {
+    // FORK: BirdyGo home (J6c); the warm-up above is unchanged.
+    if (_forkHome) return const ForkHome();
+
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
