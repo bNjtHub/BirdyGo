@@ -70,6 +70,36 @@ List<MarkSpan> markSpansFrom({
   return spans;
 }
 
+/// Pauses of the capture. The spectrogram stops scrolling while paused and
+/// resumes without a gap, so the marks must not count paused time either:
+/// otherwise every passage heard before a pause would jump left by the
+/// length of the pause.
+class MarkPauses {
+  final List<(DateTime, DateTime?)> _spans = [];
+
+  bool get isPaused => _spans.isNotEmpty && _spans.last.$2 == null;
+
+  void pause(DateTime at) {
+    if (!isPaused) _spans.add((at, null));
+  }
+
+  void resume(DateTime at) {
+    if (isPaused) _spans.last = (_spans.last.$1, at);
+  }
+
+  /// Microseconds of pause between [from] and [to].
+  int pausedMicros(DateTime from, DateTime to) {
+    var micros = 0;
+    for (final (start, end) in _spans) {
+      final a = start.isAfter(from) ? start : from;
+      final pauseEnd = end ?? to;
+      final b = pauseEnd.isBefore(to) ? pauseEnd : to;
+      if (b.isAfter(a)) micros += b.difference(a).inMicroseconds;
+    }
+    return micros;
+  }
+}
+
 /// A mark placed in the strip: [left] and [right] are fractions of the
 /// width (0 = oldest visible instant, 1 = now).
 @immutable
@@ -92,26 +122,31 @@ class DetectionMark {
 /// Places the [spans] (sorted by start) visible in the last
 /// [displaySeconds] before [now]. Overlapping passages go to the next lane,
 /// [maxLanes] at most; beyond, they share the lane that frees first.
+/// Time spent in [pauses] does not scroll the strip.
 List<DetectionMark> layoutDetectionMarks({
   required List<MarkSpan> spans,
   required DateTime now,
   required double displaySeconds,
+  MarkPauses? pauses,
   int maxLanes = 3,
   double minGap = 0.004,
 }) {
   if (displaySeconds <= 0) return const [];
-  final windowStart = now.microsecondsSinceEpoch - displaySeconds * 1e6;
-  double fraction(DateTime t) =>
-      ((t.microsecondsSinceEpoch - windowStart) / (displaySeconds * 1e6)).clamp(
-        0.0,
-        1.0,
-      );
+  final displayMicros = displaySeconds * 1e6;
+  // Age of an instant in scrolled time: wall time minus paused time.
+  double age(DateTime t) {
+    if (!t.isBefore(now)) return 0;
+    final wall = now.difference(t).inMicroseconds;
+    return (wall - (pauses?.pausedMicros(t, now) ?? 0)).toDouble();
+  }
+
+  double fraction(DateTime t) => (1 - age(t) / displayMicros).clamp(0.0, 1.0);
 
   final laneEnds = <double>[];
   final marks = <DetectionMark>[];
   for (final span in spans) {
     final end = span.end ?? now;
-    if (end.microsecondsSinceEpoch < windowStart || span.start.isAfter(now)) {
+    if (age(end) > displayMicros || span.start.isAfter(now)) {
       continue;
     }
     final left = fraction(span.start);
@@ -168,6 +203,7 @@ class _DetectionMarksState extends State<DetectionMarks>
     with SingleTickerProviderStateMixin {
   late final ValueNotifier<DateTime> _now = ValueNotifier(DateTime.now());
   late final Ticker _ticker = createTicker((_) => _now.value = DateTime.now());
+  final MarkPauses _pauses = MarkPauses();
 
   /// Laid-out species names, kept across frames and rebuilds.
   final Map<String, TextPainter> _labels = {};
@@ -177,12 +213,17 @@ class _DetectionMarksState extends State<DetectionMarks>
   @override
   void initState() {
     super.initState();
+    if (!widget.running) _pauses.pause(DateTime.now());
     _syncTicker();
   }
 
   @override
   void didUpdateWidget(DetectionMarks old) {
     super.didUpdateWidget(old);
+    if (widget.running != old.running) {
+      final at = DateTime.now();
+      widget.running ? _pauses.resume(at) : _pauses.pause(at);
+    }
     _syncTicker();
   }
 
@@ -234,6 +275,7 @@ class _DetectionMarksState extends State<DetectionMarks>
         ),
         painter: DetectionMarksPainter(
           now: _now,
+          pauses: _pauses,
           spans: widget.spans,
           displaySeconds: widget.displaySeconds,
           showLabels: widget.showLabels,
@@ -250,6 +292,7 @@ class _DetectionMarksState extends State<DetectionMarks>
 class DetectionMarksPainter extends CustomPainter {
   DetectionMarksPainter({
     required this.now,
+    this.pauses,
     required this.spans,
     required this.displaySeconds,
     required this.showLabels,
@@ -261,6 +304,7 @@ class DetectionMarksPainter extends CustomPainter {
        super(repaint: now);
 
   final ValueListenable<DateTime> now;
+  final MarkPauses? pauses;
   final List<MarkSpan> spans;
   final double displaySeconds;
   final bool showLabels;
@@ -277,6 +321,7 @@ class DetectionMarksPainter extends CustomPainter {
       spans: spans,
       now: now.value,
       displaySeconds: displaySeconds,
+      pauses: pauses,
     );
     if (marks.isEmpty) return;
     final bar = showLabels ? 5.0 : 3.0;
@@ -328,5 +373,6 @@ class DetectionMarksPainter extends CustomPainter {
       old.showLabels != showLabels ||
       old.labelStyle != labelStyle ||
       old.textScaler != textScaler ||
-      old.now != now;
+      old.now != now ||
+      old.pauses != pauses;
 }
