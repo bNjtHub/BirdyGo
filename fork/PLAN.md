@@ -27,19 +27,23 @@ Flutter (section « Phase iOS » en bas de ce fichier).
 - [ ] Installer BirdNET Live depuis le Play Store, faire une ou deux sorties, noter ce qui gêne vraiment.
 - [x] Sur GitHub, forker birdnet-team/birdnet-live-app vers Bnjthub (tu peux renommer le dépôt en
       `BirdyGo`). Un fork est public. Pour un dépôt privé, il faut le dupliquer au lieu de le forker.
-- [ ] Sur le PC : installer Flutter (canal stable), Android Studio (pour le SDK Android) et Git LFS, puis :
+- [x] Sur le PC : installer Flutter (canal stable), Android Studio (pour le SDK Android) et Git LFS, puis
+  (PowerShell, dans le dossier du projet) :
   ```
-  git clone https://github.com/Bnjthub/BirdyGo.git
-  cd BirdyGo
-  git lfs install
+  $env:GIT_LFS_SKIP_SMUDGE = "1"
+  git clone https://github.com/bNjtHub/BirdyGo.git .
+  Remove-Item Env:GIT_LFS_SKIP_SMUDGE
+  git config lfs.url https://github.com/birdnet-team/birdnet-live-app.git/info/lfs
   git lfs pull
+  New-Item -ItemType Directory -Force assets\species_data | Out-Null
   flutter pub get
   flutter gen-l10n
   flutter run
   ```
-  Si `git lfs pull` échoue sur le fork, prendre les modèles dans le dépôt officiel :
-  `git config lfs.url https://github.com/birdnet-team/birdnet-live-app.git/info/lfs` puis `git lfs pull`.
-  L'app d'origine doit tourner sur le téléphone avant de commencer quoi que ce soit.
+  Les modèles ONNX ne sont pas stockés sur le fork : on les prend dans le dépôt officiel (`lfs.url`).
+  `assets/species_data` est un dossier généré, attendu par `pubspec.yaml`. Sur le Xiaomi (HyperOS),
+  activer « Débogage USB » et « Installer via USB » dans les options pour les développeurs, et
+  appuyer sur « Installer » quand le téléphone le demande, sinon `INSTALL_FAILED_USER_RESTRICTED`.
 - [x] Dézipper le kit à la racine du dépôt (`CLAUDE.md`, `fork/`, `.claude/`), commit, push.
 - [x] Sur claude.ai/code : connecter GitHub, créer un environnement cloud « Flutter » avec l'accès
       réseau Trusted, coller le contenu de `fork/cloud-setup.sh` dans le champ Setup script, et
