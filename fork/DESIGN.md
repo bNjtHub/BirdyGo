@@ -300,6 +300,20 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).
 - Colonne de 600 dp au plus en paysage et sur tablette.
 
+## Mise en œuvre (J6c, Revue rapide)
+
+Code dans `lib/fork/reliability/quick_review_screen.dart` (état, lecture, geste) et
+`quick_review_widgets.dart` (barre, progression, pile, carte, indices, boutons). On suit SPEC.md 9.9
+et 5.11.
+
+- Thème de l'app (clair ou sombre), colonne de 600 dp au plus, la page défile si le texte est agrandi.
+- Geste : la carte suit le doigt ; relâchée sous les seuils (`answerForDrag`), elle revient avec un
+  ressort interruptible ; au-delà, elle sort de l'écran en 260 ms dans le sens de la réponse. Pas de
+  rotation. La carte suivante arrive en fondu et à l'échelle 0,97 vers 1 (220 ms).
+- Pendant le glissement, le contour de la carte prend la couleur de la réponse (Lichen, rouille de
+  « À vérifier », bleu de « Probable »).
+- Animations réduites : pas de déplacement, la carte s'efface en 150 ms.
+
 ## Photos
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.

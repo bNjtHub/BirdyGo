@@ -5261,5 +5261,17 @@
   "forkPracticeMarked": "Recording: this session doesn't count in the ranking, on the map or for the LPO.",
   "@forkPracticeMarked": {"description": "BirdyGo fork: listening to a recording (J5c)."},
   "forkPracticeUnmark": "No, those were real birds",
-  "@forkPracticeUnmark": {"description": "BirdyGo fork: listening to a recording (J5c)."}
+  "@forkPracticeUnmark": {"description": "BirdyGo fork: listening to a recording (J5c)."},
+  "forkQuickReviewSorted": "{count, plural, =0{Nothing sorted yet.} =1{You sorted 1 detection.} other{You sorted {count} detections.}}",
+  "@forkQuickReviewSorted": {"description": "BirdyGo fork: quick review screen (J6c).", "placeholders": {"count": {"type": "int"}}},
+  "forkQuickReviewHeadphones": "With headphones or at low volume.",
+  "@forkQuickReviewHeadphones": {"description": "BirdyGo fork: quick review screen (J6c)."},
+  "forkQuickReviewDontKnowNote": "“I don't know” is a good answer: the detection is set aside, without counting.",
+  "@forkQuickReviewDontKnowNote": {"description": "BirdyGo fork: quick review screen (J6c)."},
+  "forkQuickReviewScore": "Score {score}",
+  "@forkQuickReviewScore": {"description": "BirdyGo fork: quick review screen (J6c).", "placeholders": {"score": {"type": "String"}}},
+  "forkQuickReviewPlaying": "Playing the clip",
+  "@forkQuickReviewPlaying": {"description": "BirdyGo fork: quick review screen (J6c)."},
+  "forkQuickReviewClose": "Close the review",
+  "@forkQuickReviewClose": {"description": "BirdyGo fork: quick review screen (J6c)."}
 }

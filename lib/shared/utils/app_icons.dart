@@ -42,7 +42,11 @@ abstract final class AppIcons {
   static const IconData checkCircleOutline = Symbols.check_circle;
   static const IconData checkCircleRounded = Symbols.check_circle_rounded;
   static const IconData checkRounded = Symbols.check_rounded;
+  static const IconData chevronLeft =
+      Symbols.chevron_left; // FORK: quick review swipe hints (J6c)
   static const IconData chevronRight = Symbols.chevron_right;
+  static const IconData chevronUp =
+      Symbols.keyboard_arrow_up; // FORK: quick review swipe hints (J6c)
   static const IconData clear = Symbols.clear;
   static const IconData clearRounded = Symbols.clear_rounded;
   static const IconData close = Symbols.close;
