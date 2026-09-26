@@ -33,6 +33,7 @@ import '../../history/global_species_history.dart';
 import '../../live/live_providers.dart';
 import 'pick_wikipedia_url.dart';
 import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (J3)
+import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
 
 /// Shows a modal bottom sheet with detailed species information.
 class SpeciesInfoOverlay {
@@ -280,6 +281,13 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SpeciesPrecisionLine(
+                  scientificName: widget.scientificName,
+                ),
+              ),
+              // FORK: "Entendu 23 fois sur 9 jours…" and activity charts (J4).
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SpeciesActivitySection(
                   scientificName: widget.scientificName,
                 ),
               ),

@@ -28,6 +28,7 @@ import 'help_screen.dart';
 import '../../fork/data/observation_index_service.dart'; // FORK: observation index
 import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound library
 import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
+import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
 
 // =============================================================================
 // Home Screen — Main Menu
@@ -953,6 +954,18 @@ class _Footer extends StatelessWidget {
                 MaterialPageRoute<void>(
                   builder: (_) => const SessionLibraryScreen(),
                 ),
+              ),
+        ),
+        // FORK: palmarès (fork/PLAN.md J4).
+        _FooterButton(
+          icon: AppIcons.sort,
+          label: l10n.forkRanking,
+          color: color,
+          fontSize: fontSize,
+          isTablet: isTablet,
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const RankingScreen()),
               ),
         ),
         // FORK: quick review of doubtful detections (fork/PLAN.md J3).

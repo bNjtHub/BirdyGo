@@ -393,6 +393,35 @@ class ObservationIndex {
     ];
   }
 
+  /// Tally of one species over a period, or null if never heard in it.
+  Future<SpeciesTally?> speciesTally(
+    String scientificName, {
+    DateTime? from,
+    DateTime? to,
+    bool confirmedOnly = false,
+  }) async {
+    final all = await speciesRanking(
+      from: from,
+      to: to,
+      confirmedOnly: confirmedOnly,
+    );
+    for (final tally in all) {
+      if (tally.scientificName == scientificName) return tally;
+    }
+    return null;
+  }
+
+  /// Species whose first-ever detection (rejected ones aside) is at or
+  /// after [since]: the "nouvelles de l'année".
+  Future<Set<String>> speciesFirstHeardSince(DateTime since) async {
+    final rows = await _db.rawQuery(
+      "SELECT scientific_name FROM detections WHERE review_status != 'rejected' "
+      'GROUP BY scientific_name HAVING MIN(start_ms) >= ?',
+      [since.toUtc().millisecondsSinceEpoch],
+    );
+    return {for (final row in rows) row['scientific_name']! as String};
+  }
+
   /// All-time contact count per species (for "×3 · 142 au total").
   Future<Map<String, int>> totalContactsBySpecies() async {
     final rows = await _db.rawQuery(

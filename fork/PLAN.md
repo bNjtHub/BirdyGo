@@ -188,13 +188,18 @@ Fini quand : les niveaux sont cohérents d'un écran à l'autre et chaque balaya
 
 ## J4 : palmarès
 
-- [ ] Classement des espèces par nombre de contacts, par nombre de jours ou par dernière écoute.
+- [x] Classement des espèces par nombre de contacts, par nombre de jours ou par dernière écoute.
       Périodes : 30 jours, saison, année, tout. Option « confirmées seulement ».
-- [ ] En tête : nombre d'espèces sur la période et nouvelles de l'année.
-- [ ] Fiche espèce : une phrase plutôt qu'un tableau (« Entendu 23 fois sur 9 jours, la dernière fois
+- [x] En tête : nombre d'espèces sur la période et nouvelles de l'année.
+- [x] Fiche espèce : une phrase plutôt qu'un tableau (« Entendu 23 fois sur 9 jours, la dernière fois
       hier à 7 h 42 »), activité par heure (24 barres) et par mois (12 barres) dessinées avec
       CustomPainter, sans nouvelle dépendance.
-- [ ] Filtre « oiseaux seulement » : le modèle reconnaît aussi des amphibiens, des insectes et des mammifères.
+- [x] Filtre « oiseaux seulement » : le modèle reconnaît aussi des amphibiens, des insectes et des mammifères.
+- Notes de réalisation : écran Palmarès (accueil), périodes météorologiques pour « saison »,
+  « nouvelles de l'année » = première détection de l'espèce dans l'année. La phrase et les deux
+  graphiques sont ajoutés à la fiche espèce d'upstream (`SpeciesInfoOverlay`, une ligne FORK).
+  « Oiseaux seulement » utilise le groupe de `taxonomy.csv` (Aves). Reste à vérifier sur le
+  téléphone : les compteurs d'une espèce contre un export CSV.
 
 Fini quand : les compteurs d'une espèce correspondent à un export CSV sur un échantillon.
 
