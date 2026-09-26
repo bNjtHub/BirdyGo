@@ -10,7 +10,8 @@ import UIKit
 
   /// Must match `Runner.entitlements`. Only reachable now through files the
   /// 1.1.2 Share extension left behind — see `queueStagedSharedFile`.
-  private static let appGroupIdentifier = "group.de.tu-chemnitz.mi.kahst.birdnet-live"
+  // FORK: own App Group, the upstream one belongs to the BirdNET team.
+  private static let appGroupIdentifier = "group.fr.justcodeit.birdygo"
 
   /// A shared audio document waiting to be picked up by Dart. Set on both cold
   /// and warm launches; drained by `takePendingSharedFile`.
