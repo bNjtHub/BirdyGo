@@ -52,7 +52,7 @@ class BilanLoader {
   final String Function() _localeName;
 
   Future<BilanInputs> load(LiveSession session) async {
-    final saved = await _repository.load(session.id) ?? session;
+    final saved = await _fresh(session);
     final names = {for (final d in saved.detections) d.scientificName};
 
     Set<String>? heardBefore;
@@ -90,6 +90,15 @@ class BilanLoader {
     );
   }
 
+  /// The saved version of [session], or [session] when it cannot be read.
+  Future<LiveSession> _fresh(LiveSession session) async {
+    try {
+      return await _repository.load(session.id) ?? session;
+    } catch (_) {
+      return session;
+    }
+  }
+
   /// Place name of [session]: the stored one, else reverse geocoding (cache,
   /// or network with the user's consent), stored in the session as the
   /// review screen does. Null offline or without a position.
@@ -106,8 +115,13 @@ class BilanLoader {
         localeName: _localeName(),
       );
       if (name != null) {
-        session.locationName = name;
-        await _repository.save(session);
+        // Re-read first: a review may have been saved while the name was
+        // being resolved, and must not be overwritten.
+        final saved = await _fresh(session);
+        if (saved.locationName == null) {
+          saved.locationName = name;
+          await _repository.save(saved);
+        }
       }
       return name;
     } catch (_) {
