@@ -81,7 +81,7 @@ void main() {
     );
     expect(find.text('Un petit oiseau.'), findsOneWidget);
     expect(find.text('En bref'), findsNothing);
-    expect(find.text("À l'oreille"), findsOneWidget);
+    expect(find.text('Pour le reconnaître'), findsOneWidget);
     expect(find.text('Un chant flûté.'), findsOneWidget);
     expect(
       find.text('Fiche rédigée par IA : elle peut contenir des erreurs.'),
