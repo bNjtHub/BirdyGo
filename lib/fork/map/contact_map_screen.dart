@@ -41,7 +41,11 @@ const double _defaultZoom = 5;
 
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
-  const ContactMapScreen({super.key});
+  const ContactMapScreen({super.key, this.focus});
+
+  /// Where the map opens (the Bilan's session), instead of fitting every
+  /// contact.
+  final LatLng? focus;
 
   @override
   ConsumerState<ContactMapScreen> createState() => _ContactMapScreenState();
@@ -320,10 +324,14 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter:
-                      data.isEmpty ? _defaultCenter : data.positions.first,
+                      widget.focus ??
+                      (data.isEmpty ? _defaultCenter : data.positions.first),
                   initialZoom:
-                      data.isEmpty ? _defaultZoom : kMapSinglePointZoom,
-                  initialCameraFit: _cameraFit(data),
+                      widget.focus == null && data.isEmpty
+                          ? _defaultZoom
+                          : kMapSinglePointZoom,
+                  initialCameraFit:
+                      widget.focus == null ? _cameraFit(data) : null,
                   backgroundColor: theme.colorScheme.surfaceContainerLow,
                   interactionOptions: const InteractionOptions(
                     flags: InteractiveFlag.all & ~InteractiveFlag.rotate,

@@ -185,6 +185,45 @@ void main() {
       },
     );
 
+    test('review queue restricted to given keys (Bilan)', () async {
+      final keys = [
+        for (final d in evening.detections) detectionKey(evening.id, d),
+        detectionKey(morning.id, morning.detections[2]), // Parus major
+        'missing|key',
+      ];
+      final queue = await index.reviewQueue(keys: keys);
+      expect(queue.map((d) => d.scientificName).toList(), [
+        'Parus major',
+        'Strix aluco',
+      ]);
+      expect(await index.reviewQueue(keys: const []), isEmpty);
+
+      await index.markSkipped(queue.first.key);
+      expect(await index.skippedKeys(), {queue.first.key});
+      expect(
+        (await index.reviewQueue(keys: keys)).map((d) => d.scientificName),
+        ['Strix aluco'],
+      );
+    });
+
+    test('species heard before a time, rejected ones aside', () async {
+      final heard = await index.speciesHeardBefore(
+        evening.startTime,
+        among: [
+          'Erithacus rubecula',
+          'Strix aluco',
+          'Turdus merula',
+          'Upupa epops',
+        ],
+      );
+      // Strix aluco only in the evening; Turdus merula only rejected.
+      expect(heard, {'Erithacus rubecula', 'Upupa epops'});
+      expect(
+        await index.speciesHeardBefore(evening.startTime, among: const []),
+        isEmpty,
+      );
+    });
+
     test('upsert replaces a session and remove deletes it', () async {
       morning.detections.removeLast();
       await index.upsertSession(morning);

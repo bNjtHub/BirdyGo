@@ -422,6 +422,25 @@ class ObservationIndex {
     return {for (final row in rows) row['scientific_name']! as String};
   }
 
+  /// Species among [among] heard (rejected ones aside) before [before]. The
+  /// others are heard for the first time at or after [before] (Bilan, J6c).
+  Future<Set<String>> speciesHeardBefore(
+    DateTime before, {
+    required Iterable<String> among,
+  }) async {
+    final heard = <String>{};
+    for (final chunk in _chunks(among.toSet().toList())) {
+      final rows = await _db.rawQuery(
+        'SELECT DISTINCT scientific_name FROM detections '
+        "WHERE review_status != 'rejected' AND start_ms < ? "
+        'AND scientific_name IN (${_marks(chunk.length)})',
+        [before.toUtc().millisecondsSinceEpoch, ...chunk],
+      );
+      heard.addAll(rows.map((row) => row['scientific_name']! as String));
+    }
+    return heard;
+  }
+
   /// All-time contact count per species (for "×3 · 142 au total").
   Future<Map<String, int>> totalContactsBySpecies() async {
     final rows = await _db.rawQuery(
@@ -534,16 +553,42 @@ class ObservationIndex {
 
   /// Unreviewed detections waiting for the quick review, lowest score first
   /// (the most doubtful come first), capped at [limit]. Detections answered
-  /// "Je ne sais pas" leave the queue.
-  Future<List<IndexedDetection>> reviewQueue({int limit = 50}) async {
-    final rows = await _db.rawQuery(
-      "SELECT * FROM detections WHERE review_status = 'unreviewed' "
-      'AND key NOT IN (SELECT key FROM review_skipped) '
-      'ORDER BY confidence ASC, start_ms DESC LIMIT ?',
-      [limit],
-    );
-    return rows.map(IndexedDetection.fromRow).toList();
+  /// "Je ne sais pas" leave the queue. With [keys], only those detections
+  /// (the Bilan's « Vérifier 3 détections », J6c).
+  Future<List<IndexedDetection>> reviewQueue({
+    int limit = 50,
+    Iterable<String>? keys,
+  }) async {
+    const base =
+        "SELECT * FROM detections WHERE review_status = 'unreviewed' "
+        'AND key NOT IN (SELECT key FROM review_skipped) ';
+    const order = 'ORDER BY confidence ASC, start_ms DESC LIMIT ?';
+    if (keys == null) {
+      final rows = await _db.rawQuery('$base$order', [limit]);
+      return rows.map(IndexedDetection.fromRow).toList();
+    }
+    final rows = <Map<String, Object?>>[];
+    for (final chunk in _chunks(keys.toSet().toList())) {
+      rows.addAll(
+        await _db.rawQuery(
+          '${base}AND key IN (${_marks(chunk.length)}) $order',
+          [...chunk, limit],
+        ),
+      );
+    }
+    final queue =
+        rows.map(IndexedDetection.fromRow).toList()..sort((a, b) {
+          final byScore = a.confidence.compareTo(b.confidence);
+          return byScore != 0 ? byScore : b.start.compareTo(a.start);
+        });
+    return queue.take(limit).toList();
   }
+
+  /// Keys answered "Je ne sais pas".
+  Future<Set<String>> skippedKeys() async => {
+    for (final row in await _db.query('review_skipped', columns: ['key']))
+      row['key']! as String,
+  };
 
   /// Number of detections waiting in the quick review.
   Future<int> reviewQueueLength() async =>
@@ -632,3 +677,16 @@ class ObservationIndex {
     );
   }
 }
+
+/// Below SQLite's historical limit of 999 bound arguments per statement.
+const int _maxArgs = 500;
+
+List<List<String>> _chunks(List<String> values) => [
+  for (var i = 0; i < values.length; i += _maxArgs)
+    values.sublist(
+      i,
+      i + _maxArgs < values.length ? i + _maxArgs : values.length,
+    ),
+];
+
+String _marks(int count) => List.filled(count, '?').join(',');
