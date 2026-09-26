@@ -385,7 +385,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
       Écrans restants : une session et une PR par écran (titre « J6c <écran> : … »). Avant de
-      commencer, vérifier dans les PR ouvertes que l'écran n'est pas déjà pris.
+      commencer, vérifier dans les PR ouvertes que l'écran n'est pas déjà pris. Deux sessions à la
+      fois, dans cet ordre : Fiche espèce et Revue rapide, puis Palmarès et Carte, puis Sonothèque
+      et Envoi à la LPO.
       - [ ] Fiche espèce (photo de J6b en tête)
       - [ ] Palmarès
       - [ ] Carte
