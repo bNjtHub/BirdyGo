@@ -40,6 +40,7 @@ import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
+import '../../fork/summary/listening_summary_screen.dart'; // FORK: listening summary (J6c)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -672,7 +673,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
           MaterialPageRoute<void>(
             builder:
                 (_) =>
-                    SessionReviewScreen(session: session, autoSaved: autoSave),
+                    autoSave // FORK: listening summary when saved (J6c)
+                        ? ListeningSummaryScreen(session: session)
+                        : SessionReviewScreen(
+                          session: session,
+                          autoSaved: autoSave,
+                        ),
           ),
         );
       }
