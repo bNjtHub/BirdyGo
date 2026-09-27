@@ -1,1 +1,4 @@
 assets/models/*.onnx filter=lfs diff=lfs merge=lfs -text
+/assets/fork/species_icons/*.svg text eol=lf
+/assets/fork/species_icons/index.json text eol=lf
+/tools/fork_icons/sheet.html text eol=lf
