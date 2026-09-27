@@ -44,6 +44,13 @@ abstract final class BirdyMotion {
   static const Duration newStatus = Duration(milliseconds: 300);
   static const Duration newStatusTextDelay = Duration(milliseconds: 60);
 
+  /// Animated icon (tips): waits for the card fade, then plays once.
+  static const Duration iconDelay = Duration(milliseconds: 150);
+  static const Duration iconPlay = Duration(milliseconds: 450);
+
+  /// Travel of a sliding icon, under [maxOffset].
+  static const double iconOffset = 6;
+
   /// Upper bound of any celebration.
   static const Duration celebrationMax = Duration(milliseconds: 500);
 

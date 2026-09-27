@@ -1540,5 +1540,7 @@
   "forkMomentRareKeep": "Garde l'extrait : si tu l'envoies à la LPO, ses bénévoles pourront l'écouter.",
   "forkMomentRarePlusOne": "+1 espèce rare",
   "forkMomentRareLater": "Gardé pour plus tard, dans la revue rapide.",
-  "forkMomentRareNo": "C'est noté. Il ne comptera pas, merci."
+  "forkMomentRareNo": "C'est noté. Il ne comptera pas, merci.",
+  "forkTipHeader": "Le saviez-vous ?",
+  "forkTipNext": "Astuce suivante"
 }

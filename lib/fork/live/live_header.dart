@@ -314,6 +314,10 @@ class _ElapsedTextState extends State<_ElapsedText> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Text(formatListeningTime(widget.elapsed()), style: BirdyText.numberL);
+  Widget build(BuildContext context) => Text(
+    formatListeningTime(widget.elapsed()),
+    style: BirdyText.numberL,
+    maxLines: 1,
+    softWrap: false,
+  );
 }

@@ -423,6 +423,35 @@ Règles :
 - Textes : clé `<écran>EmptyTitle` pour le titre, `<écran>Empty` pour la phrase, dans `app_fr.arb`
   et `app_en.arb`. Les trois situations sont visibles dans la galerie du design system.
 
+## Astuces (« Le saviez-vous ? »)
+
+Un seul composant, `BirdyTipCard` (`lib/fork/design/widgets/tip_card.dart`), pour toute astuce ou
+anecdote montrée pendant une attente (écoute sans oiseau, chargement long, fin de liste) ;
+`BirdyTipCarousel` pour en faire défiler plusieurs.
+
+- Carte `surface1`, bordure, rayon 20, largeur 460 au plus. À gauche, l'icône de l'astuce (`AppIcons`)
+  dans un disque Loriot clair (`orioleContainer` / `orioleText`) : le Loriot dit « petite découverte ».
+- En tête, une ampoule et « Le saviez-vous ? » en légende Loriot, en minuscules (clé `forkTipHeader`).
+  C'est le seul sur-titre admis, et il reste dans la carte. Puis le titre (`label`) et une ou deux
+  phrases (`bodyCompact`, `text2`).
+- Carrousel : départ au hasard, un appui passe à la suivante (léger enfoncement `Pressable`), défilement
+  seul toutes les 15 s sauf avec un lecteur d'écran, fondu enchaîné de 220 ms (aucun en animations
+  réduites). Des points en bas disent où on en est. La carte garde la hauteur de l'astuce la plus
+  longue : rien ne bouge autour.
+- Icône animée (`BirdyAnimatedIcon`, `lib/fork/design/widgets/birdy_animated_icon.dart`) : nos
+  Material Symbols, joués une fois quand l'astuce arrive, 150 ms après le fondu de la carte, en
+  450 ms. Quatre mouvements : `fill` (l'icône se remplit, par défaut), `drift` (glisse de 6 px :
+  vent, distance), `drop` (descend en place : téléchargement), `pulse` (1 → 1,08 → 1 : son, score).
+  Ni rotation, ni rebond, ni boucle ; état final direct en animations réduites. Pas de pack d'icônes
+  animées externe : les packs gratuits ne couvrent pas nos sujets dans un style unique, et Lordicon
+  gratuit exige un crédit et interdit de publier ses fichiers dans le dépôt public.
+- Une astuce ne fait jamais la leçon : elle donne un truc de terrain ou une curiosité sur les oiseaux.
+
+## Chiffres des tuiles
+
+Le chiffre d'une `StatTile` tient toujours sur une ligne : trop long (« 1:02:47 » après une heure
+d'écoute), il rétrécit à la largeur de la tuile au lieu de passer à la ligne.
+
 ## Contrôle qualité
 
 Contraste AA, thèmes clair et sombre, paysage et tablette (exigence d'upstream), texte agrandi à

@@ -5601,5 +5601,9 @@
   "forkMomentRareLater": "Kept for later, in the quick review.",
   "@forkMomentRareLater": {"description": "BirdyGo fork: Live moments (J6e)."},
   "forkMomentRareNo": "Noted. It will not count, thank you.",
-  "@forkMomentRareNo": {"description": "BirdyGo fork: Live moments (J6e)."}
+  "@forkMomentRareNo": {"description": "BirdyGo fork: Live moments (J6e)."},
+  "forkTipHeader": "Did you know?",
+  "@forkTipHeader": {"description": "BirdyGo fork: caption of the tip cards (BirdyTipCard)."},
+  "forkTipNext": "Next tip",
+  "@forkTipNext": {"description": "BirdyGo fork: screen reader hint to show the next tip."}
 }
