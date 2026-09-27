@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../game/game_widgets.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'birdy_motion.dart';
@@ -150,6 +151,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGalleryPlayer, [_player(l10n)]),
                 _Section(l10n.forkGalleryMotion, _motion(l10n)),
                 _Section(l10n.forkGalleryEmpty, _empty(l10n)),
+                _Section(l10n.forkBadges, [_medals()]),
               ],
             ),
           );
@@ -450,6 +452,23 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         state: ClipPlayState.pending,
         semanticLabel: l10n.forkReplayPending,
       ),
+    ],
+  );
+
+  /// Badge medals: locked, bronze, silver, gold (DESIGN.md « Jeu »).
+  Widget _medals() => Wrap(
+    spacing: BirdySpace.l,
+    runSpacing: BirdySpace.m,
+    children: [
+      for (var tier = 0; tier <= 3; tier++)
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BadgeMedal(tier: tier, icon: AppIcons.star),
+            const SizedBox(height: BirdySpace.xs),
+            if (tier > 0) TierDots(filled: tier),
+          ],
+        ),
     ],
   );
 
