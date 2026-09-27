@@ -13,92 +13,161 @@
 <style>
 body{margin:0;background:#EEF1EC}
 a{color:#19A7B3}a:hover{color:#0E7C86}
-@keyframes bg-fade{from{opacity:0}to{opacity:1}}
-@keyframes bg-rise{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes bg-song{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.8)}}
-@keyframes bg-beak-up{0%,4%,16%,26%,100%{transform:none}8%,20%{transform:rotate(7deg)}}
-@keyframes bg-beak-down{0%,4%,16%,26%,100%{transform:none}8%,20%{transform:rotate(-11deg)}}
-@keyframes bg-note{0%,5%{opacity:0;transform:none}10%{opacity:.9}28%{opacity:0;transform:translateX(-8px)}100%{opacity:0;transform:translateX(-8px)}}
-.sp-btn{transition:transform 120ms cubic-bezier(0.23,1,0.32,1)}.sp-btn:active{transform:scale(.97)}
-@keyframes bg-load{0%{opacity:0;transform:scaleX(.04)}4%{opacity:1}58%{transform:scaleX(1)}86%{opacity:1;transform:scaleX(1)}93%{opacity:0;transform:scaleX(1)}100%{opacity:0;transform:scaleX(.04)}}
-@media (prefers-reduced-motion: reduce){[style*="animation"]{animation-name:bg-fade!important;animation-duration:200ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}}
+@keyframes sp-fade{from{opacity:0}to{opacity:1}}
+@keyframes sp-lift{from{transform:translateY(14px) scale(.95)}to{transform:none}}
+@keyframes sp-draw{from{opacity:0;transform:scaleY(0)}20%{opacity:1}to{opacity:1;transform:none}}
+@keyframes sp-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sp-beak-up{0%{transform:rotate(0deg)}1%{transform:rotate(3.812deg)}2%{transform:rotate(7.289deg)}3%{transform:rotate(10.125deg)}4%{transform:rotate(12.071deg)}5%{transform:rotate(12.956deg)}6%{transform:rotate(12.701deg)}7%{transform:rotate(11.329deg)}8%{transform:rotate(8.962deg)}9%{transform:rotate(5.806deg)}10%{transform:rotate(2.14deg)}11%{transform:rotate(0deg)}12%{transform:rotate(0.215deg)}13%{transform:rotate(4.017deg)}14%{transform:rotate(7.466deg)}15%{transform:rotate(10.259deg)}16%{transform:rotate(12.149deg)}17%{transform:rotate(12.972deg)}18%{transform:rotate(12.653deg)}19%{transform:rotate(11.222deg)}20%{transform:rotate(8.805deg)}21%{transform:rotate(5.613deg)}22%{transform:rotate(1.927deg)}23%{transform:rotate(0deg)}24%{transform:rotate(0.43deg)}25%{transform:rotate(4.221deg)}26%{transform:rotate(7.641deg)}27%{transform:rotate(10.389deg)}28%{transform:rotate(12.224deg)}29%{transform:rotate(12.984deg)}30%{transform:rotate(12.602deg)}31%{transform:rotate(11.112deg)}32%{transform:rotate(8.645deg)}33%{transform:rotate(5.418deg)}34%{transform:rotate(1.715deg)}35%{transform:rotate(0deg)}36%{transform:rotate(0deg)}38%,100%{transform:none}}
+@keyframes sp-beak-down{0%{transform:rotate(0deg)}1%{transform:rotate(-3.226deg)}2%{transform:rotate(-6.168deg)}3%{transform:rotate(-8.568deg)}4%{transform:rotate(-10.214deg)}5%{transform:rotate(-10.962deg)}6%{transform:rotate(-10.747deg)}7%{transform:rotate(-9.586deg)}8%{transform:rotate(-7.583deg)}9%{transform:rotate(-4.913deg)}10%{transform:rotate(-1.811deg)}11%{transform:rotate(0deg)}12%{transform:rotate(-0.182deg)}13%{transform:rotate(-3.399deg)}14%{transform:rotate(-6.318deg)}15%{transform:rotate(-8.681deg)}16%{transform:rotate(-10.28deg)}17%{transform:rotate(-10.976deg)}18%{transform:rotate(-10.707deg)}19%{transform:rotate(-9.496deg)}20%{transform:rotate(-7.45deg)}21%{transform:rotate(-4.749deg)}22%{transform:rotate(-1.631deg)}23%{transform:rotate(0deg)}24%{transform:rotate(-0.364deg)}25%{transform:rotate(-3.572deg)}26%{transform:rotate(-6.466deg)}27%{transform:rotate(-8.791deg)}28%{transform:rotate(-10.344deg)}29%{transform:rotate(-10.986deg)}30%{transform:rotate(-10.663deg)}31%{transform:rotate(-9.403deg)}32%{transform:rotate(-7.315deg)}33%{transform:rotate(-4.585deg)}34%{transform:rotate(-1.451deg)}35%{transform:rotate(0deg)}36%{transform:rotate(0deg)}38%,100%{transform:none}}
+@keyframes sp-tail{0%{transform:rotate(0deg)}1%{transform:rotate(-2.053deg)}2%{transform:rotate(-3.925deg)}3%{transform:rotate(-5.452deg)}4%{transform:rotate(-6.5deg)}5%{transform:rotate(-6.976deg)}6%{transform:rotate(-6.839deg)}7%{transform:rotate(-6.1deg)}8%{transform:rotate(-4.825deg)}9%{transform:rotate(-3.126deg)}10%{transform:rotate(-1.152deg)}11%{transform:rotate(0deg)}12%{transform:rotate(-0.116deg)}13%{transform:rotate(-2.163deg)}14%{transform:rotate(-4.02deg)}15%{transform:rotate(-5.524deg)}16%{transform:rotate(-6.542deg)}17%{transform:rotate(-6.985deg)}18%{transform:rotate(-6.813deg)}19%{transform:rotate(-6.043deg)}20%{transform:rotate(-4.741deg)}21%{transform:rotate(-3.022deg)}22%{transform:rotate(-1.038deg)}23%{transform:rotate(0deg)}24%{transform:rotate(-0.231deg)}25%{transform:rotate(-2.273deg)}26%{transform:rotate(-4.114deg)}27%{transform:rotate(-5.594deg)}28%{transform:rotate(-6.582deg)}29%{transform:rotate(-6.991deg)}30%{transform:rotate(-6.786deg)}31%{transform:rotate(-5.984deg)}32%{transform:rotate(-4.655deg)}33%{transform:rotate(-2.917deg)}34%{transform:rotate(-0.923deg)}35%{transform:rotate(0deg)}36%{transform:rotate(0deg)}38%,100%{transform:none}}
+@keyframes sp-swell{0%{transform:rotate(0deg) scale(1,1)}1%{transform:rotate(-0.733deg) scale(0.996,1.013)}2%{transform:rotate(-1.402deg) scale(0.992,1.025)}3%{transform:rotate(-1.947deg) scale(0.989,1.035)}4%{transform:rotate(-2.321deg) scale(0.987,1.042)}5%{transform:rotate(-2.491deg) scale(0.986,1.045)}6%{transform:rotate(-2.442deg) scale(0.986,1.044)}7%{transform:rotate(-2.179deg) scale(0.988,1.039)}8%{transform:rotate(-1.723deg) scale(0.99,1.031)}9%{transform:rotate(-1.117deg) scale(0.994,1.02)}10%{transform:rotate(-0.411deg) scale(0.998,1.007)}11%{transform:rotate(0deg) scale(1,1)}12%{transform:rotate(-0.041deg) scale(1,1.001)}13%{transform:rotate(-0.773deg) scale(0.996,1.014)}14%{transform:rotate(-1.436deg) scale(0.992,1.026)}15%{transform:rotate(-1.973deg) scale(0.989,1.036)}16%{transform:rotate(-2.336deg) scale(0.987,1.042)}17%{transform:rotate(-2.495deg) scale(0.986,1.045)}18%{transform:rotate(-2.433deg) scale(0.986,1.044)}19%{transform:rotate(-2.158deg) scale(0.988,1.039)}20%{transform:rotate(-1.693deg) scale(0.991,1.03)}21%{transform:rotate(-1.079deg) scale(0.994,1.019)}22%{transform:rotate(-0.371deg) scale(0.998,1.007)}23%{transform:rotate(0deg) scale(1,1)}24%{transform:rotate(-0.083deg) scale(1,1.001)}25%{transform:rotate(-0.812deg) scale(0.995,1.015)}26%{transform:rotate(-1.469deg) scale(0.992,1.026)}27%{transform:rotate(-1.998deg) scale(0.989,1.036)}28%{transform:rotate(-2.351deg) scale(0.987,1.042)}29%{transform:rotate(-2.497deg) scale(0.986,1.045)}30%{transform:rotate(-2.424deg) scale(0.986,1.044)}31%{transform:rotate(-2.137deg) scale(0.988,1.038)}32%{transform:rotate(-1.663deg) scale(0.991,1.03)}33%{transform:rotate(-1.042deg) scale(0.994,1.019)}34%{transform:rotate(-0.33deg) scale(0.998,1.006)}35%{transform:rotate(0deg) scale(1,1)}36%{transform:rotate(0deg) scale(1,1)}38%,100%{transform:none}}
+@keyframes sp-bar0{0%{transform:scaleY(1)}1%{transform:scaleY(1.017)}2%{transform:scaleY(1.052)}3%{transform:scaleY(1.076)}4%{transform:scaleY(1.063)}5%{transform:scaleY(1.014)}6%{transform:scaleY(0.957)}7%{transform:scaleY(0.924)}8%{transform:scaleY(0.931)}9%{transform:scaleY(0.965)}10%{transform:scaleY(0.995)}11%{transform:scaleY(1)}12%{transform:scaleY(1.001)}13%{transform:scaleY(1.031)}14%{transform:scaleY(1.049)}15%{transform:scaleY(1.033)}16%{transform:scaleY(0.984)}17%{transform:scaleY(0.93)}18%{transform:scaleY(0.905)}19%{transform:scaleY(0.921)}20%{transform:scaleY(0.964)}21%{transform:scaleY(1.001)}22%{transform:scaleY(1.009)}23%{transform:scaleY(1)}24%{transform:scaleY(1.003)}25%{transform:scaleY(1.021)}26%{transform:scaleY(1.006)}27%{transform:scaleY(0.962)}28%{transform:scaleY(0.917)}29%{transform:scaleY(0.901)}30%{transform:scaleY(0.927)}31%{transform:scaleY(0.979)}32%{transform:scaleY(1.023)}33%{transform:scaleY(1.034)}34%{transform:scaleY(1.013)}35%{transform:scaleY(1)}36%{transform:scaleY(1)}38%,100%{transform:none}}
+@keyframes sp-bar1{0%{transform:scaleY(1)}1%{transform:scaleY(1.035)}2%{transform:scaleY(1.021)}3%{transform:scaleY(0.956)}4%{transform:scaleY(0.878)}5%{transform:scaleY(0.841)}6%{transform:scaleY(0.87)}7%{transform:scaleY(0.948)}8%{transform:scaleY(1.024)}9%{transform:scaleY(1.052)}10%{transform:scaleY(1.026)}11%{transform:scaleY(1)}12%{transform:scaleY(1.001)}13%{transform:scaleY(0.996)}14%{transform:scaleY(0.943)}15%{transform:scaleY(0.879)}16%{transform:scaleY(0.857)}17%{transform:scaleY(0.901)}18%{transform:scaleY(0.99)}19%{transform:scaleY(1.07)}20%{transform:scaleY(1.098)}21%{transform:scaleY(1.068)}22%{transform:scaleY(1.017)}23%{transform:scaleY(1)}24%{transform:scaleY(0.998)}25%{transform:scaleY(0.957)}26%{transform:scaleY(0.906)}27%{transform:scaleY(0.896)}28%{transform:scaleY(0.948)}29%{transform:scaleY(1.04)}30%{transform:scaleY(1.117)}31%{transform:scaleY(1.136)}32%{transform:scaleY(1.094)}33%{transform:scaleY(1.031)}34%{transform:scaleY(0.998)}35%{transform:scaleY(1)}36%{transform:scaleY(1)}38%,100%{transform:none}}
+@keyframes sp-bar2{0%{transform:scaleY(1)}1%{transform:scaleY(0.973)}2%{transform:scaleY(0.933)}3%{transform:scaleY(0.917)}4%{transform:scaleY(0.948)}5%{transform:scaleY(1.014)}6%{transform:scaleY(1.077)}7%{transform:scaleY(1.101)}8%{transform:scaleY(1.078)}9%{transform:scaleY(1.031)}10%{transform:scaleY(1)}11%{transform:scaleY(1)}12%{transform:scaleY(0.998)}13%{transform:scaleY(0.964)}14%{transform:scaleY(0.952)}15%{transform:scaleY(0.984)}16%{transform:scaleY(1.047)}17%{transform:scaleY(1.103)}18%{transform:scaleY(1.117)}19%{transform:scaleY(1.082)}20%{transform:scaleY(1.025)}21%{transform:scaleY(0.985)}22%{transform:scaleY(0.986)}23%{transform:scaleY(1)}24%{transform:scaleY(0.997)}25%{transform:scaleY(0.983)}26%{transform:scaleY(1.011)}27%{transform:scaleY(1.065)}28%{transform:scaleY(1.11)}29%{transform:scaleY(1.111)}30%{transform:scaleY(1.065)}31%{transform:scaleY(0.999)}32%{transform:scaleY(0.954)}33%{transform:scaleY(0.953)}34%{transform:scaleY(0.985)}35%{transform:scaleY(1)}36%{transform:scaleY(1)}38%,100%{transform:none}}
+@keyframes sp-bar3{0%{transform:scaleY(1)}1%{transform:scaleY(0.968)}2%{transform:scaleY(1.002)}3%{transform:scaleY(1.09)}4%{transform:scaleY(1.174)}5%{transform:scaleY(1.193)}6%{transform:scaleY(1.13)}7%{transform:scaleY(1.022)}8%{transform:scaleY(0.937)}9%{transform:scaleY(0.921)}10%{transform:scaleY(0.967)}11%{transform:scaleY(1)}12%{transform:scaleY(0.999)}13%{transform:scaleY(1.02)}14%{transform:scaleY(1.092)}15%{transform:scaleY(1.158)}16%{transform:scaleY(1.158)}17%{transform:scaleY(1.079)}18%{transform:scaleY(0.963)}19%{transform:scaleY(0.877)}20%{transform:scaleY(0.867)}21%{transform:scaleY(0.921)}22%{transform:scaleY(0.985)}23%{transform:scaleY(1)}24%{transform:scaleY(1.004)}25%{transform:scaleY(1.062)}26%{transform:scaleY(1.113)}27%{transform:scaleY(1.102)}28%{transform:scaleY(1.017)}29%{transform:scaleY(0.903)}30%{transform:scaleY(0.826)}31%{transform:scaleY(0.831)}32%{transform:scaleY(0.902)}33%{transform:scaleY(0.981)}34%{transform:scaleY(1.009)}35%{transform:scaleY(1)}36%{transform:scaleY(1)}38%,100%{transform:none}}
+@keyframes sp-blink{0%,55.5%{transform:none}57.8%{transform:scaleY(.1)}60%,100%{transform:none}}
+@keyframes sp-note0{0%{opacity:0;transform:translate(40px,190px) rotate(-14deg) scale(1.2)}2.083%{opacity:0.802;transform:translate(38.572px,177.812px) rotate(-11.184deg) scale(1.718)}4.167%{opacity:0.988;transform:translate(37.102px,166.25px) rotate(-8.438deg) scale(2.002)}6.25%{opacity:1;transform:translate(35.372px,155.312px) rotate(-5.828deg) scale(2.138)}8.333%{opacity:1;transform:translate(33.208px,145px) rotate(-3.42deg) scale(2.188)}10.417%{opacity:1;transform:translate(30.5px,135.312px) rotate(-1.272deg) scale(2.199)}12.5%{opacity:1;transform:translate(27.208px,126.25px) rotate(0.562deg) scale(2.2)}14.583%{opacity:1;transform:translate(23.372px,117.813px) rotate(2.038deg) scale(2.2)}16.667%{opacity:1;transform:translate(19.102px,110px) rotate(3.119deg) scale(2.2)}18.75%{opacity:1;transform:translate(14.572px,102.812px) rotate(3.778deg) scale(2.2)}20.833%{opacity:1;transform:translate(10px,96.25px) rotate(4deg) scale(2.2)}22.917%{opacity:1;transform:translate(5.628px,90.312px) rotate(3.778deg) scale(2.2)}25%{opacity:0.966;transform:translate(1.698px,85px) rotate(3.119deg) scale(2.2)}27.083%{opacity:0.874;transform:translate(-1.572px,80.312px) rotate(2.038deg) scale(2.2)}29.167%{opacity:0.741;transform:translate(-4.008px,76.25px) rotate(0.562deg) scale(2.2)}31.25%{opacity:0.583;transform:translate(-5.5px,72.812px) rotate(-1.272deg) scale(2.2)}33.333%{opacity:0.417;transform:translate(-6.008px,70px) rotate(-3.42deg) scale(2.2)}35.417%{opacity:0.259;transform:translate(-5.572px,67.812px) rotate(-5.828deg) scale(2.2)}37.5%{opacity:0.126;transform:translate(-4.302px,66.25px) rotate(-8.438deg) scale(2.2)}39.583%{opacity:0.034;transform:translate(-2.372px,65.313px) rotate(-11.184deg) scale(2.2)}41.667%{opacity:0;transform:translate(0px,65px) rotate(-14deg) scale(2.2)}42%,100%{opacity:0;transform:translate(0px,0px) scale(.1)}}
+@keyframes sp-note1{0%{opacity:0;transform:translate(46.732px,190px) rotate(-14deg) scale(1.104)}2.083%{opacity:0.802;transform:translate(41.693px,176.058px) rotate(-11.184deg) scale(1.58)}4.167%{opacity:0.988;transform:translate(36.207px,162.83px) rotate(-8.438deg) scale(1.842)}6.25%{opacity:1;transform:translate(30.249px,150.317px) rotate(-5.828deg) scale(1.967)}8.333%{opacity:1;transform:translate(23.871px,138.52px) rotate(-3.42deg) scale(2.013)}10.417%{opacity:1;transform:translate(17.197px,127.438px) rotate(-1.272deg) scale(2.023)}12.5%{opacity:1;transform:translate(10.411px,117.07px) rotate(0.562deg) scale(2.024)}14.583%{opacity:1;transform:translate(3.735px,107.418px) rotate(2.038deg) scale(2.024)}16.667%{opacity:1;transform:translate(-2.585px,98.48px) rotate(3.119deg) scale(2.024)}18.75%{opacity:1;transform:translate(-8.312px,90.257px) rotate(3.778deg) scale(2.024)}20.833%{opacity:1;transform:translate(-13.232px,82.75px) rotate(4deg) scale(2.024)}22.917%{opacity:1;transform:translate(-17.183px,75.957px) rotate(3.778deg) scale(2.024)}25%{opacity:0.966;transform:translate(-20.067px,69.88px) rotate(3.119deg) scale(2.024)}27.083%{opacity:0.874;transform:translate(-21.859px,64.517px) rotate(2.038deg) scale(2.024)}29.167%{opacity:0.741;transform:translate(-22.611px,59.87px) rotate(0.562deg) scale(2.024)}31.25%{opacity:0.583;transform:translate(-22.447px,55.938px) rotate(-1.272deg) scale(2.024)}33.333%{opacity:0.417;transform:translate(-21.551px,52.72px) rotate(-3.42deg) scale(2.024)}35.417%{opacity:0.259;transform:translate(-20.145px,50.218px) rotate(-5.828deg) scale(2.024)}37.5%{opacity:0.126;transform:translate(-18.475px,48.43px) rotate(-8.438deg) scale(2.024)}39.583%{opacity:0.034;transform:translate(-16.778px,47.358px) rotate(-11.184deg) scale(2.024)}41.667%{opacity:0;transform:translate(-15.268px,47px) rotate(-14deg) scale(2.024)}42%,100%{opacity:0;transform:translate(0px,0px) scale(.1)}}
+@keyframes sp-note2{0%{opacity:0;transform:translate(47.274px,190px) rotate(-14deg) scale(1.008)}2.083%{opacity:0.802;transform:translate(37.7px,174.303px) rotate(-11.184deg) scale(1.443)}4.167%{opacity:0.988;transform:translate(27.968px,159.41px) rotate(-8.438deg) scale(1.682)}6.25%{opacity:1;transform:translate(18.272px,145.322px) rotate(-5.828deg) scale(1.796)}8.333%{opacity:1;transform:translate(8.842px,132.04px) rotate(-3.42deg) scale(1.838)}10.417%{opacity:1;transform:translate(-0.079px,119.562px) rotate(-1.272deg) scale(1.847)}12.5%{opacity:1;transform:translate(-8.254px,107.89px) rotate(0.562deg) scale(1.848)}14.583%{opacity:1;transform:translate(-15.479px,97.023px) rotate(2.038deg) scale(1.848)}16.667%{opacity:1;transform:translate(-21.602px,86.96px) rotate(3.119deg) scale(1.848)}18.75%{opacity:1;transform:translate(-26.537px,77.703px) rotate(3.778deg) scale(1.848)}20.833%{opacity:1;transform:translate(-30.274px,69.25px) rotate(4deg) scale(1.848)}22.917%{opacity:1;transform:translate(-32.88px,61.602px) rotate(3.778deg) scale(1.848)}25%{opacity:0.966;transform:translate(-34.488px,54.76px) rotate(3.119deg) scale(1.848)}27.083%{opacity:0.874;transform:translate(-35.292px,48.722px) rotate(2.038deg) scale(1.848)}29.167%{opacity:0.741;transform:translate(-35.522px,43.49px) rotate(0.562deg) scale(1.848)}31.25%{opacity:0.583;transform:translate(-35.421px,39.062px) rotate(-1.272deg) scale(1.848)}33.333%{opacity:0.417;transform:translate(-35.226px,35.44px) rotate(-3.42deg) scale(1.848)}35.417%{opacity:0.259;transform:translate(-35.141px,32.623px) rotate(-5.828deg) scale(1.848)}37.5%{opacity:0.126;transform:translate(-35.318px,30.61px) rotate(-8.438deg) scale(1.848)}39.583%{opacity:0.034;transform:translate(-35.843px,29.403px) rotate(-11.184deg) scale(1.848)}41.667%{opacity:0;transform:translate(-36.726px,29px) rotate(-14deg) scale(1.848)}42%,100%{opacity:0;transform:translate(0px,0px) scale(.1)}}
+@media (prefers-reduced-motion: reduce){[style*="animation"]{animation:none!important}}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: #13233A; background: #EEF1EC; padding: 0 32px 40px">
-  <div style="flex: 1 1 0"></div>
-  <div style="display: flex; flex-direction: column; align-items: center; gap: 20px">
-    <svg viewBox="-52 72 530 368" width="270" height="187" role="img" aria-label="BirdyGo" style="display: block; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both">
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: #13233A; background: #EEF1EC; padding: 16px 28px 40px">
+  <div style="height: 0"></div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 480px">
+    <svg viewBox="-80 10 570 450" width="310" height="245" role="img" aria-label="Le logo BirdyGo chante" style="display: block">
       <defs>
-        <linearGradient id="sp-plumage" gradientUnits="userSpaceOnUse" x1="165" y1="97.7" x2="361.7" y2="434.9"><stop offset="0" stop-color="#1CAEBA"/><stop offset="1" stop-color="#0E7C86"/></linearGradient>
+        <linearGradient id="sp-plumage" gradientUnits="userSpaceOnUse" x1="165" y1="97.7" x2="361.7" y2="434.9"><stop offset="0" stop-color="#1CAEBA"></stop><stop offset="1" stop-color="#0E7C86"></stop></linearGradient>
       </defs>
-      <path d="M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z" fill="url(#sp-plumage)"/>
-      <g stroke-linejoin="round" stroke-width="12">
-        <path d="M118.1 206.6L64.5 222.5L140 240.3Z" fill="#E3A22B" stroke="#E3A22B" style="transform-box: view-box; transform-origin: 138px 222px; animation: bg-beak-down 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
-        <path d="M145.9 149L50.6 160.9L118.1 196.6Z" fill="#F4C542" stroke="#F4C542" style="transform-box: view-box; transform-origin: 140px 200px; animation: bg-beak-up 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
+      <g style="animation: sp-fade 300ms linear both">
+        <g transform="translate(277.4 423.7)">
+          <g style="animation: sp-lift 700ms cubic-bezier(0.25,1,0.5,1) both">
+            <g style="animation: sp-swell 3600ms linear infinite; animation-delay: 800ms">
+              <g transform="translate(-277.4 -423.7)">
+                <g transform="translate(395 215)">
+                  <g style="animation: sp-tail 3600ms linear infinite; animation-delay: 800ms">
+                    <path transform="translate(-395 -215)" d="M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z" fill="url(#sp-plumage)"></path>
+                  </g>
+                </g>
+                <g transform="translate(118.1 202.6)" stroke-linejoin="round" stroke-width="12">
+                  <g style="animation: sp-beak-down 3600ms linear infinite; animation-delay: 800ms">
+                    <path transform="translate(-118.1 -202.6)" d="M118.1 206.6L64.5 222.5L140 240.3Z" fill="#E3A22B" stroke="#E3A22B"></path>
+                  </g>
+                  <g style="animation: sp-beak-up 3600ms linear infinite; animation-delay: 800ms">
+                    <path transform="translate(-118.1 -202.6)" d="M145.9 149L50.6 160.9L118.1 196.6Z" fill="#F4C542" stroke="#F4C542"></path>
+                  </g>
+                </g>
+                <path d="M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z" fill="url(#sp-plumage)"></path>
+                <g fill="none" stroke-width="30" stroke-linecap="round">
+          <g transform="translate(217.4 333.7) rotate(0)">
+            <g style="animation: sp-draw 520ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 350ms">
+              <g transform="translate(0 -46.8)">
+                <path d="M0 46.8V-46.8" stroke="#EEF1EC" style="animation: sp-bar0 3600ms linear infinite; animation-delay: 800ms"></path>
+              </g>
+            </g>
+          </g>
+          <g transform="translate(260.6 365.5) rotate(2.979)">
+            <g style="animation: sp-draw 520ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 420ms">
+              <g transform="translate(0 -71.196)">
+                <path d="M0 71.196V-71.196" stroke="#F4C542" style="animation: sp-bar1 3600ms linear infinite; animation-delay: 800ms"></path>
+              </g>
+            </g>
+          </g>
+          <g transform="translate(306.2 349.4) rotate(6.003)">
+            <g style="animation: sp-draw 520ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 490ms">
+              <g transform="translate(0 -46.857)">
+                <path d="M0 46.857V-46.857" stroke="#EEF1EC" style="animation: sp-bar2 3600ms linear infinite; animation-delay: 800ms"></path>
+              </g>
+            </g>
+          </g>
+          <g transform="translate(352.9 331.7) rotate(8.915)">
+            <g style="animation: sp-draw 520ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 560ms">
+              <g transform="translate(0 -20.649)">
+                <path d="M0 20.649V-20.649" stroke="#8CD3D9" style="animation: sp-bar3 3600ms linear infinite; animation-delay: 800ms"></path>
+              </g>
+            </g>
+          </g>
+                </g>
+                <g transform="translate(176.2 172.6)">
+                  <g style="animation: sp-blink 3600ms linear infinite; animation-delay: 800ms">
+                    <circle cx="0" cy="0" r="18.7" fill="#13233A"></circle>
+                    <circle cx="-5.2" cy="-6" r="5.4" fill="#FFFFFF"></circle>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
       </g>
-      <g fill="none" stroke="#19A7B3" stroke-width="9" stroke-linecap="round">
-        <path d="M34 172Q20 192 34 212" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
-        <path d="M8 160Q-10 192 8 224" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 480ms"/>
-        <path d="M-18 148Q-40 192 -18 236" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 560ms"/>
+      <g style="opacity: 0; animation: sp-note0 3600ms linear infinite; animation-delay: 890ms" fill="#19A7B3">
+        <ellipse cx="-0.5" cy="15" rx="7.5" ry="5" transform="rotate(-20 -0.5 15)"></ellipse>
+        <rect x="3" y="-14" width="4" height="30" rx="2"></rect>
+        <path d="M6 -14C9 -8 22 -6 14 5C17 -4 8 -3 6 -5Z"></path>
       </g>
-      <path d="M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z" fill="url(#sp-plumage)"/>
-      <g fill="none" stroke-width="30" stroke-linecap="round">
-        <path d="M217.4 333.7L217.4 240.1" stroke="#EEF1EC" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 0ms"/>
-        <path d="M260.6 365.5L268 223.3" stroke="#F4C542" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 220ms"/>
-        <path d="M306.2 349.4L316 256.2" stroke="#EEF1EC" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 440ms"/>
-        <path d="M352.9 331.7L359.3 290.9" stroke="#8CD3D9" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 660ms"/>
+      <g style="opacity: 0; animation: sp-note1 3600ms linear infinite; animation-delay: 1320ms" fill="#E3A22B">
+        <ellipse cx="-0.5" cy="15" rx="7.5" ry="5" transform="rotate(-20 -0.5 15)"></ellipse>
+        <rect x="3" y="-14" width="4" height="30" rx="2"></rect>
+        <path d="M6 -14C9 -8 22 -6 14 5C17 -4 8 -3 6 -5Z"></path>
       </g>
-      <circle cx="176.2" cy="172.6" r="18.7" fill="#13233A"/>
-      <circle cx="171" cy="166.6" r="5.4" fill="#FFFFFF"/>
+      <g style="opacity: 0; animation: sp-note2 3600ms linear infinite; animation-delay: 1750ms" fill="#0E7C86">
+        <ellipse cx="-0.5" cy="15" rx="7.5" ry="5" transform="rotate(-20 -0.5 15)"></ellipse>
+        <rect x="3" y="-14" width="4" height="30" rx="2"></rect>
+        <path d="M6 -14C9 -8 22 -6 14 5C17 -4 8 -3 6 -5Z"></path>
+      </g>
     </svg>
-    <div style="font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 40px; line-height: 1.1; letter-spacing: -0.5px; color: #13233A; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 60ms">BirdyGo</div>
-    <button type="button" class="sp-btn" onClick="{{ chirp }}" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 20px; border: 1.5px solid #0E7C86; border-radius: 24px; background: transparent; color: #0E7C86; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 120ms">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-      Écouter son chant
-    </button>
-  </div>
-  <div style="flex: 1 1 0"></div>
-  <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 120ms">
-    <div role="progressbar" aria-label="Chargement" aria-valuetext="En cours" style="width: 180px; height: 4px; border-radius: 2px; background: rgba(19, 35, 58, 0.10); overflow: hidden">
-      <div style="width: 100%; height: 100%; border-radius: 2px; background: #19A7B3; transform-origin: left center; animation: bg-load 5200ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 300ms"></div>
+    <div role="img" aria-label="BirdyGo" style="display: flex; align-items: baseline; justify-content: center; color: #13233A; white-space: nowrap; animation: sp-rise 320ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 1000ms">
+      <span style="font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 44px; line-height: 1.1; letter-spacing: -0.8px; font-variation-settings: 'SOFT' 100, 'opsz' 44">Birdy</span>
+      <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #F4C542; margin: 0 5px 5px 5px"></span>
+      <span style="font-weight: 800; font-size: 42px; line-height: 1.1; letter-spacing: -1px">Go</span>
     </div>
-    <div style="font-size: 14px; line-height: 20px; color: #6B5847">Préparation de l'écoute…</div>
-    <div style="font-size: 13px; line-height: 18px; color: #6B5847; margin-top: 10px">Propulsé par BirdNET</div>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: 17px; line-height: 1.45; color: #6B5847">
+      <span style="animation: sp-rise 320ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 1250ms">Le monde chante.</span>
+      <span style="animation: sp-rise 320ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 2150ms">Écoute.</span>
+    </div>
+  </div>
+  <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 480px; padding-top: 32px; animation: sp-rise 320ms cubic-bezier(0.25,1,0.5,1) both; animation-delay: 1350ms">
+    <div role="progressbar" aria-label="{{ caption }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ percent }}" style="width: 180px; height: 4px; border-radius: 2px; background: rgba(19, 35, 58, 0.10); overflow: hidden">
+      <div style="width: 100%; height: 100%; border-radius: 2px; background: #19A7B3; transform-origin: left center; transform: {{ barTransform }}; transition: transform 420ms cubic-bezier(0.25,1,0.5,1)"></div>
+    </div>
+    <div aria-live="polite" style="margin-top: 14px; font-size: 14px; line-height: 1.35; color: #6B5847; text-align: center">{{ caption }}</div>
+    <div style="margin-top: 24px; font-size: 13px; line-height: 1.35; color: #6B5847; text-align: center">Propulsé par BirdNET</div>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  // Short synthesized song (three rising whistles), played on tap only:
-  // browsers block sound before a user gesture.
-  playChirp() {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
-    if (!this.audio) this.audio = new Ctx();
-    const ctx = this.audio;
-    if (ctx.state === 'suspended') ctx.resume();
-    const start = ctx.currentTime + 0.02;
-    const notes = [[2900, 3900, 0], [3100, 4300, 0.16], [3400, 4700, 0.32], [4200, 3000, 0.52]];
-    notes.forEach(([f0, f1, at]) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const t = start + at;
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(f0, t);
-      osc.frequency.exponentialRampToValueAtTime(f1, t + 0.1);
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + 0.14);
-    });
+  // Startup steps as the app names them (app_fr.arb), with the weighted
+  // share of the bar done when each one is showing (BirdyGoLoadStep weights
+  // 1, 4, 2, 2, 1). The timings are a plausible launch, replayed in a loop.
+  steps() {
+    return [
+    { caption: 'Chargement…', done: 0, until: 1700 },
+    { caption: 'Chargement du modèle de chants…', done: 0.1, until: 3300 },
+    { caption: 'Chargement des espèces de ta région…', done: 0.5, until: 4200 },
+    { caption: 'Chargement des fiches espèces…', done: 0.7, until: 5000 },
+    { caption: 'Chargement de tes observations…', done: 0.9, until: 5500 },
+    { caption: 'C’est prêt.', done: 1, until: 7200 },
+    ];
+  }
+  componentDidMount() {
+    this.elapsed = 0;
+    this.timer = setInterval(() => {
+      const steps = this.steps();
+      this.elapsed = (this.elapsed + 100) % steps[steps.length - 1].until;
+      const step = steps.findIndex(s => this.elapsed < s.until);
+      if (step !== (this.state && this.state.step)) this.setState({ step });
+    }, 100);
   }
   componentWillUnmount() {
-    if (this.audio) this.audio.close();
+    clearInterval(this.timer);
   }
   renderVals() {
-    return { chirp: () => this.playChirp() };
+    const s = this.steps()[(this.state && this.state.step) || 0];
+    return {
+      caption: s.caption,
+      percent: Math.round(s.done * 100),
+      barTransform: 'scaleX(' + s.done + ')',
+    };
   }
 }
 </script>
