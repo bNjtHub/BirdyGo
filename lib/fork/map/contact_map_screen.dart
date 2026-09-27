@@ -46,10 +46,17 @@ const double _defaultZoom = 5;
 
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
-  const ContactMapScreen({super.key, this.initialSpecies});
+  const ContactMapScreen({
+    super.key,
+    this.initialSpecies,
+    this.showBack = true,
+  });
 
   /// Opens filtered on this species, over every period (species page).
   final SpeciesChoice? initialSpecies;
+
+  /// False in the bottom navigation (J6e): the map is a tab, not a page.
+  final bool showBack;
 
   @override
   ConsumerState<ContactMapScreen> createState() => _ContactMapScreenState();
@@ -419,7 +426,10 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                   speciesSelected: _species.scientificName != null,
                   periodLabel: _periodLabel(l10n, _period),
                   confirmedOnly: _confirmedOnly,
-                  onBack: () => Navigator.of(context).maybePop(),
+                  onBack:
+                      widget.showBack
+                          ? () => Navigator.of(context).maybePop()
+                          : null,
                   onSpecies: _pickSpecies,
                   onPeriod: () => _pickPeriod(l10n),
                   onConfirmed: (v) {
@@ -502,7 +512,7 @@ class _FilterBar extends StatelessWidget {
     required this.speciesSelected,
     required this.periodLabel,
     required this.confirmedOnly,
-    required this.onBack,
+    this.onBack,
     required this.onSpecies,
     required this.onPeriod,
     required this.onConfirmed,
@@ -512,7 +522,9 @@ class _FilterBar extends StatelessWidget {
   final bool speciesSelected;
   final String periodLabel;
   final bool confirmedOnly;
-  final VoidCallback onBack;
+
+  /// Null: no back button (map tab).
+  final VoidCallback? onBack;
   final VoidCallback onSpecies;
   final VoidCallback onPeriod;
   final ValueChanged<bool> onConfirmed;
@@ -526,12 +538,14 @@ class _FilterBar extends StatelessWidget {
       clipBehavior: Clip.none,
       child: Row(
         children: [
-          _MapButton(
-            icon: AppIcons.arrowBackRounded,
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: onBack,
-          ),
-          const SizedBox(width: 8),
+          if (onBack != null) ...[
+            _MapButton(
+              icon: AppIcons.arrowBackRounded,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: onBack!,
+            ),
+            const SizedBox(width: 8),
+          ],
           _MapChip(
             label: speciesLabel,
             selected: speciesSelected,

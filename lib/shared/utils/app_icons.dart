@@ -55,6 +55,7 @@ abstract final class AppIcons {
   static const IconData cloud = Symbols.cloud;
   static const IconData cloudy = Symbols.cloudy;
   static const IconData code = Symbols.code;
+  static const IconData contrast = Symbols.contrast; // FORK: « peu commun » mark (J6e)
   static const IconData contentCut = Symbols.content_cut;
   static const IconData darkMode = Symbols.dark_mode;
   static const IconData deleteOutline = Symbols.delete;
@@ -92,6 +93,7 @@ abstract final class AppIcons {
   static const IconData helpOutline = Symbols.help;
   static const IconData helpOutlineRounded = Symbols.help_outline_rounded;
   static const IconData hourglassTopRounded = Symbols.hourglass_top_rounded;
+  static const IconData home = Symbols.home; // FORK: bottom navigation (J6e)
   static const IconData imageNotSupported = Symbols.image_not_supported;
   static const IconData infoOutline = Symbols.info;
   static const IconData landscapeRounded = Symbols.landscape_rounded;
@@ -106,6 +108,7 @@ abstract final class AppIcons {
   static const IconData locationOnFilled = Icons.location_on;
   static const IconData locationOnRounded = Symbols.location_on_rounded;
   static const IconData layers = Symbols.layers; // FORK: map base layers (J5)
+  static const IconData leaderboard = Symbols.leaderboard; // FORK: Palmarès (J6e)
   static const IconData lockOutline = Symbols.lock;
   static const IconData map = Symbols.location_on;
   static const IconData mapSheet = Symbols.map;

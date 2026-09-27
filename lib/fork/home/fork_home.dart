@@ -1,9 +1,9 @@
 /// BirdyGo home screen (J6c, fork/maquette/Main.dc.html and SPEC.md 9.1).
 ///
-/// Shown by the upstream `HomeScreen`, which keeps its warm-up (model,
-/// taxonomy, geo-model, index). Status, streak, challenge and the bottom
-/// navigation come with the game (J6e); until then the menu gives every
-/// entry the upstream home had.
+/// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
+/// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
+/// geo-model, index). Status, streak and challenge come with the rest of the
+/// game (J6e); the menu keeps every entry the upstream home had.
 library;
 
 import 'dart:async';

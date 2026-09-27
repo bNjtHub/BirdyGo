@@ -21,6 +21,10 @@ abstract final class ReliabilityConfig {
   /// Abundance tiers that mean "rare here at this season".
   static const Set<ExploreTier> rareTiers = {ExploreTier.rare};
 
+  /// Abundance tiers marked « peu commun » (half disc) in the notebook
+  /// (J6e). Rarity never gives points or levels.
+  static const Set<ExploreTier> uncommonTiers = {ExploreTier.scarce};
+
   /// Reviews needed before a species' precision is shown.
   static const int minReviewsForSpeciesPrecision = 5;
 
