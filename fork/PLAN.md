@@ -480,6 +480,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Reportés en J6e : pastille de série, carte de statut, défi de la semaine, barre de
             navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
+      - [x] Accueil visuel (maquette `Main.dc.html` de la PR #47) : l'objectif du jour devient la carte
+            principale sous la salutation, ses oiseaux en grands ronds (2 rangées de 4 ; entendu sur sa
+            teinte avec une coche, à trouver gris en pointillé, chaque rond annoncé au lecteur d'écran) ;
+            ordre de la maquette ; « Écouter » seule action forte, fixée au-dessus de la barre ; entrée
+            de 220 ms sur 5 blocs au plus, rien avec les animations réduites.
+            À vérifier sur le Xiaomi : ronds avec les vraies photos, thème sombre, texte à 130 %.
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
             Mist background, singing bird (beak, body, tail, wing bars, one note per
             syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,
