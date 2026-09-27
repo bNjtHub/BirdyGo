@@ -13,6 +13,7 @@ import '../data/observation_index_service.dart';
 import '../notebook/notebook_loader.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
+import 'challenges.dart';
 import 'game_config.dart';
 import 'game_progress.dart';
 import 'streak.dart';
@@ -29,8 +30,10 @@ class GameLoader {
     required Future<GamePosition?> Function() position,
     required Future<Map<String, List<double>>?> Function(GamePosition)
     weeklyScores,
+    DateTime? Function(DateTime now)? challengeStartedAt,
     DateTime Function()? now,
   }) : _index = index,
+       _challengeStartedAt = challengeStartedAt ?? ((_) => null),
        _presence = presence,
        _taxonomy = taxonomy,
        _position = position,
@@ -42,6 +45,7 @@ class GameLoader {
   final Future<TaxonomyService?> Function() _taxonomy;
   final Future<GamePosition?> Function() _position;
   final Future<Map<String, List<double>>?> Function(GamePosition) _weeklyScores;
+  final DateTime? Function(DateTime now) _challengeStartedAt;
   final DateTime Function() _now;
 
   /// The facts; an index that cannot open gives an empty game.
@@ -61,36 +65,48 @@ class GameLoader {
         if (isBird(taxonomy, name)) name,
     };
     final listenings = await index.listenings();
+    final now = _now();
+    final listened = listenedDays([
+      for (final l in listenings) (l.start, l.end),
+    ]);
+    final dawnIds = {
+      for (final l in listenings)
+        if (_isDawn(l.start)) l.id,
+    };
+    final dawnSpecies = await _sureSpeciesBySession(index, dawnIds, taxonomy);
 
     return GameFacts(
       verifiedBirds: verified,
-      dawnChoruses: await _dawnChoruses(index, listenings, taxonomy),
+      dawnChoruses:
+          dawnSpecies.values
+              .where((s) => s.length >= GameConfig.dawnChorusSpecies)
+              .length,
       earlyStarts: listenings.where(_beforeSunrise).length,
       reviewed: await index.reviewedCount(),
       migrants: await _migrants(verified),
-      streak: computeStreak(
-        listenedDays([for (final l in listenings) (l.start, l.end)]),
-        _now(),
-      ),
+      streak: computeStreak(listened, now),
+      challenge: await _challenge(index, listenings, listened, taxonomy, now),
     );
   }
 
-  /// Listenings started before 8 h with enough verified species.
-  Future<int> _dawnChoruses(
+  bool _isDawn(DateTime start) =>
+      start.toLocal().hour < GameConfig.dawnChorusBeforeHour;
+
+  /// Species « Sûr » or confirmed in each of the listenings [ids], birds
+  /// only; with [since], only detections from then on.
+  Future<Map<String, Set<String>>> _sureSpeciesBySession(
     ObservationIndex index,
-    List<IndexedListening> listenings,
-    TaxonomyService? taxonomy,
-  ) async {
-    final dawn = {
-      for (final l in listenings)
-        if (l.start.toLocal().hour < GameConfig.dawnChorusBeforeHour) l.id,
-    };
+    Set<String> ids,
+    TaxonomyService? taxonomy, {
+    DateTime? since,
+  }) async {
     final candidates = await index.verifiedCandidatesIn(
-      dawn,
+      ids,
       minScore: ReliabilityConfig.sureMinScore,
     );
     final perSession = <String, Set<String>>{};
     for (final d in candidates) {
+      if (since != null && d.start.isBefore(since)) continue;
       final species = perSession.putIfAbsent(d.sessionId, () => {});
       if (species.contains(d.scientificName) ||
           !isBird(taxonomy, d.scientificName)) {
@@ -108,9 +124,62 @@ class GameLoader {
       );
       if (level == ReliabilityLevel.sure) species.add(d.scientificName);
     }
-    return perSession.values
-        .where((s) => s.length >= GameConfig.dawnChorusSpecies)
-        .length;
+    return perSession;
+  }
+
+  /// This week's challenge; nothing counts before it was started.
+  Future<WeeklyChallenge> _challenge(
+    ObservationIndex index,
+    List<IndexedListening> listenings,
+    Set<DateTime> listened,
+    TaxonomyService? taxonomy,
+    DateTime now,
+  ) async {
+    final (kind, target) = challengeOfWeek(now);
+    final startedAt = _challengeStartedAt(now);
+    var value = 0;
+    if (startedAt != null) {
+      final startDay = DateTime(startedAt.year, startedAt.month, startedAt.day);
+      final since = [
+        for (final l in listenings)
+          if (!l.start.isBefore(startedAt)) l,
+      ];
+      value = switch (kind) {
+        ChallengeKind.dawnMornings =>
+          {
+            for (final l in since)
+              if (_isDawn(l.start))
+                DateTime(
+                  l.start.toLocal().year,
+                  l.start.toLocal().month,
+                  l.start.toLocal().day,
+                ),
+          }.length,
+        ChallengeKind.listeningDays =>
+          listened.where((d) => !d.isBefore(startDay)).length,
+        ChallengeKind.weekSpecies =>
+          {
+            for (final species
+                in (await _sureSpeciesBySession(
+                  index,
+                  {
+                    for (final l in listenings)
+                      if (l.end == null || l.end!.isAfter(startedAt)) l.id,
+                  },
+                  taxonomy,
+                  since: startedAt,
+                )).values)
+              ...species,
+          }.length,
+      };
+    }
+    return WeeklyChallenge(
+      kind: kind,
+      target: target,
+      startedAt: startedAt,
+      value: value,
+      ends: weekEnd(now),
+    );
   }
 
   /// Started before the local sunrise; needs the listening's place.
@@ -164,6 +233,7 @@ final gameLoaderProvider = Provider<GameLoader>(
           ? null
           : (latitude: location.latitude, longitude: location.longitude);
     },
+    challengeStartedAt: ref.read(challengeStoreProvider).startedAt,
     weeklyScores: (position) async {
       final model = await ref.read(geoModelProvider.future);
       return model.predictAllWeeks(

@@ -2,6 +2,7 @@
 /// species, badges and their tiers, the série. Pure, so it is tested alone.
 library;
 
+import 'challenges.dart';
 import 'game_config.dart';
 import 'streak.dart';
 
@@ -56,6 +57,7 @@ class GameFacts {
     required this.reviewed,
     required this.migrants,
     required this.streak,
+    this.challenge,
   });
 
   static const empty = GameFacts(
@@ -83,6 +85,9 @@ class GameFacts {
   final Set<String> migrants;
 
   final Streak streak;
+
+  /// This week's challenge; null when unknown.
+  final WeeklyChallenge? challenge;
 }
 
 class GameProgress {

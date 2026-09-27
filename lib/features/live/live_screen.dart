@@ -40,6 +40,7 @@ import '../../fork/design/birdy_theme.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
@@ -1109,6 +1110,24 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                       ),
                   empty: const LiveTipsCarousel(),
                   practice: _forkPractice, // FORK: J5c
+                  // FORK: first encounter and rare bird moments (J6e)
+                  moment:
+                      inSession && !_forkPractice
+                          ? LiveMoments(
+                            key: ValueKey(controller.session?.id),
+                            entries: entries,
+                            controller: controller,
+                            presenceOf:
+                                (name) => livePresence(commonness, name),
+                            presenceScoreOf:
+                                (name) => commonness?[name]?.currentScore,
+                            clips: clips,
+                            imageFor: (name) {
+                              final path = imagePath(name);
+                              return path == null ? null : AssetImage(path);
+                            },
+                          )
+                          : null,
                   banner:
                       liveState == LiveState.error
                           ? _StatusBanner(liveState: liveState, ref: ref)

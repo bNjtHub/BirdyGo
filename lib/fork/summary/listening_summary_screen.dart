@@ -18,6 +18,8 @@ import '../../features/live/live_providers.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/share_sheet.dart';
+import '../game/game_loader.dart';
+import '../game/status_celebration.dart';
 import '../lpo/lpo_send_button.dart';
 import '../map/contact_map_screen.dart';
 import '../reliability/quick_review_screen.dart';
@@ -131,6 +133,13 @@ class _ListeningSummaryScreenState
 
   @override
   Widget build(BuildContext context) {
+    // J6e: a new status plays here, after « Arrêter », once the index knows
+    // the session.
+    ref.listen(gameProgressProvider, (_, next) {
+      if (next.value case final progress?) {
+        unawaited(maybeCelebrateStatus(context, ref, progress));
+      }
+    });
     final summary = _summary;
     if (summary == null) {
       return const Scaffold(body: SizedBox.shrink());

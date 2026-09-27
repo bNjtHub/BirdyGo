@@ -47,6 +47,7 @@ class LiveListeningLayout extends StatefulWidget {
     this.onOpen,
     this.empty,
     this.banner,
+    this.moment,
     this.practice = false,
   });
 
@@ -86,6 +87,10 @@ class LiveListeningLayout extends StatefulWidget {
 
   /// Error banner, under the header.
   final Widget? banner;
+
+  /// Moment card (J6e: first encounter, rare bird) over the spectrogram and
+  /// the table, never over the control bar.
+  final Widget? moment;
 
   /// Listening to a recording (J5c): « Enregistrement » under the header.
   final bool practice;
@@ -219,7 +224,16 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(child: table(compact: false)),
+                                Expanded(
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      table(compact: false),
+                                      if (widget.moment != null)
+                                        Positioned.fill(child: widget.moment!),
+                                    ],
+                                  ),
+                                ),
                                 controls,
                               ],
                             ),
@@ -243,21 +257,31 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
           if (widget.practice) const PracticeBanner(),
           if (widget.banner != null) widget.banner!,
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final expandedHeight = (constraints.maxHeight * _expandedShare)
-                    .clamp(
-                      LiveSpectrogramPanel.normalHeight,
-                      constraints.maxHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final expandedHeight =
+                        (constraints.maxHeight * _expandedShare).clamp(
+                          LiveSpectrogramPanel.normalHeight,
+                          constraints.maxHeight,
+                        );
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        panel(
+                          expanded: _expanded,
+                          expandedHeight: expandedHeight,
+                        ),
+                        Expanded(child: table(compact: _expanded)),
+                      ],
                     );
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    panel(expanded: _expanded, expandedHeight: expandedHeight),
-                    Expanded(child: table(compact: _expanded)),
-                  ],
-                );
-              },
+                  },
+                ),
+                if (widget.moment != null)
+                  Positioned.fill(child: widget.moment!),
+              ],
             ),
           ),
           controls,

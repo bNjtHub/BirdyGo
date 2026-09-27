@@ -11,6 +11,8 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../game/challenge_card.dart';
+import '../game/challenges.dart';
 import '../game/game_config.dart';
 import '../game/game_loader.dart';
 import '../game/game_progress.dart';
@@ -89,6 +91,18 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: BirdySpace.m),
                   _Badges(badges: progress.badges),
+                  if (progress.facts.challenge case final challenge?) ...[
+                    const SizedBox(height: BirdySpace.l),
+                    ChallengeCard(
+                      challenge: challenge,
+                      onStart: () async {
+                        await ref
+                            .read(challengeStoreProvider)
+                            .start(DateTime.now());
+                        ref.invalidate(gameProgressProvider);
+                      },
+                    ),
+                  ],
                 ],
               ],
             ),

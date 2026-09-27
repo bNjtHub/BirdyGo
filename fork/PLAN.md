@@ -664,7 +664,28 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             vient avec la célébration de nouveau statut en J6e-c).
             À vérifier sur le Xiaomi : Lève-tôt sur une vraie écoute avant le lever du soleil, série
             après un jour sans écoute.
-      - [ ] J6e-c Moments (arrivée, première fois, oiseau rare, nouveau statut) et défis de la semaine.
+      - [x] J6e-c Moments et défis :
+            - Arrivée : déjà là depuis J6c (la ligne entre en haut, vibration légère).
+            - Première fois (`lib/fork/live/live_moments.dart`) : quand un oiseau jamais vérifié devient
+              Sûr pendant l'écoute, carte « Première rencontre ! » par-dessus le spectre et le tableau,
+              jamais sur Arrêter / Pause (`LiveListeningLayout.moment`) ; teinte de l'oiseau à 15 % au
+              plus, rang dans le carnet, statut et ce qui manque pour le suivant, Réécouter (lecteur du
+              Live, donc sans fausse détection), se referme seule après 6 s.
+            - Oiseau rare : carte dorée immobile quand un oiseau jamais vérifié est « Rare ici · à
+              confirmer » ; présence estimée ici, réécoute, « c'est bien lui ? » et les trois réponses,
+              écrites sur les détections de la session (enregistrées à « Arrêter »). La fête (un anneau,
+              « +1 espèce rare ») seulement après « C'est bien lui ».
+            - Une carte à la fois : un moment qui arrive pendant qu'une carte est ouverte attend le Bilan.
+            - Nouveau statut (`status_celebration.dart`) : dans le Bilan après « Arrêter », ou à
+              l'Accueil (statut atteint par la revue), jamais pendant une écoute ; une seule fois par
+              statut ; les statuts atteints avant cette version ne sont pas fêtés.
+            - Défis de la semaine (`challenges.dart`) : un par semaine à tour de rôle (3 matins avant
+              8 h, 5 jours d'écoute, 10 espèces sûres ou confirmées) ; rien ne compte avant « Commencer »,
+              pas de pénalité ; carte sur l'Accueil et le Profil.
+            Écarts : pas de défi saisonnier ni de défi débloqué par un statut, pas de notification ;
+            pas de bouton Partager sur le nouveau statut ; pas de vague ni de plumes (DESIGN.md prime).
+            À vérifier sur le Xiaomi : carte « Première rencontre » pendant une vraie écoute (l'écoute
+            continue, Arrêter reste accessible), réponse sur un oiseau rare retrouvée dans la session.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;

@@ -2,8 +2,8 @@
 ///
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
-/// geo-model, index). Série chip and status card come from the game (J6e),
-/// the weekly challenge with J6e-c; the menu keeps every upstream entry.
+/// geo-model, index). Série chip, status card and weekly challenge come from
+/// the game (J6e); the menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -37,8 +37,11 @@ import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
+import '../game/challenge_card.dart';
+import '../game/challenges.dart';
 import '../game/game_loader.dart';
 import '../game/game_widgets.dart';
+import '../game/status_celebration.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
 import '../profile/profile_screen.dart';
@@ -93,6 +96,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   void _open(Widget screen) => Navigator.of(
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
+
+  Future<void> _startChallenge() async {
+    await ref.read(challengeStoreProvider).start(DateTime.now());
+    ref.invalidate(gameProgressProvider);
+  }
 
   /// The Profil tab, or the profile page outside the bottom navigation.
   void _openProfile() {
@@ -214,6 +222,12 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   Widget build(BuildContext context) {
     // A saved session, a review or a rebuild changes the numbers.
     ref.listen(observationIndexServiceProvider, (_, _) => _reload());
+    // A new status reached through a review is celebrated here.
+    ref.listen(gameProgressProvider, (_, next) {
+      if (next.value case final progress?) {
+        unawaited(maybeCelebrateStatus(context, ref, progress));
+      }
+    });
 
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
@@ -284,6 +298,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                       last.detection.commonName,
                 ),
           ),
+        ),
+      if (game?.facts.challenge case final challenge?)
+        (
+          'challenge',
+          ChallengeCard(challenge: challenge, onStart: _startChallenge),
         ),
       if (snapshot != null && snapshot.toVerify > 0)
         (

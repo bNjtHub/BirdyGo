@@ -1,5 +1,7 @@
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
+import 'package:birdnet_live/fork/game/challenges.dart';
+import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -110,7 +112,11 @@ void main() {
     await index.close();
   });
 
-  GameLoader loader({Map<String, List<double>>? weekly}) => GameLoader(
+  GameLoader loader({
+    Map<String, List<double>>? weekly,
+    DateTime? challengeStart,
+  }) => GameLoader(
+    challengeStartedAt: (_) => challengeStart,
     index: () async => index,
     presence: container.read(geoPresenceServiceProvider),
     taxonomy: () async => null,
@@ -151,5 +157,30 @@ void main() {
           weeklyScores: (_) async => null,
         ).load();
     expect(facts.verifiedBirds, isEmpty);
+  });
+
+  test('the weekly challenge counts from « Commencer » only', () async {
+    final offered = (await loader().load()).challenge!;
+    expect(offered.started, isFalse);
+    expect(offered.value, 0);
+
+    // Started on Friday 25 at 5 h, before the dawn listening.
+    final started =
+        (await loader(challengeStart: DateTime(2026, 9, 25, 5)).load())
+            .challenge!;
+    expect(started.kind, challengeOfWeek(DateTime(2026, 9, 27)).$1);
+    expect(started.value, switch (started.kind) {
+      ChallengeKind.dawnMornings => 1,
+      // Friday and Saturday; Sunday's two minutes do not count.
+      ChallengeKind.listeningDays => 2,
+      // The ten dawn species and the confirmed magpie.
+      ChallengeKind.weekSpecies => 11,
+    });
+
+    // Started after everything: nothing counts yet.
+    final late =
+        (await loader(challengeStart: DateTime(2026, 9, 27, 10)).load())
+            .challenge!;
+    expect(late.value, 0);
   });
 }
