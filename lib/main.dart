@@ -116,7 +116,7 @@ Future<Widget> _initializeApp({
 
   registerForkFontLicenses(); // FORK: OFL font licenses (J6a)
 
-  // FORK: replace startup immediately when ready, without a minimum delay.
+  // FORK: no delay here; BirdyGoStartup holds the splash for its minimum time.
   return ProviderScope(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
     child: App(

@@ -432,21 +432,26 @@ profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d
 
 ## Startup screen (J6c)
 
-The supplied Claude Design startup board defines the Mist background, 270 × 187 dp
-framing of the original turquoise/gold bird, Fraunces 40 dp wordmark, and bottom loading
-status with BirdNET attribution. The user's chosen tagline replaces the prototype's
-synthetic-song button: "Le monde chante. Écoute." / "The world is singing. Listen."
+The Claude Design board « BirdyGo Splash » defines the Mist background, the singing bird
+in a 310 × 245 dp frame (narrower screens shrink it), the wordmark « Birdy » in Fraunces
+44 dp followed by « Go » in a Kingfisher pill, and the bottom loading status with BirdNET
+attribution. The tagline is "Le monde chante. Écoute." / "The world is singing. Listen."
 No synthetic bird audio is played. The native Android launch background also uses Mist.
 
-At the user's request, exactly three musical notes replace the decorative sound waves.
-They rise and fade successively in one 2.4-second introduction, with a 250 ms entrance.
-This startup-only motion is an explicit exception to the general 500 ms/no-rotation
-rules; it does not change Home's logo or other app animations. It does not repeat.
-The bottom track shows an activity sweep, not a percentage of bootstrap completion.
-Reduced motion draws the completed composition immediately and adds no intro wait.
-Normal launch waits for both the introduction and real initialization. Explicit audio
-shares and Quick Listen bypass any remaining introduction once their route is ready,
+The bird sings phrases of three syllables: on each one the beak opens, the body swells,
+the tail and the wing bars move, and a note leaves the beak (Kingfisher, gold, deep
+teal). The eye blinks after the phrase. The wing bars draw first; the wordmark enters at
+1.0 s, « Le monde chante. » at 1.25 s, the loading status at 1.35 s and « Écoute. » at
+2.15 s, each in 320 ms with 8 dp of travel. A phrase lasts 3.6 s and repeats for as long
+as initialization runs. This startup-only motion is an explicit exception to the general
+500 ms/no-rotation rules; it does not change Home's logo or other app animations.
+The bottom track shows a looping activity sweep, not a percentage of bootstrap completion.
+Reduced motion draws the settled composition immediately and adds no wait.
+Normal launch waits for real initialization and for a minimum display of 2.6 s
+(`BirdyGoSplash.minimumDisplay`): the first phrase and the whole tagline. Explicit audio
+shares and Quick Listen bypass any remaining wait once their route is ready,
 so an active recording's controls are never hidden just to finish the animation.
+After a startup error the bird stops singing.
 A startup error offers a localized retry. Audio shares and Quick Listen launch intents
 are retained across retries. App mounts behind the splash while their storage checks
 prepare the destination, so Home does not flash during a cold handoff. The upstream

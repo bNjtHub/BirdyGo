@@ -5,9 +5,10 @@ import '../design/birdy_theme.dart';
 import 'birdygo_launch_handoff.dart';
 import 'birdygo_splash.dart';
 
-/// Shows the introduction while initialization and cold-launch routing run.
-/// Opens App as soon as all three are ready, without a separate delay timer.
-/// Explicit launch actions bypass the remaining intro once their route is ready.
+/// Shows the splash while initialization and cold-launch routing run.
+/// Opens App once it is ready and the splash has been up for
+/// [BirdyGoSplash.minimumDisplay]; a slower start keeps the splash singing.
+/// Explicit launch actions bypass the remaining wait once their route is ready.
 class BirdyGoStartup extends StatefulWidget {
   const BirdyGoStartup({super.key, required this.bootstrap});
 
