@@ -142,6 +142,7 @@ class BirdyGoSingingPainter extends CustomPainter {
   static const Size viewBox = Size(570, 450);
 
   /// Start of the first phrase and time between two phrases of the loop.
+  /// The home logo (`SingingLogo`) plays one phrase at a time with them.
   static const double firstPhrase = BirdyGoSplashTimeline.firstPhrase;
   static const double phrasePeriod = BirdyGoSplashTimeline.phrasePeriod;
 
