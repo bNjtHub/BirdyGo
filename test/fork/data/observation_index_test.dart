@@ -317,4 +317,43 @@ void main() {
     expect(await index.favoriteKeys(), {'kept'});
     await index.close();
   });
+
+  test(
+    'newer tables under the current version number are rebuilt too',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('index_columns');
+      addTearDown(() => dir.delete(recursive: true));
+      final path = '${dir.path}/index.db';
+
+      // An older build opened a newer index: version set back, tables kept.
+      final stale = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: ObservationIndex.schemaVersion,
+          onCreate: (db, _) async {
+            await db.execute(
+              'CREATE TABLE detections (key TEXT PRIMARY KEY, '
+              'source TEXT NOT NULL)',
+            );
+            await db.execute('CREATE TABLE sessions (id TEXT PRIMARY KEY)');
+            await db.execute('CREATE TABLE favorites (key TEXT PRIMARY KEY)');
+            await db.insert('favorites', {'key': 'kept'});
+          },
+        ),
+      );
+      await stale.close();
+
+      final index = await ObservationIndex.open(databaseFactoryFfi, path);
+      expect(index.needsRebuild, isTrue);
+      await index.rebuild([_fixture('session_2026-09-20.json')]);
+      expect((await index.counts()).sessions, 1);
+      expect(await index.favoriteKeys(), {'kept'});
+      await index.close();
+
+      // A sound index is left alone.
+      final again = await ObservationIndex.open(databaseFactoryFfi, path);
+      expect(again.needsRebuild, isFalse);
+      await again.close();
+    },
+  );
 }
