@@ -83,6 +83,12 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
       if (timing.buildDuration > _frameBudget ||
           timing.rasterDuration > _frameBudget) {
         _slowFrames++;
+        debugPrint(
+          '[BirdyGoSplash] slow frame at ${_clock.value.round()} ms '
+          '(${widget.progress.value.current?.name ?? 'loaded'}): '
+          'build ${timing.buildDuration.inMilliseconds} ms, '
+          'raster ${timing.rasterDuration.inMilliseconds} ms',
+        );
       }
       if (timing.buildDuration > _worstBuild) {
         _worstBuild = timing.buildDuration;
