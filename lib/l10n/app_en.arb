@@ -5351,5 +5351,19 @@
   "forkLevelsInfoRareHere": "The song matches, but the place or the season is surprising: confirm it by listening again.",
   "@forkLevelsInfoRareHere": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
   "forkLevelsInfoFooter": "Only Sure or confirmed birds count. Answering “It's this bird” in the quick review confirms a bird.",
-  "@forkLevelsInfoFooter": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."}
+  "@forkLevelsInfoFooter": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkBackgroundChannel": "Live listening",
+  "@forkBackgroundChannel": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundTitle": "BirdyGo is listening",
+  "@forkBackgroundTitle": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundText": "Listening goes on with the screen off.",
+  "@forkBackgroundText": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundTipTitle": "Listen with the screen off",
+  "@forkBackgroundTipTitle": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundTipBody": "Listening goes on when you turn the screen off. On Xiaomi and some other phones, allow BirdyGo to run without battery restriction, or the phone may stop it after a few minutes.",
+  "@forkBackgroundTipBody": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundTipSettings": "Open the settings",
+  "@forkBackgroundTipSettings": {"description": "BirdyGo fork: Live listening in the background (J2b)."},
+  "forkBackgroundTipLater": "Later",
+  "@forkBackgroundTipLater": {"description": "BirdyGo fork: Live listening in the background (J2b)."}
 }

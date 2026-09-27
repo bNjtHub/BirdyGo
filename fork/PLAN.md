@@ -157,6 +157,26 @@ Fini quand : les tests passent, et sur le téléphone l'index se remplit sans fi
 
 Fini quand : rejouer un rougegorge pendant une écoute ne crée aucune nouvelle détection.
 
+## J2b : écouter écran éteint
+
+Problème : l'écoute Live se coupait dès que l'app passait en arrière-plan. Le Live se mettait en pause
+lui-même (`_pauseSessionForBackground` dans `live_screen.dart`) et n'avait pas de service au premier
+plan, contrairement au mode Survey et à l'ARU ; HyperOS tuait ensuite le processus.
+
+- [x] Service Android au premier plan pour le Live (`lib/fork/background/live_background.dart`,
+      type micro, identifiant 768, canal « Écoute en direct », notification discrète « BirdyGo écoute »
+      avec « Ouvrir »). Démarre avec l'écoute, s'arrête à la fin de l'écoute ou en quittant l'écran.
+      `ForegroundServiceOwner.live` (ligne FORK) : jamais en même temps que Survey ou ARU.
+- [x] Tant que le service tourne, passer en arrière-plan ne met plus l'écoute en pause (une ligne FORK
+      dans `_pauseSessionForBackground`). Sans service (refus, autre mode), l'ancien comportement reste.
+- [x] Conseil unique à la première écoute (`background_tip.dart`) : l'écoute continue écran éteint ;
+      sur Xiaomi, autoriser BirdyGo sans restriction de batterie, avec un bouton vers les réglages de
+      l'app. Pas de demande automatique d'exemption d'optimisation de batterie (surveillée par le
+      Play Store).
+- [ ] (Benjamin) Sur le Xiaomi : 30 minutes d'écoute écran éteint, avec et sans « Pas de
+      restriction » ; vérifier la notification, le bouton « Ouvrir », la reprise à l'écran, et qu'un
+      Survey lancé ensuite démarre bien son propre service.
+
 ## J3 : savoir quand l'app se trompe
 
 - [x] Trois niveaux affichés partout (Live, revue de session, sonothèque, palmarès) : Sûr, Probable,
@@ -657,6 +677,8 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
+  `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
   posés dans le projet, jamais compilés. Créer l'App ID et l'App Group sur le portail Apple, renseigner
   l'équipe (DEVELOPMENT_TEAM). L'App Group ne sert qu'à une ancienne extension de partage upstream : on

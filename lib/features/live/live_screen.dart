@@ -28,6 +28,8 @@ import 'live_detection_display.dart';
 import 'live_providers.dart';
 import 'live_session.dart';
 import 'widgets/detection_list_widget.dart';
+import '../../fork/background/background_tip.dart'; // FORK: J2b
+import '../../fork/background/live_background.dart'; // FORK: J2b
 import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
 import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
 import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
@@ -341,6 +343,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
       // Keep screen on during live recording.
       await WakelockService.enable();
+      // FORK: keep listening with the screen off / in the background (J2b)
+      _forkBackground = ref.read(liveBackgroundProvider);
+      unawaited(_forkBackground!.start());
 
       // Apply user-tunable DSP (gain + high-pass) before starting
       // capture so the very first chunk is already processed.
@@ -446,6 +451,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         longitude: startLon,
       );
       if (_forkPractice) controller.session?.practice = true; // FORK: J5c
+      if (mounted) {
+        // FORK: one-time tip about listening with the screen off (J2b)
+        unawaited(showBackgroundTipOnce(context, ref));
+      }
 
       _isStarting = false;
       _onControllerStateChanged();
@@ -488,6 +497,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
     // Ensure screen lock is released when leaving the live screen.
     WakelockService.disable();
+    unawaited(_forkBackground?.stop()); // FORK: J2b
     super.dispose();
   }
 
@@ -509,6 +519,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
   }
 
   bool _pausedByLifecycle = false;
+
+  // FORK: foreground service keeping the listening alive (J2b). While it
+  // runs, going to the background no longer pauses the session.
+  LiveBackground? _forkBackground;
 
   /// Tail of the serialized lifecycle pause/resume chain.
   Future<void> _lifecycleTransition = Future<void>.value();
@@ -541,6 +555,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     // The session is already being torn down — finalizing stops capture and
     // closes the session itself, so pausing would only race it.
     if (_finalizing) return;
+    if (_forkBackground?.isRunning ?? false) return; // FORK: J2b
     final controller = ref.read(liveControllerProvider);
     if (controller.state != LiveState.active) return;
     _pausedByLifecycle = true;
@@ -642,6 +657,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
     // Release screen wakelock.
     await WakelockService.disable();
+    await _forkBackground?.stop(); // FORK: J2b
 
     // Stop audio capture if still running.
     await captureNotifier.stop();
