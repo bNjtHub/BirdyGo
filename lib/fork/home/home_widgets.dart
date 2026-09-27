@@ -9,6 +9,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdygo_wordmark.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/dashed_border.dart';
@@ -37,9 +38,11 @@ class HomeTopBar extends StatelessWidget {
         children: [
           Expanded(
             child: SingingLogo(
-              wordmark: Text(
-                l10n.appTitle,
-                style: BirdyText.heading.copyWith(color: c.text1),
+              // The startup screen's wordmark, header size.
+              wordmark: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: BirdyGoWordmark(size: _wordmarkSize, color: c.text1),
               ),
             ),
           ),
@@ -54,6 +57,10 @@ class HomeTopBar extends StatelessWidget {
     );
   }
 }
+
+/// Wordmark size in the home header: the startup letters, a little above
+/// the board's 20 px name so the Oriole dot stays readable.
+const double _wordmarkSize = 24;
 
 /// « Bonjour » and the date line.
 class HomeGreeting extends StatelessWidget {

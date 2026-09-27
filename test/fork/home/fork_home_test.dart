@@ -12,6 +12,7 @@ import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
+import 'package:birdnet_live/fork/design/widgets/birdygo_wordmark.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
 import 'package:birdnet_live/fork/home/home_model.dart';
@@ -176,7 +177,9 @@ void main() {
 
   testWidgets('the morning overview includes the daily goal', (tester) async {
     await pump(tester);
-    expect(find.text('BirdyGo'), findsOneWidget);
+    // The startup wordmark (Birdy • Go), read as one name.
+    expect(find.byType(BirdyGoWordmark), findsOneWidget);
+    expect(find.bySemanticsLabel('BirdyGo'), findsOneWidget);
     expect(find.byTooltip('Menu'), findsOneWidget);
     expect(find.textContaining('· Beaulieu-sur-Brenne'), findsOneWidget);
     for (final text in [
