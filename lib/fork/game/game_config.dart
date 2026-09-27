@@ -217,6 +217,10 @@ abstract final class GameConfig {
   /// for one, two and three stars.
   static const List<double> quizStarShares = [0.4, 0.7, 1];
 
+  /// Share of right answers that ends a round with a rain of confetti and
+  /// the fanfare (Quiz v2: 5 out of 10).
+  static const double quizPartyShare = 0.5;
+
   /// Medal of each earned tier: bronze, silver, gold for 1, 2, 3 plumes.
   /// The same in both themes, like real metal; a locked badge takes the
   /// theme neutrals instead (DESIGN.md « Jeu »).

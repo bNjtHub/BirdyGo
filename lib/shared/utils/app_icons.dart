@@ -229,4 +229,11 @@ abstract final class AppIcons {
   static const IconData wbSunny = Symbols.wb_sunny;
   static const IconData wbTwilightRounded = Symbols.wb_twilight_rounded;
   static const IconData weatherSnowy = Symbols.weather_snowy;
+  // FORK: quiz « Qui chante ? » v2, Material Symbols Rounded (J6e).
+  static const IconData quizBird = Symbols.raven_rounded; // FORK: quiz
+  static const IconData quizCheck = Symbols.check_rounded; // FORK: quiz
+  static const IconData quizClose = Symbols.close_rounded; // FORK: quiz
+  static const IconData quizSpark = Symbols.auto_awesome_rounded; // FORK: quiz
+  static const IconData quizStar = Symbols.star_rounded; // FORK: quiz
+  static const IconData quizStop = Symbols.stop_rounded; // FORK: quiz
 }

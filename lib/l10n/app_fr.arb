@@ -1594,7 +1594,7 @@
   "forkQuizQuit": "Quitter le quiz",
   "forkQuizStreak": "{count} d'affilée !",
   "forkQuizCheer": "{index, select, 0{Bravo !} 1{Bien vu !} 2{Génial !} other{Super !}}",
-  "forkQuizRightName": "C'est bien lui : {name}",
+  "forkQuizRightName": "C'est bien : {name}",
   "forkQuizAlmost": "Presque !",
   "forkQuizPlusOne": "+1 {badge}",
   "forkQuizResultTitle": "{stars, select, 0{Bon début !} 1{Bien joué !} 2{Super oreille !} other{Parfait !}}",
@@ -1602,5 +1602,13 @@
   "forkQuizStars": "{count, plural, =0{Aucune étoile sur 3} =1{1 étoile sur 3} other{{count} étoiles sur 3}}",
   "forkQuizRecap": "Tes oiseaux du jour",
   "forkQuizMissed": "manqué",
-  "forkQuizToTier": "{tier, plural, =1{{value} sur {target} pour ta 1re plume} other{{value} sur {target} vers la {tier}e plume}}"
+  "forkQuizToTier": "{tier, plural, =1{{value} sur {target} pour ta 1re plume} other{{value} sur {target} vers la {tier}e plume}}",
+  "forkQuizSoundOn": "Avec son",
+  "forkQuizSoundOff": "Sans son",
+  "forkQuizSoundSwitch": "Bruitages du quiz",
+  "forkQuizSongsLabel": "{count, plural, =1{chant} other{chants}}",
+  "forkQuizChoicesLabel": "choix",
+  "forkQuizBirdsLabel": "de tes oiseaux",
+  "forkQuizRightArticle": "C'est bien {name}",
+  "forkQuizWrongArticle": "C'était {name}"
 }

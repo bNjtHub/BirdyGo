@@ -34,6 +34,61 @@ abstract final class BirdyBrand {
   static const Color wellBottom = Color(0xFF0F1E33);
 }
 
+/// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not
+/// theme tokens: the equalizer bars on the dark well, the confetti and the
+/// small marks of the round's recap.
+abstract final class BirdyQuizColors {
+  /// Equalizer bars, from the deepest to the lightest Martin-pêcheur shade.
+  static const Color bar1 = Color(0xFF52C0C9);
+  static const Color bar2 = Color(0xFF79D0D7);
+  static const Color bar3 = Color(0xFFA8E2E6);
+  static const Color bar4 = Color(0xFFDDF4F5);
+
+  /// Bars left of the play button, then right of it.
+  static const List<Color> barsLeft = [bar1, bar3, BirdyBrand.oriole];
+  static const List<Color> barsRight = [bar4, bar2, bar1];
+
+  /// The five bars under the mystery bird on the intro.
+  static const List<Color> barsIntro = [
+    bar4,
+    BirdyBrand.oriole,
+    bar3,
+    bar2,
+    bar1,
+  ];
+
+  /// Rain of confetti on a good score.
+  static const List<Color> rain = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF3B8FDB),
+    Color(0xFFE9836B),
+  ];
+
+  /// Burst on a right answer, besides the bird's own colors.
+  static const List<Color> burst = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+  ];
+
+  /// Cross mark of a missed bird in the recap, light and dark.
+  static const Color missedLight = Color(0xFF9AA39A);
+  static const Color missedDark = Color(0xFF6E7A86);
+
+  /// Knob of the sound switch, and its shadow.
+  static const Color knob = Color(0xFFFFFFFF);
+  static const Color knobShadow = Color(0x4013233A);
+
+  /// Réécouter button on the bird's light tint (white at 60 %).
+  static const Color replayOnTint = Color(0x99FFFFFF);
+
+  /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
+  static const double mysteryBrightness = 2.2;
+}
+
 /// Foreground and background of one reliability level.
 @immutable
 class LevelColors {

@@ -5723,5 +5723,21 @@
   "forkQuizMissed": "missed",
   "@forkQuizMissed": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
   "forkQuizToTier": "{tier, plural, =1{{value} of {target} for your first feather} =2{{value} of {target} toward your second feather} other{{value} of {target} toward your third feather}}",
-  "@forkQuizToTier": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"value": {"type": "int"}, "target": {"type": "int"}, "tier": {"type": "int"}}}
+  "@forkQuizToTier": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"value": {"type": "int"}, "target": {"type": "int"}, "tier": {"type": "int"}}},
+  "forkQuizSoundOn": "Sound on",
+  "@forkQuizSoundOn": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
+  "forkQuizSoundOff": "Sound off",
+  "@forkQuizSoundOff": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
+  "forkQuizSoundSwitch": "Quiz sound effects",
+  "@forkQuizSoundSwitch": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
+  "forkQuizSongsLabel": "{count, plural, =1{song} other{songs}}",
+  "@forkQuizSongsLabel": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"count": {"type": "int"}}},
+  "forkQuizChoicesLabel": "choices",
+  "@forkQuizChoicesLabel": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
+  "forkQuizBirdsLabel": "of your birds",
+  "@forkQuizBirdsLabel": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e)."},
+  "forkQuizRightArticle": "Yes, it's {name}",
+  "@forkQuizRightArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}},
+  "forkQuizWrongArticle": "It was {name}",
+  "@forkQuizWrongArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}}
 }
