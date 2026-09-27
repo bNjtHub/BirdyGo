@@ -269,9 +269,15 @@ class BirdyGoSingingPainter extends CustomPainter {
 /// The loading bar: filled to the real share of the startup work done
 /// ([fraction], 0..1), never a made-up percentage.
 class BirdyGoLoadingPainter extends CustomPainter {
-  BirdyGoLoadingPainter({required this.fraction}) : super(repaint: fraction);
+  BirdyGoLoadingPainter({
+    required this.fraction,
+    this.track = const Color(0x1A13233A),
+  }) : super(repaint: fraction);
 
   final ValueListenable<double> fraction;
+
+  /// Empty part of the bar: Encre at 10 % on Brume, Brume at 12 % on Encre.
+  final Color track;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -279,10 +285,7 @@ class BirdyGoLoadingPainter extends CustomPainter {
       Offset.zero & size,
       const Radius.circular(2),
     );
-    canvas.drawRRect(
-      bounds,
-      Paint()..color = BirdyBrand.ink.withValues(alpha: .1),
-    );
+    canvas.drawRRect(bounds, Paint()..color = track);
     final filled = fraction.value.clamp(0.0, 1.0);
     if (filled == 0) return;
     canvas.drawRRect(

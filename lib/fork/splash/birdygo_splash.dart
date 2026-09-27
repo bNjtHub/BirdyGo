@@ -51,6 +51,12 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   bool _reported = false;
   bool _reduced = false;
 
+  // Brume or Encre, from the device theme; set at the top of [build].
+  Color _background = BirdyBrand.mist;
+  Color _text = BirdyBrand.ink;
+  Color _soft = BirdyBrand.bark;
+  Color _track = const Color(0x1A13233A);
+
   void _onTick(Duration elapsed) {
     final now = elapsed.inMicroseconds / 1000;
     final dt = now - _clock.value;
@@ -229,7 +235,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                 ),
               ],
             ),
-            style: const TextStyle(color: BirdyBrand.ink),
+            style: TextStyle(color: _text),
             softWrap: false,
           ),
         ),
@@ -239,7 +245,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
 
   /// The tagline enters in two beats; a screen reader hears one sentence.
   Widget _tagline(AppLocalizations l10n) {
-    final style = BirdyText.body.copyWith(color: BirdyBrand.bark);
+    final style = BirdyText.body.copyWith(color: _soft);
     return Semantics(
       label: '${l10n.forkSplashTaglineFirst} ${l10n.forkSplashTaglineSecond}',
       child: ExcludeSemantics(
@@ -267,7 +273,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
         liveRegion: true,
         child: Text(
           l10n.forkSplashError,
-          style: BirdyText.bodyCompact.copyWith(color: BirdyBrand.ink),
+          style: BirdyText.bodyCompact.copyWith(color: _text),
           textAlign: TextAlign.center,
         ),
       ),
@@ -303,22 +309,22 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                 RepaintBoundary(
                   child: CustomPaint(
                     size: const Size(180, 4),
-                    painter: BirdyGoLoadingPainter(fraction: _bar),
+                    painter: BirdyGoLoadingPainter(
+                      fraction: _bar,
+                      track: _track,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
                 Text(
                   caption,
-                  style: BirdyText.caption.copyWith(
-                    fontSize: 14,
-                    color: BirdyBrand.bark,
-                  ),
+                  style: BirdyText.caption.copyWith(fontSize: 14, color: _soft),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: compact ? 8 : 24),
                 Text(
                   l10n.forkPoweredByBirdnet,
-                  style: BirdyText.caption.copyWith(color: BirdyBrand.bark),
+                  style: BirdyText.caption.copyWith(color: _soft),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -332,14 +338,22 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    _background = dark ? BirdyBrand.ink : BirdyBrand.mist;
+    _text = dark ? BirdyBrand.mist : BirdyBrand.ink;
+    _soft = dark ? BirdyColors.dark.text2 : BirdyBrand.bark;
+    _track = (dark ? BirdyBrand.mist : BirdyBrand.ink).withValues(
+      alpha: dark ? .12 : .1,
+    );
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarContrastEnforced: false,
-      ),
+      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
+          ),
       child: Scaffold(
-        backgroundColor: BirdyBrand.mist,
+        backgroundColor: _background,
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {

@@ -437,7 +437,11 @@ in a 310 × 245 dp frame (narrower screens shrink it), the wordmark « Birdy » 
 44 dp, an Oriole dot, then « Go » in Atkinson 42 dp extra-bold (variant « Point Loriot »
 of the board, the user's choice), and the bottom loading status with BirdNET
 attribution. The tagline is "Le monde chante. Écoute." / "The world is singing. Listen."
-No synthetic bird audio is played. The native Android launch background also uses Mist.
+No synthetic bird audio is played. The startup follows the device theme, like App by
+default: Mist with Ink text in light mode, Ink with Mist text (secondary text `text2` of the
+dark theme) in dark mode. The native Android launch screen is the same plain color with no
+mark (transparent Android 12+ icon, `values-night/birdygo_colors.xml` for dark), so the bird
+appears only once, fading in with the Flutter splash.
 
 The bird sings phrases of three syllables: on each one the beak opens, the body swells,
 the tail and the wing bars move, and a note leaves the beak (Kingfisher, gold, deep

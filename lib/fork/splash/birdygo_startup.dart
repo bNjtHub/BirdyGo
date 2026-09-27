@@ -151,6 +151,10 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
   Widget _buildSplash() => MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: BirdyTheme.light(),
+    // Same background as the native launch (values-night): the startup
+    // follows the device theme, like App does by default.
+    darkTheme: BirdyTheme.dark(),
+    themeMode: ThemeMode.system,
     // A notification launch route belongs to App, after initialization.
     initialRoute: '/',
     localizationsDelegates: AppLocalizations.localizationsDelegates,

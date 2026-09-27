@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/splash/birdygo_splash.dart';
 import 'package:birdnet_live/fork/splash/birdygo_startup.dart';
 import 'package:birdnet_live/fork/splash/birdygo_warm_up.dart';
@@ -175,6 +176,30 @@ void main() {
     expect(find.text('App ready'), findsOneWidget);
     expect(find.byType(BirdyGoSplash), findsNothing);
   });
+
+  for (final (brightness, background) in [
+    (Brightness.light, BirdyBrand.mist),
+    (Brightness.dark, BirdyBrand.ink),
+  ]) {
+    testWidgets('startup background follows the device theme: $brightness', (
+      tester,
+    ) async {
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      final pending = Completer<Widget>();
+      await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+      await tester.pump();
+      final scaffold = tester.widget<Scaffold>(
+        find.descendant(
+          of: find.byType(BirdyGoSplash),
+          matching: find.byType(Scaffold),
+        ),
+      );
+      expect(scaffold.backgroundColor, background);
+      pending.complete(const MaterialApp(home: Text('App ready')));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+    });
+  }
 
   for (final (locale, first, second, loading) in [
     ('fr', 'Le monde chante.', 'Écoute.', 'Chargement…'),

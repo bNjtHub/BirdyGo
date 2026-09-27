@@ -51,6 +51,11 @@ void main() {
         expect(layers, isNot(contains('android:gravity')));
       }
       expect(_read('$res/values/birdygo_colors.xml'), contains('#EEF1EC'));
+      // Dark mode: Encre, like the dark app that follows.
+      expect(
+        _read('$res/values-night/birdygo_colors.xml'),
+        contains('#13233A'),
+      );
     });
   });
 
