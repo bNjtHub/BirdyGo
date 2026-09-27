@@ -367,6 +367,11 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
+- Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
+  métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
+  est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
+  (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
+  remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
 - Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
   confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
   pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.

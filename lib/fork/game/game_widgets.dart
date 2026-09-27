@@ -224,7 +224,9 @@ class _RingPainter extends CustomPainter {
       old.progress != progress || old.track != track || old.color != color;
 }
 
-/// Badge circle in its tier colors, with an icon or a [glyph].
+/// Badge medal: bronze, silver or gold once earned (a metal gradient, a rim
+/// and an engraved inner ring), a flat disc in the theme neutrals while
+/// locked. Carries an icon or a [glyph].
 class BadgeMedal extends StatelessWidget {
   const BadgeMedal({
     super.key,
@@ -242,20 +244,65 @@ class BadgeMedal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (fill, ink) = GameConfig.badgeTierColors[tier];
+    final c = BirdyColors.of(context);
+    final metal = tier == 0 ? null : GameConfig.badgeMedals[tier - 1];
+    final ink = metal?.ink ?? c.text2;
+    final rim = math.max(1.5, size / 26);
     final glyphSize = size / 2;
+    final face =
+        glyph != null
+            ? CustomPaint(
+              size: Size.square(glyphSize),
+              painter: _GlyphPainter(glyph!, ink),
+            )
+            : Icon(icon, size: glyphSize, color: ink);
+
+    if (metal == null) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: c.lineOpaque,
+          shape: BoxShape.circle,
+          border: Border.all(color: c.border, width: rim),
+        ),
+        alignment: Alignment.center,
+        child: face,
+      );
+    }
+
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child:
-          glyph != null
-              ? CustomPaint(
-                size: Size.square(glyphSize),
-                painter: _GlyphPainter(glyph!, ink),
-              )
-              : Icon(icon, size: glyphSize, color: ink),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: metal.rim, width: rim),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [metal.highlight, metal.base, metal.shadow],
+          stops: const [0, .55, 1],
+        ),
+      ),
+      padding: EdgeInsets.all(size * .1),
+      // Engraved ring: light on the lower right, shade on the upper left,
+      // as if struck into the metal.
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [metal.base, metal.highlight.withValues(alpha: .9)],
+          ),
+          border: Border.all(
+            color: metal.shadow.withValues(alpha: .55),
+            width: 1,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: face,
+      ),
     );
   }
 }
