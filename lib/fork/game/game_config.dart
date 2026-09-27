@@ -2,7 +2,10 @@
 /// forgiving streak. Every threshold of the game lives here.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+
+import '../design/birdy_tokens.dart';
 
 /// One of the 8 statuses, reached with [from] verified species.
 class StatusDef {
@@ -24,6 +27,25 @@ class StatusDef {
 
 /// Stroked paths and circles of a 24 × 24 line glyph; [filled] paths are
 /// painted solid.
+/// Metal of an earned badge medal: a top-left light, the body color, a
+/// bottom-right shade, the rim and the engraved glyph.
+@immutable
+class MedalMetal {
+  const MedalMetal({
+    required this.highlight,
+    required this.base,
+    required this.shadow,
+    required this.rim,
+    required this.ink,
+  });
+
+  final Color highlight;
+  final Color base;
+  final Color shadow;
+  final Color rim;
+  final Color ink;
+}
+
 class Glyph {
   const Glyph({
     this.paths = const [],
@@ -182,13 +204,31 @@ abstract final class GameConfig {
     BadgeKind.tits: [2, 4, 6],
   };
 
-  /// Badge circle fill and glyph color: locked, then 1, 2, 3 plumes
-  /// (SPEC.md 2.7).
-  static const List<(Color, Color)> badgeTierColors = [
-    (Color(0xFFE6E9E4), Color(0xFF9AA39A)),
-    (Color(0xFFEADFD1), Color(0xFF6B5847)),
-    (Color(0xFFE3EBD2), Color(0xFF4B6023)),
-    (Color(0xFFFBEFC8), Color(0xFF7A5A00)),
+  /// Medal of each earned tier: bronze, silver, gold for 1, 2, 3 plumes.
+  /// The same in both themes, like real metal; a locked badge takes the
+  /// theme neutrals instead (DESIGN.md « Jeu »).
+  static const List<MedalMetal> badgeMedals = [
+    MedalMetal(
+      highlight: Color(0xFFE9B98E),
+      base: Color(0xFFC27F4A),
+      shadow: Color(0xFF8C542C),
+      rim: Color(0xFF6E3F1F),
+      ink: Color(0xFF3F220C),
+    ),
+    MedalMetal(
+      highlight: Color(0xFFF7F9FB),
+      base: Color(0xFFC9D0D7),
+      shadow: Color(0xFF8F99A4),
+      rim: Color(0xFF6F7984),
+      ink: Color(0xFF2F3943),
+    ),
+    MedalMetal(
+      highlight: Color(0xFFFFE9A0),
+      base: BirdyBrand.oriole,
+      shadow: Color(0xFFC49224),
+      rim: Color(0xFF9A7010),
+      ink: Color(0xFF5A4000),
+    ),
   ];
 
   /// « Chœur de l'aube »: verified species in one listening…
