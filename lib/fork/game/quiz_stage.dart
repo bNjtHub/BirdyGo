@@ -287,7 +287,7 @@ class _RevealCard extends StatelessWidget {
       iconSize: right ? 116 : 100,
     );
     final species = bird.species;
-    if (bird.icon == null && species != null) {
+    if (species != null) {
       // A photo: credit and license at a tap (DESIGN.md « Photos »).
       art = Semantics(
         button: true,

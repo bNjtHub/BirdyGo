@@ -5,7 +5,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../shared/models/taxonomy_species.dart';
 import '../design/birdy_tokens.dart';
@@ -41,16 +40,13 @@ class QuizBird {
   /// Common name in the species language.
   final String name;
 
-  /// Bundled photo, when the bird has no drawn icon.
+  /// Bundled photo (the quiz shows photos only, no drawn icons).
   final ImageProvider? image;
 
   /// Taxonomy entry, for the photo credit.
   final TaxonomySpecies? species;
 
   SpeciesTint get tint => SpeciesAccents.tintOf(scientificName);
-
-  /// Drawn icon (assets/fork/species_icons), or null.
-  String? get icon => SpeciesIcons.assetOf(scientificName);
 }
 
 /// Oreille fine for [correct] right answers.
@@ -65,8 +61,8 @@ double toNextTier(BadgeProgress badge) {
   return ((badge.value - from) / (next - from)).clamp(0, 1).toDouble();
 }
 
-/// A bird in a round halo of its tint: its drawn icon at [iconSize], or its
-/// photo when it has none. [muted] turns it grey (a missed bird).
+/// A bird in a round halo of its tint: its photo at [iconSize]. [muted]
+/// turns it grey (a missed bird).
 class QuizBirdArt extends StatelessWidget {
   const QuizBirdArt({
     super.key,
@@ -85,34 +81,15 @@ class QuizBirdArt extends StatelessWidget {
   /// Halo color; the bird's halo by default.
   final Color? background;
 
-  static const ColorFilter _grey = ColorFilter.matrix([
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0.2126, 0.7152, 0.0722, 0, 0, //
-    0, 0, 0, 1, 0, //
-  ]);
-
   @override
   Widget build(BuildContext context) {
     final tint = bird.tint;
-    final asset = bird.icon;
-    Widget art;
-    if (asset != null) {
-      art = SvgPicture.asset(asset, width: iconSize, height: iconSize);
-      if (muted) {
-        art = Opacity(
-          opacity: 0.45,
-          child: ColorFiltered(colorFilter: _grey, child: art),
-        );
-      }
-    } else {
-      art = SpeciesAvatar(
-        image: bird.image,
-        tint: tint,
-        size: iconSize,
-        muted: muted,
-      );
-    }
+    final art = SpeciesAvatar(
+      image: bird.image,
+      tint: tint,
+      size: iconSize,
+      muted: muted,
+    );
     return Container(
       width: size,
       height: size,

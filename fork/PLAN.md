@@ -705,8 +705,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Quiz v2 (maquette « Quiz v2 ») : accueil avec interrupteur « Avec son / Sans son »,
             chemin de 10 étapes, oiseau mystère dessiné, confettis, rayons, pops, « +1 Oreille fine »
             qui s'envole, bilan étoiles / grille 5 × 2 / barre animée, jingle et fanfare (lecteur
-            dédié `quiz_sfx.dart`, sons synthétisés par `tools/fork_quiz_sounds.py`). Icônes
-            dessinées pour les 14 espèces de `icons.json`, photos pour les autres. Dépendances
+            dédié `quiz_sfx.dart`, sons synthétisés par `tools/fork_quiz_sounds.py`). Oiseaux
+            toujours en photo (choix de Benjamin : aucune icône d'oiseau dessinée) ; seule la
+            silhouette mystère vient de `icons.json`. Dépendances
             ajoutées : `confetti`, `flutter_svg`.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :

@@ -1,6 +1,5 @@
-/// Drawn species icons (fork/maquette/icons.json, J6e quiz): SVG assets in
-/// assets/fork/species_icons, named after the scientific name. Species
-/// without an icon keep their photo avatar.
+/// The quiz's mystery bird (fork/maquette/icons.json « mystere »), an SVG
+/// asset. Birds themselves are always shown by their photo.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,30 +12,6 @@ abstract final class SpeciesIcons {
 
   /// The mystery bird: a grey silhouette with a question mark.
   static const String mystery = '$_dir/mystere.svg';
-
-  /// Species with a drawn icon.
-  static const Set<String> _known = {
-    'Erithacus rubecula',
-    'Cyanistes caeruleus',
-    'Parus major',
-    'Turdus merula',
-    'Dendrocopos major',
-    'Fringilla coelebs',
-    'Pica pica',
-    'Troglodytes troglodytes',
-    'Passer domesticus',
-    'Phylloscopus collybita',
-    'Strix aluco',
-    'Upupa epops',
-    'Alcedo atthis',
-    'Oriolus oriolus',
-  };
-
-  /// Asset of [scientificName]'s icon, or null.
-  static String? assetOf(String scientificName) =>
-      _known.contains(scientificName)
-          ? '$_dir/${scientificName.toLowerCase().replaceAll(' ', '_')}.svg'
-          : null;
 }
 
 /// The mystery silhouette, brightened like the mockup's CSS
