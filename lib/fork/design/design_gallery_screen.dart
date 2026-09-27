@@ -17,6 +17,7 @@ import 'birdy_tokens.dart';
 import 'birdy_typography.dart';
 import 'species_tint.dart';
 import 'widgets/animated_count.dart';
+import 'widgets/birdy_animated_icon.dart';
 import 'widgets/birdy_buttons.dart';
 import 'widgets/birdy_pill.dart';
 import 'widgets/clip_play_button.dart';
@@ -25,6 +26,7 @@ import 'widgets/entrance.dart';
 import 'widgets/species_avatar.dart';
 import 'widgets/species_card.dart';
 import 'widgets/species_tile.dart';
+import 'widgets/tip_card.dart';
 
 /// Settings entry to the gallery. Hidden (and tree-shaken) in release.
 class DesignGalleryTile extends StatelessWidget {
@@ -150,6 +152,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGalleryPlayer, [_player(l10n)]),
                 _Section(l10n.forkGalleryMotion, _motion(l10n)),
                 _Section(l10n.forkGalleryEmpty, _empty(l10n)),
+                _Section(l10n.forkTipHeader, [_tips(l10n)]),
               ],
             ),
           );
@@ -479,6 +482,35 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
       body: l10n.forkQuickReviewEmpty,
     ),
   ];
+
+  /// Tip cards (DESIGN.md « Astuces »): tap for the next one.
+  Widget _tips(AppLocalizations l10n) => BirdyTipCarousel(
+    tips: [
+      BirdyTip(
+        icon: AppIcons.air,
+        title: l10n.liveTipWindTitle,
+        body: l10n.liveTipWindBody,
+        motion: BirdyIconMotion.drift,
+      ),
+      BirdyTip(
+        icon: AppIcons.graphicEq,
+        title: l10n.liveTipSpectrogramTitle,
+        body: l10n.liveTipSpectrogramBody,
+        motion: BirdyIconMotion.pulse,
+      ),
+      BirdyTip(
+        icon: AppIcons.batteryChargingFull,
+        title: l10n.liveTipBatteryTitle,
+        body: l10n.liveTipBatteryBody,
+      ),
+      BirdyTip(
+        icon: AppIcons.saveAlt,
+        title: l10n.liveTipSaveClipsTitle,
+        body: l10n.liveTipSaveClipsBody,
+        motion: BirdyIconMotion.drop,
+      ),
+    ],
+  );
 
   List<Widget> _motion(AppLocalizations l10n) => [
     Align(

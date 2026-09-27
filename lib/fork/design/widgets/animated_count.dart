@@ -107,7 +107,10 @@ class StatTile extends StatelessWidget {
           children: [
             DefaultTextStyle.merge(
               style: BirdyText.numberL.copyWith(color: c.text1),
-              child: Align(
+              // A tile number stays on one line: a long one (« 1:02:47 »)
+              // shrinks to the tile width instead of wrapping.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.centerStart,
                 child: value,
               ),
