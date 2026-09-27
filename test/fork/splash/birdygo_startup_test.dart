@@ -208,7 +208,10 @@ void main() {
         tester
             .widget<Opacity>(
               find
-                  .ancestor(of: find.text(text), matching: find.byType(Opacity))
+                  .ancestor(
+                    of: find.textContaining(text, findRichText: true),
+                    matching: find.byType(Opacity),
+                  )
                   .first,
             )
             .opacity;
@@ -240,13 +243,13 @@ void main() {
       await tester.pump(BirdyGoSplash.minimumDisplay);
       await tester.pump(const Duration(milliseconds: 16));
       expect(tester.takeException(), isNull);
-      final wordmark = find.ancestor(
-        of: find.text('Birdy'),
-        matching: find.byType(Row),
+      // « Birdy », the Oriole dot (a widget span) and « Go » are one text.
+      final wordmark = find.textContaining(
+        RegExp(r'^Birdy.Go$'),
+        findRichText: true,
       );
       expect(wordmark, findsOneWidget);
       expect(tester.getCenter(wordmark).dx, closeTo(size.width / 2, 1));
-      expect(find.text('Go'), findsOneWidget);
       expect(find.text('The world is singing.'), findsOneWidget);
       expect(find.text('Listen.'), findsOneWidget);
     });

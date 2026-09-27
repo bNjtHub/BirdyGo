@@ -434,7 +434,8 @@ profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d
 
 The Claude Design board « BirdyGo Splash » defines the Mist background, the singing bird
 in a 310 × 245 dp frame (narrower screens shrink it), the wordmark « Birdy » in Fraunces
-44 dp followed by « Go » in a Kingfisher pill, and the bottom loading status with BirdNET
+44 dp, an Oriole dot, then « Go » in Atkinson 42 dp extra-bold (variant « Point Loriot »
+of the board, the user's choice), and the bottom loading status with BirdNET
 attribution. The tagline is "Le monde chante. Écoute." / "The world is singing. Listen."
 No synthetic bird audio is played. The native Android launch background also uses Mist.
 
@@ -447,8 +448,9 @@ as initialization runs. This startup-only motion is an explicit exception to the
 500 ms/no-rotation rules; it does not change Home's logo or other app animations.
 The bottom track shows a looping activity sweep, not a percentage of bootstrap completion.
 Reduced motion draws the settled composition immediately and adds no wait.
-Normal launch waits for real initialization and for a minimum display of 2.6 s
-(`BirdyGoSplash.minimumDisplay`): the first phrase and the whole tagline. Explicit audio
+Normal launch waits for real initialization and for a minimum display of 4.4 s
+(`BirdyGoSplash.minimumDisplay`): one whole phrase, up to the blink and the last note
+fading out. Explicit audio
 shares and Quick Listen bypass any remaining wait once their route is ready,
 so an active recording's controls are never hidden just to finish the animation.
 After a startup error the bird stops singing.

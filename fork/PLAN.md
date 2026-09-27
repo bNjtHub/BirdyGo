@@ -482,8 +482,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
             Mist background, singing bird (beak, body, tail, wing bars, one note per
-            syllable), « Birdy » + « Go » pill wordmark, tagline in two beats, looping
-            loading sweep, 2.6-second minimum display, immediate reduced-motion state,
+            syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,
+            looping loading sweep, 4.4-second minimum display, immediate reduced-motion state,
             real bootstrap loading and retry. Launch share and Quick Listen are retained
             across retry; normal launch waits for initialization and introduction. Android launch
             and normal window backgrounds match Flutter, with the current BirdyGo mark.

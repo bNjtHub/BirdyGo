@@ -17,8 +17,9 @@ class BirdyGoSplash extends StatefulWidget {
   const BirdyGoSplash({super.key, this.onRetry, this.onIntroComplete});
 
   /// Shortest time the splash stays up on a normal launch, however fast the
-  /// app initializes: the first sung phrase and the whole tagline.
-  static const minimumDisplay = Duration(milliseconds: 2600);
+  /// app initializes: one whole sung phrase, up to the blink and the last
+  /// note fading out, until the bird is about to sing again.
+  static const minimumDisplay = Duration(milliseconds: 4400);
 
   final VoidCallback? onRetry;
 
@@ -94,52 +95,64 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
         },
       );
 
-  /// « Birdy » and its « Go » pill. The brand name is never translated.
-  Widget _wordmark(AppLocalizations l10n) => Semantics(
-    label: l10n.appTitle,
-    child: ExcludeSemantics(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Birdy',
-              style: BirdyText.display.copyWith(
-                fontSize: 44,
-                letterSpacing: -.8,
-                color: BirdyBrand.ink,
-                fontVariations: const [
-                  FontVariation('SOFT', 100),
-                  FontVariation('opsz', 44),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            DecoratedBox(
-              decoration: const ShapeDecoration(
-                color: BirdyBrand.kingfisher,
-                shape: StadiumBorder(),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 2, 14, 6),
-                child: Text(
-                  'Go',
-                  style: BirdyText.label.copyWith(
-                    fontSize: 34,
-                    height: 1.1,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -.5,
-                    color: BirdyBrand.ink,
+  /// « Birdy », an Oriole dot, « Go » (variant « Point Loriot » of the board).
+  /// The brand name is never translated.
+  Widget _wordmark(BuildContext context, AppLocalizations l10n) {
+    final scaler = MediaQuery.textScalerOf(context);
+    return Semantics(
+      label: l10n.appTitle,
+      child: ExcludeSemantics(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Birdy',
+                  style: BirdyText.display.copyWith(
+                    fontSize: 44,
+                    letterSpacing: -.8,
+                    fontVariations: const [
+                      FontVariation('SOFT', 100),
+                      FontVariation('opsz', 44),
+                    ],
                   ),
                 ),
-              ),
+                // The dot floats at mid-height of the lowercase letters.
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(5, 0, 5, scaler.scale(5)),
+                    child: SizedBox.square(
+                      dimension: scaler.scale(9),
+                      child: const DecoratedBox(
+                        decoration: ShapeDecoration(
+                          color: BirdyBrand.oriole,
+                          shape: CircleBorder(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                TextSpan(
+                  text: 'Go',
+                  style: BirdyText.label.copyWith(
+                    fontSize: 42,
+                    height: 1.1,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ],
             ),
-          ],
+            style: const TextStyle(color: BirdyBrand.ink),
+            softWrap: false,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   /// The tagline enters in two beats; a screen reader hears one sentence.
   Widget _tagline(AppLocalizations l10n) {
@@ -276,7 +289,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                               SizedBox(height: compact ? 10 : 20),
                               _entrance(
                                 at: BirdyGoSplashTimeline.wordmark,
-                                child: _wordmark(l10n),
+                                child: _wordmark(context, l10n),
                               ),
                               SizedBox(height: compact ? 10 : 20),
                               _tagline(l10n),
