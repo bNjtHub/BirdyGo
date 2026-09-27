@@ -286,4 +286,35 @@ void main() {
       await index.close();
     });
   });
+
+  test('an index from a newer build is rebuilt, favorites kept', () async {
+    final dir = await Directory.systemTemp.createTemp('index_downgrade');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = '${dir.path}/index.db';
+
+    // A newer build wrote the index: higher version, an extra required column.
+    final newer = await databaseFactoryFfi.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: ObservationIndex.schemaVersion + 1,
+        onCreate: (db, _) async {
+          await db.execute(
+            'CREATE TABLE detections (key TEXT PRIMARY KEY, '
+            'source TEXT NOT NULL)',
+          );
+          await db.execute('CREATE TABLE sessions (id TEXT PRIMARY KEY)');
+          await db.execute('CREATE TABLE favorites (key TEXT PRIMARY KEY)');
+          await db.insert('favorites', {'key': 'kept'});
+        },
+      ),
+    );
+    await newer.close();
+
+    final index = await ObservationIndex.open(databaseFactoryFfi, path);
+    expect(index.needsRebuild, isTrue);
+    await index.rebuild([_fixture('session_2026-09-20.json')]);
+    expect((await index.counts()).sessions, 1);
+    expect(await index.favoriteKeys(), {'kept'});
+    await index.close();
+  });
 }

@@ -202,23 +202,28 @@ class ObservationIndex {
   ///
   /// Use [inMemoryDatabasePath] for tests. A schema change drops the derived
   /// tables; the caller must then rebuild them from the sessions
-  /// ([needsRebuild] reports it). Favorites are kept.
+  /// ([needsRebuild] reports it). Favorites are kept. This holds both ways:
+  /// an index written by a newer build (a newer schema, then an older app
+  /// installed over it) is rebuilt too, instead of failing on its columns.
   static Future<ObservationIndex> open(
     DatabaseFactory factory,
     String path,
   ) async {
     var migrated = false;
+    Future<void> recreate(Database db, int from, int to) async {
+      await db.execute('DROP TABLE IF EXISTS detections');
+      await db.execute('DROP TABLE IF EXISTS sessions');
+      await _createSchema(db);
+      migrated = true;
+    }
+
     final db = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: schemaVersion,
         onCreate: (db, _) => _createSchema(db),
-        onUpgrade: (db, _, _) async {
-          await db.execute('DROP TABLE IF EXISTS detections');
-          await db.execute('DROP TABLE IF EXISTS sessions');
-          await _createSchema(db);
-          migrated = true;
-        },
+        onUpgrade: recreate,
+        onDowngrade: recreate,
       ),
     );
     final index = ObservationIndex._(db);
