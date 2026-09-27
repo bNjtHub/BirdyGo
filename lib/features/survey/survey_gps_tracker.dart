@@ -26,7 +26,14 @@ import '../../shared/models/gps_point.dart';
 
 /// Tracks GPS position during a survey and maintains the track + distance.
 class SurveyGpsTracker {
-  SurveyGpsTracker({this.intervalSeconds = 10, this.distanceFilterMeters = 5});
+  SurveyGpsTracker({
+    this.intervalSeconds = 10,
+    this.distanceFilterMeters = 5,
+    this.maxAccuracyMeters = _maxAccuracyMeters, // FORK: Live tracking config
+  });
+
+  /// FORK: fixes with a worse horizontal accuracy are dropped (meters).
+  final double maxAccuracyMeters;
 
   /// Minimum interval between position updates (seconds).
   final int intervalSeconds;
@@ -209,7 +216,8 @@ class SurveyGpsTracker {
   void _onPosition(Position position) {
     // Reject fixes with very poor horizontal accuracy — these are typically
     // indoor or heavily obstructed readings that introduce large jitter.
-    if (position.accuracy > _maxAccuracyMeters) {
+    // FORK: configurable accuracy threshold (Live GPS track).
+    if (position.accuracy > maxAccuracyMeters) {
       debugPrint(
         '[SurveyGpsTracker] skipping low-accuracy fix '
         '(${position.accuracy.toStringAsFixed(0)} m)',

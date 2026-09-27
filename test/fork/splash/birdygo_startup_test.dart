@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/splash/birdygo_splash.dart';
+import 'package:birdnet_live/fork/splash/birdygo_splash_painter.dart';
 import 'package:birdnet_live/fork/splash/birdygo_startup.dart';
 import 'package:birdnet_live/fork/splash/birdygo_warm_up.dart';
 import 'package:flutter/material.dart';
@@ -216,7 +217,9 @@ void main() {
       await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
       expect(find.text(first), findsOneWidget);
       expect(find.text(second), findsOneWidget);
-      expect(find.text(loading), findsOneWidget);
+      // The board shows the bar only; a screen reader still hears the step.
+      expect(find.text(loading), findsNothing);
+      expect(find.bySemanticsLabel(loading), findsOneWidget);
       // A screen reader hears the brand and the tagline as one phrase each.
       expect(find.bySemanticsLabel('BirdyGo'), findsOneWidget);
       expect(find.bySemanticsLabel('$first $second'), findsOneWidget);
@@ -229,6 +232,7 @@ void main() {
   ) async {
     final audio = Completer<void>();
     final geo = Completer<void>();
+    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(
       BirdyGoStartup(
         bootstrap: () async => const MaterialApp(home: Text('App ready')),
@@ -241,11 +245,17 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1500));
-    expect(find.text('Loading the bird song model…'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Loading the bird song model…'),
+      findsOneWidget,
+    );
 
     audio.complete();
     await tester.pump();
-    expect(find.text('Loading the species of your area…'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Loading the species of your area…'),
+      findsOneWidget,
+    );
 
     // The minimum display is over, but the geo-model still loads.
     await tester.pump(BirdyGoSplash.minimumDisplay);
@@ -260,11 +270,13 @@ void main() {
     await tester.pump();
     expect(find.text('App ready'), findsOneWidget);
     expect(find.byType(BirdyGoSplash), findsNothing);
+    semantics.dispose();
   });
 
   testWidgets('fast loading still keeps the minimum display, then says ready', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(
       BirdyGoStartup(
         bootstrap: () async => const MaterialApp(home: Text('App ready')),
@@ -273,12 +285,13 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1500));
-    expect(find.text('Ready.'), findsOneWidget);
+    expect(find.bySemanticsLabel('Ready.'), findsOneWidget);
     expect(find.text('App ready'), findsNothing);
     await tester.pump(BirdyGoSplash.minimumDisplay);
     await tester.pump(const Duration(milliseconds: 16));
     await tester.pump();
     expect(find.text('App ready'), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('loading that never ends opens the app after the time limit', (
@@ -300,31 +313,121 @@ void main() {
     expect(find.text('App ready'), findsOneWidget);
   });
 
-  testWidgets('the tagline enters in two beats after the wordmark', (
+  testWidgets('the name comes after the song: wordmark, then two beats', (
     tester,
   ) async {
     final pending = Completer<Widget>();
     await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
     await tester.pump(); // Start the ticker.
+    Finder textOf(String text) => find.textContaining(text, findRichText: true);
     double opacityOf(String text) =>
         tester
             .widget<Opacity>(
               find
-                  .ancestor(
-                    of: find.textContaining(text, findRichText: true),
-                    matching: find.byType(Opacity),
-                  )
+                  .ancestor(of: textOf(text), matching: find.byType(Opacity))
                   .first,
             )
             .opacity;
+    bool blurred(String text) =>
+        tester
+            .widget<ImageFiltered>(
+              find
+                  .ancestor(
+                    of: textOf(text),
+                    matching: find.byType(ImageFiltered),
+                  )
+                  .first,
+            )
+            .enabled;
+    double bottomOf(String text) => tester.getBottomLeft(textOf(text)).dy;
+
     expect(opacityOf('Birdy'), 0);
-    await tester.pump(const Duration(milliseconds: 1700));
+    expect(opacityOf('The world is singing.'), 0);
+    final low = bottomOf('Birdy');
+    // Mid-entrance: fading in, still soft.
+    await tester.pump(const Duration(milliseconds: 2600));
+    expect(opacityOf('Birdy'), inExclusiveRange(0, 1));
+    expect(blurred('Birdy'), isTrue);
+    expect(opacityOf('The world is singing.'), 0);
+    await tester.pump(const Duration(milliseconds: 650));
     expect(opacityOf('Birdy'), 1);
-    expect(opacityOf('The world is singing.'), 1);
+    expect(blurred('Birdy'), isFalse);
     expect(opacityOf('Listen.'), 0);
     await tester.pump(const Duration(milliseconds: 800));
+    expect(opacityOf('The world is singing.'), 1);
     expect(opacityOf('Listen.'), 1);
+    // The centred block has risen as the name came.
+    expect(bottomOf('Birdy'), lessThan(low - 40));
   });
+
+  testWidgets('reduced motion draws the settled composition at once', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    final pending = Completer<Widget>();
+    await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+    await tester.pump();
+    for (final text in ['Birdy', 'The world is singing.', 'Listen.']) {
+      final finder = find.textContaining(text, findRichText: true);
+      expect(
+        tester
+            .widget<Opacity>(
+              find.ancestor(of: finder, matching: find.byType(Opacity)).first,
+            )
+            .opacity,
+        1,
+      );
+      expect(
+        tester
+            .widget<ImageFiltered>(
+              find
+                  .ancestor(of: finder, matching: find.byType(ImageFiltered))
+                  .first,
+            )
+            .enabled,
+        isFalse,
+      );
+    }
+    final painter =
+        tester
+            .widgetList<CustomPaint>(find.byType(CustomPaint))
+            .map((paint) => paint.painter)
+            .whereType<BirdyGoSingingPainter>()
+            .single;
+    expect(painter.still, isTrue);
+    expect(
+      tester
+          .widgetList<Transform>(find.byType(Transform))
+          .every((t) => t.transform.getTranslation().y == 0),
+      isTrue,
+    );
+  });
+
+  for (final (brightness, track) in [
+    (Brightness.light, BirdyGoLoadingPainter.lightTrack),
+    (Brightness.dark, BirdyBrand.mist.withValues(alpha: .12)),
+  ]) {
+    testWidgets('loading bar track follows the device theme: $brightness', (
+      tester,
+    ) async {
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      final pending = Completer<Widget>();
+      await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+      await tester.pump();
+      final bar =
+          tester
+              .widgetList<CustomPaint>(find.byType(CustomPaint))
+              .where((paint) => paint.painter is BirdyGoLoadingPainter)
+              .single;
+      expect((bar.painter! as BirdyGoLoadingPainter).track, track);
+      expect(bar.size, const Size(120, 3));
+    });
+  }
 
   for (final size in [
     const Size(320, 568),

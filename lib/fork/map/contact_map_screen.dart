@@ -75,6 +75,28 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
   late MapBaseLayer _layer;
   TileLayer? _tileLayer;
 
+  /// Tiles that failed since the layer was built; past
+  /// [kMapTileErrorsBeforeNotice] the map says its background does not load.
+  int _tileErrors = 0;
+  bool _tilesFailing = false;
+
+  void _onTileError(TileImage tile, Object error, StackTrace? stackTrace) {
+    // The first error names the cause in the log (network, HTTP status…).
+    if (_tileErrors++ == 0) {
+      debugPrint('[ContactMap] ${_layer.name} tile failed: $error');
+    }
+    if (_tilesFailing || _tileErrors < kMapTileErrorsBeforeNotice) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_tilesFailing) setState(() => _tilesFailing = true);
+    });
+  }
+
+  void _retryTiles() => setState(() {
+    _tileErrors = 0;
+    _tilesFailing = false;
+    _tileLayer = null;
+  });
+
   ContactMapData? _data;
   int _loadGeneration = 0;
   double _zoom = _defaultZoom;
@@ -201,6 +223,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     setState(() {
       _layer = layer;
       _tileLayer = null;
+      _tileErrors = 0;
+      _tilesFailing = false;
     });
     await ref
         .read(sharedPreferencesProvider)
@@ -373,7 +397,11 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                   onTap: (_, point) => _onMapTap(point),
                 ),
                 children: [
-                  if (hasConsent) _tileLayer ??= buildBaseTileLayer(_layer),
+                  if (hasConsent)
+                    _tileLayer ??= buildBaseTileLayer(
+                      _layer,
+                      onTileError: _onTileError,
+                    ),
                   if (showHexes)
                     PolygonLayer(
                       polygons: _hexPolygons(data),
@@ -445,7 +473,13 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                       Expanded(
                         child:
                             hasConsent
-                                ? const SizedBox.shrink()
+                                ? _tilesFailing
+                                    ? _Notice(
+                                      text: l10n.forkMapTilesFailed,
+                                      action: l10n.retry,
+                                      onAction: _retryTiles,
+                                    )
+                                    : const SizedBox.shrink()
                                 : _Notice(
                                   text: l10n.forkMapTilesOff,
                                   action: l10n.mapTileConsentAllow,

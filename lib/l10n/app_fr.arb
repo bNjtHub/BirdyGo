@@ -1610,5 +1610,6 @@
   "forkQuizChoicesLabel": "choix",
   "forkQuizBirdsLabel": "de tes oiseaux",
   "forkQuizRightArticle": "C'est bien {name}",
-  "forkQuizWrongArticle": "C'était {name}"
+  "forkQuizWrongArticle": "C'était {name}",
+  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo."
 }

@@ -5739,5 +5739,7 @@
   "forkQuizRightArticle": "Yes, it's {name}",
   "@forkQuizRightArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}},
   "forkQuizWrongArticle": "It was {name}",
-  "@forkQuizWrongArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}}
+  "@forkQuizWrongArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}},
+  "forkMapTilesFailed": "The map background does not load. Check BirdyGo's internet connection.",
+  "@forkMapTilesFailed": {"description": "BirdyGo fork: contact map, tiles that do not load."}
 }

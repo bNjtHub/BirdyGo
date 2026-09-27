@@ -603,6 +603,25 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             À vérifier et « Rare ici · à confirmer » (`lib/fork/reliability/levels_sheet.dart`).
       - [x] Chevron agrandir / réduire dans le coin du spectre ; un appui sur le spectre bascule.
       À vérifier sur le Xiaomi : rotation pendant une écoute, lisibilité des noms en petit.
+- [ ] J6c Écoute : position GPS suivie pendant l'écoute (`lib/fork/live/live_position.dart`,
+      PR « J6c Écoute : position GPS suivie pendant l'écoute »).
+      - [x] `LivePositionTracker` sur `SurveyGpsTracker` (interface `LivePositionSource` pour iOS) :
+            démarre après le lancement de l'écoute, sans la retarder ; seulement si « Utiliser le GPS »
+            est actif, la localisation allumée et l'autorisation déjà donnée (jamais de demande).
+            Rien en écoute d'un enregistrement (J5c) ni en position manuelle.
+      - [x] Chaque nouvelle détection reçoit le dernier point mesuré (detLat, detLon) ; avant le
+            premier point, la position de la session si elle est fiable, sinon rien (les lecteurs
+            retombent sur la position de la session, corrigée au premier point).
+      - [x] Position de départ absente ou venue du cache de l'OS : remplacée par le premier point précis.
+      - [x] Trace mesurée gardée dans `gpsTrack` de la session (précision pour la LPO, carte du
+            rapport HTML). Arrêt à la pause, à la fin, en quittant ; reprise avec l'écoute.
+      - [x] Écran éteint : le service Live (J2b) démarre au premier plan et son type manifeste est
+            déjà `microphone|location`, rien à ajouter.
+      - [x] Seuils `liveGpsIntervalSeconds` (10 s), `liveGpsDistanceFilterMeters` (5 m),
+            `liveGpsMaxAccuracyMeters` (30 m) dans `reliability_config.dart`. Localisation
+            « approximative » d'Android seulement journalisée (les points de 2 km sont écartés).
+      - [ ] (Benjamin) Sur le Xiaomi : marche de 10 minutes écran éteint, puis vérifier sur la carte
+            que les contacts sont placés le long du chemin et non tous au point de départ.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -798,6 +817,11 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   `--profile` (le temps d'analyse ONNX y sera différent).
 - Live, « Analyse… » et fin rapide (J6c-bis-b) : aucun code natif. Vérifier qu'une réécoute par le
   haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».
+- Position GPS pendant l'écoute (J6c) : `GeolocatorLivePositionSource` marche au premier plan.
+  `UIBackgroundModes` contient déjà `location` et `audio` (upstream, pour le Survey). Écran éteint,
+  vérifier que le flux continue avec `buildLocationSettings(background: true)` (indicateur bleu) et
+  l'autorisation « Pendant l'utilisation », sans demander « Toujours ». Localisation approximative d'iOS :
+  même comportement (points écartés, position de la session gardée).
 
 - Startup screen (J6c): Flutter composition is shared. Native iOS launch assets remain
   unchanged; during the iOS phase make `LaunchScreen.storyboard` a plain Mist (#EEF1EC) view
