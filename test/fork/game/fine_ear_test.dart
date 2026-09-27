@@ -13,7 +13,6 @@ import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
-import 'package:birdnet_live/fork/species_photo/species_photo.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/providers/settings_providers.dart';
@@ -151,6 +150,24 @@ void main() {
     expect(badge.nextTarget, 50);
   });
 
+  test('stars: 40 %, 70 % and all right answers', () {
+    expect(quizStars(0, 10), 0);
+    expect(quizStars(3, 10), 0);
+    expect(quizStars(4, 10), 1);
+    expect(quizStars(7, 10), 2);
+    expect(quizStars(9, 10), 2);
+    expect(quizStars(10, 10), 3);
+    expect(quizStars(4, 4), 3);
+    expect(quizStars(0, 0), 0);
+  });
+
+  test('streak: right answers in a row at the end', () {
+    expect(quizStreak(const []), 0);
+    expect(quizStreak(const [true, true, false]), 0);
+    expect(quizStreak(const [false, true, true]), 2);
+    expect(quizStreak(const [true, true, true]), 3);
+  });
+
   group('quiz screen', () {
     late SharedPreferences prefs;
     late _FakePlayer player;
@@ -171,6 +188,7 @@ void main() {
       double textScale = 1,
       Size size = const Size(390, 844),
       int correct = 0,
+      bool start = true,
     }) async {
       SharedPreferences.setMockInitialValues({
         if (correct > 0) kFineEarCorrectPref: correct,
@@ -209,37 +227,66 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      if (start && find.text("C'est parti !").evaluate().isNotEmpty) {
+        await tester.tap(find.text("C'est parti !"));
+        await tester.pumpAndSettle();
+      }
     }
 
     /// Scientific name of the bird being played.
     String playing() => player.played.last.split('/').last.split('-').first;
 
     Future<void> tapChoice(WidgetTester tester, String name) async {
-      await tester.tap(
-        find.descendant(
-          of: find.byType(QuizChoiceCard),
-          matching: find.text(name),
-        ),
+      final choice = find.descendant(
+        of: find.byType(QuizChoiceCard),
+        matching: find.text(name),
       );
+      await tester.ensureVisible(choice);
+      await tester.pumpAndSettle();
+      await tester.tap(choice);
       await tester.pumpAndSettle();
     }
 
-    String french(String scientificName) =>
-        'Oiseau ${scientificName.split(' ').last}';
+    /// The name shown: French for species 0 to 5, the index's otherwise.
+    String french(String scientificName) {
+      final i = int.parse(scientificName.split(' ').last);
+      return i < 6 ? 'Oiseau $i' : 'Common $scientificName';
+    }
 
     Future<void> next(WidgetTester tester, {required bool last}) async {
-      await tester.ensureVisible(
-        find.text(last ? 'Voir le résultat' : 'Question suivante'),
-      );
-      await tester.tap(
-        find.text(last ? 'Voir le résultat' : 'Question suivante'),
-      );
+      final button = find.text(last ? 'Voir mon score' : 'Continuer');
+      await tester.tap(button);
       await tester.pumpAndSettle();
     }
 
     testWidgets('fewer than four birds: says what is missing', (tester) async {
       await pump(tester, _species(2));
       expect(find.text("Pas encore assez d'oiseaux"), findsOneWidget);
+      expect(find.text("C'est parti !"), findsNothing);
+    });
+
+    testWidgets('the intro: the round, the badge, nothing played yet', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), correct: 5, start: false);
+      expect(find.text('Qui chante ?'), findsOneWidget);
+      expect(find.text('4 chants'), findsOneWidget);
+      expect(find.text('4 choix'), findsOneWidget);
+      expect(find.text('4 de tes oiseaux'), findsOneWidget);
+      expect(find.text('Oreille fine'), findsOneWidget);
+      expect(find.text('5 sur 10'), findsOneWidget);
+      expect(
+        find.text('Chaque bonne réponse te rapproche de ta 1re plume'),
+        findsOneWidget,
+      );
+      expect(find.byType(BadgeMedal), findsOneWidget);
+      expect(player.played, isEmpty);
+
+      await tester.tap(find.text("C'est parti !"));
+      await tester.pumpAndSettle();
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(player.played, hasLength(1));
+      expect(find.byType(QuizTrail), findsOneWidget);
     });
 
     testWidgets('names in the species language, with the bird photos', (
@@ -276,19 +323,28 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4));
+      final stage = find.byType(QuizStage);
       expect(find.text('Oiseau mystère'), findsOneWidget);
-      expect(find.byType(SpeciesPhoto), findsNothing);
+      expect(
+        find.descendant(of: stage, matching: find.byType(SpeciesAvatar)),
+        findsNothing,
+      );
       final answer = playing();
-      expect(find.text(answer), findsNothing);
+      expect(
+        find.descendant(of: stage, matching: find.textContaining('Oiseau ')),
+        findsOneWidget, // « Oiseau mystère » only
+      );
 
       await tapChoice(tester, french(answer));
       expect(find.text('Oiseau mystère'), findsNothing);
-      expect(find.byType(SpeciesPhoto), findsOneWidget);
-      expect(find.text(answer), findsOneWidget);
+      expect(
+        find.descendant(of: stage, matching: find.byType(SpeciesAvatar)),
+        findsOneWidget,
+      );
       expect(
         find.descendant(
-          of: find.byType(QuizStage),
-          matching: find.text(french(answer)),
+          of: stage,
+          matching: find.text("C'est bien lui : ${french(answer)}"),
         ),
         findsOneWidget,
       );
@@ -298,17 +354,32 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4));
-      expect(find.text('Question 1 sur 4'), findsOneWidget);
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
       expect(player.played, hasLength(1));
+      expect(find.text("Touche l'oiseau qui chante"), findsOneWidget);
 
       await tapChoice(tester, french(playing()));
-      expect(find.text("Bien vu, c'est lui !"), findsOneWidget);
+      expect(find.text('Bravo !'), findsOneWidget);
+      expect(find.text('+1 Oreille fine'), findsOneWidget);
       expect(prefs.getInt(kFineEarCorrectPref), 1);
+      expect(
+        find.bySemanticsLabel('1 bonne réponse sur 1'),
+        findsOneWidget, // the trail
+      );
 
       await next(tester, last: false);
-      expect(find.text('Question 2 sur 4'), findsOneWidget);
+      expect(find.text('Chant 2 sur 4'), findsOneWidget);
       expect(player.played, hasLength(2));
       expect(find.text('Oiseau mystère'), findsOneWidget);
+    });
+
+    testWidgets('two right answers in a row show the streak', (tester) async {
+      await pump(tester, _species(4));
+      await tapChoice(tester, french(playing()));
+      expect(find.textContaining("d'affilée"), findsNothing);
+      await next(tester, last: false);
+      await tapChoice(tester, french(playing()));
+      expect(find.text("2 d'affilée !"), findsOneWidget);
     });
 
     testWidgets('a wrong answer names the bird and counts nothing', (
@@ -318,15 +389,25 @@ void main() {
       final answer = playing();
       final wrong = _species(4).keys.firstWhere((s) => s != answer);
       await tapChoice(tester, french(wrong));
-      expect(find.text('La bonne réponse'), findsOneWidget);
+      expect(find.text('Presque !'), findsOneWidget);
       expect(
-        find.bySemanticsLabel(RegExp("^C'était : ${french(answer)}")),
+        find.bySemanticsLabel(RegExp("^Presque ! C'était : ${french(answer)}")),
         findsOneWidget,
       );
+      expect(find.text('+1 Oreille fine'), findsNothing);
       expect(prefs.getInt(kFineEarCorrectPref), isNull);
     });
 
-    testWidgets('the end of a round: score, medal and a new plume', (
+    testWidgets('quitting a round goes back to the intro', (tester) async {
+      await pump(tester, _species(4));
+      expect(player.playing.value, isNotNull);
+      await tester.tap(find.byTooltip('Quitter le quiz'));
+      await tester.pumpAndSettle();
+      expect(find.text("C'est parti !"), findsOneWidget);
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('the end of a round: stars, score, birds and a new plume', (
       tester,
     ) async {
       await pump(tester, _species(4), correct: 8);
@@ -334,13 +415,49 @@ void main() {
         await tapChoice(tester, french(playing()));
         await next(tester, last: i == 3);
       }
-      expect(find.text('4 bonnes réponses sur 4'), findsOneWidget);
+      expect(find.text('4/4'), findsOneWidget);
+      expect(find.bySemanticsLabel('4 bonnes réponses sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel('3 étoiles sur 3'), findsOneWidget);
+      expect(find.text('Parfait !'), findsOneWidget);
+      expect(
+        find.text('Tu as reconnu 4 oiseaux sur 4 à leur chant.'),
+        findsOneWidget,
+      );
+      expect(find.text('Tes oiseaux du jour'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r', bonne réponse$')),
+        findsNWidgets(4),
+      );
       expect(find.byType(BadgeMedal), findsOneWidget);
       expect(find.text('Oreille fine'), findsOneWidget);
       expect(find.text('Nouvelle plume'), findsOneWidget);
-      expect(find.text('12 sur 50 vers la prochaine plume'), findsOneWidget);
+      expect(find.text('12 sur 50 vers la 2e plume'), findsOneWidget);
       expect(find.text('Rejouer'), findsOneWidget);
       expect(find.text('Terminer'), findsOneWidget);
+
+      await tester.tap(find.text('Rejouer'));
+      await tester.pumpAndSettle();
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(player.played, hasLength(5));
+    });
+
+    testWidgets('a round with no right answer stays kind', (tester) async {
+      await pump(tester, _species(4));
+      for (var i = 0; i < 4; i++) {
+        final answer = playing();
+        final wrong = _species(4).keys.firstWhere((s) => s != answer);
+        await tapChoice(tester, french(wrong));
+        await next(tester, last: i == 3);
+      }
+      expect(find.text('0/4'), findsOneWidget);
+      expect(find.text('Bon début !'), findsOneWidget);
+      expect(
+        find.text('Réécoute-les dans la sonothèque, puis retente ta chance.'),
+        findsOneWidget,
+      );
+      expect(find.bySemanticsLabel(RegExp(r', manqué$')), findsNWidgets(4));
+      expect(find.text('Nouvelle plume'), findsNothing);
+      expect(find.text('0 sur 10 pour ta 1re plume'), findsOneWidget);
     });
 
     for (final dark in [false, true]) {
@@ -352,14 +469,16 @@ void main() {
           dark: dark,
           textScale: 1.3,
           size: const Size(320, 568),
+          start: false,
         );
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.text("C'est parti !"));
+        await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         for (var i = 0; i < 4; i++) {
           final answer = playing();
           final wrong = _species(4).keys.firstWhere((s) => s != answer);
-          final pick = french(i.isEven ? answer : wrong);
-          await tester.ensureVisible(find.text(pick).last);
-          await tapChoice(tester, pick);
+          await tapChoice(tester, french(i.isEven ? answer : wrong));
           expect(tester.takeException(), isNull);
           await next(tester, last: i == 3);
         }
@@ -367,5 +486,21 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+
+    testWidgets('ten questions fit the trail on a small phone', (tester) async {
+      await pump(
+        tester,
+        _species(12),
+        textScale: 1.3,
+        size: const Size(320, 568),
+      );
+      expect(find.text('Chant 1 sur 10'), findsOneWidget);
+      for (var i = 0; i < 10; i++) {
+        await tapChoice(tester, french(playing()));
+        expect(tester.takeException(), isNull);
+        await next(tester, last: i == 9);
+      }
+      expect(tester.takeException(), isNull);
+    });
   });
 }
