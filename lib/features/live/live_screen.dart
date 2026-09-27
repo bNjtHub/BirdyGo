@@ -16,6 +16,7 @@ import '../../shared/widgets/confirm_destructive.dart';
 import '../audio/audio_capture_service.dart';
 import '../audio/audio_providers.dart';
 import '../explore/explore_providers.dart';
+import '../../fork/live/live_position.dart'; // FORK: GPS track (J6c)
 import '../explore/widgets/species_info_overlay.dart';
 import '../history/session_library_screen.dart';
 import '../history/session_review_screen.dart';
@@ -422,6 +423,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
       double? startLat;
       double? startLon;
+      controller.forkPosition.canTrack = liveTrackingGate(
+        ref.read(locationServiceProvider),
+      ); // FORK: GPS track (J6c)
       try {
         final loc = ref.read(currentLocationProvider).value;
         if (loc != null) {
@@ -452,6 +456,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         highPassHz: ref.read(highPassFilterProvider).toDouble(),
         latitude: startLat,
         longitude: startLon,
+        // FORK: follow the phone while listening (J6c GPS track).
+        forkTrackPosition: useGps && !_forkPractice,
+        forkStartPositionUncertain:
+            startLat == null ||
+            ref.read(locationServiceProvider).lastFetchUsedCachedFallback,
       );
       if (_forkPractice) controller.session?.practice = true; // FORK: J5c
       if (mounted) {

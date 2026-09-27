@@ -36,6 +36,15 @@ abstract final class ReliabilityConfig {
   /// Live (J6c-bis-b): cycles « Analyse… » stays on after a candidate is
   /// confirmed, so the header does not fade while the row comes in.
   static const int analysingHoldWindows = 1;
+
+  /// Live GPS track: minimum seconds between two position updates.
+  static const int liveGpsIntervalSeconds = 10;
+
+  /// Live GPS track: minimum move (meters) before the OS reports a new fix.
+  static const int liveGpsDistanceFilterMeters = 5;
+
+  /// Live GPS track: fixes less accurate than this (meters) are dropped.
+  static const double liveGpsMaxAccuracyMeters = 30;
 }
 
 /// What the geo-model says about a species at a place and week.
