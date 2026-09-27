@@ -27,6 +27,7 @@ try:  # Script execution puts tools/ on sys.path; tests import tools.*.
         TEMPLATES,
         ZONES,
         bounded_adjustments,
+        legacy_species_without_sound_bars,
         legacy_species_svg,
         mystery_svg,
         render_template,
@@ -38,6 +39,7 @@ except ModuleNotFoundError:  # pragma: no cover - depends on invocation style
         TEMPLATES,
         ZONES,
         bounded_adjustments,
+        legacy_species_without_sound_bars,
         legacy_species_svg,
         mystery_svg,
         render_template,
@@ -65,9 +67,10 @@ CSV_FIELDS = (
     "source_plate",
     "plumage",
     "review_status",
+    "show_sound_bars",
     "render_style",
 )
-OPTIONAL_CSV_FIELDS = {"render_style"}
+OPTIONAL_CSV_FIELDS = {"render_style", "show_sound_bars"}
 REVIEW_STATUSES = {"draft", "needs_source_review", "reviewed"}
 COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 SAFE_SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -129,6 +132,9 @@ def _clean_row(raw: Mapping[str, object], line_number: int) -> dict[str, str]:
         "reference" if row["scientific_name"] in LEGACY_SPECIES else "template")
     if row["render_style"] not in ("reference", "template"):
         raise ValueError(f"{prefix}: render_style must be reference or template")
+    row["show_sound_bars"] = (row["show_sound_bars"] or "true").casefold()
+    if row["show_sound_bars"] not in ("true", "false"):
+        raise ValueError(f"{prefix}: show_sound_bars must be true or false")
     return row
 
 
@@ -251,6 +257,18 @@ def _palette(row: Mapping[str, object]) -> dict[str, str]:
     return {zone: value.upper() for zone, value in palette.items()}
 
 
+def _show_sound_bars(row: Mapping[str, object]) -> bool:
+    value = row.get("show_sound_bars", True)
+    if isinstance(value, bool):
+        return value
+    normalized = str(value).strip().casefold()
+    if not normalized:
+        return True
+    if normalized not in ("true", "false"):
+        raise ValueError("show_sound_bars must be true or false")
+    return normalized == "true"
+
+
 def render_species(row: Mapping[str, object], adjustments: Mapping[str, object] | None = None) -> str:
     """Render a row; untouched approved legacy species keep exact geometry.
 
@@ -267,10 +285,11 @@ def render_species(row: Mapping[str, object], adjustments: Mapping[str, object] 
     normalized_adjustments = bounded_adjustments(adjustments)
     adjusted = any(value != 1.0 for value in normalized_adjustments.values())
     customized = bool(row.get("_customized")) or adjusted or row.get("render_style") == "template"
+    show_sound_bars = _show_sound_bars(row)
     if not customized:
         approved = legacy_species_svg(scientific_name, slug, label)
         if approved is not None:
-            return approved
+            return approved if show_sound_bars else legacy_species_without_sound_bars(approved)
     return render_template(
         str(row["template"]),
         _palette(row),
@@ -278,6 +297,7 @@ def render_species(row: Mapping[str, object], adjustments: Mapping[str, object] 
         slug=slug,
         adjustments=adjustments,
         scientific_name=scientific_name,
+        show_sound_bars=show_sound_bars,
     )
 
 

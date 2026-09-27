@@ -52,6 +52,8 @@ class WorkshopTest(unittest.TestCase):
                         {"adjustments": {"head_scale": float("nan")}},
                         {"adjustments": {"head_scale": 9}},
                         {"adjustments": {"head_scale": True}},
+                        {"show_sound_bars": "false"},
+                        {"show_sound_bars": 0},
                         {"template": "../other"}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.workshop.preview({"scientific_name": "Testus example", **changes})
@@ -80,6 +82,25 @@ class WorkshopTest(unittest.TestCase):
     def test_unknown_template_cannot_export_as_documented_species(self):
         with self.assertRaisesRegex(ValueError, "Choose a template"):
             self.workshop.export({"drafts": [{"scientific_name": "Unknown bird"}]})
+
+    def test_sound_bar_choice_survives_preview_project_and_csv_export(self):
+        draft = {"scientific_name": "Erithacus rubecula", "show_sound_bars": False}
+        original = self.workshop.preview({"scientific_name": "Erithacus rubecula"})
+        hidden = self.workshop.preview(draft)
+        restored = self.workshop.preview({**draft, "show_sound_bars": True})
+        self.assertNotEqual(original["svg"], hidden["svg"])
+        self.assertEqual(original["svg"], restored["svg"])
+        self.assertEqual("reference", hidden["row"]["render_style"])
+        with zipfile.ZipFile(io.BytesIO(self.workshop.export({"drafts": [draft]}))) as archive:
+            path = "assets/fork/species_icons/erithacus-rubecula.svg"
+            self.assertEqual(hidden["svg"], archive.read(path).decode("utf-8"))
+            self.assertEqual([draft], json.loads(archive.read("project.json"))["drafts"])
+            csv_path = self.folder / "without-bars.csv"
+            csv_path.write_bytes(archive.read("species_colors.csv"))
+            row = next(row for row in generator.load_species(csv_path)
+                       if row["scientific_name"] == "Erithacus rubecula")
+            self.assertEqual("false", row["show_sound_bars"])
+            self.assertEqual(hidden["svg"], generator.render_species(row))
 
     def test_new_species_exports_after_template_choice(self):
         blob = self.workshop.export({"drafts": [{"scientific_name": "Unknown bird", "template": "paridae"}]})

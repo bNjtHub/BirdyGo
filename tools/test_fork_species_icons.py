@@ -110,6 +110,38 @@ class TemplateTests(unittest.TestCase):
         self.assertIn("#123456", svg)
         self.assertIn('data-zone="crown"', svg)
 
+    def test_sound_bars_default_is_unchanged_and_can_be_hidden_in_templates(self) -> None:
+        row = {**_row(), "_customized": True}
+        default_svg = icons.render_species(row)
+        self.assertEqual(default_svg, icons.render_species({**row, "show_sound_bars": "true"}))
+        self.assertIn('data-zone="wing_bar"><g fill="none"', default_svg)
+
+        without_bars = icons.render_species({**row, "show_sound_bars": "false"})
+        self.assertIn('data-zone="wing_bar"></g>', without_bars)
+        self.assertNotIn('data-zone="wing_bar"><g fill="none"', without_bars)
+        self.assertIn('data-zone="legs">', without_bars)
+        self.assertIn('data-zone="eye">', without_bars)
+        ET.fromstring(without_bars)
+
+    def test_sound_bars_can_be_hidden_from_every_legacy_reference_only(self) -> None:
+        for scientific_name in templates.LEGACY_SPECIES:
+            row = _row(scientific_name)
+            default_svg = icons.render_species(row)
+            without_bars = icons.render_species({**row, "show_sound_bars": False})
+            removed = templates.legacy_species_without_sound_bars(default_svg)
+
+            self.assertEqual(removed, without_bars, scientific_name)
+            self.assertNotEqual(default_svg, without_bars, scientific_name)
+            self.assertNotRegex(
+                without_bars,
+                r'<g fill="none" stroke-width="[^"]+" stroke-linecap="round">'
+                r'(?:<path d="[^"]*V[^"]*" stroke="[^"]+"/>)+</g>',
+                scientific_name,
+            )
+            self.assertIn("<svg", without_bars)
+            self.assertIn("</svg>", without_bars)
+            ET.fromstring(without_bars)
+
     def test_anatidae_genus_selects_duck_goose_and_swan_shapes(self) -> None:
         palette = icons.NEUTRAL_PALETTE
         drawings = {
@@ -129,6 +161,18 @@ class TemplateTests(unittest.TestCase):
 
 
 class DataAndBundleTests(unittest.TestCase):
+    def test_show_sound_bars_round_trips_through_csv_and_validates_values(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "species.csv"
+            _write_csv(path, [{**_row(), "show_sound_bars": "false"}])
+            loaded = icons.load_species(path)[0]
+            self.assertEqual("false", loaded["show_sound_bars"])
+            self.assertIn('data-zone="wing_bar"></g>', icons.render_species(loaded))
+
+            _write_csv(path, [{**_row(), "show_sound_bars": "sometimes"}])
+            with self.assertRaisesRegex(ValueError, "show_sound_bars must be true or false"):
+                icons.load_species(path)
+
     def test_palette_validation_does_not_fill_missing_species_colors(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "species.csv"

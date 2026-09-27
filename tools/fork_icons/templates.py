@@ -218,6 +218,17 @@ def legacy_species_svg(scientific_name: str, slug: str, label: str) -> str | Non
     return _namespace_legacy(legacy.ICONS[key]["svg"], key, slug, label)
 
 
+_LEGACY_SOUND_BARS_RE = re.compile(
+    r'<g fill="none" stroke-width="[^"]+" stroke-linecap="round">'
+    r'(?:<path d="[^"]*V[^"]*" stroke="[^"]+"/>)+</g>'
+)
+
+
+def legacy_species_without_sound_bars(svg: str) -> str:
+    """Remove only groups emitted by the legacy ``bars()`` helper."""
+    return _LEGACY_SOUND_BARS_RE.sub("", svg)
+
+
 def mystery_svg() -> str:
     """Return the exact approved undiscovered-species reference."""
     return legacy.ICONS["mystere"]["svg"]
@@ -231,6 +242,7 @@ def render_template(
     slug: str,
     adjustments: Mapping[str, object] | None = None,
     scientific_name: str | None = None,
+    show_sound_bars: bool = True,
 ) -> str:
     """Render one family silhouette with explicit named color zones."""
     try:
@@ -395,7 +407,11 @@ def render_template(
         f'<g data-zone="crown">{legacy.circle((hx + hr * .10, hy - hr * .70), hr * .68, palette["crown"])}</g>'
     )
     eye_at = (hx - hr * .30, hy - hr * .12)
-    wing = legacy.bars(template.wing_x, 4.3, template.wing_y, halves, wing_colors, 3.2)
+    wing = (
+        legacy.bars(template.wing_x, 4.3, template.wing_y, halves, wing_colors, 3.2)
+        if show_sound_bars
+        else ""
+    )
     leg_length = template.leg_length * a["leg_length"]
     legs = (
         legacy.line((bx - 4, by + br * .76), (bx - 6, by + br * .76 + leg_length), 1.8, palette["legs"])

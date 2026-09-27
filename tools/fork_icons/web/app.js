@@ -13,6 +13,7 @@ const copy = {
     reference: "Planche de référence", openSource: "Consulter la source", adjust: "Ajuster",
     reset: "Réinitialiser", templateHint: "Proposé selon l’espèce, son genre ou sa famille.",
     shape: "Silhouette", colors: "Couleurs du plumage", referenceDetails: "Noms et provenance",
+    soundBars: "Afficher les barres sonores",
     legacyHint: "Les 15 dessins d’origine sont conservés. Modifier une forme ou une couleur passe au gabarit paramétrable.",
     scientificName: "Nom scientifique", commonName: "Nom courant",
     newHint: "Un gabarit neutre sera proposé. Documente la source avant de choisir les couleurs.",
@@ -45,6 +46,7 @@ const copy = {
     reference: "Reference plate", openSource: "View source", adjust: "Adjust",
     reset: "Reset", templateHint: "Suggested from the species, genus or family.",
     shape: "Silhouette", colors: "Plumage colors", referenceDetails: "Names and provenance",
+    soundBars: "Show sound bars",
     legacyHint: "The 15 original drawings are preserved. Changing a shape or color switches to the adjustable template.",
     scientificName: "Scientific name", commonName: "Common name",
     newHint: "A neutral template will be suggested. Document a source before choosing colors.",
@@ -167,6 +169,8 @@ function buildControls(row) {
   if (!row.template) template.add(new Option("Mystère / Mystery", ""));
   state.catalog.templates.forEach(item => template.add(new Option(item.label || item.id, item.id)));
   template.value = row.template || "";
+  $("sound-bars").checked = state.current.show_sound_bars ?? (row.show_sound_bars !== "false");
+  $("sound-bars").disabled = false;
   $("morphology").replaceChildren();
   for (const [key, limits] of Object.entries(state.catalog.controls)) {
     const group = document.createElement("div"); group.className = "control";
@@ -294,6 +298,10 @@ $("language").addEventListener("change", () => {
   if (state.catalog) { renderList(); if (state.rendered) { buildControls(state.rendered.row); renderPreview(false); } }
 });
 $("template").addEventListener("change", () => { state.current.template = $("template").value; changed(); });
+$("sound-bars").addEventListener("change", () => {
+  state.current.show_sound_bars = $("sound-bars").checked;
+  changed();
+});
 $("reset").addEventListener("click", () => {
   const name = state.current.scientific_name; delete state.drafts[name]; persist();
   selectSpecies(name).then(() => message(t("original")));

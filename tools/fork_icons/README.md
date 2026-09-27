@@ -22,6 +22,9 @@ uniquement lorsqu'on les consulte.
 2. Comparer son dessin sur fond clair et sombre, puis à 34, 48 et 64 px.
 3. Choisir un gabarit si nécessaire, déplacer les curseurs et modifier les zones
    de couleur. L'aperçu « Entendu » applique le gris et l'opacité 0,45.
+   Décocher « Afficher les barres sonores » pour retirer les barres de l'oiseau
+   sélectionné. Ce réglage est conservé dans le projet, le CSV et les SVG exportés.
+   Il préserve la silhouette originale, y compris pour les dessins de référence.
 4. Consulter la planche citée et vérifier le sexe, l'âge et le plumage représentés.
 5. Exporter le SVG ou le lot complet. Enregistrer aussi le projet pour conserver
    les réglages morphologiques et les ouvrir dans un autre navigateur.

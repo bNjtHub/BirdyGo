@@ -87,6 +87,11 @@ class Workshop:
             row.setdefault("family", "")
             row.setdefault("review_status", "needs_source_review")
         original = deepcopy(row)
+        if "show_sound_bars" in payload:
+            show_sound_bars = payload["show_sound_bars"]
+            if not isinstance(show_sound_bars, bool):
+                raise ValueError("show_sound_bars must be true or false")
+            row["show_sound_bars"] = "true" if show_sound_bars else "false"
         template = payload.get("template")
         if template:
             if template not in self.template_ids:
