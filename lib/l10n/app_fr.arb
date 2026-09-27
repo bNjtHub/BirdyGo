@@ -1405,5 +1405,8 @@
   "forkRankingUnitContacts": "{count, plural, =1{contact} other{contacts}}",
   "forkRankingUnitDays": "{count, plural, =1{jour} other{jours}}",
   "forkRankingSortMenu": "Trier et filtrer",
-  "forkMapClusterSpecies": "{count, plural, =1{espèce} other{espèces}}"
+  "forkMapClusterSpecies": "{count, plural, =1{espèce} other{espèces}}",
+  "forkSplashTagline": "Le monde chante. Écoute.",
+  "forkSplashLoading": "Préparation de l’écoute…",
+  "forkSplashError": "BirdyGo n’a pas pu démarrer. Réessaie."
 }

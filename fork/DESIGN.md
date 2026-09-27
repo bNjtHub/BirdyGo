@@ -416,3 +416,31 @@ Règles :
 Contraste AA, thèmes clair et sombre, paysage et tablette (exigence d'upstream), texte agrandi à
 130 %, libellés pour les lecteurs d'écran sur les boutons icônes, 60 images par seconde en mode
 profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d'une seconde.
+
+
+## Startup screen (J6c)
+
+The supplied Claude Design startup board defines the Mist background, 270 × 187 dp
+framing of the original turquoise/gold bird, Fraunces 40 dp wordmark, and bottom loading
+status with BirdNET attribution. The user's chosen tagline replaces the prototype's
+synthetic-song button: "Le monde chante. Écoute." / "The world is singing. Listen."
+No synthetic bird audio is played. The native Android launch background also uses Mist.
+
+At the user's request, exactly three musical notes replace the decorative sound waves.
+They rise and fade successively in one 2.4-second introduction, with a 250 ms entrance.
+This startup-only motion is an explicit exception to the general 500 ms/no-rotation
+rules; it does not change Home's logo or other app animations. It does not repeat.
+The bottom track shows an activity sweep, not a percentage of bootstrap completion.
+Reduced motion draws the completed composition immediately and adds no intro wait.
+Normal launch waits for both the introduction and real initialization. Explicit audio
+shares and Quick Listen bypass any remaining introduction once their route is ready,
+so an active recording's controls are never hidden just to finish the animation.
+A startup error offers a localized retry. Audio shares and Quick Listen launch intents
+are retained across retries. App mounts behind the splash while their storage checks
+prepare the destination, so Home does not flash during a cold handoff. The upstream
+five-second safety timeout remains. There is no added model load, network image, or dependency.
+
+The content remains centered within 480 dp, with a compact logo in landscape and scrolling
+as a fallback for large text or a short viewport. Android 12 uses a padded VectorDrawable;
+older Android versions use the same mark in a layer-list. The native iOS launch assets are
+unchanged; the Flutter startup screen also works on iOS.

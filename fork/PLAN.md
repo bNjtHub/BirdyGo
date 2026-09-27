@@ -460,6 +460,16 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Reportés en J6e : pastille de série, carte de statut, défi de la semaine, barre de
             navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
+      - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
+            Mist background, localized tagline, three rising/fading musical notes,
+            one 2.4-second introduction, immediate reduced-motion state,
+            real bootstrap loading and retry. Launch share and Quick Listen are retained
+            across retry; normal launch waits for initialization and introduction. Android launch
+            and normal window backgrounds match Flutter, with the current BirdyGo mark.
+            Cold Share/Quick Listen keep the splash over App until their route checks finish,
+            then bypass any remaining introduction to expose the destination controls.
+      - [ ] Device check: cold launch on Xiaomi (Android 12+), light/dark system theme,
+            launch from an audio share and Quick Listen, and Android pre-12 if available.
       Écrans restants : une session et une PR par écran (titre « J6c <écran> : … »). Avant de
       commencer, vérifier dans les PR ouvertes que l'écran n'est pas déjà pris. Deux sessions à la
       fois, dans cet ordre : Fiche espèce et Revue rapide, puis Palmarès et Carte, puis Sonothèque
@@ -659,3 +669,6 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   `--profile` (le temps d'analyse ONNX y sera différent).
 - Live, « Analyse… » et fin rapide (J6c-bis-b) : aucun code natif. Vérifier qu'une réécoute par le
   haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».
+
+- Startup screen (J6c): Flutter composition is shared. Native iOS launch assets remain
+  unchanged; align their mark/background during the iOS phase and check cold-launch timing.
