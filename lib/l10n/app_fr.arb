@@ -1556,6 +1556,8 @@
   "forkDailyGoalNoReplacement": "Aucun autre oiseau local n'est disponible.",
   "forkDailyGoalLocation": "Lieu de l'objectif",
   "forkDailyGoalListen": "Commencer à écouter",
+  "forkDailyGoalBirdHeard": "{name} : entendu",
+  "forkDailyGoalBirdToFind": "{name} : pas encore entendu",
   "forkSummaryAddObservation": "Ajouter un oiseau observé",
   "forkSummarySpeciesObserved": "{count, plural, =1{L'espèce observée} other{Les {count} espèces observées}}",
   "forkSummaryObservationSaveFailed": "Impossible d'enregistrer l'observation. Réessaie.",

@@ -9,16 +9,17 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdygo_wordmark.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/dashed_border.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
 import '../reliability/reliability_badge.dart';
-import 'birdygo_logo.dart';
 import 'home_model.dart';
+import 'singing_logo.dart';
 
-/// Mark, name and menu button.
+/// Singing mark, name and menu button.
 class HomeTopBar extends StatelessWidget {
   const HomeTopBar({super.key, required this.onMenu, this.streak});
 
@@ -35,12 +36,14 @@ class HomeTopBar extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: BirdySizes.target),
       child: Row(
         children: [
-          const ExcludeSemantics(child: BirdyGoLogo()),
-          const SizedBox(width: BirdySpace.s),
           Expanded(
-            child: Text(
-              l10n.appTitle,
-              style: BirdyText.heading.copyWith(color: c.text1),
+            child: SingingLogo(
+              // The startup screen's wordmark, header size.
+              wordmark: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: BirdyGoWordmark(size: _wordmarkSize, color: c.text1),
+              ),
             ),
           ),
           if (streak != null) ...[streak!, const SizedBox(width: BirdySpace.s)],
@@ -54,6 +57,10 @@ class HomeTopBar extends StatelessWidget {
     );
   }
 }
+
+/// Wordmark size in the home header: the startup letters, a little above
+/// the board's 20 px name so the Oriole dot stays readable.
+const double _wordmarkSize = 24;
 
 /// « Bonjour » and the date line.
 class HomeGreeting extends StatelessWidget {

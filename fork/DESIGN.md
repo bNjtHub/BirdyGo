@@ -267,11 +267,38 @@ Code dans `lib/fork/home/`, affiché par `HomeScreen` (un seul branchement `// F
 la disposition upstream reste dans le fichier, et le préchargement `_warmUpApp` ne change pas).
 On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 
-- Logo : `birdygo_logo.dart` redessine `birdygo-logo-static.svg` en `CustomPainter` (pas de
-  `flutter_svg` avant J6d). À l'arrivée, les quatre barres de l'aile se dessinent de bas en haut,
-  l'une après l'autre, en 480 ms ; l'oiseau ne bouge pas. Animations réduites : dessiné d'un coup.
+- Logo : l'oiseau qui chante de l'écran de démarrage (`SingingLogo`, `singing_logo.dart`, qui
+  réutilise `BirdyGoSingingPainter`), à la taille de la maquette (40 × 32 dp), suivi du nom
+  « BirdyGo ». Seconde exception explicite, après le démarrage, aux règles des 500 ms et de
+  l'absence de rotation : à l'arrivée de l'accueil, l'oiseau apparaît et chante une phrase (trois
+  syllabes, notes qui s'envolent, environ 3,3 s), puis reste immobile ; il rechante une seule phrase
+  toutes les 2 minutes (`SingingLogo.singEvery`) tant que l'accueil est visible. Jamais de boucle :
+  le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
+  programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
+  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois (pas annoncé au lecteur
+  d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
+  L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
+  couleurs de la marque.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
+- Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
+  dernier oiseau, défi de la semaine, détections à vérifier. Le haut (logo, pastille de série, menu)
+  n'a pas d'entrée ; seul le logo bouge, quand il chante (voir Logo).
+- Objectif du jour, carte principale (`lib/fork/daily_goal/daily_goal_card.dart`) : carte blanche
+  (`surface1`, rayon 28, sans ombre ni dégradé) sur Brume, pastille drapeau, titre, « 5/8 espèces
+  entendues » (le rapport en gras), chevron ; dessous les oiseaux de l'objectif en ronds de 60 dp,
+  2 rangées de 4 (le rond rétrécit si la colonne est trop étroite). Oiseau entendu : rond sur sa
+  teinte d'espèce (`SpeciesAccents`, `tintLight` ou `tintDark`), visuel de 46 dp, coche de 22 dp sur
+  le vert du niveau Sûr (`sure.foreground`, Lichen foncé) cerclée de la couleur de la carte. Oiseau à
+  trouver : visuel gris estompé de 40 dp dans un cercle en pointillé (`dashed`). Chaque rond annonce
+  « <nom> : entendu » ou « <nom> : pas encore entendu ». Toute la carte ouvre l'écran de l'objectif
+  (une seule cible, bien plus grande que 48 dp). Sans objectif du jour : phrase d'invitation et
+  « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
+- La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
+  statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
+  au-dessus de la barre du bas, hors de la zone qui défile.
+- Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
+  sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
   jamais vérifiées avant : même règle que « Première fois » du Bilan, via `verifiedSpecies(before:)`).
   Sans écoute du jour : phrase d'invitation à la place des tuiles.
@@ -282,8 +309,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 - Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
   Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
   fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
-- Paysage large : salutation et tuiles à gauche, cartes et « Écouter » à droite. Colonne de 600 dp
-  au plus sur tablette.
+- Paysage large : salutation et objectif du jour à gauche ; statut, tuiles, cartes et « Écouter » à
+  droite. Colonne de 600 dp au plus sur tablette.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
   navigation (Accueil, Carnet, Carte, Profil).
 
@@ -543,8 +570,9 @@ lower and rises from 2.15 s over 800 ms (cubic in-out); the wordmark enters at 2
 travel and a blur fading from 4 dp; the footer (loading bar, « Propulsé par BirdNET »)
 fades in from 3.8 s over 700 ms. The phrase repeats for as long as initialization runs.
 This startup-only motion (rotation, back-ease overshoot, breathing, blur, longer
-durations) is an explicit exception to the general 500 ms/no-rotation rules; it does not
-change Home's logo or other app animations.
+durations) is an explicit exception to the general 500 ms/no-rotation rules. Home reuses
+the same painter for its logo, one phrase at a time (see « Mise en œuvre (J6c, Accueil) »);
+other app animations are unchanged.
 The splash is a real loading screen. After initialization (preferences, notifications,
 launch intents), it loads in App's provider container the audio model, the geo-model,
 the taxonomy, audio labels and species sheets, and opens (or fills) the observation

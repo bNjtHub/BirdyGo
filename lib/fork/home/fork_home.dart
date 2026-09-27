@@ -2,9 +2,10 @@
 ///
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
-/// geo-model, index). Série chip, status card and weekly challenge come from
-/// the game (J6e), the daily listening goal has its card; the menu keeps
-/// every upstream entry.
+/// geo-model, index). The daily goal is the hero card under the greeting;
+/// série chip, status card and weekly challenge come from the game (J6e);
+/// « Écouter » is the one strong action, pinned above the bottom bar; the
+/// menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -36,6 +37,7 @@ import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
 import '../daily_goal/daily_goal_card.dart';
 import '../daily_goal/daily_goal_screen.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/empty_state.dart';
@@ -253,6 +255,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       // No chip without a running série: nothing to lose, nothing shown.
       streak: streak > 0 ? StreakChip(days: streak, onTap: _openProfile) : null,
     );
+    // The daily goal is the hero card, right under the greeting.
     final head = <(String, Widget)>[
       (
         'greeting',
@@ -261,6 +264,12 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           dateLine: homeDateLine(localeName, now, place: _place),
         ),
       ),
+      (
+        'daily-goal',
+        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
+      ),
+    ];
+    final cards = <(String, Widget)>[
       if (game != null)
         (
           'status',
@@ -277,12 +286,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
               ),
             )
             : ('today', DayTiles(today: snapshot.today)),
-    ];
-    final cards = <(String, Widget)>[
-      (
-        'daily-goal',
-        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
-      ),
       if (last != null)
         (
           'last',
@@ -345,11 +348,13 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: _blocks([...head], topBar: topBar)),
+                  Expanded(child: _blocks(head, topBar: topBar)),
                   Expanded(
                     child: Column(
                       children: [
-                        Expanded(child: _blocks(cards, firstIndex: 2)),
+                        Expanded(
+                          child: _blocks(cards, firstIndex: head.length),
+                        ),
                         listen,
                       ],
                     ),
@@ -376,28 +381,39 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     );
   }
 
-  /// A scrolling column of [blocks], entering 40 ms apart.
+  /// A scrolling column of [blocks]. The first
+  /// [BirdyMotion.staggerMaxItems] rise once, 40 ms apart; the others, and
+  /// every block under reduced motion, appear still.
   Widget _blocks(
     List<(String, Widget)> blocks, {
     Widget? topBar,
     int firstIndex = 0,
-  }) => ListView(
-    padding: const EdgeInsets.fromLTRB(
-      BirdySpace.xl,
-      BirdySpace.l,
-      BirdySpace.xl,
-      BirdySpace.l,
-    ),
-    children: [
-      if (topBar != null) topBar,
-      for (final (i, (key, block)) in blocks.indexed)
-        Padding(
-          key: ValueKey('home-$key'),
-          padding: EdgeInsets.only(
-            top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+  }) {
+    final still = BirdyMotion.reduced(context);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xl,
+        BirdySpace.l,
+        BirdySpace.xl,
+        BirdySpace.l,
+      ),
+      children: [
+        if (topBar != null) topBar,
+        for (final (i, (key, block)) in blocks.indexed)
+          Padding(
+            key: ValueKey('home-$key'),
+            padding: EdgeInsets.only(
+              top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+            ),
+            child:
+                still || firstIndex + i >= BirdyMotion.staggerMaxItems
+                    ? block
+                    : BirdyEntrance.staggered(
+                      index: firstIndex + i,
+                      child: block,
+                    ),
           ),
-          child: BirdyEntrance.staggered(index: firstIndex + i, child: block),
-        ),
-    ],
-  );
+      ],
+    );
+  }
 }
