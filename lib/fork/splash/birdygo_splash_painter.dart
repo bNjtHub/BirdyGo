@@ -19,8 +19,8 @@ abstract final class BirdyGoSplashTimeline {
   /// Length of a text entrance.
   static const double textEnter = 320;
 
-  /// One pass of the loading sweep.
-  static const double sweepPeriod = 1600;
+  /// Time constant of the loading bar catching up with the real progress.
+  static const double barEase = 180;
 
   /// Quartic ease-out of the board, clamped to 0..1.
   static double easeOut(double v) =>
@@ -266,15 +266,12 @@ class BirdyGoSingingPainter extends CustomPainter {
       oldDelegate.still != still;
 }
 
-/// An activity sweep, never a made-up percentage of bootstrap completion.
-/// It loops for as long as initialization runs; [active] off leaves the
-/// quiet track (reduced motion).
+/// The loading bar: filled to the real share of the startup work done
+/// ([fraction], 0..1), never a made-up percentage.
 class BirdyGoLoadingPainter extends CustomPainter {
-  BirdyGoLoadingPainter({required this.clock, this.active = true})
-    : super(repaint: clock);
+  BirdyGoLoadingPainter({required this.fraction}) : super(repaint: fraction);
 
-  final ValueListenable<double> clock;
-  final bool active;
+  final ValueListenable<double> fraction;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -286,28 +283,18 @@ class BirdyGoLoadingPainter extends CustomPainter {
       bounds,
       Paint()..color = BirdyBrand.ink.withValues(alpha: .1),
     );
-    if (!active) return;
-    final t =
-        (clock.value % BirdyGoSplashTimeline.sweepPeriod) /
-        BirdyGoSplashTimeline.sweepPeriod;
-    canvas.save();
-    canvas.clipRRect(bounds);
+    final filled = fraction.value.clamp(0.0, 1.0);
+    if (filled == 0) return;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          (t * 1.4 - .4) * size.width,
-          0,
-          size.width * .4,
-          size.height,
-        ),
+        Rect.fromLTWH(0, 0, size.width * filled, size.height),
         const Radius.circular(2),
       ),
       Paint()..color = BirdyBrand.kingfisher,
     );
-    canvas.restore();
   }
 
   @override
   bool shouldRepaint(BirdyGoLoadingPainter oldDelegate) =>
-      oldDelegate.clock != clock || oldDelegate.active != active;
+      oldDelegate.fraction != fraction;
 }

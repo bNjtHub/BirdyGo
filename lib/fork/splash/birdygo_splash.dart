@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +10,21 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import 'birdygo_splash_painter.dart';
+import 'birdygo_warm_up.dart';
 
 /// The startup screen of the Claude Design board « BirdyGo Splash »: the mark
-/// sings, the wordmark and the tagline follow. Initialization and launch
-/// routing run alongside; the bird keeps singing for as long as they take.
+/// sings, the wordmark and the tagline follow. The app loads alongside; the
+/// bar and the caption show the real [progress], and the bird keeps singing
+/// for as long as loading takes.
 class BirdyGoSplash extends StatefulWidget {
-  const BirdyGoSplash({super.key, this.onRetry, this.onIntroComplete});
+  const BirdyGoSplash({
+    super.key,
+    required this.progress,
+    this.onRetry,
+    this.onIntroComplete,
+  });
+
+  final ValueListenable<BirdyGoLoadState> progress;
 
   /// Shortest time the splash stays up on a normal launch, however fast the
   /// app initializes: one whole sung phrase, up to the blink and the last
@@ -34,13 +44,45 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
     with SingleTickerProviderStateMixin {
   /// Milliseconds since the splash appeared.
   final _clock = ValueNotifier<double>(0);
+
+  /// Filled share of the loading bar: follows the real progress, eased.
+  final _bar = ValueNotifier<double>(0);
   late final Ticker _ticker = createTicker(_onTick);
   bool _reported = false;
   bool _reduced = false;
 
   void _onTick(Duration elapsed) {
-    _clock.value = elapsed.inMicroseconds / 1000;
+    final now = elapsed.inMicroseconds / 1000;
+    final dt = now - _clock.value;
+    _clock.value = now;
+    final target = widget.progress.value.fraction;
+    _bar.value =
+        (target - _bar.value).abs() < .002
+            ? target
+            : _bar.value +
+                (target - _bar.value) *
+                    (1 - math.exp(-dt / BirdyGoSplashTimeline.barEase));
     if (elapsed >= BirdyGoSplash.minimumDisplay) _reportIntroComplete();
+  }
+
+  /// Without the ticker (reduced motion), the bar jumps to the progress.
+  void _onProgress() {
+    if (!_ticker.isActive) _bar.value = widget.progress.value.fraction;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.progress.addListener(_onProgress);
+  }
+
+  @override
+  void didUpdateWidget(BirdyGoSplash oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.progress != widget.progress) {
+      oldWidget.progress.removeListener(_onProgress);
+      widget.progress.addListener(_onProgress);
+    }
   }
 
   void _reportIntroComplete() {
@@ -55,6 +97,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
     _reduced = BirdyMotion.reduced(context);
     if (_reduced) {
       _ticker.stop();
+      _bar.value = widget.progress.value.fraction;
       // Reduced motion adds no wait. Reported after the frame: this runs
       // during build.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -67,8 +110,10 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
 
   @override
   void dispose() {
+    widget.progress.removeListener(_onProgress);
     _ticker.dispose();
     _clock.dispose();
+    _bar.dispose();
     super.dispose();
   }
 
@@ -193,41 +238,56 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
     ],
   );
 
+  /// What is loading right now, as the caption under the bar says it.
+  static String _stepCaption(AppLocalizations l10n, BirdyGoLoadStep? step) =>
+      switch (step) {
+        BirdyGoLoadStep.start => l10n.forkSplashLoading,
+        BirdyGoLoadStep.audioModel => l10n.forkSplashStepAudioModel,
+        BirdyGoLoadStep.geoModel => l10n.forkSplashStepGeoModel,
+        BirdyGoLoadStep.species => l10n.forkSplashStepSpecies,
+        BirdyGoLoadStep.observations => l10n.forkSplashStepObservations,
+        null => l10n.forkSplashReady,
+      };
+
   Widget _loading(AppLocalizations l10n, {required bool compact}) => _entrance(
     at: BirdyGoSplashTimeline.footer,
-    child: Semantics(
-      liveRegion: true,
-      label: l10n.forkSplashLoading,
-      child: ExcludeSemantics(
-        child: Column(
-          children: [
-            RepaintBoundary(
-              child: CustomPaint(
-                size: const Size(180, 4),
-                painter: BirdyGoLoadingPainter(
-                  clock: _clock,
-                  active: !_reduced,
+    child: ValueListenableBuilder<BirdyGoLoadState>(
+      valueListenable: widget.progress,
+      builder: (context, state, _) {
+        final caption = _stepCaption(l10n, state.current);
+        return Semantics(
+          liveRegion: true,
+          label: caption,
+          value: '${(state.fraction * 100).round()} %',
+          child: ExcludeSemantics(
+            child: Column(
+              children: [
+                RepaintBoundary(
+                  child: CustomPaint(
+                    size: const Size(180, 4),
+                    painter: BirdyGoLoadingPainter(fraction: _bar),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 14),
+                Text(
+                  caption,
+                  style: BirdyText.caption.copyWith(
+                    fontSize: 14,
+                    color: BirdyBrand.bark,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: compact ? 8 : 24),
+                Text(
+                  l10n.forkPoweredByBirdnet,
+                  style: BirdyText.caption.copyWith(color: BirdyBrand.bark),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              l10n.forkSplashLoading,
-              style: BirdyText.caption.copyWith(
-                fontSize: 14,
-                color: BirdyBrand.bark,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: compact ? 8 : 24),
-            Text(
-              l10n.forkPoweredByBirdnet,
-              style: BirdyText.caption.copyWith(color: BirdyBrand.bark),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     ),
   );
 

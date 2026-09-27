@@ -58,15 +58,17 @@ void main() {
     );
   });
 
-  test('the loading sweep loops and rests when inactive', () {
-    final clock = ValueNotifier<double>(0);
-    addTearDown(clock.dispose);
-    for (final active in [true, false]) {
-      final painter = BirdyGoLoadingPainter(clock: clock, active: active);
-      for (var t = 0.0; t <= 5000; t += 111) {
-        clock.value = t;
-        _paint(painter, const Size(180, 4));
-      }
+  test('the loading bar paints any share, out-of-range ones clamped', () {
+    final fraction = ValueNotifier<double>(0);
+    addTearDown(fraction.dispose);
+    final painter = BirdyGoLoadingPainter(fraction: fraction);
+    for (final value in [-.2, 0.0, .1, .5, 1.0, 1.3]) {
+      fraction.value = value;
+      _paint(painter, const Size(180, 4));
     }
+    expect(
+      painter.shouldRepaint(BirdyGoLoadingPainter(fraction: fraction)),
+      isFalse,
+    );
   });
 }

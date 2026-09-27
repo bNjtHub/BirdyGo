@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:birdnet_live/fork/splash/birdygo_splash.dart';
 import 'package:birdnet_live/fork/splash/birdygo_startup.dart';
+import 'package:birdnet_live/fork/splash/birdygo_warm_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -197,6 +198,81 @@ void main() {
       semantics.dispose();
     });
   }
+
+  testWidgets('the splash waits for the real loading, step by step', (
+    tester,
+  ) async {
+    final audio = Completer<void>();
+    final geo = Completer<void>();
+    await tester.pumpWidget(
+      BirdyGoStartup(
+        bootstrap: () async => const MaterialApp(home: Text('App ready')),
+        warmUp:
+            (progress) => runBirdyGoWarmUp({
+              BirdyGoLoadStep.audioModel: () => audio.future,
+              BirdyGoLoadStep.geoModel: () => geo.future,
+            }, progress),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1500));
+    expect(find.text('Loading the bird song model…'), findsOneWidget);
+
+    audio.complete();
+    await tester.pump();
+    expect(find.text('Loading the species of your area…'), findsOneWidget);
+
+    // The minimum display is over, but the geo-model still loads.
+    await tester.pump(BirdyGoSplash.minimumDisplay);
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.byType(BirdyGoSplash), findsOneWidget);
+    expect(find.text('App ready'), findsNothing);
+
+    geo.complete();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('App ready'), findsOneWidget);
+    expect(find.byType(BirdyGoSplash), findsNothing);
+  });
+
+  testWidgets('fast loading still keeps the minimum display, then says ready', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      BirdyGoStartup(
+        bootstrap: () async => const MaterialApp(home: Text('App ready')),
+        warmUp: (progress) => runBirdyGoWarmUp(const {}, progress),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1500));
+    expect(find.text('Ready.'), findsOneWidget);
+    expect(find.text('App ready'), findsNothing);
+    await tester.pump(BirdyGoSplash.minimumDisplay);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump();
+    expect(find.text('App ready'), findsOneWidget);
+  });
+
+  testWidgets('loading that never ends opens the app after the time limit', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      BirdyGoStartup(
+        bootstrap: () async => const MaterialApp(home: Text('App ready')),
+        warmUp: (progress) => Completer<void>().future,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(BirdyGoSplash.minimumDisplay);
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.text('App ready'), findsNothing);
+    await tester.pump(BirdyGoStartup.loadTimeout);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('App ready'), findsOneWidget);
+  });
 
   testWidgets('the tagline enters in two beats after the wordmark', (
     tester,

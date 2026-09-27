@@ -446,18 +446,26 @@ teal). The eye blinks after the phrase. The wing bars draw first; the wordmark e
 2.15 s, each in 320 ms with 8 dp of travel. A phrase lasts 3.6 s and repeats for as long
 as initialization runs. This startup-only motion is an explicit exception to the general
 500 ms/no-rotation rules; it does not change Home's logo or other app animations.
-The bottom track shows a looping activity sweep, not a percentage of bootstrap completion.
-Reduced motion draws the settled composition immediately and adds no wait.
-Normal launch waits for real initialization and for a minimum display of 4.4 s
-(`BirdyGoSplash.minimumDisplay`): one whole phrase, up to the blink and the last note
-fading out. Explicit audio
+The splash is a real loading screen. After initialization (preferences, notifications,
+launch intents), it loads in App's provider container the audio model, the geo-model,
+the taxonomy, audio labels and species sheets, and opens (or fills) the observation
+index (`lib/fork/splash/birdygo_warm_up.dart`). The steps run side by side. The bottom
+bar fills with the weighted share of the steps done (never a made-up percentage) and the
+caption names the first step still loading, then « C'est prêt. ». A failed step counts
+as done: the screen that needs the resource reports the error. App opens when loading
+is done and the minimum display of 4.4 s (`BirdyGoSplash.minimumDisplay`: one whole
+phrase, up to the blink and the last note fading out) has passed; past 25 s of loading
+(`BirdyGoStartup.loadTimeout`) it opens anyway. The location is not loaded here: it may
+ask for a permission, which belongs to the screen that needs it.
+Reduced motion draws the settled composition immediately and adds no wait. Explicit audio
 shares and Quick Listen bypass any remaining wait once their route is ready,
 so an active recording's controls are never hidden just to finish the animation.
 After a startup error the bird stops singing.
 A startup error offers a localized retry. Audio shares and Quick Listen launch intents
 are retained across retries. App mounts behind the splash while their storage checks
 prepare the destination, so Home does not flash during a cold handoff. The upstream
-five-second safety timeout remains. There is no added model load, network image, or dependency.
+five-second safety timeout remains. The models load earlier, not twice: the splash awaits
+the same futures the home screen warms up. No network image or dependency is added.
 
 The content remains centered within 480 dp, with a compact logo in landscape and scrolling
 as a fallback for large text or a short viewport. Android 12 uses a padded VectorDrawable;

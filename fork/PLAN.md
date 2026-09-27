@@ -483,7 +483,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
             Mist background, singing bird (beak, body, tail, wing bars, one note per
             syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,
-            looping loading sweep, 4.4-second minimum display, immediate reduced-motion state,
+            real loading (audio model, geo-model, species, observation index) with a
+            weighted bar and a caption per step, 4.4-second minimum display, 25-second
+            loading limit, immediate reduced-motion state,
             real bootstrap loading and retry. Launch share and Quick Listen are retained
             across retry; normal launch waits for initialization and introduction. Android launch
             and normal window backgrounds match Flutter, with the current BirdyGo mark.
