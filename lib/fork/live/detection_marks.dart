@@ -239,7 +239,7 @@ class DetectionMarks extends StatefulWidget {
     required this.spans,
     required this.displaySeconds,
     required this.running,
-    this.showLabels = false,
+    this.showLabels = true,
   });
 
   /// Strip height: bars only.
@@ -252,7 +252,8 @@ class DetectionMarks extends StatefulWidget {
   final double displaySeconds;
   final bool running;
 
-  /// Names under the marks (enlarged spectrogram).
+  /// Names under the marks, in the species color (small and enlarged
+  /// spectrogram since J6c-bis-c).
   final bool showLabels;
 
   @override
@@ -426,9 +427,14 @@ class DetectionMarksPainter extends CustomPainter {
       final left = m.left * size.width;
       if (left < freeFrom) continue;
       final text = _labels.putIfAbsent(
-        m.span.label,
+        '${m.span.scientificName}|${m.span.label}',
         () => TextPainter(
-          text: TextSpan(text: m.span.label, style: labelStyle),
+          text: TextSpan(
+            text: m.span.label,
+            style: labelStyle.copyWith(
+              color: SpeciesAccents.accentOf(m.span.scientificName),
+            ),
+          ),
           textDirection: textDirection,
           textScaler: textScaler,
           maxLines: 1,

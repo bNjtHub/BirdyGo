@@ -5337,5 +5337,19 @@
   "forkSplashLoading": "Preparing to listen…",
   "@forkSplashLoading": {"description": "BirdyGo startup screen (J6c)."},
   "forkSplashError": "BirdyGo could not start. Please try again.",
-  "@forkSplashError": {"description": "BirdyGo startup screen (J6c)."}
+  "@forkSplashError": {"description": "BirdyGo startup screen (J6c)."},
+  "forkLevelsInfoButton": "What do Sure, Probable and To check mean?",
+  "@forkLevelsInfoButton": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoTitle": "How sure is the app?",
+  "@forkLevelsInfoTitle": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoSure": "The song is a strong match and the bird is expected here at this season.",
+  "@forkLevelsInfoSure": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoProbable": "A good match, but not strong enough to be sure, or the app does not know where you are.",
+  "@forkLevelsInfoProbable": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoToCheck": "A weak match: listen again before counting it.",
+  "@forkLevelsInfoToCheck": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoRareHere": "The song matches, but the place or the season is surprising: confirm it by listening again.",
+  "@forkLevelsInfoRareHere": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."},
+  "forkLevelsInfoFooter": "Only Sure or confirmed birds count. Answering “It's this bird” in the quick review confirms a bird.",
+  "@forkLevelsInfoFooter": {"description": "BirdyGo fork: reliability levels explained, Live « i » button (J6c-bis-c)."}
 }

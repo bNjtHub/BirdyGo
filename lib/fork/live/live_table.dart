@@ -180,13 +180,19 @@ class LiveTableRow extends StatelessWidget {
       name: entry.commonName,
       compact: compact,
       onTap: onTap,
-      avatar: SpeciesAvatar(image: image, tint: tint, size: compact ? 40 : 48),
+      // The species color, as on its marks under the spectrogram
+      // (J6c-bis-c): a dot on the photo.
+      avatar: SpeciesColorDot(
+        color: tint.accent,
+        ring: c.background,
+        child: SpeciesAvatar(image: image, tint: tint, size: compact ? 40 : 48),
+      ),
       meta: Wrap(
         spacing: BirdySpace.s,
         runSpacing: BirdySpace.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          SingingIndicator(singing: entry.singingVisual, color: c.accentText),
+          SingingIndicator(singing: entry.singingVisual, color: tint.accent),
           if (badge != null) badge!,
           if (!compact)
             Text(
@@ -206,6 +212,45 @@ class LiveTableRow extends StatelessWidget {
       action: action,
     );
   }
+}
+
+/// [child] with a small dot of [color] at its bottom right, circled with
+/// [ring] (the background) so it reads on any photo.
+class SpeciesColorDot extends StatelessWidget {
+  const SpeciesColorDot({
+    super.key,
+    required this.color,
+    required this.ring,
+    required this.child,
+  });
+
+  /// Diameter of the dot, ring included.
+  static const double size = 16;
+
+  final Color color;
+  final Color ring;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    clipBehavior: Clip.none,
+    children: [
+      child,
+      PositionedDirectional(
+        end: -2,
+        bottom: -2,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(color: ring, width: 3),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 /// [SingingBars] in a place kept for them: they fade in and out

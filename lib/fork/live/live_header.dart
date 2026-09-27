@@ -32,7 +32,7 @@ class LiveHeader extends StatelessWidget {
     required this.elapsed,
     required this.expanded,
     this.showTiles = true,
-    required this.onToggleSpectrum,
+    required this.onLevelsInfo,
     required this.onBack,
     required this.onSettings,
     required this.onHelp,
@@ -56,7 +56,8 @@ class LiveHeader extends StatelessWidget {
   /// height to the spectrogram.
   final bool showTiles;
 
-  final VoidCallback onToggleSpectrum;
+  /// Opens what the reliability levels mean (the « i » button).
+  final VoidCallback onLevelsInfo;
   final VoidCallback onBack;
   final VoidCallback onSettings;
   final VoidCallback onHelp;
@@ -114,13 +115,11 @@ class LiveHeader extends StatelessWidget {
                     ],
                   ),
                 ),
+                // The enlarge chevron moved onto the spectrogram (J6c-bis-c).
                 BirdyIconButton(
-                  icon: expanded ? AppIcons.expandLess : AppIcons.expandMore,
-                  semanticLabel:
-                      expanded
-                          ? l10n.forkLiveCollapseSpectrum
-                          : l10n.forkLiveExpandSpectrum,
-                  onPressed: onToggleSpectrum,
+                  icon: AppIcons.infoOutline,
+                  semanticLabel: l10n.forkLevelsInfoButton,
+                  onPressed: onLevelsInfo,
                 ),
                 const SizedBox(width: BirdySpace.xs),
                 _Menu(onSettings: onSettings, onHelp: onHelp),

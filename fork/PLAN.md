@@ -568,6 +568,18 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       À faire sur le Xiaomi : à l'aube, noter si « Analyse… » reste allumé presque tout le temps ;
       vérifier le coût du cycle dans `[InferenceTiming]` ; réécoute par le haut-parleur sans
       « Analyse… » ni symbole.
+- [ ] J6c-bis-c Live : spectre, noms et couleurs (`lib/fork/live/`, PR « J6c-bis-c Live : … »).
+      - [x] Rotation portrait ↔ paysage sans effacer le spectre ni ses traits (clés globales : le
+            spectre, les traits et le tableau changent de place dans l'arbre sans être recréés).
+      - [x] Échelle en kHz retirée, en petit comme en grand : le modèle dit quand un oiseau chante,
+            pas à quelle fréquence. `live_screen.dart` repasse `showFrequencyAxis: false` comme upstream.
+      - [x] Noms sous les traits aussi en petit, dans la couleur de l'espèce ; bande de 40 dp.
+      - [x] Lien de couleur avec le tableau : pastille de la couleur de l'espèce sur la photo de
+            chaque ligne, symbole « chante » de la même couleur.
+      - [x] Bouton « i » en haut à la place du chevron : feuille qui explique Sûr, Probable,
+            À vérifier et « Rare ici · à confirmer » (`lib/fork/reliability/levels_sheet.dart`).
+      - [x] Chevron agrandir / réduire dans le coin du spectre ; un appui sur le spectre bascule.
+      À vérifier sur le Xiaomi : rotation pendant une écoute, lisibilité des noms en petit.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
