@@ -367,11 +367,20 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
-- Quiz « Qui chante ? » : un grand bouton de lecture (celui du design system, joué dès la question),
-  quatre réponses en cartes de 56 dp au moins, noms en Fraunces. Après la réponse, la bonne passe en
-  Lichen avec une coche, la mauvaise choisie en neutre avec une croix, les autres s'effacent ; une
-  phrase dit « Bien vu » ou le nom de l'oiseau, jamais de reproche. Vibration légère sur une bonne
-  réponse, pas d'autre effet. Fin de manche : le score et « Rejouer ».
+- Quiz « Qui chante ? » (`lib/fork/game/fine_ear_quiz_screen.dart` et `fine_ear_quiz_widgets.dart`) :
+  en haut, une carte « Oiseau mystère » au contour pointillé, comme les espèces à découvrir du Carnet,
+  avec le grand bouton de lecture (celui du design system, joué dès la question) ; rien n'y trahit
+  l'oiseau. Dessous, quatre réponses en cartes de 64 dp au moins : photo ronde (`SpeciesAvatar` sur la
+  teinte de l'espèce) et nom en Fraunces, dans la langue des espèces (taxonomie,
+  `effectiveSpeciesLocaleProvider`, le nom de l'index en secours). Après la réponse, la bonne passe en
+  Lichen avec une coche, la mauvaise choisie en neutre avec une croix, les autres s'effacent ; la
+  carte du haut révèle l'oiseau dans le même cadre 3:2 : photo (`SpeciesPhoto`, crédit à un appui) sur
+  sa teinte, « Bien vu, c'est lui ! » ou « La bonne réponse », nom en Fraunces, nom latin en Fraunces
+  italique, bouton « Réécouter ». Entrée en fondu et glissement de 8 px (220 ms, fondu seul en
+  animations réduites), vibration légère sur une bonne réponse, pas d'autre effet, jamais de reproche.
+  Fin de manche : le score, la médaille Oreille fine (`BadgeMedal`) avec ses plumes, la pastille
+  Loriot « Nouvelle plume » si la manche en a gagné une, la barre Lichen vers la prochaine plume,
+  puis « Rejouer » et « Terminer ».
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
   métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
