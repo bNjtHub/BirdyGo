@@ -420,15 +420,21 @@ profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d
 
 ## Startup screen (J6c)
 
-The native Android launch screen and the first Flutter frame share the Encre background
-and BirdyGo mark. Flutter adds a quiet turquoise and Loriot dawn glow, three stationary
-listening contours, the Fraunces wordmark, and the chosen tagline: "Le monde chante.
-Écoute." / "The world is singing. Listen."
+The supplied Claude Design startup board defines the Mist background, 270 × 187 dp
+framing of the original turquoise/gold bird, Fraunces 40 dp wordmark, and bottom loading
+status with BirdNET attribution. The user's chosen tagline replaces the prototype's
+synthetic-song button: "Le monde chante. Écoute." / "The world is singing. Listen."
+No synthetic bird audio is played. The native Android launch background also uses Mist.
 
-The existing logo painter draws its spectrogram wing once in 480 ms. The rest of the
-composition stays still. Reduced motion draws the completed mark immediately. The screen
-appears only while notification configuration, preferences, migrations, and launch intents
-initialize; it has no minimum display duration and yields as soon as the app is ready.
+At the user's request, exactly three musical notes replace the decorative sound waves.
+They rise and fade successively in one 2.4-second introduction, with a 250 ms entrance.
+This startup-only motion is an explicit exception to the general 500 ms/no-rotation
+rules; it does not change Home's logo or other app animations. It does not repeat.
+The bottom track shows an activity sweep, not a percentage of bootstrap completion.
+Reduced motion draws the completed composition immediately and adds no intro wait.
+Normal launch waits for both the introduction and real initialization. Explicit audio
+shares and Quick Listen bypass any remaining introduction once their route is ready,
+so an active recording's controls are never hidden just to finish the animation.
 A startup error offers a localized retry. Audio shares and Quick Listen launch intents
 are retained across retries. App mounts behind the splash while their storage checks
 prepare the destination, so Home does not flash during a cold handoff. The upstream

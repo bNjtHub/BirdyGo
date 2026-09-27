@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- FORK: BirdyGo launch colors and mark match Flutter startup (J6c). -->
-    <!-- Android 12+ splash screen: bird on dark blue background. -->
+    <!-- Android 12+ splash screen: bird on the Mist background. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- FORK: readable system controls on the Mist launch background. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/birdygo_launch_background</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarColor">@color/birdygo_launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/birdygo_launch_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/birdygo_splash</item>
     </style>

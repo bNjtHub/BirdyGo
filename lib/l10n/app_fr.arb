@@ -1407,6 +1407,6 @@
   "forkRankingSortMenu": "Trier et filtrer",
   "forkMapClusterSpecies": "{count, plural, =1{espèce} other{espèces}}",
   "forkSplashTagline": "Le monde chante. Écoute.",
-  "forkSplashLoading": "BirdyGo se prépare…",
+  "forkSplashLoading": "Préparation de l’écoute…",
   "forkSplashError": "BirdyGo n’a pas pu démarrer. Réessaie."
 }

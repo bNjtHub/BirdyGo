@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:birdnet_live/fork/home/birdygo_logo.dart';
 import 'package:birdnet_live/fork/splash/birdygo_splash.dart';
 import 'package:birdnet_live/fork/splash/birdygo_startup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows real pending work and opens immediately when ready', (
+  // AnimationController reports completion on the first frame after its duration.
+
+  testWidgets('slow initialization opens immediately after the intro is done', (
     tester,
   ) async {
     final pending = Completer<Widget>();
@@ -20,11 +21,12 @@ void main() {
         },
       ),
     );
+    await tester.pump(); // Start the ticker before advancing the test clock.
     expect(find.byType(BirdyGoSplash), findsOneWidget);
     expect(find.text('The world is singing. Listen.'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(BirdyGoSplash.introDuration);
+    await tester.pump(const Duration(milliseconds: 16));
     expect(calls, 1);
-    expect(tester.hasRunningAnimations, isFalse);
     expect(find.byType(BirdyGoSplash), findsOneWidget);
 
     pending.complete(const MaterialApp(home: Text('App ready')));
@@ -35,23 +37,31 @@ void main() {
     expect(find.byType(BirdyGoSplash), findsNothing);
   });
 
-  testWidgets('does not wait for the wing animation when initialization ends', (
-    tester,
-  ) async {
-    final pending = Completer<Widget>();
-    await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.hasRunningAnimations, isTrue);
-    pending.complete(const MaterialApp(home: Text('App ready')));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
-    expect(find.text('App ready'), findsOneWidget);
-    expect(tester.hasRunningAnimations, isFalse);
-  });
+  testWidgets(
+    'fast initialization keeps the splash until the intro completes',
+    (tester) async {
+      final pending = Completer<Widget>();
+      await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(tester.hasRunningAnimations, isTrue);
+      pending.complete(const MaterialApp(home: Text('App ready')));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(BirdyGoSplash), findsOneWidget);
+      expect(find.text('App ready'), findsNothing);
+      expect(find.text('App ready', skipOffstage: false), findsOneWidget);
+
+      await tester.pump(BirdyGoSplash.introDuration);
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump();
+      expect(find.text('App ready'), findsOneWidget);
+      expect(tester.hasRunningAnimations, isFalse);
+    },
+  );
 
   testWidgets(
-    'failure offers retry without automatic repeated initialization',
+    'retry after the intro does not replay it or repeat automatically',
     (tester) async {
       var calls = 0;
       final retry = Completer<Widget>();
@@ -70,7 +80,8 @@ void main() {
         find.text('BirdyGo could not start. Please try again.'),
         findsOneWidget,
       );
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(BirdyGoSplash.introDuration);
+      await tester.pump(const Duration(milliseconds: 16));
       expect(calls, 1);
       await tester.tap(find.text('Retry'));
       await tester.pump();
@@ -85,37 +96,78 @@ void main() {
     },
   );
 
+  testWidgets('an error can be retried while the intro is still running', (
+    tester,
+  ) async {
+    var calls = 0;
+    final retry = Completer<Widget>();
+    await tester.pumpWidget(
+      BirdyGoStartup(
+        bootstrap: () {
+          calls++;
+          return calls == 1
+              ? Future<Widget>.error(StateError('Preferences unavailable'))
+              : retry.future;
+        },
+      ),
+    );
+    await tester.pump();
+    expect(
+      find.text('BirdyGo could not start. Please try again.'),
+      findsOneWidget,
+    );
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.tap(find.text('Retry'));
+    await tester.pump();
+    expect(calls, 2);
+    retry.complete(const MaterialApp(home: Text('Recovered')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(BirdyGoSplash), findsOneWidget);
+    expect(find.text('Recovered'), findsNothing);
+    await tester.pump(BirdyGoSplash.introDuration);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump();
+    await tester.pump(); // Paint the reveal scheduled after intro completion.
+    expect(find.text('Recovered'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('an initialization completing after disposal is harmless', (
     tester,
   ) async {
     final pending = Completer<Widget>();
     await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+    final finishIntro =
+        tester
+            .widget<BirdyGoSplash>(find.byType(BirdyGoSplash))
+            .onIntroComplete!;
     await tester.pumpWidget(const SizedBox());
+    finishIntro();
     pending.complete(const SizedBox());
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'reduced motion draws the complete mark without an active ticker',
-    (tester) async {
-      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
-          const FakeAccessibilityFeatures(disableAnimations: true);
-      addTearDown(
-        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
-      );
-      final pending = Completer<Widget>();
-      await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
-      final paint = tester.widget<CustomPaint>(
-        find.descendant(
-          of: find.byType(BirdyGoLogo),
-          matching: find.byType(CustomPaint),
-        ),
-      );
-      expect((paint.painter! as BirdyGoLogoPainter).progress.value, 1);
-      expect(tester.hasRunningAnimations, isFalse);
-    },
-  );
+  testWidgets('reduced motion adds no intro wait and starts no ticker', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    final pending = Completer<Widget>();
+    await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+    pending.complete(const MaterialApp(home: Text('App ready')));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('App ready'), findsOneWidget);
+    expect(find.byType(BirdyGoSplash), findsNothing);
+  });
 
   for (final (locale, tagline) in [
     ('fr', 'Le monde chante. Écoute.'),
@@ -150,9 +202,14 @@ void main() {
       );
       final pending = Completer<Widget>();
       await tester.pumpWidget(BirdyGoStartup(bootstrap: () => pending.future));
-      await tester.pumpAndSettle();
+      await tester.pump(BirdyGoSplash.introDuration);
+      await tester.pump(const Duration(milliseconds: 16));
       expect(tester.takeException(), isNull);
       expect(find.text('BirdyGo'), findsOneWidget);
+      expect(
+        tester.getCenter(find.text('BirdyGo')).dx,
+        closeTo(size.width / 2, 1),
+      );
       expect(find.text('The world is singing. Listen.'), findsOneWidget);
     });
   }

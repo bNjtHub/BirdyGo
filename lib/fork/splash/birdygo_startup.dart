@@ -5,7 +5,9 @@ import '../design/birdy_theme.dart';
 import 'birdygo_launch_handoff.dart';
 import 'birdygo_splash.dart';
 
-/// Paints the launch screen while real initialization runs. No minimum delay.
+/// Shows the introduction while initialization and cold-launch routing run.
+/// Opens App as soon as all three are ready, without a separate delay timer.
+/// Explicit launch actions bypass the remaining intro once their route is ready.
 class BirdyGoStartup extends StatefulWidget {
   const BirdyGoStartup({super.key, required this.bootstrap});
 
@@ -20,8 +22,10 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
   bool _failed = false;
   bool _running = false;
   bool _showSplash = true;
+  bool _introComplete = false;
+  bool _launchHandoffReady = false;
   bool _revealScheduled = false;
-  late final _handoff = BirdyGoLaunchHandoff(_scheduleReveal);
+  late final _handoff = BirdyGoLaunchHandoff(_launchHandoffReleased);
 
   @override
   void initState() {
@@ -52,8 +56,28 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
     _start();
   }
 
+  void _completeIntro() {
+    if (!mounted || _introComplete) return;
+    _introComplete = true;
+    _scheduleReveal();
+  }
+
+  void _launchHandoffReleased() {
+    if (!mounted || _handoff.isPending) return;
+    // Quick Listen may start recording as its route mounts. Never hide its
+    // controls behind the rest of the intro (the same applies to shared audio).
+    _launchHandoffReady = true;
+    _scheduleReveal();
+  }
+
   void _scheduleReveal() {
-    if (!mounted || _app == null || !_showSplash || _revealScheduled) return;
+    if (!mounted ||
+        _app == null ||
+        !(_introComplete || _launchHandoffReady) ||
+        !_showSplash ||
+        _revealScheduled) {
+      return;
+    }
     _revealScheduled = true;
     // Mount and lay out App behind the splash so its launch listeners can
     // register their holds and its Navigator can prepare the actual destination.
@@ -85,7 +109,7 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
 
   Widget _buildSplash() => MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: BirdyTheme.dark(),
+    theme: BirdyTheme.light(),
     // A notification launch route belongs to App, after initialization.
     initialRoute: '/',
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -97,6 +121,9 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
       }
       return const Locale('en');
     },
-    home: BirdyGoSplash(onRetry: _failed ? _retry : null),
+    home: BirdyGoSplash(
+      onRetry: _failed ? _retry : null,
+      onIntroComplete: _completeIntro,
+    ),
   );
 }

@@ -66,74 +66,86 @@ class _NoDiskIndex extends ChangeNotifier implements ObservationIndexService {
 
 void main() {
   for (final share in [true, false]) {
-    testWidgets(
-      '${share ? 'audio share' : 'Quick Listen'} keeps splash during cold route checks',
-      (tester) async {
-        SharedPreferences.setMockInitialValues({
-          PrefKeys.onboardingComplete: true,
-          PrefKeys.termsAccepted: true,
-        });
-        final prefs = await SharedPreferences.getInstance();
-        final repository = _PendingRepository();
-        final pending = Completer<Widget>();
-        final index = _NoDiskIndex();
-        await tester.pumpWidget(
-          BirdyGoStartup(bootstrap: () => pending.future),
-        );
-        await tester.pump(const Duration(milliseconds: 600));
-        pending.complete(
-          ProviderScope(
-            overrides: [
-              sharedPreferencesProvider.overrideWithValue(prefs),
-              sessionRepositoryProvider.overrideWithValue(repository),
-              liveControllerProvider.overrideWithValue(_IdleLive()),
-              fileAnalysisControllerProvider.overrideWithValue(
-                _IdleFileAnalysis(),
+    for (final introFinished in [false, true]) {
+      testWidgets(
+        '${share ? 'audio share' : 'Quick Listen'} holds routing, intro finished: $introFinished',
+        (tester) async {
+          SharedPreferences.setMockInitialValues({
+            PrefKeys.onboardingComplete: true,
+            PrefKeys.termsAccepted: true,
+          });
+          final prefs = await SharedPreferences.getInstance();
+          final repository = _PendingRepository();
+          final pending = Completer<Widget>();
+          final index = _NoDiskIndex();
+          await tester.pumpWidget(
+            BirdyGoStartup(bootstrap: () => pending.future),
+          );
+          await tester.pump(
+            introFinished
+                ? BirdyGoSplash.introDuration
+                : const Duration(milliseconds: 20),
+          );
+          await tester.pump(
+            introFinished ? const Duration(milliseconds: 16) : Duration.zero,
+          );
+          pending.complete(
+            ProviderScope(
+              overrides: [
+                sharedPreferencesProvider.overrideWithValue(prefs),
+                sessionRepositoryProvider.overrideWithValue(repository),
+                liveControllerProvider.overrideWithValue(_IdleLive()),
+                fileAnalysisControllerProvider.overrideWithValue(
+                  _IdleFileAnalysis(),
+                ),
+                homeLoaderProvider.overrideWithValue(_EmptyHome()),
+                observationIndexServiceProvider.overrideWith((ref) => index),
+                taxonomyServiceProvider.overrideWith(
+                  (ref) async => TaxonomyService(),
+                ),
+                audioLabelsSetProvider.overrideWith((ref) async => <String>{}),
+                geoModelProvider.overrideWith((ref) async => GeoModel()),
+                currentLocationProvider.overrideWith((ref) async => null),
+                speciesSheetsProvider.overrideWith(
+                  (ref) async => SpeciesSheets.empty,
+                ),
+              ],
+              child: App(
+                launchSharedFile:
+                    share
+                        ? const SharedAudioFile(
+                          uri: 'content://test/bird.wav',
+                          name: 'bird.wav',
+                        )
+                        : null,
+                launchQuickAction:
+                    share ? null : QuickActionService.startListeningAction,
               ),
-              homeLoaderProvider.overrideWithValue(_EmptyHome()),
-              observationIndexServiceProvider.overrideWith((ref) => index),
-              taxonomyServiceProvider.overrideWith(
-                (ref) async => TaxonomyService(),
-              ),
-              audioLabelsSetProvider.overrideWith((ref) async => <String>{}),
-              geoModelProvider.overrideWith((ref) async => GeoModel()),
-              currentLocationProvider.overrideWith((ref) async => null),
-              speciesSheetsProvider.overrideWith(
-                (ref) async => SpeciesSheets.empty,
-              ),
-            ],
-            child: App(
-              launchSharedFile:
-                  share
-                      ? const SharedAudioFile(
-                        uri: 'content://test/bird.wav',
-                        name: 'bird.wav',
-                      )
-                      : null,
-              launchQuickAction:
-                  share ? null : QuickActionService.startListeningAction,
             ),
-          ),
-        );
-        await tester.pump();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
-        expect(find.byType(BirdyGoSplash), findsOneWidget);
-        expect(find.byType(HomeScreen), findsNothing);
-        expect(find.byType(HomeScreen, skipOffstage: false), findsOneWidget);
+          );
+          await tester.pump();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+          expect(find.byType(BirdyGoSplash), findsOneWidget);
+          expect(find.byType(HomeScreen), findsNothing);
+          expect(find.byType(HomeScreen, skipOffstage: false), findsOneWidget);
 
-        // A failed storage read must reveal the fail-closed dialog, not leave
-        // startup stuck behind it. This exercises both real App listeners.
-        repository.scan.completeError(StateError('Storage unavailable'));
-        await tester.pump();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 350));
-        expect(find.byType(BirdyGoSplash), findsNothing);
-        expect(find.byType(AlertDialog), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-        await tester.pump(const Duration(seconds: 2));
-      },
-    );
+          // A failed storage read must reveal the fail-closed dialog, not leave
+          // startup stuck behind it. This exercises both real App listeners.
+          repository.scan.completeError(StateError('Storage unavailable'));
+          await tester.pump();
+          await tester.pump();
+          await tester.pump();
+          // No clock advance: explicit launches reveal their controls even when
+          // the normal startup introduction still has time left.
+          expect(find.byType(BirdyGoSplash), findsNothing);
+          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(tester.takeException(), isNull);
+          await tester.pump(const Duration(milliseconds: 350));
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump(const Duration(seconds: 2));
+        },
+      );
+    }
   }
 }
