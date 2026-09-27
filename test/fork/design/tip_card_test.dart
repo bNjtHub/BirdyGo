@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/widgets/animated_count.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_animated_icon.dart';
 import 'package:birdnet_live/fork/design/widgets/tip_card.dart';
 import 'package:birdnet_live/fork/live/live_header.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -18,13 +19,14 @@ Widget _app(Widget child) => MaterialApp(
 );
 
 const _tips = <BirdyTip>[
-  (icon: AppIcons.air, title: 'Vent', body: 'Abrite le micro du vent.'),
-  (
+  BirdyTip(icon: AppIcons.air, title: 'Vent', body: 'Abrite le micro du vent.'),
+  BirdyTip(
     icon: AppIcons.graphicEq,
     title: 'Spectrogramme',
     body:
-        'Touche le spectrogramme pour l\'agrandir, avec l\'échelle en kHz '
+        "Touche le spectrogramme pour l'agrandir, avec l'échelle en kHz "
         'et un trait sous chaque chant détecté.',
+    motion: BirdyIconMotion.pulse,
   ),
 ];
 
@@ -107,5 +109,40 @@ void main() {
     final text = find.text('1:02:00');
     expect(tester.getSize(text).height, lessThan(40));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('animated icon fills in when it becomes active', (tester) async {
+    Widget icon(bool active) => _app(
+      BirdyAnimatedIcon(
+        icon: AppIcons.air,
+        motion: BirdyIconMotion.fill,
+        active: active,
+      ),
+    );
+    double fill() => tester.widget<Icon>(find.byType(Icon)).fill!;
+
+    await tester.pumpWidget(icon(false));
+    expect(fill(), 0);
+    await tester.pumpWidget(icon(true));
+    await tester.pumpAndSettle();
+    expect(fill(), 1);
+  });
+
+  testWidgets('animated icon: final state at once with reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: BirdyAnimatedIcon(
+            icon: AppIcons.air,
+            motion: BirdyIconMotion.fill,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.widget<Icon>(find.byType(Icon)).fill, 1);
   });
 }

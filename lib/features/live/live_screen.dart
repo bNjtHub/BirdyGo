@@ -45,6 +45,7 @@ import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
+import '../../fork/live/live_tip_motion.dart'; // FORK: tip cards
 import '../../fork/summary/listening_summary_screen.dart'; // FORK: listening summary (J6c)
 
 // =============================================================================
@@ -1113,7 +1114,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                   empty: BirdyTipCarousel(
                     tips: [
                       for (final t in buildLiveTips(l10n))
-                        (icon: t.icon, title: t.title, body: t.body),
+                        BirdyTip(
+                          icon: t.icon,
+                          title: t.title,
+                          body: t.body,
+                          motion: liveTipMotion(t.icon),
+                        ),
                     ],
                   ),
                   practice: _forkPractice, // FORK: J5c

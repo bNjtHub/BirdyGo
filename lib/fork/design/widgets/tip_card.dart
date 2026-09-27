@@ -1,7 +1,7 @@
 /// « Le saviez-vous ? » cards of BirdyGo (DESIGN.md « Astuces »).
 ///
 /// One component for every tip or fact shown while the user waits: a card
-/// with the tip icon in a Loriot disc, a small « Le saviez-vous ? » caption,
+/// with the tip icon in a Loriot disc (played once as it appears), a small « Le saviez-vous ? » caption,
 /// the title and one or two sentences. [BirdyTipCarousel] cycles through a
 /// list: tap for the next one, auto-advance otherwise, dots show the place.
 library;
@@ -16,11 +16,24 @@ import '../../../shared/utils/app_icons.dart';
 import '../birdy_motion.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
+import 'birdy_animated_icon.dart';
 import 'entrance.dart';
 import 'pressable.dart';
 
-/// One tip: icon, short title, one or two sentences. All localized.
-typedef BirdyTip = ({IconData icon, String title, String body});
+/// One tip: icon and how it moves, short title, one or two sentences.
+class BirdyTip {
+  const BirdyTip({
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.motion = BirdyIconMotion.fill,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final BirdyIconMotion motion;
+}
 
 class BirdyTipCard extends StatelessWidget {
   const BirdyTipCard({
@@ -28,6 +41,8 @@ class BirdyTipCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.body,
+    this.motion = BirdyIconMotion.fill,
+    this.active = true,
     this.footer,
     this.fill = false,
   });
@@ -35,6 +50,10 @@ class BirdyTipCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String body;
+
+  /// How the icon plays each time the card becomes [active].
+  final BirdyIconMotion motion;
+  final bool active;
 
   /// Under the texts, e.g. the carousel dots.
   final Widget? footer;
@@ -76,7 +95,13 @@ class BirdyTipCard extends StatelessWidget {
                         color: c.orioleContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, size: discIcon, color: c.orioleText),
+                      child: BirdyAnimatedIcon(
+                        icon: icon,
+                        motion: motion,
+                        active: active,
+                        size: discIcon,
+                        color: c.orioleText,
+                      ),
                     ),
                   ),
                   const SizedBox(width: BirdySpace.m),
@@ -233,6 +258,8 @@ class _BirdyTipCarouselState extends State<BirdyTipCarousel> {
                             icon: tip.icon,
                             title: tip.title,
                             body: tip.body,
+                            motion: tip.motion,
+                            active: i == current,
                             footer: dots,
                             fill: true,
                           ),

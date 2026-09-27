@@ -438,6 +438,13 @@ anecdote montrée pendant une attente (écoute sans oiseau, chargement long, fin
   seul toutes les 15 s sauf avec un lecteur d'écran, fondu enchaîné de 220 ms (aucun en animations
   réduites). Des points en bas disent où on en est. La carte garde la hauteur de l'astuce la plus
   longue : rien ne bouge autour.
+- Icône animée (`BirdyAnimatedIcon`, `lib/fork/design/widgets/birdy_animated_icon.dart`) : nos
+  Material Symbols, joués une fois quand l'astuce arrive, 150 ms après le fondu de la carte, en
+  450 ms. Quatre mouvements : `fill` (l'icône se remplit, par défaut), `drift` (glisse de 6 px :
+  vent, distance), `drop` (descend en place : téléchargement), `pulse` (1 → 1,08 → 1 : son, score).
+  Ni rotation, ni rebond, ni boucle ; état final direct en animations réduites. Pas de pack d'icônes
+  animées externe : les packs gratuits ne couvrent pas nos sujets dans un style unique, et Lordicon
+  gratuit exige un crédit et interdit de publier ses fichiers dans le dépôt public.
 - Une astuce ne fait jamais la leçon : elle donne un truc de terrain ou une curiosité sur les oiseaux.
 
 ## Chiffres des tuiles

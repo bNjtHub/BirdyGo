@@ -17,6 +17,7 @@ import 'birdy_tokens.dart';
 import 'birdy_typography.dart';
 import 'species_tint.dart';
 import 'widgets/animated_count.dart';
+import 'widgets/birdy_animated_icon.dart';
 import 'widgets/birdy_buttons.dart';
 import 'widgets/birdy_pill.dart';
 import 'widgets/clip_play_button.dart';
@@ -485,20 +486,28 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
   /// Tip cards (DESIGN.md « Astuces »): tap for the next one.
   Widget _tips(AppLocalizations l10n) => BirdyTipCarousel(
     tips: [
-      (
+      BirdyTip(
         icon: AppIcons.air,
         title: l10n.liveTipWindTitle,
         body: l10n.liveTipWindBody,
+        motion: BirdyIconMotion.drift,
       ),
-      (
+      BirdyTip(
         icon: AppIcons.graphicEq,
         title: l10n.liveTipSpectrogramTitle,
         body: l10n.liveTipSpectrogramBody,
+        motion: BirdyIconMotion.pulse,
       ),
-      (
-        icon: AppIcons.volumeDown,
-        title: l10n.liveTipDistanceTitle,
-        body: l10n.liveTipDistanceBody,
+      BirdyTip(
+        icon: AppIcons.batteryChargingFull,
+        title: l10n.liveTipBatteryTitle,
+        body: l10n.liveTipBatteryBody,
+      ),
+      BirdyTip(
+        icon: AppIcons.saveAlt,
+        title: l10n.liveTipSaveClipsTitle,
+        body: l10n.liveTipSaveClipsBody,
+        motion: BirdyIconMotion.drop,
       ),
     ],
   );
