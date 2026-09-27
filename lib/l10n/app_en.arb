@@ -5645,5 +5645,7 @@
   "forkTipHeader": "Did you know?",
   "@forkTipHeader": {"description": "BirdyGo fork: caption of the tip cards (BirdyTipCard)."},
   "forkTipNext": "Next tip",
-  "@forkTipNext": {"description": "BirdyGo fork: screen reader hint to show the next tip."}
+  "@forkTipNext": {"description": "BirdyGo fork: screen reader hint to show the next tip."},
+  "forkMapTilesFailed": "The map background does not load. Check BirdyGo's internet connection.",
+  "@forkMapTilesFailed": {"description": "BirdyGo fork: contact map, tiles that do not load."}
 }
