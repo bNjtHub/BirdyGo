@@ -1,0 +1,259 @@
+/// « Le saviez-vous ? » cards of BirdyGo (DESIGN.md « Astuces »).
+///
+/// One component for every tip or fact shown while the user waits: a card
+/// with the tip icon in a Loriot disc, a small « Le saviez-vous ? » caption,
+/// the title and one or two sentences. [BirdyTipCarousel] cycles through a
+/// list: tap for the next one, auto-advance otherwise, dots show the place.
+library;
+
+import 'dart:async';
+import 'dart:math';
+
+import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
+import '../../../shared/utils/app_icons.dart';
+import '../birdy_motion.dart';
+import '../birdy_tokens.dart';
+import '../birdy_typography.dart';
+import 'entrance.dart';
+import 'pressable.dart';
+
+/// One tip: icon, short title, one or two sentences. All localized.
+typedef BirdyTip = ({IconData icon, String title, String body});
+
+class BirdyTipCard extends StatelessWidget {
+  const BirdyTipCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.footer,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  /// Under the texts, e.g. the carousel dots.
+  final Widget? footer;
+
+  static const double disc = 48;
+  static const double discIcon = 24;
+  static const double maxWidth = 460;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: maxWidth),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surface1,
+          borderRadius: BorderRadius.circular(BirdyRadii.card),
+          border: Border.all(color: c.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(BirdySpace.l),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  width: disc,
+                  height: disc,
+                  decoration: BoxDecoration(
+                    color: c.orioleContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: discIcon, color: c.orioleText),
+                ),
+              ),
+              const SizedBox(width: BirdySpace.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          AppIcons.lightbulbOutline,
+                          size: 16,
+                          color: c.orioleText,
+                        ),
+                        const SizedBox(width: BirdySpace.xs),
+                        Flexible(
+                          child: Text(
+                            l10n.forkTipHeader,
+                            style: BirdyText.caption.copyWith(
+                              color: c.orioleText,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(title, style: BirdyText.label.copyWith(color: c.text1)),
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      body,
+                      style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                    ),
+                    if (footer != null) ...[
+                      const SizedBox(height: BirdySpace.m),
+                      footer!,
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Rotating [BirdyTipCard]. Starts on a random tip, advances every
+/// [interval] (not with a screen reader), tap for the next one. The card
+/// keeps the height of the longest tip so nothing around it moves.
+class BirdyTipCarousel extends StatefulWidget {
+  const BirdyTipCarousel({
+    super.key,
+    required this.tips,
+    this.interval = const Duration(seconds: 15),
+    this.random,
+  });
+
+  final List<BirdyTip> tips;
+  final Duration interval;
+
+  /// For tests: a seeded start.
+  final Random? random;
+
+  @override
+  State<BirdyTipCarousel> createState() => _BirdyTipCarouselState();
+}
+
+class _BirdyTipCarouselState extends State<BirdyTipCarousel> {
+  late int _index;
+  Timer? _timer;
+  bool _autoRotate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = (widget.random ?? Random()).nextInt(1 << 16);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auto = !MediaQuery.accessibleNavigationOf(context);
+    if (auto == _autoRotate) return;
+    _autoRotate = auto;
+    _restartTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _restartTimer() {
+    _timer?.cancel();
+    if (!_autoRotate) return;
+    _timer = Timer.periodic(widget.interval, (_) {
+      if (mounted) setState(() => _index++);
+    });
+  }
+
+  void _next() {
+    setState(() => _index++);
+    _restartTimer();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tips = widget.tips;
+    if (tips.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
+    final current = _index % tips.length;
+    final duration =
+        BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.enter;
+    final dots = _Dots(count: tips.length, current: current);
+
+    // Every tip is laid out, only the current one shows: the stack takes
+    // the height of the longest, and the switch is a cross-fade.
+    return BirdyEntrance(
+      child: Semantics(
+        button: true,
+        onTapHint: l10n.forkTipNext,
+        child: Pressable(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _next,
+            child: Stack(
+            children: [
+              for (final (i, tip) in tips.indexed)
+                IgnorePointer(
+                  ignoring: i != current,
+                  child: ExcludeSemantics(
+                    excluding: i != current,
+                    child: AnimatedOpacity(
+                      opacity: i == current ? 1 : 0,
+                      duration: duration,
+                      curve: BirdyMotion.standard,
+                      child: BirdyTipCard(
+                        icon: tip.icon,
+                        title: tip.title,
+                        body: tip.body,
+                        footer: dots,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Place in the carousel. Many tips: the dots stay small and wrap.
+class _Dots extends StatelessWidget {
+  const _Dots({required this.count, required this.current});
+
+  final int count;
+  final int current;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return ExcludeSemantics(
+      child: Wrap(
+        spacing: 5,
+        runSpacing: 5,
+        children: [
+          for (var i = 0; i < count; i++)
+            AnimatedContainer(
+              duration: BirdyMotion.enter,
+              curve: BirdyMotion.standard,
+              width: i == current ? 14 : 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: i == current ? c.orioleText : c.borderStrong,
+                borderRadius: BorderRadius.circular(BirdyRadii.pill),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

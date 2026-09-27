@@ -25,6 +25,7 @@ import 'widgets/entrance.dart';
 import 'widgets/species_avatar.dart';
 import 'widgets/species_card.dart';
 import 'widgets/species_tile.dart';
+import 'widgets/tip_card.dart';
 
 /// Settings entry to the gallery. Hidden (and tree-shaken) in release.
 class DesignGalleryTile extends StatelessWidget {
@@ -150,6 +151,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGalleryPlayer, [_player(l10n)]),
                 _Section(l10n.forkGalleryMotion, _motion(l10n)),
                 _Section(l10n.forkGalleryEmpty, _empty(l10n)),
+                _Section(l10n.forkTipHeader, [_tips(l10n)]),
               ],
             ),
           );
@@ -479,6 +481,27 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
       body: l10n.forkQuickReviewEmpty,
     ),
   ];
+
+  /// Tip cards (DESIGN.md « Astuces »): tap for the next one.
+  Widget _tips(AppLocalizations l10n) => BirdyTipCarousel(
+    tips: [
+      (
+        icon: AppIcons.air,
+        title: l10n.liveTipWindTitle,
+        body: l10n.liveTipWindBody,
+      ),
+      (
+        icon: AppIcons.graphicEq,
+        title: l10n.liveTipSpectrogramTitle,
+        body: l10n.liveTipSpectrogramBody,
+      ),
+      (
+        icon: AppIcons.volumeDown,
+        title: l10n.liveTipDistanceTitle,
+        body: l10n.liveTipDistanceBody,
+      ),
+    ],
+  );
 
   List<Widget> _motion(AppLocalizations l10n) => [
     Align(

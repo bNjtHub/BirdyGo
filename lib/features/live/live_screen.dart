@@ -44,6 +44,7 @@ import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
+import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
 import '../../fork/summary/listening_summary_screen.dart'; // FORK: listening summary (J6c)
 
 // =============================================================================
@@ -1108,7 +1109,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                         scientificName: entry.scientificName,
                         commonName: entry.record.commonName,
                       ),
-                  empty: const LiveTipsCarousel(),
+                  // FORK: tip cards in the BirdyGo design
+                  empty: BirdyTipCarousel(
+                    tips: [
+                      for (final t in buildLiveTips(l10n))
+                        (icon: t.icon, title: t.title, body: t.body),
+                    ],
+                  ),
                   practice: _forkPractice, // FORK: J5c
                   // FORK: first encounter and rare bird moments (J6e)
                   moment:
