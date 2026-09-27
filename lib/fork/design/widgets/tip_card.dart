@@ -61,68 +61,70 @@ class BirdyTipCard extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(BirdySpace.l),
-          child: Row(
-            crossAxisAlignment:
-                fill ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              ExcludeSemantics(
-                child: Align(
-                  alignment: AlignmentDirectional.topStart,
-                  heightFactor: 1,
-                  child: Container(
-                    width: disc,
-                    height: disc,
-                    decoration: BoxDecoration(
-                      color: c.orioleContainer,
-                      shape: BoxShape.circle,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ExcludeSemantics(
+                    child: Container(
+                      width: disc,
+                      height: disc,
+                      decoration: BoxDecoration(
+                        color: c.orioleContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, size: discIcon, color: c.orioleText),
                     ),
-                    child: Icon(icon, size: discIcon, color: c.orioleText),
                   ),
-                ),
-              ),
-              const SizedBox(width: BirdySpace.m),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  const SizedBox(width: BirdySpace.m),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          AppIcons.lightbulbOutline,
-                          size: 16,
-                          color: c.orioleText,
-                        ),
-                        const SizedBox(width: BirdySpace.xs),
-                        Flexible(
-                          child: Text(
-                            l10n.forkTipHeader,
-                            style: BirdyText.caption.copyWith(
+                        Row(
+                          children: [
+                            Icon(
+                              AppIcons.lightbulbOutline,
+                              size: 16,
                               color: c.orioleText,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            const SizedBox(width: BirdySpace.xs),
+                            Flexible(
+                              child: Text(
+                                l10n.forkTipHeader,
+                                style: BirdyText.caption.copyWith(
+                                  color: c.orioleText,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: BirdySpace.xs),
+                        Text(
+                          title,
+                          style: BirdyText.label.copyWith(color: c.text1),
+                        ),
+                        const SizedBox(height: BirdySpace.xs),
+                        Text(
+                          body,
+                          style: BirdyText.bodyCompact.copyWith(color: c.text2),
                         ),
                       ],
                     ),
-                    const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      title,
-                      style: BirdyText.label.copyWith(color: c.text1),
-                    ),
-                    const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      body,
-                      style: BirdyText.bodyCompact.copyWith(color: c.text2),
-                    ),
-                    if (footer != null) ...[
-                      const SizedBox(height: BirdySpace.m),
-                      if (fill) const Spacer(),
-                      footer!,
-                    ],
-                  ],
-                ),
+                  ),
+                ],
               ),
+              // Centered on the whole card, pinned to the bottom with [fill].
+              if (footer != null) ...[
+                const SizedBox(height: BirdySpace.m),
+                if (fill) const Spacer(),
+                Center(child: footer),
+              ],
             ],
           ),
         ),
@@ -247,7 +249,8 @@ class _BirdyTipCarouselState extends State<BirdyTipCarousel> {
   }
 }
 
-/// Place in the carousel. Many tips: the dots stay small and wrap.
+/// Place in the carousel. Many tips: the dots stay small and wrap,
+/// centered.
 class _Dots extends StatelessWidget {
   const _Dots({required this.count, required this.current});
 
@@ -259,6 +262,7 @@ class _Dots extends StatelessWidget {
     final c = BirdyColors.of(context);
     return ExcludeSemantics(
       child: Wrap(
+        alignment: WrapAlignment.center,
         spacing: 5,
         runSpacing: 5,
         children: [
