@@ -737,6 +737,11 @@ Cette branche contient une fusion avec upstream dont les conflits sont encore ma
 
 - Activité de chant selon la météo (upstream a déjà un service météo).
 - Widget « dernier oiseau entendu ».
+- Audit des couleurs (skills `design:accessibility-review` et `design:design-system`) : contraste
+  mesuré de toutes les paires de `BirdyColors` en clair et en sombre (au-delà de
+  `test/fork/design/contrast_test.dart`), couleurs en dur (`Color(0x…)`, `Colors.*`) dans
+  `lib/fork/`, puis propositions de teintes avec avant/après et ratio. Rapport d'abord, aucune
+  modification sans choix de Benjamin.
 - Export au format eBird (CSV étendu), l'import eBird étant ouvert à tous.
 
 ## Phase iOS (après validation d'Android)
