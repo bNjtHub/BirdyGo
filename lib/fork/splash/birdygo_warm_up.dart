@@ -6,6 +6,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
@@ -79,34 +80,41 @@ class BirdyGoLoadProgress extends ValueNotifier<BirdyGoLoadState> {
 /// A failed or overlong step still counts as done: loading here is an
 /// optimisation, and the screen that needs the resource reports the error
 /// itself. A step without a task is done at once.
+///
+/// The steps run one after the other, with [pause] between them: part of
+/// each load parses on the UI isolate, and piling them up in parallel stalls
+/// the splash animation. [pause] lets a frame through (see
+/// [birdyGoFramePause]).
 Future<void> runBirdyGoWarmUp(
   Map<BirdyGoLoadStep, Future<void> Function()> tasks,
   BirdyGoLoadProgress progress, {
   Duration stepTimeout = const Duration(seconds: 20),
+  Future<void> Function()? pause,
 }) async {
   final clock = Stopwatch()..start();
-  Future<void> run(BirdyGoLoadStep step) async {
+  for (final step in BirdyGoLoadStep.values) {
+    if (progress.value.done.contains(step)) continue;
     final task = tasks[step];
-    try {
-      await task?.call().timeout(stepTimeout);
-      if (task != null) {
+    if (task != null) {
+      await pause?.call();
+      try {
+        await task().timeout(stepTimeout);
         debugPrint(
           '[BirdyGoWarmUp] ${step.name} ready in '
           '${clock.elapsedMilliseconds} ms',
         );
+      } catch (error) {
+        debugPrint('[BirdyGoWarmUp] ${step.name} failed: $error');
       }
-    } catch (error) {
-      debugPrint('[BirdyGoWarmUp] ${step.name} failed: $error');
-    } finally {
-      progress.markDone(step);
     }
+    progress.markDone(step);
   }
-
-  await Future.wait([
-    for (final step in BirdyGoLoadStep.values)
-      if (!progress.value.done.contains(step)) run(step),
-  ]);
 }
+
+/// Waits for the next frame to be drawn, or at most 100 ms (no frame comes
+/// while the app is in the background).
+Future<void> birdyGoFramePause() => SchedulerBinding.instance.endOfFrame
+    .timeout(const Duration(milliseconds: 100), onTimeout: () {});
 
 /// The loading tasks of the app, read from its provider [container]. They
 /// are the same futures the home screen warms up, so nothing loads twice.
@@ -117,12 +125,14 @@ Map<BirdyGoLoadStep, Future<void> Function()> birdyGoWarmUpTasks(
   BirdyGoLoadStep.audioModel:
       () => container.read(liveControllerProvider).loadModel(),
   BirdyGoLoadStep.geoModel: () => container.read(geoModelProvider.future),
-  BirdyGoLoadStep.species:
-      () => Future.wait([
-        container.read(taxonomyServiceProvider.future),
-        container.read(audioLabelsSetProvider.future),
-        container.read(speciesSheetsProvider.future),
-      ]),
+  // One after the other too, a frame apart, for the same reason.
+  BirdyGoLoadStep.species: () async {
+    await container.read(taxonomyServiceProvider.future);
+    await birdyGoFramePause();
+    await container.read(audioLabelsSetProvider.future);
+    await birdyGoFramePause();
+    await container.read(speciesSheetsProvider.future);
+  },
   BirdyGoLoadStep.observations: () async {
     final service = container.read(observationIndexServiceProvider);
     await service.ensureReady();

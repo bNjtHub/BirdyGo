@@ -35,9 +35,19 @@ void main() {
                 () => launchQuickActionRead ??= _readLaunchQuickAction(),
             onContainer: (created) => container = created,
           ),
-      warmUp:
-          (progress) =>
-              runBirdyGoWarmUp(birdyGoWarmUpTasks(container), progress),
+      warmUp: (progress) async {
+        // A share or a Quick Listen tap opens its screen at once, which
+        // loads what it needs itself.
+        if (await launchShareRead != null ||
+            await launchQuickActionRead != null) {
+          return;
+        }
+        await runBirdyGoWarmUp(
+          birdyGoWarmUpTasks(container),
+          progress,
+          pause: birdyGoFramePause,
+        );
+      },
     ),
   );
 }

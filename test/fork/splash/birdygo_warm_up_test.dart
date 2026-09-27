@@ -36,38 +36,41 @@ void main() {
     expect(notified, 1);
   });
 
-  test('steps run side by side and each is marked when it settles', () async {
+  test('steps run one after the other, with a pause before each', () async {
     final progress = BirdyGoLoadProgress()..markDone(BirdyGoLoadStep.start);
     addTearDown(progress.dispose);
     final audio = Completer<void>();
     final geo = Completer<void>();
-    var started = 0;
-    final run = runBirdyGoWarmUp({
-      BirdyGoLoadStep.audioModel: () {
-        started++;
-        return audio.future;
+    final started = <String>[];
+    var pauses = 0;
+    final run = runBirdyGoWarmUp(
+      {
+        BirdyGoLoadStep.audioModel: () {
+          started.add('audio');
+          return audio.future;
+        },
+        BirdyGoLoadStep.geoModel: () {
+          started.add('geo');
+          return geo.future;
+        },
       },
-      BirdyGoLoadStep.geoModel: () {
-        started++;
-        return geo.future;
-      },
-    }, progress);
+      progress,
+      pause: () async => pauses++,
+    );
     await Future<void>.delayed(Duration.zero);
-    expect(started, 2);
-    // Steps without a task are done at once.
-    expect(progress.value.done, {
-      BirdyGoLoadStep.start,
-      BirdyGoLoadStep.species,
-      BirdyGoLoadStep.observations,
-    });
-
-    geo.complete();
-    await Future<void>.delayed(Duration.zero);
-    expect(progress.value.done, contains(BirdyGoLoadStep.geoModel));
+    expect(started, ['audio']);
     expect(progress.value.current, BirdyGoLoadStep.audioModel);
 
     audio.complete();
+    await Future<void>.delayed(Duration.zero);
+    expect(started, ['audio', 'geo']);
+    expect(progress.value.done, contains(BirdyGoLoadStep.audioModel));
+    expect(progress.value.current, BirdyGoLoadStep.geoModel);
+
+    geo.complete();
     await run;
+    // Steps without a task are done without a pause.
+    expect(pauses, 2);
     expect(progress.value.complete, isTrue);
   });
 

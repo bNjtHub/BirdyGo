@@ -70,10 +70,36 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
     if (!_ticker.isActive) _bar.value = widget.progress.value.fraction;
   }
 
+  // Frame statistics, logged when the splash leaves, to measure smoothness
+  // on a device (debug builds are much slower than release ones).
+  int _frames = 0;
+  int _slowFrames = 0;
+  Duration _worstBuild = Duration.zero;
+  Duration _worstRaster = Duration.zero;
+
+  void _onTimings(List<FrameTiming> timings) {
+    for (final timing in timings) {
+      _frames++;
+      if (timing.buildDuration > _frameBudget ||
+          timing.rasterDuration > _frameBudget) {
+        _slowFrames++;
+      }
+      if (timing.buildDuration > _worstBuild) {
+        _worstBuild = timing.buildDuration;
+      }
+      if (timing.rasterDuration > _worstRaster) {
+        _worstRaster = timing.rasterDuration;
+      }
+    }
+  }
+
+  static const _frameBudget = Duration(microseconds: 16667);
+
   @override
   void initState() {
     super.initState();
     widget.progress.addListener(_onProgress);
+    SchedulerBinding.instance.addTimingsCallback(_onTimings);
   }
 
   @override
@@ -110,6 +136,12 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
 
   @override
   void dispose() {
+    SchedulerBinding.instance.removeTimingsCallback(_onTimings);
+    debugPrint(
+      '[BirdyGoSplash] $_frames frames, $_slowFrames over 16.7 ms, '
+      'worst build ${_worstBuild.inMilliseconds} ms, '
+      'worst raster ${_worstRaster.inMilliseconds} ms',
+    );
     widget.progress.removeListener(_onProgress);
     _ticker.dispose();
     _clock.dispose();

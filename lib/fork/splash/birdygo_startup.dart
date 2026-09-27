@@ -79,6 +79,7 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
     }
     if (!mounted) return;
     _progress.markAllDone();
+    setState(() {}); // Mounts App behind the splash.
     _scheduleReveal();
   }
 
@@ -132,7 +133,14 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Offstage(offstage: _showSplash, child: _app),
+            // App mounts once loading is done: its home screen would
+            // otherwise start the same loads all at once and stall the
+            // animation. Explicit launches skip [BirdyGoStartup.warmUp], so
+            // their App still mounts right after initialization.
+            Offstage(
+              offstage: _showSplash,
+              child: _progress.value.complete ? _app : null,
+            ),
             if (_showSplash) _buildSplash(),
           ],
         ),

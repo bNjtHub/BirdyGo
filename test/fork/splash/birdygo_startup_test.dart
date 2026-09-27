@@ -226,7 +226,8 @@ void main() {
     await tester.pump(BirdyGoSplash.minimumDisplay);
     await tester.pump(const Duration(milliseconds: 16));
     expect(find.byType(BirdyGoSplash), findsOneWidget);
-    expect(find.text('App ready'), findsNothing);
+    // App is not even mounted yet: its home would start the same loads.
+    expect(find.text('App ready', skipOffstage: false), findsNothing);
 
     geo.complete();
     await tester.pump();
