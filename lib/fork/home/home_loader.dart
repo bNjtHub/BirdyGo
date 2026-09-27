@@ -62,7 +62,7 @@ class HomeLoader {
     }
 
     LastBird? last;
-    final newest = await index.lastDetection();
+    final newest = await index.lastDetection(heardOnly: true);
     if (newest != null) {
       final geo = await _presenceOf(newest);
       final totals = await index.totalContactsBySpecies();

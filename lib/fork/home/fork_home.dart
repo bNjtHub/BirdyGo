@@ -3,7 +3,8 @@
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
 /// geo-model, index). Série chip, status card and weekly challenge come from
-/// the game (J6e); the menu keeps every upstream entry.
+/// the game (J6e), the daily listening goal has its card; the menu keeps
+/// every upstream entry.
 library;
 
 import 'dart:async';
@@ -33,6 +34,8 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
+import '../daily_goal/daily_goal_card.dart';
+import '../daily_goal/daily_goal_screen.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/empty_state.dart';
@@ -133,6 +136,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           (_) => HomeMenuSheet(
             groups: [
               [
+                HomeMenuEntry(
+                  AppIcons.flagRounded,
+                  l10n.forkDailyGoalTitle,
+                  () => _open(const DailyGoalScreen()),
+                ),
                 HomeMenuEntry(
                   AppIcons.libraryMusic,
                   l10n.sessionLibraryTitle,
@@ -271,6 +279,10 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
             : ('today', DayTiles(today: snapshot.today)),
     ];
     final cards = <(String, Widget)>[
+      (
+        'daily-goal',
+        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
+      ),
       if (last != null)
         (
           'last',

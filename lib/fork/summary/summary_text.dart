@@ -64,7 +64,9 @@ String summaryShareText(
       summaryDuration(l10n, summary.duration),
     ),
     if (verified.isNotEmpty) '',
-    for (final s in verified) '${nameOf(s)} ×${s.count}',
+    for (final s in verified)
+      '${nameOf(s)} ×${s.count}'
+          '${s.seen ? ' · ${s.heard ? l10n.detectionEvidenceHeardAndSeen : l10n.detectionEvidenceSeen}' : ''}',
     if (pending > 0) ...['', l10n.forkSummaryShareToCheck(pending)],
   ].join('\n');
 }

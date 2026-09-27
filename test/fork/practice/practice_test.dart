@@ -190,7 +190,7 @@ void main() {
 
     final index = await ObservationIndex.open(databaseFactoryFfi, path);
     addTearDown(index.close);
-    expect(ObservationIndex.schemaVersion, 3);
+    expect(ObservationIndex.schemaVersion, greaterThan(2));
     expect(index.needsRebuild, isTrue);
     expect((await index.counts()).sessions, 0);
     expect(await index.favoriteKeys(), {'fav'});

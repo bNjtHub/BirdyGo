@@ -137,6 +137,25 @@ class AnalysingHold {
 class LiveCycleTracker {
   final AnalysingHold _hold = AnalysingHold();
   final LiveHeard _heard = LiveHeard();
+  DateTime? _expiresAt;
+
+  /// Time left until the current signal becomes stale, measured from the
+  /// audio window's end, not the moment its inference happened to finish.
+  /// Null means there is no active signal to expire.
+  Duration? remainingLifetime(DateTime now) {
+    final expiresAt = _expiresAt;
+    if (expiresAt == null) return null;
+    final remaining = expiresAt.difference(now);
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  /// Clears an expired signal even if no new inference completes. Historical
+  /// mark ends remain available. Returns null while the signal is fresh.
+  LiveCycleSignal? expire(DateTime now) {
+    final remaining = remainingLifetime(now);
+    if (remaining == null || remaining > Duration.zero) return null;
+    return pause();
+  }
 
   /// Cycle read from [service] (null when it is not running).
   LiveCycleSignal updateFrom(
@@ -150,6 +169,8 @@ class LiveCycleTracker {
     required Set<String>? geoNames,
     required DateTime windowEnd,
     required Duration window,
+    required Duration expectedHop,
+    required DateTime processedAt,
     required bool replayHeard,
   }) => update(
     windowScores: service?.lastWindowScores,
@@ -164,6 +185,8 @@ class LiveCycleTracker {
     geoNames: geoNames,
     windowEnd: windowEnd,
     window: window,
+    expectedHop: expectedHop,
+    processedAt: processedAt,
     replayHeard: replayHeard,
   );
 
@@ -183,10 +206,18 @@ class LiveCycleTracker {
     Set<String>? geoNames,
     required DateTime windowEnd,
     required Duration window,
+    required Duration expectedHop,
+    required DateTime processedAt,
     bool replayHeard = false,
   }) {
     final scores = windowScores;
     if (scores == null || replayHeard) return pause();
+
+    // Allow the next scheduled hop plus one model window of processing
+    // slack. This also works at slow inference rates without blinking
+    // between normal cycles. Backlogged results never relight the signal.
+    final expiresAt = windowEnd.add(expectedHop + window);
+    if (!processedAt.isBefore(expiresAt)) return pause();
 
     final confirmedNames = {
       for (final d in confirmed) d.species.scientificName,
@@ -225,10 +256,12 @@ class LiveCycleTracker {
       window: window,
     );
 
+    final singing = _heard.singingVisual;
+    _expiresAt = analysing || singing.isNotEmpty ? expiresAt : null;
     return LiveCycleSignal(
       candidates: candidates,
       analysing: analysing,
-      singingVisual: _heard.singingVisual,
+      singingVisual: singing,
       heardUntil: _heard.heardUntil,
     );
   }
@@ -257,6 +290,7 @@ class LiveCycleTracker {
 
   /// Pause or replay: no candidate, no symbol; the marks keep their ends.
   LiveCycleSignal pause() {
+    _expiresAt = null;
     _hold.reset();
     _heard.pause();
     return LiveCycleSignal(heardUntil: _heard.heardUntil);
@@ -264,6 +298,7 @@ class LiveCycleTracker {
 
   /// New session.
   void reset() {
+    _expiresAt = null;
     _hold.reset();
     _heard.reset();
   }

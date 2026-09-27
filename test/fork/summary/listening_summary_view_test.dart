@@ -44,6 +44,7 @@ void main() {
     bool dark = false,
     double textScale = 1,
     bool reduceMotion = false,
+    VoidCallback? onAddObservation,
     Size size = const Size(360, 800),
   }) async {
     tester.view.physicalSize = size * 3;
@@ -72,6 +73,7 @@ void main() {
           onShare: () => shared++,
           onCheck: (keys) => checked = keys,
           onDetails: () => details++,
+          onAddObservation: onAddObservation,
           onMarkRecording: (recording) => markedRecording = recording,
         ),
       ),
@@ -102,6 +104,41 @@ void main() {
     expect(find.text('Les 13 espèces entendues'), findsOneWidget);
     expect(find.text('×9'), findsOneWidget);
   });
+
+  testWidgets(
+    'visual-only bird is observed, with no invented hearing or time',
+    (tester) async {
+      final session = morningSession()..detections.clear();
+      session.detections.add(
+        DetectionRecord(
+          scientificName: 'Upupa epops',
+          commonName: 'Huppe fasciée',
+          confidence: 1,
+          timestamp: session.startTime,
+          source: DetectionSource.manualGlobal,
+          evidence: DetectionEvidence.seen,
+          reviewStatus: ReviewStatus.confirmed,
+        ),
+      );
+      var added = false;
+      await pump(
+        tester,
+        ListeningSummary.of(session, verifiedBefore: const {}),
+        onAddObservation: () => added = true,
+      );
+      final l10n =
+          AppLocalizations.of(
+            tester.element(find.byType(ListeningSummaryView)),
+          )!;
+      expect(find.text(l10n.forkSummarySpeciesObserved(1)), findsOneWidget);
+      expect(find.text(l10n.forkSummarySpeciesHeard(1)), findsNothing);
+      expect(find.text(l10n.detectionEvidenceSeen), findsOneWidget);
+      expect(find.text(l10n.forkSummaryRankWithoutTime(1)), findsOneWidget);
+      expect(find.textContaining('07:12.'), findsNothing);
+      await _tapInPage(tester, find.text(l10n.forkSummaryAddObservation));
+      expect(added, isTrue);
+    },
+  );
 
   testWidgets('« Vérifier 3 détections » opens the three to check', (
     tester,

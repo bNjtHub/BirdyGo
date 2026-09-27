@@ -1306,7 +1306,8 @@ class SurveyController {
               AnnouncementDetection(
                 speciesId: d.species.scientificName,
                 displayName: d.species.commonName,
-                score: d.confidence,
+                score:
+                    d.effectiveDecisionConfidence, // FORK: pooled decision score
                 at: d.timestamp ?? DateTime.now(),
               ),
           ];

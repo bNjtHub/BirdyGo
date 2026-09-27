@@ -176,6 +176,59 @@ void main() {
       expect(survives(1.0, 0.0), isTrue);
     });
 
+    test('a reported peak cannot grant geographic immunity', () {
+      final result = SpeciesFilter.apply(
+        detections: [
+          Detection(
+            species: _sp(0, 'Subject'),
+            confidence: 0.995,
+            decisionConfidence: 0.60,
+          ),
+        ],
+        mode: SpeciesFilterMode.geoAdaptive,
+        geoScores: location(subject: 0.0),
+        confidenceThreshold: 0.35,
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('a reported peak cannot weaken the geographic penalty', () {
+      // A 98% score would pass here, but the pooled evidence is only 60%.
+      expect(survives(0.98, 0.05), isTrue);
+      final result = SpeciesFilter.apply(
+        detections: [
+          Detection(
+            species: _sp(0, 'Subject'),
+            confidence: 0.98,
+            decisionConfidence: 0.60,
+          ),
+        ],
+        mode: SpeciesFilterMode.geoAdaptive,
+        geoScores: location(subject: 0.05),
+        confidenceThreshold: 0.35,
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('keeps the reported peak and metadata when evidence passes', () {
+      final detection = Detection(
+        species: _sp(0, 'Subject'),
+        confidence: 0.99,
+        decisionConfidence: 0.90,
+        timestamp: DateTime.utc(2026, 9, 27),
+      );
+      final result = SpeciesFilter.apply(
+        detections: [detection],
+        mode: SpeciesFilterMode.geoAdaptive,
+        geoScores: location(subject: 0.05),
+        confidenceThreshold: 0.35,
+      );
+
+      expect(result.single, same(detection));
+    });
+
     test('a species at or above the abundant floor is never filtered', () {
       // g >= g0 cancels or reverses the geo penalty, so the mode matches 'off'.
       for (final p in [0.35, 0.4, 0.6, 0.9]) {
@@ -318,11 +371,7 @@ void main() {
     test('extreme inputs stay finite', () {
       for (final p in [0.0, 1.0]) {
         for (final g in [0.0, 1.0]) {
-          expect(
-            () => survives(p, g),
-            returnsNormally,
-            reason: 'p=$p g=$g',
-          );
+          expect(() => survives(p, g), returnsNormally, reason: 'p=$p g=$g');
         }
       }
     });
@@ -333,6 +382,50 @@ void main() {
   // ─────────────────────────────────────────────────────────────────────────
 
   group('SpeciesFilterMode.geoMerge', () {
+    test('a reported peak cannot pass the merged decision threshold', () {
+      final result = SpeciesFilter.apply(
+        detections: [
+          Detection(species: spA, confidence: 0.95, decisionConfidence: 0.40),
+        ],
+        mode: SpeciesFilterMode.geoMerge,
+        geoScores: {spA.scientificName: 0.6},
+        confidenceThreshold: 0.35,
+      );
+
+      // The peak would score 0.57, but the decision evidence scores 0.24.
+      expect(result, isEmpty);
+    });
+
+    test('weights both scores, ranks by evidence, and preserves time', () {
+      final timestamp = DateTime.utc(2026, 9, 27);
+      final result = SpeciesFilter.apply(
+        detections: [
+          Detection(
+            species: spA,
+            confidence: 0.95,
+            decisionConfidence: 0.50,
+            timestamp: timestamp,
+          ),
+          Detection(
+            species: spB,
+            confidence: 0.80,
+            decisionConfidence: 0.75,
+            timestamp: timestamp,
+          ),
+        ],
+        mode: SpeciesFilterMode.geoMerge,
+        geoScores: {spA.scientificName: 0.8, spB.scientificName: 0.8},
+        confidenceThreshold: 0.35,
+      );
+
+      expect(result.map((d) => d.species), [spB, spA]);
+      expect(result[0].confidence, closeTo(0.64, 1e-10));
+      expect(result[0].decisionConfidence, closeTo(0.60, 1e-10));
+      expect(result[1].confidence, closeTo(0.76, 1e-10));
+      expect(result[1].decisionConfidence, closeTo(0.40, 1e-10));
+      expect(result.every((d) => d.timestamp == timestamp), isTrue);
+    });
+
     test('multiplies audio score by geo score', () {
       final result = SpeciesFilter.apply(
         detections: detections,

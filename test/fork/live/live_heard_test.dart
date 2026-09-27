@@ -22,20 +22,20 @@ List<Set<String>> _feed(LiveHeard live, List<bool> heard) => [
 ];
 
 void main() {
-  test('the symbol lights up when the contact opens', () {
+  test('an unsupported pooled contact does not light the symbol', () {
     final visual = _feed(LiveHeard(), [false]);
-    expect(visual.single, {_name});
+    expect(visual.single, isEmpty);
   });
 
-  test('phrase, one missed window, phrase: the symbol stays', () {
+  test('a new supported phrase relights the same contact', () {
     final visual = _feed(LiveHeard(), [true, false, true, true]);
-    expect(visual.every((v) => v.contains(_name)), isTrue);
+    expect(visual.map((v) => v.contains(_name)), [true, false, true, true]);
   });
 
-  test('two windows under the support threshold put it out', () {
-    expect(ReliabilityConfig.liveSingingHoldWindows, 2);
+  test('the first window under the support threshold puts it out', () {
+    expect(ReliabilityConfig.liveSingingHoldWindows, 1);
     final visual = _feed(LiveHeard(), [true, false, false, true]);
-    expect(visual.map((v) => v.contains(_name)), [true, true, false, true]);
+    expect(visual.map((v) => v.contains(_name)), [true, false, false, true]);
   });
 
   test('out of the results: out at once', () {

@@ -6,6 +6,7 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/fork_session_hooks.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
+import 'package:birdnet_live/fork/reliability/review_writer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -228,7 +229,102 @@ void main() {
       await index.clear();
       expect((await index.counts()).detections, 0);
     });
+
+    test('preserves manual evidence and same-time automatic records', () async {
+      final timestamp = morning.startTime;
+      morning.detections.clear();
+      morning.detections.addAll([
+        DetectionRecord(
+          scientificName: 'Parus major',
+          commonName: 'Great tit',
+          confidence: .9,
+          timestamp: timestamp,
+        ),
+        DetectionRecord(
+          scientificName: 'Parus major',
+          commonName: 'Great tit',
+          confidence: 1,
+          timestamp: timestamp,
+          source: DetectionSource.manualGlobal,
+          evidence: DetectionEvidence.seen,
+          reviewStatus: ReviewStatus.confirmed,
+        ),
+        DetectionRecord(
+          scientificName: 'Erithacus rubecula',
+          commonName: 'Robin',
+          confidence: 1,
+          timestamp: timestamp,
+          source: DetectionSource.manualGlobal,
+          evidence: DetectionEvidence.heardAndSeen,
+        ),
+      ]);
+      await index.rebuild([morning]);
+      final rows = await index.detectionsSince(timestamp);
+      expect(rows, hasLength(3));
+      final tit =
+          rows.where((row) => row.scientificName == 'Parus major').toList();
+      expect(tit.map((row) => row.key).toSet(), hasLength(1));
+      expect(tit.map((row) => row.position).toSet(), {0, 1});
+      expect(tit.where((row) => row.isHeard), hasLength(1));
+      final manual = rows.singleWhere(
+        (row) => row.scientificName == 'Erithacus rubecula',
+      );
+      expect(manual.source, DetectionSource.manualGlobal);
+      expect(manual.evidence, DetectionEvidence.heardAndSeen);
+      expect((await index.lastDetection(heardOnly: true))!.isHeard, isTrue);
+      await index.setFavorite(tit.first.key, favorite: true);
+      await index.upsertSession(morning);
+      expect((await index.counts()).detections, 3);
+      expect(await index.favoriteKeys(), {tit.first.key});
+    });
   });
+
+  test(
+    'schema upgrade preserves favorites and rebuilds manual evidence',
+    () async {
+      final tmp = await Directory.systemTemp.createTemp('obs_index_migration_');
+      final path = '${tmp.path}/index.db';
+      final key = detectionKey(morning.id, morning.detections.first);
+      final old = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 3,
+          onCreate: (db, _) async {
+            await db.execute('CREATE TABLE sessions (id TEXT PRIMARY KEY)');
+            await db.execute('CREATE TABLE detections (key TEXT PRIMARY KEY)');
+            await db.execute('CREATE TABLE favorites (key TEXT PRIMARY KEY)');
+            await db.insert('favorites', {'key': key});
+          },
+        ),
+      );
+      await old.close();
+      final index = await ObservationIndex.open(databaseFactoryFfi, path);
+      try {
+        expect(index.needsRebuild, isTrue);
+        expect(await index.favoriteKeys(), {key});
+        morning.detections.add(
+          DetectionRecord(
+            scientificName: 'Manual bird',
+            commonName: 'Manual bird',
+            confidence: 1,
+            timestamp: morning.startTime,
+            source: DetectionSource.manualGlobal,
+            evidence: DetectionEvidence.seen,
+          ),
+        );
+        await index.rebuild([morning]);
+        expect(index.needsRebuild, isFalse);
+        final rows = await index.mapPoints(scientificName: 'Manual bird');
+        expect(rows.single.source, DetectionSource.manualGlobal);
+        expect(rows.single.evidence, DetectionEvidence.seen);
+        expect(rows.single.isHeard, isFalse);
+        expect(await index.favoriteKeys(), {key});
+      } finally {
+        await index.close();
+        await tmp.delete(recursive: true);
+      }
+    },
+  );
 
   group('ObservationIndexService', () {
     late Directory tmp;
@@ -285,5 +381,65 @@ void main() {
       expect((await index.counts()).sessions, 0);
       await index.close();
     });
+
+    test(
+      'review targets the correct physical record despite a shared key',
+      () async {
+        final timestamp = morning.startTime;
+        morning.detections.clear();
+        morning.detections.addAll([
+          DetectionRecord(
+            scientificName: 'Parus major',
+            commonName: 'Great tit',
+            confidence: .9,
+            timestamp: timestamp,
+          ),
+          DetectionRecord(
+            scientificName: 'Parus major',
+            commonName: 'Great tit',
+            confidence: 1,
+            timestamp: timestamp,
+            source: DetectionSource.manualGlobal,
+            evidence: DetectionEvidence.seen,
+            reviewStatus: ReviewStatus.confirmed,
+          ),
+          DetectionRecord(
+            scientificName: 'Parus major',
+            commonName: 'Great tit',
+            confidence: 1,
+            timestamp: timestamp,
+            source: DetectionSource.manualGlobal,
+            evidence: DetectionEvidence.heard,
+            reviewStatus: ReviewStatus.rejected,
+          ),
+        ]);
+        await repository.save(morning);
+        final index = await _openMemory();
+        try {
+          await index.rebuild([morning]);
+          expect((await index.counts()).detections, 3);
+          final heard = (await index.lastDetection(heardOnly: true))!;
+          expect(heard.position, 0);
+          final writer = ReviewWriter(
+            repository: repository,
+            index: () async => index,
+          );
+          expect(await writer.setStatus(heard, ReviewStatus.confirmed), isTrue);
+          final saved = (await repository.load(morning.id))!;
+          expect(saved.detections.map((record) => record.reviewStatus), [
+            ReviewStatus.confirmed,
+            ReviewStatus.confirmed,
+            ReviewStatus.rejected,
+          ]);
+          await index.upsertSession(saved);
+          expect(
+            (await index.lastDetection(heardOnly: true))!.source,
+            DetectionSource.auto,
+          );
+        } finally {
+          await index.close();
+        }
+      },
+    );
   });
 }

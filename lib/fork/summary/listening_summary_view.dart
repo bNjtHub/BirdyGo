@@ -38,6 +38,8 @@ class ListeningSummaryView extends StatelessWidget {
     this.onOpenSpecies,
     this.onCheck,
     this.onDetails,
+    this.onAddObservation,
+    this.savingObservation = false,
     this.onMarkRecording,
     this.footer,
   });
@@ -63,6 +65,10 @@ class ListeningSummaryView extends StatelessWidget {
 
   /// Opens the full session review.
   final VoidCallback? onDetails;
+
+  /// Adds a bird observed during this session, even without a recording.
+  final VoidCallback? onAddObservation;
+  final bool savingObservation;
 
   /// « C'était un enregistrement ? » (J5c): marks the session as a
   /// recording (true) or back as real birds (false). Hidden when null.
@@ -91,9 +97,20 @@ class ListeningSummaryView extends StatelessWidget {
           onOpenSpecies: onOpenSpecies,
           onCheck: onCheck,
         ),
-      if (!summary.isEmpty)
+      if (summary.heardSpecies.isNotEmpty)
         _SpeciesStrip(
-          summary: summary,
+          species: summary.heardSpecies,
+          heading: l10n.forkSummarySpeciesHeard(summary.heardSpecies.length),
+          nameOf: nameOf,
+          imageFor: imageFor,
+          onOpen: onOpenSpecies,
+        ),
+      if (summary.otherObservedSpecies.isNotEmpty)
+        _SpeciesStrip(
+          species: summary.otherObservedSpecies,
+          heading: l10n.forkSummarySpeciesObserved(
+            summary.otherObservedSpecies.length,
+          ),
           nameOf: nameOf,
           imageFor: imageFor,
           onOpen: onOpenSpecies,
@@ -102,6 +119,8 @@ class ListeningSummaryView extends StatelessWidget {
         toCheck: toCheck,
         onCheck: onCheck == null ? null : () => onCheck!(toCheck),
         onDetails: onDetails,
+        onAddObservation: onAddObservation,
+        savingObservation: savingObservation,
       ),
       if (onMarkRecording != null)
         _RecordingLink(
@@ -361,10 +380,12 @@ class _FirstTimeCard extends StatelessWidget {
                         ),
                         const SizedBox(height: BirdySpace.xs),
                         Text(
-                          l10n.forkSummaryRank(
-                            first.rank,
-                            summaryTime(l10n, first.species.verifiedAt!),
-                          ),
+                          first.species.hasPreciseVerifiedTime
+                              ? l10n.forkSummaryRank(
+                                first.rank,
+                                summaryTime(l10n, first.species.verifiedAt!),
+                              )
+                              : l10n.forkSummaryRankWithoutTime(first.rank),
                           style: BirdyText.body.copyWith(color: c.text1),
                         ),
                       ],
@@ -452,13 +473,15 @@ class _MaybeFirstRow extends StatelessWidget {
 /// wait for a check.
 class _SpeciesStrip extends StatelessWidget {
   const _SpeciesStrip({
-    required this.summary,
+    required this.species,
+    required this.heading,
     required this.nameOf,
     this.imageFor,
     this.onOpen,
   });
 
-  final ListeningSummary summary;
+  final List<SummarySpecies> species;
+  final String heading;
   final String Function(SummarySpecies species) nameOf;
   final ImageProvider? Function(String scientificName)? imageFor;
   final void Function(SummarySpecies species)? onOpen;
@@ -471,10 +494,7 @@ class _SpeciesStrip extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.forkSummarySpeciesHeard(summary.species.length),
-          style: BirdyText.caption.copyWith(color: c.text2),
-        ),
+        Text(heading, style: BirdyText.caption.copyWith(color: c.text2)),
         const SizedBox(height: BirdySpace.s),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -482,11 +502,17 @@ class _SpeciesStrip extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final s in summary.species)
+              for (final s in species)
                 _StripItem(
                   species: s,
                   label: l10n.forkSummaryStripItem(nameOf(s), s.count),
                   pendingLabel: reliabilityLabel(l10n, s.level),
+                  evidenceLabel:
+                      s.seen
+                          ? s.heard
+                              ? l10n.detectionEvidenceHeardAndSeen
+                              : l10n.detectionEvidenceSeen
+                          : null,
                   image: imageFor?.call(s.scientificName),
                   dotColor: dot,
                   onTap: onOpen == null ? null : () => onOpen!(s),
@@ -505,6 +531,7 @@ class _StripItem extends StatelessWidget {
     required this.label,
     required this.pendingLabel,
     required this.dotColor,
+    this.evidenceLabel,
     this.image,
     this.onTap,
   });
@@ -513,6 +540,7 @@ class _StripItem extends StatelessWidget {
   final String label;
   final String pendingLabel;
   final Color dotColor;
+  final String? evidenceLabel;
   final ImageProvider? image;
   final VoidCallback? onTap;
 
@@ -522,7 +550,11 @@ class _StripItem extends StatelessWidget {
     final tint = SpeciesAccents.tintOf(species.scientificName);
     return Semantics(
       button: onTap != null,
-      label: species.pending ? '$label, $pendingLabel' : label,
+      label: [
+        label,
+        if (evidenceLabel != null) evidenceLabel!,
+        if (species.pending) pendingLabel,
+      ].join(', '),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -576,6 +608,12 @@ class _StripItem extends StatelessWidget {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
+                if (evidenceLabel != null)
+                  Text(
+                    evidenceLabel!,
+                    textAlign: TextAlign.center,
+                    style: BirdyText.caption.copyWith(color: c.text2),
+                  ),
               ],
             ),
           ),
@@ -587,11 +625,19 @@ class _StripItem extends StatelessWidget {
 
 /// « Vérifier 3 détections », or the session details when nothing waits.
 class _Actions extends StatelessWidget {
-  const _Actions({required this.toCheck, this.onCheck, this.onDetails});
+  const _Actions({
+    required this.toCheck,
+    this.onCheck,
+    this.onDetails,
+    this.onAddObservation,
+    this.savingObservation = false,
+  });
 
   final Set<String> toCheck;
   final VoidCallback? onCheck;
   final VoidCallback? onDetails;
+  final VoidCallback? onAddObservation;
+  final bool savingObservation;
 
   @override
   Widget build(BuildContext context) {
@@ -600,6 +646,21 @@ class _Actions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (onAddObservation != null || savingObservation) ...[
+          OutlinedButton.icon(
+            style: BirdyButtonStyles.secondary(context),
+            onPressed: savingObservation ? null : onAddObservation,
+            icon:
+                savingObservation
+                    ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Icon(AppIcons.add),
+            label: Text(l10n.forkSummaryAddObservation),
+          ),
+          const SizedBox(height: BirdySpace.s),
+        ],
         if (toCheck.isNotEmpty) ...[
           Pressable(
             enabled: onCheck != null,

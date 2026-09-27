@@ -95,6 +95,28 @@ void main() {
     await index.close();
   });
 
+  test(
+    'a later visual observation never becomes the last bird heard',
+    () async {
+      final visual = _session('visual', DateTime(2026, 9, 26, 8), []);
+      visual.detections.add(
+        DetectionRecord(
+          scientificName: 'Parus major',
+          commonName: 'Great tit',
+          confidence: 1,
+          timestamp: visual.startTime,
+          source: DetectionSource.manualGlobal,
+          evidence: DetectionEvidence.seen,
+          reviewStatus: ReviewStatus.confirmed,
+        ),
+      );
+      await index.upsertSession(visual);
+      final home = await loader().load();
+      expect(home.last!.scientificName, 'Erithacus rubecula');
+      expect(home.last!.detection.isHeard, isTrue);
+    },
+  );
+
   test("today's tiles, last bird and review count", () async {
     final home = await loader().load();
     expect(home.today.species, 3);

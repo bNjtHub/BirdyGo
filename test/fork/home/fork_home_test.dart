@@ -6,6 +6,7 @@ import 'package:birdnet_live/features/live/live_screen.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
+import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
@@ -144,9 +145,7 @@ void main() {
     return screen;
   }
 
-  testWidgets('the mockup morning (SPEC 9.1), without the game blocks', (
-    tester,
-  ) async {
+  testWidgets('the morning overview includes the daily goal', (tester) async {
     await pump(tester);
     expect(find.text('BirdyGo'), findsOneWidget);
     expect(find.byTooltip('Menu'), findsOneWidget);
@@ -182,10 +181,20 @@ void main() {
 
   testWidgets('the to-check card opens the quick review', (tester) async {
     final pushes = await pump(tester);
+    await tester.ensureVisible(find.text('12 détections à vérifier'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('12 détections à vérifier'));
     final screen = await pushedScreen(tester, pushes);
     expect(screen, isA<QuickReviewScreen>());
     expect((screen as QuickReviewScreen).onlyKeys, isNull);
+  });
+
+  testWidgets('the daily goal card opens the listening checklist', (
+    tester,
+  ) async {
+    final pushes = await pump(tester);
+    await tester.tap(find.text('Objectif du jour'));
+    expect(await pushedScreen(tester, pushes), isA<DailyGoalScreen>());
   });
 
   testWidgets('nothing to check: no card', (tester) async {
