@@ -20,9 +20,12 @@ import 'home_model.dart';
 
 /// Mark, name and menu button.
 class HomeTopBar extends StatelessWidget {
-  const HomeTopBar({super.key, required this.onMenu});
+  const HomeTopBar({super.key, required this.onMenu, this.streak});
 
   final VoidCallback onMenu;
+
+  /// Série chip (J6e), before the menu.
+  final Widget? streak;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +43,7 @@ class HomeTopBar extends StatelessWidget {
               style: BirdyText.heading.copyWith(color: c.text1),
             ),
           ),
+          if (streak != null) ...[streak!, const SizedBox(width: BirdySpace.s)],
           BirdyIconButton(
             icon: AppIcons.menu,
             semanticLabel: l10n.forkHomeMenu,

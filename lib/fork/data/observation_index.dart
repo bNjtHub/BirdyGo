@@ -144,6 +144,23 @@ class SpeciesTally {
   final DateTime last;
 }
 
+/// One indexed listening (J6e).
+class IndexedListening {
+  const IndexedListening({
+    required this.id,
+    required this.start,
+    required this.end,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final String id;
+  final DateTime start;
+  final DateTime? end;
+  final double? latitude;
+  final double? longitude;
+}
+
 /// Review state of one species over all time, for the notebook (J6e).
 class SpeciesReviewTally {
   const SpeciesReviewTally({
@@ -694,6 +711,68 @@ class ObservationIndex {
       [scientificName],
     );
     return {for (final row in rows) row['key']! as String};
+  }
+
+  /// Every indexed listening: id, start, end and place (J6e: série, early
+  /// starts, dawn chorus).
+  Future<List<IndexedListening>> listenings() async {
+    final rows = await _db.rawQuery(
+      'SELECT id, start_ms, end_ms, latitude, longitude FROM sessions',
+    );
+    return [
+      for (final row in rows)
+        IndexedListening(
+          id: row['id']! as String,
+          start: DateTime.fromMillisecondsSinceEpoch(
+            row['start_ms']! as int,
+            isUtc: true,
+          ),
+          end: switch (row['end_ms']) {
+            final int ms => DateTime.fromMillisecondsSinceEpoch(
+              ms,
+              isUtc: true,
+            ),
+            _ => null,
+          },
+          latitude: row['latitude'] as double?,
+          longitude: row['longitude'] as double?,
+        ),
+    ];
+  }
+
+  /// Detections confirmed, or unreviewed with a score of at least
+  /// [minScore], in the listenings [sessionIds] (J6e: dawn chorus).
+  Future<List<IndexedDetection>> verifiedCandidatesIn(
+    Set<String> sessionIds, {
+    required double minScore,
+  }) async {
+    if (sessionIds.isEmpty) return const [];
+    // Filtered in Dart, like [reviewQueue]: too many ids for SQLite.
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE (review_status = 'confirmed' OR "
+      "(review_status = 'unreviewed' AND confidence >= ?)) "
+      'AND scientific_name != ?',
+      [minScore, DetectionRecord.unknownSpeciesName],
+    );
+    return [
+      for (final row in rows)
+        if (sessionIds.contains(row['session_id']))
+          IndexedDetection.fromRow(row),
+    ];
+  }
+
+  /// Detections answered in the quick review: confirmed, rejected or
+  /// « Je ne sais pas » (J6e: Réviseur badge).
+  Future<int> reviewedCount() async {
+    final answered = Sqflite.firstIntValue(
+      await _db.rawQuery(
+        "SELECT COUNT(*) FROM detections WHERE review_status != 'unreviewed'",
+      ),
+    );
+    final skipped = Sqflite.firstIntValue(
+      await _db.rawQuery('SELECT COUNT(*) FROM review_skipped'),
+    );
+    return (answered ?? 0) + (skipped ?? 0);
   }
 
   /// Number of detections waiting in the quick review.
