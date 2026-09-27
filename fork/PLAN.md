@@ -484,8 +484,11 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             principale sous la salutation, ses oiseaux en grands ronds (2 rangées de 4 ; entendu sur sa
             teinte avec une coche, à trouver gris en pointillé, chaque rond annoncé au lecteur d'écran) ;
             ordre de la maquette ; « Écouter » seule action forte, fixée au-dessus de la barre ; entrée
-            de 220 ms sur 5 blocs au plus, rien avec les animations réduites.
-            À vérifier sur le Xiaomi : ronds avec les vraies photos, thème sombre, texte à 130 %.
+            de 220 ms sur 5 blocs au plus, rien avec les animations réduites. Logo : l'oiseau qui
+            chante du démarrage, une phrase à l'arrivée puis une toutes les 2 minutes tant que
+            l'accueil est visible (immobile avec les animations réduites).
+            À vérifier sur le Xiaomi : ronds avec les vraies photos, thème sombre, texte à 130 %,
+            chant du logo (à l'arrivée, après 2 minutes, arrêté sur un autre onglet).
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
             Mist background, singing bird (beak, body, tail, wing bars, one note per
             syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,

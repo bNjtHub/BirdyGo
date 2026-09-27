@@ -260,14 +260,23 @@ Code dans `lib/fork/home/`, affiché par `HomeScreen` (un seul branchement `// F
 la disposition upstream reste dans le fichier, et le préchargement `_warmUpApp` ne change pas).
 On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 
-- Logo : `birdygo_logo.dart` redessine `birdygo-logo-static.svg` en `CustomPainter` (pas de
-  `flutter_svg` avant J6d). À l'arrivée, les quatre barres de l'aile se dessinent de bas en haut,
-  l'une après l'autre, en 480 ms ; l'oiseau ne bouge pas. Animations réduites : dessiné d'un coup.
+- Logo : l'oiseau qui chante de l'écran de démarrage (`SingingLogo`, `singing_logo.dart`, qui
+  réutilise `BirdyGoSingingPainter`), à la taille de la maquette (40 × 32 dp), suivi du nom
+  « BirdyGo ». Seconde exception explicite, après le démarrage, aux règles des 500 ms et de
+  l'absence de rotation : à l'arrivée de l'accueil, l'oiseau apparaît et chante une phrase (trois
+  syllabes, notes qui s'envolent, environ 3,3 s), puis reste immobile ; il rechante une seule phrase
+  toutes les 2 minutes (`SingingLogo.singEvery`) tant que l'accueil est visible. Jamais de boucle :
+  le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
+  programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
+  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois (pas annoncé au lecteur
+  d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
+  L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
+  couleurs de la marque.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
 - Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
   dernier oiseau, défi de la semaine, détections à vérifier. Le haut (logo, pastille de série, menu)
-  ne s'anime pas.
+  n'a pas d'entrée ; seul le logo bouge, quand il chante (voir Logo).
 - Objectif du jour, carte principale (`lib/fork/daily_goal/daily_goal_card.dart`) : carte blanche
   (`surface1`, rayon 28, sans ombre ni dégradé) sur Brume, pastille drapeau, titre, « 5/8 espèces
   entendues » (le rapport en gras), chevron ; dessous les oiseaux de l'objectif en ronds de 60 dp,
@@ -501,7 +510,8 @@ teal). The eye blinks after the phrase. The wing bars draw first; the wordmark e
 1.0 s, « Le monde chante. » at 1.25 s, the loading status at 1.35 s and « Écoute. » at
 2.15 s, each in 320 ms with 8 dp of travel. A phrase lasts 3.6 s and repeats for as long
 as initialization runs. This startup-only motion is an explicit exception to the general
-500 ms/no-rotation rules; it does not change Home's logo or other app animations.
+500 ms/no-rotation rules. Home reuses the same painter for its logo, one phrase at a time
+(see « Mise en œuvre (J6c, Accueil) »); other app animations are unchanged.
 The splash is a real loading screen. After initialization (preferences, notifications,
 launch intents), it loads in App's provider container the audio model, the geo-model,
 the taxonomy, audio labels and species sheets, and opens (or fills) the observation
