@@ -702,6 +702,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Écarts : icône générique pour Les mésanges et silhouettes grises du carnet, J6d étant en
             pause ; « Je ne sais pas » reste dans l'index (table `review_skipped`), pas dans les
             sessions JSON.
+            Quiz v2 (maquette « Quiz v2 ») : accueil avec interrupteur « Avec son / Sans son »,
+            chemin de 10 étapes, oiseau mystère dessiné, confettis, rayons, pops, « +1 Oreille fine »
+            qui s'envole, bilan étoiles / grille 5 × 2 / barre animée, jingle et fanfare (lecteur
+            dédié `quiz_sfx.dart`, sons synthétisés par `tools/fork_quiz_sounds.py`). Icônes
+            dessinées pour les 14 espèces de `icons.json`, photos pour les autres. Dépendances
+            ajoutées : `confetti`, `flutter_svg`.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
@@ -796,3 +802,6 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   unchanged; during the iOS phase make `LaunchScreen.storyboard` a plain Mist (#EEF1EC) view
   with no mark, as on Android, so the Flutter splash fades the bird in without a jump, and check
   cold-launch timing.
+- Quiz « Qui chante ? » (J6e) : aucun code natif. Bruitages en WAV lus par just_audio avec un
+  lecteur à part : sur iPhone, vérifier qu'ils ne coupent pas une musique en cours (session audio
+  « ambient » ou mixage) et que le mode silencieux est respecté.
