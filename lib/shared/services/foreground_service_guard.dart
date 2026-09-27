@@ -11,7 +11,11 @@
 // [release] after `stopService` (or when a start attempt fails).
 
 /// The mode currently holding the shared Android foreground service.
-enum ForegroundServiceOwner { survey, aru }
+enum ForegroundServiceOwner {
+  survey,
+  aru,
+  live, // FORK: Live listening in the background (J2b)
+}
 
 /// Process-wide tracker that enforces single ownership of the shared Android
 /// foreground service across ARU and Survey.
