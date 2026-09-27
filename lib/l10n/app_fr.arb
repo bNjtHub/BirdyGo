@@ -1578,5 +1578,13 @@
   "forkQuizAgain": "Rejouer",
   "forkQuizDone": "Terminer",
   "forkQuizEmptyTitle": "Pas encore assez d'oiseaux",
-  "forkQuizEmpty": "Le quiz se lance avec 4 oiseaux vérifiés qui ont un enregistrement. Garde les extraits pendant tes écoutes."
+  "forkQuizEmpty": "Le quiz se lance avec 4 oiseaux vérifiés qui ont un enregistrement. Garde les extraits pendant tes écoutes.",
+  "forkQuizMystery": "Oiseau mystère",
+  "forkQuizHint": "Écoute, puis choisis son nom.",
+  "forkQuizAnswerWas": "La bonne réponse",
+  "forkQuizListenAgain": "Réécouter",
+  "forkQuizChoiceRight": "bonne réponse",
+  "forkQuizChoiceWrong": "ton choix",
+  "forkQuizNewTier": "Nouvelle plume",
+  "forkQuizToNextTier": "{value} sur {target} vers la prochaine plume"
 }

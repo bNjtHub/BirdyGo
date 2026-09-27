@@ -5675,5 +5675,21 @@
   "forkQuizEmptyTitle": "Not enough birds yet",
   "@forkQuizEmptyTitle": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
   "forkQuizEmpty": "The quiz needs 4 verified birds with a recording. Keep the clips during your listenings.",
-  "@forkQuizEmpty": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."}
+  "@forkQuizEmpty": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizMystery": "Mystery bird",
+  "@forkQuizMystery": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizHint": "Listen, then pick its name.",
+  "@forkQuizHint": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizAnswerWas": "The right answer",
+  "@forkQuizAnswerWas": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizListenAgain": "Listen again",
+  "@forkQuizListenAgain": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizChoiceRight": "right answer",
+  "@forkQuizChoiceRight": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizChoiceWrong": "your pick",
+  "@forkQuizChoiceWrong": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizNewTier": "New feather",
+  "@forkQuizNewTier": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizToNextTier": "{value} of {target} toward the next feather",
+  "@forkQuizToNextTier": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e).", "placeholders": {"value": {"type": "int"}, "target": {"type": "int"}}}
 }
