@@ -112,3 +112,21 @@ Future<Map<String, IndexedDetection>> loadQuizClips(
         case final clip?)
       name: clip,
 };
+
+/// Stars (0 to 3) of a round with [right] answers out of [total]: one per
+/// share of [GameConfig.quizStarShares] reached.
+int quizStars(int right, int total) {
+  if (total <= 0) return 0;
+  final share = right / total;
+  return GameConfig.quizStarShares.where((s) => share >= s).length;
+}
+
+/// Right answers in a row at the end of [results] (the streak pill).
+int quizStreak(List<bool> results) {
+  var count = 0;
+  for (final right in results.reversed) {
+    if (!right) break;
+    count++;
+  }
+  return count;
+}

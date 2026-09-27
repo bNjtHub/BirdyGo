@@ -213,6 +213,10 @@ abstract final class GameConfig {
   static const int quizQuestions = 10;
   static const int quizChoices = 4;
 
+  /// Stars at the end of a round (Quiz v2): share of right answers needed
+  /// for one, two and three stars.
+  static const List<double> quizStarShares = [0.4, 0.7, 1];
+
   /// Medal of each earned tier: bronze, silver, gold for 1, 2, 3 plumes.
   /// The same in both themes, like real metal; a locked badge takes the
   /// theme neutrals instead (DESIGN.md « Jeu »).
