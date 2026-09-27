@@ -373,10 +373,43 @@ Français simple, tutoiement, phrases courtes. Une action garde le même nom par
 Une erreur dit ce qui se passe et quoi faire : « Le micro est bloqué. Autorise-le dans les réglages
 du téléphone. »
 
-Un écran vide invite à agir : « Aucun oiseau pour l'instant. Lance une écoute au lever du jour,
-c'est l'heure où ils chantent le plus. »
+Un écran vide invite à agir (voir « Écrans vides » ci-dessous) : « Aucun oiseau pour l'instant »,
+puis « Lance une écoute au lever du jour, c'est l'heure où ils chantent le plus. »
 
 Pas d'emoji dans l'interface.
+
+## Écrans vides
+
+Un seul composant, `BirdyEmptyState` (`lib/fork/design/widgets/empty_state.dart`), pour tout écran ou
+bloc qui n'a rien à montrer. Il se lit de haut en bas comme une phrase : l'icône dit ce qui remplira
+l'écran, le titre dit ce qui manque, la phrase dit quoi faire (et quand), le bouton le fait.
+
+Trois situations, qui choisissent la couleur du disque et le ton :
+
+| Situation | `kind` | Disque | Icône | Ton | Bouton |
+|---|---|---|---|---|---|
+| Rien encore : l'app n'a jamais rien eu à montrer ici | `firstUse` | Martin-pêcheur clair (`tonal`) | ce qui remplit l'écran (oreille pour une écoute, note pour la sonothèque, plus pour un ajout) | invitation, avec le bon moment (« au lever du jour ») | principal, seulement si l'écran n'a pas déjà l'action (l'Accueil a déjà « Écouter ») |
+| Rien avec ces filtres : il y a des données, pas pour cette période ou ce filtre | `filtered` | gris (`borderOpaque`) | loupe barrée, ou le filtre lui-même (étoile pour « Favoris ») | court, propose d'élargir | tonal, qui élargit quand c'est possible (« Toute la période », « Tous les enregistrements ») |
+| Tout est fait : vide parce que le travail est terminé | `done` | Lichen (`sure`) | coche | positif, avec le chiffre de ce qui a été fait | aucun |
+
+Règles :
+
+- Le titre dit ce qui manque, en une ligne, sans point final : « Aucun oiseau pour l'instant ». La
+  phrase dit l'action qui remplit l'écran, jamais un reproche (« Tu n'as pas… » est interdit).
+- Toujours une icône (`AppIcons`), jamais d'illustration ni d'emoji. L'icône montre ce qui viendra,
+  pas le vide : pas de « boîte vide » ni de point d'interrogation.
+- Pleine page (`BirdyEmptyState`) quand l'écran n'a rien d'autre à montrer : Palmarès, Sonothèque,
+  Revue rapide. Carte en ligne (`BirdyEmptyState.inline`) quand le vide n'est qu'un bloc parmi
+  d'autres : tuiles du jour de l'Accueil, liste de l'Envoi à la LPO, comptage au jardin, et par-dessus
+  la Carte (avec l'ombre des couches flottantes).
+- Distinguer « rien encore » de « rien avec ces filtres » dès que l'écran a un filtre : le Palmarès
+  compare à la période « Tout », la Carte sait si l'index est vide, la Sonothèque regarde le filtre
+  « Favoris seulement ». Le cas « rien encore » ne doit jamais s'afficher alors que d'autres réglages
+  montreraient quelque chose.
+- Un chargement n'est pas un vide : indicateur de progression tant que les données ne sont pas là,
+  puis l'écran vide en fondu (`BirdyEntrance`, fondu seul en animations réduites).
+- Textes : clé `<écran>EmptyTitle` pour le titre, `<écran>Empty` pour la phrase, dans `app_fr.arb`
+  et `app_en.arb`. Les trois situations sont visibles dans la galerie du design system.
 
 ## Contrôle qualité
 

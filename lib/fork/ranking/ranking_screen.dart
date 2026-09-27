@@ -17,6 +17,7 @@ import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/empty_state.dart';
 import 'ranking_logic.dart';
 import 'ranking_widgets.dart';
 
@@ -230,16 +231,26 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                     else if (ranked.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(BirdySpace.xxxl),
-                            child: Text(
-                              l10n.forkRankingEmpty,
-                              textAlign: TextAlign.center,
-                              style: BirdyText.body.copyWith(color: c.text2),
-                            ),
-                          ),
-                        ),
+                        // Nothing in the widest period: nothing heard yet.
+                        // Otherwise the period hides birds heard before.
+                        child:
+                            _period == RankingPeriod.all
+                                ? BirdyEmptyState(
+                                  icon: AppIcons.hearing,
+                                  title: l10n.forkRankingEmptyTitle,
+                                  body: l10n.forkRankingEmpty,
+                                )
+                                : BirdyEmptyState(
+                                  kind: BirdyEmptyKind.filtered,
+                                  icon: AppIcons.searchOff,
+                                  title: l10n.forkRankingEmptyTitle,
+                                  body: l10n.forkRankingEmptyFiltered,
+                                  action: l10n.forkRankingAllPeriods,
+                                  onAction:
+                                      () => setState(
+                                        () => _period = RankingPeriod.all,
+                                      ),
+                                ),
                       )
                     else ...[
                       SliverPadding(

@@ -22,6 +22,7 @@ import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/clip_play_button.dart';
+import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_avatar.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_badge.dart';
@@ -133,7 +134,11 @@ class SoundLibraryScreen extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (species.isEmpty) {
-            return _EmptyMessage(text: l10n.forkSoundLibraryEmpty);
+            return BirdyEmptyState(
+              icon: AppIcons.libraryMusic,
+              title: l10n.forkSoundLibraryEmptyTitle,
+              body: l10n.forkSoundLibraryEmpty,
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.only(
@@ -329,12 +334,20 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                 }
                 final (clips, favorites) = data;
                 if (clips.isEmpty) {
-                  return _EmptyMessage(
-                    text:
-                        _favoritesOnly
-                            ? l10n.forkSoundLibraryNoFavorites
-                            : l10n.forkSoundLibraryEmpty,
-                  );
+                  return _favoritesOnly
+                      ? BirdyEmptyState(
+                        kind: BirdyEmptyKind.filtered,
+                        icon: AppIcons.star,
+                        title: l10n.forkSoundLibraryNoFavoritesTitle,
+                        body: l10n.forkSoundLibraryNoFavorites,
+                        action: l10n.forkSoundLibraryAllClips,
+                        onAction: () => setState(() => _favoritesOnly = false),
+                      )
+                      : BirdyEmptyState(
+                        icon: AppIcons.libraryMusic,
+                        title: l10n.forkSoundLibraryEmptyTitle,
+                        body: l10n.forkSoundLibraryEmpty,
+                      );
                 }
                 return ListView.separated(
                   padding: const EdgeInsets.only(bottom: BirdySpace.xxl),
@@ -452,27 +465,6 @@ class _ClipLevel extends ConsumerWidget {
             unexpected: snapshot.data?.unexpected ?? false,
             score: clip.confidence,
           ),
-    );
-  }
-}
-
-class _EmptyMessage extends StatelessWidget {
-  const _EmptyMessage({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(BirdySpace.xxxl),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: BirdyText.body.copyWith(color: c.text2),
-        ),
-      ),
     );
   }
 }

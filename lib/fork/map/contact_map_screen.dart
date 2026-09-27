@@ -22,6 +22,7 @@ import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart' as birdy;
 import '../ranking/ranking_logic.dart';
@@ -454,11 +455,24 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                 if (data != null && data.isEmpty)
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: _Notice(
-                      text:
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(BirdyRadii.card),
+                        boxShadow: BirdyColors.of(context).floatShadow,
+                      ),
+                      child:
                           _indexEmpty
-                              ? l10n.forkMapEmpty
-                              : l10n.forkMapEmptyFiltered,
+                              ? BirdyEmptyState.inline(
+                                icon: AppIcons.hearing,
+                                title: l10n.forkMapEmptyTitle,
+                                body: l10n.forkMapEmpty,
+                              )
+                              : BirdyEmptyState.inline(
+                                kind: BirdyEmptyKind.filtered,
+                                icon: AppIcons.searchOff,
+                                title: l10n.forkMapEmptyFilteredTitle,
+                                body: l10n.forkMapEmptyFiltered,
+                              ),
                     ),
                   ),
                 Align(

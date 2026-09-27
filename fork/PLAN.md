@@ -517,6 +517,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             « espèce sensible » en bleu Probable ; questions et fiche à copier inchangées ; boutons
             du design system (Copier en principal, les autres en secondaire). Aucun changement de
             règle : seules les détections confirmées sont proposées.
+      - [x] Écrans vides (`lib/fork/design/widgets/empty_state.dart`, DESIGN.md « Écrans vides ») :
+            un composant, trois situations (rien encore, rien avec ces filtres, tout est fait), icône,
+            titre, phrase, bouton qui élargit le filtre quand c'est possible. Posé sur l'Accueil, le
+            Palmarès, la Carte, la Sonothèque, la Revue rapide, l'Envoi à la LPO et le comptage au
+            jardin. À vérifier sur le Xiaomi : l'Accueil un jour sans écoute, la Sonothèque avec
+            « Favoris seulement » et aucun favori.
 - [ ] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections »).
       - [x] Traits sous le spectre : départ au début de la fenêtre analysée (`DetectionRecord.timestamp`),
             plus 3 s trop tôt ; la fin ne recule ni ne saute quand le contact se ferme (fin de chant,

@@ -28,6 +28,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_avatar.dart';
 import '../reliability/geo_presence_service.dart';
 import 'atlas_codes.dart';
@@ -154,11 +155,13 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
                 const SizedBox(height: 12),
                 if (_observations.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Text(
-                      l10n.forkLpoEmpty,
-                      textAlign: TextAlign.center,
-                      style: BirdyText.body.copyWith(color: c.text2),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    // Detections exist, none confirmed: a filter, not a void.
+                    child: BirdyEmptyState.inline(
+                      kind: BirdyEmptyKind.filtered,
+                      icon: AppIcons.checkCircleOutline,
+                      title: l10n.forkLpoEmptyTitle,
+                      body: l10n.forkLpoEmpty,
                     ),
                   ),
                 for (var i = 0; i < _observations.length; i++)
