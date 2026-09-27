@@ -15,10 +15,10 @@ import '../design/widgets/dashed_border.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
 import '../reliability/reliability_badge.dart';
-import 'birdygo_logo.dart';
 import 'home_model.dart';
+import 'singing_logo.dart';
 
-/// Mark, name and menu button.
+/// Singing mark, name and menu button.
 class HomeTopBar extends StatelessWidget {
   const HomeTopBar({super.key, required this.onMenu, this.streak});
 
@@ -35,12 +35,12 @@ class HomeTopBar extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: BirdySizes.target),
       child: Row(
         children: [
-          const ExcludeSemantics(child: BirdyGoLogo()),
-          const SizedBox(width: BirdySpace.s),
           Expanded(
-            child: Text(
-              l10n.appTitle,
-              style: BirdyText.heading.copyWith(color: c.text1),
+            child: SingingLogo(
+              wordmark: Text(
+                l10n.appTitle,
+                style: BirdyText.heading.copyWith(color: c.text1),
+              ),
             ),
           ),
           if (streak != null) ...[streak!, const SizedBox(width: BirdySpace.s)],

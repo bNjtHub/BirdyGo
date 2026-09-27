@@ -47,11 +47,21 @@ class BirdyGoSingingPainter extends CustomPainter {
   /// Source view box of the board: x -80, y 10, 570 × 450.
   static const Size viewBox = Size(570, 450);
 
+  /// Start of the first phrase and time between two phrases of the loop.
+  /// The home logo (`SingingLogo`) plays one phrase at a time with them.
+  static const double firstPhrase = _first;
+  static const double phrasePeriod = _period;
+
+  /// Length of one phrase, until its last note has faded; the mark is
+  /// settled again after it.
+  static const double phraseLength = 2 * _syllable + _noteDelay + _noteLife;
+
   static const double _first = 800;
   static const double _period = 3600;
   static const double _syllable = 430;
   static const double _syllableLength = 380;
   static const double _noteLife = 1500;
+  static const double _noteDelay = 90;
   static const double _settled = 1e7;
   static const double _never = -1e9;
 
@@ -212,7 +222,7 @@ class BirdyGoSingingPainter extends CustomPainter {
       double? age;
       for (final k in [phrase, phrase - 1]) {
         if (k < 0) continue;
-        final a = t - (_first + k * _period + i * _syllable + 90);
+        final a = t - (_first + k * _period + i * _syllable + _noteDelay);
         if (a >= 0 && a < _noteLife) {
           age = a;
           break;
