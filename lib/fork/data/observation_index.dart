@@ -202,25 +202,43 @@ class ObservationIndex {
   ///
   /// Use [inMemoryDatabasePath] for tests. A schema change drops the derived
   /// tables; the caller must then rebuild them from the sessions
-  /// ([needsRebuild] reports it). Favorites are kept.
+  /// ([needsRebuild] reports it). Favorites are kept. This holds both ways:
+  /// an index written by a newer build (a newer schema, then an older app
+  /// installed over it) is rebuilt too, instead of failing on its columns.
+  /// The columns are checked as well as the version: an older build that
+  /// already opened such an index set its version back without touching the
+  /// tables.
   static Future<ObservationIndex> open(
     DatabaseFactory factory,
     String path,
   ) async {
     var migrated = false;
+    Future<void> recreate(Database db, int from, int to) async {
+      await db.execute('DROP TABLE IF EXISTS detections');
+      await db.execute('DROP TABLE IF EXISTS sessions');
+      await _createSchema(db);
+      migrated = true;
+    }
+
     final db = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: schemaVersion,
         onCreate: (db, _) => _createSchema(db),
-        onUpgrade: (db, _, _) async {
-          await db.execute('DROP TABLE IF EXISTS detections');
-          await db.execute('DROP TABLE IF EXISTS sessions');
-          await _createSchema(db);
-          migrated = true;
-        },
+        onUpgrade: recreate,
+        onDowngrade: recreate,
       ),
     );
+    if (!migrated &&
+        (!await _hasColumns(db, 'sessions', _sessionColumns) ||
+            !await _hasColumns(db, 'detections', _detectionColumns))) {
+      await db.transaction((txn) async {
+        await txn.execute('DROP TABLE IF EXISTS detections');
+        await txn.execute('DROP TABLE IF EXISTS sessions');
+      });
+      await _createSchema(db);
+      migrated = true;
+    }
     final index = ObservationIndex._(db);
     index._needsRebuild = migrated;
     return index;
@@ -230,6 +248,44 @@ class ObservationIndex {
 
   /// True when a schema upgrade emptied the derived tables.
   bool get needsRebuild => _needsRebuild;
+
+  /// Columns of the derived tables, as [_createSchema] makes them.
+  static const _sessionColumns = {
+    'id',
+    'type',
+    'start_ms',
+    'end_ms',
+    'latitude',
+    'longitude',
+    'detection_count',
+  };
+  static const _detectionColumns = {
+    'key',
+    'session_id',
+    'position',
+    'scientific_name',
+    'common_name',
+    'start_ms',
+    'end_ms',
+    'local_hour',
+    'local_month',
+    'local_day',
+    'confidence',
+    'review_status',
+    'latitude',
+    'longitude',
+    'clip_path',
+  };
+
+  static Future<bool> _hasColumns(
+    Database db,
+    String table,
+    Set<String> expected,
+  ) async {
+    final rows = await db.rawQuery('PRAGMA table_info($table)');
+    final actual = {for (final row in rows) row['name']! as String};
+    return actual.length == expected.length && actual.containsAll(expected);
+  }
 
   static Future<void> _createSchema(Database db) async {
     await db.execute('''
