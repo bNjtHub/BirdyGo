@@ -29,6 +29,7 @@ class BirdyTipCard extends StatelessWidget {
     required this.title,
     required this.body,
     this.footer,
+    this.fill = false,
   });
 
   final IconData icon;
@@ -37,6 +38,10 @@ class BirdyTipCard extends StatelessWidget {
 
   /// Under the texts, e.g. the carousel dots.
   final Widget? footer;
+
+  /// Fills the height it is given, [footer] pinned to the bottom: every
+  /// card of a carousel then has its dots at the same place.
+  final bool fill;
 
   static const double disc = 48;
   static const double discIcon = 24;
@@ -57,17 +62,22 @@ class BirdyTipCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(BirdySpace.l),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                fill ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
             children: [
               ExcludeSemantics(
-                child: Container(
-                  width: disc,
-                  height: disc,
-                  decoration: BoxDecoration(
-                    color: c.orioleContainer,
-                    shape: BoxShape.circle,
+                child: Align(
+                  alignment: AlignmentDirectional.topStart,
+                  heightFactor: 1,
+                  child: Container(
+                    width: disc,
+                    height: disc,
+                    decoration: BoxDecoration(
+                      color: c.orioleContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: discIcon, color: c.orioleText),
                   ),
-                  child: Icon(icon, size: discIcon, color: c.orioleText),
                 ),
               ),
               const SizedBox(width: BirdySpace.m),
@@ -96,7 +106,10 @@ class BirdyTipCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: BirdySpace.xs),
-                    Text(title, style: BirdyText.label.copyWith(color: c.text1)),
+                    Text(
+                      title,
+                      style: BirdyText.label.copyWith(color: c.text1),
+                    ),
                     const SizedBox(height: BirdySpace.xs),
                     Text(
                       body,
@@ -104,6 +117,7 @@ class BirdyTipCard extends StatelessWidget {
                     ),
                     if (footer != null) ...[
                       const SizedBox(height: BirdySpace.m),
+                      if (fill) const Spacer(),
                       footer!,
                     ],
                   ],
@@ -118,8 +132,9 @@ class BirdyTipCard extends StatelessWidget {
 }
 
 /// Rotating [BirdyTipCard]. Starts on a random tip, advances every
-/// [interval] (not with a screen reader), tap for the next one. The card
-/// keeps the height of the longest tip so nothing around it moves.
+/// [interval] (not with a screen reader), tap for the next one. Every card
+/// takes the height of the longest tip, dots at the bottom: nothing moves
+/// around it, and the dots stay in place from one tip to the next.
 class BirdyTipCarousel extends StatefulWidget {
   const BirdyTipCarousel({
     super.key,
@@ -197,27 +212,33 @@ class _BirdyTipCarouselState extends State<BirdyTipCarousel> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _next,
-            child: Stack(
-            children: [
-              for (final (i, tip) in tips.indexed)
-                IgnorePointer(
-                  ignoring: i != current,
-                  child: ExcludeSemantics(
-                    excluding: i != current,
-                    child: AnimatedOpacity(
-                      opacity: i == current ? 1 : 0,
-                      duration: duration,
-                      curve: BirdyMotion.standard,
-                      child: BirdyTipCard(
-                        icon: tip.icon,
-                        title: tip.title,
-                        body: tip.body,
-                        footer: dots,
+            // Intrinsic height: the stack measures the longest tip, then
+            // every card is stretched to it.
+            child: IntrinsicHeight(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  for (final (i, tip) in tips.indexed)
+                    IgnorePointer(
+                      ignoring: i != current,
+                      child: ExcludeSemantics(
+                        excluding: i != current,
+                        child: AnimatedOpacity(
+                          opacity: i == current ? 1 : 0,
+                          duration: duration,
+                          curve: BirdyMotion.standard,
+                          child: BirdyTipCard(
+                            icon: tip.icon,
+                            title: tip.title,
+                            body: tip.body,
+                            footer: dots,
+                            fill: true,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              ),
             ),
           ),
         ),

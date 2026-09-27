@@ -22,7 +22,8 @@ const _tips = <BirdyTip>[
   (
     icon: AppIcons.graphicEq,
     title: 'Spectrogramme',
-    body: 'Touche le spectrogramme pour l\'agrandir, avec l\'échelle en kHz '
+    body:
+        'Touche le spectrogramme pour l\'agrandir, avec l\'échelle en kHz '
         'et un trait sous chaque chant détecté.',
   ),
 ];
@@ -72,6 +73,21 @@ void main() {
     expect(opacityOf(second), 1);
     expect(opacityOf(first), 0);
     expect(tester.getSize(find.byType(BirdyTipCarousel)).height, height);
+  });
+
+  testWidgets('carousel: every card has its dots at the same place', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(SizedBox(width: 360, child: BirdyTipCarousel(tips: _tips))),
+    );
+    await tester.pumpAndSettle();
+
+    final cards = find.byType(BirdyTipCard);
+    expect(cards, findsNWidgets(2));
+    expect(tester.getRect(cards.at(0)), tester.getRect(cards.at(1)));
+    final dots = find.byType(Wrap);
+    expect(tester.getRect(dots.at(0)), tester.getRect(dots.at(1)));
   });
 
   testWidgets('stat tile keeps a long duration on one line', (tester) async {
