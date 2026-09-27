@@ -775,4 +775,6 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».
 
 - Startup screen (J6c): Flutter composition is shared. Native iOS launch assets remain
-  unchanged; align their mark/background during the iOS phase and check cold-launch timing.
+  unchanged; during the iOS phase make `LaunchScreen.storyboard` a plain Mist (#EEF1EC) view
+  with no mark, as on Android, so the Flutter splash fades the bird in without a jump, and check
+  cold-launch timing.
