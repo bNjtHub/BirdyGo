@@ -11,6 +11,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/clip_play_button.dart';
+import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
 import 'clip_spectrogram.dart';
@@ -490,45 +491,18 @@ class ReviewAllDone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(BirdySpace.xxxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                color: BirdyBrand.lichen,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                AppIcons.check,
-                size: 40,
-                color: BirdyBrand.ink,
-              ),
-            ),
-            const SizedBox(height: BirdySpace.l),
-            Text(
-              sorted == 0
-                  ? l10n.forkQuickReviewEmpty
-                  : l10n.forkQuickReviewDone,
-              textAlign: TextAlign.center,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-            if (sorted > 0) ...[
-              const SizedBox(height: BirdySpace.s),
-              Text(
-                l10n.forkQuickReviewSorted(sorted),
-                textAlign: TextAlign.center,
-                style: BirdyText.body.copyWith(color: c.text2),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return BirdyEmptyState(
+      kind: BirdyEmptyKind.done,
+      icon: AppIcons.check,
+      title:
+          sorted == 0
+              ? l10n.forkQuickReviewEmptyTitle
+              : l10n.forkQuickReviewDoneTitle,
+      body:
+          sorted == 0
+              ? l10n.forkQuickReviewEmpty
+              : '${l10n.forkQuickReviewSorted(sorted)} '
+                  '${l10n.forkQuickReviewDone}',
     );
   }
 }

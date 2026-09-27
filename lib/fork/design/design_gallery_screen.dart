@@ -20,6 +20,7 @@ import 'widgets/animated_count.dart';
 import 'widgets/birdy_buttons.dart';
 import 'widgets/birdy_pill.dart';
 import 'widgets/clip_play_button.dart';
+import 'widgets/empty_state.dart';
 import 'widgets/entrance.dart';
 import 'widgets/species_avatar.dart';
 import 'widgets/species_card.dart';
@@ -148,6 +149,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGallerySpecies, _species(context, l10n)),
                 _Section(l10n.forkGalleryPlayer, [_player(l10n)]),
                 _Section(l10n.forkGalleryMotion, _motion(l10n)),
+                _Section(l10n.forkGalleryEmpty, _empty(l10n)),
               ],
             ),
           );
@@ -450,6 +452,33 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
       ),
     ],
   );
+
+  /// The three kinds of empty state (DESIGN.md « Écrans vides »).
+  List<Widget> _empty(AppLocalizations l10n) => [
+    BirdyEmptyState(
+      icon: AppIcons.hearing,
+      title: l10n.forkHomeEmptyDayTitle,
+      body: l10n.forkHomeEmptyDay,
+      action: l10n.forkListen,
+      onAction: () {},
+    ),
+    const SizedBox(height: BirdySpace.m),
+    BirdyEmptyState.inline(
+      kind: BirdyEmptyKind.filtered,
+      icon: AppIcons.searchOff,
+      title: l10n.forkRankingEmptyTitle,
+      body: l10n.forkRankingEmptyFiltered,
+      action: l10n.forkRankingAllPeriods,
+      onAction: () {},
+    ),
+    const SizedBox(height: BirdySpace.m),
+    BirdyEmptyState.inline(
+      kind: BirdyEmptyKind.done,
+      icon: AppIcons.check,
+      title: l10n.forkQuickReviewEmptyTitle,
+      body: l10n.forkQuickReviewEmpty,
+    ),
+  ];
 
   List<Widget> _motion(AppLocalizations l10n) => [
     Align(

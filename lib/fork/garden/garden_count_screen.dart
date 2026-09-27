@@ -15,6 +15,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/widgets/empty_state.dart';
 import '../lpo/lpo_config.dart';
 import 'garden_count.dart';
 import 'garden_summary.dart';
@@ -182,7 +183,11 @@ class _Running extends ConsumerWidget {
         ],
         const SizedBox(height: 16),
         if (count.counts.isEmpty)
-          Text(l10n.forkGardenEmpty, style: theme.textTheme.bodyLarge)
+          BirdyEmptyState.inline(
+            icon: AppIcons.add,
+            title: l10n.forkGardenEmptyTitle,
+            body: l10n.forkGardenEmpty,
+          )
         else
           for (final e in count.counts.entries)
             _CounterRow(

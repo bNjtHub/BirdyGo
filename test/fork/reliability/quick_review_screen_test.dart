@@ -175,18 +175,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(writer.answers, [('a', ReviewStatus.confirmed)]);
     expect(find.text('2 sur 2'), findsOneWidget);
-    expect(find.text('Tu as trié 1 détection.'), findsOneWidget);
+    expect(find.textContaining('Tu as trié 1 détection.'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(InkWell, 'Je ne sais pas'));
     await tester.pumpAndSettle();
     expect(writer.answers.last, ('b', 'skip'));
+    expect(find.text('Tout est trié, bravo'), findsOneWidget);
     expect(
       find.text(
-        "Tout est trié, bravo. Tes réponses rendent l'app plus fiable.",
+        "Tu as trié 2 détections. Tes réponses rendent l'app plus fiable.",
       ),
       findsOneWidget,
     );
-    expect(find.text('Tu as trié 2 détections.'), findsOneWidget);
   });
 
   testWidgets('swipes: right confirms, left rejects, a short drag springs '
@@ -246,10 +246,8 @@ void main() {
   testWidgets('empty queue', (tester) async {
     index = _FakeIndex([]);
     await pump(tester);
-    expect(
-      find.text('Rien à vérifier. Toutes les détections sont triées.'),
-      findsOneWidget,
-    );
+    expect(find.text('Rien à vérifier'), findsOneWidget);
+    expect(find.text('Toutes les détections sont triées.'), findsOneWidget);
     expect(find.text("C'est bien lui"), findsNothing);
   });
 
