@@ -619,6 +619,32 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau
       statut). Règles : seules les détections Sûr ou confirmées font progresser ; un oiseau rare se
       vérifie avant la fête ; ni notification culpabilisante ni série perdue pour un jour manqué.
+      Trois PR : J6e-a (navigation et Carnet), J6e-b (Profil), J6e-c (moments et défis).
+      - [x] J6e-a Navigation et Carnet (`lib/fork/shell/`, `lib/fork/notebook/`, `lib/fork/game/`) :
+            barre Accueil, Carnet, Carte, Profil (un point FORK dans `HomeScreen`, qui renvoie
+            `ForkShell`) ; chaque onglet est construit à sa première visite puis gardé, la carte ne
+            charge donc ses tuiles qu'à l'ouverture de l'onglet ; retour depuis un onglet = Accueil ;
+            la carte en onglet n'a pas de bouton retour. Profil : écran « bientôt » jusqu'à J6e-b.
+            Carnet : découvertes (Sûr ou confirmées, oiseaux seulement) en couleur avec « N fois » et
+            « Nouveau » jusqu'à l'ouverture de la fiche (à la première ouverture du carnet, les espèces
+            déjà trouvées ne sont pas nouvelles) ; « À confirmer » (entendue, jamais vérifiée, détections
+            dans la revue) ouvre la revue rapide sur ces seules détections ; silhouettes mystère des
+            oiseaux attendus ici cette semaine (liste d'Explorer, jamais de demande de localisation)
+            avec l'indice de la fiche IA, jamais le nom ; marques de rareté selon le palier du
+            géomodèle ici cette semaine (`uncommonTiers`, `rareTiers`, absente = étoile) ; puces Toutes,
+            Découvertes, À découvrir, Rares ; podium vers le Palmarès.
+            Règle du jeu (`gameVerifiedSpecies`) : confirmée, ou Sûr au sens de `reliabilityFor`
+            (score ≥ `sureMinScore` et espèce plausible au lieu et à la semaine de la détection). Plus
+            stricte que `verifiedSpecies` de l'index : un oiseau rare attend « C'est bien lui », une
+            détection sans position ne compte pas sur son seul score.
+            Écarts : silhouette générique (oiseau gris) en attendant les icônes de J6d, qui se
+            brancheront dans `notebook_visuals.dart` ; sans fiche en français, le mystère n'a pas
+            d'indice ; pas de mystères sans position (une phrase le dit).
+            À vérifier sur le Xiaomi : passage d'un onglet à l'autre sans saccade, carte ouverte
+            puis quittée, Carnet avec la localisation coupée, « Écouter » au-dessus de la barre.
+      - [ ] J6e-b Profil : statuts, anneau, échelle, badges, série de jours ; pastille de série et
+            carte de statut sur l'Accueil.
+      - [ ] J6e-c Moments (arrivée, première fois, oiseau rare, nouveau statut) et défis de la semaine.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;

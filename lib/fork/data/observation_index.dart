@@ -144,6 +144,29 @@ class SpeciesTally {
   final DateTime last;
 }
 
+/// Review state of one species over all time, for the notebook (J6e).
+class SpeciesReviewTally {
+  const SpeciesReviewTally({
+    required this.scientificName,
+    required this.commonName,
+    required this.contacts,
+    required this.confirmed,
+    required this.inQueue,
+  });
+
+  final String scientificName;
+  final String commonName;
+
+  /// Detections not rejected (the « N fois » of the notebook).
+  final int contacts;
+
+  /// Detections confirmed by the user.
+  final int confirmed;
+
+  /// Detections waiting in the quick review.
+  final int inQueue;
+}
+
 /// Sort orders for [ObservationIndex.speciesRanking].
 enum RankingOrder { contacts, days, lastHeard }
 
@@ -619,6 +642,58 @@ class ObservationIndex {
       ],
     );
     return {for (final row in rows) row['scientific_name']! as String};
+  }
+
+  /// Review state of every species heard (rejected detections and
+  /// « unknown species » aside), for the notebook (J6e).
+  Future<List<SpeciesReviewTally>> speciesReviewTallies() async {
+    final rows = await _db.rawQuery(
+      'SELECT scientific_name, MAX(common_name) AS common_name, '
+      'COUNT(*) AS contacts, '
+      "SUM(review_status = 'confirmed') AS confirmed, "
+      "SUM(review_status = 'unreviewed' AND key NOT IN "
+      '(SELECT key FROM review_skipped)) AS in_queue '
+      "FROM detections WHERE review_status != 'rejected' "
+      'AND scientific_name != ? GROUP BY scientific_name',
+      [DetectionRecord.unknownSpeciesName],
+    );
+    return [
+      for (final row in rows)
+        SpeciesReviewTally(
+          scientificName: row['scientific_name']! as String,
+          commonName: row['common_name']! as String,
+          contacts: row['contacts']! as int,
+          confirmed: row['confirmed']! as int,
+          inQueue: row['in_queue']! as int,
+        ),
+    ];
+  }
+
+  /// Unreviewed detections with a score of at least [minScore], of species
+  /// never confirmed, best score first: the ones that may count as « Sûr »
+  /// once the geo-model says the species is plausible there (J6e).
+  Future<List<IndexedDetection>> sureCandidates({
+    required double minScore,
+  }) async {
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE review_status = 'unreviewed' "
+      'AND confidence >= ? AND scientific_name != ? '
+      'AND scientific_name NOT IN (SELECT scientific_name FROM detections '
+      "WHERE review_status = 'confirmed') "
+      'ORDER BY confidence DESC, start_ms DESC',
+      [minScore, DetectionRecord.unknownSpeciesName],
+    );
+    return rows.map(IndexedDetection.fromRow).toList();
+  }
+
+  /// Keys of the detections of [scientificName] waiting in the quick review.
+  Future<Set<String>> reviewKeysFor(String scientificName) async {
+    final rows = await _db.rawQuery(
+      "SELECT key FROM detections WHERE review_status = 'unreviewed' "
+      'AND scientific_name = ? AND key NOT IN (SELECT key FROM review_skipped)',
+      [scientificName],
+    );
+    return {for (final row in rows) row['key']! as String};
   }
 
   /// Number of detections waiting in the quick review.

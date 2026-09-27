@@ -338,7 +338,19 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
 
-## Photos
+## Mise en œuvre (J6e-a, navigation et Carnet)
+
+- Barre du bas (`lib/fork/shell/fork_shell.dart`) : `NavigationBar` du thème (80 dp, pastille
+  Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
+  Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
+  garde toutes ses entrées.
+- Carnet (`lib/fork/notebook/`) : titre « Mon carnet » et bouton podium, carte de progression
+  (découvertes, « N sur M espèces attendues ici cette semaine », barre Martin-pêcheur sans gain
+  animé), puces en ligne qui défile, grille de 3 cartes `SpeciesCard` (écart 10). Ordre de « Toutes » :
+  nouvelles, à confirmer, puis par nombre de contacts, un mystère toutes les 3 cartes. Pas d'entrée
+  décalée : c'est un onglet. Marques en haut à droite : demi-disque Écorce (peu commun), losange et
+  étoile Loriot (rare, exceptionnel ici).
+
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.
 - Version plus grande en ligne (iNaturalist), cache disque, fondu par-dessus la version embarquée,
