@@ -367,6 +367,11 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
+- Quiz « Qui chante ? » : un grand bouton de lecture (celui du design system, joué dès la question),
+  quatre réponses en cartes de 56 dp au moins, noms en Fraunces. Après la réponse, la bonne passe en
+  Lichen avec une coche, la mauvaise choisie en neutre avec une croix, les autres s'effacent ; une
+  phrase dit « Bien vu » ou le nom de l'oiseau, jamais de reproche. Vibration légère sur une bonne
+  réponse, pas d'autre effet. Fin de manche : le score et « Rejouer ».
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
   métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème

@@ -14,6 +14,7 @@ import '../notebook/notebook_loader.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
 import 'challenges.dart';
+import 'fine_ear.dart';
 import 'game_config.dart';
 import 'game_progress.dart';
 import 'streak.dart';
@@ -31,8 +32,10 @@ class GameLoader {
     required Future<Map<String, List<double>>?> Function(GamePosition)
     weeklyScores,
     DateTime? Function(DateTime now)? challengeStartedAt,
+    int Function()? fineEarCorrect,
     DateTime Function()? now,
   }) : _index = index,
+       _fineEarCorrect = fineEarCorrect ?? (() => 0),
        _challengeStartedAt = challengeStartedAt ?? ((_) => null),
        _presence = presence,
        _taxonomy = taxonomy,
@@ -46,6 +49,7 @@ class GameLoader {
   final Future<GamePosition?> Function() _position;
   final Future<Map<String, List<double>>?> Function(GamePosition) _weeklyScores;
   final DateTime? Function(DateTime now) _challengeStartedAt;
+  final int Function() _fineEarCorrect;
   final DateTime Function() _now;
 
   /// The facts; an index that cannot open gives an empty game.
@@ -86,6 +90,7 @@ class GameLoader {
       migrants: await _migrants(verified),
       streak: computeStreak(listened, now),
       challenge: await _challenge(index, listenings, listened, taxonomy, now),
+      fineEarCorrect: _fineEarCorrect(),
     );
   }
 
@@ -234,6 +239,7 @@ final gameLoaderProvider = Provider<GameLoader>(
           : (latitude: location.latitude, longitude: location.longitude);
     },
     challengeStartedAt: ref.read(challengeStoreProvider).startedAt,
+    fineEarCorrect: ref.read(fineEarStoreProvider).correct,
     weeklyScores: (position) async {
       final model = await ref.read(geoModelProvider.future);
       return model.predictAllWeeks(

@@ -90,6 +90,8 @@ abstract final class AppIcons {
   static const IconData graphicEqRounded = Symbols.graphic_eq_rounded;
   static const IconData gridViewRounded = Symbols.grid_view_rounded;
   static const IconData hearing = Symbols.hearing;
+  static const IconData headphones =
+      Symbols.headphones; // FORK: « Oreille fine » badge (J6e)
   static const IconData helpOutline = Symbols.help;
   static const IconData helpOutlineRounded = Symbols.help_outline_rounded;
   static const IconData hourglassTopRounded = Symbols.hourglass_top_rounded;

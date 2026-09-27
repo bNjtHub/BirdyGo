@@ -1561,5 +1561,22 @@
   "forkSummaryObservationSaveFailed": "Impossible d'enregistrer l'observation. Réessaie.",
   "forkSummaryRankWithoutTime": "{rank, plural, =1{Ta 1re espèce.} other{Ta {rank}e espèce.}}",
   "forkTipHeader": "Le saviez-vous ?",
-  "forkTipNext": "Astuce suivante"
+  "forkTipNext": "Astuce suivante",
+  "forkBadgeFineEar": "Oreille fine",
+  "forkBadgeFineEarRule": "Les bonnes réponses au quiz « Qui chante ? », fait avec tes propres enregistrements.",
+  "forkQuizTitle": "Qui chante ?",
+  "forkQuizEntrySubtitle": "Reconnais les oiseaux de tes enregistrements",
+  "forkQuizStart": "Lancer le quiz",
+  "forkQuizQuestion": "Question {current} sur {total}",
+  "forkQuizListen": "Écouter l'extrait",
+  "forkQuizStop": "Arrêter l'extrait",
+  "forkQuizRight": "Bien vu, c'est lui !",
+  "forkQuizWrong": "C'était : {name}",
+  "forkQuizNext": "Question suivante",
+  "forkQuizFinish": "Voir le résultat",
+  "forkQuizScore": "{correct, plural, =0{Aucune bonne réponse} =1{1 bonne réponse} other{{correct} bonnes réponses}} sur {total}",
+  "forkQuizAgain": "Rejouer",
+  "forkQuizDone": "Terminer",
+  "forkQuizEmptyTitle": "Pas encore assez d'oiseaux",
+  "forkQuizEmpty": "Le quiz se lance avec 4 oiseaux vérifiés qui ont un enregistrement. Garde les extraits pendant tes écoutes."
 }

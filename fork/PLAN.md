@@ -662,7 +662,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             d'affilée (record de série).
             Emblèmes : tracés de la maquette (SPEC.md 4.3) lus par `lib/fork/design/svg_path.dart`
             (petit lecteur de chemins SVG, sans `flutter_svg`).
-            Écarts : pas de badge Oreille fine (le quiz « Qui chante ? » n'existe pas encore) ; icône
+            Écarts : badge Oreille fine arrivé avec J6e-d ; icône
             générique pour Les mésanges en attendant J6d ; pas d'animation de gain sur l'anneau (elle
             vient avec la célébration de nouveau statut en J6e-c).
             À vérifier sur le Xiaomi : Lève-tôt sur une vraie écoute avant le lever du soleil, série
@@ -689,6 +689,19 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             pas de bouton Partager sur le nouveau statut ; pas de vague ni de plumes (DESIGN.md prime).
             À vérifier sur le Xiaomi : carte « Première rencontre » pendant une vraie écoute (l'écoute
             continue, Arrêter reste accessible), réponse sur un oiseau rare retrouvée dans la session.
+      - [x] J6e-d Quiz « Qui chante ? » et badge Oreille fine (`lib/fork/game/fine_ear*.dart`) : un de
+            ses propres enregistrements d'un oiseau vérifié, quatre noms, un seul juste ; manches de
+            10 questions tirées au hasard, chaque espèce une fois ; il faut 4 oiseaux vérifiés avec un
+            extrait. Le clip vient d'une détection qui compte pour le jeu (confirmée, ou Sûr non revue),
+            jamais rejetée, fichier encore présent (sinon un autre extrait de l'espèce). Lecture par le
+            lecteur partagé (`speciesClipPlayerProvider`), donc l'inférence ignore la réécoute si une
+            écoute tourne. Seules les bonnes réponses sont gardées (un compteur). Badge Oreille fine :
+            10, 50, 150 bonnes réponses. Accès : carte « Qui chante ? » sous les badges du Profil, et
+            « Lancer le quiz » dans la fiche du badge. Repris de la branche `feat/j6e-notebook-game`
+            (le reste de cette branche doublait J6e-a à c).
+            Écarts : icône générique pour Les mésanges et silhouettes grises du carnet, J6d étant en
+            pause ; « Je ne sais pas » reste dans l'index (table `review_skipped`), pas dans les
+            sessions JSON.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;

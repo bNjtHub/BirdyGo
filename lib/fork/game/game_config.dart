@@ -81,6 +81,9 @@ enum BadgeKind {
 
   /// Verified tit species.
   tits,
+
+  /// Right answers in the « Qui chante ? » quiz.
+  fineEar,
 }
 
 /// Weekly challenges (SPEC.md 7.5), one per week in turn.
@@ -202,7 +205,13 @@ abstract final class GameConfig {
     BadgeKind.migrant: [3, 6, 12],
     BadgeKind.streak: [7, 30, 100],
     BadgeKind.tits: [2, 4, 6],
+    BadgeKind.fineEar: [10, 50, 150],
   };
+
+  /// « Qui chante ? »: questions in one round, answers offered, and the
+  /// verified species with a clip needed to play.
+  static const int quizQuestions = 10;
+  static const int quizChoices = 4;
 
   /// Medal of each earned tier: bronze, silver, gold for 1, 2, 3 plumes.
   /// The same in both themes, like real metal; a locked badge takes the

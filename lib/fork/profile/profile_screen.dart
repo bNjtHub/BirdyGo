@@ -17,6 +17,7 @@ import '../game/game_config.dart';
 import '../game/game_loader.dart';
 import '../game/game_progress.dart';
 import '../game/game_text.dart';
+import '../game/fine_ear_quiz_screen.dart';
 import '../game/game_widgets.dart';
 import '../game/streak.dart';
 import '../ranking/ranking_screen.dart';
@@ -91,6 +92,8 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: BirdySpace.m),
                   _Badges(badges: progress.badges),
+                  const SizedBox(height: BirdySpace.m),
+                  const _QuizEntry(),
                   if (progress.facts.challenge case final challenge?) ...[
                     const SizedBox(height: BirdySpace.l),
                     ChallengeCard(
@@ -568,10 +571,86 @@ class _Badges extends StatelessWidget {
                 l10n.forkBadgeTiers(badge.tiers.join(' · ')),
                 style: BirdyText.caption.copyWith(color: c.text2),
               ),
+              if (badge.kind == BadgeKind.fineEar) ...[
+                const SizedBox(height: BirdySpace.xl),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: BirdyButtonStyles.primary(context),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _openQuiz(context);
+                    },
+                    child: Text(l10n.forkQuizStart),
+                  ),
+                ),
+              ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+void _openQuiz(BuildContext context) => Navigator.of(
+  context,
+).push(MaterialPageRoute<void>(builder: (_) => const FineEarQuizScreen()));
+
+/// « Qui chante ? »: the quiz behind the Oreille fine badge.
+class _QuizEntry extends StatelessWidget {
+  const _QuizEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Material(
+      color: c.surface1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+        side: BorderSide(color: c.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openQuiz(context),
+        child: Padding(
+          padding: const EdgeInsets.all(BirdySpace.l),
+          child: Row(
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: c.tonal,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(AppIcons.headphones, color: c.accentText),
+                ),
+              ),
+              const SizedBox(width: BirdySpace.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.forkQuizTitle,
+                      style: BirdyText.label.copyWith(color: c.text1),
+                    ),
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      l10n.forkQuizEntrySubtitle,
+                      style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(AppIcons.chevronRight, color: c.text2),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
