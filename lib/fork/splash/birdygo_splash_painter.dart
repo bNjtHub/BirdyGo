@@ -56,7 +56,20 @@ class BirdyGoSingingPainter extends CustomPainter {
   static const double _never = -1e9;
 
   static const Offset _beakHinge = Offset(118.1, 202.6);
-  static const Offset _tailHinge = Offset(395, 215);
+
+  /// The tail swings about its root (Claude Design « BirdyGo Splash »).
+  static const Offset _tailHinge = Offset(414.2, 285.3);
+
+  /// The logo's tail, extended into the body: when it swings, no gap opens
+  /// between tail and body (the extension is hidden under the body).
+  static final Path _singingTail = Path.from(BirdyGoLogoPainter.tail)
+    ..addPolygon(const [
+      Offset(414.2, 285.3),
+      Offset(412, 300),
+      Offset(360, 295),
+      Offset(335, 205),
+      Offset(364.4, 181.4),
+    ], true);
   static const Offset _feet = Offset(277.4, 423.7);
   static const Offset _eye = Offset(176.2, 172.6);
 
@@ -142,9 +155,9 @@ class BirdyGoSingingPainter extends CustomPainter {
           );
 
     canvas.save();
-    _rotateAbout(canvas, _tailHinge, -7 * song);
+    _rotateAbout(canvas, _tailHinge, -5 * song);
     canvas
-      ..drawPath(BirdyGoLogoPainter.tail, plumage)
+      ..drawPath(_singingTail, plumage)
       ..restore();
 
     for (final (path, color, degrees) in [

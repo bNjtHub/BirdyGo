@@ -478,7 +478,7 @@ mark (transparent Android 12+ icon, `values-night/birdygo_colors.xml` for dark),
 appears only once, fading in with the Flutter splash.
 
 The bird sings phrases of three syllables: on each one the beak opens, the body swells,
-the tail and the wing bars move, and a note leaves the beak (Kingfisher, gold, deep
+the tail (extended into the body so no gap opens, swinging 5° about its root, as on the Claude Design board) and the wing bars move, and a note leaves the beak (Kingfisher, gold, deep
 teal). The eye blinks after the phrase. The wing bars draw first; the wordmark enters at
 1.0 s, « Le monde chante. » at 1.25 s, the loading status at 1.35 s and « Écoute. » at
 2.15 s, each in 320 ms with 8 dp of travel. A phrase lasts 3.6 s and repeats for as long
