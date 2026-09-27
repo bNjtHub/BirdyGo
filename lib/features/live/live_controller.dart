@@ -1007,8 +1007,8 @@ class LiveController {
     } catch (e, st) {
       // Inference errors are logged but don't stop the session.
       debugPrint('[LiveController] inference ERROR: $e\n$st');
-      if (generation != _sessionGeneration)
-        return; // FORK: J6c-bis-b cycle expiry
+      // FORK: J6c-bis-b cycle expiry.
+      if (generation != _sessionGeneration) return;
       _errorMessage = e.toString();
       _pauseForkCycle(); // FORK: J6c-bis-b cycle expiry
     } finally {

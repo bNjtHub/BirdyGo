@@ -295,6 +295,8 @@ class ObservationIndex {
     'latitude',
     'longitude',
     'clip_path',
+    'source',
+    'evidence',
   };
 
   static Future<bool> _hasColumns(
