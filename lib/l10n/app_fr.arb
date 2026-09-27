@@ -1561,5 +1561,6 @@
   "forkSummaryObservationSaveFailed": "Impossible d'enregistrer l'observation. Réessaie.",
   "forkSummaryRankWithoutTime": "{rank, plural, =1{Ta 1re espèce.} other{Ta {rank}e espèce.}}",
   "forkTipHeader": "Le saviez-vous ?",
-  "forkTipNext": "Astuce suivante"
+  "forkTipNext": "Astuce suivante",
+  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo."
 }
