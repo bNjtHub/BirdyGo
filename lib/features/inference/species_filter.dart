@@ -24,7 +24,9 @@
 //   `merged = audioScore * geoScore`
 //
 // This naturally down-weights species the geo-model considers unlikely while
-// preserving the audio model's relative ranking.
+// preserving the audio model's relative ranking. When a detection reports a
+// recent peak separately from its decision score, both scores are weighted;
+// filtering and ranking use the weighted decision score.
 //
 // ### Adaptive filtering (geoAdaptive)
 //
@@ -33,7 +35,7 @@
 //
 //   `z = logit(p) + w(p) * (logit(g) - logit(g0))`
 //
-// where `p` is the audio confidence, `g` the geo-model score, `g0` the
+// where `p` is the audio decision score, `g` the geo-model score, `g0` the
 // *neutral occurrence*, and `w(p)` a damping weight that is `1` at the user's
 // confidence threshold and falls to `0` at [_adaptiveImmunity].  A detection
 // is kept when `z` still clears the confidence threshold.  Unlike `geoMerge`
@@ -203,14 +205,15 @@ abstract final class SpeciesFilter {
     final span = logitImmunity - logitThreshold;
 
     return detections.where((d) {
+      final decisionConfidence =
+          d.effectiveDecisionConfidence; // FORK: pooled decision score
       // Near-certain detections are never filtered.
-      if (d.confidence >= _adaptiveImmunity) return true;
+      if (decisionConfidence >= _adaptiveImmunity) return true;
 
       // Species the geo-model has no opinion on are treated as neutral.
-      final geoScore =
-          geoScores[d.species.scientificName] ?? neutralOccurrence;
+      final geoScore = geoScores[d.species.scientificName] ?? neutralOccurrence;
 
-      final logitConfidence = _logit(d.confidence);
+      final logitConfidence = _logit(decisionConfidence);
       final ramp = ((logitImmunity - logitConfidence) / span).clamp(0.0, 1.0);
       final weight = math.pow(ramp, _adaptiveShape).toDouble();
 
@@ -220,8 +223,8 @@ abstract final class SpeciesFilter {
     }).toList();
   }
 
-  /// Multiply audio confidence by geo-model probability, then re-sort and
-  /// re-filter.
+  /// Weight both reported and decision confidence by geo-model probability,
+  /// then re-sort and re-filter using the decision confidence.
   static List<Detection> _mergeWithGeo(
     List<Detection> detections,
     Map<String, double> geoScores,
@@ -232,20 +235,27 @@ abstract final class SpeciesFilter {
     for (final d in detections) {
       final geoScore = geoScores[d.species.scientificName] ?? 0.0;
       final mergedConfidence = d.confidence * geoScore;
+      // FORK: pooled decision score.
+      final mergedDecisionConfidence = d.effectiveDecisionConfidence * geoScore;
 
-      if (mergedConfidence >= confidenceThreshold) {
+      if (mergedDecisionConfidence >= confidenceThreshold) {
         merged.add(
           Detection(
             species: d.species,
             confidence: mergedConfidence,
+            decisionConfidence: mergedDecisionConfidence,
             timestamp: d.timestamp,
           ),
         );
       }
     }
 
-    // Re-sort by descending merged confidence.
-    merged.sort((a, b) => b.confidence.compareTo(a.confidence));
+    // FORK: rank by the same merged evidence used for the threshold decision.
+    merged.sort(
+      (a, b) => b.effectiveDecisionConfidence.compareTo(
+        a.effectiveDecisionConfidence,
+      ),
+    );
     return merged;
   }
 

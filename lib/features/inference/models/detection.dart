@@ -21,6 +21,7 @@ class Detection {
   const Detection({
     required this.species,
     required this.confidence,
+    this.decisionConfidence, // FORK: pooled decision score
     this.timestamp,
   });
 
@@ -31,9 +32,16 @@ class Detection {
   /// The detected species.
   final Species species;
 
-  /// Model confidence in [0.0, 1.0] after sigmoid and optional sensitivity
-  /// scaling.
+  /// Reported confidence in [0.0, 1.0]. Temporal pooling may report a recent
+  /// peak while retaining the pooled score in [decisionConfidence].
   final double confidence;
+
+  // FORK: pooled decision score.
+  /// Score used to decide whether a detection passes downstream filters.
+  ///
+  /// Kept separate from the reported peak so an older strong window cannot
+  /// override weaker pooled evidence. When omitted, [confidence] is used.
+  final double? decisionConfidence;
 
   /// Wall-clock [DateTime] when this detection was produced (optional).
   ///
@@ -44,6 +52,10 @@ class Detection {
   // ---------------------------------------------------------------------------
   // Convenience
   // ---------------------------------------------------------------------------
+
+  /// Decision score for pooled detections and ordinary single-window results.
+  // FORK: pooled decision score.
+  double get effectiveDecisionConfidence => decisionConfidence ?? confidence;
 
   /// Confidence expressed as a percentage string, e.g. "87.3 %".
   String get confidencePercent => '${(confidence * 100).toStringAsFixed(1)} %';
@@ -61,8 +73,10 @@ class Detection {
       other is Detection &&
           runtimeType == other.runtimeType &&
           species == other.species &&
-          confidence == other.confidence;
+          confidence == other.confidence &&
+          effectiveDecisionConfidence == other.effectiveDecisionConfidence; // FORK: pooled decision score
 
   @override
-  int get hashCode => Object.hash(species, confidence);
+  int get hashCode =>
+      Object.hash(species, confidence, effectiveDecisionConfidence);
 }

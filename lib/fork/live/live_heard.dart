@@ -2,7 +2,7 @@
 ///
 /// Temporal pooling keeps a species in the results for a few windows after
 /// it stops singing. The symbol follows the last window instead: it lights
-/// up when the contact opens, and goes out after
+/// up only when that window supports the species, and goes out after
 /// [ReliabilityConfig.liveSingingHoldWindows] consecutive windows under the
 /// support threshold. The mark under the spectrogram ends at [heardUntil],
 /// the end of the last window at or above that threshold.
@@ -52,14 +52,16 @@ class LiveHeard {
       final opened = _open[name] != key;
       if (opened) {
         _open[name] = key;
-        _misses[name] = 0;
+        // A pooled contact can open after its last supporting window. It
+        // belongs in history, but must not imply that the bird sings now.
+        _misses[name] = holdWindows;
         // The record starts on its first supporting window.
         _raise(key, start.add(window));
       }
       if (supported.contains(name)) {
         _misses[name] = 0;
         _raise(key, windowEnd);
-      } else if (!opened) {
+      } else {
         _misses[name] = (_misses[name] ?? 0) + 1;
       }
     }

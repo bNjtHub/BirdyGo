@@ -53,13 +53,15 @@ class InferenceService {
   /// Creates an uninitialized inference service.
   ///
   /// Call [initialize] before [infer].
-  InferenceService();
+  // FORK: injectable model for tests.
+  InferenceService({ClassifierModel? model})
+    : _model = model ?? ClassifierModel();
 
   // ---------------------------------------------------------------------------
   // State
   // ---------------------------------------------------------------------------
 
-  final ClassifierModel _model = ClassifierModel();
+  final ClassifierModel _model;
   List<Species> _labels = const [];
   List<double> _scoreMultipliers = const [];
   ModelConfig? _config;
@@ -519,13 +521,25 @@ class InferenceService {
       multipliers: _scoreMultipliers,
     );
 
+    // FORK: pooled decision score.
+    // Confirmation, timestamps, and the live indicator must use the same
+    // per-window evidence. A penalized label must not bypass confirmation
+    // on a raw peak that the model's score blacklist deliberately reduced.
+    final supportScores = [
+      for (final scores in poolingInputScores)
+        ScoreBlacklist.applyMultipliers(
+          scores: scores,
+          multipliers: _scoreMultipliers,
+        ),
+    ];
+
     final gated =
         (_poolingMode == 'lme' || _poolingMode == 'adaptive_lme_peak') &&
                 useTemporalPooling &&
                 poolingInputScores.isNotEmpty
             ? PostProcessor.applyTemporalSupportGate(
               scores: adjusted,
-              windowScores: poolingInputScores,
+              windowScores: supportScores, // FORK: pooled decision score
               confirmedIndexes: _confirmedDetectionIndexes,
               confidenceThreshold: thresh,
               supportThreshold: _supportThresholdFor(thresh),
@@ -546,6 +560,7 @@ class InferenceService {
       detections = _withEarliestSupportTimestamps(
         detections,
         poolingInput,
+        supportScores, // FORK: pooled decision score
         _supportThresholdFor(thresh),
       );
     }
@@ -553,7 +568,8 @@ class InferenceService {
     if (_poolingMode == 'adaptive_lme_peak' &&
         useTemporalPooling &&
         poolingInputScores.isNotEmpty) {
-      detections = _withRecentPeakConfidence(detections, poolingInputScores);
+      // FORK: pooled decision score.
+      detections = _withRecentPeakConfidence(detections, supportScores);
     }
 
     _confirmedDetectionIndexes
@@ -580,8 +596,7 @@ class InferenceService {
 
     final peaks = PostProcessor.recentPeakScores(
       windowScores,
-      multipliers: _scoreMultipliers,
-    );
+    ); // FORK: pooled decision score
     final adjusted = <Detection>[];
     for (final detection in detections) {
       final index = detection.species.index;
@@ -593,6 +608,9 @@ class InferenceService {
         Detection(
           species: detection.species,
           confidence: peak.clamp(0.0, 1.0).toDouble(),
+          decisionConfidence:
+              detection
+                  .effectiveDecisionConfidence, // FORK: pooled decision score
           timestamp: detection.timestamp,
         ),
       );
@@ -605,11 +623,11 @@ class InferenceService {
   List<Detection> _withEarliestSupportTimestamps(
     List<Detection> detections,
     List<_TimestampedScores> windowScores,
+    List<List<double>> supportScores, // FORK: pooled decision score
     double supportThreshold,
   ) {
     if (detections.isEmpty || windowScores.isEmpty) return detections;
 
-    final scores = windowScores.map((ts) => ts.scores).toList();
     final timestamps = windowScores.map((ts) => ts.timestamp).toList();
 
     return [
@@ -617,9 +635,11 @@ class InferenceService {
         Detection(
           species: detection.species,
           confidence: detection.confidence,
+          decisionConfidence:
+              detection.decisionConfidence, // FORK: pooled decision score
           timestamp:
               PostProcessor.earliestSupportingTimestamp(
-                windowScores: scores,
+                windowScores: supportScores, // FORK: pooled decision score
                 timestamps: timestamps,
                 index: detection.species.index,
                 supportThreshold: supportThreshold,

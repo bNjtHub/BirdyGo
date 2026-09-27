@@ -109,6 +109,8 @@ abstract final class PrefKeys {
   static const String highContrastTheme = 'high_contrast_theme';
   static const String locale = 'locale';
   static const String speciesLanguage = 'species_language';
+  static const String dailyBirdGoal =
+      'fork_daily_bird_goal_v1'; // FORK: daily goal
 
   // Audio settings
   static const String audioGain = 'audio_gain';

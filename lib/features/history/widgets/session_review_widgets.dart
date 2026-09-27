@@ -2638,6 +2638,7 @@ class AddSpeciesOverlay extends ConsumerStatefulWidget {
     required this.existingDetections,
     this.initialMode,
     this.initialReplaceTarget,
+    this.initialEvidence, // FORK: observed bird from the summary
     this.lockMode = false,
     this.titleOverride,
   });
@@ -2647,6 +2648,11 @@ class AddSpeciesOverlay extends ConsumerStatefulWidget {
   final List<DetectionRecord> existingDetections;
   final AddSpeciesInsertMode? initialMode;
   final DetectionRecord? initialReplaceTarget;
+
+  // FORK: observed bird from the summary.
+  /// Evidence selected initially when adding an observation. Replacement
+  /// records always retain their own evidence instead.
+  final DetectionEvidence? initialEvidence;
 
   /// When true, hide the segmented insert-mode selector and use
   /// [initialMode] as a fixed choice. Used by the live survey entry point
@@ -2717,7 +2723,11 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
     super.initState();
     _mode = widget.initialMode ?? AddSpeciesInsertMode.atTimestamp;
     _replaceTarget = widget.initialReplaceTarget;
-    final seed = widget.initialReplaceTarget?.evidence;
+    // FORK: observed bird from the summary.
+    final seed =
+        widget.initialReplaceTarget != null
+            ? widget.initialReplaceTarget!.evidence
+            : widget.initialEvidence;
     _heard = seed?.includesHeard ?? false;
     _seen = seed?.includesSeen ?? false;
   }

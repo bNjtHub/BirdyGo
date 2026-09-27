@@ -140,6 +140,8 @@ List<_Cycle> _run(
       geoNames: geoNames,
       windowEnd: start.add(_window),
       window: _window,
+      expectedHop: const Duration(seconds: 1),
+      processedAt: start.add(_window),
     );
     cycles.add(_Cycle(confirmed, List.of(records), signal));
   }
@@ -351,6 +353,8 @@ void main() {
       filterMode: SpeciesFilterMode.off,
       windowEnd: _t0.add(_window),
       window: _window,
+      expectedHop: const Duration(seconds: 1),
+      processedAt: _t0.add(_window),
     );
     expect(lit.analysing, isTrue);
     expect(lit.singingVisual, {'Turdus merula'});
@@ -365,6 +369,8 @@ void main() {
       filterMode: SpeciesFilterMode.off,
       windowEnd: _t0.add(const Duration(seconds: 4)),
       window: _window,
+      expectedHop: const Duration(seconds: 1),
+      processedAt: _t0.add(const Duration(seconds: 4)),
       replayHeard: true,
     );
     expect(replayed.candidates, isEmpty);

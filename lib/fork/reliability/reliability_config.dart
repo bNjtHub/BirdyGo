@@ -29,9 +29,9 @@ abstract final class ReliabilityConfig {
   static const int minReviewsForSpeciesPrecision = 5;
 
   /// Live (J6c-bis-b): consecutive windows under the support threshold that
-  /// put out the « chante » symbol. One missed window between two phrases
-  /// keeps it on.
-  static const int liveSingingHoldWindows = 2;
+  /// put out the singing symbol. The first unsupported window ends it;
+  /// temporal pooling still preserves the contact in the results/history.
+  static const int liveSingingHoldWindows = 1;
 
   /// Live (J6c-bis-b): cycles « Analyse… » stays on after a candidate is
   /// confirmed, so the header does not fade while the row comes in.

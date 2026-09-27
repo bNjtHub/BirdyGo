@@ -42,6 +42,9 @@ class SummarySpecies {
     required this.level,
     required this.unexpected,
     required this.firstEver,
+    this.heard = true,
+    this.seen = false,
+    this.hasPreciseVerifiedTime = true,
     this.bestScore,
     this.verifiedAt,
     this.keysToCheck = const {},
@@ -54,6 +57,17 @@ class SummarySpecies {
   final int count;
 
   final DateTime firstHeard;
+
+  /// At least one acoustic contact, from the model or explicitly heard.
+  /// Legacy manual records with unspecified evidence imply no hearing.
+  final bool heard;
+
+  /// At least one contact was explicitly reported as seen.
+  final bool seen;
+
+  /// Global observations use the session start as a storage timestamp,
+  /// which must not be presented as the time the bird was observed.
+  final bool hasPreciseVerifiedTime;
 
   /// Best level over the session's contacts.
   final ReliabilityLevel level;
@@ -133,6 +147,7 @@ class ListeningSummary {
       final geo = counts ? presence?.call(name) : null;
       var best = ReliabilityLevel.toCheck;
       DateTime? verifiedAt;
+      var hasPreciseVerifiedTime = true;
       var bestScore = 0.0;
       for (final (_, d) in records) {
         if (d.confidence > bestScore) bestScore = d.confidence;
@@ -142,7 +157,12 @@ class ListeningSummary {
           presence: geo,
         );
         if (level.index < best.index) best = level;
-        if (level == ReliabilityLevel.sure) verifiedAt ??= d.timestamp;
+        if (level == ReliabilityLevel.sure && verifiedAt == null) {
+          verifiedAt = d.timestamp;
+          hasPreciseVerifiedTime =
+              d.source != DetectionSource.manualGlobal &&
+              d.source != DetectionSource.userSpecified;
+        }
       }
       species.add(
         SummarySpecies(
@@ -150,6 +170,13 @@ class ListeningSummary {
           commonName: records.first.$2.commonName,
           count: records.length,
           firstHeard: records.first.$2.timestamp,
+          heard: records.any(
+            (r) =>
+                r.$2.evidence?.includesHeard ??
+                r.$2.source == DetectionSource.auto,
+          ),
+          seen: records.any((r) => r.$2.wasSeen),
+          hasPreciseVerifiedTime: hasPreciseVerifiedTime,
           level: best,
           unexpected: geo?.unexpected ?? false,
           bestScore: bestScore,
@@ -218,6 +245,18 @@ class ListeningSummary {
   DayPart get dayPart => dayPartOf(start);
 
   bool get isEmpty => species.isEmpty;
+
+  List<SummarySpecies> get heardSpecies => [
+    for (final s in species)
+      if (s.heard) s,
+  ];
+
+  /// Observations without acoustic evidence, including visual-only and
+  /// older manual records whose evidence was not specified.
+  List<SummarySpecies> get otherObservedSpecies => [
+    for (final s in species)
+      if (!s.heard) s,
+  ];
 
   /// Detections to check: the unreviewed contacts of species not « Sûr ».
   Set<String> get keysToCheck => {for (final s in species) ...s.keysToCheck};

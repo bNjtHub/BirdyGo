@@ -28,6 +28,8 @@ class IndexedDetection {
     required this.latitude,
     required this.longitude,
     required this.clipPath,
+    this.source = DetectionSource.auto,
+    this.evidence,
   });
 
   /// Stable detection key, see [detectionKey].
@@ -45,6 +47,11 @@ class IndexedDetection {
   final double? latitude;
   final double? longitude;
   final String? clipPath;
+  final DetectionSource source;
+  final DetectionEvidence? evidence;
+
+  /// Legacy automatic detections are acoustic; manual records need evidence.
+  bool get isHeard => evidence?.includesHeard ?? source == DetectionSource.auto;
 
   Map<String, Object?> toRow() => {
     'key': key,
@@ -62,6 +69,8 @@ class IndexedDetection {
     'latitude': latitude,
     'longitude': longitude,
     'clip_path': clipPath,
+    'source': source.name,
+    'evidence': evidence?.name,
   };
 
   static IndexedDetection fromRow(Map<String, Object?> row) => IndexedDetection(
@@ -86,6 +95,13 @@ class IndexedDetection {
     latitude: (row['latitude'] as num?)?.toDouble(),
     longitude: (row['longitude'] as num?)?.toDouble(),
     clipPath: row['clip_path'] as String?,
+    source: switch (row['source']) {
+      'manual' => DetectionSource.manual,
+      'manualGlobal' => DetectionSource.manualGlobal,
+      'userSpecified' => DetectionSource.userSpecified,
+      _ => DetectionSource.auto,
+    },
+    evidence: DetectionEvidence.fromName(row['evidence'] as String?),
   );
 }
 
@@ -118,6 +134,8 @@ List<IndexedDetection> indexRowsForSession(LiveSession session) => [
       latitude: session.detections[i].latitude ?? session.latitude,
       longitude: session.detections[i].longitude ?? session.longitude,
       clipPath: session.detections[i].audioClipPath,
+      source: session.detections[i].source,
+      evidence: session.detections[i].evidence,
     ),
 ];
 
@@ -194,7 +212,9 @@ class ObservationIndex {
   /// Current schema version. Bump it to force a rebuild after a change.
   /// 3: sessions that do not count (practice, file analyses) left the
   /// index (J5c); the upgrade rebuild drops the ones already indexed.
-  static const int schemaVersion = 3;
+  /// 4: preserve detection source, acoustic/visual evidence and same-time
+  /// records (for example an automatic contact plus a visual annotation).
+  static const int schemaVersion = 4;
 
   final Database _db;
 
@@ -275,6 +295,8 @@ class ObservationIndex {
     'latitude',
     'longitude',
     'clip_path',
+    'source',
+    'evidence',
   };
 
   static Future<bool> _hasColumns(
@@ -300,7 +322,7 @@ class ObservationIndex {
       )''');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS detections (
-        key TEXT PRIMARY KEY,
+        key TEXT NOT NULL,
         session_id TEXT NOT NULL,
         position INTEGER NOT NULL,
         scientific_name TEXT NOT NULL,
@@ -314,7 +336,10 @@ class ObservationIndex {
         review_status TEXT NOT NULL,
         latitude REAL,
         longitude REAL,
-        clip_path TEXT
+        clip_path TEXT,
+        source TEXT NOT NULL,
+        evidence TEXT,
+        PRIMARY KEY (key, position)
       )''');
     await db.execute(
       'CREATE INDEX IF NOT EXISTS det_species ON detections(scientific_name)',
@@ -529,10 +554,12 @@ class ObservationIndex {
 
   /// Newest detection (rejected ones and « unknown species » aside), for the
   /// home screen's « Dernier oiseau entendu » (J6c).
-  Future<IndexedDetection?> lastDetection() async {
+  Future<IndexedDetection?> lastDetection({bool heardOnly = false}) async {
     final rows = await _db.rawQuery(
       "SELECT * FROM detections WHERE review_status != 'rejected' "
-      'AND scientific_name != ? ORDER BY start_ms DESC LIMIT 1',
+      'AND scientific_name != ? '
+      '${heardOnly ? "AND (evidence IN ('heard', 'heardAndSeen') OR (evidence IS NULL AND source = 'auto')) " : ''}'
+      'ORDER BY start_ms DESC LIMIT 1',
       [DetectionRecord.unknownSpeciesName],
     );
     return rows.isEmpty ? null : IndexedDetection.fromRow(rows.first);
