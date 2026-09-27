@@ -12,6 +12,10 @@ import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/notebook/notebook_loader.dart';
 import 'package:birdnet_live/fork/notebook/notebook_model.dart';
 import 'package:birdnet_live/fork/notebook/notebook_screen.dart';
+import 'package:birdnet_live/fork/game/game_loader.dart';
+import 'package:birdnet_live/fork/game/game_progress.dart';
+import 'package:birdnet_live/fork/game/streak.dart';
+import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/fork/shell/fork_shell.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -64,6 +68,18 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           homeLoaderProvider.overrideWithValue(_FakeHome()),
           notebookLoaderProvider.overrideWithValue(_FakeNotebook()),
+          gameProgressProvider.overrideWith(
+            (ref) async => GameProgress(
+              GameFacts(
+                verifiedBirds: {for (var i = 0; i < 24; i++) 'Species $i'},
+                dawnChoruses: 0,
+                earlyStarts: 0,
+                reviewed: 0,
+                migrants: const {},
+                streak: const Streak(current: 9, record: 12, calendar: []),
+              ),
+            ),
+          ),
           taxonomyServiceProvider.overrideWith(
             (ref) async => TaxonomyService(),
           ),
@@ -106,7 +122,7 @@ void main() {
 
     await tester.tap(tab('Profil'));
     await tester.pumpAndSettle();
-    expect(find.text('Ton profil arrive'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
     // The notebook stays alive behind.
     expect(find.byType(NotebookScreen, skipOffstage: false), findsOneWidget);
     expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
@@ -127,5 +143,30 @@ void main() {
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       0,
     );
+  });
+
+  testWidgets('home: série chip and status card open the Profil tab', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.text('9 jours'), findsOneWidget);
+    expect(find.text('Sentinelle des haies'), findsOneWidget);
+
+    await tester.tap(find.text('9 jours'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      3,
+    );
+
+    await tester.tap(tab('Accueil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sentinelle des haies'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      3,
+    );
+    expect(find.text('Série : 9 jours'), findsOneWidget);
   });
 }

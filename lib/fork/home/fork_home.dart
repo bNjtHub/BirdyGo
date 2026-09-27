@@ -2,8 +2,8 @@
 ///
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
-/// geo-model, index). Status, streak and challenge come with the rest of the
-/// game (J6e); the menu keeps every entry the upstream home had.
+/// geo-model, index). Série chip and status card come from the game (J6e),
+/// the weekly challenge with J6e-c; the menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -37,10 +37,14 @@ import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
+import '../game/game_loader.dart';
+import '../game/game_widgets.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
+import '../profile/profile_screen.dart';
 import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
+import '../shell/fork_shell.dart';
 import '../sound_library/sound_library_screen.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
@@ -89,6 +93,16 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   void _open(Widget screen) => Navigator.of(
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
+
+  /// The Profil tab, or the profile page outside the bottom navigation.
+  void _openProfile() {
+    final shell = ForkShellScope.maybeOf(context);
+    if (shell != null) {
+      shell.select(ForkTab.profile);
+    } else {
+      _open(const ProfileScreen());
+    }
+  }
 
   void _openAru() {
     final session = ref.read(aruSessionProvider);
@@ -210,7 +224,13 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final snapshot = _snapshot;
     final last = snapshot?.last;
 
-    final topBar = HomeTopBar(onMenu: _showMenu);
+    final game = ref.watch(gameProgressProvider).value;
+    final streak = game?.facts.streak.current ?? 0;
+    final topBar = HomeTopBar(
+      onMenu: _showMenu,
+      // No chip without a running série: nothing to lose, nothing shown.
+      streak: streak > 0 ? StreakChip(days: streak, onTap: _openProfile) : null,
+    );
     final head = <(String, Widget)>[
       (
         'greeting',
@@ -219,6 +239,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           dateLine: homeDateLine(localeName, now, place: _place),
         ),
       ),
+      if (game != null)
+        (
+          'status',
+          StatusCard(progress: game, compact: true, onTap: _openProfile),
+        ),
       if (snapshot != null)
         snapshot.today.isEmpty
             ? (

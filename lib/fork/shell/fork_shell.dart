@@ -7,13 +7,26 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
-import '../design/birdy_tokens.dart';
-import '../design/widgets/empty_state.dart';
 import '../home/fork_home.dart';
 import '../map/contact_map_screen.dart';
 import '../notebook/notebook_screen.dart';
+import '../profile/profile_screen.dart';
 
 enum ForkTab { home, notebook, map, profile }
+
+/// Lets a tab open another one (the home's status card opens Profil).
+class ForkShellScope extends InheritedWidget {
+  const ForkShellScope({super.key, required this.select, required super.child});
+
+  final void Function(ForkTab tab) select;
+
+  /// Null outside the bottom navigation.
+  static ForkShellScope? maybeOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<ForkShellScope>();
+
+  @override
+  bool updateShouldNotify(ForkShellScope old) => false;
+}
 
 class ForkShell extends StatefulWidget {
   const ForkShell({super.key});
@@ -38,7 +51,7 @@ class _ForkShellState extends State<ForkShell> {
     ForkTab.home => const ForkHome(),
     ForkTab.notebook => const NotebookScreen(),
     ForkTab.map => const ContactMapScreen(showBack: false),
-    ForkTab.profile => const _ProfileSoon(),
+    ForkTab.profile => const ProfileScreen(),
   };
 
   @override
@@ -51,12 +64,15 @@ class _ForkShellState extends State<ForkShell> {
         if (!didPop) _select(ForkTab.home);
       },
       child: Scaffold(
-        body: IndexedStack(
-          index: _tab.index,
-          children: [
-            for (final tab in ForkTab.values)
-              _built.contains(tab) ? _page(tab) : const SizedBox.shrink(),
-          ],
+        body: ForkShellScope(
+          select: _select,
+          child: IndexedStack(
+            index: _tab.index,
+            children: [
+              for (final tab in ForkTab.values)
+                _built.contains(tab) ? _page(tab) : const SizedBox.shrink(),
+            ],
+          ),
         ),
         bottomNavigationBar: Semantics(
           container: true,
@@ -85,27 +101,6 @@ class _ForkShellState extends State<ForkShell> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Profil tab until J6e-b.
-class _ProfileSoon extends StatelessWidget {
-  const _ProfileSoon();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: BirdyColors.of(context).background,
-      body: SafeArea(
-        bottom: false,
-        child: BirdyEmptyState(
-          icon: AppIcons.personOutline,
-          title: l10n.forkProfileSoonTitle,
-          body: l10n.forkProfileSoon,
         ),
       ),
     );

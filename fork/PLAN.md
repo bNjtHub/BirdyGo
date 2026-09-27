@@ -642,8 +642,28 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             d'indice ; pas de mystères sans position (une phrase le dit).
             À vérifier sur le Xiaomi : passage d'un onglet à l'autre sans saccade, carte ouverte
             puis quittée, Carnet avec la localisation coupée, « Écouter » au-dessus de la barre.
-      - [ ] J6e-b Profil : statuts, anneau, échelle, badges, série de jours ; pastille de série et
-            carte de statut sur l'Accueil.
+      - [x] J6e-b Profil (`lib/fork/profile/`, `lib/fork/game/`) : carte de statut (anneau de progression,
+            nom, espèces découvertes, « Encore N espèces pour devenir … », phrase du statut), échelle des
+            8 statuts (seuils 1, 5, 10, 20, 35, 50, 75, 100), série sur deux semaines (écoute, repos en
+            pointillé, jour manqué, aujourd'hui cerclé) avec record, badges en grille de 4 (médaille aux
+            couleurs de la plume, points de plumes ou « N sur M » tant qu'il est à gagner) ; un appui sur
+            un badge ouvre sa règle et ses paliers. Accueil : pastille de série (cachée sans série en
+            cours) et carte de statut, qui ouvrent l'onglet Profil.
+            Règles (`game_config.dart`, SPEC.md 7) : statut selon les oiseaux Sûrs ou confirmés
+            (`gameVerifiedSpecies`) ; série : un jour compte à partir de 5 minutes d'écoute, un jour de
+            repos par 7 jours, au-delà la série repart sans bruit et le record reste ; badges Chœur de
+            l'aube (10 espèces sûres dans une écoute commencée avant 8 h), Lève-tôt (avant le lever du
+            soleil, calcul NOAA d'upstream `estimateAruSunTimes`, lieu de l'écoute), Noctambule et Les
+            mésanges (par genre), Réviseur (confirmées, rejetées et « Je ne sais pas »), Migrateur (score
+            hebdomadaire du géomodèle ici : présent certaines semaines, absent d'autres), 7 jours
+            d'affilée (record de série).
+            Emblèmes : tracés de la maquette (SPEC.md 4.3) lus par `lib/fork/design/svg_path.dart`
+            (petit lecteur de chemins SVG, sans `flutter_svg`).
+            Écarts : pas de badge Oreille fine (le quiz « Qui chante ? » n'existe pas encore) ; icône
+            générique pour Les mésanges en attendant J6d ; pas d'animation de gain sur l'anneau (elle
+            vient avec la célébration de nouveau statut en J6e-c).
+            À vérifier sur le Xiaomi : Lève-tôt sur une vraie écoute avant le lever du soleil, série
+            après un jour sans écoute.
       - [ ] J6e-c Moments (arrivée, première fois, oiseau rare, nouveau statut) et défis de la semaine.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
