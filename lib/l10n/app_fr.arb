@@ -1408,5 +1408,12 @@
   "forkMapClusterSpecies": "{count, plural, =1{espèce} other{espèces}}",
   "forkSplashTagline": "Le monde chante. Écoute.",
   "forkSplashLoading": "Préparation de l’écoute…",
-  "forkSplashError": "BirdyGo n’a pas pu démarrer. Réessaie."
+  "forkSplashError": "BirdyGo n’a pas pu démarrer. Réessaie.",
+  "forkLevelsInfoButton": "Que veulent dire Sûr, Probable et À vérifier ?",
+  "forkLevelsInfoTitle": "À quel point l'app est sûre ?",
+  "forkLevelsInfoSure": "Le chant ressemble beaucoup et l'oiseau est attendu ici à cette saison.",
+  "forkLevelsInfoProbable": "Le chant ressemble bien, mais pas assez pour être sûr, ou l'app ne sait pas où tu es.",
+  "forkLevelsInfoToCheck": "Le chant ressemble peu : réécoute-le avant de le compter.",
+  "forkLevelsInfoRareHere": "Le chant ressemble, mais le lieu ou la saison surprend : réécoute-le pour confirmer.",
+  "forkLevelsInfoFooter": "Seuls les oiseaux Sûrs ou confirmés comptent. « C'est bien lui » dans la revue rapide confirme un oiseau."
 }

@@ -229,7 +229,7 @@ void main() {
                           stats: LiveStats.of(entries),
                           elapsed: () => Duration.zero,
                           expanded: false,
-                          onToggleSpectrum: () {},
+                          onLevelsInfo: () {},
                           onBack: () {},
                           onSettings: () {},
                           onHelp: () {},

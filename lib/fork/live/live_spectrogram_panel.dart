@@ -1,10 +1,12 @@
 /// Live spectrogram panel (J6c): the upstream spectrogram with the strip of
-/// species marks below. One tap enlarges it (about 60 % of the screen, kHz
-/// scale, names under the marks), a second tap brings it back.
+/// species marks and names below. One tap enlarges it (about 60 % of the
+/// screen), a second tap brings it back; a chevron in the corner says so
+/// (J6c-bis-c).
 library;
 
 import 'package:flutter/material.dart';
 
+import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import 'detection_marks.dart';
@@ -23,7 +25,7 @@ class LiveSpectrogramPanel extends StatelessWidget {
 
   /// Height of the normal band, marks included.
   static const double normalHeight =
-      BirdySizes.spectrumNormal + DetectionMarks.heightCompact;
+      BirdySizes.spectrumNormal + DetectionMarks.heightLabeled;
 
   final bool expanded;
 
@@ -48,8 +50,7 @@ class LiveSpectrogramPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
-    final strip =
-        expanded ? DetectionMarks.heightLabeled : DetectionMarks.heightCompact;
+    const strip = DetectionMarks.heightLabeled;
     return Semantics(
       container: true,
       button: true,
@@ -75,7 +76,17 @@ class LiveSpectrogramPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: ClipRect(child: RepaintBoundary(child: spectrogram)),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ClipRect(child: RepaintBoundary(child: spectrogram)),
+                      PositionedDirectional(
+                        top: BirdySpace.s,
+                        end: BirdySpace.s,
+                        child: _Chevron(expanded: expanded, color: c.text1),
+                      ),
+                    ],
+                  ),
                 ),
                 DecoratedBox(
                   decoration: BoxDecoration(
@@ -91,4 +102,28 @@ class LiveSpectrogramPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Enlarge / reduce chevron in the spectrogram's corner. Decorative: the
+/// whole panel is the button (and carries the label).
+class _Chevron extends StatelessWidget {
+  const _Chevron({required this.expanded, required this.color});
+
+  final bool expanded;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 32,
+    height: 32,
+    decoration: BoxDecoration(
+      color: BirdyBrand.ink.withValues(alpha: 0.55),
+      shape: BoxShape.circle,
+    ),
+    child: Icon(
+      expanded ? AppIcons.expandLess : AppIcons.expandMore,
+      size: 22,
+      color: color,
+    ),
+  );
 }

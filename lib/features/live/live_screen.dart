@@ -1038,11 +1038,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                   entries: entries,
                   spans: spans,
                   displaySeconds: displaySeconds,
+                  // FORK: no kHz scale, the marks carry the names (J6c-bis-c)
                   spectrogramBuilder:
-                      (expanded) => _LiveSpectrogram(
-                        isCapturing: isCapturing,
-                        showFrequencyAxis: expanded,
-                      ),
+                      (_) => _LiveSpectrogram(isCapturing: isCapturing),
                   phase: phase,
                   onStart: _toggleSession,
                   onStop: () => _confirmStop(themed),
@@ -1626,12 +1624,7 @@ class _SessionInfoBar extends ConsumerWidget {
 /// When capture is inactive the spectrogram remains visible (frozen on the
 /// last frame) but the FFT ticker is paused to conserve CPU.
 class _LiveSpectrogram extends ConsumerWidget {
-  const _LiveSpectrogram({
-    required this.isCapturing,
-    this.showFrequencyAxis = false, // FORK: kHz scale when enlarged (J6c)
-  });
-
-  final bool showFrequencyAxis; // FORK: kHz scale when enlarged (J6c)
+  const _LiveSpectrogram({required this.isCapturing});
 
   final bool isCapturing;
 
@@ -1657,7 +1650,7 @@ class _LiveSpectrogram extends ConsumerWidget {
         dbFloor: dbFloor,
         dbCeiling: dbCeiling,
         displaySeconds: durationSec.toDouble(),
-        showFrequencyAxis: showFrequencyAxis, // FORK: J6c
+        showFrequencyAxis: false,
         showTimeAxis: false,
         maxDisplayFrequency: maxFreq,
         logAmplitude: logAmplitude,

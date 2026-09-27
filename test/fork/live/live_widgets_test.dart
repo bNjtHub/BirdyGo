@@ -12,6 +12,9 @@ import 'package:birdnet_live/fork/live/live_table.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/widgets/confirm_destructive.dart';
+import 'package:birdnet_live/fork/reliability/levels_sheet.dart';
+import 'package:birdnet_live/fork/design/species_accents.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -359,7 +362,7 @@ void main() {
       stats: const LiveStats(species: 5, contacts: 12),
       elapsed: () => const Duration(minutes: 12, seconds: 47),
       expanded: expanded,
-      onToggleSpectrum: () {},
+      onLevelsInfo: () {},
       onBack: () {},
       onSettings: () {},
       onHelp: () {},
@@ -384,7 +387,7 @@ void main() {
                 elapsed: () => const Duration(minutes: 12, seconds: 47),
                 expanded: false,
                 showTiles: tiles,
-                onToggleSpectrum: () {},
+                onLevelsInfo: () {},
                 onBack: () {},
                 onSettings: () {},
                 onHelp: () {},
@@ -424,44 +427,53 @@ void main() {
       expect(find.text('12:47'), findsOneWidget);
       expect(find.text('espèces'), findsOneWidget);
       expect(find.text('contacts'), findsOneWidget);
-      expect(find.byTooltip('Agrandir le spectre'), findsOneWidget);
+      // The « i » button replaced the enlarge chevron (J6c-bis-c).
+      expect(
+        find.byTooltip('Que veulent dire Sûr, Probable et À vérifier ?'),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Agrandir le spectre'), findsNothing);
 
       await tester.pumpWidget(_app(header(expanded: true)));
       await tester.pumpAndSettle();
       expect(find.text('12:47'), findsNothing);
       expect(find.text('5 espèces · 12 contacts'), findsOneWidget);
-      expect(find.byTooltip('Réduire le spectre'), findsOneWidget);
+      expect(find.byTooltip('Réduire le spectre'), findsNothing);
     });
   });
 
   group('LiveListeningLayout', () {
-    Widget layout(List<LiveTableEntry> entries, {bool practice = false}) =>
-        LiveListeningLayout(
-          practice: practice,
-          statusText: 'En écoute',
-          live: true,
-          capturing: false,
-          elapsed: () => Duration.zero,
-          entries: entries,
-          spans: [
-            MarkSpan(
-              scientificName: 'Merle',
-              label: 'Merle noir',
-              start: _t0,
-              end: _t0.add(const Duration(seconds: 2)),
-            ),
-          ],
-          displaySeconds: 10,
-          spectrogramBuilder:
-              (expanded) => Text(expanded ? 'spectre agrandi' : 'spectre'),
-          phase: LiveControlPhase.active,
-          onStart: () {},
-          onStop: () {},
-          onTogglePause: () {},
-          onBack: () {},
-          onSettings: () {},
-          onHelp: () {},
-        );
+    Widget layout(
+      List<LiveTableEntry> entries, {
+      bool practice = false,
+      Widget Function(bool expanded)? spectrogram,
+    }) => LiveListeningLayout(
+      practice: practice,
+      statusText: 'En écoute',
+      live: true,
+      capturing: false,
+      elapsed: () => Duration.zero,
+      entries: entries,
+      spans: [
+        MarkSpan(
+          scientificName: 'Merle',
+          label: 'Merle noir',
+          start: _t0,
+          end: _t0.add(const Duration(seconds: 2)),
+        ),
+      ],
+      displaySeconds: 10,
+      spectrogramBuilder:
+          spectrogram ??
+          (expanded) => Text(expanded ? 'spectre agrandi' : 'spectre'),
+      phase: LiveControlPhase.active,
+      onStart: () {},
+      onStop: () {},
+      onTogglePause: () {},
+      onBack: () {},
+      onSettings: () {},
+      onHelp: () {},
+    );
 
     testWidgets('a recording shows the « Enregistrement » strip', (
       tester,
@@ -486,9 +498,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the header button enlarges the spectrogram to 60 %', (
-      tester,
-    ) async {
+    testWidgets('a tap on the spectrogram enlarges it to 60 %', (tester) async {
       tester.view.physicalSize = const Size(400, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -496,9 +506,16 @@ void main() {
         _app(layout([_entry('Merle', 0)]), scaffold: false),
       );
       expect(find.text('spectre'), findsOneWidget);
+      // Names under the marks and the chevron on the spectrogram, small too.
+      expect(
+        tester.widget<DetectionMarks>(find.byType(DetectionMarks)).showLabels,
+        isTrue,
+      );
+      expect(find.byIcon(AppIcons.expandMore), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Agrandir le spectre'));
+      await tester.tap(find.byType(LiveSpectrogramPanel));
       await tester.pumpAndSettle();
+      expect(find.byIcon(AppIcons.expandLess), findsOneWidget);
       final body = tester.getSize(find.byType(LayoutBuilder).first).height;
       expect(find.text('spectre agrandi'), findsOneWidget);
       expect(
@@ -578,4 +595,93 @@ void main() {
       Brightness.dark,
     );
   });
+
+  group('J6c-bis-c', () {
+    Widget app(Widget child) => _app(child, scaffold: false);
+
+    Widget live({Widget Function(bool expanded)? spectrogram}) =>
+        LiveListeningLayout(
+          statusText: 'En écoute',
+          live: true,
+          capturing: false,
+          elapsed: () => Duration.zero,
+          entries: [_entry('Merle', 0)],
+          spans: const [],
+          displaySeconds: 10,
+          spectrogramBuilder: spectrogram ?? (_) => const SizedBox.expand(),
+          phase: LiveControlPhase.active,
+          onStart: () {},
+          onStop: () {},
+          onTogglePause: () {},
+          onBack: () {},
+          onSettings: () {},
+          onHelp: () {},
+        );
+
+    testWidgets('rotating keeps the spectrogram (no new state)', (
+      tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400, 900);
+      _Counted.created = 0;
+      await tester.pumpWidget(app(live(spectrogram: (_) => const _Counted())));
+      expect(_Counted.created, 1);
+
+      tester.view.physicalSize = const Size(900, 420);
+      await tester.pumpAndSettle();
+      expect(find.byType(_Counted), findsOneWidget);
+      expect(_Counted.created, 1);
+
+      tester.view.physicalSize = const Size(400, 900);
+      await tester.pumpAndSettle();
+      expect(_Counted.created, 1);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('each row carries its species color dot', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(app(live()));
+      final dot = tester.widget<SpeciesColorDot>(find.byType(SpeciesColorDot));
+      expect(dot.color, SpeciesAccents.accentOf('Merle'));
+    });
+
+    testWidgets('the « i » button explains the levels', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(app(live()));
+      await tester.tap(
+        find.byTooltip('Que veulent dire Sûr, Probable et À vérifier ?'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LevelsSheet), findsOneWidget);
+      expect(find.text("À quel point l'app est sûre ?"), findsOneWidget);
+      expect(find.text('Rare ici · à confirmer'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+/// Counts its states, to prove the spectrogram is not rebuilt from scratch.
+class _Counted extends StatefulWidget {
+  const _Counted();
+
+  static int created = 0;
+
+  @override
+  State<_Counted> createState() => _CountedState();
+}
+
+class _CountedState extends State<_Counted> {
+  @override
+  void initState() {
+    super.initState();
+    _Counted.created++;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
 }

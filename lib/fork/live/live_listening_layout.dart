@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../practice/practice_banner.dart';
+import '../reliability/levels_sheet.dart';
 import 'detection_marks.dart';
 import 'live_control_bar.dart';
 import 'live_header.dart';
@@ -103,6 +104,10 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
 
   bool _expanded = false;
 
+  final GlobalKey _spectrogramKey = GlobalKey(debugLabel: 'live-spectrogram');
+  final GlobalKey _marksKey = GlobalKey(debugLabel: 'live-marks');
+  final GlobalKey _tableKey = GlobalKey(debugLabel: 'live-table');
+
   void _toggle() => setState(() => _expanded = !_expanded);
 
   @override
@@ -127,7 +132,7 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
         elapsed: widget.elapsed,
         expanded: _expanded,
         showTiles: !landscape,
-        onToggleSpectrum: _toggle,
+        onLevelsInfo: () => showLevelsSheet(context),
         onBack: widget.onBack,
         onSettings: widget.onSettings,
         onHelp: widget.onHelp,
@@ -143,15 +148,21 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
               marked.isEmpty
                   ? l10n.forkLiveSpectrumLabel
                   : l10n.forkLiveSpectrumMarksLabel(marked.join(', ')),
-          spectrogram: widget.spectrogramBuilder(expanded),
+          // Global keys: rotating the phone moves the spectrogram and its
+          // marks to another place in the tree without clearing them.
+          spectrogram: KeyedSubtree(
+            key: _spectrogramKey,
+            child: widget.spectrogramBuilder(expanded),
+          ),
           marks: DetectionMarks(
+            key: _marksKey,
             spans: widget.spans,
             displaySeconds: widget.displaySeconds,
             running: widget.capturing,
-            showLabels: expanded,
           ),
         );
     Widget table({required bool compact}) => LiveTable(
+      key: _tableKey,
       entries: widget.entries,
       compact: compact,
       imageFor: widget.imageFor,
