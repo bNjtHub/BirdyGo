@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Démarrage</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..650,100;1,9..144,500..650,100&amp;family=Atkinson+Hyperlegible+Next:wght@400..800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EEF1EC}
+a{color:#19A7B3}a:hover{color:#0E7C86}
+@keyframes bg-fade{from{opacity:0}to{opacity:1}}
+@keyframes bg-rise{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes bg-song{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.8)}}
+@keyframes bg-beak-up{0%,4%,16%,26%,100%{transform:none}8%,20%{transform:rotate(7deg)}}
+@keyframes bg-beak-down{0%,4%,16%,26%,100%{transform:none}8%,20%{transform:rotate(-11deg)}}
+@keyframes bg-note{0%,5%{opacity:0;transform:none}10%{opacity:.9}28%{opacity:0;transform:translateX(-8px)}100%{opacity:0;transform:translateX(-8px)}}
+.sp-btn{transition:transform 120ms cubic-bezier(0.23,1,0.32,1)}.sp-btn:active{transform:scale(.97)}
+@keyframes bg-load{0%{opacity:0;transform:scaleX(.04)}4%{opacity:1}58%{transform:scaleX(1)}86%{opacity:1;transform:scaleX(1)}93%{opacity:0;transform:scaleX(1)}100%{opacity:0;transform:scaleX(.04)}}
+@media (prefers-reduced-motion: reduce){[style*="animation"]{animation-name:bg-fade!important;animation-duration:200ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: #13233A; background: #EEF1EC; padding: 0 32px 40px">
+  <div style="flex: 1 1 0"></div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 20px">
+    <svg viewBox="-52 72 530 368" width="270" height="187" role="img" aria-label="BirdyGo" style="display: block; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both">
+      <defs>
+        <linearGradient id="sp-plumage" gradientUnits="userSpaceOnUse" x1="165" y1="97.7" x2="361.7" y2="434.9"><stop offset="0" stop-color="#1CAEBA"/><stop offset="1" stop-color="#0E7C86"/></linearGradient>
+      </defs>
+      <path d="M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z" fill="url(#sp-plumage)"/>
+      <g stroke-linejoin="round" stroke-width="12">
+        <path d="M118.1 206.6L64.5 222.5L140 240.3Z" fill="#E3A22B" stroke="#E3A22B" style="transform-box: view-box; transform-origin: 138px 222px; animation: bg-beak-down 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
+        <path d="M145.9 149L50.6 160.9L118.1 196.6Z" fill="#F4C542" stroke="#F4C542" style="transform-box: view-box; transform-origin: 140px 200px; animation: bg-beak-up 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
+      </g>
+      <g fill="none" stroke="#19A7B3" stroke-width="9" stroke-linecap="round">
+        <path d="M34 172Q20 192 34 212" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 400ms"/>
+        <path d="M8 160Q-10 192 8 224" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 480ms"/>
+        <path d="M-18 148Q-40 192 -18 236" style="animation: bg-note 2600ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 560ms"/>
+      </g>
+      <path d="M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z" fill="url(#sp-plumage)"/>
+      <g fill="none" stroke-width="30" stroke-linecap="round">
+        <path d="M217.4 333.7L217.4 240.1" stroke="#EEF1EC" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 0ms"/>
+        <path d="M260.6 365.5L268 223.3" stroke="#F4C542" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 220ms"/>
+        <path d="M306.2 349.4L316 256.2" stroke="#EEF1EC" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 440ms"/>
+        <path d="M352.9 331.7L359.3 290.9" stroke="#8CD3D9" style="transform-box: stroke-box; transform-origin: 50% 50%; animation: bg-song 1400ms ease-in-out infinite; animation-delay: 660ms"/>
+      </g>
+      <circle cx="176.2" cy="172.6" r="18.7" fill="#13233A"/>
+      <circle cx="171" cy="166.6" r="5.4" fill="#FFFFFF"/>
+    </svg>
+    <div style="font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 40px; line-height: 1.1; letter-spacing: -0.5px; color: #13233A; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 60ms">BirdyGo</div>
+    <button type="button" class="sp-btn" onClick="{{ chirp }}" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 20px; border: 1.5px solid #0E7C86; border-radius: 24px; background: transparent; color: #0E7C86; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 120ms">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      Écouter son chant
+    </button>
+  </div>
+  <div style="flex: 1 1 0"></div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; animation: bg-rise 250ms cubic-bezier(0.23,1,0.32,1) both; animation-delay: 120ms">
+    <div role="progressbar" aria-label="Chargement" aria-valuetext="En cours" style="width: 180px; height: 4px; border-radius: 2px; background: rgba(19, 35, 58, 0.10); overflow: hidden">
+      <div style="width: 100%; height: 100%; border-radius: 2px; background: #19A7B3; transform-origin: left center; animation: bg-load 5200ms cubic-bezier(0.23,1,0.32,1) infinite; animation-delay: 300ms"></div>
+    </div>
+    <div style="font-size: 14px; line-height: 20px; color: #6B5847">Préparation de l'écoute…</div>
+    <div style="font-size: 13px; line-height: 18px; color: #6B5847; margin-top: 10px">Propulsé par BirdNET</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  // Short synthesized song (three rising whistles), played on tap only:
+  // browsers block sound before a user gesture.
+  playChirp() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!this.audio) this.audio = new Ctx();
+    const ctx = this.audio;
+    if (ctx.state === 'suspended') ctx.resume();
+    const start = ctx.currentTime + 0.02;
+    const notes = [[2900, 3900, 0], [3100, 4300, 0.16], [3400, 4700, 0.32], [4200, 3000, 0.52]];
+    notes.forEach(([f0, f1, at]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t = start + at;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f0, t);
+      osc.frequency.exponentialRampToValueAtTime(f1, t + 0.1);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    });
+  }
+  componentWillUnmount() {
+    if (this.audio) this.audio.close();
+  }
+  renderVals() {
+    return { chirp: () => this.playChirp() };
+  }
+}
+</script>
+</body>
+</html>

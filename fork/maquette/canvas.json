@@ -5,6 +5,7 @@
   "launch": {"view": "canvas"},
   "pages": [],
   "boards": {
+    "Splash.dc.html": {"x": -470, "y": 0, "w": 390, "h": 844, "title": "Démarrage", "is_interactive": true},
     "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "Accueil"},
     "Live.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "Écoute en direct", "is_interactive": true},
     "LiveSpectre.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "Écoute, spectrogramme agrandi", "is_interactive": true},
@@ -22,13 +23,13 @@
     "Especes.dc.html": {"x": 1410, "y": 3750, "w": 880, "h": 640, "title": "Icônes d'espèces"}
   },
   "order": [
-    "Main.dc.html", "Live.dc.html", "LiveSpectre.dc.html", "Resume.dc.html",
+    "Splash.dc.html", "Main.dc.html", "Live.dc.html", "LiveSpectre.dc.html", "Resume.dc.html",
     "Arrivee.dc.html", "Premiere.dc.html", "Rare.dc.html", "Niveau.dc.html",
     "Carnet.dc.html", "Profil.dc.html", "Palmares.dc.html",
     "Carte.dc.html", "Fiche.dc.html", "Revue.dc.html", "Especes.dc.html"
   ],
   "notes": {
-    "row_ecouter": {"x": 0, "y": -280, "text": "Écouter", "kind": "title1", "maxW": 1800},
+    "row_ecouter": {"x": -470, "y": -280, "text": "Écouter", "kind": "title1", "maxW": 2270},
     "row_moments": {"x": 0, "y": 970, "text": "Les grands moments", "kind": "title1", "maxW": 1800},
     "row_jeu": {"x": 0, "y": 2220, "text": "Le jeu", "kind": "title1", "maxW": 1330},
     "row_explorer": {"x": 0, "y": 3470, "text": "Explorer et apprendre", "kind": "title1", "maxW": 2290}

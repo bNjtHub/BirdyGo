@@ -11,6 +11,7 @@ maquettes avec des données fictives, pas du code de l'app.
 
 | Fichier | Écran |
 |---|---|
+| `Splash.dc.html` | Démarrage : le logo dont l'aile chante, barre de chargement |
 | `Main.dc.html` | Accueil |
 | `Live.dc.html` | Écoute en direct : le tableau s'alimente seul, compteurs de session et totaux |
 | `LiveSpectre.dc.html` | Écoute avec le spectrogramme agrandi |
