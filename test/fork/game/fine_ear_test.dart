@@ -4,19 +4,24 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/widgets/species_avatar.dart';
 import 'package:birdnet_live/fork/game/fine_ear.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_screen.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_widgets.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
+import 'package:birdnet_live/fork/game/french_article.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart';
+import 'package:birdnet_live/fork/game/quiz_fx.dart';
+import 'package:birdnet_live/fork/game/quiz_sfx.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/providers/settings_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,6 +68,24 @@ class _FakePlayer implements SpeciesClipPlayer {
 
   @override
   Future<void> stop() async => _playing.value = null;
+}
+
+class _FakeSfx implements QuizSfxPlayer {
+  final played = <QuizSound>[];
+
+  @override
+  Future<void> play(QuizSound sound) async => played.add(sound);
+
+  @override
+  Future<void> dispose() async {}
+}
+
+/// Pumps frames for [seconds]: the quiz has looping animations, so
+/// pumpAndSettle would never return.
+Future<void> settle(WidgetTester tester, {double seconds = 3}) async {
+  for (var i = 0; i < seconds * 10; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }
 
 void main() {
@@ -171,6 +194,7 @@ void main() {
   group('quiz screen', () {
     late SharedPreferences prefs;
     late _FakePlayer player;
+    late _FakeSfx sfx;
 
     /// French names for species 0 to 5; others keep the index's name.
     TaxonomyService taxonomy() =>
@@ -189,12 +213,16 @@ void main() {
       Size size = const Size(390, 844),
       int correct = 0,
       bool start = true,
+      bool reduced = false,
+      bool? soundOn,
     }) async {
       SharedPreferences.setMockInitialValues({
         if (correct > 0) kFineEarCorrectPref: correct,
+        if (soundOn != null) kQuizSoundPref: soundOn,
       });
       prefs = await SharedPreferences.getInstance();
       player = _FakePlayer();
+      sfx = _FakeSfx();
       tester.view.physicalSize = size * 2;
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
@@ -204,6 +232,7 @@ void main() {
             sharedPreferencesProvider.overrideWithValue(prefs),
             fineEarStoreProvider.overrideWithValue(FineEarStore(prefs)),
             speciesClipPlayerProvider.overrideWithValue(player),
+            quizSfxPlayerProvider.overrideWithValue(sfx),
             taxonomyServiceProvider.overrideWith((ref) async => taxonomy()),
             effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
           ],
@@ -214,9 +243,10 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             builder:
                 (context, child) => MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(textScaler: TextScaler.linear(textScale)),
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(textScale),
+                    disableAnimations: reduced,
+                  ),
                   child: child!,
                 ),
             home: FineEarQuizScreen(
@@ -226,10 +256,10 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await settle(tester);
       if (start && find.text("C'est parti !").evaluate().isNotEmpty) {
         await tester.tap(find.text("C'est parti !"));
-        await tester.pumpAndSettle();
+        await settle(tester);
       }
     }
 
@@ -242,9 +272,9 @@ void main() {
         matching: find.text(name),
       );
       await tester.ensureVisible(choice);
-      await tester.pumpAndSettle();
+      await tester.pump();
       await tester.tap(choice);
-      await tester.pumpAndSettle();
+      await settle(tester);
     }
 
     /// The name shown: French for species 0 to 5, the index's otherwise.
@@ -255,8 +285,10 @@ void main() {
 
     Future<void> next(WidgetTester tester, {required bool last}) async {
       final button = find.text(last ? 'Voir mon score' : 'Continuer');
+      await tester.ensureVisible(button);
+      await tester.pump();
       await tester.tap(button);
-      await tester.pumpAndSettle();
+      await settle(tester);
     }
 
     testWidgets('fewer than four birds: says what is missing', (tester) async {
@@ -270,9 +302,9 @@ void main() {
     ) async {
       await pump(tester, _species(4), correct: 5, start: false);
       expect(find.text('Qui chante ?'), findsOneWidget);
-      expect(find.text('4 chants'), findsOneWidget);
-      expect(find.text('4 choix'), findsOneWidget);
-      expect(find.text('4 de tes oiseaux'), findsOneWidget);
+      expect(find.bySemanticsLabel('4 chants'), findsOneWidget);
+      expect(find.bySemanticsLabel('4 choix'), findsOneWidget);
+      expect(find.bySemanticsLabel('4 de tes oiseaux'), findsOneWidget);
       expect(find.text('Oreille fine'), findsOneWidget);
       expect(find.text('5 sur 10'), findsOneWidget);
       expect(
@@ -283,7 +315,7 @@ void main() {
       expect(player.played, isEmpty);
 
       await tester.tap(find.text("C'est parti !"));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(find.text('Chant 1 sur 4'), findsOneWidget);
       expect(player.played, hasLength(1));
       expect(find.byType(QuizTrail), findsOneWidget);
@@ -344,7 +376,7 @@ void main() {
       expect(
         find.descendant(
           of: stage,
-          matching: find.text("C'est bien lui : ${french(answer)}"),
+          matching: find.text("C'est bien l'${french(answer).toLowerCase()}"),
         ),
         findsOneWidget,
       );
@@ -391,7 +423,9 @@ void main() {
       await tapChoice(tester, french(wrong));
       expect(find.text('Presque !'), findsOneWidget);
       expect(
-        find.bySemanticsLabel(RegExp("^Presque ! C'était : ${french(answer)}")),
+        find.bySemanticsLabel(
+          RegExp("^Presque ! C'était l'${french(answer).toLowerCase()}"),
+        ),
         findsOneWidget,
       );
       expect(find.text('+1 Oreille fine'), findsNothing);
@@ -402,7 +436,7 @@ void main() {
       await pump(tester, _species(4));
       expect(player.playing.value, isNotNull);
       await tester.tap(find.byTooltip('Quitter le quiz'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(find.text("C'est parti !"), findsOneWidget);
       expect(player.playing.value, isNull);
     });
@@ -436,7 +470,7 @@ void main() {
       expect(find.text('Terminer'), findsOneWidget);
 
       await tester.tap(find.text('Rejouer'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(find.text('Chant 1 sur 4'), findsOneWidget);
       expect(player.played, hasLength(5));
     });
@@ -473,7 +507,7 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         await tester.tap(find.text("C'est parti !"));
-        await tester.pumpAndSettle();
+        await settle(tester);
         expect(tester.takeException(), isNull);
         for (var i = 0; i < 4; i++) {
           final answer = playing();
@@ -502,5 +536,354 @@ void main() {
       }
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('the sound switch: on by default, remembered, effects only', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), start: false);
+      final toggle = find.byType(QuizSoundSwitch);
+      expect(toggle, findsOneWidget);
+      expect(find.text('Avec son'), findsOneWidget);
+      await tester.tap(toggle);
+      await settle(tester, seconds: 0.5);
+      expect(find.text('Sans son'), findsOneWidget);
+      expect(prefs.getBool(kQuizSoundPref), isFalse);
+
+      await tester.tap(find.text("C'est parti !"));
+      await settle(tester);
+      expect(player.played, hasLength(1)); // the bird still sings
+      await tapChoice(tester, french(playing()));
+      expect(sfx.played, isEmpty);
+    });
+
+    testWidgets('the sound switch starts from the remembered choice', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), start: false, soundOn: false);
+      expect(find.text('Sans son'), findsOneWidget);
+      await tester.tap(find.byType(QuizSoundSwitch));
+      await settle(tester, seconds: 0.5);
+      expect(prefs.getBool(kQuizSoundPref), isTrue);
+    });
+
+    testWidgets('a right answer: confetti from the card, a jingle', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final name = french(playing());
+      final card = find.ancestor(
+        of: find.text(name),
+        matching: find.byType(QuizChoiceCard),
+      );
+      final center = tester.getCenter(card);
+      await tester.tap(find.text(name));
+      await tester.pump();
+      await tester.pump();
+      final confetti = tester.widget<ConfettiWidget>(
+        find.byType(ConfettiWidget),
+      );
+      expect(
+        confetti.confettiController.state,
+        ConfettiControllerState.playing,
+      );
+      expect(confetti.numberOfParticles, 110);
+      final at = tester.getTopLeft(find.byType(ConfettiWidget));
+      expect((at - center).distance, lessThan(1));
+      expect(sfx.played, [QuizSound.success]);
+      await settle(tester);
+      expect(find.text('+1 Oreille fine'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(QuizStage),
+          matching: find.byType(QuizRays),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a wrong answer: no confetti, a soft note, a gentle card', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final answer = playing();
+      final wrong = _species(4).keys.firstWhere((s) => s != answer);
+      await tester.tap(find.text(french(wrong)));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(sfx.played, [QuizSound.soft]);
+      await settle(tester);
+      expect(find.byType(QuizRays), findsNothing);
+      final picked = tester.widget<QuizChoiceCard>(
+        find.ancestor(
+          of: find.text(french(wrong)),
+          matching: find.byType(QuizChoiceCard),
+        ),
+      );
+      expect(picked.state, QuizChoiceState.wrong);
+      final states = tester
+          .widgetList<QuizChoiceCard>(find.byType(QuizChoiceCard))
+          .map((c) => c.state);
+      expect(states.where((s) => s == QuizChoiceState.other), hasLength(2));
+      expect(states.where((s) => s == QuizChoiceState.right), hasLength(1));
+    });
+
+    testWidgets('reduced motion: no confetti, nothing moves', (tester) async {
+      await pump(tester, _species(4), reduced: true);
+      // No loop runs: the screen settles.
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(french(playing())));
+      await tester.pumpAndSettle();
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(find.text('Bravo !'), findsOneWidget);
+      expect(sfx.played, [QuizSound.success]);
+    });
+
+    testWidgets('the result: stars, a 5 × 2 grid, buttons, rain, fanfare', (
+      tester,
+    ) async {
+      await pump(tester, _species(12));
+      for (var i = 0; i < 10; i++) {
+        await tapChoice(tester, french(playing()));
+        await next(tester, last: i == 9);
+      }
+      expect(find.text('10/10'), findsOneWidget);
+      for (var i = 0; i < 3; i++) {
+        final star = tester.widget<Icon>(find.byKey(ValueKey('quiz-star-$i')));
+        expect(star.color, BirdyColors.light.oriole);
+        expect(star.size, i == 1 ? 56 : 42);
+      }
+      for (var r = 0; r < 2; r++) {
+        expect(
+          find.descendant(
+            of: find.byKey(ValueKey('quiz-recap-row-$r')),
+            matching: find.byType(QuizBirdArt),
+          ),
+          findsNWidgets(5),
+        );
+      }
+      expect(find.byKey(const ValueKey('quiz-recap-row-2')), findsNothing);
+      expect(find.byType(ConfettiWidget), findsNWidgets(3));
+      expect(sfx.played.last, QuizSound.fanfare);
+      expect(find.widgetWithText(OutlinedButton, 'Terminer'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Rejouer'), findsOneWidget);
+      // The glow is the card's own decoration.
+      final card = tester.widget<Container>(
+        find.byKey(const ValueKey('quiz-score-card')),
+      );
+      final decoration = card.decoration! as BoxDecoration;
+      expect(decoration.gradient, isA<RadialGradient>());
+      expect(decoration.borderRadius, BorderRadius.circular(28));
+    });
+
+    testWidgets('a weak round: grey stars, no rain, no fanfare', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      for (var i = 0; i < 4; i++) {
+        final answer = playing();
+        final wrong = _species(4).keys.firstWhere((s) => s != answer);
+        await tapChoice(tester, french(i == 0 ? answer : wrong));
+        await next(tester, last: i == 3);
+      }
+      final star = tester.widget<Icon>(
+        find.byKey(const ValueKey('quiz-star-0')),
+      );
+      expect(star.color, BirdyColors.light.lineOpaque);
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(sfx.played, isNot(contains(QuizSound.fanfare)));
+    });
+
+    for (final size in const [Size(390, 844), Size(360, 640), Size(320, 640)]) {
+      testWidgets('${size.width.toInt()} × ${size.height.toInt()}: the '
+          'bottom cards and the button stay in view', (tester) async {
+        await pump(tester, _species(4), size: size);
+        final bottom = size.height;
+        for (final e in find.byType(QuizChoiceCard).evaluate()) {
+          final box = e.renderObject! as RenderBox;
+          final rect = box.localToGlobal(Offset.zero) & box.size;
+          expect(rect.bottom, lessThanOrEqualTo(bottom));
+        }
+        expect(
+          tester.getRect(find.text("Touche l'oiseau qui chante")).bottom,
+          lessThanOrEqualTo(bottom),
+        );
+        await tester.tap(find.text(french(playing())));
+        await settle(tester);
+        expect(
+          tester.getRect(find.byType(FilledButton)).bottom,
+          lessThanOrEqualTo(bottom),
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    for (final dark in [false, true]) {
+      for (final size in const [Size(360, 640), Size(320, 640)]) {
+        testWidgets('${size.width.toInt()} × ${size.height.toInt()}, text at '
+            '130 %, ${dark ? 'dark' : 'light'}: no overflow', (tester) async {
+          await pump(
+            tester,
+            _species(12),
+            dark: dark,
+            textScale: 1.3,
+            size: size,
+            start: false,
+          );
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.text("C'est parti !"));
+          await settle(tester);
+          for (var i = 0; i < 10; i++) {
+            final answer = playing();
+            final wrong = tester
+                .widgetList<QuizChoiceCard>(find.byType(QuizChoiceCard))
+                .map((c) => c.bird.scientificName)
+                .firstWhere((s) => s != answer);
+            await tapChoice(tester, french(i.isEven ? answer : wrong));
+            expect(tester.takeException(), isNull);
+            await next(tester, last: i == 9);
+          }
+          expect(find.byType(BadgeMedal), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
+  });
+
+  group('trail of stones', () {
+    Future<void> pumpTrail(
+      WidgetTester tester, {
+      required List<bool> results,
+      required int current,
+      double width = 300,
+      bool dark = false,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: width,
+                child: QuizTrail(
+                  birds: [
+                    for (var i = 0; i < 10; i++)
+                      QuizBird(
+                        scientificName: 'Species $i',
+                        latin: 'Species $i',
+                        name: 'Oiseau $i',
+                      ),
+                  ],
+                  results: results,
+                  current: current,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await settle(tester, seconds: 1);
+    }
+
+    Finder stone(int i) => find.descendant(
+      of: find.byKey(ValueKey('quiz-stone-$i')),
+      matching: find.byType(QuizStone),
+    );
+
+    Finder disc(int i) =>
+        find.descendant(of: stone(i), matching: find.byType(Container)).first;
+
+    testWidgets('upcoming, current, right and wrong steps', (tester) async {
+      await pumpTrail(tester, results: const [true, false], current: 2);
+      QuizStoneState stateOf(int i) => tester.widget<QuizStone>(stone(i)).state;
+      expect(stateOf(0), QuizStoneState.right);
+      expect(stateOf(1), QuizStoneState.wrong);
+      expect(stateOf(2), QuizStoneState.current);
+      for (var i = 3; i < 10; i++) {
+        expect(stateOf(i), QuizStoneState.upcoming);
+      }
+      expect(find.bySemanticsLabel('1 bonne réponse sur 2'), findsOneWidget);
+      expect(tester.getSize(disc(0)), const Size(26, 26));
+      expect(tester.getSize(disc(1)), const Size(20, 20));
+      expect(tester.getSize(disc(2)), const Size(30, 30));
+      expect(tester.getSize(disc(5)), const Size(12, 12));
+    });
+
+    testWidgets('fixed 24 px steps, the line from the first center to the '
+        'last, the fill up to the current step', (tester) async {
+      await pumpTrail(tester, results: const [true, true, false], current: 3);
+      final left = tester.getTopLeft(find.byType(QuizTrail)).dx;
+      const width = 300.0;
+      const span = width - QuizTrail.slot;
+      for (var i = 0; i < 10; i++) {
+        final slot = tester.getRect(find.byKey(ValueKey('quiz-stone-$i')));
+        expect(slot.width, QuizTrail.slot);
+        expect(
+          slot.center.dx - left,
+          moreOrLessEquals(12 + span * i / 9, epsilon: 0.01),
+        );
+        // Each step is centered in its slot, on the line.
+        final rect = tester.getRect(disc(i));
+        expect(rect.center.dx, moreOrLessEquals(slot.center.dx, epsilon: .01));
+        expect(rect.center.dy, moreOrLessEquals(slot.center.dy, epsilon: .01));
+      }
+      final line = tester.getRect(
+        find.byKey(const ValueKey('quiz-trail-line')),
+      );
+      expect(line.left - left, 12);
+      expect(line.right - left, width - 12);
+      expect(line.height, QuizTrail.line);
+      expect(
+        line.center.dy,
+        moreOrLessEquals(tester.getRect(disc(5)).center.dy, epsilon: .01),
+      );
+      final fill = tester.getRect(
+        find.byKey(const ValueKey('quiz-trail-fill')),
+      );
+      expect(fill.left - left, 12);
+      expect(fill.width, moreOrLessEquals(span * 3 / 9, epsilon: 0.01));
+    });
+
+    testWidgets('an upcoming dot wears a ring of the page color', (
+      tester,
+    ) async {
+      for (final dark in [false, true]) {
+        await pumpTrail(tester, results: const [], current: 0, dark: dark);
+        final dot = tester.widget<Container>(disc(4));
+        final decoration = dot.decoration! as BoxDecoration;
+        final c = dark ? BirdyColors.dark : BirdyColors.light;
+        expect(decoration.boxShadow!.single.color, c.background);
+        expect(decoration.boxShadow!.single.spreadRadius, 3);
+      }
+    });
+
+    testWidgets('narrow: ten steps still fit', (tester) async {
+      await pumpTrail(tester, results: const [], current: 0, width: 200);
+      final trail = tester.getRect(find.byType(QuizTrail));
+      final last = tester.getRect(find.byKey(const ValueKey('quiz-stone-9')));
+      expect(last.right, lessThanOrEqualTo(trail.right + .01));
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  test('French articles for the reveal', () {
+    expect(frenchWithArticle('Merle noir'), 'le merle noir');
+    expect(frenchWithArticle('Mésange bleue'), 'la mésange bleue');
+    expect(frenchWithArticle('Étourneau sansonnet'), "l'étourneau sansonnet");
+    expect(frenchWithArticle('Huppe fasciée'), 'la huppe fasciée');
+    expect(frenchWithArticle('Héron cendré'), 'le héron cendré');
+    expect(frenchWithArticle('Hirondelle rustique'), "l'hirondelle rustique");
+    expect(
+      frenchWithArticle('Pie-grièche écorcheur'),
+      'la pie-grièche écorcheur',
+    );
+    expect(
+      frenchWithArticle("Martin-pêcheur d'Europe"),
+      "le martin-pêcheur d'Europe",
+    );
+    expect(frenchWithArticle('Zostérops inconnu'), isNull);
   });
 }
