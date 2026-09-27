@@ -61,7 +61,26 @@ enum BadgeKind {
   tits,
 }
 
+/// Weekly challenges (SPEC.md 7.5), one per week in turn.
+enum ChallengeKind {
+  /// Mornings with a listening started before [GameConfig.dawnChorusBeforeHour].
+  dawnMornings,
+
+  /// Days with at least [GameConfig.streakMinListening] of listening.
+  listeningDays,
+
+  /// Distinct species verified (Sûr or confirmed) this week.
+  weekSpecies,
+}
+
 abstract final class GameConfig {
+  /// Challenges in turn, one per week, with their target.
+  static const List<(ChallengeKind, int)> weeklyChallenges = [
+    (ChallengeKind.dawnMornings, 3),
+    (ChallengeKind.listeningDays, 5),
+    (ChallengeKind.weekSpecies, 10),
+  ];
+
   /// SPEC.md 7.2 and 2.6.
   static const List<StatusDef> statuses = [
     StatusDef(
