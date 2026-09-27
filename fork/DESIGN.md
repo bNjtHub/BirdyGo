@@ -367,20 +367,38 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
-- Quiz « Qui chante ? » (`lib/fork/game/fine_ear_quiz_screen.dart` et `fine_ear_quiz_widgets.dart`) :
-  en haut, une carte « Oiseau mystère » au contour pointillé, comme les espèces à découvrir du Carnet,
-  avec le grand bouton de lecture (celui du design system, joué dès la question) ; rien n'y trahit
-  l'oiseau. Dessous, quatre réponses en cartes de 64 dp au moins : photo ronde (`SpeciesAvatar` sur la
-  teinte de l'espèce) et nom en Fraunces, dans la langue des espèces (taxonomie,
-  `effectiveSpeciesLocaleProvider`, le nom de l'index en secours). Après la réponse, la bonne passe en
-  Lichen avec une coche, la mauvaise choisie en neutre avec une croix, les autres s'effacent ; la
-  carte du haut révèle l'oiseau dans le même cadre 3:2 : photo (`SpeciesPhoto`, crédit à un appui) sur
-  sa teinte, « Bien vu, c'est lui ! » ou « La bonne réponse », nom en Fraunces, nom latin en Fraunces
-  italique, bouton « Réécouter ». Entrée en fondu et glissement de 8 px (220 ms, fondu seul en
-  animations réduites), vibration légère sur une bonne réponse, pas d'autre effet, jamais de reproche.
-  Fin de manche : le score, la médaille Oreille fine (`BadgeMedal`) avec ses plumes, la pastille
-  Loriot « Nouvelle plume » si la manche en a gagné une, la barre Lichen vers la prochaine plume,
-  puis « Rejouer » et « Terminer ».
+- Quiz « Qui chante ? » v2 (`lib/fork/game/fine_ear_quiz_screen.dart` et `fine_ear_quiz_widgets.dart`,
+  maquette Claude Design « Quiz v2 ») en trois temps.
+  Accueil : le puits sombre de l'écoute (dégradé Encre, rayon 28) avec, autour de l'oiseau mystère
+  (disque pointillé, silhouette), quatre de tes oiseaux en photos rondes sur leur halo et des barres de
+  son immobiles ; titre « Qui chante ? » en 34, une phrase, trois puces (nombre de chants, 4 choix,
+  nombre de tes oiseaux), la carte Oreille fine (médaille, « 8 sur 10 », barre Lichen, prochaine plume)
+  et le grand bouton « C'est parti ! » de 72 dp. Rien ne se joue avant l'appui.
+  Question : une croix (« Quitter le quiz », retour à l'accueil, comme le retour système) et le chemin
+  de pierres, une par question : l'oiseau trouvé y laisse sa photo cerclée de sa teinte, la question
+  manquée une petite croix, la question en cours son numéro dans un anneau Martin-pêcheur ; le trait
+  se remplit en 250 ms. Dessous, « Chant 3 sur 10 » et, dès deux bonnes réponses d'affilée, la pastille
+  Loriot « 3 d'affilée ! ». La scène (244 dp, moins sur petit écran) est le puits sombre avec
+  « Oiseau mystère », le disque pointillé et le bouton de lecture de 64 dp entre des barres immobiles
+  qui s'allument pendant la lecture ; rien n'y trahit l'oiseau. Quatre réponses en grille 2 × 2, tuiles
+  de 148 dp (112 au moins sur petit écran) : photo ronde sur le halo de l'espèce et nom en Fraunces,
+  dans la langue des espèces (taxonomie, `effectiveSpeciesLocaleProvider`, nom de l'index en secours).
+  Bonne réponse : la scène prend la teinte de l'oiseau avec une lueur fixe de sa couleur (15 % au
+  plus), sa photo (crédit d'un appui), un encouragement qui varie (« Bravo ! », « Bien vu ! »…),
+  « C'est bien lui : » et le nom en Fraunces, puis la pastille Loriot « +1 Oreille fine » en fondu ;
+  la tuile passe en Lichen avec une coche, vibration légère. Mauvaise réponse : carte neutre,
+  « Presque ! », « C'était : » et le nom, la tuile choisie en neutre avec une croix, jamais de
+  reproche. Les autres tuiles s'effacent, « Réécouter » en haut à droite, puis « Continuer ».
+  Bilan : trois étoiles Loriot (40 %, 70 %, 100 % de bonnes réponses, `GameConfig.quizStarShares`),
+  le score en 64 (`BirdyText.numberHero`, seul chiffre de cette taille dans l'app), un mot selon les
+  étoiles et une phrase, « Tes oiseaux du jour » (photos, trouvés en couleur avec une coche, manqués
+  en gris avec une croix), la médaille Oreille fine (`BadgeMedal`), la pastille « Nouvelle plume » et
+  la barre Lichen qui avance une fois vers la plume suivante ; « Terminer » et « Rejouer » côte à côte.
+  Mouvement : fondus et échelle 0,95 vers 1 pour les pierres, les marques et les étoiles (décalage de
+  40 ms), entrée de 220 ms pour la révélation, 500 ms au plus pour la barre ; fondus seuls en
+  animations réduites. Écarts voulus avec la maquette : ni confettis, ni sons, ni rayons qui tournent,
+  ni flottement, pulsation ou barres de son en boucle, ni rebond (« pop » à 1,08) ni tremblement de la
+  mauvaise réponse, ni « +1 » qui s'envole ; photos à la place des icônes dessinées (J6d en pause).
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
   métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
