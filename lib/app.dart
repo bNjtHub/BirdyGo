@@ -22,6 +22,7 @@ import 'features/live/live_providers.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/live_session.dart';
 import 'fork/design/birdy_theme.dart'; // FORK: BirdyGo design system (J6a)
+import 'fork/splash/birdygo_launch_handoff.dart'; // FORK: visible launch handoff
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
@@ -263,7 +264,7 @@ class _QuickActionListenerState extends ConsumerState<_QuickActionListener> {
   void initState() {
     super.initState();
     QuickActionService.setNativeActionHandler(_onNativeAction);
-    if (widget.launchAction != null) _launchFrame.hold();
+    if (widget.launchAction != null) _launchFrame.hold(context); // FORK
     unawaited(_takePendingNativeAction());
   }
 
@@ -435,14 +436,18 @@ class _QuickActionListenerState extends ConsumerState<_QuickActionListener> {
 class _LaunchFrameHold {
   bool _held = false;
   Timer? _timeout;
+  // FORK: holds the already painted startup screen.
+  VoidCallback? _releaseSplash;
 
-  /// Starts holding. Only valid before the first frame — that is, from a
-  /// listener's [State.initState]. Calling it later stalls a running app
-  /// instead of delaying a launch.
-  void hold() {
+  /// Starts holding from a launch listener's [State.initState].
+  /// FORK: a painted startup uses its splash; App alone defers its first frame.
+  void hold(BuildContext context) {
     if (_held) return;
     _held = true;
-    WidgetsBinding.instance.deferFirstFrame();
+    // FORK: after startup has painted, deferring the engine's first frame is
+    // ineffective. Keep its splash visible while this App prepares its route.
+    _releaseSplash = BirdyGoLaunchScope.maybeOf(context)?.hold();
+    if (_releaseSplash == null) WidgetsBinding.instance.deferFirstFrame();
     // Nothing on the path that follows is slow, but none of it is worth a
     // launch that never paints either. Give up after a beat and let the
     // ordinary push-over-Home behavior take over.
@@ -455,7 +460,14 @@ class _LaunchFrameHold {
     _held = false;
     _timeout?.cancel();
     _timeout = null;
-    WidgetsBinding.instance.allowFirstFrame();
+    // FORK: preserve the original first-frame behavior when App runs alone.
+    final releaseSplash = _releaseSplash;
+    _releaseSplash = null;
+    if (releaseSplash != null) {
+      releaseSplash();
+    } else {
+      WidgetsBinding.instance.allowFirstFrame();
+    }
   }
 }
 
@@ -633,7 +645,7 @@ class _SharedAudioListenerState extends ConsumerState<_SharedAudioListener> {
     super.initState();
     SharedMediaService.setNativeShareHandler(_onNativeShare);
     _launchSharedFile = widget.launchSharedFile;
-    if (_launchSharedFile != null) _launchFrame.hold();
+    if (_launchSharedFile != null) _launchFrame.hold(context); // FORK
     _requestPendingSharedFile();
   }
 

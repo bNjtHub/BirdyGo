@@ -416,3 +416,25 @@ Règles :
 Contraste AA, thèmes clair et sombre, paysage et tablette (exigence d'upstream), texte agrandi à
 130 %, libellés pour les lecteurs d'écran sur les boutons icônes, 60 images par seconde en mode
 profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d'une seconde.
+
+
+## Startup screen (J6c)
+
+The native Android launch screen and the first Flutter frame share the Encre background
+and BirdyGo mark. Flutter adds a quiet turquoise and Loriot dawn glow, three stationary
+listening contours, the Fraunces wordmark, and the chosen tagline: "Le monde chante.
+Écoute." / "The world is singing. Listen."
+
+The existing logo painter draws its spectrogram wing once in 480 ms. The rest of the
+composition stays still. Reduced motion draws the completed mark immediately. The screen
+appears only while notification configuration, preferences, migrations, and launch intents
+initialize; it has no minimum display duration and yields as soon as the app is ready.
+A startup error offers a localized retry. Audio shares and Quick Listen launch intents
+are retained across retries. App mounts behind the splash while their storage checks
+prepare the destination, so Home does not flash during a cold handoff. The upstream
+five-second safety timeout remains. There is no added model load, network image, or dependency.
+
+The content remains centered within 480 dp, with a compact logo in landscape and scrolling
+as a fallback for large text or a short viewport. Android 12 uses a padded VectorDrawable;
+older Android versions use the same mark in a layer-list. The native iOS launch assets are
+unchanged; the Flutter startup screen also works on iOS.

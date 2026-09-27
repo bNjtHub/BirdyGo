@@ -11,14 +11,34 @@ import 'core/constants/app_constants.dart';
 import 'features/aru/aru_notification.dart';
 import 'features/survey/survey_notification.dart';
 import 'fork/design/font_licenses.dart'; // FORK: OFL font licenses (J6a)
+import 'fork/splash/birdygo_startup.dart'; // FORK: visible startup (J6c)
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
 import 'shared/widgets/open_street_map_tile_layer.dart';
 
-Future<void> main() async {
+// FORK: paint the launch screen before initialization; retain consumed launch
+// intents if initialization fails and the user retries.
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  Future<SharedAudioFile?>? launchShareRead;
+  Future<String?>? launchQuickActionRead;
+  runApp(
+    BirdyGoStartup(
+      bootstrap: () => _initializeApp(
+        readLaunchShare: () => launchShareRead ??= _readLaunchShare(),
+        readLaunchQuickAction: () =>
+            launchQuickActionRead ??= _readLaunchQuickAction(),
+      ),
+    ),
+  );
+}
 
+// FORK: preserve upstream initialization order behind the startup screen.
+Future<Widget> _initializeApp({
+  required Future<SharedAudioFile?> Function() readLaunchShare,
+  required Future<String?> Function() readLaunchQuickAction,
+}) async {
   // Initialize foreground task communication for survey background service.
   FlutterForegroundTask.initCommunicationPort();
   await SurveyNotificationService.init();
@@ -40,8 +60,9 @@ Future<void> main() async {
   // sent to instead of painting Home and immediately navigating away from it.
   // Started here and awaited just below so the channel round trips overlap the
   // preference work.
-  final launchShareRead = _readLaunchShare();
-  final launchQuickActionRead = _readLaunchQuickAction();
+  // FORK: retry-safe reads, still completed before App opens its first route.
+  final launchShareRead = readLaunchShare();
+  final launchQuickActionRead = readLaunchQuickAction();
 
   // Initialize SharedPreferences before running the app.
   final prefs = await SharedPreferences.getInstance();
@@ -95,13 +116,12 @@ Future<void> main() async {
 
   registerForkFontLicenses(); // FORK: OFL font licenses (J6a)
 
-  runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: App(
-        launchSharedFile: launchSharedFile,
-        launchQuickAction: launchQuickAction,
-      ),
+  // FORK: replace startup immediately when ready, without a minimum delay.
+  return ProviderScope(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    child: App(
+      launchSharedFile: launchSharedFile,
+      launchQuickAction: launchQuickAction,
     ),
   );
 }
