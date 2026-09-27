@@ -261,7 +261,8 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
     });
 
     try {
-      final result = await FilePicker.pickFiles(
+      // FORK: file_picker 13 (pickFiles returns a list; one file here).
+      final result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: [
           'wav', 'wave', 'flac', // Lossless (pure-Dart decoder)
@@ -271,11 +272,11 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
         ],
       );
 
-      if (result == null || result.files.isEmpty) {
+      if (result == null) {
         if (mounted) setState(() => _isInspecting = false);
         return;
       }
-      final path = result.files.first.path;
+      final path = result.path;
       if (path == null) {
         if (mounted) setState(() => _isInspecting = false);
         return;

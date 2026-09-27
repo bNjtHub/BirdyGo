@@ -1592,12 +1592,12 @@ class _CreateWatchlistScreenState
   Future<void> _importFromFile() async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final result = await FilePicker.pickFiles(
+      // FORK: file_picker 13 (pickFiles returns a list; one file here).
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: const ['txt', 'csv'],
       );
-      if (result == null || result.files.isEmpty) return;
-      final file = result.files.single;
+      if (file == null) return;
       final filePath = file.path;
       if (filePath == null || filePath.isEmpty) {
         throw const FileSystemException('Selected file has no readable path');
