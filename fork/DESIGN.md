@@ -477,22 +477,33 @@ dark theme) in dark mode. The native Android launch screen is the same plain col
 mark (transparent Android 12+ icon, `values-night/birdygo_colors.xml` for dark), so the bird
 appears only once, fading in with the Flutter splash.
 
-The bird sings phrases of three syllables: on each one the beak opens, the body swells,
-the tail and the wing bars move, and a note leaves the beak (Kingfisher, gold, deep
-teal). The eye blinks after the phrase. The wing bars draw first; the wordmark enters at
-1.0 s, « Le monde chante. » at 1.25 s, the loading status at 1.35 s and « Écoute. » at
-2.15 s, each in 320 ms with 8 dp of travel. A phrase lasts 3.6 s and repeats for as long
-as initialization runs. This startup-only motion is an explicit exception to the general
-500 ms/no-rotation rules; it does not change Home's logo or other app animations.
+The startup plays in three acts (times from the moment the splash appears, all in
+`BirdyGoSplashTimeline`). Arrival, 0 to 1 s: the bird fades in (380 ms), rises 12 view-box
+units and grows from 0.9 with a slight back-ease overshoot (850 ms); the wing bars draw
+from 450 ms, 60 ms apart, 500 ms each. Song, from 1.15 s: phrases of three syllables
+(400 ms apart, 360 ms each), every 6.5 s. On each syllable the beak opens, the body swells,
+the tail (extended into the body so no gap opens, swinging 5° about its root, as on the
+Claude Design board) and the wing bars move, and a note leaves the beak (Kingfisher, gold,
+deep teal) and flies for 1.3 s. From 2.4 s the bird breathes (scale ±0.7 %), and it blinks
+at 4.3 s, then every 4.2 s. Name: the centred block (mark, wordmark, tagline) starts 56 dp
+lower and rises from 2.15 s over 800 ms (cubic in-out); the wordmark enters at 2.35 s,
+« Le monde chante. » at 2.75 s and « Écoute. » at 3.3 s, each in 650 ms with 10 dp of
+travel and a blur fading from 4 dp; the footer (loading bar, « Propulsé par BirdNET »)
+fades in from 3.8 s over 700 ms. The phrase repeats for as long as initialization runs.
+This startup-only motion (rotation, back-ease overshoot, breathing, blur, longer
+durations) is an explicit exception to the general 500 ms/no-rotation rules; it does not
+change Home's logo or other app animations.
 The splash is a real loading screen. After initialization (preferences, notifications,
 launch intents), it loads in App's provider container the audio model, the geo-model,
 the taxonomy, audio labels and species sheets, and opens (or fills) the observation
 index (`lib/fork/splash/birdygo_warm_up.dart`). The steps run side by side. The bottom
-bar fills with the weighted share of the steps done (never a made-up percentage) and the
-caption names the first step still loading, then « C'est prêt. ». A failed step counts
+bar (120 × 3 dp, Ink at 8 % on Mist, Mist at 12 % on Ink, Kingfisher fill) fills with the
+weighted share of the steps done (never a made-up percentage; the board's sweep is not
+used). As on the board, no step caption is shown; a screen reader still hears the first
+step still loading, then « C'est prêt. » (live region). A failed step counts
 as done: the screen that needs the resource reports the error. App opens when loading
-is done and the minimum display of 4.4 s (`BirdyGoSplash.minimumDisplay`: one whole
-phrase, up to the blink and the last note fading out) has passed; past 25 s of loading
+is done and the minimum display of 4.5 s (`BirdyGoSplash.minimumDisplay`: the whole
+intro, until the footer has faded in) has passed; past 25 s of loading
 (`BirdyGoStartup.loadTimeout`) it opens anyway. The location is not loaded here: it may
 ask for a permission, which belongs to the screen that needs it.
 Reduced motion draws the settled composition immediately and adds no wait. Explicit audio
