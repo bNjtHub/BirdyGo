@@ -22,6 +22,7 @@ if str(_SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_ROOT))
 
 try:  # Script execution puts tools/ on sys.path; tests import tools.*.
+    from fork_icons.plumage import soften_plumage
     from fork_icons.templates import (
         LEGACY_SPECIES,
         TEMPLATES,
@@ -34,6 +35,7 @@ try:  # Script execution puts tools/ on sys.path; tests import tools.*.
         template_catalog,
     )
 except ModuleNotFoundError:  # pragma: no cover - depends on invocation style
+    from tools.fork_icons.plumage import soften_plumage
     from tools.fork_icons.templates import (
         LEGACY_SPECIES,
         TEMPLATES,
@@ -66,11 +68,13 @@ CSV_FIELDS = (
     "source_license",
     "source_plate",
     "plumage",
+    "plumage_style",
     "review_status",
     "show_sound_bars",
     "render_style",
 )
-OPTIONAL_CSV_FIELDS = {"render_style", "show_sound_bars"}
+OPTIONAL_CSV_FIELDS = {"plumage_style", "render_style", "show_sound_bars"}
+PLUMAGE_STYLES = {"flat", "soft"}
 REVIEW_STATUSES = {"draft", "needs_source_review", "reviewed"}
 COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 SAFE_SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -123,6 +127,9 @@ def _clean_row(raw: Mapping[str, object], line_number: int) -> dict[str, str]:
         raise ValueError(f"{prefix}: review_status must be one of {allowed}")
     if not row["plumage"]:
         raise ValueError(f"{prefix}: plumage is required")
+    row["plumage_style"] = (row["plumage_style"] or "flat").casefold()
+    if row["plumage_style"] not in PLUMAGE_STYLES:
+        raise ValueError(f"{prefix}: plumage_style must be flat or soft")
     source_fields = ("source_url", "source_title", "source_author", "source_license")
     if row["review_status"] == "reviewed" and any(not row[field] for field in source_fields):
         raise ValueError(f"{prefix}: reviewed rows require complete source attribution")
@@ -192,6 +199,7 @@ def _neutral_row(scientific_name: str, template_id: str, family: str, resolution
         "source_license": "",
         "source_plate": "",
         "plumage": "neutral fallback",
+        "plumage_style": "flat",
         "review_status": "needs_source_review",
         "_resolution": resolution,
         "_requested_name": scientific_name,
@@ -257,6 +265,13 @@ def _palette(row: Mapping[str, object]) -> dict[str, str]:
     return {zone: value.upper() for zone, value in palette.items()}
 
 
+def _plumage_style(row: Mapping[str, object]) -> str:
+    value = str(row.get("plumage_style", "") or "flat").strip().casefold()
+    if value not in PLUMAGE_STYLES:
+        raise ValueError("plumage_style must be flat or soft")
+    return value
+
+
 def _show_sound_bars(row: Mapping[str, object]) -> bool:
     value = row.get("show_sound_bars", True)
     if isinstance(value, bool):
@@ -286,19 +301,27 @@ def render_species(row: Mapping[str, object], adjustments: Mapping[str, object] 
     adjusted = any(value != 1.0 for value in normalized_adjustments.values())
     customized = bool(row.get("_customized")) or adjusted or row.get("render_style") == "template"
     show_sound_bars = _show_sound_bars(row)
+    plumage_style = _plumage_style(row)
+    legacy_reference = False
+    svg = None
     if not customized:
         approved = legacy_species_svg(scientific_name, slug, label)
         if approved is not None:
-            return approved if show_sound_bars else legacy_species_without_sound_bars(approved)
-    return render_template(
-        str(row["template"]),
-        _palette(row),
-        label=label,
-        slug=slug,
-        adjustments=adjustments,
-        scientific_name=scientific_name,
-        show_sound_bars=show_sound_bars,
-    )
+            legacy_reference = True
+            svg = approved if show_sound_bars else legacy_species_without_sound_bars(approved)
+    if svg is None:
+        svg = render_template(
+            str(row["template"]),
+            _palette(row),
+            label=label,
+            slug=slug,
+            adjustments=adjustments,
+            scientific_name=scientific_name,
+            show_sound_bars=show_sound_bars,
+        )
+    if plumage_style == "soft":
+        return soften_plumage(svg, slug=slug, legacy=legacy_reference)
+    return svg
 
 
 def _json_bytes(value: object) -> bytes:

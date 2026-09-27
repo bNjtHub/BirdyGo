@@ -87,6 +87,11 @@ class Workshop:
             row.setdefault("family", "")
             row.setdefault("review_status", "needs_source_review")
         original = deepcopy(row)
+        if "plumage_style" in payload:
+            plumage_style = payload["plumage_style"]
+            if plumage_style not in ("flat", "soft"):
+                raise ValueError("plumage_style must be flat or soft")
+            row["plumage_style"] = plumage_style
         if "show_sound_bars" in payload:
             show_sound_bars = payload["show_sound_bars"]
             if not isinstance(show_sound_bars, bool):

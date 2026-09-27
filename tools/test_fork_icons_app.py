@@ -54,6 +54,8 @@ class WorkshopTest(unittest.TestCase):
                         {"adjustments": {"head_scale": True}},
                         {"show_sound_bars": "false"},
                         {"show_sound_bars": 0},
+                        {"plumage_style": "blur"},
+                        {"plumage_style": False},
                         {"template": "../other"}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.workshop.preview({"scientific_name": "Testus example", **changes})
@@ -107,6 +109,28 @@ class WorkshopTest(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(blob)) as archive:
             index = json.loads(archive.read("assets/fork/species_icons/index.json"))
             self.assertEqual("paridae", index["species"]["Unknown bird"]["template"])
+
+    def test_soft_plumage_and_sound_bar_choices_export_independently(self):
+        draft = {"scientific_name": "Erithacus rubecula", "plumage_style": "soft",
+                 "show_sound_bars": False}
+        soft = self.workshop.preview(draft)
+        flat = self.workshop.preview({**draft, "plumage_style": "flat"})
+        self.assertNotEqual(flat["svg"], soft["svg"])
+        self.assertIn("radialGradient", soft["svg"])
+        self.assertEqual("reference", soft["row"]["render_style"])
+        for zone in self.workshop.catalog()["zones"]:
+            self.assertEqual(flat["row"][zone], soft["row"][zone])
+        with zipfile.ZipFile(io.BytesIO(self.workshop.export({"drafts": [draft]}))) as archive:
+            self.assertEqual(soft["svg"], archive.read(
+                "assets/fork/species_icons/erithacus-rubecula.svg").decode("utf-8"))
+            self.assertEqual([draft], json.loads(archive.read("project.json"))["drafts"])
+            csv_path = self.folder / "soft.csv"
+            csv_path.write_bytes(archive.read("species_colors.csv"))
+            row = next(row for row in generator.load_species(csv_path)
+                       if row["scientific_name"] == "Erithacus rubecula")
+            self.assertEqual("soft", row["plumage_style"])
+            self.assertEqual("false", row["show_sound_bars"])
+            self.assertEqual(soft["svg"], generator.render_species(row))
 
     def test_loopback_http_serves_preview_rejects_foreign_origin_and_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(self.workshop))

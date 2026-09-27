@@ -25,6 +25,9 @@ uniquement lorsqu'on les consulte.
    Décocher « Afficher les barres sonores » pour retirer les barres de l'oiseau
    sélectionné. Ce réglage est conservé dans le projet, le CSV et les SVG exportés.
    Il préserve la silhouette originale, y compris pour les dessins de référence.
+   « Rendu du plumage → Plumage doux » adoucit les raccords des zones colorées.
+   Le centre des zones garde sa couleur ; les marques distinctives, les yeux et
+   le contour restent nets. Le réglage se combine librement avec les barres sonores.
 4. Consulter la planche citée et vérifier le sexe, l'âge et le plumage représentés.
 5. Exporter le SVG ou le lot complet. Enregistrer aussi le projet pour conserver
    les réglages morphologiques et les ouvrir dans un autre navigateur.

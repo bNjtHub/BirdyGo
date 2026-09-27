@@ -10,7 +10,19 @@ import unittest
 import xml.etree.ElementTree as ET
 
 from tools.fork_icons import templates
+from tools.fork_icons.plumage import soften_plumage
 from tools import fork_species_icons as icons
+
+
+_SVG = "{http://www.w3.org/2000/svg}"
+
+
+def _soft_gradients(root: ET.Element) -> list[ET.Element]:
+    return [
+        node
+        for node in root.iter(f"{_SVG}radialGradient")
+        if "-plumage-" in node.get("id", "")
+    ]
 
 
 def _row(scientific_name: str = "Testus example") -> dict[str, str]:
@@ -142,6 +154,133 @@ class TemplateTests(unittest.TestCase):
             self.assertIn("</svg>", without_bars)
             ET.fromstring(without_bars)
 
+    def test_flat_style_is_byte_identical_and_independent_from_sound_bars(self) -> None:
+        template = {**_row(), "_customized": True}
+        self.assertEqual(
+            icons.render_species(template),
+            icons.render_species({**template, "plumage_style": "flat"}),
+        )
+        legacy = _row("Erithacus rubecula")
+        self.assertEqual(
+            icons.render_species(legacy),
+            icons.render_species({**legacy, "plumage_style": "flat"}),
+        )
+        for bars in ("true", "false"):
+            implicit = icons.render_species({**template, "show_sound_bars": bars})
+            explicit = icons.render_species(
+                {**template, "show_sound_bars": bars, "plumage_style": "flat"}
+            )
+            self.assertEqual(implicit, explicit)
+
+            soft_root = ET.fromstring(
+                icons.render_species(
+                    {**template, "show_sound_bars": bars, "plumage_style": "soft"}
+                )
+            )
+            self.assertTrue(_soft_gradients(soft_root))
+            wing_bar = next(
+                group
+                for group in soft_root.iter(f"{_SVG}g")
+                if group.get("data-zone") == "wing_bar"
+            )
+            self.assertEqual(bars == "true", bool(list(wing_bar)))
+
+    def test_soft_template_preserves_zone_colors_and_uses_unique_ids(self) -> None:
+        row = {**_row(), "_customized": True}
+        flat_root = ET.fromstring(icons.render_species(row))
+        original_colors = []
+        for group in flat_root.iter(f"{_SVG}g"):
+            if group.get("data-zone") not in {
+                "back", "breast", "belly", "crown", "cheek", "throat"
+            }:
+                continue
+            original_colors.extend(
+                child.get("fill")
+                for child in list(group)
+                if child.tag == f"{_SVG}circle"
+                and child.get("fill", "").startswith("#")
+            )
+
+        soft_root = ET.fromstring(
+            icons.render_species({**row, "plumage_style": "soft"})
+        )
+        gradients = _soft_gradients(soft_root)
+        self.assertEqual(len(original_colors), len(gradients))
+        self.assertEqual(
+            sorted(original_colors),
+            sorted(list(gradient)[0].get("stop-color") for gradient in gradients),
+        )
+        ids = [gradient.get("id") for gradient in gradients]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertTrue(all(value.startswith("testus-example-plumage-") for value in ids))
+        for gradient in gradients:
+            stops = list(gradient)
+            self.assertEqual(["0", ".78", ".92", "1"], [stop.get("offset") for stop in stops])
+            self.assertEqual(["1", "1", ".65", "0"], [stop.get("stop-opacity") for stop in stops])
+            self.assertEqual(1, len({stop.get("stop-color") for stop in stops}))
+
+    def test_soft_gradient_ids_do_not_collide_between_species(self) -> None:
+        first = ET.fromstring(
+            icons.render_species(
+                {**_row("Testus first"), "_customized": True, "plumage_style": "soft"}
+            )
+        )
+        second = ET.fromstring(
+            icons.render_species(
+                {**_row("Testus second"), "_customized": True, "plumage_style": "soft"}
+            )
+        )
+        first_ids = {gradient.get("id") for gradient in _soft_gradients(first)}
+        second_ids = {gradient.get("id") for gradient in _soft_gradients(second)}
+        self.assertTrue(first_ids)
+        self.assertTrue(second_ids)
+        self.assertTrue(first_ids.isdisjoint(second_ids))
+
+    def test_soft_legacy_keeps_geometry_and_only_matches_direct_clipped_shapes(self) -> None:
+        row = _row("Erithacus rubecula")
+        flat_root = ET.fromstring(icons.render_species(row))
+        soft_root = ET.fromstring(
+            icons.render_species({**row, "plumage_style": "soft"})
+        )
+
+        def clipped_shapes(root: ET.Element) -> list[ET.Element]:
+            return [
+                child
+                for group in root.iter(f"{_SVG}g")
+                if "clip-path" in group.attrib
+                for child in list(group)
+                if child.tag in (f"{_SVG}circle", f"{_SVG}ellipse")
+                and child.get("fill", "").startswith(("#", "url(#"))
+            ]
+
+        flat_shapes = clipped_shapes(flat_root)
+        soft_shapes = clipped_shapes(soft_root)
+        self.assertEqual(len(flat_shapes), len(_soft_gradients(soft_root)))
+        self.assertEqual(len(flat_shapes), len(soft_shapes))
+        for flat, soft in zip(flat_shapes, soft_shapes):
+            flat_geometry = {key: value for key, value in flat.attrib.items() if key != "fill"}
+            soft_geometry = {key: value for key, value in soft.attrib.items() if key != "fill"}
+            self.assertEqual(flat_geometry, soft_geometry)
+            self.assertTrue(soft.get("fill", "").startswith("url(#"))
+
+        # Front-layer eye circles stay solid and are not accidentally softened.
+        self.assertGreater(
+            sum(1 for circle in soft_root.iter(f"{_SVG}circle") if circle.get("fill", "").startswith("#")),
+            0,
+        )
+
+    def test_soft_legacy_does_not_reach_nested_diagnostic_marks(self) -> None:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg"><defs/>'
+            '<g clip-path="url(#body)"><circle cx="1" cy="1" r="1" fill="#112233"/>'
+            '<g><circle cx="2" cy="2" r="1" fill="#445566"/></g></g>'
+            '<circle cx="3" cy="3" r="1" fill="#778899"/></svg>'
+        )
+        root = ET.fromstring(soften_plumage(svg, slug="testus-example", legacy=True))
+        fills = [circle.get("fill") for circle in root.iter(f"{_SVG}circle")]
+        self.assertTrue(fills[0].startswith("url(#testus-example-plumage-legacy-"))
+        self.assertEqual(["#445566", "#778899"], fills[1:])
+
     def test_anatidae_genus_selects_duck_goose_and_swan_shapes(self) -> None:
         palette = icons.NEUTRAL_PALETTE
         drawings = {
@@ -171,6 +310,29 @@ class DataAndBundleTests(unittest.TestCase):
 
             _write_csv(path, [{**_row(), "show_sound_bars": "sometimes"}])
             with self.assertRaisesRegex(ValueError, "show_sound_bars must be true or false"):
+                icons.load_species(path)
+
+    def test_plumage_style_defaults_round_trips_and_validates(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "species.csv"
+            fields_without_style = [
+                field for field in icons.CSV_FIELDS if field != "plumage_style"
+            ]
+            with path.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fields_without_style)
+                writer.writeheader()
+                writer.writerow(
+                    {key: value for key, value in _row().items() if key in fields_without_style}
+                )
+            self.assertEqual("flat", icons.load_species(path)[0]["plumage_style"])
+
+            _write_csv(path, [{**_row(), "plumage_style": "soft"}])
+            loaded = icons.load_species(path)[0]
+            self.assertEqual("soft", loaded["plumage_style"])
+            self.assertTrue(_soft_gradients(ET.fromstring(icons.render_species(loaded))))
+
+            _write_csv(path, [{**_row(), "plumage_style": "blurred"}])
+            with self.assertRaisesRegex(ValueError, "plumage_style must be flat or soft"):
                 icons.load_species(path)
 
     def test_palette_validation_does_not_fill_missing_species_colors(self) -> None:

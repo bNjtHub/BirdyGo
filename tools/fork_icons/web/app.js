@@ -14,6 +14,8 @@ const copy = {
     reset: "Réinitialiser", templateHint: "Proposé selon l’espèce, son genre ou sa famille.",
     shape: "Silhouette", colors: "Couleurs du plumage", referenceDetails: "Noms et provenance",
     soundBars: "Afficher les barres sonores",
+    plumageStyle: "Rendu du plumage", flatPlumage: "Aplats", softPlumage: "Plumage doux",
+    softPlumageHint: "Adoucit seulement les raccords du plumage, avec les couleurs de l’oiseau.",
     legacyHint: "Les 15 dessins d’origine sont conservés. Modifier une forme ou une couleur passe au gabarit paramétrable.",
     scientificName: "Nom scientifique", commonName: "Nom courant",
     newHint: "Un gabarit neutre sera proposé. Documente la source avant de choisir les couleurs.",
@@ -47,6 +49,8 @@ const copy = {
     reset: "Reset", templateHint: "Suggested from the species, genus or family.",
     shape: "Silhouette", colors: "Plumage colors", referenceDetails: "Names and provenance",
     soundBars: "Show sound bars",
+    plumageStyle: "Plumage style", flatPlumage: "Flat colors", softPlumage: "Soft plumage",
+    softPlumageHint: "Softens only the plumage transitions, using this bird’s colors.",
     legacyHint: "The 15 original drawings are preserved. Changing a shape or color switches to the adjustable template.",
     scientificName: "Scientific name", commonName: "Common name",
     newHint: "A neutral template will be suggested. Document a source before choosing colors.",
@@ -171,6 +175,8 @@ function buildControls(row) {
   template.value = row.template || "";
   $("sound-bars").checked = state.current.show_sound_bars ?? (row.show_sound_bars !== "false");
   $("sound-bars").disabled = false;
+  $("plumage-style").value = state.current.plumage_style ?? (row.plumage_style || "flat");
+  $("plumage-style").disabled = false;
   $("morphology").replaceChildren();
   for (const [key, limits] of Object.entries(state.catalog.controls)) {
     const group = document.createElement("div"); group.className = "control";
@@ -300,6 +306,10 @@ $("language").addEventListener("change", () => {
 $("template").addEventListener("change", () => { state.current.template = $("template").value; changed(); });
 $("sound-bars").addEventListener("change", () => {
   state.current.show_sound_bars = $("sound-bars").checked;
+  changed();
+});
+$("plumage-style").addEventListener("change", () => {
+  state.current.plumage_style = $("plumage-style").value;
   changed();
 });
 $("reset").addEventListener("click", () => {
