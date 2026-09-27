@@ -83,7 +83,7 @@ void main() {
           );
           await tester.pump(
             introFinished
-                ? BirdyGoSplash.introDuration
+                ? BirdyGoSplash.minimumDisplay
                 : const Duration(milliseconds: 20),
           );
           await tester.pump(

@@ -481,8 +481,11 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
-            Mist background, localized tagline, three rising/fading musical notes,
-            one 2.4-second introduction, immediate reduced-motion state,
+            Mist background, singing bird (beak, body, tail, wing bars, one note per
+            syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,
+            real loading (audio model, geo-model, species, observation index) with a
+            weighted bar and a caption per step, 4.4-second minimum display, 25-second
+            loading limit, immediate reduced-motion state,
             real bootstrap loading and retry. Launch share and Quick Listen are retained
             across retry; normal launch waits for initialization and introduction. Android launch
             and normal window backgrounds match Flutter, with the current BirdyGo mark.
@@ -734,6 +737,11 @@ Cette branche contient une fusion avec upstream dont les conflits sont encore ma
 
 - Activité de chant selon la météo (upstream a déjà un service météo).
 - Widget « dernier oiseau entendu ».
+- Audit des couleurs (skills `design:accessibility-review` et `design:design-system`) : contraste
+  mesuré de toutes les paires de `BirdyColors` en clair et en sombre (au-delà de
+  `test/fork/design/contrast_test.dart`), couleurs en dur (`Color(0x…)`, `Colors.*`) dans
+  `lib/fork/`, puis propositions de teintes avec avant/après et ratio. Rapport d'abord, aucune
+  modification sans choix de Benjamin.
 - Export au format eBird (CSV étendu), l'import eBird étant ouvert à tous.
 
 ## Phase iOS (après validation d'Android)
@@ -772,4 +780,6 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».
 
 - Startup screen (J6c): Flutter composition is shared. Native iOS launch assets remain
-  unchanged; align their mark/background during the iOS phase and check cold-launch timing.
+  unchanged; during the iOS phase make `LaunchScreen.storyboard` a plain Mist (#EEF1EC) view
+  with no mark, as on Android, so the Flutter splash fades the bird in without a jump, and check
+  cold-launch timing.

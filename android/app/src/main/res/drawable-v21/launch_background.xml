@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- FORK: BirdyGo launch mark and Encre background before Flutter paints. -->
+<!-- FORK: plain Mist before Flutter paints; the Flutter splash fades the bird in. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/birdygo_launch_background" />
-    <item android:gravity="center" android:drawable="@drawable/birdygo_splash" />
 </layer-list>

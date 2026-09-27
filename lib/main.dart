@@ -12,24 +12,42 @@ import 'features/aru/aru_notification.dart';
 import 'features/survey/survey_notification.dart';
 import 'fork/design/font_licenses.dart'; // FORK: OFL font licenses (J6a)
 import 'fork/splash/birdygo_startup.dart'; // FORK: visible startup (J6c)
+import 'fork/splash/birdygo_warm_up.dart'; // FORK: real loading (J6c)
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
 import 'shared/widgets/open_street_map_tile_layer.dart';
 
 // FORK: paint the launch screen before initialization; retain consumed launch
-// intents if initialization fails and the user retries.
+// intents if initialization fails and the user retries. The startup screen
+// then loads the heavy resources in the app's provider container.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Future<SharedAudioFile?>? launchShareRead;
   Future<String?>? launchQuickActionRead;
+  late ProviderContainer container;
   runApp(
     BirdyGoStartup(
-      bootstrap: () => _initializeApp(
-        readLaunchShare: () => launchShareRead ??= _readLaunchShare(),
-        readLaunchQuickAction: () =>
-            launchQuickActionRead ??= _readLaunchQuickAction(),
-      ),
+      bootstrap:
+          () => _initializeApp(
+            readLaunchShare: () => launchShareRead ??= _readLaunchShare(),
+            readLaunchQuickAction:
+                () => launchQuickActionRead ??= _readLaunchQuickAction(),
+            onContainer: (created) => container = created,
+          ),
+      warmUp: (progress) async {
+        // A share or a Quick Listen tap opens its screen at once, which
+        // loads what it needs itself.
+        if (await launchShareRead != null ||
+            await launchQuickActionRead != null) {
+          return;
+        }
+        await runBirdyGoWarmUp(
+          birdyGoWarmUpTasks(container),
+          progress,
+          pause: birdyGoFramePause,
+        );
+      },
     ),
   );
 }
@@ -38,6 +56,7 @@ void main() {
 Future<Widget> _initializeApp({
   required Future<SharedAudioFile?> Function() readLaunchShare,
   required Future<String?> Function() readLaunchQuickAction,
+  required void Function(ProviderContainer container) onContainer,
 }) async {
   // Initialize foreground task communication for survey background service.
   FlutterForegroundTask.initCommunicationPort();
@@ -116,9 +135,14 @@ Future<Widget> _initializeApp({
 
   registerForkFontLicenses(); // FORK: OFL font licenses (J6a)
 
-  // FORK: replace startup immediately when ready, without a minimum delay.
-  return ProviderScope(
+  // FORK: an explicit container, so the startup screen can load the heavy
+  // resources in it while App mounts behind; it lives as long as the app.
+  final container = ProviderContainer(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
+  onContainer(container);
+  return UncontrolledProviderScope(
+    container: container,
     child: App(
       launchSharedFile: launchSharedFile,
       launchQuickAction: launchQuickAction,
