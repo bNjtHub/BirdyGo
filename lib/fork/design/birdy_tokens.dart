@@ -171,6 +171,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.probable,
     required this.toCheck,
     required this.skeleton,
+    required this.skeletonSheen,
   });
 
   final Brightness brightness;
@@ -241,9 +242,12 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
-  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
-  /// loops, so no shimmer or pulse).
+  /// Muted fill of a loading skeleton.
   final Color skeleton;
+
+  /// Light band sweeping over the skeletons (the shimmer, `BirdyShimmer`):
+  /// translucent, painted over [skeleton]. Static fill with reduced motion.
+  final Color skeletonSheen;
 
   final LevelColors sure;
   final LevelColors probable;
@@ -311,6 +315,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
     skeleton: Color(0xFFD6DCD2),
+    skeletonSheen: Color(0x8CFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -352,6 +357,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
     skeleton: Color(0xFF29425F),
+    skeletonSheen: Color(0x1FFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -409,6 +415,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
       skeleton: c(skeleton, other.skeleton),
+      skeletonSheen: c(skeletonSheen, other.skeletonSheen),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
