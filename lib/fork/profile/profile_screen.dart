@@ -10,7 +10,9 @@ import 'package:intl/intl.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_config.dart';
@@ -43,59 +45,64 @@ class ProfileScreen extends ConsumerWidget {
             constraints: const BoxConstraints(maxWidth: _maxWidth),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
-                BirdySpace.xl,
-                BirdySpace.l,
-                BirdySpace.xl,
-                BirdySpace.xl,
+                BirdySpace.page,
+                BirdySpace.page,
+                BirdySpace.page,
+                BirdySpace.page,
               ),
               children: [
-                SizedBox(
-                  height: BirdySizes.topBar,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(
-                            l10n.forkProfileTitle,
-                            style: BirdyText.title.copyWith(color: c.text1),
+                BirdyTabHeader(
+                  title: l10n.forkProfileTitle,
+                  caption:
+                      progress == null
+                          ? null
+                          : l10n.forkProfileCaption(
+                            progress.verified,
+                            progress.facts.streak.current,
+                            progress.facts.streak.record,
                           ),
-                        ),
-                      ),
-                      BirdyIconButton(
-                        icon: AppIcons.leaderboard,
-                        semanticLabel: l10n.forkRanking,
-                        onPressed:
-                            () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const RankingScreen(),
-                              ),
+                  actions: [
+                    BirdyIconButton(
+                      icon: AppIcons.leaderboard,
+                      semanticLabel: l10n.forkRanking,
+                      onPressed:
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const RankingScreen(),
                             ),
-                      ),
-                    ],
-                  ),
+                          ),
+                    ),
+                  ],
                 ),
                 if (progress != null) ...[
-                  const SizedBox(height: BirdySpace.m),
-                  StatusCard(progress: progress),
-                  const SizedBox(height: BirdySpace.l),
+                  const SizedBox(height: BirdySpace.block),
+                  StatusCard(progress: progress, background: c.sure.background),
+                  const SizedBox(height: BirdySpace.block),
                   _Ladder(verified: progress.verified),
-                  const SizedBox(height: BirdySpace.l),
+                  const SizedBox(height: BirdySpace.block),
                   _StreakCard(streak: progress.facts.streak),
-                  const SizedBox(height: BirdySpace.l),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      l10n.forkBadges,
-                      style: BirdyText.heading.copyWith(color: c.text1),
+                  const SizedBox(height: BirdySpace.block),
+                  BirdyBlock(
+                    tone: BirdyBlockTone.plain,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            l10n.forkBadges,
+                            style: BirdyText.heading.copyWith(color: c.text1),
+                          ),
+                        ),
+                        const SizedBox(height: BirdySpace.m),
+                        _Badges(badges: progress.badges),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: BirdySpace.m),
-                  _Badges(badges: progress.badges),
-                  const SizedBox(height: BirdySpace.m),
+                  const SizedBox(height: BirdySpace.block),
                   const _QuizEntry(),
                   if (progress.facts.challenge case final challenge?) ...[
-                    const SizedBox(height: BirdySpace.l),
+                    const SizedBox(height: BirdySpace.block),
                     ChallengeCard(
                       challenge: challenge,
                       onStart: () async {
@@ -124,11 +131,16 @@ class StatusCard extends StatelessWidget {
     required this.progress,
     this.compact = false,
     this.onTap,
+    this.background,
   });
 
   final GameProgress progress;
   final bool compact;
   final VoidCallback? onTap;
+
+  /// Fill of the card. Defaults to [BirdyColors.surface1]; the full Profil
+  /// screen (J6f) uses the sure tone instead.
+  final Color? background;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +208,7 @@ class StatusCard extends StatelessWidget {
       ),
     );
     return Material(
-      color: c.surface1,
+      color: background ?? c.surface1,
       borderRadius: BorderRadius.circular(radius),
       clipBehavior: Clip.antiAlias,
       child: onTap == null ? content : InkWell(onTap: onTap, child: content),
@@ -298,69 +310,64 @@ class _StreakCard extends StatelessWidget {
       color: c.text2,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surface1,
-        borderRadius: BorderRadius.circular(BirdyRadii.card),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(BirdySpace.l),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: BirdySpace.m,
-              children: [
-                Text(
-                  l10n.forkStreakTitle(streak.current),
-                  style: BirdyText.heading.copyWith(color: c.text1),
-                ),
-                Text(l10n.forkStreakRecord(streak.record), style: caption),
-              ],
-            ),
-            const SizedBox(height: BirdySpace.m),
-            Row(
-              children: [
-                for (final day in streak.calendar)
-                  Expanded(
-                    child: Semantics(
-                      label:
-                          '${dateLabel.format(day.date)}, ${switch (day.state) {
-                            StreakDayState.listened => l10n.forkStreakDayListened,
-                            StreakDayState.rest => l10n.forkStreakDayRest,
-                            StreakDayState.missed => l10n.forkStreakDayMissed,
-                            StreakDayState.open => l10n.forkStreakDayOpen,
-                          }}',
-                      child: ExcludeSemantics(
-                        // 14 cells: small phones and large text shrink them.
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Column(
-                            children: [
-                              Text(
-                                weekday.format(day.date).toUpperCase(),
-                                style: caption,
-                              ),
-                              const SizedBox(height: BirdySpace.xs),
-                              _DayDot(day: day),
-                              const SizedBox(height: BirdySpace.xs),
-                              Text('${day.date.day}', style: caption),
-                            ],
-                          ),
+    return BirdyBlock(
+      tone: BirdyBlockTone.oriole,
+      padding: const EdgeInsets.all(BirdySpace.l),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: BirdySpace.m,
+            children: [
+              Text(
+                l10n.forkStreakTitle(streak.current),
+                style: BirdyText.heading.copyWith(color: c.text1),
+              ),
+              Text(l10n.forkStreakRecord(streak.record), style: caption),
+            ],
+          ),
+          const SizedBox(height: BirdySpace.m),
+          Row(
+            children: [
+              for (final day in streak.calendar)
+                Expanded(
+                  child: Semantics(
+                    label:
+                        '${dateLabel.format(day.date)}, ${switch (day.state) {
+                          StreakDayState.listened => l10n.forkStreakDayListened,
+                          StreakDayState.rest => l10n.forkStreakDayRest,
+                          StreakDayState.missed => l10n.forkStreakDayMissed,
+                          StreakDayState.open => l10n.forkStreakDayOpen,
+                        }}',
+                    child: ExcludeSemantics(
+                      // 14 cells: small phones and large text shrink them.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          children: [
+                            Text(
+                              weekday.format(day.date).toUpperCase(),
+                              style: caption,
+                            ),
+                            const SizedBox(height: BirdySpace.xs),
+                            _DayDot(day: day),
+                            const SizedBox(height: BirdySpace.xs),
+                            Text('${day.date.day}', style: caption),
+                          ],
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: BirdySpace.m),
-            Text(l10n.forkStreakRestNote, style: caption),
-            const SizedBox(height: BirdySpace.xs),
-            Text(l10n.forkStreakRule, style: caption),
-          ],
-        ),
+                ),
+            ],
+          ),
+          const SizedBox(height: BirdySpace.m),
+          Text(l10n.forkStreakRestNote, style: caption),
+          const SizedBox(height: BirdySpace.xs),
+          Text(l10n.forkStreakRule, style: caption),
+        ],
       ),
     );
   }
@@ -374,20 +381,20 @@ class _DayDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    const size = 20.0;
+    const size = BirdySizes.dayDot;
     final Widget dot = switch (day.state) {
       StreakDayState.listened => Container(
         width: size,
         height: size,
         decoration: const BoxDecoration(
-          color: BirdyBrand.kingfisher,
+          color: BirdyBrand.oriole,
           shape: BoxShape.circle,
         ),
-        child: const Icon(AppIcons.check, size: 14, color: BirdyBrand.ink),
+        child: const Icon(AppIcons.check, size: 10, color: BirdyBrand.ink),
       ),
       StreakDayState.rest => CustomPaint(
         size: const Size.square(size),
-        painter: _DashedCircle(BirdyBrand.kingfisher),
+        painter: _DashedCircle(BirdyBrand.oriole),
       ),
       StreakDayState.missed => Container(
         width: size,
@@ -405,10 +412,10 @@ class _DayDot extends StatelessWidget {
     };
     if (!day.isToday) return dot;
     return Container(
-      padding: const EdgeInsets.all(2),
+      padding: const EdgeInsets.all(1.5),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: c.text1, width: 2),
+        border: Border.all(color: c.text1, width: 1.5),
       ),
       child: dot,
     );
@@ -426,7 +433,7 @@ class _DashedCircle extends CustomPainter {
         Paint()
           ..color = color
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
+          ..strokeWidth = 1.5;
     final rect = (Offset.zero & size).deflate(1);
     const dashes = 10;
     const sweep = 2 * 3.141592653589793 / dashes;
