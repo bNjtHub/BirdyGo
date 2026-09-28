@@ -63,6 +63,65 @@ abstract final class QuizMotion {
   static const Duration wiggle = Duration(milliseconds: 3000);
   static const Duration ring = Duration(milliseconds: 1400);
   static const Duration ringStep = Duration(milliseconds: 700);
+  static const Duration bounce = Duration(milliseconds: 2400);
+
+  /// cubic-bezier(0.37, 0, 0.63, 1): qz-bounce's own easing.
+  static const Curve bounceEase = Cubic(0.37, 0, 0.63, 1);
+}
+
+/// A radial gradient whose radius is [radius] logical pixels regardless of
+/// the box's size, centered at [center] (the well's radial highlight, the
+/// result score card's Loriot glow).
+class QuizFixedRadius extends GradientTransform {
+  const QuizFixedRadius(this.radius, {this.center = Alignment.topCenter});
+
+  final double radius;
+  final Alignment center;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // RadialGradient(radius: 1) spans the shortest side; scale it to
+    // [radius] around [center].
+    final scale = radius / bounds.shortestSide;
+    final c = center.withinRect(bounds);
+    return Matrix4.identity()
+      ..translateByDouble(c.dx, c.dy, 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1)
+      ..translateByDouble(-c.dx, -c.dy, 0, 1);
+  }
+}
+
+/// qz-bounce: a small forever bob and tilt, for the mystery disc.
+class QuizBounce extends StatelessWidget {
+  const QuizBounce({super.key, required this.child, this.delay = Duration.zero});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  Widget build(BuildContext context) => QuizLoop(
+    period: QuizMotion.bounce,
+    delay: delay,
+    child: child,
+    builder: (context, t, child) {
+      final dy = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        const [0, -8, 0],
+        QuizMotion.bounceEase,
+      );
+      final deg = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        const [-3, 3, -3],
+        QuizMotion.bounceEase,
+      );
+      return Transform.translate(
+        offset: Offset(0, dy),
+        child: Transform.rotate(angle: deg * math.pi / 180, child: child),
+      );
+    },
+  );
 }
 
 /// Value at [t] (0 to 1) of keyframes [values] at [stops], [curve] applied

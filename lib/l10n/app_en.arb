@@ -5666,6 +5666,8 @@
   "@forkBadgeFineEarRule": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
   "forkQuizTitle": "Who's singing?",
   "@forkQuizTitle": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
+  "forkQuizTitleWord": "Who's singing",
+  "@forkQuizTitleWord": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 intro title, without the trailing question mark (drawn as a small oriole disc instead), J6f-e."},
   "forkQuizEntrySubtitle": "Recognise the birds in your recordings",
   "@forkQuizEntrySubtitle": {"description": "BirdyGo fork: « Qui chante ? » quiz, badge Oreille fine (J6e)."},
   "forkQuizStart": "Start the quiz",

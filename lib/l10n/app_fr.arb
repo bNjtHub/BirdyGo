@@ -1574,6 +1574,7 @@
   "forkBadgeFineEar": "Oreille fine",
   "forkBadgeFineEarRule": "Les bonnes réponses au quiz « Qui chante ? », fait avec tes propres enregistrements.",
   "forkQuizTitle": "Qui chante ?",
+  "forkQuizTitleWord": "Qui chante",
   "forkQuizEntrySubtitle": "Reconnais les oiseaux de tes enregistrements",
   "forkQuizStart": "Lancer le quiz",
   "forkQuizQuestion": "Chant {current} sur {total}",

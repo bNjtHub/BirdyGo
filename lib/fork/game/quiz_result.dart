@@ -122,27 +122,6 @@ class QuizResult extends StatelessWidget {
   }
 }
 
-/// A radial gradient whose radius is [radius] logical pixels, centered at
-/// the top of the box, whatever the box's size.
-class _FixedRadius extends GradientTransform {
-  const _FixedRadius(this.radius);
-
-  final double radius;
-
-  @override
-  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    // RadialGradient(radius: 1) spans the shortest side; scale it to
-    // [radius] around the top center.
-    final scale = radius / bounds.shortestSide;
-    final cx = bounds.center.dx;
-    final cy = bounds.top;
-    return Matrix4.identity()
-      ..translateByDouble(cx, cy, 0, 1)
-      ..scaleByDouble(scale, scale, 1, 1)
-      ..translateByDouble(-cx, -cy, 0, 1);
-  }
-}
-
 class _ScoreCard extends StatelessWidget {
   const _ScoreCard({
     required this.right,
@@ -173,7 +152,7 @@ class _ScoreCard extends StatelessWidget {
           center: Alignment.topCenter,
           radius: 1,
           colors: [glow, c.surface1],
-          transform: const _FixedRadius(glowRadius),
+          transform: const QuizFixedRadius(glowRadius),
         ),
       ),
       child: Column(

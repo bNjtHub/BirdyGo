@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import '../../shared/models/taxonomy_species.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/birdygo_silhouette.dart';
 import '../design/species_accents.dart';
-import '../design/species_icons.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/species_avatar.dart';
 import 'game_config.dart';
@@ -105,11 +105,22 @@ class QuizBirdArt extends StatelessWidget {
 }
 
 /// The dark listening well (both themes): the spectrogram gradient with a
-/// faint line every 24 px, radius 28.
+/// faint line every 24 px, radius 28, and an optional faint radial
+/// highlight (the hero and the stage each have their own size and center).
 class QuizWell extends StatelessWidget {
-  const QuizWell({super.key, required this.child});
+  const QuizWell({
+    super.key,
+    required this.child,
+    this.highlightRadius,
+    this.highlightCenter = const Alignment(0, -0.04),
+  });
 
   final Widget child;
+
+  /// Radius of the [BirdyBrand.wellHighlight] radial glow; no glow when
+  /// null.
+  final double? highlightRadius;
+  final Alignment highlightCenter;
 
   @override
   Widget build(BuildContext context) => ClipRRect(
@@ -122,7 +133,26 @@ class QuizWell extends StatelessWidget {
           colors: [BirdyBrand.wellTop, BirdyBrand.wellBottom],
         ),
       ),
-      child: CustomPaint(painter: const _WellLines(), child: child),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (highlightRadius case final radius?)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: highlightCenter,
+                  radius: 1,
+                  colors: const [
+                    BirdyBrand.wellHighlight,
+                    Color(0x00173A55),
+                  ],
+                  transform: QuizFixedRadius(radius, center: highlightCenter),
+                ),
+              ),
+            ),
+          CustomPaint(painter: const _WellLines(), child: child),
+        ],
+      ),
     ),
   );
 }
@@ -142,7 +172,10 @@ class _WellLines extends CustomPainter {
   bool shouldRepaint(_WellLines oldDelegate) => false;
 }
 
-/// The dashed mystery disc on the well, with the brightened silhouette.
+/// The dashed mystery disc on the well: the BirdyGo silhouette in white at
+/// 35 %, the oriole question mark, inside a 2 dp dashed oriole ring at
+/// 60 % (DESIGN.md decision: the mystery bird reads as BirdyGo's own bird,
+/// not a generic species icon).
 class QuizMysteryDisc extends StatelessWidget {
   const QuizMysteryDisc({
     super.key,
@@ -157,7 +190,7 @@ class QuizMysteryDisc extends StatelessWidget {
   Widget build(BuildContext context) => ExcludeSemantics(
     child: CustomPaint(
       foregroundPainter: QuizDashedCircle(
-        color: BirdyBrand.mist.withValues(alpha: 0.32),
+        color: BirdyBrand.oriole.withValues(alpha: 0.6),
       ),
       child: Container(
         width: size,
@@ -165,9 +198,30 @@ class QuizMysteryDisc extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: BirdyBrand.mist.withValues(alpha: 0.06),
+          color: BirdyBrand.mist.withValues(alpha: 0.08),
         ),
-        child: MysterySilhouette(size: silhouette),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            BirdyGoSilhouetteIcon(
+              size: silhouette,
+              color: BirdyBrand.mist.withValues(alpha: 0.35),
+            ),
+            Positioned(
+              right: size * 0.22,
+              bottom: size * 0.16,
+              child: Text(
+                '?',
+                style: BirdyText.species.copyWith(
+                  color: BirdyBrand.oriole,
+                  fontWeight: FontWeight.w700,
+                  fontSize: size * 0.22,
+                  height: 1,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );

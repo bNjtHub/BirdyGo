@@ -32,6 +32,9 @@ abstract final class BirdyBrand {
   /// Background of the spectrogram well (both themes).
   static const Color wellTop = Color(0xFF0B1728);
   static const Color wellBottom = Color(0xFF0F1E33);
+
+  /// Faint radial highlight over the well (Quiz v2 mockup's hero and stage).
+  static const Color wellHighlight = Color(0xFF173A55);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -91,6 +94,20 @@ abstract final class BirdyQuizColors {
 
   /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
   static const double mysteryBrightness = 2.2;
+
+  /// Sparks, twinkles and star burst particles on the intro hero, the
+  /// result and a right reveal (Quiz v2 mockup).
+  static const List<Color> sparkColors = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF5AA9E6),
+    Color(0xFFE9836B),
+  ];
+
+  /// Rim of an earned result star (a shaded gold), both themes.
+  static const Color starRim = Color(0xFFC49224);
 }
 
 /// Foreground and background of one reliability level.

@@ -301,7 +301,7 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4), correct: 5, start: false);
-      expect(find.text('Qui chante ?'), findsOneWidget);
+      expect(find.bySemanticsLabel('Qui chante ?'), findsOneWidget);
       expect(find.text('Écoute'), findsOneWidget);
       expect(find.text('4 chants de tes sorties'), findsOneWidget);
       expect(find.text('Devine'), findsOneWidget);

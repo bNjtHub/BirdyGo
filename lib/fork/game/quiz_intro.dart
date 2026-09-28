@@ -4,6 +4,8 @@
 /// « C'est parti ! ». The sound switch sits in the header.
 library;
 
+import 'dart:math' as math;
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +18,7 @@ import 'fine_ear_quiz_widgets.dart';
 import 'game_progress.dart';
 import 'game_text.dart';
 import 'game_widgets.dart';
+import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
 class QuizIntro extends StatelessWidget {
@@ -61,9 +64,24 @@ class QuizIntro extends StatelessWidget {
                       const SizedBox(height: BirdySpace.l),
                       Semantics(
                         header: true,
-                        child: Text(
-                          l10n.forkQuizTitle,
-                          style: BirdyText.display.copyWith(color: c.text1),
+                        label: l10n.forkQuizTitle,
+                        excludeSemantics: true,
+                        child: Text.rich(
+                          TextSpan(
+                            style: BirdyText.display.copyWith(color: c.text1),
+                            children: [
+                              TextSpan(text: l10n.forkQuizTitleWord),
+                              const WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: SizedBox(width: 2),
+                              ),
+                              const WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                baseline: TextBaseline.alphabetic,
+                                child: _QuizTitleMark(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: BirdySpace.s),
@@ -94,14 +112,18 @@ class _IntroWell extends StatelessWidget {
 
   final List<QuizBird> birds;
 
+  /// Tilt of each orbit bird, mockup order.
+  static const _tilts = [-8.0, 6.0, 5.0, -6.0];
+
   @override
   Widget build(BuildContext context) {
     return QuizWell(
+      highlightRadius: 240,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final h = constraints.maxHeight;
           final k = (h / QuizIntro.heroMax).clamp(0.6, 1.0);
-          final orbit = 64 * k;
+          final orbit = 58 * k;
           // Mockup positions on a 350 × 290 card.
           final spots =
               <({double? left, double? right, double? top, double? bottom})>[
@@ -112,6 +134,10 @@ class _IntroWell extends StatelessWidget {
               ];
           return Stack(
             children: [
+              // Background glow: 16 radiating sparks and 5 twinkles, one
+              // controller each, both under the birds and the disc.
+              const Positioned.fill(child: QuizSparkField(maxRadius: 130)),
+              const Positioned.fill(child: QuizTwinkleField(count: 5, seed: 7)),
               for (var i = 0; i < birds.length && i < 4; i++)
                 Positioned(
                   left: spots[i].left,
@@ -121,10 +147,35 @@ class _IntroWell extends StatelessWidget {
                   child: QuizFloat(
                     period: QuizMotion.floatIntro,
                     delay: QuizMotion.floatStep * i,
-                    child: QuizBirdArt(
-                      bird: birds[i],
-                      size: orbit,
-                      iconSize: 54 * k,
+                    child: Transform.rotate(
+                      angle: _tilts[i] * math.pi / 180,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: birds[i].tint.accent.withValues(
+                                alpha: 0.35,
+                              ),
+                              blurRadius: 3,
+                              spreadRadius: 3,
+                            ),
+                            const BoxShadow(
+                              color: Color(0x40000000),
+                              blurRadius: 16,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: QuizBirdArt(
+                          bird: birds[i],
+                          size: orbit,
+                          iconSize: 54 * k,
+                          background: birds[i].tint.cardBackground(
+                            Brightness.light,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -136,7 +187,9 @@ class _IntroWell extends StatelessWidget {
                       label: AppLocalizations.of(context)!.forkQuizIntroBubble,
                     ),
                     SizedBox(height: 10 * k),
-                    QuizMysteryDisc(size: 128 * k, silhouette: 104 * k),
+                    QuizBounce(
+                      child: QuizMysteryDisc(size: 128 * k, silhouette: 104 * k),
+                    ),
                     SizedBox(height: 14 * k),
                     QuizBars(
                       heights: const [14, 26, 20, 12, 6],
@@ -363,6 +416,33 @@ class _IntroBadgeCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The 40 dp oriole disc standing in for the title's own « ? », tilted
+/// like the mockup.
+class _QuizTitleMark extends StatelessWidget {
+  const _QuizTitleMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Transform.rotate(
+      angle: -8 * math.pi / 180,
+      child: Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: BirdyBrand.oriole,
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          '?',
+          style: BirdyText.display.copyWith(color: c.text1, height: 1),
+        ),
       ),
     );
   }
