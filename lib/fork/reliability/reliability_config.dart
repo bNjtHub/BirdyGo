@@ -4,6 +4,7 @@
 /// (Reliability screen) after a few weeks of reviews.
 library;
 
+import '../../features/announcements/domain/announcement_signals.dart';
 import '../../features/inference/geo_abundance.dart';
 import '../../features/live/live_session.dart';
 
@@ -45,6 +46,20 @@ abstract final class ReliabilityConfig {
 
   /// Live GPS track: fixes less accurate than this (meters) are dropped.
   static const double liveGpsMaxAccuracyMeters = 30;
+
+  /// Live empty state (J6f): species listed under « Attendus ici ».
+  static const int liveExpectedCount = 5;
+
+  /// Live empty state (J6f): commonness bins said « Parmi les plus
+  /// fréquents ici en `<mois>` ».
+  static const Set<CommonnessBin> liveExpectedFrequentBins = {
+    CommonnessBin.abundant,
+    CommonnessBin.common,
+  };
+
+  /// Live empty state (J6f): this week's score over the species' annual
+  /// peak here from which it is « En pleine saison ici ».
+  static const double liveExpectedPeakShare = 0.8;
 }
 
 /// What the geo-model says about a species at a place and week.

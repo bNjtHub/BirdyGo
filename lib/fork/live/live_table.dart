@@ -95,11 +95,40 @@ class _LiveTableState extends State<LiveTable> {
     _known = names;
   }
 
+  static const Key _emptyKey = ValueKey('live-table-empty');
+  static const Key _rowsKey = ValueKey('live-table-rows');
+
   @override
   Widget build(BuildContext context) {
-    if (widget.entries.isEmpty && widget.empty != null) {
-      return Padding(padding: widget.padding, child: widget.empty);
-    }
+    final empty = widget.empty;
+    if (empty == null) return _rows();
+    // J6f: the empty state fades out (exit) as the first row comes in; the
+    // row plays its own entrance, so the rows themselves do not fade.
+    return AnimatedSwitcher(
+      duration: BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.exit,
+      switchInCurve: BirdyMotion.standard,
+      switchOutCurve: BirdyMotion.standard,
+      layoutBuilder:
+          (current, previous) => Stack(
+            fit: StackFit.expand,
+            children: [...previous, if (current != null) current],
+          ),
+      transitionBuilder:
+          (child, animation) =>
+              child.key == _emptyKey
+                  ? FadeTransition(opacity: animation, child: child)
+                  : child,
+      child:
+          widget.entries.isEmpty
+              ? KeyedSubtree(
+                key: _emptyKey,
+                child: Padding(padding: widget.padding, child: empty),
+              )
+              : KeyedSubtree(key: _rowsKey, child: _rows()),
+    );
+  }
+
+  Widget _rows() {
     final gap = widget.compact ? 6.0 : BirdySpace.s;
     // Moves repaint the table only, not the header or the spectrogram.
     return RepaintBoundary(
