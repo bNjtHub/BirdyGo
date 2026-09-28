@@ -306,7 +306,7 @@ Shown only when **Include audio files** is on. When enabled, FLAC recordings are
 
 ### Include app metadata
 
-When on, the export ZIP carries a `*.metadata.json` side-file describing how the session was produced: BirdNET Live version, model identity, the weather snapshot captured at session start, and any audio integrity warnings detected during recording. The intuition: that provenance is what lets you (or a reviewer) reproduce or audit a session months later. Turn it off when you want a clean share of just the audio and your selected formats — for example, dropping a single WAV into iNaturalist or eBird without any app-specific files riding along.
+When on, the export ZIP carries a `*.metadata.json` side-file describing how the session was produced: BirdNET Live version, model identity, readable `device` and `os` fields for the device used to export it (for example, `"device": "Pixel 10"` and `"os": "Android 17"`), the weather snapshot captured at session start, and any audio integrity warnings detected during recording. It does not include a device ID or user-assigned device name. The intuition: that provenance is what lets you (or a reviewer) reproduce or audit a session months later. Turn it off when you want a clean share of just the audio and your selected formats — for example, dropping a single WAV into iNaturalist or eBird without any app-specific files riding along.
 
 ### Include HTML report
 

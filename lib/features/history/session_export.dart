@@ -39,6 +39,7 @@ import '../live/live_session.dart';
 import '../recording/audio_decoder.dart';
 import '../recording/native_audio_decoder.dart';
 import '../recording/wav_writer.dart';
+import 'export_device_info.dart';
 import 'html_report.dart';
 import 'services/audio_share_extension.dart';
 import 'services/detection_audio_window.dart';
@@ -491,6 +492,8 @@ String buildCsvExport(
 /// contains `name`, `version`, `description`, `speciesCount`, `sampleRate` from
 /// `model_config.json`.
 Map<String, dynamic> buildExportMetadata({
+  String? device,
+  String? os,
   String? appVersion,
   String? appBuildNumber,
   String? appPackageName,
@@ -533,6 +536,8 @@ Map<String, dynamic> buildExportMetadata({
       if (appBuildNumber != null) 'buildNumber': appBuildNumber,
       if (appPackageName != null) 'packageName': appPackageName,
     },
+    if (device != null) 'device': device,
+    if (os != null) 'os': os,
     if (sessionMetadata != null) 'session': sessionMetadata,
     if (typeMetadata != null && typeMetadata.isNotEmpty)
       'typeMetadata': typeMetadata,
@@ -963,10 +968,19 @@ Future<String?> buildSessionExport(
     fullRecordingSourceExt,
     shareAudioAsWav: shareAudioAsWav,
   );
+  final fallbackDeviceInfo =
+      metadata == null && session.aruMetadata != null
+          ? await exportDeviceInfo()
+          : null;
   final baseMetadata =
       metadata ??
       (session.aruMetadata != null
-          ? buildExportMetadata(session: session, speciesLocale: speciesLocale)
+          ? buildExportMetadata(
+            session: session,
+            speciesLocale: speciesLocale,
+            device: fallbackDeviceInfo?.device,
+            os: fallbackDeviceInfo?.os,
+          )
           : null);
   var exportMetadata = await _withAudioIntegrityMetadata(
     session,

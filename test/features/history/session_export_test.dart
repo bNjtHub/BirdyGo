@@ -2276,6 +2276,34 @@ void main() {
         isTrue,
       );
     });
+
+    test('carries per-session device metadata into bulk bundles', () async {
+      final session = _makeSession(detections: []);
+      final bulkZipPath = await buildMultiSessionExport(
+        [session],
+        formats: const {'json'},
+        includeAudio: false,
+        metadataProvider:
+            (session) async => buildExportMetadata(
+              session: session,
+              device: 'Pixel 10',
+              os: 'Android 17',
+            ),
+      );
+
+      final outer = ZipDecoder().decodeBytes(
+        File(bulkZipPath!).readAsBytesSync(),
+      );
+      final inner = ZipDecoder().decodeBytes(outer.single.content as List<int>);
+      final metadataFile = inner.singleWhere(
+        (file) => file.name.endsWith('.metadata.json'),
+      );
+      final metadata =
+          jsonDecode(utf8.decode(metadataFile.content as List<int>))
+              as Map<String, dynamic>;
+      expect(metadata['device'], 'Pixel 10');
+      expect(metadata['os'], 'Android 17');
+    });
   });
 
   // ── Trimmed sessions (issue #177) ───────────────────────────────────────
