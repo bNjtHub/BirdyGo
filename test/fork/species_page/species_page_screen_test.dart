@@ -271,6 +271,19 @@ void main() {
     expect(find.text('Activité par heure'), findsNothing);
   });
 
+  testWidgets(
+    'the tinted header shows the back button and the title at 130 % text',
+    (tester) async {
+      await pump(tester, textScale: 1.3);
+      expect(tester.takeException(), isNull);
+      // J6f: the mockup keeps the back button over the photo (unlike the
+      // other overlays' `BirdyOverlayHeader`), so it carries the system
+      // tooltip too.
+      expect(find.byTooltip('Retour'), findsOneWidget);
+      expect(find.text('Rougegorge familier'), findsOneWidget);
+    },
+  );
+
   for (final (label, dark, scale, size) in [
     ('dark', true, 1.0, const Size(390, 844)),
     ('large text', false, 1.3, const Size(360, 780)),
