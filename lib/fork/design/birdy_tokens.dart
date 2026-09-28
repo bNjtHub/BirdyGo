@@ -439,6 +439,10 @@ abstract final class BirdySizes {
   /// « Arrêter » and « Pause » in the live control bar.
   static const double liveControl = 64;
 
+  /// The home logo's double-tap flight (J6f): bigger than the resting mark
+  /// so the bird stays readable while it crosses the screen.
+  static const double logoFlightBird = 56;
+
   static const double navBar = 80;
   static const double topBar = 56;
 
