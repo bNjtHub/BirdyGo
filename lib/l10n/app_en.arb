@@ -5760,6 +5760,8 @@
   "@forkHomeReviewTime": {"description": "BirdyGo fork: home screen (J6f).", "placeholders": {"count": {"type": "int"}}},
   "forkHomeTodayTitle": "Today",
   "@forkHomeTodayTitle": {"description": "BirdyGo fork: home screen (J6f)."},
+  "forkHomeLoading": "Loading home screen",
+  "@forkHomeLoading": {"description": "BirdyGo fork: home screen loading skeleton, announced once (J6f)."},
   "forkHomeSpeciesStat": "{count, plural, =1{species} other{species}}",
   "@forkHomeSpeciesStat": {"description": "BirdyGo fork: home screen (J6f).", "placeholders": {"count": {"type": "int"}}},
   "forkDailyGoalLeft": "{count, plural, =0{Goal reached} =1{1 species to go} other{{count} species to go}}",
