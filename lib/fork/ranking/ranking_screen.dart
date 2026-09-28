@@ -510,7 +510,7 @@ class _RankingListSkeleton extends StatelessWidget {
           key: key,
           padding: const EdgeInsets.symmetric(vertical: BirdySpace.xs),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 56),
+            constraints: const BoxConstraints(minHeight: 60),
             child: Row(
               children: [
                 SizedBox(
