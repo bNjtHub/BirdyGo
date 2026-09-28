@@ -253,6 +253,7 @@ abstract final class PrefKeys {
 
   // Point count settings
   static const String pointCountDuration = 'point_count_duration';
+  static const String pointCountRecordingMode = 'point_count_recording_mode';
 
   // Shared field-session identity settings
   static const String lastObserver = 'last_observer';

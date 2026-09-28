@@ -81,6 +81,14 @@ void main() {
       expect(container.read(recordingModeProvider), 'full');
     });
 
+    test('Point Count recording defaults to full independently of Live', () {
+      container.read(recordingModeProvider.notifier).set('detections');
+      expect(container.read(pointCountRecordingModeProvider), 'full');
+
+      container.read(pointCountRecordingModeProvider.notifier).set('off');
+      expect(container.read(recordingModeProvider), 'detections');
+    });
+
     test('clipContext defaults to 1', () {
       expect(container.read(clipContextProvider), 1);
     });
@@ -505,6 +513,7 @@ void main() {
         'color_map': 'magma',
         'include_audio': true,
         'confidence_threshold': 50,
+        PrefKeys.pointCountRecordingMode: 'detections',
       });
       final prefs = await SharedPreferences.getInstance();
       final container = ProviderContainer(
@@ -517,6 +526,8 @@ void main() {
       expect(container.read(colorMapProvider), 'magma');
       expect(container.read(includeAudioProvider), true);
       expect(container.read(confidenceThresholdProvider), 50);
+      expect(container.read(pointCountRecordingModeProvider), 'detections');
+      expect(container.read(recordingModeProvider), 'full');
     });
   });
 }
