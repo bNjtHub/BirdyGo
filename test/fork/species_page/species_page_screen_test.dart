@@ -9,6 +9,7 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/ranking/activity_bars.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
@@ -269,6 +270,28 @@ void main() {
 
       expect(find.text('Surtout vers 7 h'), findsNothing);
       expect(find.text('4 h — 1 contact'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    '« Voir sur la carte » opens the contact map filtered on the species',
+    (tester) async {
+      await pump(tester);
+      await tester.ensureVisible(find.text('Voir sur la carte'));
+      await tester.tap(find.text('Voir sur la carte'));
+      // Not pumpAndSettle: the map screen it opens keeps timers running
+      // (tile loading, location) that never quiesce on their own.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final map = tester.widget<ContactMapScreen>(
+        find.byType(ContactMapScreen),
+      );
+      expect(map.initialSpecies?.scientificName, _robin);
+      expect(map.initialSpecies?.commonName, 'Rougegorge familier');
+      // The species chip shows its name, not "Toutes les espèces".
+      expect(find.text('Rougegorge familier'), findsWidgets);
+      expect(find.text('Toutes les espèces'), findsNothing);
     },
   );
 
