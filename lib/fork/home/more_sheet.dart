@@ -97,7 +97,11 @@ class _MoreSheetState extends State<MoreSheet> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final tiles = <_Entry>[
-      _Entry(AppIcons.leaderboard, l10n.forkRanking, () => const RankingScreen()),
+      _Entry(
+        AppIcons.leaderboard,
+        l10n.forkRanking,
+        () => const RankingScreen(),
+      ),
       _Entry(AppIcons.mapSheet, l10n.forkMap, () => const ContactMapScreen()),
       _Entry(
         AppIcons.verifiedRounded,
@@ -114,7 +118,11 @@ class _MoreSheetState extends State<MoreSheet> {
         l10n.forkGardenTitle,
         () => const GardenCountScreen(),
       ),
-      _Entry(AppIcons.searchRounded, l10n.exploreMode, () => const ExploreScreen()),
+      _Entry(
+        AppIcons.searchRounded,
+        l10n.exploreMode,
+        () => const ExploreScreen(),
+      ),
       _Entry(
         AppIcons.libraryMusic,
         l10n.sessionLibraryTitle,
@@ -322,6 +330,17 @@ class _AdvancedSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
+    final Widget body =
+        open
+            ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final tool in tools)
+                  _ToolRow(entry: tool, onTap: () => onTap(tool)),
+                const SizedBox(height: BirdySpace.xs),
+              ],
+            )
+            : const SizedBox(width: double.infinity);
     return BirdyBlock(
       key: const ValueKey('more-advanced'),
       color: c.background,
@@ -367,22 +386,17 @@ class _AdvancedSection extends StatelessWidget {
               ),
             ),
           ),
-          AnimatedSize(
-            duration: reduced ? Duration.zero : BirdyMotion.enter,
-            curve: BirdyMotion.standard,
-            alignment: Alignment.topCenter,
-            child:
-                open
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final tool in tools)
-                          _ToolRow(entry: tool, onTap: () => onTap(tool)),
-                        const SizedBox(height: BirdySpace.xs),
-                      ],
-                    )
-                    : const SizedBox(width: double.infinity),
-          ),
+          // A zero-duration AnimatedSize re-dirties itself: reduced motion
+          // skips it altogether.
+          if (reduced)
+            body
+          else
+            AnimatedSize(
+              duration: BirdyMotion.enter,
+              curve: BirdyMotion.standard,
+              alignment: Alignment.topCenter,
+              child: body,
+            ),
         ],
       ),
     );
