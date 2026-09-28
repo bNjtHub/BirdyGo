@@ -21,11 +21,13 @@ import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart' as birdy;
@@ -173,6 +175,17 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
       _mapController.move(data.positions.first, kMapSinglePointZoom);
     }
   }
+
+  /// Fades [child] in in place: a loaded value replacing its skeleton.
+  /// [child]'s own key tells the switcher when to cross-fade.
+  static Widget _crossFade(Widget child) => AnimatedSwitcher(
+    duration: BirdyMotion.enter,
+    switchInCurve: BirdyMotion.standard,
+    switchOutCurve: BirdyMotion.standard,
+    transitionBuilder:
+        (child, animation) => FadeTransition(opacity: animation, child: child),
+    child: child,
+  );
 
   String _periodLabel(AppLocalizations l10n, RankingPeriod p) => switch (p) {
     RankingPeriod.last30Days => l10n.forkPeriod30Days,
@@ -375,6 +388,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
             // FORK: all four tabs share the same header row (J6f-b phone
             // feedback); the map used to float a white card of its own.
             Padding(
+              key: const ValueKey('map-header'),
               padding: const EdgeInsets.fromLTRB(
                 BirdySpace.page,
                 BirdySpace.page,
@@ -383,9 +397,23 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
               ),
               child: BirdyTabHeader(
                 title: l10n.forkMapTitle,
-                caption: l10n.forkMapCaption(
-                  _periodLabel(l10n, _period),
-                  data?.spots.map((s) => s.spot).toSet().length ?? 0,
+                captionWidget: _crossFade(
+                  data == null
+                      ? BirdySkeleton.text(
+                        BirdyText.caption,
+                        key: const ValueKey('map-caption-skeleton'),
+                        placeholder: '00000000000000000000000000',
+                      )
+                      : Text(
+                        l10n.forkMapCaption(
+                          _periodLabel(l10n, _period),
+                          data.spots.map((s) => s.spot).toSet().length,
+                        ),
+                        key: const ValueKey('map-caption-real'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: BirdyText.caption.copyWith(color: c.text2),
+                      ),
                 ),
                 actions: [
                   if (widget.showBack)
