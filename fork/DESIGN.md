@@ -371,6 +371,10 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   « espèces » en dessous.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
+- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est dessiné en silhouette de
+  l'oiseau du logo (queue, corps et bec réunis, œil évidé), 40 dp, centrée sur la case :
+  remplissage Martin-pêcheur dont l'opacité suit le nombre de contacts, contour opaque de 1,5 dp.
+  Un seul chemin mis en cache, une couche peinte en quelques appels (`place_bird_layer.dart`).
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 
@@ -451,6 +455,11 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
   (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
   remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
+- Profil en couleur (J6f), langage de blocs de l'Accueil : statut sur bloc Sûr, échelle dans un bloc
+  blanc avec le statut en cours sur une pastille tonale (seuil en Martin-pêcheur texte), série sur
+  bloc Loriot, badges en mini-blocs Loriot / tonal / Sûr en alternance (jamais deux voisins pareils),
+  « Qui chante ? » sur bloc tonal avec un disque Martin-pêcheur de 60 dp (casque) et un « ? » Loriot,
+  défi réussi en bloc Loriot avec une coche sur disque Loriot (aussi sur l'Accueil).
 - Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
   confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
   pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.

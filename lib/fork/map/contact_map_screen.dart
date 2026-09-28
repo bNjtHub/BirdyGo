@@ -1,9 +1,10 @@
 /// Map of every contact of every session (fork/PLAN.md J5, layout from
 /// fork/maquette/Carte.dc.html).
 ///
-/// Small zooms show a hexagon grid whose opacity follows the number of
-/// contacts; large zooms show one round bird marker per species and spot,
-/// clustered. Tapping a hexagon or a marker opens the species of the area.
+/// Small zooms bin contacts on a hexagon grid and draw each bin as the
+/// BirdyGo bird, whose opacity follows the number of contacts (J6f); large
+/// zooms show one round bird marker per species and spot, clustered.
+/// Tapping a place or a marker opens the species of the area.
 library;
 
 import 'dart:async';
@@ -34,8 +35,9 @@ import 'contact_map_data.dart';
 import 'contact_map_sheets.dart';
 import 'hex_grid.dart';
 import 'map_config.dart';
+import 'place_bird_layer.dart';
 
-/// Martin-pêcheur (fork/DESIGN.md): hexagons, markers and the user's
+/// Martin-pêcheur (fork/DESIGN.md): places, markers and the user's
 /// position.
 const Color _kingfisher = BirdyBrand.kingfisher;
 
@@ -109,8 +111,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   // Layer caches, rebuilt only when the data, the zoom step or the
   // selection change (never per frame).
-  (ContactMapData, int)? _polygonsKey;
-  List<Polygon> _polygons = const [];
+  (ContactMapData, int)? _placesKey;
+  List<PlaceBird> _places = const [];
   (ContactMapData, HexKey?)? _markersKey;
   List<Marker> _markers = const [];
 
@@ -310,20 +312,16 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   // ── Layers ───────────────────────────────────────────────────────────
 
-  List<Polygon> _hexPolygons(ContactMapData data) {
+  List<PlaceBird> _placeBirds(ContactMapData data) {
     final step = _zoom.floor();
-    if (_polygonsKey == (data, step)) return _polygons;
+    if (_placesKey == (data, step)) return _places;
     final bins = data.hexBins(step);
-    _polygonsKey = (data, step);
-    return _polygons = [
+    _placesKey = (data, step);
+    return _places = [
       for (final entry in bins.cells.entries)
-        Polygon(
-          points: bins.grid.corners(entry.key),
-          color: _kingfisher.withValues(
-            alpha: hexOpacity(entry.value.length, bins.maxCount),
-          ),
-          borderColor: _kingfisher,
-          borderStrokeWidth: 1,
+        (
+          point: bins.grid.center(entry.key),
+          opacity: hexOpacity(entry.value.length, bins.maxCount),
         ),
     ];
   }
@@ -451,9 +449,9 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                               onTileError: _onTileError,
                             ),
                           if (showHexes)
-                            PolygonLayer(
-                              polygons: _hexPolygons(data),
-                              simplificationTolerance: 0,
+                            PlaceBirdLayer(
+                              places: _placeBirds(data),
+                              color: _kingfisher,
                             )
                           else
                             MarkerClusterLayerWidget(

@@ -478,6 +478,11 @@ abstract final class BirdySizes {
 
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
+
+  /// Illustration disc of the « Qui chante ? » block on the Profil, and the
+  /// Loriot question mark pinned on its corner.
+  static const double quizDisc = 60;
+  static const double quizDiscBadge = 24;
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from
