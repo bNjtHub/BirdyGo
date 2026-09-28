@@ -1204,6 +1204,8 @@
   "forkBlurSensitiveExport": "Flouter les espèces sensibles",
   "forkBlurSensitiveExportHint": "Dans les exports, la position des espèces sensibles (rapaces, chouettes, tétras…) est arrondie à 10 km environ.",
   "forkMapPeriod": "Période",
+  "forkMapContactsUnit": "{count, plural, =1{contact} other{contacts}}",
+  "forkMapLoading": "Chargement de la carte",
   "forkLpoTitle": "Envoyer à la LPO",
   "forkLpoIntro": "Rien ne part tout seul. Pour chaque oiseau que tu as confirmé, BirdyGo prépare une fiche : tu la reportes toi-même dans NaturaList ou sur faune-france.org.",
   "forkLpoNoPassword": "BirdyGo ne te demande jamais ton mot de passe Faune-France.",

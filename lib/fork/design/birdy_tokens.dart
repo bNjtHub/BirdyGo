@@ -603,3 +603,43 @@ abstract final class BirdyAlpha {
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;
 }
+
+/// Contact map markers (J6g-f). The map tiles stay light in both themes, so
+/// the marker disc and its ring do not follow the theme: they must read on
+/// any tile, and on the dark placeholder shown before tiles are allowed.
+abstract final class BirdyMapStyle {
+  /// Disc under a species photo and border of the cluster bubble.
+  static const Color disc = Color(0xFFFFFFFF);
+
+  /// Soft drop shadow under a marker (Encre at 18 %).
+  static const Color shadow = Color(0x2E13233A);
+
+  /// Contact-count badge (Encre with Brume text: 14:1 on any tile).
+  static const Color badge = BirdyBrand.ink;
+  static const Color onBadge = BirdyBrand.mist;
+
+  /// Text on the Martin-pêcheur cluster disc.
+  static const Color onCluster = BirdyBrand.ink;
+
+  /// Species marker: disc, ring, photo and badge height.
+  static const double markerDisc = 44;
+  static const double markerRing = 3;
+  static const double markerPhoto = 34;
+  static const double badgeHeight = 22;
+
+  /// Cluster bubble diameter and border.
+  static const double cluster = 56;
+  static const double clusterBorder = 3;
+
+  /// User position dot and its border.
+  static const double userDot = 14;
+  static const double userDotBorder = 3;
+
+  /// Ring around a species avatar in the map sheets.
+  static const double avatarRing = 2;
+
+  /// Shadow lifting a marker off the tiles.
+  static List<BoxShadow> get lift => const [
+    BoxShadow(color: shadow, offset: Offset(0, 4), blurRadius: 12),
+  ];
+}
