@@ -44,6 +44,9 @@ import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (
 import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
+import '../../fork/live/live_expected.dart'; // FORK: listening screen (J6f)
+import '../../fork/live/live_place.dart'; // FORK: listening screen (J6f)
+import '../../fork/live/listening_mode_pill.dart'; // FORK: listening screen (J6f)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
 import '../../fork/live/live_tip_motion.dart'; // FORK: tip cards
@@ -1119,18 +1122,35 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                         scientificName: entry.scientificName,
                         commonName: entry.record.commonName,
                       ),
-                  // FORK: tip cards in the BirdyGo design
-                  empty: BirdyTipCarousel(
-                    tips: [
-                      for (final t in buildLiveTips(l10n))
-                        BirdyTip(
-                          icon: t.icon,
-                          title: t.title,
-                          body: t.body,
-                          motion: liveTipMotion(t.icon),
-                        ),
-                    ],
-                  ),
+                  // FORK: tip cards in the BirdyGo design; « Attendus ici »
+                  // outdoors (J6f).
+                  empty:
+                      _forkPractice
+                          ? BirdyTipCarousel(
+                            tips: [
+                              for (final t in buildLiveTips(l10n))
+                                BirdyTip(
+                                  icon: t.icon,
+                                  title: t.title,
+                                  body: t.body,
+                                  motion: liveTipMotion(t.icon),
+                                ),
+                            ],
+                          )
+                          : LiveExpectedEmpty(
+                            commonness: commonness,
+                            // FORK: skeleton rows while the geo-model/position
+                            // resolves, so the tip does not move (J6f).
+                            loading: !ref.watch(geoCommonnessProvider).hasValue,
+                            imageFor: (name) {
+                              final path = imagePath(name);
+                              return path == null ? null : AssetImage(path);
+                            },
+                          ),
+                  // FORK: place line and listening mode pill (J6f)
+                  place:
+                      _forkPractice ? null : ref.watch(livePlaceProvider).value,
+                  modeChip: ListeningModePill(label: l10n.forkLiveModeNormal),
                   practice: _forkPractice, // FORK: J5c
                   // FORK: first encounter and rare bird moments (J6e)
                   moment:

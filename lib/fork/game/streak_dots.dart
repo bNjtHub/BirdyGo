@@ -60,9 +60,7 @@ class StreakDots extends StatelessWidget {
                 dayLabel?.call(day),
                 Column(
                   children: [
-                    _StreakDot(
-                      listened: day.state == StreakDayState.listened,
-                    ),
+                    _StreakDot(listened: day.state == StreakDayState.listened),
                     const SizedBox(height: BirdySpace.xs),
                     Text(
                       weekday.format(day.date).toUpperCase(),

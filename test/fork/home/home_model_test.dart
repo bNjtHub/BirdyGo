@@ -88,7 +88,30 @@ void main() {
       final day = buildDaySummary(detections: const []);
       expect(day.isEmpty, isTrue);
       expect(day.species, 0);
+      expect(day.heard, isEmpty);
     });
+
+    test("today's species, the most recently heard first", () {
+      final day = buildDaySummary(detections: today, presence: presence);
+      expect(
+        [for (final s in day.heard) s.scientificName],
+        [
+          'Upupa epops', // 7:38
+          'Dendrocopos major', // 7:26
+          'Erithacus rubecula', // 7:20, its latest of two
+          'Strix aluco', // 7:14
+        ],
+      );
+      expect(day.heard[2].contacts, 2);
+      expect(day.heard[2].commonName, 'Erithacus rubecula');
+    });
+  });
+
+  test('review time: whole minutes, one at least', () {
+    expect(reviewMinutes(0), 0);
+    expect(reviewMinutes(1), 1);
+    expect(reviewMinutes(12), 2);
+    expect(reviewMinutes(13), 3);
   });
 
   group('texts', () {
@@ -106,6 +129,16 @@ void main() {
       expect(
         homeDateLine('fr', now, place: 'Beaulieu-sur-Brenne'),
         'Samedi 26 septembre · Beaulieu-sur-Brenne',
+      );
+      final sunrise = homeSunrise(fr, DateTime(2026, 9, 26, 7, 36));
+      expect(sunrise, 'lever du soleil 07:36');
+      expect(
+        homeDateLine('fr', now, place: 'Beaulieu-sur-Brenne', sunrise: sunrise),
+        'Samedi 26 septembre · Beaulieu-sur-Brenne · lever du soleil 07:36',
+      );
+      expect(
+        homeDateLine('fr', now, sunrise: sunrise),
+        'Samedi 26 septembre · lever du soleil 07:36',
       );
     });
 

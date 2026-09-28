@@ -19,14 +19,25 @@ String homeGreeting(AppLocalizations l10n, DateTime now) => switch (dayPartOf(
   DayPart.night => l10n.forkHomeNight,
 };
 
-/// « Samedi 26 septembre · Beaulieu-sur-Brenne ».
-String homeDateLine(String localeName, DateTime now, {String? place}) {
+/// « Samedi 26 septembre · Beaulieu-sur-Brenne · lever du soleil 07:36 ».
+/// [sunrise] is the already worded part ([homeSunrise]).
+String homeDateLine(
+  String localeName,
+  DateTime now, {
+  String? place,
+  String? sunrise,
+}) {
   final day = DateFormat('EEEE d MMMM', localeName).format(now.toLocal());
   return [
     day.isEmpty ? day : day[0].toUpperCase() + day.substring(1),
     if (place != null && place.isNotEmpty) place,
+    if (sunrise != null && sunrise.isNotEmpty) sunrise,
   ].join(' · ');
 }
+
+/// « lever du soleil 07:36 », the time in the language's format.
+String homeSunrise(AppLocalizations l10n, DateTime sunrise) =>
+    l10n.forkHomeSunrise(summaryTime(l10n, sunrise));
 
 /// « 07:52 » today, « hier, 07:52 », else « 24 sept., 07:52 ».
 String homeHeardWhen(

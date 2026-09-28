@@ -1,11 +1,12 @@
-/// BirdyGo home screen (J6c, fork/maquette/Main.dc.html and SPEC.md 9.1).
+/// BirdyGo home screen (J6f blocks, « App finale » board AppAccueil; first
+/// version J6c, SPEC.md 9.1).
 ///
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
-/// geo-model, index). The daily goal is the hero card under the greeting;
-/// série chip, status card and weekly challenge come from the game (J6e);
-/// « Écouter » is the one strong action, pinned above the bottom bar; the
-/// menu keeps every upstream entry.
+/// geo-model, index). Blocks, told apart by their fill: greeting, last bird
+/// hero, goal / série / to-check grid, status, today's species, weekly
+/// challenge. « Écouter » is the one strong action, pinned above the bottom
+/// bar, and starts listening at once; the menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -25,6 +26,7 @@ import '../../features/explore/explore_screen.dart';
 import '../../features/explore/widgets/species_info_overlay.dart';
 import '../../features/file_analysis/file_analysis_screen.dart';
 import '../../features/history/session_library_screen.dart';
+import '../../features/history/widgets/clip_player_sheet.dart';
 import '../../features/home/help_screen.dart';
 import '../../features/live/live_screen.dart';
 import '../../features/live/live_session.dart';
@@ -35,18 +37,20 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
-import '../daily_goal/daily_goal_card.dart';
+import '../daily_goal/daily_goal_block.dart';
 import '../daily_goal/daily_goal_screen.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_loader.dart';
-import '../game/game_widgets.dart';
 import '../game/status_celebration.dart';
+import '../game/streak.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
 import '../profile/profile_screen.dart';
@@ -72,6 +76,7 @@ class ForkHome extends ConsumerStatefulWidget {
 class _ForkHomeState extends ConsumerState<ForkHome> {
   HomeSnapshot? _snapshot;
   String? _place;
+  DateTime? _sunrise;
   int _generation = 0;
 
   @override
@@ -94,9 +99,39 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }
 
   Future<void> _loadPlace() async {
-    final place = await ref.read(homeLoaderProvider).placeName();
+    final loader = ref.read(homeLoaderProvider);
+    final sunrise = await loader.sunrise();
+    if (mounted && sunrise != null) setState(() => _sunrise = sunrise);
+    final place = await loader.placeName();
     if (mounted && place != null) setState(() => _place = place);
   }
+
+  /// « Réécouter »: the clip of the last bird, in the shared player sheet.
+  void _replay(LastBird last, String name) {
+    final d = last.detection;
+    showClipPlayerSheet(
+      context,
+      detection: DetectionRecord(
+        scientificName: d.scientificName,
+        commonName: name,
+        confidence: d.confidence,
+        timestamp: d.start,
+        endTimestamp: d.end,
+        audioClipPath: d.clipPath,
+        latitude: d.latitude,
+        longitude: d.longitude,
+        reviewStatus: d.reviewStatus,
+      ),
+    );
+  }
+
+  void _openSpecies(String scientificName, String name) =>
+      SpeciesInfoOverlay.show(
+        context,
+        ref,
+        scientificName: scientificName,
+        commonName: name,
+      );
 
   void _open(Widget screen) => Navigator.of(
     context,
@@ -247,95 +282,189 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final snapshot = _snapshot;
     final last = snapshot?.last;
+    final loadingSnapshot = snapshot == null;
 
-    final game = ref.watch(gameProgressProvider).value;
-    final streak = game?.facts.streak.current ?? 0;
-    final topBar = HomeTopBar(
-      onMenu: _showMenu,
-      // No chip without a running série: nothing to lose, nothing shown.
-      streak: streak > 0 ? StreakChip(days: streak, onTap: _openProfile) : null,
-    );
-    // The daily goal is the hero card, right under the greeting.
+    String nameOf(String scientificName, String fallback) =>
+        taxonomy?.lookup(scientificName)?.commonNameForLocale(speciesLocale) ??
+        fallback;
+    ImageProvider? imageOf(String scientificName) => switch (taxonomy
+        ?.assetImagePath(scientificName)) {
+      final String path => AssetImage(path),
+      null => null,
+    };
+
+    final gameAsync = ref.watch(gameProgressProvider);
+    final game = gameAsync.value;
+    final loadingGame = !gameAsync.hasValue;
+    final streak = game?.facts.streak;
+    final toVerify = snapshot?.toVerify ?? 0;
+    // Both sources (the saved-session snapshot and the game progress) can
+    // resolve independently; the header's live region only announces once
+    // both have (SPEC.md's common case never announces a second "loading").
+    final dataReady = !loadingSnapshot && !loadingGame;
+    // The singing logo, small, alone above the tab header (Accueil only).
+    const topBar = HomeLogoRow();
+    final sunrise = _sunrise;
+
+    // 'last' (hero): the common case for a returning user is a last bird
+    // already on record, so it skeletons while loading; a fresh install
+    // with no last bird ever collapses the block once loaded instead
+    // (allowed to shift, see HomeHeroSkeleton's doc comment).
+    (String, Widget)? heroEntry() {
+      if (loadingSnapshot) {
+        return (
+          'last',
+          _crossFade(
+            const HomeHeroSkeleton(key: ValueKey('home-last-skeleton')),
+          ),
+        );
+      }
+      if (last == null) return null;
+      return (
+        'last',
+        _crossFade(
+          HomeHero(
+            key: const ValueKey('home-last-real'),
+            last: last,
+            name: nameOf(last.scientificName, last.detection.commonName),
+            when: homeHeardWhen(l10n, localeName, last.detection.start, now),
+            image: imageOf(last.scientificName),
+            onTap:
+                () => _openSpecies(
+                  last.scientificName,
+                  nameOf(last.scientificName, last.detection.commonName),
+                ),
+            onReplay:
+                last.clipPath == null
+                    ? null
+                    : () => _replay(
+                      last,
+                      nameOf(last.scientificName, last.detection.commonName),
+                    ),
+          ),
+        ),
+      );
+    }
+
+    // 'status': the game progress always carries a status (even "None"
+    // before the first species), so this is the only skeleton with no
+    // collapsing case once [gameAsync] resolves.
+    (String, Widget)? statusEntry() {
+      if (loadingGame) {
+        return (
+          'status',
+          _crossFade(
+            const StatusBlockSkeleton(key: ValueKey('home-status-skeleton')),
+          ),
+        );
+      }
+      if (game == null) return null;
+      return (
+        'status',
+        _crossFade(
+          StatusBlock(
+            key: const ValueKey('home-status-real'),
+            progress: game,
+            onTap: _openProfile,
+          ),
+        ),
+      );
+    }
+
+    // 'today' / 'empty': the common case for a returning user is at least
+    // one species heard today, so it skeletons while loading; a day with
+    // nothing heard yet swaps to the smaller empty state once loaded
+    // instead (allowed to shift, see TodayBlockSkeleton's doc comment).
+    (String, Widget) todayEntry() {
+      if (loadingSnapshot) {
+        return (
+          'today',
+          _crossFade(
+            const TodayBlockSkeleton(key: ValueKey('home-today-skeleton')),
+          ),
+        );
+      }
+      if (snapshot.today.isEmpty) {
+        return (
+          'empty',
+          _crossFade(
+            BirdyEmptyState.inline(
+              key: const ValueKey('home-today-empty'),
+              icon: AppIcons.hearing,
+              title: l10n.forkHomeEmptyDayTitle,
+              body: l10n.forkHomeEmptyDay,
+            ),
+          ),
+        );
+      }
+      return (
+        'today',
+        _crossFade(
+          TodayBlock(
+            key: const ValueKey('home-today-real'),
+            today: snapshot.today,
+            nameOf: (s) => nameOf(s.scientificName, s.commonName),
+            imageOf: imageOf,
+            onSpecies: (s, name) => _openSpecies(s.scientificName, name),
+          ),
+        ),
+      );
+    }
+
     final head = <(String, Widget)>[
       (
         'greeting',
-        HomeGreeting(
-          title: homeGreeting(l10n, now),
-          dateLine: homeDateLine(localeName, now, place: _place),
+        Semantics(
+          liveRegion: true,
+          label: dataReady ? null : l10n.forkHomeLoading,
+          child: BirdyTabHeader(
+            title: homeGreeting(l10n, now),
+            caption: homeDateLine(
+              localeName,
+              now,
+              place: _place,
+              sunrise: sunrise == null ? null : homeSunrise(l10n, sunrise),
+            ),
+            actions: [
+              BirdyIconButton(
+                icon: AppIcons.menu,
+                semanticLabel: l10n.forkHomeMenu,
+                onPressed: _showMenu,
+              ),
+            ],
+          ),
         ),
       ),
+      if (heroEntry() case final entry?) entry,
       (
-        'daily-goal',
-        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
+        'grid',
+        HomeGrid(
+          goal: DailyGoalBlock(onTap: () => _open(const DailyGoalScreen())),
+          // No série block without a running série, and 0 to check: both
+          // legitimately empty once loaded, so they collapse (see the
+          // skeleton classes' doc comments for the common-case rule).
+          streak: _streakSlot(loadingGame, streak),
+          toCheck: _toCheckSlot(loadingSnapshot, toVerify),
+        ),
       ),
     ];
     final cards = <(String, Widget)>[
-      if (game != null)
-        (
-          'status',
-          StatusCard(progress: game, compact: true, onTap: _openProfile),
-        ),
-      if (snapshot != null)
-        snapshot.today.isEmpty
-            ? (
-              'empty',
-              BirdyEmptyState.inline(
-                icon: AppIcons.hearing,
-                title: l10n.forkHomeEmptyDayTitle,
-                body: l10n.forkHomeEmptyDay,
-              ),
-            )
-            : ('today', DayTiles(today: snapshot.today)),
-      if (last != null)
-        (
-          'last',
-          LastBirdCard(
-            last: last,
-            name:
-                taxonomy
-                    ?.lookup(last.scientificName)
-                    ?.commonNameForLocale(speciesLocale) ??
-                last.detection.commonName,
-            when: homeHeardWhen(l10n, localeName, last.detection.start, now),
-            image: switch (taxonomy?.assetImagePath(last.scientificName)) {
-              final String path => AssetImage(path),
-              null => null,
-            },
-            onTap:
-                () => SpeciesInfoOverlay.show(
-                  context,
-                  ref,
-                  scientificName: last.scientificName,
-                  commonName:
-                      taxonomy
-                          ?.lookup(last.scientificName)
-                          ?.commonNameForLocale(speciesLocale) ??
-                      last.detection.commonName,
-                ),
-          ),
-        ),
+      if (statusEntry() case final entry?) entry,
+      todayEntry(),
       if (game?.facts.challenge case final challenge?)
         (
           'challenge',
           ChallengeCard(challenge: challenge, onStart: _startChallenge),
         ),
-      if (snapshot != null && snapshot.toVerify > 0)
-        (
-          'verify',
-          ToVerifyCard(
-            count: snapshot.toVerify,
-            onTap: () => _open(const QuickReviewScreen()),
-          ),
-        ),
     ];
     final listen = Padding(
-      padding: const EdgeInsets.fromLTRB(
-        BirdySpace.xl,
-        BirdySpace.s,
-        BirdySpace.xl,
-        BirdySpace.l,
+      // Equal margins above and below, as wide as the button's glow
+      // (BirdyColors.listenGlowExtent): centered, and never cut by the bar.
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      // Straight into listening: the live screen starts on arrival.
+      child: ListenButton(
+        onPressed: () => _open(const LiveScreen(forceAutoStart: true)),
       ),
-      child: ListenButton(onPressed: () => _open(const LiveScreen())),
     );
 
     return Scaffold(
@@ -381,6 +510,49 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     );
   }
 
+  /// Grid's « X jours de suite » cell: skeletons while [loadingGame], the
+  /// real block once a running série lands, or null (no cell at all) once
+  /// loaded with no série — allowed to shift, see [StreakBlockSkeleton].
+  Widget? _streakSlot(bool loadingGame, Streak? streak) {
+    if (loadingGame) {
+      return _crossFade(
+        const StreakBlockSkeleton(key: ValueKey('home-streak-skeleton')),
+      );
+    }
+    if (streak == null || streak.current <= 0) return null;
+    return _crossFade(
+      StreakBlock(
+        key: const ValueKey('home-streak-real'),
+        streak: streak,
+        onTap: _openProfile,
+      ),
+    );
+  }
+
+  /// Grid's « N à vérifier » cell: skeletons while [loadingSnapshot], the
+  /// real block once there is something to check, or null once loaded
+  /// with 0 — allowed to shift, see [ToCheckBlockSkeleton].
+  Widget? _toCheckSlot(bool loadingSnapshot, int toVerify) {
+    if (loadingSnapshot) {
+      return _crossFade(
+        const ToCheckBlockSkeleton(key: ValueKey('home-to-check-skeleton')),
+      );
+    }
+    if (toVerify <= 0) return null;
+    return _crossFade(
+      ToCheckBlock(
+        key: const ValueKey('home-to-check-real'),
+        count: toVerify,
+        onTap: () => _open(const QuickReviewScreen()),
+      ),
+    );
+  }
+
+  /// Fades [child] in in place (no move, no scale): a skeleton replaced by
+  /// its loaded content. [child]'s own key tells the switcher when to
+  /// cross-fade (J6f skeletons, same pattern as the notebook screen's).
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
+
   /// A scrolling column of [blocks]. The first
   /// [BirdyMotion.staggerMaxItems] rise once, 40 ms apart; the others, and
   /// every block under reduced motion, appear still.
@@ -391,19 +563,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }) {
     final still = BirdyMotion.reduced(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        BirdySpace.xl,
-        BirdySpace.l,
-        BirdySpace.xl,
-        BirdySpace.l,
-      ),
+      padding: const EdgeInsets.all(BirdySpace.page),
       children: [
         if (topBar != null) topBar,
         for (final (i, (key, block)) in blocks.indexed)
           Padding(
             key: ValueKey('home-$key'),
             padding: EdgeInsets.only(
-              top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+              top: i == 0 && topBar == null ? 0 : BirdySpace.block,
             ),
             child:
                 still || firstIndex + i >= BirdyMotion.staggerMaxItems

@@ -1,5 +1,6 @@
 import 'package:birdnet_live/fork/home/singing_logo.dart';
 import 'package:birdnet_live/fork/splash/birdygo_splash_painter.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,7 +87,7 @@ void main() {
     await tester.pump(interval * 3);
     expect(tester.hasRunningAnimations, isFalse);
     await tester.tap(find.text('BG'));
-    await tester.pump();
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     expect(tester.hasRunningAnimations, isFalse);
   });
 
@@ -117,7 +118,9 @@ void main() {
   testWidgets('a tap sings once', (tester) async {
     await arrive(tester);
     await tester.tap(find.text('BG'));
-    await tester.pump();
+    // A double-tap recognizer is also armed (J6f flight): the tap only
+    // resolves as a single tap once the double-tap timeout passes.
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     expect(tester.hasRunningAnimations, isTrue);
     await tester.pump(later);
     await tester.pump();

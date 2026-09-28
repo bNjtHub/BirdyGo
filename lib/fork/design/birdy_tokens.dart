@@ -249,6 +249,16 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 10), blurRadius: 28),
   ];
 
+  /// Glow of the home « Écouter » button: centered around it and at most
+  /// [listenGlowExtent] past its edge, so it fits the equal margins above
+  /// the bottom bar without being cut.
+  List<BoxShadow> get listenGlow => const [
+    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 4), blurRadius: 16),
+  ];
+
+  /// How far [listenGlow] reaches below the button (offset + blur).
+  static const double listenGlowExtent = 20;
+
   /// Light theme (notebook), SPEC.md 2.3.
   static const BirdyColors light = BirdyColors(
     brightness: Brightness.light,
@@ -439,6 +449,10 @@ abstract final class BirdySizes {
   /// « Arrêter » and « Pause » in the live control bar.
   static const double liveControl = 64;
 
+  /// The home logo's double-tap flight (J6f): bigger than the resting mark
+  /// so the bird stays readable while it crosses the screen.
+  static const double logoFlightBird = 56;
+
   static const double navBar = 80;
   static const double topBar = 56;
 
@@ -470,13 +484,22 @@ abstract final class BirdySizes {
   /// Outline of a day dot without listening.
   static const double dayDotStroke = 2;
 
+  /// Small icon in a block's corner (« À vérifier »).
+  static const double blockIcon = 20;
+
   /// Dashed silhouette slot of a species still to find (daily goal block,
   /// empty live state uses [expectedSlot]).
   static const double goalSlot = 36;
+
+  /// Grey species visual inside a [goalSlot].
+  static const double goalSlotVisual = 26;
   static const double expectedSlot = 52;
 
   /// Tinted species card of a scrolling row (home « Aujourd'hui »).
   static const double speciesChipCard = 92;
+
+  /// Species visual of a [speciesChipCard].
+  static const double speciesChipAvatar = 56;
 
   /// Hero block (« Dernier oiseau entendu »): minimum height, decorative
   /// disc behind the bird, and the bird itself.
@@ -489,6 +512,13 @@ abstract final class BirdySizes {
 
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
+
+  /// Icon of a one-line tip (empty live table).
+  static const double tipIcon = 18;
+
+  /// Icon and chevron of the listening mode pill (live header).
+  static const double modeIcon = 20;
+  static const double modeChevron = 16;
 
   /// Illustration disc of the « Qui chante ? » block on the Profil, and the
   /// Loriot question mark pinned on its corner.
@@ -508,6 +538,16 @@ abstract final class BirdyAlpha {
   /// White track of a bar or ring on a tinted block.
   static const double trackOnTint = 0.8;
 
+  /// Brume track of a bar or ring on a tinted block, dark theme.
+  static const double trackOnTintDark = 0.16;
+
   /// Outline of a day dot without listening (série block).
   static const double dayDotOutline = 0.45;
+
+  /// [BirdyColors.surface1] of an expected species row in the empty live
+  /// table (it is not there yet).
+  static const double expectedRow = 0.55;
+
+  /// [BirdyColors.accentText] outline of the listening mode pill.
+  static const double modePillBorder = 0.4;
 }

@@ -32,6 +32,9 @@ class _FakeHome implements HomeLoader {
 
   @override
   Future<String?> placeName() async => null;
+
+  @override
+  Future<DateTime?> sunrise() async => null;
 }
 
 class _FakeNotebook implements NotebookLoader {
@@ -160,14 +163,14 @@ void main() {
     );
   });
 
-  testWidgets('home: série chip and status card open the Profil tab', (
+  testWidgets('home: série and status blocks open the Profil tab', (
     tester,
   ) async {
     await pump(tester);
-    expect(find.text('9 jours'), findsOneWidget);
+    expect(find.text('jours de suite'), findsOneWidget);
     expect(find.text('Sentinelle des haies'), findsOneWidget);
 
-    await tester.tap(find.text('9 jours'));
+    await tester.tap(find.byKey(const ValueKey('home-streak')));
     await tester.pumpAndSettle();
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,

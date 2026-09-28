@@ -37,6 +37,18 @@ Color birdyBlockColor(BirdyColors c, BirdyBlockTone tone) => switch (tone) {
   BirdyBlockTone.oriole => c.orioleContainer,
 };
 
+/// Track of a bar or ring on a tinted block: white on light, a faint Brume
+/// on dark (white would glare on the translucent dark tints).
+Color birdyTrackOnTint(BirdyColors c) =>
+    c.isDark
+        ? BirdyBrand.mist.withValues(alpha: BirdyAlpha.trackOnTintDark)
+        : c.surface1.withValues(alpha: BirdyAlpha.trackOnTint);
+
+/// Fill of a dashed slot on a tinted block: white on light, the page
+/// background on dark (a hole in the block).
+Color birdySlotFill(BirdyColors c) => (c.isDark ? c.background : c.surface1)
+    .withValues(alpha: BirdyAlpha.slotFill);
+
 /// A rounded block of the J6f layout. With [onTap] the whole block is one
 /// target, pressed like every BirdyGo card.
 class BirdyBlock extends StatelessWidget {

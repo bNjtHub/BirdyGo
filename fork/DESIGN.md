@@ -167,6 +167,12 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   terrain. Avec les animations réduites, tout s'arrête : états finaux immobiles, aucun confetti.
   Les bruitages (jingle, fanfare) suivent l'interrupteur « Avec son / Sans son » et jamais pendant
   une écoute Live.
+- Exception autorisée : un double appui sur le logo de l'accueil (J6f, `lib/fork/home/logo_flight.dart`)
+  fait s'envoler l'oiseau à travers l'écran (chemin courbe, une boucle, retour à sa place), 2 à 2,5 s,
+  au-delà des 500 ms. Explicite et voulu par la personne (deux appuis, jamais tout seul), donc pas
+  une célébration au sens de la règle. Le cri BirdyGo joue une fois au décollage ; pendant ce temps le
+  logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un double appui se
+  comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 
@@ -275,10 +281,13 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   toutes les 2 minutes (`SingingLogo.singEvery`) tant que l'accueil est visible. Jamais de boucle :
   le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
   programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
-  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois (pas annoncé au lecteur
+  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois et joue le cri BirdyGo
+  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part, muet pendant une écoute pour que
+  le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
-  couleurs de la marque.
+  couleurs de la marque. Un double appui (J6f, `logo_flight.dart`) le fait s'envoler à travers
+  l'écran à la place : voir l'exception de la section Animations.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
 - Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
@@ -296,7 +305,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
 - La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
   statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
-  au-dessus de la barre du bas, hors de la zone qui défile.
+  au-dessus de la barre du bas, hors de la zone qui défile. Sa marge basse (J6f) tient toute la
+  lueur (`ctaGlow`, rayon de flou 28) : moins, et la barre de navigation en coupe le bas.
 - Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
   sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
@@ -622,3 +632,66 @@ The content remains centered within 480 dp, with a compact logo in landscape and
 as a fallback for large text or a short viewport. Android 12 uses a padded VectorDrawable;
 older Android versions use the same mark in a layer-list. The native iOS launch assets are
 unchanged; the Flutter startup screen also works on iOS.
+
+## Mise en œuvre (J6f, interface finale)
+
+Maquettes : page « App finale » du canevas. Design system : cartes Block, TabHeader, FilterChip,
+ListeningMode, ExpectedSpecies.
+
+- Mise en page en blocs (`lib/fork/design/widgets/birdy_block.dart`) : marge de page 16 dp
+  (`BirdySpace.page`), 10 dp entre les blocs (`BirdySpace.block`). Un bloc se distingue par la
+  teinte de son fond (blanc, tonal, Sûr, Loriot, ou pointillé « À vérifier »), jamais par une
+  bordure grise. Boutons ronds blancs sans bordure en thème clair.
+- Règle des titres : un onglet (Accueil, Carnet, Carte, Profil) a un grand titre display 34, une
+  légende dessous et ses boutons ronds à droite (`BirdyTabHeader`). Un écran ouvert par-dessus
+  (Palmarès, Bilan, Revue) a le bouton retour et un titre heading 20 (`BirdyOverlayHeader`) ; une
+  croix « Fermer » quand l'écran clôt un parcours (Bilan, Revue), grisée pendant une sauvegarde.
+  La Fiche garde son bouton retour sur la photo.
+- Filtres (`BirdyFilterChip`) : blancs sans bordure, 48 dp ; le choisi prend sa couleur (Carnet :
+  Toutes en encre, Découvertes en Sûr, À découvrir en tonal, Rares en Loriot ; Carte et Palmarès :
+  tonal). Sur la carte, ombre flottante.
+
+Accueil
+- Ordre : salutation (display 34), « date · lieu · lever du soleil HH:mm » (`estimateAruSunTimes`,
+  position déjà connue, jamais de demande) ; héros « Dernier oiseau entendu » (teinte de l'espèce,
+  rayon 28, disque d'accent à 18 %, oiseau de 120 dp, nom en title 26, nom latin, Réécouter rond de
+  48 dp sur l'accent, icône Encre ou Brume selon le contraste, niveau et total ; tout le bloc ouvre
+  la fiche) ; grille de 2 colonnes : objectif du jour sur tonal (anneau Martin-pêcheur, « Encore N
+  espèces », 3 silhouettes au plus), série sur Loriot (7 pastilles de la semaine remplies en
+  `orioleText` pour garder 3:1), « À vérifier » en pointillé (« N min de revue », 10 s par
+  détection) ; statut sur Sûr avec barre ; « Aujourd'hui » (3 chiffres sur une ligne, cartes
+  teintées qui défilent, la plus récente d'abord) ; défi de la semaine ; « Écouter » fixé en bas.
+- Un bloc sans donnée disparaît et l'objectif prend toute la largeur. La pastille de série quitte le
+  haut de l'écran.
+- « Écouter » (et « Commencer à écouter » de l'objectif) lance l'écoute tout de suite :
+  `LiveScreen(forceAutoStart: true)`, aucun écran intermédiaire.
+
+Écoute : état vide
+- Tant qu'aucune espèce n'est entrée : « Attendus ici ce matin / cet après-midi / ce soir / cette
+  nuit » (`dayPartOf`), « Ils s'allument dès qu'ils chantent. », plus « N comptent pour ton
+  objectif du jour. » si N > 0.
+- `ReliabilityConfig.liveExpectedCount` (5) espèces, les plus probables cette semaine d'après la
+  carte de fréquence du Live (aucun calcul de modèle en plus), sans les non-oiseaux ni celles que
+  le Live dirait inattendues. Silhouette grise dans un cercle pointillé de 52 dp, nom, raison
+  honnête : « Parmi les plus fréquents ici en <mois> », « En pleine saison ici » (semaine ≥ 80 %
+  du pic annuel) ou « Peut chanter ici en <mois> ». Aucun modèle ne connaît l'heure : pas de
+  « Chante souvent à cette heure ». Pastille Loriot « Objectif » sur les espèces de l'objectif
+  pas encore trouvées. Conseil d'une ligne sur `orioleContainer` en bas.
+- L'état s'efface en 150 ms quand la première espèce entre (rien sous animations réduites). Sans
+  géomodèle : titre et conseil seulement. Une écoute d'enregistrement garde le carrousel d'astuces.
+- En-tête : ligne de lieu en caption sous le statut (cache de géocodage ou OSM avec accord, jamais
+  de demande). À droite, le bouton « i » (niveaux, aide et réglages : le menu ⋮ a disparu) puis la
+  pilule de mode. Les moments (Première fois, Oiseau rare) gardent l'en-tête et sa pilule.
+
+Modes d'écoute (`lib/fork/listening_mode/`)
+- Pilule de 48 dp (fond tonal, contour accentText à 40 %, icône et nom du mode, chevron) qui ouvre
+  la feuille « Conditions d'écoute » : 4 options d'une phrase chacune, l'option choisie sur
+  surface2 avec contour accentText et coche. Un appui applique le mode sans couper l'écoute, ferme
+  la feuille, et une snackbar confirme « Mode Vent activé ». Le dernier mode est gardé.
+- Normal : réglages par défaut. Vent : passe-haut 250 Hz (−2 dB au plus à 400 Hz, chouettes et
+  pigeons passent). Boost : gain ×2 et passe-haut 120 Hz. Ville : réduction des bruits continus
+  (trames de 16 ms, bruit de fond appris en 1,5 s, −15 dB au plus, retard 16 ms, environ 0,3 % du
+  temps réel sur PC), derrière `kCityModeEnabled = !kReleaseMode`.
+- Le mode écrit les réglages gain et passe-haut existants, donc le spectre, l'inférence et les
+  clips voient le même signal. Un curseur des Réglages bougé à la main affiche « Personnalisé ».
+  Le modèle et les seuils ne changent pas.
