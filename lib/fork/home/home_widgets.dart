@@ -961,7 +961,7 @@ class TodayBlock extends StatelessWidget {
               ),
             ),
           ],
-          if (onOpen != null) ...[
+          ...[
             const SizedBox(height: BirdySpace.block),
             Padding(
               padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
@@ -1131,7 +1131,7 @@ class TodayBlockSkeleton extends StatelessWidget {
                       placeholder: l10n.forkHomeTodayOpen,
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 20, height: 20),
                 ],
               ),
             ),

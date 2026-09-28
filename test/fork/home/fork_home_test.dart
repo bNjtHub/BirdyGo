@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_screen.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
@@ -18,6 +19,7 @@ import 'package:birdnet_live/fork/design/widgets/birdygo_wordmark.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
+import 'package:birdnet_live/fork/game/game_widgets.dart' show StatusRing;
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
@@ -26,12 +28,14 @@ import 'package:birdnet_live/fork/home/home_widgets.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/fork/reliability/quick_review_screen.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
+import 'package:birdnet_live/fork/summary/listening_summary_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../summary/summary_fixture.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Loader with a fixed snapshot, place and sunrise.
@@ -60,6 +64,16 @@ class _PendingIndex extends ObservationIndexService {
   @override
   Future<ObservationIndex> ensureReady() =>
       Completer<ObservationIndex>().future;
+}
+
+/// Repository that only knows the sessions of [known].
+class _FakeRepository extends SessionRepository {
+  _FakeRepository(this.known);
+
+  final Map<String, LiveSession> known;
+
+  @override
+  Future<LiveSession?> load(String id) async => known[id];
 }
 
 class _Pushes extends NavigatorObserver {
@@ -172,6 +186,7 @@ void main() {
     bool withGoal = false,
     bool reducedMotion = false,
     bool settle = true,
+    SessionRepository? repository,
   }) async {
     if (withGoal) {
       await DailyGoalStore(prefs).save(
@@ -199,6 +214,8 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
+          if (repository != null)
+            sessionRepositoryProvider.overrideWithValue(repository),
           homeLoaderProvider.overrideWithValue(
             _FakeLoader(
               snapshot ?? _morning(),
@@ -379,9 +396,9 @@ void main() {
     tester,
   ) async {
     await pump(tester, snapshot: _morning(withToday: false), place: null);
-    await scrollTo(tester, find.textContaining('Aucun oiseau pour l'));
-    expect(find.text("Aujourd'hui"), findsNothing);
     expect(find.text('Rougegorge familier'), findsOneWidget);
+    await scrollTo(tester, find.textContaining('Aucun oiseau pour l'));
+    expect(find.text("Commencer à écouter"), findsOneWidget);
     expect(find.textContaining('Beaulieu'), findsNothing);
   });
 
@@ -546,5 +563,100 @@ void main() {
     await tester.pump();
     expect(find.byType(BirdyEntrance), findsNothing);
     expect(find.text('Objectif du jour'), findsOneWidget);
+  });
+
+  group("« Aujourd'hui » opens today's Bilan (J6g-b)", () {
+    const twoSessions = DaySummary(
+      species: 2,
+      contacts: 5,
+      newSpecies: 0,
+      latestSessionId: 'today-2',
+      sessionCount: 2,
+      heard: [
+        DaySpecies(
+          scientificName: 'Parus major',
+          commonName: 'Mésange charbonnière',
+          contacts: 5,
+        ),
+      ],
+    );
+    HomeSnapshot snapshotWith(DaySummary today) =>
+        HomeSnapshot(today: today, last: _morning().last, toVerify: 0);
+
+    testWidgets('the latest session of the day, said in the block', (
+      tester,
+    ) async {
+      final pushes = await pump(
+        tester,
+        snapshot: snapshotWith(twoSessions),
+        repository: _FakeRepository({'today-2': morningSession(id: 'today-2')}),
+      );
+      await scrollTo(tester, find.byKey(const ValueKey('home-today-block')));
+      expect(find.text('Bilan de la dernière des 2 écoutes'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('home-today-block')));
+      // The session is read from its JSON, then the Bilan route opens.
+      await tester.pump();
+      await tester.pump();
+      final route = pushes.routes.last as MaterialPageRoute<void>;
+      final screen = route.builder(tester.element(find.byType(ForkHome)));
+      await tester.pumpWidget(const SizedBox());
+      expect(screen, isA<ListeningSummaryScreen>());
+      expect((screen as ListeningSummaryScreen).session.id, 'today-2');
+    });
+
+    testWidgets('one listening: plain link', (tester) async {
+      await pump(
+        tester,
+        snapshot: snapshotWith(
+          const DaySummary(
+            species: 1,
+            contacts: 1,
+            newSpecies: 0,
+            latestSessionId: 'only',
+            sessionCount: 1,
+          ),
+        ),
+      );
+      await scrollTo(tester, find.byKey(const ValueKey('home-today-block')));
+      expect(find.text('Voir le bilan du jour'), findsOneWidget);
+    });
+
+    testWidgets('a session file gone since the index: a message, no crash', (
+      tester,
+    ) async {
+      final pushes = await pump(
+        tester,
+        snapshot: snapshotWith(twoSessions),
+        repository: _FakeRepository({}),
+      );
+      await scrollTo(tester, find.byKey(const ValueKey('home-today-block')));
+      final before = pushes.routes.length;
+      await tester.tap(find.byKey(const ValueKey('home-today-block')));
+      await tester.pumpAndSettle();
+      expect(pushes.routes.length, before);
+      expect(
+        find.text("Impossible d'ouvrir le bilan du jour."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no session today: the block invites to listen', (
+      tester,
+    ) async {
+      final pushes = await pump(tester, snapshot: _morning(withToday: false));
+      await scrollTo(tester, find.byKey(const ValueKey('home-today-empty')));
+      await tester.tap(find.byKey(const ValueKey('home-today-empty')));
+      final screen = await pushedScreen(tester, pushes);
+      expect(screen, isA<LiveScreen>());
+      expect((screen as LiveScreen).forceAutoStart, isTrue);
+    });
+  });
+
+  testWidgets('the level block opens the profile', (tester) async {
+    final pushes = await pump(tester);
+    await scrollTo(tester, find.byKey(const ValueKey('home-status-block')));
+    expect(find.byType(StatusRing), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('home-status-block')));
+    expect(await pushedScreen(tester, pushes), isA<ProfileScreen>());
   });
 }
