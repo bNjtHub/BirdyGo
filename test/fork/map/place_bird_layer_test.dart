@@ -1,4 +1,5 @@
 import 'package:birdnet_live/fork/home/birdygo_logo.dart';
+import 'package:birdnet_live/fork/map/map_config.dart';
 import 'package:birdnet_live/fork/map/place_bird_layer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -36,6 +37,17 @@ void main() {
     );
   });
 
+  test('busier places are bigger birds, within the configured sizes', () {
+    expect(placeBirdSize(kMapHexMinOpacity), kMapPlaceBirdMinSizePx);
+    expect(placeBirdSize(kMapHexMaxOpacity), kMapPlaceBirdSizePx);
+    expect(placeBirdSize(0), kMapPlaceBirdMinSizePx);
+    expect(placeBirdSize(1), kMapPlaceBirdSizePx);
+    expect(
+      placeBirdSize(0.5),
+      allOf(greaterThan(kMapPlaceBirdMinSizePx), lessThan(kMapPlaceBirdSizePx)),
+    );
+  });
+
   testWidgets('the layer paints many places inside a map', (tester) async {
     final places = <PlaceBird>[
       for (var i = 0; i < 200; i++)
@@ -51,7 +63,7 @@ void main() {
             initialCenter: LatLng(47, 2.4),
             initialZoom: 6,
           ),
-          children: [PlaceBirdLayer(places: places, color: Colors.teal)],
+          children: [PlaceBirdLayer(places: places)],
         ),
       ),
     );

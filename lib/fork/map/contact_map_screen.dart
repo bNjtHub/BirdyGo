@@ -449,10 +449,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                               onTileError: _onTileError,
                             ),
                           if (showHexes)
-                            PlaceBirdLayer(
-                              places: _placeBirds(data),
-                              color: _kingfisher,
-                            )
+                            PlaceBirdLayer(places: _placeBirds(data))
                           else
                             MarkerClusterLayerWidget(
                               options: MarkerClusterLayerOptions(

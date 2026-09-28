@@ -371,10 +371,12 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   « espèces » en dessous.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
-- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est dessiné en silhouette de
-  l'oiseau du logo (queue, corps et bec réunis, œil évidé), 40 dp, centrée sur la case :
-  remplissage Martin-pêcheur dont l'opacité suit le nombre de contacts, contour opaque de 1,5 dp.
-  Un seul chemin mis en cache, une couche peinte en quelques appels (`place_bird_layer.dart`).
+- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est le logo BirdyGo en
+  couleurs (dégradé Martin-pêcheur, ailes en barres, bec Loriot, œil), centré sur la case, sur un
+  halo blanc de 3 dp qui le détache de n'importe quel fond. Le nombre de contacts se lit à la
+  taille, de 24 à 40 dp, jamais à l'opacité : un lieu calme est un petit oiseau, pas un oiseau
+  délavé. Les plus gros sont dessinés en dernier. Logo enregistré une fois en image, puis
+  seulement déplacé et mis à l'échelle (`place_bird_layer.dart`).
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 

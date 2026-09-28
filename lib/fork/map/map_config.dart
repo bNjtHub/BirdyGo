@@ -12,8 +12,12 @@ const double kMapHexRadiusPx = 26;
 /// never touch.
 const double kMapPlaceBirdSizePx = 40;
 
-/// Outline of those birds, opaque so faint places stay visible.
-const double kMapPlaceBirdStrokePx = 1.5;
+/// Smallest place bird (fewest contacts); the logo keeps its colors, so the
+/// number of contacts shows as size, from this to [kMapPlaceBirdSizePx].
+const double kMapPlaceBirdMinSizePx = 24;
+
+/// White halo around each place bird, so it reads on any base map.
+const double kMapPlaceBirdHaloPx = 3;
 
 /// Contacts closer than one hexagon of this zoom's grid share a marker
 /// ("a spot"): about 25 m around the point in France.
