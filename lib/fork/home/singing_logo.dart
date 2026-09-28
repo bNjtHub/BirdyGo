@@ -198,7 +198,9 @@ class _SingingLogoState extends State<SingingLogo>
       _onTap();
       return;
     }
-    final originGlobal = markBox.localToGlobal(markBox.size.center(Offset.zero));
+    final originGlobal = markBox.localToGlobal(
+      markBox.size.center(Offset.zero),
+    );
     final path = LogoFlightPath(
       origin: overlayBox.globalToLocal(originGlobal),
       screen: overlayBox.size,
@@ -260,7 +262,10 @@ class _SingingLogoState extends State<SingingLogo>
               height: board.height,
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter: BirdyGoSingingPainter(clock: _clock, still: _reduced),
+                  painter: BirdyGoSingingPainter(
+                    clock: _clock,
+                    still: _reduced,
+                  ),
                 ),
               ),
             ),

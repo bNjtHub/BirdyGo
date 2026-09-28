@@ -34,7 +34,9 @@ void main() {
   }
 
   Finder opacityOfMark() => find.ancestor(
-    of: find.byWidgetPredicate((w) => w is CustomPaint && w.painter is BirdyGoSingingPainter),
+    of: find.byWidgetPredicate(
+      (w) => w is CustomPaint && w.painter is BirdyGoSingingPainter,
+    ),
     matching: find.byType(Opacity),
   );
 

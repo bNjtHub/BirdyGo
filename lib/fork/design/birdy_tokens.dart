@@ -249,6 +249,16 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 10), blurRadius: 28),
   ];
 
+  /// Glow of the home « Écouter » button: centered around it and at most
+  /// [listenGlowExtent] past its edge, so it fits the equal margins above
+  /// the bottom bar without being cut.
+  List<BoxShadow> get listenGlow => const [
+    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 4), blurRadius: 16),
+  ];
+
+  /// How far [listenGlow] reaches below the button (offset + blur).
+  static const double listenGlowExtent = 20;
+
   /// Light theme (notebook), SPEC.md 2.3.
   static const BirdyColors light = BirdyColors(
     brightness: Brightness.light,

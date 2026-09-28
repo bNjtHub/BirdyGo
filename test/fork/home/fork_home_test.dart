@@ -502,18 +502,21 @@ void main() {
       await pump(tester, withGoal: true);
       final button = find.byType(ListenButton);
       // The Padding directly wrapping the button (nearest ancestor).
-      final padding = tester
-          .widgetList<Padding>(
-            find.ancestor(of: button, matching: find.byType(Padding)),
-          )
-          .first;
-      // Bottom room at least the glow's blur radius (birdy_tokens.dart's
-      // ctaGlow), or the bottom navigation bar covers part of it.
-      final blurRadius = BirdyColors.light.ctaGlow
-          .map((s) => s.blurRadius)
+      final padding =
+          tester
+              .widgetList<Padding>(
+                find.ancestor(of: button, matching: find.byType(Padding)),
+              )
+              .first;
+      // Centered: the same room above and below, and at least the glow's
+      // reach (offset + blur), or the bottom navigation bar covers it.
+      final glow = BirdyColors.light.listenGlow
+          .map((s) => s.offset.dy + s.blurRadius)
           .reduce((a, b) => a > b ? a : b);
-      final bottom = (padding.padding as EdgeInsets).bottom;
-      expect(bottom, greaterThanOrEqualTo(blurRadius));
+      expect(glow, lessThanOrEqualTo(BirdyColors.listenGlowExtent));
+      final insets = padding.padding as EdgeInsets;
+      expect(insets.top, insets.bottom);
+      expect(insets.bottom, greaterThanOrEqualTo(BirdyColors.listenGlowExtent));
       // No hard clip between the button and the screen: the glow can
       // paint past the button's own box.
       expect(
