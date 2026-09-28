@@ -7,9 +7,13 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../game/game_widgets.dart';
+import '../live/live_expected.dart';
+import '../live/listening_mode_pill.dart';
+import '../listening_mode/listening_mode_sheet.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'birdy_motion.dart';
@@ -19,7 +23,10 @@ import 'birdy_typography.dart';
 import 'species_tint.dart';
 import 'widgets/animated_count.dart';
 import 'widgets/birdy_animated_icon.dart';
+import 'widgets/birdy_block.dart';
 import 'widgets/birdy_buttons.dart';
+import 'widgets/birdy_filter_chip.dart';
+import 'widgets/birdy_headers.dart';
 import 'widgets/birdy_pill.dart';
 import 'widgets/clip_play_button.dart';
 import 'widgets/empty_state.dart';
@@ -106,6 +113,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
   int _count = 3;
   int _replays = 0;
   bool _playing = false;
+  int _filter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +163,13 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGalleryEmpty, _empty(l10n)),
                 _Section(l10n.forkTipHeader, [_tips(l10n)]),
                 _Section(l10n.forkBadges, [_medals()]),
+                _Section(l10n.forkGalleryBlocks, _blocks(c, l10n)),
+                _Section(l10n.forkGalleryHeaders, _headers(context, l10n)),
+                _Section(l10n.forkGalleryFilters, _filters(l10n)),
+                _Section(l10n.forkGalleryListeningMode, [
+                  _listeningMode(l10n),
+                ]),
+                _Section(l10n.forkGalleryExpected, [_expected(l10n)]),
               ],
             ),
           );
@@ -558,6 +573,144 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         ),
       ),
   ];
+
+  /// A [BirdyBlock] in each tone (DESIGN.md « App finale »), then its
+  /// progress bar and ring.
+  List<Widget> _blocks(BirdyColors c, AppLocalizations l10n) {
+    final tones = <(BirdyBlockTone, String, String)>[
+      (BirdyBlockTone.plain, '12', 'Espèces'),
+      (BirdyBlockTone.tonal, '3', 'Objectif du jour'),
+      (BirdyBlockTone.sure, '48', 'Découvertes'),
+      (BirdyBlockTone.oriole, '2', 'Rares'),
+      (BirdyBlockTone.toCheck, '5', 'À vérifier'),
+    ];
+    return [
+      Wrap(
+        spacing: BirdySpace.m,
+        runSpacing: BirdySpace.m,
+        children: [
+          for (final (tone, number, label) in tones)
+            SizedBox(
+              width: 140,
+              child: BirdyBlock(
+                tone: tone,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      number,
+                      style: BirdyText.numberXL.copyWith(color: c.text1),
+                    ),
+                    Text(
+                      label,
+                      style: BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+      const SizedBox(height: BirdySpace.m),
+      BirdyBlock(
+        tone: BirdyBlockTone.tonal,
+        child: BirdyProgressBar(
+          value: 0.6,
+          color: c.accent,
+          track: birdyTrackOnTint(c),
+        ),
+      ),
+      const SizedBox(height: BirdySpace.m),
+      BirdyBlock(
+        tone: BirdyBlockTone.sure,
+        child: Center(
+          child: BirdyProgressRing(
+            value: 5 / 8,
+            color: c.sure.foreground,
+            track: birdyTrackOnTint(c),
+            child: Text(
+              '5/8',
+              style: BirdyText.numberM.copyWith(color: c.text1),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// Tab header and overlay header (DESIGN.md « App finale »).
+  ///
+  /// The « Fermer » (closing) variant of [BirdyOverlayHeader] lives on
+  /// `feat/j6f-b-tabs-overlays`, not yet merged into this gallery's base
+  /// branch (`feat/j6f-c-modes-wired`): skipped here, see the PR description.
+  List<Widget> _headers(BuildContext context, AppLocalizations l10n) => [
+    BirdyTabHeader(
+      title: l10n.forkGallerySpecies,
+      caption: '24 espèces découvertes',
+      actions: [
+        BirdyIconButton(
+          icon: AppIcons.sparkle,
+          semanticLabel: l10n.forkDesignGallery,
+          onPressed: () {},
+        ),
+      ],
+    ),
+    const SizedBox(height: BirdySpace.m),
+    BirdyOverlayHeader(title: _samples.first.name, onBack: () {}),
+  ];
+
+  /// Filter chips (Carnet: Toutes/Découvertes/À découvrir/Rares), one
+  /// selected at a time, plus the floating variant over a map.
+  List<Widget> _filters(AppLocalizations l10n) {
+    final chips = <(String, BirdyChipColors Function(BirdyColors))>[
+      (l10n.forkNotebookFilterAll, BirdyChipColors.ink),
+      (l10n.forkNotebookFilterDiscovered, BirdyChipColors.sure),
+      (l10n.forkNotebookFilterToDiscover, BirdyChipColors.tonal),
+      (l10n.forkNotebookFilterRare, BirdyChipColors.oriole),
+    ];
+    Widget row({bool floating = false}) => Builder(
+      builder: (context) {
+        final c = BirdyColors.of(context);
+        return Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.s,
+          children: [
+            for (final (i, chip) in chips.indexed)
+              BirdyFilterChip(
+                label: chip.$1,
+                selected: _filter == i,
+                selectedColors: chip.$2(c),
+                floating: floating,
+                onSelected: () => setState(() => _filter = i),
+              ),
+          ],
+        );
+      },
+    );
+    return [row(), const SizedBox(height: BirdySpace.m), row(floating: true)];
+  }
+
+  /// Plain [ListeningModePill]: a tap opens the modes sheet via the
+  /// [ProviderScope] the gallery already runs in (see `main.dart`).
+  Widget _listeningMode(AppLocalizations l10n) => Consumer(
+    builder:
+        (context, ref, _) => ListeningModePill(
+          label: 'Normal',
+          onPressed: () => showListeningModeSheet(context, ref),
+        ),
+  );
+
+  /// One [LiveExpectedRow], built from sample data only (no model needed).
+  Widget _expected(AppLocalizations l10n) => const LiveExpectedRow(
+    species: LiveExpectedSpecies(
+      scientificName: 'Erithacus rubecula',
+      commonName: 'Rougegorge familier',
+      reason: LiveExpectedReason.frequent,
+      goal: true,
+    ),
+    reason: 'Parmi les plus fréquents ici en septembre',
+  );
 }
 
 class _Section extends StatelessWidget {
