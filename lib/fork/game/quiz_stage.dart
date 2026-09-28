@@ -16,6 +16,7 @@ import '../species_photo/photo_credit.dart';
 import '../species_photo/photo_credit_sheet.dart';
 import 'fine_ear_quiz_widgets.dart';
 import 'french_article.dart';
+import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
 enum QuizStageState { listening, right, wrong }
@@ -100,11 +101,17 @@ class _ListeningCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    // 116 px on the mockup's 212 px card; smaller on short screens.
-    final disc = (height - 96).clamp(48.0, 116.0);
+    // 112 px on the mockup's 212 px card; smaller on short screens. Leaves
+    // room below for the full-width spectrum.
+    final disc = (height - 96).clamp(48.0, 112.0);
     return QuizWell(
+      highlightRadius: 190,
+      highlightCenter: const Alignment(0, -0.16),
       child: Stack(
         children: [
+          const Positioned.fill(
+            child: QuizTwinkleField(count: 4, seed: 11),
+          ),
           Positioned(
             top: 12,
             left: 12,
@@ -160,74 +167,64 @@ class _ListeningCard extends StatelessWidget {
               ),
             ),
           ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                QuizFloat(
-                  child: SizedBox(
-                    width: disc,
-                    height: disc,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      fit: StackFit.expand,
-                      children: [
-                        QuizRing(
-                          color: c.accent,
-                          running: playing,
-                        ),
-                        QuizRing(
-                          color: BirdyBrand.oriole,
-                          delay: QuizMotion.ringStep,
-                          running: playing,
-                        ),
-                        QuizMysteryDisc(
-                          size: disc,
-                          silhouette: disc * 92 / 116,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: height >= 200 ? 12 : 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 44,
+            child: Center(
+              child: SizedBox(
+                // Room for the play button overlapping bottom-right.
+                width: disc * 1.16,
+                height: disc * 1.09,
+                child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    QuizBars(
-                      key: const ValueKey('quiz-bars-left'),
-                      heights: const [10, 20, 26],
-                      colors: BirdyQuizColors.barsLeft,
-                      delays: const [
-                        Duration(milliseconds: 240),
-                        Duration(milliseconds: 120),
-                        Duration.zero,
-                      ],
-                      running: playing,
-                      dimmed: !playing,
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      width: disc,
+                      height: disc,
+                      child: QuizBounce(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          fit: StackFit.expand,
+                          children: [
+                            QuizRing(color: c.accent, running: playing),
+                            QuizRing(
+                              color: BirdyBrand.oriole,
+                              delay: QuizMotion.ringStep,
+                              running: playing,
+                            ),
+                            QuizMysteryDisc(
+                              size: disc,
+                              silhouette: disc * 92 / 116,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 14),
-                    _BigPlayButton(
-                      playing: playing,
-                      label: playing ? l10n.forkQuizStop : l10n.forkQuizListen,
-                      onPressed: onPlay,
-                    ),
-                    const SizedBox(width: 14),
-                    QuizBars(
-                      key: const ValueKey('quiz-bars-right'),
-                      heights: const [26, 18, 10],
-                      colors: BirdyQuizColors.barsRight,
-                      delays: const [
-                        Duration(milliseconds: 60),
-                        Duration(milliseconds: 180),
-                        Duration(milliseconds: 300),
-                      ],
-                      running: playing,
-                      dimmed: !playing,
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: _BigPlayButton(
+                        playing: playing,
+                        label:
+                            playing ? l10n.forkQuizStop : l10n.forkQuizListen,
+                        onPressed: onPlay,
+                      ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 14,
+            height: 26,
+            child: _StageSpectrum(playing: playing),
           ),
         ],
       ),
@@ -235,13 +232,61 @@ class _ListeningCard extends StatelessWidget {
   }
 }
 
-/// 64 dp filled play button of the well, with the Martin-pêcheur glow.
+/// The mockup's single 27-bar spectrum across the bottom of the well,
+/// animated only while the clip plays, dimmed at rest.
+class _StageSpectrum extends StatelessWidget {
+  const _StageSpectrum({required this.playing});
+
+  final bool playing;
+
+  static const _heights = [8, 14, 22, 12, 26, 18, 10, 20, 28, 16, 9, 24, 14];
+  static const _colors = [
+    BirdyQuizColors.bar1,
+    BirdyQuizColors.bar2,
+    BirdyQuizColors.bar3,
+    BirdyBrand.oriole,
+    BirdyQuizColors.bar4,
+    BirdyQuizColors.bar2,
+  ];
+  static const _count = 27;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Opacity(
+      opacity: playing ? 1 : 0.4,
+      child: Row(
+        children: [
+          for (var i = 0; i < _count; i++) ...[
+            if (i > 0) const SizedBox(width: 3),
+            Expanded(
+              child: Center(
+                child: QuizBar(
+                  width: 5,
+                  height: _heights[i % _heights.length].toDouble(),
+                  color: _colors[i % _colors.length],
+                  period: Duration(milliseconds: 700 + (i % 5) * 90),
+                  delay: Duration(milliseconds: (i * 70) % 600),
+                  running: playing,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
+/// 60 dp filled play button overlapping the disc, a wellBottom ring and the
+/// Martin-pêcheur glow (Quiz v2 mockup).
 class _BigPlayButton extends StatelessWidget {
   const _BigPlayButton({
     required this.playing,
     required this.label,
     required this.onPressed,
   });
+
+  static const double size = 60;
 
   final bool playing;
   final String label;
@@ -261,6 +306,7 @@ class _BigPlayButton extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              border: Border.all(color: BirdyBrand.wellBottom, width: 3),
               boxShadow: c.ctaGlow,
             ),
             child: Material(
@@ -270,10 +316,10 @@ class _BigPlayButton extends StatelessWidget {
               child: InkWell(
                 onTap: onPressed,
                 child: SizedBox.square(
-                  dimension: BirdySizes.liveControl,
+                  dimension: size,
                   child: Icon(
                     playing ? AppIcons.quizStop : AppIcons.playArrowRounded,
-                    size: playing ? 30 : 36,
+                    size: playing ? size * 0.5 : size * 0.6,
                     fill: 1,
                     color: BirdyBrand.ink,
                   ),
