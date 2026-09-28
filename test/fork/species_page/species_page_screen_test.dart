@@ -9,6 +9,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/map/contact_map_screen.dart';
+import 'package:birdnet_live/fork/ranking/activity_bars.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
@@ -159,7 +161,11 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           taxonomyServiceProvider.overrideWith(
-            (ref) async => TaxonomyService(),
+            (ref) async =>
+                TaxonomyService()..loadFromCsv(
+                  'scientific_name,common_name\n'
+                  '$_robin,Rougegorge familier',
+                ),
           ),
           effectiveSpeciesLocaleProvider.overrideWithValue('fr'),
           speciesSheetsProvider.overrideWith(
@@ -217,7 +223,17 @@ void main() {
     expect(find.text('Voir les 9 enregistrements'), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.summary]!), findsOneWidget);
     expect(find.text('Activité par heure'), findsOneWidget);
+    // J6f-b fix: hour labels every 6 h, and the peak hour named below the
+    // chart (hour 7 has the tally's only busy value).
+    expect(find.text('0 h'), findsOneWidget);
+    expect(find.text('6 h'), findsOneWidget);
+    expect(find.text('12 h'), findsOneWidget);
+    expect(find.text('18 h'), findsOneWidget);
+    expect(find.text('Surtout vers 7 h'), findsOneWidget);
     expect(find.text('Voir sur la carte'), findsOneWidget);
+    // J6f-b fix: the label is short enough to stay on one line.
+    expect(find.text('En savoir plus'), findsOneWidget);
+    expect(find.text('En savoir plus sur cette espèce'), findsNothing);
     expect(find.textContaining('Garde le son pour toi'), findsOneWidget);
     // The upstream description gives way to the AI sheet.
     expect(find.text('Description upstream.'), findsNothing);
@@ -245,6 +261,46 @@ void main() {
     await pump(tester);
     expect(find.text(explanation), findsOneWidget);
   });
+
+  testWidgets(
+    'tapping an hour bar shows its own hour and count (J6f-b fix)',
+    (tester) async {
+      await pump(tester);
+      expect(find.text('Surtout vers 7 h'), findsOneWidget);
+
+      await tester.ensureVisible(find.byType(ActivityBars));
+      final rect = tester.getRect(find.byType(ActivityBars));
+      final slot = rect.width / 24;
+      // Hour 4 has a single contact: distinct from the busy hour 7.
+      await tester.tapAt(Offset(rect.left + slot * 4.5, rect.top + 5));
+      await tester.pump();
+
+      expect(find.text('Surtout vers 7 h'), findsNothing);
+      expect(find.text('4 h — 1 contact'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    '« Voir sur la carte » opens the contact map filtered on the species',
+    (tester) async {
+      await pump(tester);
+      await tester.ensureVisible(find.text('Voir sur la carte'));
+      await tester.tap(find.text('Voir sur la carte'));
+      // Not pumpAndSettle: the map screen it opens keeps timers running
+      // (tile loading, location) that never quiesce on their own.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final map = tester.widget<ContactMapScreen>(
+        find.byType(ContactMapScreen),
+      );
+      expect(map.initialSpecies?.scientificName, _robin);
+      expect(map.initialSpecies?.commonName, 'Rougegorge familier');
+      // The species chip shows its name, not "Toutes les espèces".
+      expect(find.text('Rougegorge familier'), findsWidgets);
+      expect(find.text('Toutes les espèces'), findsNothing);
+    },
+  );
 
   testWidgets('play a recording and change a favorite', (tester) async {
     await pump(tester);
