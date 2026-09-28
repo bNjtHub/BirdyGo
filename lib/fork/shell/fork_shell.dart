@@ -67,13 +67,18 @@ class _ForkShellState extends State<ForkShell> {
   }
 
   void _select(ForkTab tab) {
+    // Where the pages are now, before the bar moves.
+    final from =
+        _pages.hasClients ? (_pages.page ?? tab.index).round() : tab.index;
     setState(() {
       _tab = tab;
       _settled = tab;
       _built.add(tab);
     });
     if (!_pages.hasClients) return;
-    if (BirdyMotion.reduced(context)) {
+    // A tap that skips tabs jumps: sliding through them would flash the
+    // ones in between (possibly never built yet).
+    if (BirdyMotion.reduced(context) || (tab.index - from).abs() > 1) {
       _slidingTo = null;
       _pages.jumpToPage(tab.index);
       return;
@@ -152,9 +157,10 @@ class _ForkShellState extends State<ForkShell> {
             child: PageView(
               controller: _pages,
               // The map pans with horizontal drags: no swiping out of it.
-              physics: _settled == ForkTab.map
-                  ? const NeverScrollableScrollPhysics()
-                  : null,
+              physics:
+                  _settled == ForkTab.map
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
               onPageChanged: _onPageChanged,
               children: [
                 for (final tab in ForkTab.values)
@@ -162,9 +168,10 @@ class _ForkShellState extends State<ForkShell> {
                     key: ValueKey(tab),
                     pages: _pages,
                     visible: () => _onScreen(tab),
-                    child: _built.contains(tab)
-                        ? _page(tab)
-                        : const SizedBox.expand(),
+                    child:
+                        _built.contains(tab)
+                            ? _page(tab)
+                            : const SizedBox.expand(),
                   ),
               ],
             ),
@@ -222,8 +229,7 @@ class _TabPage extends StatefulWidget {
   State<_TabPage> createState() => _TabPageState();
 }
 
-class _TabPageState extends State<_TabPage>
-    with AutomaticKeepAliveClientMixin {
+class _TabPageState extends State<_TabPage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -232,8 +238,9 @@ class _TabPageState extends State<_TabPage>
     super.build(context);
     return ListenableBuilder(
       listenable: widget.pages,
-      builder: (context, child) =>
-          Visibility.maintain(visible: widget.visible(), child: child!),
+      builder:
+          (context, child) =>
+              Visibility.maintain(visible: widget.visible(), child: child!),
       child: widget.child,
     );
   }

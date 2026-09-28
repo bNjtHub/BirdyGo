@@ -256,6 +256,19 @@ void main() {
     expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
   });
 
+  testWidgets('a tap that skips tabs jumps, never flashing those between', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(tab('Profil'));
+    // First frame after the tap: already on the Profil, nothing slid.
+    await tester.pump();
+    expect(selected(tester), 3);
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
+  });
+
   testWidgets('each tab keeps its state across swipes', (tester) async {
     await pump(tester, heard: _heard);
     await swipe(tester, -300);
