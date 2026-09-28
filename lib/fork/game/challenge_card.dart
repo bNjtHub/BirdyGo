@@ -55,9 +55,9 @@ class ChallengeCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: c.surface1,
+        // J6f: a challenge met turns into a Loriot block.
+        color: done ? c.orioleContainer : c.surface1,
         borderRadius: BorderRadius.circular(BirdyRadii.card),
-        border: done ? Border.all(color: c.oriole, width: 1.5) : null,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -70,16 +70,16 @@ class ChallengeCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: BirdySizes.blockIconDisc,
+                  height: BirdySizes.blockIconDisc,
                   decoration: BoxDecoration(
-                    color: c.tonal,
+                    color: done ? c.oriole : c.tonal,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    challengeIcon(challenge.kind),
+                    done ? AppIcons.check : challengeIcon(challenge.kind),
                     size: 22,
-                    color: c.accentText,
+                    color: done ? c.onOriole : c.accentText,
                   ),
                 ),
                 const SizedBox(width: BirdySpace.m),

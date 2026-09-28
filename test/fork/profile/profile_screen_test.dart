@@ -106,6 +106,9 @@ void main() {
   testWidgets('a badge explains its rule', (tester) async {
     await pump(tester);
     await tester.scrollUntilVisible(find.text('Réviseur'), 200);
+    // Taller badge tiles (J6f): bring the whole tile on screen.
+    await tester.ensureVisible(find.text('Réviseur'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Réviseur'));
     await tester.pumpAndSettle();
     expect(
