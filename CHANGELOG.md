@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Setup controls in Point Count, Survey, ARU, and File Analysis now have matching help buttons and consistent icons for shared settings; the user guide reflects the same icons.
+- Point Count setup now offers Full, Clips, and Off recording choices independently of Live Mode. Full is the default; Clips use Live Mode's clip context and keep every detection clip.
 - Export metadata now includes separate readable `device` and `os` fields without a device ID.
 
 ### Fixed
 
+- Live Mode and Point Count Sessions now record their clip context, so Raven and CSV exports place detections at the right offset within each clip.
 - Raven selection tables now use cumulative clip-sequence times, omit detections without exported clips, always report Survey Time in UTC, and keep Raven’s default columns first. Document-only Raven clip exports reference the original audio filenames (#229).
 
 ## [1.1.3] - 2026-09-10

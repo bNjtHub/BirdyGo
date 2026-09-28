@@ -2,6 +2,10 @@
 
 BirdNET Live reuses one Settings screen across multiple workflows. The :material-tune: button opens the sections that are relevant to the screen you came from.
 
+The :material-help: button beside a setting opens a short explanation. The
+Point Count, Survey, ARU, and File Analysis setup wizards use the same button
+and the same icons for controls they share with Settings or each other.
+
 ## How Settings Scope Works
 
 - Opening Settings from Home shows the full screen.
@@ -195,13 +199,17 @@ A disclosure that exposes a handful of audio-routing toggles plus the trigger-mo
 
 ### Mode
 
+This setting controls Live Mode. Point Count has its own recording choice on
+the Analysis Settings step of setup; new Point Counts default to Full. Survey
+also has a separate recording choice in its setup.
+
 - **Full** — save the whole recording
 - **Detections only** — save clips around detections
 - **Off** — no audio recording
 
 ### Clip context
 
-When **Detections only** is active, the app shows a single **Clip context** slider (0–5 s) that sets how much audio is preserved on **both sides** of each detection. Each clip is `analysis window + 2 × clip context` long, so with a 3 s analysis window and the default 1 s context the saved clip is 5 s. Setting the context to 2 s yields a 7 s clip (2 s pre-roll + 3 s analyzed audio + 2 s post-roll). Larger values give you more room for visual inspection or external review tools at the cost of disk space; 0 saves only the analyzed window itself.
+When **Detections only** is active, the app shows a single **Clip context** slider (0–5 s) that sets how much audio is preserved on **both sides** of each detection. Point Count uses this same value when Clips is selected in setup, and can change it there. Each clip is `analysis window + 2 × clip context` long, so with a 3 s analysis window and the default 1 s context the saved clip is 5 s. Setting the context to 2 s yields a 7 s clip (2 s pre-roll + 3 s analyzed audio + 2 s post-roll). Larger values give you more room for visual inspection or external review tools at the cost of disk space; 0 saves only the analyzed window itself.
 
 ### Format
 
