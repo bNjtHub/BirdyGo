@@ -368,8 +368,7 @@ final recordingFormatProvider =
 
 /// Recording mode ('full', 'detections', 'off' — default 'full').
 ///
-/// Used by live and point-count sessions.  Surveys use their own
-/// [surveyRecordingModeProvider] configured in the survey-setup screen.
+/// Used by live sessions. Point Count and Survey have their own setup choices.
 final recordingModeProvider =
     StateNotifierProvider<StringSettingNotifier, String>((ref) {
       final prefs = ref.watch(sharedPreferencesProvider);
@@ -741,6 +740,17 @@ final pointCountDurationProvider =
     StateNotifierProvider<IntSettingNotifier, int>((ref) {
       final prefs = ref.watch(sharedPreferencesProvider);
       return IntSettingNotifier(prefs, PrefKeys.pointCountDuration, 5);
+    });
+
+/// Point Count recording mode ('full', 'detections', 'off'; default 'full').
+final pointCountRecordingModeProvider =
+    StateNotifierProvider<StringSettingNotifier, String>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return StringSettingNotifier(
+        prefs,
+        PrefKeys.pointCountRecordingMode,
+        'full',
+      );
     });
 
 /// Last used observer name in Point Count (shared across field modes).

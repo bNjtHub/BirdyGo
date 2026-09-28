@@ -58,6 +58,7 @@ class PointCountLiveScreen extends ConsumerStatefulWidget {
   const PointCountLiveScreen({
     super.key,
     required this.durationMinutes,
+    required this.recordingMode,
     this.latitude,
     this.longitude,
     this.customName,
@@ -71,6 +72,9 @@ class PointCountLiveScreen extends ConsumerStatefulWidget {
 
   /// Total survey duration in minutes.
   final int durationMinutes;
+
+  /// Recording choice made in Point Count setup.
+  final String recordingMode;
 
   /// Optional latitude chosen during setup (GPS or manual).
   final double? latitude;
@@ -200,8 +204,7 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         widget.speciesFilterModeOverride ?? ref.read(speciesFilterModeProvider);
     final double sensitivity =
         widget.sensitivityOverride ?? ref.read(sensitivityProvider);
-    final recordingModeStr = ref.read(recordingModeProvider);
-    final recordingMode = recordingModeFromString(recordingModeStr);
+    final recordingMode = recordingModeFromString(widget.recordingMode);
     final recordingFormat = ref.read(recordingFormatProvider);
     final geoThreshold = ref.read(geoThresholdProvider);
     final geoScores = await ref.read(geoScoresProvider.future);
