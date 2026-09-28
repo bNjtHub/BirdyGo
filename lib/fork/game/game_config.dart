@@ -37,6 +37,7 @@ class MedalMetal {
     required this.shadow,
     required this.rim,
     required this.ink,
+    required this.tone,
   });
 
   final Color highlight;
@@ -44,6 +45,10 @@ class MedalMetal {
   final Color shadow;
   final Color rim;
   final Color ink;
+
+  /// Pale tone of the medal metal: background of an earned badge tile
+  /// (J6f, Profil « À gagner ») and of the quiz result medal card.
+  final Color tone;
 }
 
 class Glyph {
@@ -231,6 +236,7 @@ abstract final class GameConfig {
       shadow: Color(0xFF8C542C),
       rim: Color(0xFF6E3F1F),
       ink: Color(0xFF3F220C),
+      tone: Color(0xFFF6EBE1),
     ),
     MedalMetal(
       highlight: Color(0xFFF7F9FB),
@@ -238,6 +244,7 @@ abstract final class GameConfig {
       shadow: Color(0xFF8F99A4),
       rim: Color(0xFF6F7984),
       ink: Color(0xFF2F3943),
+      tone: Color(0xFFEBEFF3),
     ),
     MedalMetal(
       highlight: Color(0xFFFFE9A0),
@@ -245,6 +252,7 @@ abstract final class GameConfig {
       shadow: Color(0xFFC49224),
       rim: Color(0xFF9A7010),
       ink: Color(0xFF5A4000),
+      tone: Color(0xFFFBEFC8),
     ),
   ];
 

@@ -32,6 +32,13 @@ abstract final class BirdyBrand {
   /// Background of the spectrogram well (both themes).
   static const Color wellTop = Color(0xFF0B1728);
   static const Color wellBottom = Color(0xFF0F1E33);
+
+  /// Small "current level" check badge on the Profil ladder (J6f), both
+  /// themes: real metal green, not a theme token.
+  static const Color checkGreen = Color(0xFF3E8E4F);
+
+  /// Faint radial highlight over the well (Quiz v2 mockup's hero and stage).
+  static const Color wellHighlight = Color(0xFF173A55);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -91,6 +98,20 @@ abstract final class BirdyQuizColors {
 
   /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
   static const double mysteryBrightness = 2.2;
+
+  /// Sparks, twinkles and star burst particles on the intro hero, the
+  /// result and a right reveal (Quiz v2 mockup).
+  static const List<Color> sparkColors = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF5AA9E6),
+    Color(0xFFE9836B),
+  ];
+
+  /// Rim of an earned result star (a shaded gold), both themes.
+  static const Color starRim = Color(0xFFC49224);
 }
 
 /// Foreground and background of one reliability level.
@@ -528,6 +549,30 @@ abstract final class BirdySizes {
   /// Loriot question mark pinned on its corner.
   static const double quizDisc = 60;
   static const double quizDiscBadge = 24;
+
+  /// The quiz entry's logo (J6f, [QuizLogo]), the Profil quiz row.
+  static const double quizLogo = 56;
+
+  /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
+  /// check badge on the current one.
+  static const double levelEmblem = 48;
+  static const double levelCellMinHeight = 84;
+  static const double levelCheckBadge = 20;
+
+  /// Icon disc leading the level info box and a weekly challenge inset.
+  static const double levelInfoIcon = 44;
+
+  /// A segmented bar's bar height and the gap between bars (level info box,
+  /// weekly challenge).
+  static const double segmentHeight = 12;
+  static const double segmentGap = 3;
+
+  /// Above this many segments, a segmented bar falls back to one continuous
+  /// [BirdyProgressBar] (too many slivers to read).
+  static const int segmentBarMax = 25;
+
+  /// Minimum height of a badge tile (Profil « À gagner »).
+  static const double badgeTile = 136;
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from
@@ -554,4 +599,7 @@ abstract final class BirdyAlpha {
 
   /// [BirdyColors.accentText] outline of the listening mode pill.
   static const double modePillBorder = 0.4;
+
+  /// Thin inner white ring on a reached level emblem/ring (J6f).
+  static const double emblemInnerRing = 0.5;
 }

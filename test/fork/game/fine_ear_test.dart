@@ -301,14 +301,17 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4), correct: 5, start: false);
-      expect(find.text('Qui chante ?'), findsOneWidget);
-      expect(find.bySemanticsLabel('4 chants'), findsOneWidget);
-      expect(find.bySemanticsLabel('4 choix'), findsOneWidget);
-      expect(find.bySemanticsLabel('4 de tes oiseaux'), findsOneWidget);
-      expect(find.text('Oreille fine'), findsOneWidget);
-      expect(find.text('5 sur 10'), findsOneWidget);
+      expect(find.bySemanticsLabel('Qui chante ?'), findsOneWidget);
+      expect(find.text('Écoute'), findsOneWidget);
+      expect(find.text('4 chants de tes sorties'), findsOneWidget);
+      expect(find.text('Devine'), findsOneWidget);
+      expect(find.text('le bon oiseau parmi 4'), findsOneWidget);
+      expect(find.text('Gagne'), findsOneWidget);
+      expect(find.text('+1 à chaque bonne réponse'), findsOneWidget);
+      expect(find.text('Badge Oreille fine'), findsOneWidget);
+      expect(find.text('Ta première plume'), findsOneWidget);
       expect(
-        find.text('Chaque bonne réponse te rapproche de ta 1re plume'),
+        find.text('Encore 5 bonnes réponses · 5 sur 10'),
         findsOneWidget,
       );
       expect(find.byType(BadgeMedal), findsOneWidget);
@@ -432,6 +435,41 @@ void main() {
       expect(prefs.getInt(kFineEarCorrectPref), isNull);
     });
 
+    testWidgets('a wrong answer shows an encourage line', (tester) async {
+      await pump(tester, _species(4));
+      final answer = playing();
+      final wrong = _species(4).keys.firstWhere((s) => s != answer);
+      await tapChoice(tester, french(wrong));
+      expect(
+        find.text('Réécoute-le, tu le retiendras'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the score chip counts right answers as they add up', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      expect(find.bySemanticsLabel('Aucune bonne réponse'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
+      await tapChoice(tester, french(playing()));
+      expect(find.bySemanticsLabel('1 bonne réponse'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+    });
+
+    testWidgets('the stage bubble switches text with playback', (
+      tester,
+    ) async {
+      // The round's first clip plays right away (« Qui suis-je ? »).
+      await pump(tester, _species(4));
+      expect(find.text('Qui suis-je ?'), findsOneWidget);
+      expect(find.text('Écoute-moi !'), findsNothing);
+      await tester.tap(find.byTooltip("Arrêter l'extrait"));
+      await settle(tester, seconds: 0.5);
+      expect(find.text('Écoute-moi !'), findsOneWidget);
+      expect(find.text('Qui suis-je ?'), findsNothing);
+    });
+
     testWidgets('quitting a round goes back to the intro', (tester) async {
       await pump(tester, _species(4));
       expect(player.playing.value, isNotNull);
@@ -465,7 +503,13 @@ void main() {
       expect(find.byType(BadgeMedal), findsOneWidget);
       expect(find.text('Oreille fine'), findsOneWidget);
       expect(find.text('Nouvelle plume'), findsOneWidget);
-      expect(find.text('12 sur 50 vers la 2e plume'), findsOneWidget);
+      expect(
+        find.text(
+          '+4 cette partie · 12 sur 50 vers la 2e plume',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Rejouer'), findsOneWidget);
       expect(find.text('Terminer'), findsOneWidget);
 
@@ -491,7 +535,13 @@ void main() {
       );
       expect(find.bySemanticsLabel(RegExp(r', manqué$')), findsNWidgets(4));
       expect(find.text('Nouvelle plume'), findsNothing);
-      expect(find.text('0 sur 10 pour ta 1re plume'), findsOneWidget);
+      expect(
+        find.text(
+          '+0 cette partie · 0 sur 10 pour ta 1re plume',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
     });
 
     for (final dark in [false, true]) {
@@ -649,8 +699,11 @@ void main() {
       }
       expect(find.text('10/10'), findsOneWidget);
       for (var i = 0; i < 3; i++) {
-        final star = tester.widget<Icon>(find.byKey(ValueKey('quiz-star-$i')));
+        final star = tester.widget<QuizRimStar>(
+          find.byKey(ValueKey('quiz-star-$i')),
+        );
         expect(star.color, BirdyColors.light.oriole);
+        expect(star.rim, BirdyQuizColors.starRim);
         expect(star.size, i == 1 ? 56 : 42);
       }
       for (var r = 0; r < 2; r++) {
@@ -686,10 +739,11 @@ void main() {
         await tapChoice(tester, french(i == 0 ? answer : wrong));
         await next(tester, last: i == 3);
       }
-      final star = tester.widget<Icon>(
+      final star = tester.widget<QuizRimStar>(
         find.byKey(const ValueKey('quiz-star-0')),
       );
       expect(star.color, BirdyColors.light.lineOpaque);
+      expect(star.rim, BirdyColors.light.border);
       expect(find.byType(ConfettiWidget), findsNothing);
       expect(sfx.played, isNot(contains(QuizSound.fanfare)));
     });
