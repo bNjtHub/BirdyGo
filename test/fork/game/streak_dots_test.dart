@@ -40,20 +40,32 @@ void main() {
     home: Scaffold(body: SizedBox(width: 300, child: child)),
   );
 
-  testWidgets('a listened day is filled, an open day is only outlined', (
+  testWidgets(
+    'a listened day is a filled accent dot, today gets its own ringed dot',
+    (tester) async {
+      final streak = computeStreak(_days([21, 22, 23, 24, 25, 26]), _now);
+      final week = lastSevenDays(streak);
+      await tester.pumpWidget(app(StreakDots(days: week, localeName: 'fr')));
+      // 6 listened (21-26), today (27, Sunday) shown as its own ringed dot
+      // even though it was not listened to yet.
+      expect(find.byKey(const ValueKey('day-listened')), findsNWidgets(6));
+      expect(find.byKey(const ValueKey('day-today')), findsOneWidget);
+      expect(find.byKey(const ValueKey('day-open')), findsNothing);
+      expect(find.byKey(const ValueKey('day-missed')), findsNothing);
+      expect(find.byKey(const ValueKey('day-rest')), findsNothing);
+    },
+  );
+
+  testWidgets('a day without listening is a plain fill, an upcoming day only an outline', (
     tester,
   ) async {
-    final streak = computeStreak(_days([21, 22, 23, 24, 25, 26]), _now);
+    // Today (27) listened, 21-26 not: they are all "missed" (no rest earned
+    // yet), and there is no upcoming day in a 7-day window ending today.
+    final streak = computeStreak(_days([27]), _now);
     final week = lastSevenDays(streak);
-    await tester.pumpWidget(
-      app(StreakDots(days: week, localeName: 'fr')),
-    );
-    // 6 listened, today (27) still open.
-    final containers = tester.widgetList<Container>(find.byType(Container));
-    final listened = containers.where((c) => c.key == const ValueKey('day-listened'));
-    final open = containers.where((c) => c.key == const ValueKey('day-open'));
-    expect(listened, hasLength(6));
-    expect(open, hasLength(1));
+    await tester.pumpWidget(app(StreakDots(days: week, localeName: 'fr')));
+    expect(find.byKey(const ValueKey('day-missed')), findsNWidgets(6));
+    expect(find.byKey(const ValueKey('day-today')), findsOneWidget);
   });
 
   testWidgets('dayLabel wraps each dot in its own semantics, else silent', (
