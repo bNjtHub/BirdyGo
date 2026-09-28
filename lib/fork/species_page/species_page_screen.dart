@@ -29,6 +29,7 @@ import '../design/widgets/birdy_sheet.dart';
 import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
+import '../lpo/species_lpo_entry.dart';
 import '../ranking/species_activity_section.dart';
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
@@ -135,6 +136,9 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
   SpeciesRecord? _record;
   YearPresence? _year;
 
+  /// Session « Envoyer à Faune-France » sends from; null hides the entry.
+  String? _lpoSessionId;
+
   /// Only used outside a sheet (a sheet already carries its own drag
   /// controller): lets the drag-to-close gesture tell whether the page is
   /// scrolled to the top (J6f-b fix).
@@ -191,6 +195,22 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final record = await _loader.record(widget.scientificName);
     if (!mounted || generation != _loadGeneration) return;
     setState(() => _record = record);
+    final lpo = await _loader.lastConfirmedSession(widget.scientificName);
+    if (mounted && generation == _loadGeneration && lpo != _lpoSessionId) {
+      setState(() => _lpoSessionId = lpo);
+    }
+  }
+
+  Future<void> _sendToLpo() async {
+    final id = _lpoSessionId;
+    if (id == null) return;
+    final session = await ref.read(sessionRepositoryProvider).load(id);
+    if (session == null || !mounted) return;
+    await openLpoSendForSpecies(
+      context,
+      session: session,
+      scientificName: widget.scientificName,
+    );
   }
 
   Future<void> _loadYear() async {
@@ -416,6 +436,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           links: _links(detail),
           onOpen: (url) => openExternalUrl(context, url),
         ),
+      if (_lpoSessionId != null) SpeciesLpoEntry(onSend: _sendToLpo),
       const SpeciesPageFooter(),
     ];
 
