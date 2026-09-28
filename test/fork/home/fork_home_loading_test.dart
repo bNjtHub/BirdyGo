@@ -277,42 +277,26 @@ void main() {
       await pump(tester);
       await tester.pumpAndSettle();
       final grid = tester.getRect(find.byKey(const ValueKey('home-grid')));
-      final status = tester.getRect(
-        find.byKey(const ValueKey('home-status')),
-      );
+      final status = tester.getRect(find.byKey(const ValueKey('home-status')));
 
       // The snapshot (hero, à vérifier) lands first; the série cell and
       // the status block must still be skeletons, at their final size,
       // since the game progress is not in yet.
       loader.resolve();
       await tester.pumpAndSettle();
-      expect(
-        tester.getRect(find.byKey(const ValueKey('home-grid'))),
-        grid,
-      );
-      expect(
-        tester.getRect(find.byKey(const ValueKey('home-status'))),
-        status,
-      );
+      expect(tester.getRect(find.byKey(const ValueKey('home-grid'))), grid);
+      expect(tester.getRect(find.byKey(const ValueKey('home-status'))), status);
 
       // The game progress lands: same blocks, same rects, real content
       // fades in.
       gameGate.complete(_game());
       await tester.pumpAndSettle();
-      expect(
-        tester.getRect(find.byKey(const ValueKey('home-grid'))),
-        grid,
-      );
-      expect(
-        tester.getRect(find.byKey(const ValueKey('home-status'))),
-        status,
-      );
+      expect(tester.getRect(find.byKey(const ValueKey('home-grid'))), grid);
+      expect(tester.getRect(find.byKey(const ValueKey('home-status'))), status);
     },
   );
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     await pump(tester, reducedMotion: true);
     await tester.pump();
     final before = tester.getRect(find.byKey(const ValueKey('home-today')));
@@ -321,10 +305,7 @@ void main() {
     // animation loops).
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
-      expect(
-        tester.getRect(find.byKey(const ValueKey('home-today'))),
-        before,
-      );
+      expect(tester.getRect(find.byKey(const ValueKey('home-today'))), before);
     }
     loader.resolve();
     gameGate.complete(_game());
@@ -374,10 +355,7 @@ void main() {
     'the rare case (no last bird, no série, 0 to check) collapses without '
     'crashing once loaded',
     (tester) async {
-      await pump(
-        tester,
-        snapshot: const HomeSnapshot(today: DaySummary.empty),
-      );
+      await pump(tester, snapshot: const HomeSnapshot(today: DaySummary.empty));
       await tester.pump();
       loader.resolve();
       gameGate.complete(_game(streak: _streak(current: 0)));
@@ -386,14 +364,8 @@ void main() {
       // The hero and the grid's two right-hand cells are gone; the goal
       // cell alone still spans the grid's width.
       expect(find.byKey(const ValueKey('home-last')), findsNothing);
-      expect(
-        find.byKey(const ValueKey('home-streak-real')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey('home-to-check-real')),
-        findsNothing,
-      );
+      expect(find.byKey(const ValueKey('home-streak-real')), findsNothing);
+      expect(find.byKey(const ValueKey('home-to-check-real')), findsNothing);
       // The status block, on the other hand, is always shown once the
       // game progress resolves.
       expect(find.byKey(const ValueKey('home-status-real')), findsOneWidget);

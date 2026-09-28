@@ -458,14 +458,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         ),
     ];
     final listen = Padding(
-      // Bottom padding at least the glow's blur radius (birdy_tokens.dart's
-      // ctaGlow), or the bottom navigation bar covers part of it.
-      padding: const EdgeInsets.fromLTRB(
-        BirdySpace.xl,
-        BirdySpace.s,
-        BirdySpace.xl,
-        BirdySpace.xxxl,
-      ),
+      // Equal margins above and below, as wide as the button's glow
+      // (BirdyColors.listenGlowExtent): centered, and never cut by the bar.
+      padding: const EdgeInsets.all(BirdySpace.xl),
       // Straight into listening: the live screen starts on arrival.
       child: ListenButton(
         onPressed: () => _open(const LiveScreen(forceAutoStart: true)),

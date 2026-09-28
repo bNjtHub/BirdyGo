@@ -97,7 +97,7 @@ class ListenButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: ShapeDecoration(
           shape: const StadiumBorder(),
-          shadows: onPressed == null ? null : c.ctaGlow,
+          shadows: onPressed == null ? null : c.listenGlow,
         ),
         child: FilledButton.icon(
           onPressed: onPressed,
