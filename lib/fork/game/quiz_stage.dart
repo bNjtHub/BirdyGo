@@ -99,22 +99,64 @@ class _ListeningCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     // 116 px on the mockup's 212 px card; smaller on short screens.
     final disc = (height - 96).clamp(48.0, 116.0);
     return QuizWell(
       child: Stack(
         children: [
           Positioned(
-            top: 14,
-            left: 16,
+            top: 12,
+            left: 12,
             right: 16,
-            child: Text(
-              l10n.forkQuizMystery,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: BirdyText.badge.copyWith(
-                height: 1.2,
-                color: BirdyColors.dark.text2,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: BirdyBrand.oriole,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '?',
+                    style: BirdyText.badge.copyWith(
+                      height: 1,
+                      fontWeight: FontWeight.w700,
+                      color: BirdyBrand.ink,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: BirdySpace.xs),
+                Flexible(
+                  child: Text(
+                    l10n.forkQuizMystery,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: BirdyText.badge.copyWith(
+                      height: 1.2,
+                      color: BirdyColors.dark.text2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // The bubble overlays the well rather than adding to the column's
+          // height: the stage shrinks on small phones, and the disc always
+          // gets the room it needs.
+          Positioned(
+            top: 34,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: QuizSpeechBubble(
+                label:
+                    playing
+                        ? l10n.forkQuizStageBubblePlaying
+                        : l10n.forkQuizStageBubbleIdle,
               ),
             ),
           ),
@@ -123,9 +165,28 @@ class _ListeningCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 QuizFloat(
-                  child: QuizMysteryDisc(
-                    size: disc,
-                    silhouette: disc * 92 / 116,
+                  child: SizedBox(
+                    width: disc,
+                    height: disc,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      fit: StackFit.expand,
+                      children: [
+                        QuizRing(
+                          color: c.accent,
+                          running: playing,
+                        ),
+                        QuizRing(
+                          color: BirdyBrand.oriole,
+                          delay: QuizMotion.ringStep,
+                          running: playing,
+                        ),
+                        QuizMysteryDisc(
+                          size: disc,
+                          silhouette: disc * 92 / 116,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: height >= 200 ? 12 : 8),
@@ -373,6 +434,14 @@ class _RevealCard extends StatelessWidget {
                                       QuizMotion.sentenceDelay,
                                       QuizBalancedText(span, maxWidth: 250),
                                     ),
+                                    if (!right) ...[
+                                      const SizedBox(height: BirdySpace.s),
+                                      _EncouragePill(
+                                        label: l10n.forkQuizEncourage(
+                                          '${cheer % 3}',
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -396,6 +465,43 @@ class _RevealCard extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// « Réécoute-le, tu le retiendras »: the calm tonal pill under a wrong
+/// answer's sentence (Quiz v2 mockup, J6f-e).
+class _EncouragePill extends StatelessWidget {
+  const _EncouragePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+      decoration: BoxDecoration(
+        color: c.tonal,
+        borderRadius: BorderRadius.circular(BirdyRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(AppIcons.graphicEqRounded, size: 14, color: c.accentText),
+          const SizedBox(width: BirdySpace.xs),
+          Flexible(
+            child: Text(
+              label,
+              style: BirdyText.badge.copyWith(
+                height: 1.2,
+                color: c.accentText,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
