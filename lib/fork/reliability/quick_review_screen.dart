@@ -265,6 +265,9 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
                           ),
                         ),
                   ),
+                  // FORK: room between the header row and the progress bar
+                  // below it, they were touching on phone (J6f-b feedback).
+                  const SizedBox(height: BirdySpace.l),
                   Expanded(
                     child:
                         queue == null
