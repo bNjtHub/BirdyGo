@@ -72,8 +72,10 @@ void main() {
       sw.stop();
       final msPerSecond = sw.elapsedMicroseconds / 1000 / 10;
       // ignore: avoid_print
-      print('ContinuousNoiseReducer: ${msPerSecond.toStringAsFixed(2)} ms '
-          'per second of audio (host JIT)');
+      print(
+        'ContinuousNoiseReducer: ${msPerSecond.toStringAsFixed(2)} ms '
+        'per second of audio (host JIT)',
+      );
       // Generous bound: 5 % of real time even on a slow CI host.
       expect(msPerSecond, lessThan(50));
     });

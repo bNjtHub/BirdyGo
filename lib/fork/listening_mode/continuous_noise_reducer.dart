@@ -133,9 +133,10 @@ class ContinuousNoiseReducer {
         _noise[k] = floor + a * kCitySignalLeak * (power - floor);
       }
 
-      final smoothed = _smoothed[k] =
-          kCityPowerSmoothing * _smoothed[k] +
-          (1 - kCityPowerSmoothing) * power;
+      final smoothed =
+          _smoothed[k] =
+              kCityPowerSmoothing * _smoothed[k] +
+              (1 - kCityPowerSmoothing) * power;
       var g = 1.0;
       if (smoothed > 0) {
         final r = 1 - kCityOverSubtraction * _noise[k] / smoothed;
