@@ -1,7 +1,8 @@
 /// « Nouveau statut » (J6e, SPEC.md 9.7, fork/DESIGN.md): the emblem fades
 /// in (scale 0.97 → 1, 300 ms), the text follows 60 ms later, one light
-/// vibration. Plays once per status, in the Bilan or on the home screen,
-/// never while listening.
+/// vibration, and one confetti burst leaves the emblem once it is in
+/// (J6f, `BirdyConfetti`, none with reduced motion). Plays once per status,
+/// in the Bilan or on the home screen, never while listening.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../design/birdy_theme.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_confetti.dart';
 import 'game_config.dart';
 import 'game_progress.dart';
 import 'game_text.dart';
@@ -129,8 +131,21 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
                       ),
                       children: [
                         Center(
-                          child: MomentAppear(
-                            child: StatusEmblem(status: status, size: 136),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              MomentAppear(
+                                child: StatusEmblem(status: status, size: 136),
+                              ),
+                              BirdyConfetti.burst(
+                                colors: [
+                                  status.color,
+                                  ...BirdyConfettiColors.burst,
+                                ],
+                                delay: BirdyMotion.newStatus,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: BirdySpace.xl),
