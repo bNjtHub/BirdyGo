@@ -5400,7 +5400,7 @@
   "@forkNotebookNoPlace": {"description": "BirdyGo fork: bottom navigation and notebook (J6e)."},
   "forkNotebookFilterAll": "All",
   "@forkNotebookFilterAll": {"description": "BirdyGo fork: bottom navigation and notebook (J6e)."},
-  "forkNotebookFilterDiscovered": "Discovered",
+  "forkNotebookFilterDiscovered": "My discoveries",
   "@forkNotebookFilterDiscovered": {"description": "BirdyGo fork: bottom navigation and notebook (J6e)."},
   "forkNotebookFilterToDiscover": "To discover",
   "@forkNotebookFilterToDiscover": {"description": "BirdyGo fork: bottom navigation and notebook (J6e)."},

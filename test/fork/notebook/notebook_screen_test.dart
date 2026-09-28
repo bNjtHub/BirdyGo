@@ -6,6 +6,7 @@ import 'package:birdnet_live/features/inference/geo_abundance.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdygo_silhouette.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/notebook/notebook_loader.dart';
 import 'package:birdnet_live/fork/notebook/notebook_model.dart';
@@ -210,6 +211,9 @@ void main() {
     // First opening: species found before the notebook are not « new ».
     expect(find.text('Nouveau'), findsNothing);
     expect(prefs.getStringList(kNotebookSeenPref), hasLength(2));
+    // The mystery card (Troglodyte mignon) draws the BirdyGo bird
+    // silhouette, never a species-giving icon.
+    expect(find.byType(BirdyGoSilhouetteIcon), findsOneWidget);
   });
 
   testWidgets('« Nouveau » stays until the card is opened', (tester) async {
@@ -266,6 +270,22 @@ void main() {
     expect(find.text('Huppe fasciée'), findsOneWidget);
     expect(find.text('Pic épeiche'), findsNothing);
     expect(find.bySemanticsLabel(RegExp('Rare ici')), findsOneWidget);
+  });
+
+  testWidgets('the discovered filter is now labelled « Mes découvertes »', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.text('Découvertes'), findsNothing);
+    final chip = find.ancestor(
+      of: find.text('Mes découvertes'),
+      matching: find.byType(BirdyFilterChip),
+    );
+    expect(chip, findsOneWidget);
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.text('Rougegorge familier'), findsOneWidget);
+    expect(find.text('Huppe fasciée'), findsNothing);
   });
 
   testWidgets('the à découvrir and rares blocks pick their filter', (
