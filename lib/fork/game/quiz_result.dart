@@ -112,14 +112,18 @@ class QuizResult extends StatelessWidget {
             const SizedBox(width: BirdySpace.s),
             Expanded(
               child: Pressable(
-                child: FilledButton(
+                child: FilledButton.icon(
                   style: BirdyButtonStyles.primary(context).copyWith(
                     padding: const WidgetStatePropertyAll(
                       EdgeInsets.symmetric(horizontal: BirdySpace.s),
                     ),
                   ),
                   onPressed: onAgain,
-                  child: Text(l10n.forkQuizAgain, textAlign: TextAlign.center),
+                  icon: const Icon(AppIcons.restartAlt, size: 22),
+                  label: Text(
+                    l10n.forkQuizAgain,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),

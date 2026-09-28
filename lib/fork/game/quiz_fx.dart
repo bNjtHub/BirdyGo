@@ -7,6 +7,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ abstract final class QuizMotion {
   static const Duration barIntro = Duration(milliseconds: 1400);
   static const Duration barIntroStep = Duration(milliseconds: 120);
   static const Duration pulse = Duration(milliseconds: 1600);
-  static const Duration spin = Duration(seconds: 14);
+  static const Duration spin = Duration(seconds: 24);
   static const Duration trail = Duration(milliseconds: 450);
   static const Duration stoneRight = Duration(milliseconds: 450);
   static const Duration stoneWrong = Duration(milliseconds: 300);
@@ -695,7 +696,8 @@ class QuizPulse extends StatelessWidget {
 }
 
 /// Slowly turning rays behind a found bird (repeating conic gradient:
-/// [color] 12°, clear 18°), one turn in 14 s.
+/// [color] 10°, clear 20°, radially faded out from 20 % to 62 % of the
+/// radius), one turn in 24 s.
 class QuizRays extends StatelessWidget {
   const QuizRays({super.key, required this.color, this.size = 520});
 
@@ -720,17 +722,31 @@ class _RaysPainter extends CustomPainter {
   final Color color;
 
   static const double _period = 30 * math.pi / 180;
-  static const double _ray = 12 * math.pi / 180;
+  static const double _ray = 10 * math.pi / 180;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final rect = Rect.fromCircle(center: center, radius: size.shortestSide / 2);
+    final radius = size.shortestSide / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.saveLayer(rect, Paint());
     final paint = Paint()..color = color;
     // CSS conic gradients start at 12 o'clock.
     for (var a = 0.0; a < 2 * math.pi - 1e-6; a += _period) {
       canvas.drawArc(rect, a - math.pi / 2, _ray, true, paint);
     }
+    // The mockup's radial mask: opaque to 20 % of the radius, clear by
+    // 62 %.
+    final mask =
+        Paint()
+          ..shader = ui.Gradient.radial(center, radius, const [
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0x00FFFFFF),
+          ], const [0, 0.2, 0.62])
+          ..blendMode = BlendMode.dstIn;
+    canvas.drawRect(rect, mask);
+    canvas.restore();
   }
 
   @override
