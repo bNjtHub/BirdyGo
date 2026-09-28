@@ -142,21 +142,14 @@ void main() {
     expect(find.textContaining('lieu'), findsOneWidget);
   });
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     final gate = Completer<ObservationIndex>();
     await pump(tester, gate, reducedMotion: true);
     await tester.pump();
-    final before = tester.getRect(
-      find.byKey(const ValueKey('map-header')),
-    );
+    final before = tester.getRect(find.byKey(const ValueKey('map-header')));
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
-      expect(
-        tester.getRect(find.byKey(const ValueKey('map-header'))),
-        before,
-      );
+      expect(tester.getRect(find.byKey(const ValueKey('map-header'))), before);
     }
     await resolveWith(tester, gate);
     await tester.pump();

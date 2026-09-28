@@ -27,27 +27,38 @@ class MapLoadingSkeleton extends StatelessWidget {
       label: l10n.forkMapLoading,
       child: ColoredBox(
         color: c.backgroundDeep,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              BirdySpace.page,
-              BirdySpace.page,
-              BirdySpace.page,
-              BirdySpace.xxxl,
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surface1,
-                borderRadius: BorderRadius.circular(BirdyRadii.hero),
-                boxShadow: c.floatShadow,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            // Fixed chrome: page and bottom padding, block padding, heading,
+            // caption and gaps; each row then takes 60 dp plus its gap.
+            const chrome = 190.0;
+            final rows = ((box.maxHeight - chrome) /
+                    (BirdySizes.rowCompact + 8))
+                .floor()
+                .clamp(1, kMapSkeletonRows);
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  BirdySpace.page,
+                  BirdySpace.page,
+                  BirdySpace.page,
+                  BirdySpace.xxxl,
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.surface1,
+                    borderRadius: BorderRadius.circular(BirdyRadii.hero),
+                    boxShadow: c.floatShadow,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(BirdySpace.l),
+                    child: MapSheetSkeleton(rows: rows),
+                  ),
+                ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(BirdySpace.l),
-                child: MapSheetSkeleton(),
-              ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

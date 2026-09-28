@@ -43,6 +43,10 @@ import 'place_bird_layer.dart';
 const LatLng _defaultCenter = LatLng(46.6, 2.4);
 const double _defaultZoom = 5;
 
+/// Space under the locate button, and the room it takes above that.
+const double _locateBottom = 40;
+const double _locateSlot = BirdySizes.target + _locateBottom;
+
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
   const ContactMapScreen({
@@ -545,41 +549,56 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                                     onAction: () => _requestTileConsent(l10n),
                                   ),
                         ),
-                        const Spacer(),
-                        if (data != null && data.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  BirdyRadii.card,
-                                ),
-                                boxShadow: c.floatShadow,
-                              ),
-                              child:
-                                  _indexEmpty
-                                      ? BirdyEmptyState.inline(
-                                        icon: AppIcons.hearing,
-                                        title: l10n.forkMapEmptyTitle,
-                                        body: l10n.forkMapEmpty,
-                                      )
-                                      : BirdyEmptyState.inline(
-                                        kind: BirdyEmptyKind.filtered,
-                                        icon: AppIcons.searchOff,
-                                        title: l10n.forkMapEmptyFilteredTitle,
-                                        body: l10n.forkMapEmptyFiltered,
+                        // Never taller than what is left: the locate button and
+                        // the empty state float in this space, so a 320 dp
+                        // phone at 130 % cannot overflow the column.
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              if (data != null && data.isEmpty)
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      BirdySpace.l,
+                                      BirdySpace.l,
+                                      BirdySpace.l,
+                                      _locateSlot + BirdySpace.l,
+                                    ),
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                          BirdyRadii.card,
+                                        ),
+                                        boxShadow: c.floatShadow,
                                       ),
-                            ),
-                          ),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
-                            child: _MapButton(
-                              icon: AppIcons.myLocation,
-                              tooltip: l10n.forkMapLocateMe,
-                              onPressed: () => _locate(l10n),
-                            ),
+                                      child:
+                                          _indexEmpty
+                                              ? BirdyEmptyState.inline(
+                                                icon: AppIcons.hearing,
+                                                title: l10n.forkMapEmptyTitle,
+                                                body: l10n.forkMapEmpty,
+                                              )
+                                              : BirdyEmptyState.inline(
+                                                kind: BirdyEmptyKind.filtered,
+                                                icon: AppIcons.searchOff,
+                                                title:
+                                                    l10n.forkMapEmptyFilteredTitle,
+                                                body: l10n.forkMapEmptyFiltered,
+                                              ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                right: BirdySpace.l,
+                                bottom: _locateBottom,
+                                child: _MapButton(
+                                  icon: AppIcons.myLocation,
+                                  tooltip: l10n.forkMapLocateMe,
+                                  onPressed: () => _locate(l10n),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -707,18 +726,48 @@ class _Notice extends StatelessWidget {
         boxShadow: c.floatShadow,
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                text,
-                style: BirdyText.bodyCompact.copyWith(color: c.text1),
-              ),
-            ),
-            if (action != null)
-              TextButton(onPressed: onAction, child: Text(action!)),
-          ],
+        padding: const EdgeInsets.all(BirdySpace.m),
+        // The action sits beside the text, or under it when the column is
+        // narrow or the text large (a 320 dp phone at 130 %).
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final stacked =
+                box.maxWidth < 360 ||
+                MediaQuery.textScalerOf(context).scale(15) > 17;
+            final message = Text(
+              text,
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
+            );
+            final button =
+                action == null
+                    ? null
+                    : TextButton(
+                      style: BirdyButtonStyles.tonal(context),
+                      onPressed: onAction,
+                      child: Text(action!),
+                    );
+            if (stacked) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  message,
+                  if (button != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    button,
+                  ],
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: message),
+                if (button != null) ...[
+                  const SizedBox(width: BirdySpace.s),
+                  button,
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
