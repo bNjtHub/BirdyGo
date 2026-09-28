@@ -1147,7 +1147,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                   // FORK: place line and listening mode pill (J6f)
                   place:
                       _forkPractice ? null : ref.watch(livePlaceProvider).value,
-                  modeChip: ListeningModePill(label: l10n.forkLiveModeNormal),
+                  modeChip: const LiveListeningModePill(),
                   practice: _forkPractice, // FORK: J5c
                   // FORK: first encounter and rare bird moments (J6e)
                   moment:

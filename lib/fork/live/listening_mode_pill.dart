@@ -1,16 +1,18 @@
 /// Listening mode pill of the live header (J6f): the current listening
-/// conditions (« Normal » until the listening modes land). A tap will open
-/// the modes sheet; without [ListeningModePill.onPressed] it only shows the
-/// mode.
+/// conditions; a tap opens the modes sheet ([LiveListeningModePill]).
+/// Without [ListeningModePill.onPressed] it only shows the mode.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
+import '../listening_mode/listening_mode.dart';
+import '../listening_mode/listening_mode_sheet.dart';
 
 class ListeningModePill extends StatelessWidget {
   const ListeningModePill({
@@ -84,6 +86,24 @@ class ListeningModePill extends StatelessWidget {
       onTap: onPressed,
       excludeSemantics: true,
       child: Pressable(enabled: onPressed != null, child: pill),
+    );
+  }
+}
+
+/// The pill wired to the stored listening mode: its name (« Personnalisé »
+/// once the Settings sliders were moved by hand) and icon; a tap opens the
+/// sheet, the change applies without stopping the listening.
+class LiveListeningModePill extends ConsumerWidget {
+  const LiveListeningModePill({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final mode = ref.watch(activeListeningModeProvider);
+    return ListeningModePill(
+      label: listeningModeLabel(l10n, mode),
+      icon: listeningModeIcon(mode),
+      onPressed: () => showListeningModeSheet(context, ref),
     );
   }
 }

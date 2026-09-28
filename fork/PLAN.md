@@ -839,3 +839,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Quiz « Qui chante ? » (J6e) : aucun code natif. Bruitages en WAV lus par just_audio avec un
   lecteur à part : sur iPhone, vérifier qu'ils ne coupent pas une musique en cours (session audio
   « ambient » ou mixage) et que le mode silencieux est respecté.
+- Modes d'écoute (J6f) : Dart pur, aucun code natif. Gain, filtre passe-haut et réducteur du mode
+  Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
+  terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même
+  bruit de fond), dont le coût du mode Ville en `--profile`.

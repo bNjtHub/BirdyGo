@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart'
 import 'package:record/record.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../fork/listening_mode/continuous_noise_reducer.dart'; // FORK: J6f
 import 'audio_source.dart';
 import 'ring_buffer.dart';
 
@@ -710,6 +711,7 @@ class AudioCaptureService with WidgetsBindingObserver {
     // Convert signed 16-bit PCM (little-endian) → mono float32 [-1.0, 1.0].
     final samples = pcm16ToFloat32(bytes, channels: _captureChannels);
     _applyDsp(samples);
+    ForkNoiseReductionHook.process(samples); // FORK: city listening mode (J6f)
     _ringBuffer.write(samples);
     _dataController.add(samples.length);
 
