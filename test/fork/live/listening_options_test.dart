@@ -23,6 +23,15 @@ void main() {
 
   tearDown(() => ForkNoiseReductionHook.setEnabled(false));
 
+  // Not pumpAndSettle: a `LiveListeningLayout` at `LiveControlPhase.active`
+  // carries the live logo's level meter, which loops while listening (J6f,
+  // the one animation exception), so a real settle never completes.
+  Future<void> pumpSettled(WidgetTester tester) async {
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   Future<ProviderContainer> pump(WidgetTester tester, Widget body) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
@@ -43,7 +52,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpSettled(tester);
     return container;
   }
 
@@ -99,12 +108,17 @@ void main() {
             ),
       ),
     );
-    expect(find.text('En écoute'), findsOneWidget);
+    // Matched by semantics label: the status text embeds the mode's icon
+    // as a `WidgetSpan` (J6f), so its rendered text is not plain "En écoute".
+    Text statusText() => tester
+        .widgetList<Text>(find.byType(Text))
+        .firstWhere((t) => t.textSpan != null);
+    expect(statusText().semanticsLabel, 'En écoute · Normal');
 
     await tester.tap(find.byTooltip("Options d'écoute, mode Normal"));
-    await tester.pumpAndSettle();
+    await pumpSettled(tester);
     await tester.tap(find.byKey(const ValueKey('listening-mode-wind')));
-    await tester.pumpAndSettle();
+    await pumpSettled(tester);
 
     expect(container.read(listeningModeProvider), ListeningMode.wind);
     expect(
@@ -113,7 +127,7 @@ void main() {
     );
     expect(find.byType(ListeningOptionsSheet), findsNothing);
     expect(find.text('Mode Vent activé'), findsOneWidget);
-    expect(find.text('En écoute · Vent'), findsOneWidget);
+    expect(statusText().semanticsLabel, 'En écoute · Vent');
     expect(find.byTooltip("Options d'écoute, mode Vent"), findsOneWidget);
     expect(
       find.descendant(

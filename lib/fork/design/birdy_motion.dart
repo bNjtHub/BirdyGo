@@ -78,6 +78,12 @@ abstract final class BirdyMotion {
   static final SpringDescription sheetSpring =
       SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85);
 
+  /// Period of the live logo's wing-bar level meter while listening (J6f,
+  /// `BirdyGoLogoPainter`): the one loop allowed in the fork, replacing the
+  /// live dot's pulse. Calm, no bounce (curve [standard] on each half);
+  /// reduced motion stops it (fork/DESIGN.md, Animations).
+  static const Duration listeningLevelPeriod = Duration(milliseconds: 1300);
+
   /// Whether the platform asks for reduced motion.
   static bool reduced(BuildContext context) =>
       MediaQuery.maybeDisableAnimationsOf(context) ?? false;

@@ -126,11 +126,16 @@ class BirdyIconButton extends StatelessWidget {
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
+    this.iconColor,
   });
 
   final IconData icon;
   final String semanticLabel;
   final VoidCallback? onPressed;
+
+  /// Overrides the icon's own color, e.g. the live options button taking
+  /// the active listening mode's color (J6f). Defaults to [BirdyColors.text1].
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +149,7 @@ class BirdyIconButton extends StatelessWidget {
         style: IconButton.styleFrom(
           fixedSize: const Size.square(BirdySizes.target),
           backgroundColor: c.isDark ? c.line : c.surface1,
-          foregroundColor: c.text1,
+          foregroundColor: iconColor ?? c.text1,
           side: c.isDark ? BorderSide(color: c.border) : BorderSide.none,
         ),
       ),

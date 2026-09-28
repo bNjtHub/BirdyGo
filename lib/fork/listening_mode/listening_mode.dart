@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_tokens.dart';
 import 'continuous_noise_reducer.dart';
 import 'listening_mode_config.dart';
 
@@ -157,4 +158,18 @@ IconData listeningModeIcon(ListeningMode? mode) => switch (mode) {
   ListeningMode.boost => AppIcons.listeningBoost,
   ListeningMode.city => AppIcons.listeningCity,
   null => AppIcons.tuneRounded,
+};
+
+/// Color of [mode]'s icon and word in [c]'s theme (J6f); always visible,
+/// including Normal. Null (custom) gives the neutral [BirdyColors.text2].
+Color listeningModeColor(BirdyColors c, ListeningMode? mode) => switch (mode) {
+  ListeningMode.normal =>
+    c.isDark ? ListeningModeColors.normalDark : ListeningModeColors.normalLight,
+  ListeningMode.wind =>
+    c.isDark ? ListeningModeColors.windDark : ListeningModeColors.windLight,
+  ListeningMode.boost =>
+    c.isDark ? ListeningModeColors.boostDark : ListeningModeColors.boostLight,
+  ListeningMode.city =>
+    c.isDark ? ListeningModeColors.cityDark : ListeningModeColors.cityLight,
+  null => c.text2,
 };

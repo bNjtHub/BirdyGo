@@ -689,14 +689,20 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
     return [row(), const SizedBox(height: BirdySpace.m), row(floating: true)];
   }
 
-  /// The live header's « Options d'écoute » button for Normal, Vent and
-  /// Personnalisé; a tap opens the options sheet via the [ProviderScope] the
-  /// gallery already runs in (see `main.dart`). Help and settings do nothing
-  /// here.
+  /// The live header's « Options d'écoute » button, one per mode plus
+  /// Personnalisé, each already in its own color (J6f); a tap opens the
+  /// options sheet via the [ProviderScope] the gallery already runs in
+  /// (see `main.dart`). Help and settings do nothing here.
   Widget _listeningMode(AppLocalizations l10n) => Wrap(
     spacing: BirdySpace.s,
     children: [
-      for (final mode in const [ListeningMode.normal, ListeningMode.wind, null])
+      for (final mode in const [
+        ListeningMode.normal,
+        ListeningMode.wind,
+        ListeningMode.boost,
+        ListeningMode.city,
+        null,
+      ])
         Builder(
           builder:
               (context) => ListeningOptionsButton(
