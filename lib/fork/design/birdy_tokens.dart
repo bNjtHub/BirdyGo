@@ -145,6 +145,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.sure,
     required this.probable,
     required this.toCheck,
+    required this.skeleton,
   });
 
   final Brightness brightness;
@@ -215,6 +216,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
+  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
+  /// loops, so no shimmer or pulse).
+  final Color skeleton;
+
   final LevelColors sure;
   final LevelColors probable;
   final LevelColors toCheck;
@@ -270,6 +275,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0xFFFBEFC8),
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFFD6DCD2),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -310,6 +316,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0x29F4C542),
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFF29425F),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -366,6 +373,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       orioleContainer: c(orioleContainer, other.orioleContainer),
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
+      skeleton: c(skeleton, other.skeleton),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),

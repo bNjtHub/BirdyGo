@@ -1626,6 +1626,7 @@
   "forkHomeToCheckLabel": "à vérifier",
   "forkHomeReviewTime": "{count, plural, =1{1 min de revue} other{{count} min de revue}}",
   "forkHomeTodayTitle": "Aujourd'hui",
+  "forkHomeLoading": "Chargement de l'accueil",
   "forkHomeSpeciesStat": "{count, plural, =0{espèce} =1{espèce} other{espèces}}",
   "forkDailyGoalLeft": "{count, plural, =0{Objectif atteint} =1{Encore 1 espèce} other{Encore {count} espèces}}",
   "forkDailyGoalInvite": "Huit oiseaux à trouver près d'ici aujourd'hui.",
