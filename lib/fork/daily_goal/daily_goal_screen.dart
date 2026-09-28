@@ -233,7 +233,10 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
                           onPressed:
                               () => Navigator.of(context).push<void>(
                                 MaterialPageRoute(
-                                  builder: (_) => const LiveScreen(),
+                                  builder:
+                                      (_) => const LiveScreen(
+                                        forceAutoStart: true,
+                                      ),
                                 ),
                               ),
                         ),
