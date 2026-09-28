@@ -305,7 +305,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
 - La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
   statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
-  au-dessus de la barre du bas, hors de la zone qui défile.
+  au-dessus de la barre du bas, hors de la zone qui défile. Sa marge basse (J6f) tient toute la
+  lueur (`ctaGlow`, rayon de flou 28) : moins, et la barre de navigation en coupe le bas.
 - Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
   sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,

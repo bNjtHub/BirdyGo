@@ -12,6 +12,7 @@ import 'package:birdnet_live/fork/daily_goal/daily_goal_providers.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_buttons.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/fork/design/widgets/birdygo_wordmark.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
@@ -494,6 +495,33 @@ void main() {
     // The only strong action of the screen.
     expect(find.byType(FilledButton), findsOneWidget);
   });
+
+  testWidgets(
+    'the « Écouter » glow has room: not clipped by the bottom bar (J6f)',
+    (tester) async {
+      await pump(tester, withGoal: true);
+      final button = find.byType(ListenButton);
+      // The Padding directly wrapping the button (nearest ancestor).
+      final padding = tester
+          .widgetList<Padding>(
+            find.ancestor(of: button, matching: find.byType(Padding)),
+          )
+          .first;
+      // Bottom room at least the glow's blur radius (birdy_tokens.dart's
+      // ctaGlow), or the bottom navigation bar covers part of it.
+      final blurRadius = BirdyColors.light.ctaGlow
+          .map((s) => s.blurRadius)
+          .reduce((a, b) => a > b ? a : b);
+      final bottom = (padding.padding as EdgeInsets).bottom;
+      expect(bottom, greaterThanOrEqualTo(blurRadius));
+      // No hard clip between the button and the screen: the glow can
+      // paint past the button's own box.
+      expect(
+        find.ancestor(of: button, matching: find.byType(ClipRect)),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('blocks rise once, five at most, 40 ms apart', (tester) async {
     await pump(tester, withGoal: true, settle: false);
