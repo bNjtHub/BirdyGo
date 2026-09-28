@@ -766,7 +766,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             score, scène d'écoute (bulle, anneaux, spectre 27 barres), encouragement sur une erreur,
             récap « N trouvés », carte médaille au ton du métal, « +N cette partie ». Les photos restent ;
             l'oiseau mystère prend la silhouette BirdyGo.
-      - [ ] (Benjamin) Téléphone : 60 images par seconde sur l'accueil du quiz (décor animé) et le Profil.
+      - [x] (Benjamin) Téléphone : 60 images par seconde sur l'accueil du quiz (décor animé) et le Profil.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
