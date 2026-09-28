@@ -1008,6 +1008,11 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
         shareAudioAsWav: shareAudioAsWav,
         taxonomy: taxonomy,
         speciesLocale: speciesLocale,
+        metadataProvider:
+            (session) => buildSessionExportMetadata(
+              session,
+              speciesLocale: speciesLocale,
+            ),
         useAbsoluteSurveyTime: useAbsoluteSurveyTime,
         includeHtmlReport: includeHtmlReport,
         includeAppMetadata: includeAppMetadata,

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Export metadata now includes separate readable `device` and `os` fields without a device ID.
+
 ### Fixed
 
 - Raven selection tables now use cumulative clip-sequence times, omit detections without exported clips, always report Survey Time in UTC, and keep Raven’s default columns first. Document-only Raven clip exports reference the original audio filenames (#229).
