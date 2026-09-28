@@ -268,8 +268,11 @@ void main() {
       await pump(tester);
       expect(find.text('Surtout vers 7 h'), findsOneWidget);
 
-      await tester.ensureVisible(find.byType(ActivityBars));
-      final rect = tester.getRect(find.byType(ActivityBars));
+      // The seasons chart (« Ici en ce moment ») also uses `ActivityBars`
+      // now (J6f-b fix): the hour chart is the last one on the page.
+      final hourChart = find.byType(ActivityBars).last;
+      await tester.ensureVisible(hourChart);
+      final rect = tester.getRect(hourChart);
       final slot = rect.width / 24;
       // Hour 4 has a single contact: distinct from the busy hour 7.
       await tester.tapAt(Offset(rect.left + slot * 4.5, rect.top + 5));
@@ -277,6 +280,54 @@ void main() {
 
       expect(find.text('Surtout vers 7 h'), findsNothing);
       expect(find.text('4 h — 1 contact'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'the seasons chart: peak caption, tap detail, current month marked '
+    '(J6f-b fix)',
+    (tester) async {
+      // May (index 4) at its top, March (index 2) at half of it: a clear
+      // peak and a distinct value to tap.
+      final weeks = [
+        for (var w = 0; w < 48; w++)
+          switch (w ~/ 4) {
+            4 => 1.0,
+            2 => 0.5,
+            _ => 0.0,
+          },
+      ];
+      loader = _FakeLoader(
+        recordValue: _heard(),
+        year: YearPresence.fromWeeks(weeks),
+      );
+      await pump(tester);
+
+      expect(find.text('Surtout en mai'), findsOneWidget);
+      final seasons = find.byType(ActivityBars).first;
+      final chart = tester.widget<ActivityBars>(seasons);
+      // All 12 initials at 100 % text, the current month marked.
+      expect(chart.labels.length, 12);
+      expect(chart.highlightIndex, DateTime.now().month - 1);
+
+      final rect = tester.getRect(seasons);
+      final slot = rect.width / 12;
+      await tester.tapAt(Offset(rect.left + slot * 2.5, rect.top + 5));
+      await tester.pump();
+
+      expect(find.text('Surtout en mai'), findsNothing);
+      expect(find.text('Mars — 50 % du pic'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'the seasons chart: quarterly labels at 130 % text (J6f-b fix)',
+    (tester) async {
+      await pump(tester, textScale: 1.3);
+      final chart = tester.widget<ActivityBars>(
+        find.byType(ActivityBars).first,
+      );
+      expect(chart.labels.length, 4);
     },
   );
 

@@ -5,6 +5,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
@@ -217,22 +218,23 @@ class HeardBlock extends StatelessWidget {
   }
 }
 
-/// « Ici en ce moment »: the geo-model's sentence and twelve month bars.
-class HereNowCard extends StatelessWidget {
+/// « Ici en ce moment »: the geo-model's sentence and the seasons chart
+/// (twelve month bars, J6f-b fix: colored on the same sequential
+/// Martin-pêcheur scale as the activity-by-hour chart, the current month
+/// marked, and a peak/detail caption).
+class HereNowCard extends StatefulWidget {
   const HereNowCard({
     super.key,
     required this.year,
     required this.sentence,
-    required this.monthsCaption,
     required this.currentMonth,
     this.rareNote,
   });
 
   final YearPresence year;
   final String sentence;
-  final String monthsCaption;
 
-  /// 1 to 12, highlighted.
+  /// 1 to 12, marked on the chart.
   final int currentMonth;
 
   /// Why a detection is « Rare ici · à confirmer », shown when the species
@@ -240,10 +242,31 @@ class HereNowCard extends StatelessWidget {
   final String? rareNote;
 
   @override
+  State<HereNowCard> createState() => _HereNowCardState();
+}
+
+class _HereNowCardState extends State<HereNowCard> {
+  int? _selectedMonth;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final bars = year.bars;
+    final language = Localizations.localeOf(context).languageCode;
+    final months = widget.year.months;
+    final percents = [for (final b in widget.year.bars) (b * 100).round()];
+    final scale = ActivityScale.kingfisher(c.surface1);
+    final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
+    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    final labels = {
+      for (final m in crowded ? const [0, 3, 6, 9] : List.generate(12, (i) => i))
+        m: initials[m],
+    };
+    final selected = _selectedMonth;
+    final caption =
+        selected == null
+            ? peakMonthCaption(l10n, language, months)
+            : monthDetailCaption(l10n, language, selected + 1, percents[selected]);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface1,
@@ -266,10 +289,10 @@ class HereNowCard extends StatelessWidget {
                   ),
                   const SizedBox(height: BirdySpace.xs),
                   Text(
-                    sentence,
+                    widget.sentence,
                     style: BirdyText.bodyCompact.copyWith(color: c.text1),
                   ),
-                  if (rareNote != null) ...[
+                  if (widget.rareNote != null) ...[
                     const SizedBox(height: BirdySpace.s),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +309,7 @@ class HereNowCard extends StatelessWidget {
                         const SizedBox(width: BirdySpace.xs),
                         Expanded(
                           child: Text(
-                            rareNote!,
+                            widget.rareNote!,
                             style: BirdyText.bodyCompact.copyWith(
                               color: c.orioleText,
                             ),
@@ -299,39 +322,34 @@ class HereNowCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: BirdySpace.m),
-            Semantics(
-              label: l10n.forkFichePresenceChart,
-              excludeSemantics: true,
+            SizedBox(
+              width: 150,
               child: Column(
                 children: [
-                  SizedBox(
+                  ActivityBars(
+                    values: percents,
                     height: 36,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        for (var m = 0; m < 12; m++) ...[
-                          if (m > 0) const SizedBox(width: 3),
-                          Container(
-                            key: ValueKey('month-bar-$m'),
-                            width: 6,
-                            height: (36 * bars[m]).clamp(3, 36).toDouble(),
-                            decoration: BoxDecoration(
-                              color:
-                                  m + 1 == currentMonth
-                                      ? BirdyBrand.kingfisher
-                                      : c.line,
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                        ],
-                      ],
+                    colorForValue: scale.of,
+                    trackColor: c.line,
+                    labels: labels,
+                    highlightIndex: widget.currentMonth - 1,
+                    highlightColor: c.text1,
+                    semanticLabel: seasonsChartSemanticLabel(
+                      l10n,
+                      language,
+                      months,
                     ),
+                    onSelect:
+                        (index, _) => setState(() => _selectedMonth = index),
                   ),
-                  const SizedBox(height: BirdySpace.xs),
-                  Text(
-                    monthsCaption,
-                    style: BirdyText.caption.copyWith(color: c.text2),
-                  ),
+                  if (caption != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      caption,
+                      textAlign: TextAlign.center,
+                      style: BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -924,29 +942,35 @@ class LinksBlock extends StatelessWidget {
           style: BirdyText.label.copyWith(color: c.text1),
         ),
         const SizedBox(height: BirdySpace.s),
-        Wrap(
-          spacing: BirdySpace.s,
-          runSpacing: BirdySpace.s,
-          children: [
-            for (final link in links)
-              ActionChip(
-                avatar: Image.asset(
-                  link.iconAsset,
-                  width: 18,
-                  height: 18,
-                  errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          // Cut at the edge on purpose (J6f-b fix): it tells the row
+          // scrolls, same treatment as the sheet chips above.
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (final link in links) ...[
+                if (link != links.first) const SizedBox(width: BirdySpace.s),
+                ActionChip(
+                  avatar: Image.asset(
+                    link.iconAsset,
+                    width: 18,
+                    height: 18,
+                    errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+                  ),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(link.label, maxLines: 1),
+                      const SizedBox(width: BirdySpace.xs),
+                      Icon(AppIcons.openInNew, size: 14, color: c.text2),
+                    ],
+                  ),
+                  onPressed: () => onOpen(link.url),
                 ),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(link.label),
-                    const SizedBox(width: BirdySpace.xs),
-                    Icon(AppIcons.openInNew, size: 14, color: c.text2),
-                  ],
-                ),
-                onPressed: () => onOpen(link.url),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ],
     );

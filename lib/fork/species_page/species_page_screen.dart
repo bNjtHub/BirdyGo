@@ -150,6 +150,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
         (_record?.clips ?? const []).any((c) => c.clipPath == playing)) {
       unawaited(_player.stop());
     }
+    _pageScroll.dispose();
     super.dispose();
   }
 

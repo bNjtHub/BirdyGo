@@ -1,6 +1,7 @@
 /// Small bar charts of activity by hour or by month (J4), drawn with a
 /// CustomPainter: no chart dependency. Also supports a per-bar sequential
-/// color scale and a tap/long-press selection (J6f-b fix).
+/// color scale, a tap/long-press selection and one highlighted bar (J6f-b
+/// fix).
 library;
 
 import 'dart:math' as math;
@@ -19,6 +20,8 @@ class ActivityBars extends StatelessWidget {
     this.colorForValue,
     this.trackColor,
     this.onSelect,
+    this.highlightIndex,
+    this.highlightColor,
   });
 
   final List<int> values;
@@ -43,6 +46,13 @@ class ActivityBars extends StatelessWidget {
 
   /// Called with a bar's index and value on tap or long press (J6f-b fix).
   final void Function(int index, int value)? onSelect;
+
+  /// Bar marked as the current one (e.g. today's month), with a small dot
+  /// at its base, independent of its color (J6f-b fix).
+  final int? highlightIndex;
+
+  /// Color of the [highlightIndex] dot; the theme's primary by default.
+  final Color? highlightColor;
 
   void _select(Offset local, double width) {
     final onSelect = this.onSelect;
@@ -74,6 +84,8 @@ class ActivityBars extends StatelessWidget {
                     emptyColor:
                         trackColor ?? theme.colorScheme.surfaceContainerHighest,
                     colorForValue: colorForValue,
+                    highlightIndex: highlightIndex,
+                    highlightColor: highlightColor ?? theme.colorScheme.primary,
                   ),
                 );
                 if (onSelect == null) return chart;
@@ -135,12 +147,16 @@ class _BarsPainter extends CustomPainter {
     required this.color,
     required this.emptyColor,
     this.colorForValue,
+    this.highlightIndex,
+    required this.highlightColor,
   });
 
   final List<int> values;
   final Color color;
   final Color emptyColor;
   final Color Function(int value, int maxValue)? colorForValue;
+  final int? highlightIndex;
+  final Color highlightColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -166,6 +182,14 @@ class _BarsPainter extends CustomPainter {
         RRect.fromRectAndCorners(rect, topLeft: radius, topRight: radius),
         Paint()..color = barColor,
       );
+      if (i == highlightIndex) {
+        final dotRadius = math.min(barWidth / 2, 3.0);
+        canvas.drawCircle(
+          Offset(i * slot + slot / 2, size.height - dotRadius),
+          dotRadius,
+          Paint()..color = highlightColor,
+        );
+      }
     }
   }
 
@@ -174,6 +198,8 @@ class _BarsPainter extends CustomPainter {
       old.color != color ||
       old.emptyColor != emptyColor ||
       old.colorForValue != colorForValue ||
+      old.highlightIndex != highlightIndex ||
+      old.highlightColor != highlightColor ||
       !_sameValues(old.values, values);
 
   static bool _sameValues(List<int> a, List<int> b) {
