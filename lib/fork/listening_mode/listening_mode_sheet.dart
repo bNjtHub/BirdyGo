@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_sheet.dart';
 import 'listening_mode.dart';
 import 'listening_mode_config.dart';
 
@@ -15,10 +16,8 @@ import 'listening_mode_config.dart';
 /// going), closes the sheet and confirms with a snackbar.
 Future<void> showListeningModeSheet(BuildContext context, WidgetRef ref) {
   final messenger = ScaffoldMessenger.maybeOf(context);
-  return showModalBottomSheet<void>(
+  return showBirdySheet<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
     isScrollControlled: true,
     builder:
         (sheetContext) => ListeningModeSheet(
@@ -82,18 +81,16 @@ class ListeningModeSheet extends StatelessWidget {
   final bool cityEnabled;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        BirdySpace.gutter,
-        0,
-        BirdySpace.gutter,
-        BirdySpace.xxl,
-      ),
-      child: ListeningModeSection(
-        onSelected: onSelected,
-        cityEnabled: cityEnabled,
-      ),
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.fromLTRB(
+      BirdySpace.gutter,
+      0,
+      BirdySpace.gutter,
+      BirdySpace.xxl,
+    ),
+    child: ListeningModeSection(
+      onSelected: onSelected,
+      cityEnabled: cityEnabled,
     ),
   );
 }

@@ -46,6 +46,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_loader.dart';
@@ -164,11 +165,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
 
   void _showMenu() {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
+    showBirdySheet<void>(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
+      // HomeMenuSheet's ListView adds the bottom inset itself, as trailing
+      // scroll padding: it can grow to the full sheet height (many menu
+      // entries), and wrapping it in outer padding here would shrink that
+      // scrolling viewport instead of just clearing the nav bar.
+      addBottomInset: false,
       builder:
           (_) => HomeMenuSheet(
             groups: [

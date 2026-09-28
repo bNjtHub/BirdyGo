@@ -11,6 +11,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../listening_mode/listening_mode.dart';
 import '../listening_mode/listening_mode_config.dart';
 import '../listening_mode/listening_mode_sheet.dart';
@@ -65,10 +66,8 @@ Future<void> showListeningOptionsSheet(
   required VoidCallback onSettings,
 }) {
   final messenger = ScaffoldMessenger.maybeOf(context);
-  return showModalBottomSheet<void>(
+  return showBirdySheet<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
     isScrollControlled: true,
     builder:
         (_) => ListeningOptionsSheet(
@@ -106,52 +105,50 @@ class ListeningOptionsSheet extends ConsumerWidget {
       action();
     }
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          BirdySpace.gutter,
-          0,
-          BirdySpace.gutter,
-          BirdySpace.xxl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ListeningModeSection(
-              cityEnabled: cityEnabled,
-              onSelected:
-                  (mode) => applyListeningModeChoice(
-                    context,
-                    ref,
-                    mode,
-                    messenger: messenger ?? ScaffoldMessenger.maybeOf(context),
-                  ),
-            ),
-            const SizedBox(height: BirdySpace.s),
-            Divider(color: c.line, height: 1),
-            const SizedBox(height: BirdySpace.s),
-            _OptionRow(
-              key: const ValueKey('listening-options-levels'),
-              icon: AppIcons.infoOutline,
-              label: l10n.forkLiveOptionsLevels,
-              opensMore: true,
-              onTap: () => showLevelsSheet(context),
-            ),
-            _OptionRow(
-              key: const ValueKey('listening-options-help'),
-              icon: AppIcons.helpOutlineRounded,
-              label: l10n.liveScreenHelpTitle,
-              onTap: () => thenClose(onHelp),
-            ),
-            _OptionRow(
-              key: const ValueKey('listening-options-settings'),
-              icon: AppIcons.tuneRounded,
-              label: l10n.settings,
-              onTap: () => thenClose(onSettings),
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.gutter,
+        0,
+        BirdySpace.gutter,
+        BirdySpace.xxl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListeningModeSection(
+            cityEnabled: cityEnabled,
+            onSelected:
+                (mode) => applyListeningModeChoice(
+                  context,
+                  ref,
+                  mode,
+                  messenger: messenger ?? ScaffoldMessenger.maybeOf(context),
+                ),
+          ),
+          const SizedBox(height: BirdySpace.s),
+          Divider(color: c.line, height: 1),
+          const SizedBox(height: BirdySpace.s),
+          _OptionRow(
+            key: const ValueKey('listening-options-levels'),
+            icon: AppIcons.infoOutline,
+            label: l10n.forkLiveOptionsLevels,
+            opensMore: true,
+            onTap: () => showLevelsSheet(context),
+          ),
+          _OptionRow(
+            key: const ValueKey('listening-options-help'),
+            icon: AppIcons.helpOutlineRounded,
+            label: l10n.liveScreenHelpTitle,
+            onTap: () => thenClose(onHelp),
+          ),
+          _OptionRow(
+            key: const ValueKey('listening-options-settings'),
+            icon: AppIcons.tuneRounded,
+            label: l10n.settings,
+            onTap: () => thenClose(onSettings),
+          ),
+        ],
       ),
     );
   }
