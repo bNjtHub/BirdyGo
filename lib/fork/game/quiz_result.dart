@@ -5,6 +5,8 @@
 /// bar filling up; then « Terminer » and « Rejouer ».
 library;
 
+import 'dart:math' as math;
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +18,11 @@ import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/pressable.dart';
 import 'fine_ear.dart';
 import 'fine_ear_quiz_widgets.dart';
+import 'game_config.dart';
 import 'game_progress.dart';
 import 'game_text.dart';
 import 'game_widgets.dart';
+import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
 class QuizResult extends StatelessWidget {
@@ -28,6 +32,7 @@ class QuizResult extends StatelessWidget {
     required this.results,
     required this.badge,
     required this.before,
+    this.party = false,
     required this.onAgain,
     required this.onDone,
   });
@@ -43,6 +48,9 @@ class QuizResult extends StatelessWidget {
 
   /// Oreille fine when the round started.
   final BadgeProgress before;
+
+  /// A good enough score for the confetti rain and, here, the star burst.
+  final bool party;
 
   final VoidCallback onAgain;
   final VoidCallback onDone;
@@ -65,6 +73,7 @@ class QuizResult extends StatelessWidget {
                     right: right,
                     total: total,
                     stars: quizStars(right, total),
+                    party: party,
                   ),
                 ),
                 const SizedBox(height: BirdySpace.m),
@@ -75,7 +84,7 @@ class QuizResult extends StatelessWidget {
                 const SizedBox(height: BirdySpace.m),
                 QuizRise(
                   delay: QuizMotion.cardStep * 2,
-                  child: _MedalCard(badge: badge, before: before),
+                  child: _MedalCard(badge: badge, before: before, right: right),
                 ),
                 const SizedBox(height: BirdySpace.m),
               ],
@@ -103,14 +112,18 @@ class QuizResult extends StatelessWidget {
             const SizedBox(width: BirdySpace.s),
             Expanded(
               child: Pressable(
-                child: FilledButton(
+                child: FilledButton.icon(
                   style: BirdyButtonStyles.primary(context).copyWith(
                     padding: const WidgetStatePropertyAll(
                       EdgeInsets.symmetric(horizontal: BirdySpace.s),
                     ),
                   ),
                   onPressed: onAgain,
-                  child: Text(l10n.forkQuizAgain, textAlign: TextAlign.center),
+                  icon: const Icon(AppIcons.restartAlt, size: 22),
+                  label: Text(
+                    l10n.forkQuizAgain,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
@@ -121,37 +134,18 @@ class QuizResult extends StatelessWidget {
   }
 }
 
-/// A radial gradient whose radius is [radius] logical pixels, centered at
-/// the top of the box, whatever the box's size.
-class _FixedRadius extends GradientTransform {
-  const _FixedRadius(this.radius);
-
-  final double radius;
-
-  @override
-  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    // RadialGradient(radius: 1) spans the shortest side; scale it to
-    // [radius] around the top center.
-    final scale = radius / bounds.shortestSide;
-    final cx = bounds.center.dx;
-    final cy = bounds.top;
-    return Matrix4.identity()
-      ..translateByDouble(cx, cy, 0, 1)
-      ..scaleByDouble(scale, scale, 1, 1)
-      ..translateByDouble(-cx, -cy, 0, 1);
-  }
-}
-
 class _ScoreCard extends StatelessWidget {
   const _ScoreCard({
     required this.right,
     required this.total,
     required this.stars,
+    required this.party,
   });
 
   final int right;
   final int total;
   final int stars;
+  final bool party;
 
   static const double glowRadius = 190;
 
@@ -172,7 +166,7 @@ class _ScoreCard extends StatelessWidget {
           center: Alignment.topCenter,
           radius: 1,
           colors: [glow, c.surface1],
-          transform: const _FixedRadius(glowRadius),
+          transform: const QuizFixedRadius(glowRadius),
         ),
       ),
       child: Column(
@@ -183,24 +177,37 @@ class _ScoreCard extends StatelessWidget {
             child: ExcludeSemantics(
               child: SizedBox(
                 height: 56,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
                   children: [
-                    for (var i = 0; i < 3; i++) ...[
-                      if (i > 0) const SizedBox(width: 6),
-                      QuizPop(
-                        duration: QuizMotion.star,
-                        delay: QuizMotion.starDelay + QuizMotion.starStep * i,
-                        child: Icon(
-                          AppIcons.quizStar,
-                          key: ValueKey('quiz-star-$i'),
-                          size: i == 1 ? 56 : 42,
-                          fill: 1,
-                          color: i < stars ? c.oriole : c.lineOpaque,
-                        ),
+                    const Positioned.fill(
+                      child: QuizTwinkleField(count: 4, seed: 21),
+                    ),
+                    if (party)
+                      const Positioned.fill(
+                        child: QuizStarBurstField(),
                       ),
-                    ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (var i = 0; i < 3; i++) ...[
+                          if (i > 0) const SizedBox(width: 6),
+                          QuizPop(
+                            duration: QuizMotion.star,
+                            delay:
+                                QuizMotion.starDelay + QuizMotion.starStep * i,
+                            child: QuizRimStar(
+                              key: ValueKey('quiz-star-$i'),
+                              size: i == 1 ? 56 : 42,
+                              color: i < stars ? c.oriole : c.lineOpaque,
+                              rim: i < stars ? BirdyQuizColors.starRim : c.border,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -249,6 +256,59 @@ class _ScoreCard extends StatelessWidget {
   }
 }
 
+/// A 5-point star with its own rim stroke, earned (Loriot fill, a shaded
+/// gold rim) or not (the theme's line color both ways).
+class QuizRimStar extends StatelessWidget {
+  const QuizRimStar({super.key, required this.size, required this.color, required this.rim});
+
+  final double size;
+  final Color color;
+  final Color rim;
+
+  @override
+  Widget build(BuildContext context) =>
+      CustomPaint(size: Size.square(size), painter: _RimStarPainter(color, rim));
+}
+
+class _RimStarPainter extends CustomPainter {
+  _RimStarPainter(this.color, this.rim);
+
+  final Color color;
+  final Color rim;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final outer = size.width / 2 * 0.94;
+    final inner = outer * 0.42;
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final r = i.isEven ? outer : inner;
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final p = center + Offset(math.cos(angle), math.sin(angle)) * r;
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, Paint()..color = color);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 1.4 / 24
+        ..strokeJoin = StrokeJoin.round
+        ..color = rim,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RimStarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.rim != rim;
+}
+
 /// The round's birds, five per row, popping in 50 ms apart.
 class _RecapCard extends StatelessWidget {
   const _RecapCard({required this.birds, required this.results});
@@ -274,12 +334,29 @@ class _RecapCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Semantics(
-            header: true,
-            child: Text(
-              l10n.forkQuizRecap,
-              style: BirdyText.species.copyWith(color: c.text1),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    l10n.forkQuizRecap,
+                    style: BirdyText.species.copyWith(color: c.text1),
+                  ),
+                ),
+              ),
+              Text(
+                l10n.forkQuizFoundCount(
+                  results.where((r) => r).length,
+                ),
+                style: BirdyText.caption.copyWith(
+                  color: c.sure.foreground,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: BirdySpace.m),
           LayoutBuilder(
@@ -400,10 +477,13 @@ class _RecapBird extends StatelessWidget {
 /// Oreille fine after the round: the medal, « Nouvelle plume » when a tier
 /// was just reached, the bar filling up to the new count.
 class _MedalCard extends StatelessWidget {
-  const _MedalCard({required this.badge, required this.before});
+  const _MedalCard({required this.badge, required this.before, required this.right});
 
   final BadgeProgress badge;
   final BadgeProgress before;
+
+  /// Right answers this round (the card's « +N cette partie »).
+  final int right;
 
   @override
   Widget build(BuildContext context) {
@@ -424,10 +504,23 @@ class _MedalCard extends StatelessWidget {
         child: medal,
       );
     }
+    // The medal's own metal wash once earned; a plain card while locked. A
+    // soft blend in dark mode, the flat mockup tone in light.
+    final cardColor =
+        badge.tier == 0
+            ? c.surface1
+            : c.isDark
+            ? Color.alphaBlend(
+              GameConfig.badgeMedals[badge.tier - 1].tone.withValues(
+                alpha: 0.14,
+              ),
+              c.surface1,
+            )
+            : GameConfig.badgeMedals[badge.tier - 1].tone;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: c.surface1,
+        color: cardColor,
         borderRadius: BorderRadius.circular(BirdyRadii.card),
       ),
       child: Row(
@@ -480,11 +573,26 @@ class _MedalCard extends StatelessWidget {
                   from: newTier ? 0 : toNextTier(before),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  next == null
-                      ? l10n.forkBadgeAllTiers
-                      : l10n.forkQuizToTier(badge.value, next, badge.tier + 1),
-                  style: BirdyText.caption.copyWith(color: c.text2),
+                Text.rich(
+                  TextSpan(
+                    style: BirdyText.caption.copyWith(color: c.text2),
+                    children: [
+                      TextSpan(
+                        text: l10n.forkQuizThisRoundCount(right),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: c.sure.foreground,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            ' · ${next == null ? l10n.forkBadgeAllTiers : l10n.forkQuizToTier(badge.value, next, badge.tier + 1)}',
+                      ),
+                    ],
+                  ),
+                  style: const TextStyle(
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
                 ),
               ],
             ),

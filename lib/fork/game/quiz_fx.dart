@@ -7,6 +7,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ abstract final class QuizMotion {
   static const Duration barIntro = Duration(milliseconds: 1400);
   static const Duration barIntroStep = Duration(milliseconds: 120);
   static const Duration pulse = Duration(milliseconds: 1600);
-  static const Duration spin = Duration(seconds: 14);
+  static const Duration spin = Duration(seconds: 24);
   static const Duration trail = Duration(milliseconds: 450);
   static const Duration stoneRight = Duration(milliseconds: 450);
   static const Duration stoneWrong = Duration(milliseconds: 300);
@@ -60,6 +61,68 @@ abstract final class QuizMotion {
   static const Duration newTier = Duration(milliseconds: 400);
   static const Duration newTierDelay = Duration(milliseconds: 900);
   static const Duration knob = Duration(milliseconds: 180);
+  static const Duration wiggle = Duration(milliseconds: 3000);
+  static const Duration ring = Duration(milliseconds: 1400);
+  static const Duration ringStep = Duration(milliseconds: 700);
+  static const Duration bounce = Duration(milliseconds: 2400);
+
+  /// cubic-bezier(0.37, 0, 0.63, 1): qz-bounce's own easing.
+  static const Curve bounceEase = Cubic(0.37, 0, 0.63, 1);
+}
+
+/// A radial gradient whose radius is [radius] logical pixels regardless of
+/// the box's size, centered at [center] (the well's radial highlight, the
+/// result score card's Loriot glow).
+class QuizFixedRadius extends GradientTransform {
+  const QuizFixedRadius(this.radius, {this.center = Alignment.topCenter});
+
+  final double radius;
+  final Alignment center;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // RadialGradient(radius: 1) spans the shortest side; scale it to
+    // [radius] around [center].
+    final scale = radius / bounds.shortestSide;
+    final c = center.withinRect(bounds);
+    return Matrix4.identity()
+      ..translateByDouble(c.dx, c.dy, 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1)
+      ..translateByDouble(-c.dx, -c.dy, 0, 1);
+  }
+}
+
+/// qz-bounce: a small forever bob and tilt, for the mystery disc.
+class QuizBounce extends StatelessWidget {
+  const QuizBounce({super.key, required this.child, this.delay = Duration.zero});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  Widget build(BuildContext context) => QuizLoop(
+    period: QuizMotion.bounce,
+    delay: delay,
+    child: child,
+    builder: (context, t, child) {
+      final dy = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        const [0, -8, 0],
+        QuizMotion.bounceEase,
+      );
+      final deg = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        const [-3, 3, -3],
+        QuizMotion.bounceEase,
+      );
+      return Transform.translate(
+        offset: Offset(0, dy),
+        child: Transform.rotate(angle: deg * math.pi / 180, child: child),
+      );
+    },
+  );
 }
 
 /// Value at [t] (0 to 1) of keyframes [values] at [stops], [curve] applied
@@ -420,6 +483,83 @@ class QuizFloat extends StatelessWidget {
   );
 }
 
+/// qz-wiggle: a small forever tilt, side to side (a speech bubble).
+class QuizWiggle extends StatelessWidget {
+  const QuizWiggle({super.key, required this.child, this.angle = 3});
+
+  final Widget child;
+
+  /// Degrees each way.
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) => QuizLoop(
+    period: QuizMotion.wiggle,
+    child: child,
+    builder: (context, t, child) {
+      final deg = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        [-angle, angle, -angle],
+        QuizMotion.inOut,
+      );
+      return Transform.rotate(angle: deg * math.pi / 180, child: child);
+    },
+  );
+}
+
+/// qz-ring: a stroked circle spreading from the child's size to 1.7× while
+/// fading out, forever; only while [running] (the clip plays).
+class QuizRing extends StatelessWidget {
+  const QuizRing({
+    super.key,
+    required this.color,
+    this.delay = Duration.zero,
+    this.running = true,
+  });
+
+  final Color color;
+  final Duration delay;
+  final bool running;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!running) return const SizedBox.shrink();
+    return IgnorePointer(
+      child: QuizLoop(
+        period: QuizMotion.ring,
+        delay: delay,
+        builder: (context, t, child) {
+          final scale = quizKeyframes(
+            t,
+            const [0, 1],
+            const [1, 1.7],
+            Curves.linear,
+          );
+          final opacity = quizKeyframes(
+            t,
+            const [0, 1],
+            const [.7, 0],
+            Curves.linear,
+          );
+          return Transform.scale(
+            scale: scale,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: color.withValues(alpha: opacity),
+                  width: 2,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 /// qz-bar: one equalizer bar, scaleY 0.35 ↔ 1 from its middle.
 class QuizBar extends StatelessWidget {
   const QuizBar({
@@ -556,7 +696,8 @@ class QuizPulse extends StatelessWidget {
 }
 
 /// Slowly turning rays behind a found bird (repeating conic gradient:
-/// [color] 12°, clear 18°), one turn in 14 s.
+/// [color] 10°, clear 20°, radially faded out from 20 % to 62 % of the
+/// radius), one turn in 24 s.
 class QuizRays extends StatelessWidget {
   const QuizRays({super.key, required this.color, this.size = 520});
 
@@ -581,17 +722,31 @@ class _RaysPainter extends CustomPainter {
   final Color color;
 
   static const double _period = 30 * math.pi / 180;
-  static const double _ray = 12 * math.pi / 180;
+  static const double _ray = 10 * math.pi / 180;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final rect = Rect.fromCircle(center: center, radius: size.shortestSide / 2);
+    final radius = size.shortestSide / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.saveLayer(rect, Paint());
     final paint = Paint()..color = color;
     // CSS conic gradients start at 12 o'clock.
     for (var a = 0.0; a < 2 * math.pi - 1e-6; a += _period) {
       canvas.drawArc(rect, a - math.pi / 2, _ray, true, paint);
     }
+    // The mockup's radial mask: opaque to 20 % of the radius, clear by
+    // 62 %.
+    final mask =
+        Paint()
+          ..shader = ui.Gradient.radial(center, radius, const [
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0x00FFFFFF),
+          ], const [0, 0.2, 0.62])
+          ..blendMode = BlendMode.dstIn;
+    canvas.drawRect(rect, mask);
+    canvas.restore();
   }
 
   @override

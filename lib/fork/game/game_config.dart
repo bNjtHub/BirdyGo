@@ -46,7 +46,8 @@ class MedalMetal {
   final Color rim;
   final Color ink;
 
-  /// Pale container tone of an earned badge tile (J6f, Profil « À gagner »).
+  /// Pale tone of the medal metal: background of an earned badge tile
+  /// (J6f, Profil « À gagner ») and of the quiz result medal card.
   final Color tone;
 }
 

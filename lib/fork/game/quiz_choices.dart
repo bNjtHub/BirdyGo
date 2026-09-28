@@ -81,15 +81,21 @@ class QuizChoiceCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final open = state == QuizChoiceState.open;
+    final tint = bird.tint;
     final (background, foreground, border, width) = switch (state) {
-      QuizChoiceState.open => (c.surface1, c.text1, c.lineOpaque, 1.5),
+      QuizChoiceState.open => (
+        tint.cardBackground(c.brightness),
+        c.text1,
+        tint.accent.withValues(alpha: 0.4),
+        1.5,
+      ),
       QuizChoiceState.right => (
         c.sure.background,
         c.sure.foreground,
         c.sure.foreground,
         2.5,
       ),
-      QuizChoiceState.wrong => (c.lineOpaque, c.text1, c.border, 1.5),
+      QuizChoiceState.wrong => (c.surface1, c.text1, c.border, 1.5),
       QuizChoiceState.other => (c.surface1, c.text2, c.lineOpaque, 1.5),
     };
     final value = switch (state) {
@@ -137,6 +143,9 @@ class QuizChoiceCard extends StatelessWidget {
                       bird: bird,
                       size: icon,
                       iconSize: icon * 66 / 76,
+                      // Open: a white halo on the tinted card. Answered:
+                      // each state's own halo (grey out, bird tint, ...).
+                      background: open ? c.surface1 : null,
                     ),
                     const SizedBox(height: gap),
                     QuizBalancedText(
