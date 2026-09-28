@@ -1,6 +1,8 @@
 /// The off-state Switch (thumb and track outline) must reach WCAG 1.4.11's
 /// 3:1 non-text contrast against the surfaces it sits on (J6f-b phone
 /// feedback: an off switch was almost invisible in dark theme).
+library;
+
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart' show contrastRatio;
 import 'package:flutter/material.dart';
