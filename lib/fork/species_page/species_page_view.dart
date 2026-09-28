@@ -5,14 +5,17 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
+import '../design/activity_scale.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
@@ -21,6 +24,7 @@ import '../reliability/reliability_screen.dart';
 import '../species_sheet/species_sheet.dart';
 import '../species_sheet/species_sheet_section.dart';
 import 'species_page_model.dart';
+import 'species_page_text.dart';
 
 /// Widest column on tablets and in landscape.
 const double kSpeciesPageMaxWidth = 600;
@@ -150,8 +154,13 @@ class HeardBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Capped so its loading skeleton (HeardBlock.skeleton below) can
+        // reserve a fixed number of lines instead of however many contacts
+        // and days happen to wrap to.
         Text(
           heard ?? l10n.forkFicheNeverHeard,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: BirdyText.body.copyWith(color: c.text1),
         ),
         if (record.verified || precision != null) ...[
@@ -174,24 +183,58 @@ class HeardBlock extends StatelessWidget {
       ],
     );
   }
+
+  /// Same first line as the real block (capped at 2 lines), a placeholder
+  /// for the level badge and review count while [record] is still loading:
+  /// whether that second row will show at all depends on data not in yet,
+  /// so it is shown for real once the record lands, even if that means the
+  /// block settles a little shorter.
+  static Widget skeleton(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BirdySkeleton.text(
+          BirdyText.body.copyWith(color: c.text1),
+          placeholder:
+              '00000000000000000000000000000000000000000000000000000000',
+          maxLines: 2,
+        ),
+        const SizedBox(height: BirdySpace.s),
+        Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            BirdySkeleton.box(width: 88, height: 26, radius: BirdyRadii.pill),
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: '00000000000000000000000',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
-/// « Ici en ce moment »: the geo-model's sentence and twelve month bars.
-class HereNowCard extends StatelessWidget {
+/// « Ici en ce moment »: the geo-model's sentence and the seasons chart
+/// (twelve month bars, J6f-b fix: colored on the same sequential
+/// Martin-pêcheur scale as the activity-by-hour chart, the current month
+/// marked, and a peak/detail caption).
+class HereNowCard extends StatefulWidget {
   const HereNowCard({
     super.key,
     required this.year,
     required this.sentence,
-    required this.monthsCaption,
     required this.currentMonth,
     this.rareNote,
   });
 
   final YearPresence year;
   final String sentence;
-  final String monthsCaption;
 
-  /// 1 to 12, highlighted.
+  /// 1 to 12, marked on the chart.
   final int currentMonth;
 
   /// Why a detection is « Rare ici · à confirmer », shown when the species
@@ -199,10 +242,31 @@ class HereNowCard extends StatelessWidget {
   final String? rareNote;
 
   @override
+  State<HereNowCard> createState() => _HereNowCardState();
+}
+
+class _HereNowCardState extends State<HereNowCard> {
+  int? _selectedMonth;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final bars = year.bars;
+    final language = Localizations.localeOf(context).languageCode;
+    final months = widget.year.months;
+    final percents = [for (final b in widget.year.bars) (b * 100).round()];
+    final scale = ActivityScale.kingfisher(c.surface1);
+    final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
+    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    final labels = {
+      for (final m in crowded ? const [0, 3, 6, 9] : List.generate(12, (i) => i))
+        m: initials[m],
+    };
+    final selected = _selectedMonth;
+    final caption =
+        selected == null
+            ? peakMonthCaption(l10n, language, months)
+            : monthDetailCaption(l10n, language, selected + 1, percents[selected]);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface1,
@@ -225,10 +289,10 @@ class HereNowCard extends StatelessWidget {
                   ),
                   const SizedBox(height: BirdySpace.xs),
                   Text(
-                    sentence,
+                    widget.sentence,
                     style: BirdyText.bodyCompact.copyWith(color: c.text1),
                   ),
-                  if (rareNote != null) ...[
+                  if (widget.rareNote != null) ...[
                     const SizedBox(height: BirdySpace.s),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +309,7 @@ class HereNowCard extends StatelessWidget {
                         const SizedBox(width: BirdySpace.xs),
                         Expanded(
                           child: Text(
-                            rareNote!,
+                            widget.rareNote!,
                             style: BirdyText.bodyCompact.copyWith(
                               color: c.orioleText,
                             ),
@@ -258,39 +322,34 @@ class HereNowCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: BirdySpace.m),
-            Semantics(
-              label: l10n.forkFichePresenceChart,
-              excludeSemantics: true,
+            SizedBox(
+              width: 150,
               child: Column(
                 children: [
-                  SizedBox(
+                  ActivityBars(
+                    values: percents,
                     height: 36,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        for (var m = 0; m < 12; m++) ...[
-                          if (m > 0) const SizedBox(width: 3),
-                          Container(
-                            key: ValueKey('month-bar-$m'),
-                            width: 6,
-                            height: (36 * bars[m]).clamp(3, 36).toDouble(),
-                            decoration: BoxDecoration(
-                              color:
-                                  m + 1 == currentMonth
-                                      ? BirdyBrand.kingfisher
-                                      : c.line,
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                        ],
-                      ],
+                    colorForValue: scale.of,
+                    trackColor: c.line,
+                    labels: labels,
+                    highlightIndex: widget.currentMonth - 1,
+                    highlightColor: c.text1,
+                    semanticLabel: seasonsChartSemanticLabel(
+                      l10n,
+                      language,
+                      months,
                     ),
+                    onSelect:
+                        (index, _) => setState(() => _selectedMonth = index),
                   ),
-                  const SizedBox(height: BirdySpace.xs),
-                  Text(
-                    monthsCaption,
-                    style: BirdyText.caption.copyWith(color: c.text2),
-                  ),
+                  if (caption != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      caption,
+                      textAlign: TextAlign.center,
+                      style: BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -399,6 +458,51 @@ class MySoundsBlock extends StatelessWidget {
             child: TextButton(
               onPressed: onMore,
               child: Text(l10n.forkFicheAllSounds(moreCount)),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Title row (real, static text) then [rows] placeholder recordings at
+  /// the real row's own minimum height: how many recordings there really
+  /// are is exactly what is still loading.
+  static Widget skeleton(BuildContext context, {int rows = 2}) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.forkFicheMySounds,
+          style: BirdyText.heading.copyWith(color: c.text1),
+        ),
+        for (var i = 0; i < rows; i++)
+          Padding(
+            padding: const EdgeInsets.only(top: BirdySpace.s),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Row(
+                children: [
+                  BirdySkeleton.box(
+                    width: BirdySizes.target,
+                    height: BirdySizes.target,
+                    radius: BirdySizes.target / 2,
+                  ),
+                  const SizedBox(width: BirdySpace.m),
+                  Expanded(
+                    child: BirdySkeleton.text(
+                      BirdyText.bodyCompact,
+                      placeholder: '00000000000000000000000000',
+                    ),
+                  ),
+                  BirdySkeleton.box(
+                    width: BirdySizes.target,
+                    height: BirdySizes.target,
+                    radius: 8,
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -597,17 +701,10 @@ class DescriptionBlock extends StatelessWidget {
 /// Activity by hour and the mini map, side by side (or stacked when narrow
 /// or with large text).
 class ActivityAndMap extends StatelessWidget {
-  const ActivityAndMap({
-    super.key,
-    required this.hours,
-    required this.barColor,
-    this.map,
-    this.onSeeOnMap,
-  });
+  const ActivityAndMap({super.key, required this.hours, this.map, this.onSeeOnMap});
 
   /// 24 values, or empty.
   final List<int> hours;
-  final Color barColor;
 
   /// The mini map, null without positioned contacts.
   final Widget? map;
@@ -616,36 +713,7 @@ class ActivityAndMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final activity =
-        hours.any((h) => h > 0)
-            ? DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surface1,
-                borderRadius: BorderRadius.circular(BirdyRadii.card),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(BirdySpace.m),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.forkActivityByHour,
-                      style: BirdyText.caption.copyWith(color: c.text2),
-                    ),
-                    const SizedBox(height: BirdySpace.s),
-                    ActivityBars(
-                      values: hours,
-                      height: 52,
-                      color: barColor,
-                      labels: const {0: '0 h', 12: '12 h'},
-                      semanticLabel: l10n.forkActivityByHour,
-                    ),
-                  ],
-                ),
-              ),
-            )
-            : null;
+    final activity = hours.any((h) => h > 0) ? _HourActivityCard(hours: hours) : null;
     final mapColumn =
         map == null
             ? null
@@ -690,6 +758,149 @@ class ActivityAndMap extends StatelessWidget {
       },
     );
   }
+
+  /// Both the chart and the map area, side by side like the real layout:
+  /// whether the species turns out to have activity data or positioned
+  /// contacts at all is exactly what is still loading, so this reserves the
+  /// fuller case and settles down if the real content turns out smaller or
+  /// absent (see `ActivityAndMap`'s own `null` cases).
+  static Widget skeleton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final activity = DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(BirdySpace.m),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: l10n.forkActivityByHour,
+            ),
+            const SizedBox(height: BirdySpace.s),
+            BirdySkeleton.box(
+              width: double.infinity,
+              height: 52,
+              radius: BirdyRadii.thumb,
+            ),
+            const SizedBox(height: BirdySpace.xs),
+            // Reserves the peak-hour caption's line (J6f-b fix): whether
+            // one shows at all depends on data not in yet.
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: '00000000000000000',
+            ),
+          ],
+        ),
+      ),
+    );
+    final mapColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        BirdySkeleton.box(
+          width: double.infinity,
+          height: 96,
+          radius: BirdyRadii.card,
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: BirdySkeleton.text(
+            BirdyText.label,
+            placeholder: l10n.forkFicheSeeOnMap,
+          ),
+        ),
+      ],
+    );
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (large || constraints.maxWidth < 320) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              activity,
+              const SizedBox(height: BirdySpace.m),
+              mapColumn,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: activity),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(child: mapColumn),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Activity-by-hour card (J6f-b fix): bars colored on a sequential
+/// Martin-pêcheur scale, hour labels every 6 h, the peak hour named in a
+/// caption, and a tap/long-press on a bar showing its hour and count
+/// instead.
+class _HourActivityCard extends StatefulWidget {
+  const _HourActivityCard({required this.hours});
+
+  /// 24 values, at least one above zero.
+  final List<int> hours;
+
+  @override
+  State<_HourActivityCard> createState() => _HourActivityCardState();
+}
+
+class _HourActivityCardState extends State<_HourActivityCard> {
+  int? _selectedHour;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final scale = ActivityScale.kingfisher(c.surface1);
+    final selected = _selectedHour;
+    final caption =
+        selected == null
+            ? peakHourCaption(l10n, widget.hours)
+            : hourDetailCaption(l10n, selected, widget.hours[selected]);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(BirdySpace.m),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.forkActivityByHour,
+              style: BirdyText.caption.copyWith(color: c.text2),
+            ),
+            const SizedBox(height: BirdySpace.s),
+            ActivityBars(
+              values: widget.hours,
+              height: 52,
+              colorForValue: scale.of,
+              trackColor: c.line,
+              labels: const {0: '0 h', 6: '6 h', 12: '12 h', 18: '18 h'},
+              semanticLabel: activityByHourSemanticLabel(l10n, widget.hours),
+              onSelect: (index, _) => setState(() => _selectedHour = index),
+            ),
+            if (caption != null) ...[
+              const SizedBox(height: BirdySpace.xs),
+              Text(caption, style: BirdyText.caption.copyWith(color: c.text2)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Last lines: the ethics reminder.
@@ -725,33 +936,41 @@ class LinksBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.speciesLearnMore,
+          // Short on purpose: on one line even at 130 % text (J6f-b fix).
+          l10n.forkFicheLearnMore,
+          maxLines: 1,
           style: BirdyText.label.copyWith(color: c.text1),
         ),
         const SizedBox(height: BirdySpace.s),
-        Wrap(
-          spacing: BirdySpace.s,
-          runSpacing: BirdySpace.s,
-          children: [
-            for (final link in links)
-              ActionChip(
-                avatar: Image.asset(
-                  link.iconAsset,
-                  width: 18,
-                  height: 18,
-                  errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          // Cut at the edge on purpose (J6f-b fix): it tells the row
+          // scrolls, same treatment as the sheet chips above.
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (final link in links) ...[
+                if (link != links.first) const SizedBox(width: BirdySpace.s),
+                ActionChip(
+                  avatar: Image.asset(
+                    link.iconAsset,
+                    width: 18,
+                    height: 18,
+                    errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+                  ),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(link.label, maxLines: 1),
+                      const SizedBox(width: BirdySpace.xs),
+                      Icon(AppIcons.openInNew, size: 14, color: c.text2),
+                    ],
+                  ),
+                  onPressed: () => onOpen(link.url),
                 ),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(link.label),
-                    const SizedBox(width: BirdySpace.xs),
-                    Icon(AppIcons.openInNew, size: 14, color: c.text2),
-                  ],
-                ),
-                onPressed: () => onOpen(link.url),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ],
     );

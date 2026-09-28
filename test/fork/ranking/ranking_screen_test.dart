@@ -202,4 +202,14 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets(
+    'BirdyOverlayHeader shows the back button and the title at 130 % text',
+    (tester) async {
+      await pump(tester, textScale: 1.3);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Palmarès'), findsOneWidget);
+      expect(find.byTooltip('Retour'), findsOneWidget);
+    },
+  );
 }

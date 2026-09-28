@@ -257,6 +257,7 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
                     position:
                         queue == null || current == null ? null : _position + 1,
                     total: queue?.length ?? 0,
+                    loading: queue == null,
                     onClose: () => Navigator.of(context).maybePop(),
                     onReliability:
                         () => Navigator.of(context).push(
@@ -265,10 +266,13 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
                           ),
                         ),
                   ),
+                  // FORK: room between the header row and the progress bar
+                  // below it, they were touching on phone (J6f-b feedback).
+                  const SizedBox(height: BirdySpace.l),
                   Expanded(
                     child:
                         queue == null
-                            ? const Center(child: CircularProgressIndicator())
+                            ? _loadingBody()
                             : current == null
                             ? ReviewAllDone(sorted: _done)
                             : _body(l10n, queue, current),
@@ -278,6 +282,25 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Same shape as [_body] (progress, one card, room below): the queue's
+  /// length is not known yet, so a static placeholder stands in for the
+  /// progress bar and the top card, no swipe hints or verdict buttons
+  /// (they need a real detection to answer for).
+  Widget _loadingBody() {
+    return SingleChildScrollView(
+      key: const ValueKey('quick-review-loading'),
+      padding: const EdgeInsets.only(bottom: BirdySpace.l),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ReviewProgress.skeleton(context),
+          const SizedBox(height: BirdySpace.m),
+          ReviewCardStack(behind: 0, top: ReviewCard.skeleton(context)),
+        ],
       ),
     );
   }

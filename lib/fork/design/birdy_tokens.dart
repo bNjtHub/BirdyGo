@@ -519,6 +519,11 @@ abstract final class BirdySizes {
   /// Icon and chevron of the listening mode pill (live header).
   static const double modeIcon = 20;
   static const double modeChevron = 16;
+
+  /// Illustration disc of the « Qui chante ? » block on the Profil, and the
+  /// Loriot question mark pinned on its corner.
+  static const double quizDisc = 60;
+  static const double quizDiscBadge = 24;
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from

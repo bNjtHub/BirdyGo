@@ -96,6 +96,8 @@ void main() {
   ) async {
     await pumpMap(tester, withData: false);
     expect(find.byType(FlutterMap), findsOneWidget);
+    expect(find.text('Ma carte'), findsOneWidget);
+    expect(find.textContaining('Tes contacts sur'), findsOneWidget);
     expect(find.text('Toutes les espèces'), findsOneWidget);
     expect(find.text('30 jours'), findsOneWidget);
     expect(find.text('Confirmées'), findsOneWidget);
@@ -103,6 +105,15 @@ void main() {
     // No tiles before the user allows them.
     expect(find.textContaining('fond de carte est désactivé'), findsOneWidget);
     expect(find.byType(TileLayer), findsNothing);
+    // Default constructor: showBack is true, so the top card has a back
+    // button (species page usage; the bottom navigation passes false).
+    expect(find.byIcon(AppIcons.arrowBackRounded), findsOneWidget);
+  });
+
+  testWidgets('the top card shows the number of places (J6f)', (tester) async {
+    await pumpMap(tester, withData: true);
+    // A single session, so its contacts sit at one place.
+    expect(find.textContaining('1 lieu'), findsOneWidget);
   });
 
   testWidgets('contacts show; the confirmed filter narrows them', (
@@ -132,6 +143,18 @@ void main() {
     await pumpMap(tester, withData: true, dark: true, textScale: 1.3);
     expect(tester.takeException(), isNull);
     expect(find.text('Toutes les espèces'), findsOneWidget);
+  });
+
+  testWidgets('landscape: the header and map still lay out (J6f-b)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 420);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpMap(tester, withData: true);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Ma carte'), findsOneWidget);
+    expect(find.byType(FlutterMap), findsOneWidget);
   });
 
   testWidgets('area sheet: title, contacts, replay and privacy line', (

@@ -1,9 +1,10 @@
 /// Map of every contact of every session (fork/PLAN.md J5, layout from
 /// fork/maquette/Carte.dc.html).
 ///
-/// Small zooms show a hexagon grid whose opacity follows the number of
-/// contacts; large zooms show one round bird marker per species and spot,
-/// clustered. Tapping a hexagon or a marker opens the species of the area.
+/// Small zooms bin contacts on a hexagon grid and draw each bin as the
+/// BirdyGo bird, whose opacity follows the number of contacts (J6f); large
+/// zooms show one round bird marker per species and spot, clustered.
+/// Tapping a place or a marker opens the species of the area.
 library;
 
 import 'dart:async';
@@ -22,17 +23,23 @@ import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart' as birdy;
+import '../design/widgets/birdy_cross_fade.dart';
 import '../ranking/ranking_logic.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
 import 'contact_map_sheets.dart';
 import 'hex_grid.dart';
 import 'map_config.dart';
+import 'place_bird_layer.dart';
 
-/// Martin-pêcheur (fork/DESIGN.md): hexagons, markers and the user's
+/// Martin-pêcheur (fork/DESIGN.md): places, markers and the user's
 /// position.
 const Color _kingfisher = BirdyBrand.kingfisher;
 
@@ -106,8 +113,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   // Layer caches, rebuilt only when the data, the zoom step or the
   // selection change (never per frame).
-  (ContactMapData, int)? _polygonsKey;
-  List<Polygon> _polygons = const [];
+  (ContactMapData, int)? _placesKey;
+  List<PlaceBird> _places = const [];
   (ContactMapData, HexKey?)? _markersKey;
   List<Marker> _markers = const [];
 
@@ -168,6 +175,10 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
       _mapController.move(data.positions.first, kMapSinglePointZoom);
     }
   }
+
+  /// Fades [child] in in place: a loaded value replacing its skeleton.
+  /// [child]'s own key tells the switcher when to cross-fade.
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   String _periodLabel(AppLocalizations l10n, RankingPeriod p) => switch (p) {
     RankingPeriod.last30Days => l10n.forkPeriod30Days,
@@ -307,20 +318,16 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   // ── Layers ───────────────────────────────────────────────────────────
 
-  List<Polygon> _hexPolygons(ContactMapData data) {
+  List<PlaceBird> _placeBirds(ContactMapData data) {
     final step = _zoom.floor();
-    if (_polygonsKey == (data, step)) return _polygons;
+    if (_placesKey == (data, step)) return _places;
     final bins = data.hexBins(step);
-    _polygonsKey = (data, step);
-    return _polygons = [
+    _placesKey = (data, step);
+    return _places = [
       for (final entry in bins.cells.entries)
-        Polygon(
-          points: bins.grid.corners(entry.key),
-          color: _kingfisher.withValues(
-            alpha: hexOpacity(entry.value.length, bins.maxCount),
-          ),
-          borderColor: _kingfisher,
-          borderStrokeWidth: 1,
+        (
+          point: bins.grid.center(entry.key),
+          opacity: hexOpacity(entry.value.length, bins.maxCount),
         ),
     ];
   }
@@ -363,190 +370,247 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     ref.listen(observationIndexServiceProvider, (_, _) => _load());
     final data = _data;
     final showHexes = _zoom < kMapMarkersFromZoom;
+    final c = BirdyColors.of(context);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          if (data != null)
-            Positioned.fill(
-              child: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter:
-                      data.isEmpty ? _defaultCenter : data.positions.first,
-                  initialZoom:
-                      data.isEmpty ? _defaultZoom : kMapSinglePointZoom,
-                  initialCameraFit: _cameraFit(data),
-                  backgroundColor: theme.colorScheme.surfaceContainerLow,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                  ),
-                  onMapReady: () {
-                    _mapReady = true;
-                    setState(() => _zoom = _mapController.camera.zoom);
-                  },
-                  onPositionChanged: (camera, _) {
-                    final wasHexes = _zoom < kMapMarkersFromZoom;
-                    final isHexes = camera.zoom < kMapMarkersFromZoom;
-                    final stepChanged = _zoom.floor() != camera.zoom.floor();
-                    _zoom = camera.zoom;
-                    if (wasHexes != isHexes || (isHexes && stepChanged)) {
-                      setState(() {});
-                    }
-                  },
-                  onTap: (_, point) => _onMapTap(point),
+      backgroundColor: c.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // FORK: all four tabs share the same header row (J6f-b phone
+            // feedback); the map used to float a white card of its own.
+            Padding(
+              key: const ValueKey('map-header'),
+              padding: const EdgeInsets.fromLTRB(
+                BirdySpace.page,
+                BirdySpace.page,
+                BirdySpace.page,
+                0,
+              ),
+              child: BirdyTabHeader(
+                title: l10n.forkMapTitle,
+                captionWidget: _crossFade(
+                  data == null
+                      ? BirdySkeleton.text(
+                        BirdyText.caption,
+                        key: const ValueKey('map-caption-skeleton'),
+                        placeholder: '00000000000000000000000000',
+                      )
+                      : Text(
+                        l10n.forkMapCaption(
+                          _periodLabel(l10n, _period),
+                          data.spots.map((s) => s.spot).toSet().length,
+                        ),
+                        key: const ValueKey('map-caption-real'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: BirdyText.caption.copyWith(color: c.text2),
+                      ),
                 ),
-                children: [
-                  if (hasConsent)
-                    _tileLayer ??= buildBaseTileLayer(
-                      _layer,
-                      onTileError: _onTileError,
+                actions: [
+                  if (widget.showBack)
+                    BirdyIconButton(
+                      icon: AppIcons.arrowBackRounded,
+                      semanticLabel:
+                          MaterialLocalizations.of(context).backButtonTooltip,
+                      onPressed: () => Navigator.of(context).maybePop(),
                     ),
-                  if (showHexes)
-                    PolygonLayer(
-                      polygons: _hexPolygons(data),
-                      simplificationTolerance: 0,
+                  BirdyIconButton(
+                    icon: AppIcons.layers,
+                    semanticLabel: l10n.forkMapBaseLayer,
+                    onPressed: () => _pickBaseLayer(l10n),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: BirdySpace.block),
+            Expanded(
+              child: Stack(
+                children: [
+                  if (data != null)
+                    Positioned.fill(
+                      child: FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter:
+                              data.isEmpty
+                                  ? _defaultCenter
+                                  : data.positions.first,
+                          initialZoom:
+                              data.isEmpty ? _defaultZoom : kMapSinglePointZoom,
+                          initialCameraFit: _cameraFit(data),
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerLow,
+                          interactionOptions: const InteractionOptions(
+                            flags:
+                                InteractiveFlag.all & ~InteractiveFlag.rotate,
+                          ),
+                          onMapReady: () {
+                            _mapReady = true;
+                            setState(() => _zoom = _mapController.camera.zoom);
+                          },
+                          onPositionChanged: (camera, _) {
+                            final wasHexes = _zoom < kMapMarkersFromZoom;
+                            final isHexes = camera.zoom < kMapMarkersFromZoom;
+                            final stepChanged =
+                                _zoom.floor() != camera.zoom.floor();
+                            _zoom = camera.zoom;
+                            if (wasHexes != isHexes ||
+                                (isHexes && stepChanged)) {
+                              setState(() {});
+                            }
+                          },
+                          onTap: (_, point) => _onMapTap(point),
+                        ),
+                        children: [
+                          if (hasConsent)
+                            _tileLayer ??= buildBaseTileLayer(
+                              _layer,
+                              onTileError: _onTileError,
+                            ),
+                          if (showHexes)
+                            PlaceBirdLayer(places: _placeBirds(data))
+                          else
+                            MarkerClusterLayerWidget(
+                              options: MarkerClusterLayerOptions(
+                                maxClusterRadius: 60,
+                                disableClusteringAtZoom: kMapSpotZoom,
+                                size: const Size(60, 60),
+                                padding: const EdgeInsets.all(50),
+                                markers: _spotMarkers(data, l10n),
+                                builder:
+                                    (context, markers) => _ClusterBubble(
+                                      species: _clusterSpecies(markers),
+                                    ),
+                              ),
+                            ),
+                          if (_userPosition != null)
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: _userPosition!,
+                                  width: 32,
+                                  height: 32,
+                                  child: const _UserDot(),
+                                ),
+                              ],
+                            ),
+                          if (hasConsent)
+                            RichAttributionWidget(
+                              alignment: AttributionAlignment.bottomLeft,
+                              attributions: [
+                                for (final a in baseLayerAttributions(_layer))
+                                  TextSourceAttribution(a),
+                              ],
+                            ),
+                        ],
+                      ),
                     )
                   else
-                    MarkerClusterLayerWidget(
-                      options: MarkerClusterLayerOptions(
-                        maxClusterRadius: 60,
-                        disableClusteringAtZoom: kMapSpotZoom,
-                        size: const Size(60, 60),
-                        padding: const EdgeInsets.all(50),
-                        markers: _spotMarkers(data, l10n),
-                        builder:
-                            (context, markers) => _ClusterBubble(
-                              species: _clusterSpecies(markers),
+                    const Center(child: CircularProgressIndicator()),
+                  // Filter chips, notices, empty state and the locate button float
+                  // over the map itself, below the shared tab header.
+                  Positioned.fill(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            BirdySpace.page,
+                            BirdySpace.block,
+                            BirdySpace.page,
+                            0,
+                          ),
+                          child: _FilterBar(
+                            speciesLabel:
+                                _species.commonName ?? l10n.forkMapAllSpecies,
+                            speciesSelected: _species.scientificName != null,
+                            periodLabel: _periodLabel(l10n, _period),
+                            confirmedOnly: _confirmedOnly,
+                            onSpecies: _pickSpecies,
+                            onPeriod: () => _pickPeriod(l10n),
+                            onConfirmed: (v) {
+                              setState(() => _confirmedOnly = v);
+                              unawaited(_load());
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child:
+                              hasConsent
+                                  ? _tilesFailing
+                                      ? _Notice(
+                                        text: l10n.forkMapTilesFailed,
+                                        action: l10n.retry,
+                                        onAction: _retryTiles,
+                                      )
+                                      : const SizedBox.shrink()
+                                  : _Notice(
+                                    text: l10n.forkMapTilesOff,
+                                    action: l10n.mapTileConsentAllow,
+                                    onAction: () => _requestTileConsent(l10n),
+                                  ),
+                        ),
+                        const Spacer(),
+                        if (data != null && data.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  BirdyRadii.card,
+                                ),
+                                boxShadow: c.floatShadow,
+                              ),
+                              child:
+                                  _indexEmpty
+                                      ? BirdyEmptyState.inline(
+                                        icon: AppIcons.hearing,
+                                        title: l10n.forkMapEmptyTitle,
+                                        body: l10n.forkMapEmpty,
+                                      )
+                                      : BirdyEmptyState.inline(
+                                        kind: BirdyEmptyKind.filtered,
+                                        icon: AppIcons.searchOff,
+                                        title: l10n.forkMapEmptyFilteredTitle,
+                                        body: l10n.forkMapEmptyFiltered,
+                                      ),
                             ),
-                      ),
-                    ),
-                  if (_userPosition != null)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: _userPosition!,
-                          width: 32,
-                          height: 32,
-                          child: const _UserDot(),
+                          ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+                            child: _MapButton(
+                              icon: AppIcons.myLocation,
+                              tooltip: l10n.forkMapLocateMe,
+                              onPressed: () => _locate(l10n),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  if (hasConsent)
-                    RichAttributionWidget(
-                      alignment: AttributionAlignment.bottomLeft,
-                      attributions: [
-                        for (final a in baseLayerAttributions(_layer))
-                          TextSourceAttribution(a),
-                      ],
-                    ),
+                  ),
                 ],
               ),
-            )
-          else
-            const Center(child: CircularProgressIndicator()),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _FilterBar(
-                  speciesLabel: _species.commonName ?? l10n.forkMapAllSpecies,
-                  speciesSelected: _species.scientificName != null,
-                  periodLabel: _periodLabel(l10n, _period),
-                  confirmedOnly: _confirmedOnly,
-                  onBack:
-                      widget.showBack
-                          ? () => Navigator.of(context).maybePop()
-                          : null,
-                  onSpecies: _pickSpecies,
-                  onPeriod: () => _pickPeriod(l10n),
-                  onConfirmed: (v) {
-                    setState(() => _confirmedOnly = v);
-                    unawaited(_load());
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child:
-                            hasConsent
-                                ? _tilesFailing
-                                    ? _Notice(
-                                      text: l10n.forkMapTilesFailed,
-                                      action: l10n.retry,
-                                      onAction: _retryTiles,
-                                    )
-                                    : const SizedBox.shrink()
-                                : _Notice(
-                                  text: l10n.forkMapTilesOff,
-                                  action: l10n.mapTileConsentAllow,
-                                  onAction: () => _requestTileConsent(l10n),
-                                ),
-                      ),
-                      const SizedBox(width: 8),
-                      _MapButton(
-                        icon: AppIcons.layers,
-                        tooltip: l10n.forkMapBaseLayer,
-                        onPressed: () => _pickBaseLayer(l10n),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                if (data != null && data.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(BirdyRadii.card),
-                        boxShadow: BirdyColors.of(context).floatShadow,
-                      ),
-                      child:
-                          _indexEmpty
-                              ? BirdyEmptyState.inline(
-                                icon: AppIcons.hearing,
-                                title: l10n.forkMapEmptyTitle,
-                                body: l10n.forkMapEmpty,
-                              )
-                              : BirdyEmptyState.inline(
-                                kind: BirdyEmptyKind.filtered,
-                                icon: AppIcons.searchOff,
-                                title: l10n.forkMapEmptyFilteredTitle,
-                                body: l10n.forkMapEmptyFiltered,
-                              ),
-                    ),
-                  ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
-                    child: _MapButton(
-                      icon: AppIcons.myLocation,
-                      tooltip: l10n.forkMapLocateMe,
-                      onPressed: () => _locate(l10n),
-                    ),
-                  ),
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Filter chips over the map: species, period, confirmed only.
+/// Filter chips over the map: species, period, confirmed only. White,
+/// floating, the chosen one turns tonal (J6f).
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
     required this.speciesLabel,
     required this.speciesSelected,
     required this.periodLabel,
     required this.confirmedOnly,
-    this.onBack,
     required this.onSpecies,
     required this.onPeriod,
     required this.onConfirmed,
@@ -556,9 +620,6 @@ class _FilterBar extends StatelessWidget {
   final bool speciesSelected;
   final String periodLabel;
   final bool confirmedOnly;
-
-  /// Null: no back button (map tab).
-  final VoidCallback? onBack;
   final VoidCallback onSpecies;
   final VoidCallback onPeriod;
   final ValueChanged<bool> onConfirmed;
@@ -566,120 +627,39 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       clipBehavior: Clip.none,
       child: Row(
         children: [
-          if (onBack != null) ...[
-            _MapButton(
-              icon: AppIcons.arrowBackRounded,
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: onBack!,
-            ),
-            const SizedBox(width: 8),
-          ],
-          _MapChip(
+          BirdyFilterChip(
             label: speciesLabel,
             selected: speciesSelected,
-            trailing: AppIcons.expandMore,
-            onPressed: onSpecies,
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: const Icon(AppIcons.expandMore),
+            onSelected: onSpecies,
           ),
-          const SizedBox(width: 8),
-          _MapChip(
+          const SizedBox(width: BirdySpace.s),
+          BirdyFilterChip(
             label: periodLabel,
             selected: true,
-            trailing: AppIcons.expandMore,
-            onPressed: onPeriod,
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: const Icon(AppIcons.expandMore),
+            onSelected: onPeriod,
           ),
-          const SizedBox(width: 8),
-          _MapChip(
+          const SizedBox(width: BirdySpace.s),
+          BirdyFilterChip(
             label: l10n.forkMapConfirmedOnly,
             selected: confirmedOnly,
-            toggle: true,
-            onPressed: () => onConfirmed(!confirmedOnly),
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: confirmedOnly ? const Icon(AppIcons.check) : null,
+            onSelected: () => onConfirmed(!confirmedOnly),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A 48 dp filter chip over the map (SPEC.md 5.10): selected chips take
-/// the text color as fill, toggles show a check.
-class _MapChip extends StatelessWidget {
-  const _MapChip({
-    required this.label,
-    required this.selected,
-    required this.onPressed,
-    this.trailing,
-    this.toggle = false,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onPressed;
-  final IconData? trailing;
-
-  /// On/off chip: a check when selected.
-  final bool toggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    final background = selected ? c.text1 : c.surface1;
-    final foreground = selected ? c.background : c.text1;
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: Pressable(
-        child: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: const StadiumBorder(),
-            shadows: c.floatShadow,
-          ),
-          child: Material(
-            color: background,
-            shape: StadiumBorder(
-              side: BorderSide(color: selected ? c.text1 : c.borderStrong),
-            ),
-            child: InkWell(
-              customBorder: const StadiumBorder(),
-              onTap: onPressed,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: BirdySizes.target),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    toggle && selected ? 12 : 16,
-                    0,
-                    trailing == null ? 16 : 12,
-                    0,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (toggle && selected) ...[
-                        Icon(AppIcons.check, size: 18, color: foreground),
-                        const SizedBox(width: 6),
-                      ],
-                      Text(
-                        label,
-                        style: BirdyText.labelCompact.copyWith(
-                          color: foreground,
-                        ),
-                      ),
-                      if (trailing != null) ...[
-                        const SizedBox(width: 4),
-                        Icon(trailing, size: 20, color: foreground),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
