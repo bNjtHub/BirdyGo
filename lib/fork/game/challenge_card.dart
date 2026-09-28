@@ -67,16 +67,16 @@ class ChallengeCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: BirdySizes.blockIconDisc,
+                height: BirdySizes.blockIconDisc,
                 decoration: BoxDecoration(
                   color: done ? c.oriole : c.tonal,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  challengeIcon(challenge.kind),
+                  done ? AppIcons.check : challengeIcon(challenge.kind),
                   size: 22,
-                  color: c.accentText,
+                  color: done ? c.onOriole : c.accentText,
                 ),
               ),
               const SizedBox(width: BirdySpace.m),
