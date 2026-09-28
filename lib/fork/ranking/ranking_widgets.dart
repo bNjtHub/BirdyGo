@@ -44,24 +44,40 @@ class RankedSpecies {
   final ImageProvider? image;
 }
 
-/// « 17 » « espèces en 30 jours », then « 9 nouvelles en 2026 · du … ».
+/// Leading run of digits of a localized sentence (« 9 nouvelles… » → « 9 »),
+/// so it can be set apart. Zero-count phrasings (« Aucune… », « None… »)
+/// have none, and stay plain.
+final RegExp _leadingDigits = RegExp(r'^\d+');
+
+/// « 17 » « espèces en 30 jours », then « 9 nouvelles en 2026 · du … » with
+/// the new-this-year count in oriole-text 800 (AppPalmares mockup).
 class RankingHeader extends StatelessWidget {
   const RankingHeader({
     super.key,
     required this.count,
     required this.label,
-    required this.caption,
+    required this.newCountLine,
+    this.dates,
   });
 
   final int count;
 
   /// « espèces en 30 jours ».
   final String label;
-  final String caption;
+
+  /// « 9 nouvelles en 2026 » or « Aucune nouvelle en 2026 ».
+  final String newCountLine;
+
+  /// « du 27 août au 26 septembre »: appended as « · dates » when set.
+  final String? dates;
 
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
+    final base = BirdyText.caption.copyWith(color: c.text2);
+    final digits = _leadingDigits.stringMatch(newCountLine);
+    final rest =
+        digits == null ? newCountLine : newCountLine.substring(digits.length);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -83,11 +99,24 @@ class RankingHeader extends StatelessWidget {
         // Capped so its loading skeleton (ranking_screen.dart) can reserve
         // a fixed number of lines instead of however many this sentence
         // (period + new-this-year count) happens to wrap to.
-        Text(
-          caption,
+        Text.rich(
+          TextSpan(
+            style: base,
+            children: [
+              if (digits != null)
+                TextSpan(
+                  text: digits,
+                  style: base.copyWith(
+                    color: c.orioleText,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              TextSpan(text: rest),
+              if (dates != null) TextSpan(text: ' · $dates'),
+            ],
+          ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: BirdyText.caption.copyWith(color: c.text2),
         ),
       ],
     );
@@ -258,7 +287,10 @@ class _PodiumStep extends StatelessWidget {
               constraints: BoxConstraints(minHeight: minHeight),
               child: Stack(
                 children: [
-                  if (first) _PodiumTwinkles(colors: [BirdyBrand.oriole, c.accent, tint.accent]),
+                  if (first)
+                    _PodiumTwinkles(
+                      colors: [BirdyBrand.oriole, c.accent, tint.accent],
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -467,4 +499,3 @@ class RankingRow extends StatelessWidget {
     );
   }
 }
-

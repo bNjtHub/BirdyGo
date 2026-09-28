@@ -4,6 +4,7 @@
 library;
 
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_pill.dart';
 import 'package:birdnet_live/fork/ranking/ranking_widgets.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -52,10 +53,7 @@ void main() {
     ];
 
     testWidgets('visual order is 2nd, 1st, 3rd', (tester) async {
-      await _pump(
-        tester,
-        RankingPodium(top: top, onOpen: (_) {}),
-      );
+      await _pump(tester, RankingPodium(top: top, onOpen: (_) {}));
       await tester.pumpAndSettle();
 
       double left(String name) => tester.getTopLeft(find.text(name)).dx;
@@ -74,10 +72,7 @@ void main() {
 
     testWidgets('tapping a step opens that species', (tester) async {
       RankedSpecies? opened;
-      await _pump(
-        tester,
-        RankingPodium(top: top, onOpen: (s) => opened = s),
-      );
+      await _pump(tester, RankingPodium(top: top, onOpen: (s) => opened = s));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Erithacus rubecula'));
@@ -86,20 +81,62 @@ void main() {
     });
 
     testWidgets('one species: no overflow, no crash', (tester) async {
-      await _pump(
-        tester,
-        RankingPodium(top: [top.first], onOpen: (_) {}),
-      );
+      await _pump(tester, RankingPodium(top: [top.first], onOpen: (_) {}));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text('1'), findsOneWidget);
     });
   });
 
-  group('RankingRow', () {
-    testWidgets('the bar grows to the value over the leader', (
+  group('RankingHeader', () {
+    testWidgets('the new-this-year count is set in oriole-text 800', (
       tester,
     ) async {
+      await _pump(
+        tester,
+        const RankingHeader(
+          count: 17,
+          label: 'espèces en 30 jours',
+          newCountLine: '3 nouvelles en 2026',
+          dates: 'du 27 août au 26 septembre',
+        ),
+      );
+
+      final richText = tester
+          .widgetList<RichText>(find.byType(RichText))
+          .firstWhere((w) => w.text.toPlainText().contains('nouvelles'));
+      // Text.rich wraps the given span in a synthetic root of its own; the
+      // one built by RankingHeader is that root's only child.
+      final root = richText.text as TextSpan;
+      final span = root.children!.single as TextSpan;
+      final digits = span.children!.first as TextSpan;
+      expect(digits.text, '3');
+      expect(digits.style!.fontWeight, FontWeight.w800);
+      final c = BirdyColors.of(tester.element(find.byType(RankingHeader)));
+      expect(digits.style!.color, c.orioleText);
+      // The rest of the sentence, including the dates, stays plain.
+      expect(find.textContaining('3 nouvelles en 2026'), findsOneWidget);
+      expect(find.textContaining('du 27 août au 26 septembre'), findsOneWidget);
+    });
+
+    testWidgets('zero new species: no digit to highlight, no crash', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const RankingHeader(
+          count: 5,
+          label: 'espèces en 30 jours',
+          newCountLine: 'Aucune nouvelle en 2026',
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Aucune nouvelle en 2026'), findsOneWidget);
+    });
+  });
+
+  group('RankingRow', () {
+    testWidgets('the bar grows to the value over the leader', (tester) async {
       await _pump(
         tester,
         SizedBox(
@@ -121,9 +158,7 @@ void main() {
       expect(bar.widthFactor, closeTo(0.5, 1e-9));
     });
 
-    testWidgets('a tiny fraction still shows a sliver of bar', (
-      tester,
-    ) async {
+    testWidgets('a tiny fraction still shows a sliver of bar', (tester) async {
       await _pump(
         tester,
         SizedBox(

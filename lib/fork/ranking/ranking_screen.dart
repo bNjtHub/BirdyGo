@@ -230,11 +230,12 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                                       ranked.length,
                                       periodPhrase(l10n, _period, now),
                                     ),
-                                    caption:
+                                    newCountLine: newLine,
+                                    dates:
                                         dates == null ||
                                                 _period == RankingPeriod.year
-                                            ? newLine
-                                            : '$newLine · $dates',
+                                            ? null
+                                            : dates,
                                   ),
                             ),
                           ),
