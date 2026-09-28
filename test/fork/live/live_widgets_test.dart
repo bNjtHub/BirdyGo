@@ -364,8 +364,6 @@ void main() {
       expanded: expanded,
       onLevelsInfo: () {},
       onBack: () {},
-      onSettings: () {},
-      onHelp: () {},
     );
 
     for (final (orientation, width, tiles) in [
@@ -389,8 +387,6 @@ void main() {
                 showTiles: tiles,
                 onLevelsInfo: () {},
                 onBack: () {},
-                onSettings: () {},
-                onHelp: () {},
               ),
             ),
           ),
@@ -428,10 +424,7 @@ void main() {
       expect(find.text('espèces'), findsOneWidget);
       expect(find.text('contacts'), findsOneWidget);
       // The « i » button replaced the enlarge chevron (J6c-bis-c).
-      expect(
-        find.byTooltip('Que veulent dire Sûr, Probable et À vérifier ?'),
-        findsOneWidget,
-      );
+      expect(find.byTooltip('Niveaux, aide et réglages'), findsOneWidget);
       expect(find.byTooltip('Agrandir le spectre'), findsNothing);
 
       await tester.pumpWidget(_app(header(expanded: true)));
@@ -687,9 +680,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(app(live()));
-      await tester.tap(
-        find.byTooltip('Que veulent dire Sûr, Probable et À vérifier ?'),
-      );
+      await tester.tap(find.byTooltip('Niveaux, aide et réglages'));
       await tester.pumpAndSettle();
       expect(find.byType(LevelsSheet), findsOneWidget);
       expect(find.text("À quel point l'app est sûre ?"), findsOneWidget);

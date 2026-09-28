@@ -49,6 +49,8 @@ class LiveListeningLayout extends StatefulWidget {
     this.banner,
     this.moment,
     this.practice = false,
+    this.place,
+    this.modeChip,
   });
 
   final String statusText;
@@ -95,6 +97,12 @@ class LiveListeningLayout extends StatefulWidget {
   /// Listening to a recording (J5c): « Enregistrement » under the header.
   final bool practice;
 
+  /// Place name under the status (J6f).
+  final String? place;
+
+  /// Listening mode pill of the header (J6f), 48 dp.
+  final Widget? modeChip;
+
   @override
   State<LiveListeningLayout> createState() => _LiveListeningLayoutState();
 }
@@ -137,10 +145,15 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
         elapsed: widget.elapsed,
         expanded: _expanded,
         showTiles: !landscape,
-        onLevelsInfo: () => showLevelsSheet(context),
+        place: widget.place,
+        modeChip: widget.modeChip,
+        onLevelsInfo:
+            () => showLevelsSheet(
+              context,
+              onHelp: widget.onHelp,
+              onSettings: widget.onSettings,
+            ),
         onBack: widget.onBack,
-        onSettings: widget.onSettings,
-        onHelp: widget.onHelp,
       ),
     );
     Widget panel({required bool expanded, required double expandedHeight}) =>

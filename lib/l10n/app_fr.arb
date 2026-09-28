@@ -1613,5 +1613,19 @@
   "forkQuizBirdsLabel": "de tes oiseaux",
   "forkQuizRightArticle": "C'est bien {name}",
   "forkQuizWrongArticle": "C'était {name}",
-  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo."
+  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo.",
+  "forkLiveExpectedTitleMorning": "Attendus ici ce matin",
+  "forkLiveExpectedTitleAfternoon": "Attendus ici cet après-midi",
+  "forkLiveExpectedTitleEvening": "Attendus ici ce soir",
+  "forkLiveExpectedTitleNight": "Attendus ici cette nuit",
+  "forkLiveExpectedIntro": "Ils s'allument dès qu'ils chantent.",
+  "forkLiveExpectedGoalCount": "{count, plural, =1{1 compte pour ton objectif du jour.} other{{count} comptent pour ton objectif du jour.}}",
+  "forkLiveExpectedReasonFrequent": "Parmi les plus fréquents ici en {month}",
+  "forkLiveExpectedReasonPeak": "En pleine saison ici",
+  "forkLiveExpectedReasonPossible": "Peut chanter ici en {month}",
+  "forkLiveExpectedGoal": "Objectif",
+  "forkLiveExpectedTip": "Micro vers le haut, ne bouge plus pendant une minute.",
+  "forkLiveModeNormal": "Normal",
+  "forkLiveModeButton": "Conditions d'écoute : {mode}",
+  "forkLiveInfoButton": "Niveaux, aide et réglages"
 }
