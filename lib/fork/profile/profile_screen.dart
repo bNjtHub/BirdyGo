@@ -249,10 +249,19 @@ class _StatusCardSkeletonBody extends StatelessWidget {
                     placeholder: '00000000000000000',
                   ),
                   const SizedBox(height: BirdySpace.xs),
-                  // One line, like the real caption (see `_StatusCardRealBody`).
-                  BirdySkeleton.text(
-                    captionStyle,
-                    placeholder: '00000000000000000000000000000000',
+                  // Up to 2 lines, like the real caption (see
+                  // `_StatusCardRealBody`): « Encore N espèces pour devenir
+                  // Oreille de chouette » was cut on one line (J6f-b fix).
+                  SizedBox(
+                    height: twoLineTextHeight(context, captionStyle),
+                    child: Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: BirdySkeleton.text(
+                        captionStyle,
+                        placeholder: '00000000000000000000000000000000',
+                        maxLines: 2,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -335,14 +344,24 @@ class _StatusCardRealBody extends StatelessWidget {
                     style: BirdyText.body.copyWith(color: c.text1),
                   ),
                   const SizedBox(height: BirdySpace.xs),
-                  // One line, truncated if need be: the next status's name
-                  // must never wrap one loaded card and not the skeleton
-                  // that came before it.
-                  Text(
-                    caption,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: BirdyText.caption.copyWith(color: c.text2),
+                  // Up to 2 lines (J6f-b fix): « Encore 10 espèces pour
+                  // devenir Oreille de chouette » was cut on one line. The
+                  // skeleton above reserves the same fixed 2-line height, so
+                  // nothing shifts either way.
+                  SizedBox(
+                    height: twoLineTextHeight(
+                      context,
+                      BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: Text(
+                        caption,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: BirdyText.caption.copyWith(color: c.text2),
+                      ),
+                    ),
                   ),
                 ],
               ),

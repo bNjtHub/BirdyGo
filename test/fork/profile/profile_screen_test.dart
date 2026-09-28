@@ -92,6 +92,23 @@ void main() {
       find.text('Encore 11 espèces pour devenir Oreille de chouette'),
       findsOneWidget,
     );
+    // J6f-b fix: the caption under the status name also wraps up to 2
+    // lines instead of being cut with an ellipsis on 1 line.
+    expect(
+      tester
+          .widget<Text>(
+            find
+                .descendant(
+                  of: find.byKey(const ValueKey('profile-status-card')),
+                  matching: find.text(
+                    'Encore 11 espèces pour devenir Oreille de chouette',
+                  ),
+                )
+                .first,
+          )
+          .maxLines,
+      2,
+    );
     expect(
       find.bySemanticsLabel(
         RegExp('Progression vers le prochain statut : 27 %'),
