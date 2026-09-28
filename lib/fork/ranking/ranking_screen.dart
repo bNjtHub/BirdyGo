@@ -16,7 +16,8 @@ import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
-import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/empty_state.dart';
 import 'ranking_logic.dart';
 import 'ranking_widgets.dart';
@@ -202,7 +203,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _topBar(l10n),
+                          BirdyOverlayHeader(title: l10n.forkRanking),
                           if (tallies != null) ...[
                             RankingHeader(
                               count: ranked.length,
@@ -324,38 +325,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     );
   }
 
-  Widget _topBar(AppLocalizations l10n) {
-    final c = BirdyColors.of(context);
-    return SizedBox(
-      height: BirdySizes.topBar,
-      child: Row(
-        children: [
-          BirdyIconButton(
-            icon: AppIcons.arrowBackRounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          const SizedBox(width: BirdySpace.m),
-          Expanded(
-            child: Text(
-              l10n.forkRanking,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _periodChips(AppLocalizations l10n) => Wrap(
     spacing: BirdySpace.s,
     runSpacing: BirdySpace.s,
     children: [
       for (final p in RankingPeriod.values)
-        ChoiceChip(
-          label: Text(_periodLabel(l10n, p)),
+        BirdyFilterChip(
+          label: _periodLabel(l10n, p),
           selected: _period == p,
-          onSelected: (_) => setState(() => _period = p),
+          onSelected: () => setState(() => _period = p),
         ),
     ],
   );

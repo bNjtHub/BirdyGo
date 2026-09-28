@@ -10,6 +10,7 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
@@ -39,37 +40,21 @@ class ReviewTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return SizedBox(
-      height: BirdySizes.topBar,
-      child: Row(
-        children: [
-          BirdyIconButton(
-            icon: AppIcons.close,
-            semanticLabel: l10n.forkQuickReviewClose,
-            onPressed: onClose,
+    return BirdyOverlayHeader(
+      title: l10n.forkQuickReview,
+      onBack: onClose,
+      actions: [
+        if (position != null)
+          Text(
+            l10n.forkQuickReviewProgress(position!, total),
+            style: BirdyText.label.copyWith(color: c.text1),
           ),
-          const SizedBox(width: BirdySpace.m),
-          Expanded(
-            child: Text(
-              l10n.forkQuickReview,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-          ),
-          if (position != null)
-            Text(
-              l10n.forkQuickReviewProgress(position!, total),
-              style: BirdyText.label.copyWith(color: c.text1),
-            ),
-          const SizedBox(width: BirdySpace.s),
-          BirdyIconButton(
-            icon: AppIcons.verifiedRounded,
-            semanticLabel: l10n.forkReliabilityTitle,
-            onPressed: onReliability,
-          ),
-        ],
-      ),
+        BirdyIconButton(
+          icon: AppIcons.verifiedRounded,
+          semanticLabel: l10n.forkReliabilityTitle,
+          onPressed: onReliability,
+        ),
+      ],
     );
   }
 }
