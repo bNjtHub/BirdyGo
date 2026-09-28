@@ -119,7 +119,10 @@ class ReviewProgress extends StatelessWidget {
           child: SizedBox(height: 6, child: ColoredBox(color: c.skeleton)),
         ),
         const SizedBox(height: 6),
-        BirdySkeleton.text(BirdyText.caption, placeholder: '00000000000000000000'),
+        BirdySkeleton.text(
+          BirdyText.caption,
+          placeholder: '00000000000000000000',
+        ),
       ],
     );
   }

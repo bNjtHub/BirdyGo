@@ -14,13 +14,13 @@ import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
-import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import 'ranking_logic.dart';
 import 'ranking_widgets.dart';
 
@@ -218,23 +218,23 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                           KeyedSubtree(
                             key: const ValueKey('ranking-count'),
                             child: _crossFade(
-                            loading
-                                ? const _RankingHeaderSkeleton(
-                                  key: ValueKey('ranking-header-skeleton'),
-                                )
-                                : RankingHeader(
-                                  key: const ValueKey('ranking-header-real'),
-                                  count: ranked.length,
-                                  label: l10n.forkRankingSpeciesWord(
-                                    ranked.length,
-                                    periodPhrase(l10n, _period, now),
+                              loading
+                                  ? const _RankingHeaderSkeleton(
+                                    key: ValueKey('ranking-header-skeleton'),
+                                  )
+                                  : RankingHeader(
+                                    key: const ValueKey('ranking-header-real'),
+                                    count: ranked.length,
+                                    label: l10n.forkRankingSpeciesWord(
+                                      ranked.length,
+                                      periodPhrase(l10n, _period, now),
+                                    ),
+                                    caption:
+                                        dates == null ||
+                                                _period == RankingPeriod.year
+                                            ? newLine
+                                            : '$newLine · $dates',
                                   ),
-                                  caption:
-                                      dates == null ||
-                                              _period == RankingPeriod.year
-                                          ? newLine
-                                          : '$newLine · $dates',
-                                ),
                             ),
                           ),
                           const SizedBox(height: BirdySpace.m),
@@ -428,14 +428,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
 
   /// Fades [child] in in place: a loaded value replacing its skeleton.
   /// [child]'s own key tells the switcher when to cross-fade.
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 }
 
 /// Same shape as [RankingHeader]: big number, label, caption line — so the
@@ -492,8 +485,7 @@ class _RankingListSkeleton extends StatelessWidget {
     return SliverList.builder(
       itemCount: _rows,
       itemBuilder: (context, index) {
-        final key =
-            index == 0 ? const ValueKey('ranking-list-first') : null;
+        final key = index == 0 ? const ValueKey('ranking-list-first') : null;
         return Padding(
           key: key,
           padding: const EdgeInsets.symmetric(vertical: BirdySpace.xs),
@@ -503,10 +495,7 @@ class _RankingListSkeleton extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 28,
-                  child: BirdySkeleton.text(
-                    BirdyText.label,
-                    placeholder: '00',
-                  ),
+                  child: BirdySkeleton.text(BirdyText.label, placeholder: '00'),
                 ),
                 BirdySkeleton.box(width: 36, height: 36, radius: 18),
                 const SizedBox(width: 10),

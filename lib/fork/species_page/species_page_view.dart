@@ -793,9 +793,16 @@ class ActivityAndMap extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BirdySkeleton.text(BirdyText.caption, placeholder: l10n.forkActivityByHour),
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: l10n.forkActivityByHour,
+            ),
             const SizedBox(height: BirdySpace.s),
-            BirdySkeleton.box(width: double.infinity, height: 52, radius: BirdyRadii.thumb),
+            BirdySkeleton.box(
+              width: double.infinity,
+              height: 52,
+              radius: BirdyRadii.thumb,
+            ),
           ],
         ),
       ),
@@ -803,7 +810,11 @@ class ActivityAndMap extends StatelessWidget {
     final mapColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        BirdySkeleton.box(width: double.infinity, height: 96, radius: BirdyRadii.card),
+        BirdySkeleton.box(
+          width: double.infinity,
+          height: 96,
+          radius: BirdyRadii.card,
+        ),
         Align(
           alignment: Alignment.centerLeft,
           child: BirdySkeleton.text(

@@ -15,7 +15,6 @@ import '../../features/explore/widgets/species_info_overlay.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
-import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
@@ -27,6 +26,7 @@ import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_card.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../species_sheet/species_sheet.dart';
@@ -224,14 +224,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   /// Fades [child] in in place (no move, no scale): a loaded value replacing
   /// its skeleton, or one final state replacing another. [child]'s own key
   /// tells the switcher when to cross-fade.
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   Widget _header(
     AppLocalizations l10n,
@@ -398,7 +391,8 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   ) {
     final toDiscover =
         dataReady ? notebook!.filtered(NotebookFilter.toDiscover).length : null;
-    final rare = dataReady ? notebook!.filtered(NotebookFilter.rare).length : null;
+    final rare =
+        dataReady ? notebook!.filtered(NotebookFilter.rare).length : null;
     return Padding(
       padding: const EdgeInsets.only(bottom: BirdySpace.block),
       child: IntrinsicHeight(
@@ -409,7 +403,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               child: _CountBlock(
                 key: const ValueKey('notebook-count-toDiscover'),
                 count: toDiscover,
-                label: toDiscover == null ? null : l10n.forkNotebookToDiscoverLabel,
+                label:
+                    toDiscover == null
+                        ? null
+                        : l10n.forkNotebookToDiscoverLabel,
                 tone: BirdyBlockTone.toCheck,
                 onTap:
                     () => setState(() => _filter = NotebookFilter.toDiscover),
@@ -517,7 +514,9 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           borderRadius: BorderRadius.circular(BirdyRadii.card),
         ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: BirdySizes.collectionCard),
+          constraints: const BoxConstraints(
+            minHeight: BirdySizes.collectionCard,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
@@ -551,7 +550,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     return _columnRows(skeletonRows, (index, width, visualSize) {
       final card = _cardSkeleton(c, width, visualSize);
       return index == 0
-          ? KeyedSubtree(key: const ValueKey('notebook-grid-cell-0'), child: card)
+          ? KeyedSubtree(
+            key: const ValueKey('notebook-grid-cell-0'),
+            child: card,
+          )
           : card;
     });
   }
@@ -583,7 +585,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       if (index >= cards.length) return const SizedBox.shrink();
       final card = _card(l10n, cards[index], visualSize);
       return index == 0
-          ? KeyedSubtree(key: const ValueKey('notebook-grid-cell-0'), child: card)
+          ? KeyedSubtree(
+            key: const ValueKey('notebook-grid-cell-0'),
+            child: card,
+          )
           : card;
     });
   }
@@ -717,7 +722,11 @@ class _CountBlock extends StatelessWidget {
         children: [
           _NotebookScreenState._crossFade(
             ready
-                ? Text('$count', key: const ValueKey('count-real'), style: numberStyle)
+                ? Text(
+                  '$count',
+                  key: const ValueKey('count-real'),
+                  style: numberStyle,
+                )
                 : BirdySkeleton.text(
                   numberStyle,
                   key: const ValueKey('count-skeleton'),

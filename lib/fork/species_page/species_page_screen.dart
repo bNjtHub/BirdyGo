@@ -22,9 +22,9 @@ import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/share_sheet.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
-import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
@@ -291,8 +291,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
 
     final loadingRecord = record == null;
     final showSounds =
-        loadingRecord ||
-        (record.clips.isNotEmpty || referenceUrl != null);
+        loadingRecord || (record.clips.isNotEmpty || referenceUrl != null);
     final showActivity = loadingRecord || record.heard;
 
     final blocks = <Widget>[
@@ -342,13 +341,15 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                           favorites: record.favorites,
                           playing: playing,
                           lineOf:
-                              (clip) => clipLine(l10n, language, clip, now: now),
+                              (clip) =>
+                                  clipLine(l10n, language, clip, now: now),
                           onPlay: _play,
                           onFavorite: _setFavorite,
                           onReference:
                               referenceUrl == null
                                   ? null
-                                  : () => openExternalUrl(context, referenceUrl),
+                                  : () =>
+                                      openExternalUrl(context, referenceUrl),
                           moreCount: record.clipCount,
                           onMore:
                               () => _push(
@@ -458,14 +459,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
 
   /// Fades [child] in in place: a loaded block replacing its skeleton.
   /// [child]'s own key tells the switcher when to cross-fade.
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 }
 
 /// Whether `SpeciesInfoOverlay.show` opens this page instead of the

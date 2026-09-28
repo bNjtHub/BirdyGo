@@ -8,13 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
-import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_config.dart';
@@ -123,7 +123,9 @@ class ProfileScreen extends ConsumerWidget {
                   key: const ValueKey('profile-ladder'),
                   child: _crossFade(
                     loading
-                        ? const _LadderSkeleton(key: ValueKey('ladder-skeleton'))
+                        ? const _LadderSkeleton(
+                          key: ValueKey('ladder-skeleton'),
+                        )
                         : _Ladder(
                           key: const ValueKey('ladder-real'),
                           verified: progress.verified,
@@ -198,14 +200,7 @@ class ProfileScreen extends ConsumerWidget {
 
   /// Fades [child] in in place (no move, no scale): a loaded value replacing
   /// its skeleton. [child]'s own key tells the switcher when to cross-fade.
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 }
 
 /// Same shape as [StatusCard]'s content (full, not compact): ring, status
@@ -236,7 +231,10 @@ class _StatusCardSkeletonBody extends StatelessWidget {
                     placeholder: '000000000000000000000',
                   ),
                   const SizedBox(height: BirdySpace.xs),
-                  BirdySkeleton.text(bodyStyle, placeholder: '00000000000000000'),
+                  BirdySkeleton.text(
+                    bodyStyle,
+                    placeholder: '00000000000000000',
+                  ),
                   const SizedBox(height: BirdySpace.xs),
                   // One line, like the real caption (see `_StatusCardRealBody`).
                   BirdySkeleton.text(
@@ -298,7 +296,9 @@ class _StatusCardRealBody extends StatelessWidget {
                   // One line, truncated if need be: same reason as the
                   // caption below.
                   Text(
-                    status == null ? l10n.forkStatusNone : statusName(l10n, status),
+                    status == null
+                        ? l10n.forkStatusNone
+                        : statusName(l10n, status),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: BirdyText.title.copyWith(color: c.text1),
@@ -394,7 +394,10 @@ class _LadderSkeleton extends StatelessWidget {
           },
         ),
         const SizedBox(height: BirdySpace.s),
-        BirdySkeleton.text(BirdyText.caption, placeholder: l10n.forkStatusLadder),
+        BirdySkeleton.text(
+          BirdyText.caption,
+          placeholder: l10n.forkStatusLadder,
+        ),
       ],
     );
   }
@@ -498,7 +501,10 @@ class _StreakCardSkeletonBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final caption = BirdyText.caption.copyWith(color: c.text2);
-    final weekday = DateFormat('EEEEE', Localizations.localeOf(context).toString());
+    final weekday = DateFormat(
+      'EEEEE',
+      Localizations.localeOf(context).toString(),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -527,7 +533,10 @@ class _StreakCardSkeletonBody extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Column(
                     children: [
-                      Text(weekday.format(day.date).toUpperCase(), style: caption),
+                      Text(
+                        weekday.format(day.date).toUpperCase(),
+                        style: caption,
+                      ),
                       const SizedBox(height: BirdySpace.xs),
                       _DayDotSkeleton(isToday: day.isToday),
                       const SizedBox(height: BirdySpace.xs),
@@ -546,7 +555,10 @@ class _StreakCardSkeletonBody extends StatelessWidget {
           maxLines: 2,
         ),
         const SizedBox(height: BirdySpace.xs),
-        BirdySkeleton.text(caption, placeholder: '0000000000000000000000000000'),
+        BirdySkeleton.text(
+          caption,
+          placeholder: '0000000000000000000000000000',
+        ),
       ],
     );
   }

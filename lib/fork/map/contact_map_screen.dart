@@ -21,7 +21,6 @@ import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
-import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
@@ -31,6 +30,7 @@ import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart' as birdy;
+import '../design/widgets/birdy_cross_fade.dart';
 import '../ranking/ranking_logic.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
@@ -178,14 +178,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   /// Fades [child] in in place: a loaded value replacing its skeleton.
   /// [child]'s own key tells the switcher when to cross-fade.
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   String _periodLabel(AppLocalizations l10n, RankingPeriod p) => switch (p) {
     RankingPeriod.last30Days => l10n.forkPeriod30Days,
