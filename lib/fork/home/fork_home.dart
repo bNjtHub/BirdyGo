@@ -1,9 +1,11 @@
 /// BirdyGo home screen (J6c, fork/maquette/Main.dc.html and SPEC.md 9.1).
 ///
-/// Shown by the upstream `HomeScreen`, which keeps its warm-up (model,
-/// taxonomy, geo-model, index). Status, streak, challenge and the bottom
-/// navigation come with the game (J6e); until then the menu gives every
-/// entry the upstream home had.
+/// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
+/// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
+/// geo-model, index). The daily goal is the hero card under the greeting;
+/// série chip, status card and weekly challenge come from the game (J6e);
+/// « Écouter » is the one strong action, pinned above the bottom bar; the
+/// menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -33,14 +35,24 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
+import '../daily_goal/daily_goal_card.dart';
+import '../daily_goal/daily_goal_screen.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
+import '../game/challenge_card.dart';
+import '../game/challenges.dart';
+import '../game/game_loader.dart';
+import '../game/game_widgets.dart';
+import '../game/status_celebration.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
+import '../profile/profile_screen.dart';
 import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
+import '../shell/fork_shell.dart';
 import '../sound_library/sound_library_screen.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
@@ -90,6 +102,21 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
+  Future<void> _startChallenge() async {
+    await ref.read(challengeStoreProvider).start(DateTime.now());
+    ref.invalidate(gameProgressProvider);
+  }
+
+  /// The Profil tab, or the profile page outside the bottom navigation.
+  void _openProfile() {
+    final shell = ForkShellScope.maybeOf(context);
+    if (shell != null) {
+      shell.select(ForkTab.profile);
+    } else {
+      _open(const ProfileScreen());
+    }
+  }
+
   void _openAru() {
     final session = ref.read(aruSessionProvider);
     final state = ref.read(aruStateProvider);
@@ -111,6 +138,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           (_) => HomeMenuSheet(
             groups: [
               [
+                HomeMenuEntry(
+                  AppIcons.flagRounded,
+                  l10n.forkDailyGoalTitle,
+                  () => _open(const DailyGoalScreen()),
+                ),
                 HomeMenuEntry(
                   AppIcons.libraryMusic,
                   l10n.sessionLibraryTitle,
@@ -200,6 +232,12 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   Widget build(BuildContext context) {
     // A saved session, a review or a rebuild changes the numbers.
     ref.listen(observationIndexServiceProvider, (_, _) => _reload());
+    // A new status reached through a review is celebrated here.
+    ref.listen(gameProgressProvider, (_, next) {
+      if (next.value case final progress?) {
+        unawaited(maybeCelebrateStatus(context, ref, progress));
+      }
+    });
 
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
@@ -210,7 +248,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final snapshot = _snapshot;
     final last = snapshot?.last;
 
-    final topBar = HomeTopBar(onMenu: _showMenu);
+    final game = ref.watch(gameProgressProvider).value;
+    final streak = game?.facts.streak.current ?? 0;
+    final topBar = HomeTopBar(
+      onMenu: _showMenu,
+      // No chip without a running série: nothing to lose, nothing shown.
+      streak: streak > 0 ? StreakChip(days: streak, onTap: _openProfile) : null,
+    );
+    // The daily goal is the hero card, right under the greeting.
     final head = <(String, Widget)>[
       (
         'greeting',
@@ -219,6 +264,17 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           dateLine: homeDateLine(localeName, now, place: _place),
         ),
       ),
+      (
+        'daily-goal',
+        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
+      ),
+    ];
+    final cards = <(String, Widget)>[
+      if (game != null)
+        (
+          'status',
+          StatusCard(progress: game, compact: true, onTap: _openProfile),
+        ),
       if (snapshot != null)
         snapshot.today.isEmpty
             ? (
@@ -230,8 +286,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
               ),
             )
             : ('today', DayTiles(today: snapshot.today)),
-    ];
-    final cards = <(String, Widget)>[
       if (last != null)
         (
           'last',
@@ -259,6 +313,11 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                       last.detection.commonName,
                 ),
           ),
+        ),
+      if (game?.facts.challenge case final challenge?)
+        (
+          'challenge',
+          ChallengeCard(challenge: challenge, onStart: _startChallenge),
         ),
       if (snapshot != null && snapshot.toVerify > 0)
         (
@@ -289,11 +348,13 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: _blocks([...head], topBar: topBar)),
+                  Expanded(child: _blocks(head, topBar: topBar)),
                   Expanded(
                     child: Column(
                       children: [
-                        Expanded(child: _blocks(cards, firstIndex: 2)),
+                        Expanded(
+                          child: _blocks(cards, firstIndex: head.length),
+                        ),
                         listen,
                       ],
                     ),
@@ -320,28 +381,39 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     );
   }
 
-  /// A scrolling column of [blocks], entering 40 ms apart.
+  /// A scrolling column of [blocks]. The first
+  /// [BirdyMotion.staggerMaxItems] rise once, 40 ms apart; the others, and
+  /// every block under reduced motion, appear still.
   Widget _blocks(
     List<(String, Widget)> blocks, {
     Widget? topBar,
     int firstIndex = 0,
-  }) => ListView(
-    padding: const EdgeInsets.fromLTRB(
-      BirdySpace.xl,
-      BirdySpace.l,
-      BirdySpace.xl,
-      BirdySpace.l,
-    ),
-    children: [
-      if (topBar != null) topBar,
-      for (final (i, (key, block)) in blocks.indexed)
-        Padding(
-          key: ValueKey('home-$key'),
-          padding: EdgeInsets.only(
-            top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+  }) {
+    final still = BirdyMotion.reduced(context);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xl,
+        BirdySpace.l,
+        BirdySpace.xl,
+        BirdySpace.l,
+      ),
+      children: [
+        if (topBar != null) topBar,
+        for (final (i, (key, block)) in blocks.indexed)
+          Padding(
+            key: ValueKey('home-$key'),
+            padding: EdgeInsets.only(
+              top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+            ),
+            child:
+                still || firstIndex + i >= BirdyMotion.staggerMaxItems
+                    ? block
+                    : BirdyEntrance.staggered(
+                      index: firstIndex + i,
+                      child: block,
+                    ),
           ),
-          child: BirdyEntrance.staggered(index: firstIndex + i, child: block),
-        ),
-    ],
-  );
+      ],
+    );
+  }
 }

@@ -46,10 +46,17 @@ const double _defaultZoom = 5;
 
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
-  const ContactMapScreen({super.key, this.initialSpecies});
+  const ContactMapScreen({
+    super.key,
+    this.initialSpecies,
+    this.showBack = true,
+  });
 
   /// Opens filtered on this species, over every period (species page).
   final SpeciesChoice? initialSpecies;
+
+  /// False in the bottom navigation (J6e): the map is a tab, not a page.
+  final bool showBack;
 
   @override
   ConsumerState<ContactMapScreen> createState() => _ContactMapScreenState();
@@ -67,6 +74,28 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
       widget.initialSpecies ?? const SpeciesChoice.all();
   late MapBaseLayer _layer;
   TileLayer? _tileLayer;
+
+  /// Tiles that failed since the layer was built; past
+  /// [kMapTileErrorsBeforeNotice] the map says its background does not load.
+  int _tileErrors = 0;
+  bool _tilesFailing = false;
+
+  void _onTileError(TileImage tile, Object error, StackTrace? stackTrace) {
+    // The first error names the cause in the log (network, HTTP status…).
+    if (_tileErrors++ == 0) {
+      debugPrint('[ContactMap] ${_layer.name} tile failed: $error');
+    }
+    if (_tilesFailing || _tileErrors < kMapTileErrorsBeforeNotice) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_tilesFailing) setState(() => _tilesFailing = true);
+    });
+  }
+
+  void _retryTiles() => setState(() {
+    _tileErrors = 0;
+    _tilesFailing = false;
+    _tileLayer = null;
+  });
 
   ContactMapData? _data;
   int _loadGeneration = 0;
@@ -194,6 +223,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     setState(() {
       _layer = layer;
       _tileLayer = null;
+      _tileErrors = 0;
+      _tilesFailing = false;
     });
     await ref
         .read(sharedPreferencesProvider)
@@ -366,7 +397,11 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                   onTap: (_, point) => _onMapTap(point),
                 ),
                 children: [
-                  if (hasConsent) _tileLayer ??= buildBaseTileLayer(_layer),
+                  if (hasConsent)
+                    _tileLayer ??= buildBaseTileLayer(
+                      _layer,
+                      onTileError: _onTileError,
+                    ),
                   if (showHexes)
                     PolygonLayer(
                       polygons: _hexPolygons(data),
@@ -419,7 +454,10 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                   speciesSelected: _species.scientificName != null,
                   periodLabel: _periodLabel(l10n, _period),
                   confirmedOnly: _confirmedOnly,
-                  onBack: () => Navigator.of(context).maybePop(),
+                  onBack:
+                      widget.showBack
+                          ? () => Navigator.of(context).maybePop()
+                          : null,
                   onSpecies: _pickSpecies,
                   onPeriod: () => _pickPeriod(l10n),
                   onConfirmed: (v) {
@@ -435,7 +473,13 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                       Expanded(
                         child:
                             hasConsent
-                                ? const SizedBox.shrink()
+                                ? _tilesFailing
+                                    ? _Notice(
+                                      text: l10n.forkMapTilesFailed,
+                                      action: l10n.retry,
+                                      onAction: _retryTiles,
+                                    )
+                                    : const SizedBox.shrink()
                                 : _Notice(
                                   text: l10n.forkMapTilesOff,
                                   action: l10n.mapTileConsentAllow,
@@ -502,7 +546,7 @@ class _FilterBar extends StatelessWidget {
     required this.speciesSelected,
     required this.periodLabel,
     required this.confirmedOnly,
-    required this.onBack,
+    this.onBack,
     required this.onSpecies,
     required this.onPeriod,
     required this.onConfirmed,
@@ -512,7 +556,9 @@ class _FilterBar extends StatelessWidget {
   final bool speciesSelected;
   final String periodLabel;
   final bool confirmedOnly;
-  final VoidCallback onBack;
+
+  /// Null: no back button (map tab).
+  final VoidCallback? onBack;
   final VoidCallback onSpecies;
   final VoidCallback onPeriod;
   final ValueChanged<bool> onConfirmed;
@@ -526,12 +572,14 @@ class _FilterBar extends StatelessWidget {
       clipBehavior: Clip.none,
       child: Row(
         children: [
-          _MapButton(
-            icon: AppIcons.arrowBackRounded,
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: onBack,
-          ),
-          const SizedBox(width: 8),
+          if (onBack != null) ...[
+            _MapButton(
+              icon: AppIcons.arrowBackRounded,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: onBack!,
+            ),
+            const SizedBox(width: 8),
+          ],
           _MapChip(
             label: speciesLabel,
             selected: speciesSelected,

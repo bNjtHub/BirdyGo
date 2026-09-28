@@ -1,11 +1,13 @@
 import 'package:birdnet_live/features/announcements/geo_commonness_provider.dart';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/history/session_review_screen.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/summary/listening_summary.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_loader.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_screen.dart';
+import 'package:birdnet_live/fork/summary/listening_summary_view.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
@@ -19,9 +21,13 @@ import 'summary_fixture.dart';
 /// Keeps saved sessions in memory.
 class _MemoryRepository extends SessionRepository {
   final saved = <LiveSession>[];
+  bool failSave = false;
 
   @override
-  Future<void> save(LiveSession session) async => saved.add(session);
+  Future<void> save(LiveSession session) async {
+    if (failSave) throw StateError('save failed');
+    saved.add(session);
+  }
 }
 
 void main() {
@@ -31,6 +37,7 @@ void main() {
     WidgetTester tester,
     Future<ListeningSummary> Function(LiveSession session) loader, {
     SessionRepository? repository,
+    LiveSession? session,
   }) async {
     tester.view.physicalSize = const Size(360, 800) * 3;
     tester.view.devicePixelRatio = 3;
@@ -46,6 +53,7 @@ void main() {
             sessionRepositoryProvider.overrideWithValue(repository),
           geoCommonnessProvider.overrideWith((ref) async => null),
           currentLocationProvider.overrideWith((ref) async => null),
+          rawGeoScoresProvider.overrideWith((ref) async => null),
           taxonomyServiceProvider.overrideWith(
             (ref) async => TaxonomyService(),
           ),
@@ -74,7 +82,7 @@ void main() {
                                 MaterialPageRoute<void>(
                                   builder:
                                       (_) => ListeningSummaryScreen(
-                                        session: morningSession(),
+                                        session: session ?? morningSession(),
                                       ),
                                 ),
                               ),
@@ -87,6 +95,117 @@ void main() {
     );
     await tester.tap(find.text('Accueil'));
     await tester.pumpAndSettle();
+  }
+
+  Future<void> submitObservation(WidgetTester tester) async {
+    final context = tester.element(find.byType(ListeningSummaryView));
+    final label = AppLocalizations.of(context)!.forkSummaryAddObservation;
+    await tester.scrollUntilVisible(
+      find.text(label),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text(label));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(label));
+    await tester.pumpAndSettle();
+    final overlay = tester.widget<AddSpeciesOverlay>(
+      find.byType(AddSpeciesOverlay),
+    );
+    expect(overlay.initialMode, AddSpeciesInsertMode.global);
+    expect(overlay.lockMode, isTrue);
+    expect(overlay.initialEvidence, DetectionEvidence.seen);
+    Navigator.of(tester.element(find.byType(AddSpeciesOverlay))).pop(
+      AddSpeciesResult(
+        scientificName: 'Upupa epops',
+        commonName: 'Huppe fasciée',
+        mode: AddSpeciesInsertMode.global,
+        evidence: DetectionEvidence.seen,
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('an empty listening can save a visual observation directly', (
+    tester,
+  ) async {
+    final session =
+        morningSession()
+          ..detections.clear()
+          ..locationName = 'Test place';
+    final repository = _MemoryRepository();
+    await pump(
+      tester,
+      (session) async => ListeningSummary.of(session, verifiedBefore: {}),
+      session: session,
+      repository: repository,
+    );
+    await submitObservation(tester);
+    final saved = repository.saved.single;
+    final bird = saved.detections.single;
+    expect(bird.source, DetectionSource.manualGlobal);
+    expect(bird.evidence, DetectionEvidence.seen);
+    expect(bird.isConfirmed, isTrue);
+    expect(bird.reviewedAt, isNotNull);
+    expect(bird.latitude, session.latitude);
+    expect(bird.longitude, session.longitude);
+    expect(bird.audioClipPath, isNull);
+    expect(session.detections, isEmpty);
+    final view = tester.widget<ListeningSummaryView>(
+      find.byType(ListeningSummaryView),
+    );
+    expect(view.summary.otherObservedSpecies, hasLength(1));
+    expect(view.summary.heardSpecies, isEmpty);
+  });
+
+  testWidgets('failed observation save leaves the session unchanged', (
+    tester,
+  ) async {
+    final session = morningSession()..locationName = 'Test place';
+    final repository = _MemoryRepository()..failSave = true;
+    await pump(
+      tester,
+      (session) async => ListeningSummary.of(session, verifiedBefore: {}),
+      session: session,
+      repository: repository,
+    );
+    await submitObservation(tester);
+    expect(repository.saved, isEmpty);
+    expect(session.detections, hasLength(52));
+    final view = tester.widget<ListeningSummaryView>(
+      find.byType(ListeningSummaryView),
+    );
+    expect(view.summary.contacts, 52);
+    expect(view.savingObservation, isFalse);
+    final context = tester.element(find.byType(ListeningSummaryView));
+    expect(
+      find.text(AppLocalizations.of(context)!.forkSummaryObservationSaveFailed),
+      findsOneWidget,
+    );
+  });
+
+  for (final practice in [true, false]) {
+    testWidgets('no observation action for ${practice ? 'practice' : 'file'}', (
+      tester,
+    ) async {
+      final session = LiveSession.fromJson({
+        ...morningSession().toJson(),
+        'practice': practice,
+        'type': practice ? 'live' : 'fileUpload',
+        'locationName': 'Test place',
+      });
+      await pump(
+        tester,
+        (session) async => ListeningSummary.of(session, verifiedBefore: {}),
+        session: session,
+      );
+      expect(
+        tester
+            .widget<ListeningSummaryView>(find.byType(ListeningSummaryView))
+            .onAddObservation,
+        isNull,
+      );
+    });
   }
 
   testWidgets('shows the loaded summary; « Terminer » goes home', (

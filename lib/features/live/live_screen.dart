@@ -16,6 +16,7 @@ import '../../shared/widgets/confirm_destructive.dart';
 import '../audio/audio_capture_service.dart';
 import '../audio/audio_providers.dart';
 import '../explore/explore_providers.dart';
+import '../../fork/live/live_position.dart'; // FORK: GPS track (J6c)
 import '../explore/widgets/species_info_overlay.dart';
 import '../history/session_library_screen.dart';
 import '../history/session_review_screen.dart';
@@ -40,9 +41,12 @@ import '../../fork/design/birdy_theme.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
+import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
+import '../../fork/live/live_tip_motion.dart'; // FORK: tip cards
 import '../../fork/summary/listening_summary_screen.dart'; // FORK: listening summary (J6c)
 
 // =============================================================================
@@ -419,6 +423,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
       double? startLat;
       double? startLon;
+      controller.forkPosition.canTrack = liveTrackingGate(
+        ref.read(locationServiceProvider),
+      ); // FORK: GPS track (J6c)
       try {
         final loc = ref.read(currentLocationProvider).value;
         if (loc != null) {
@@ -449,6 +456,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         highPassHz: ref.read(highPassFilterProvider).toDouble(),
         latitude: startLat,
         longitude: startLon,
+        // FORK: follow the phone while listening (J6c GPS track).
+        forkTrackPosition: useGps && !_forkPractice,
+        forkStartPositionUncertain:
+            startLat == null ||
+            ref.read(locationServiceProvider).lastFetchUsedCachedFallback,
       );
       if (_forkPractice) controller.session?.practice = true; // FORK: J5c
       if (mounted) {
@@ -1107,8 +1119,37 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                         scientificName: entry.scientificName,
                         commonName: entry.record.commonName,
                       ),
-                  empty: const LiveTipsCarousel(),
+                  // FORK: tip cards in the BirdyGo design
+                  empty: BirdyTipCarousel(
+                    tips: [
+                      for (final t in buildLiveTips(l10n))
+                        BirdyTip(
+                          icon: t.icon,
+                          title: t.title,
+                          body: t.body,
+                          motion: liveTipMotion(t.icon),
+                        ),
+                    ],
+                  ),
                   practice: _forkPractice, // FORK: J5c
+                  // FORK: first encounter and rare bird moments (J6e)
+                  moment:
+                      inSession && !_forkPractice
+                          ? LiveMoments(
+                            key: ValueKey(controller.session?.id),
+                            entries: entries,
+                            controller: controller,
+                            presenceOf:
+                                (name) => livePresence(commonness, name),
+                            presenceScoreOf:
+                                (name) => commonness?[name]?.currentScore,
+                            clips: clips,
+                            imageFor: (name) {
+                              final path = imagePath(name);
+                              return path == null ? null : AssetImage(path);
+                            },
+                          )
+                          : null,
                   banner:
                       liveState == LiveState.error
                           ? _StatusBanner(liveState: liveState, ref: ref)

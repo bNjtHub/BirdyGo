@@ -9,7 +9,8 @@
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:navigationBarColor">@color/birdygo_launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/birdygo_launch_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/birdygo_splash</item>
+        <!-- FORK: no mark here, the Flutter splash fades the bird in on the same Mist. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@color/birdygo_launch_background</item>

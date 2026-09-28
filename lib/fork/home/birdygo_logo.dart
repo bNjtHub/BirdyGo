@@ -70,23 +70,23 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// Source view box of the SVG.
   static const double _box = 512;
 
-  static const Color _plumageTop = Color(0xFF1CAEBA);
-  static const Color _plumageBottom = Color(0xFF0E7C86);
-  static const Color _lowerBeak = Color(0xFFE3A22B);
-  static const Color _paleKingfisher = Color(0xFF8CD3D9);
+  static const Color plumageTop = Color(0xFF1CAEBA);
+  static const Color plumageBottom = Color(0xFF0E7C86);
+  static const Color lowerBeakColor = Color(0xFFE3A22B);
+  static const Color paleKingfisher = Color(0xFF8CD3D9);
 
   /// Wing bars, bottom point first (the SVG draws them upward).
-  static const List<(Offset, Offset, Color)> _bars = [
+  static const List<(Offset, Offset, Color)> bars = [
     (Offset(217.4, 333.7), Offset(217.4, 240.1), BirdyBrand.mist),
     (Offset(260.6, 365.5), Offset(268, 223.3), BirdyBrand.oriole),
     (Offset(306.2, 349.4), Offset(316, 256.2), BirdyBrand.mist),
-    (Offset(352.9, 331.7), Offset(359.3, 290.9), _paleKingfisher),
+    (Offset(352.9, 331.7), Offset(359.3, 290.9), paleKingfisher),
   ];
 
   /// Each bar draws over this share of [progress], starting in turn.
   static const double _barShare = 0.75;
 
-  static final Path _tail =
+  static final Path tail =
       Path()
         ..moveTo(364.4, 181.4)
         ..arcToPoint(
@@ -107,7 +107,7 @@ class BirdyGoLogoPainter extends CustomPainter {
         )
         ..close();
 
-  static final Path _body =
+  static final Path body =
       Path()
         ..moveTo(133.1, 251.5)
         ..arcToPoint(
@@ -132,14 +132,14 @@ class BirdyGoLogoPainter extends CustomPainter {
         )
         ..close();
 
-  static final Path _upperBeak =
+  static final Path upperBeak =
       Path()
         ..moveTo(145.9, 149)
         ..lineTo(50.6, 160.9)
         ..lineTo(118.1, 196.6)
         ..close();
 
-  static final Path _lowerBeakPath =
+  static final Path lowerBeak =
       Path()
         ..moveTo(118.1, 206.6)
         ..lineTo(64.5, 222.5)
@@ -157,13 +157,13 @@ class BirdyGoLogoPainter extends CustomPainter {
           ..shader = ui.Gradient.linear(
             const Offset(165, 97.7),
             const Offset(361.7, 434.9),
-            const [_plumageTop, _plumageBottom],
+            const [plumageTop, plumageBottom],
           );
-    canvas.drawPath(_tail, plumage);
+    canvas.drawPath(tail, plumage);
 
     for (final (path, color) in [
-      (_lowerBeakPath, _lowerBeak),
-      (_upperBeak, BirdyBrand.oriole),
+      (lowerBeak, lowerBeakColor),
+      (upperBeak, BirdyBrand.oriole),
     ]) {
       canvas
         ..drawPath(path, Paint()..color = color)
@@ -177,11 +177,11 @@ class BirdyGoLogoPainter extends CustomPainter {
         );
     }
 
-    canvas.drawPath(_body, plumage);
+    canvas.drawPath(body, plumage);
 
     final t = progress.value;
-    final step = (1 - _barShare) / (_bars.length - 1);
-    for (final (i, (from, to, color)) in _bars.indexed) {
+    final step = (1 - _barShare) / (bars.length - 1);
+    for (final (i, (from, to, color)) in bars.indexed) {
       final local = ((t - i * step) / _barShare).clamp(0.0, 1.0);
       if (local == 0) continue;
       final eased = BirdyMotion.standard.transform(local);

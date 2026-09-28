@@ -28,6 +28,8 @@ class IndexedDetection {
     required this.latitude,
     required this.longitude,
     required this.clipPath,
+    this.source = DetectionSource.auto,
+    this.evidence,
   });
 
   /// Stable detection key, see [detectionKey].
@@ -45,6 +47,11 @@ class IndexedDetection {
   final double? latitude;
   final double? longitude;
   final String? clipPath;
+  final DetectionSource source;
+  final DetectionEvidence? evidence;
+
+  /// Legacy automatic detections are acoustic; manual records need evidence.
+  bool get isHeard => evidence?.includesHeard ?? source == DetectionSource.auto;
 
   Map<String, Object?> toRow() => {
     'key': key,
@@ -62,6 +69,8 @@ class IndexedDetection {
     'latitude': latitude,
     'longitude': longitude,
     'clip_path': clipPath,
+    'source': source.name,
+    'evidence': evidence?.name,
   };
 
   static IndexedDetection fromRow(Map<String, Object?> row) => IndexedDetection(
@@ -86,6 +95,13 @@ class IndexedDetection {
     latitude: (row['latitude'] as num?)?.toDouble(),
     longitude: (row['longitude'] as num?)?.toDouble(),
     clipPath: row['clip_path'] as String?,
+    source: switch (row['source']) {
+      'manual' => DetectionSource.manual,
+      'manualGlobal' => DetectionSource.manualGlobal,
+      'userSpecified' => DetectionSource.userSpecified,
+      _ => DetectionSource.auto,
+    },
+    evidence: DetectionEvidence.fromName(row['evidence'] as String?),
   );
 }
 
@@ -118,6 +134,8 @@ List<IndexedDetection> indexRowsForSession(LiveSession session) => [
       latitude: session.detections[i].latitude ?? session.latitude,
       longitude: session.detections[i].longitude ?? session.longitude,
       clipPath: session.detections[i].audioClipPath,
+      source: session.detections[i].source,
+      evidence: session.detections[i].evidence,
     ),
 ];
 
@@ -144,6 +162,46 @@ class SpeciesTally {
   final DateTime last;
 }
 
+/// One indexed listening (J6e).
+class IndexedListening {
+  const IndexedListening({
+    required this.id,
+    required this.start,
+    required this.end,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final String id;
+  final DateTime start;
+  final DateTime? end;
+  final double? latitude;
+  final double? longitude;
+}
+
+/// Review state of one species over all time, for the notebook (J6e).
+class SpeciesReviewTally {
+  const SpeciesReviewTally({
+    required this.scientificName,
+    required this.commonName,
+    required this.contacts,
+    required this.confirmed,
+    required this.inQueue,
+  });
+
+  final String scientificName;
+  final String commonName;
+
+  /// Detections not rejected (the « N fois » of the notebook).
+  final int contacts;
+
+  /// Detections confirmed by the user.
+  final int confirmed;
+
+  /// Detections waiting in the quick review.
+  final int inQueue;
+}
+
 /// Sort orders for [ObservationIndex.speciesRanking].
 enum RankingOrder { contacts, days, lastHeard }
 
@@ -154,7 +212,9 @@ class ObservationIndex {
   /// Current schema version. Bump it to force a rebuild after a change.
   /// 3: sessions that do not count (practice, file analyses) left the
   /// index (J5c); the upgrade rebuild drops the ones already indexed.
-  static const int schemaVersion = 3;
+  /// 4: preserve detection source, acoustic/visual evidence and same-time
+  /// records (for example an automatic contact plus a visual annotation).
+  static const int schemaVersion = 4;
 
   final Database _db;
 
@@ -162,25 +222,43 @@ class ObservationIndex {
   ///
   /// Use [inMemoryDatabasePath] for tests. A schema change drops the derived
   /// tables; the caller must then rebuild them from the sessions
-  /// ([needsRebuild] reports it). Favorites are kept.
+  /// ([needsRebuild] reports it). Favorites are kept. This holds both ways:
+  /// an index written by a newer build (a newer schema, then an older app
+  /// installed over it) is rebuilt too, instead of failing on its columns.
+  /// The columns are checked as well as the version: an older build that
+  /// already opened such an index set its version back without touching the
+  /// tables.
   static Future<ObservationIndex> open(
     DatabaseFactory factory,
     String path,
   ) async {
     var migrated = false;
+    Future<void> recreate(Database db, int from, int to) async {
+      await db.execute('DROP TABLE IF EXISTS detections');
+      await db.execute('DROP TABLE IF EXISTS sessions');
+      await _createSchema(db);
+      migrated = true;
+    }
+
     final db = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: schemaVersion,
         onCreate: (db, _) => _createSchema(db),
-        onUpgrade: (db, _, _) async {
-          await db.execute('DROP TABLE IF EXISTS detections');
-          await db.execute('DROP TABLE IF EXISTS sessions');
-          await _createSchema(db);
-          migrated = true;
-        },
+        onUpgrade: recreate,
+        onDowngrade: recreate,
       ),
     );
+    if (!migrated &&
+        (!await _hasColumns(db, 'sessions', _sessionColumns) ||
+            !await _hasColumns(db, 'detections', _detectionColumns))) {
+      await db.transaction((txn) async {
+        await txn.execute('DROP TABLE IF EXISTS detections');
+        await txn.execute('DROP TABLE IF EXISTS sessions');
+      });
+      await _createSchema(db);
+      migrated = true;
+    }
     final index = ObservationIndex._(db);
     index._needsRebuild = migrated;
     return index;
@@ -190,6 +268,46 @@ class ObservationIndex {
 
   /// True when a schema upgrade emptied the derived tables.
   bool get needsRebuild => _needsRebuild;
+
+  /// Columns of the derived tables, as [_createSchema] makes them.
+  static const _sessionColumns = {
+    'id',
+    'type',
+    'start_ms',
+    'end_ms',
+    'latitude',
+    'longitude',
+    'detection_count',
+  };
+  static const _detectionColumns = {
+    'key',
+    'session_id',
+    'position',
+    'scientific_name',
+    'common_name',
+    'start_ms',
+    'end_ms',
+    'local_hour',
+    'local_month',
+    'local_day',
+    'confidence',
+    'review_status',
+    'latitude',
+    'longitude',
+    'clip_path',
+    'source',
+    'evidence',
+  };
+
+  static Future<bool> _hasColumns(
+    Database db,
+    String table,
+    Set<String> expected,
+  ) async {
+    final rows = await db.rawQuery('PRAGMA table_info($table)');
+    final actual = {for (final row in rows) row['name']! as String};
+    return actual.length == expected.length && actual.containsAll(expected);
+  }
 
   static Future<void> _createSchema(Database db) async {
     await db.execute('''
@@ -204,7 +322,7 @@ class ObservationIndex {
       )''');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS detections (
-        key TEXT PRIMARY KEY,
+        key TEXT NOT NULL,
         session_id TEXT NOT NULL,
         position INTEGER NOT NULL,
         scientific_name TEXT NOT NULL,
@@ -218,7 +336,10 @@ class ObservationIndex {
         review_status TEXT NOT NULL,
         latitude REAL,
         longitude REAL,
-        clip_path TEXT
+        clip_path TEXT,
+        source TEXT NOT NULL,
+        evidence TEXT,
+        PRIMARY KEY (key, position)
       )''');
     await db.execute(
       'CREATE INDEX IF NOT EXISTS det_species ON detections(scientific_name)',
@@ -433,10 +554,12 @@ class ObservationIndex {
 
   /// Newest detection (rejected ones and « unknown species » aside), for the
   /// home screen's « Dernier oiseau entendu » (J6c).
-  Future<IndexedDetection?> lastDetection() async {
+  Future<IndexedDetection?> lastDetection({bool heardOnly = false}) async {
     final rows = await _db.rawQuery(
       "SELECT * FROM detections WHERE review_status != 'rejected' "
-      'AND scientific_name != ? ORDER BY start_ms DESC LIMIT 1',
+      'AND scientific_name != ? '
+      '${heardOnly ? "AND (evidence IN ('heard', 'heardAndSeen') OR (evidence IS NULL AND source = 'auto')) " : ''}'
+      'ORDER BY start_ms DESC LIMIT 1',
       [DetectionRecord.unknownSpeciesName],
     );
     return rows.isEmpty ? null : IndexedDetection.fromRow(rows.first);
@@ -619,6 +742,120 @@ class ObservationIndex {
       ],
     );
     return {for (final row in rows) row['scientific_name']! as String};
+  }
+
+  /// Review state of every species heard (rejected detections and
+  /// « unknown species » aside), for the notebook (J6e).
+  Future<List<SpeciesReviewTally>> speciesReviewTallies() async {
+    final rows = await _db.rawQuery(
+      'SELECT scientific_name, MAX(common_name) AS common_name, '
+      'COUNT(*) AS contacts, '
+      "SUM(review_status = 'confirmed') AS confirmed, "
+      "SUM(review_status = 'unreviewed' AND key NOT IN "
+      '(SELECT key FROM review_skipped)) AS in_queue '
+      "FROM detections WHERE review_status != 'rejected' "
+      'AND scientific_name != ? GROUP BY scientific_name',
+      [DetectionRecord.unknownSpeciesName],
+    );
+    return [
+      for (final row in rows)
+        SpeciesReviewTally(
+          scientificName: row['scientific_name']! as String,
+          commonName: row['common_name']! as String,
+          contacts: row['contacts']! as int,
+          confirmed: row['confirmed']! as int,
+          inQueue: row['in_queue']! as int,
+        ),
+    ];
+  }
+
+  /// Unreviewed detections with a score of at least [minScore], of species
+  /// never confirmed, best score first: the ones that may count as « Sûr »
+  /// once the geo-model says the species is plausible there (J6e).
+  Future<List<IndexedDetection>> sureCandidates({
+    required double minScore,
+  }) async {
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE review_status = 'unreviewed' "
+      'AND confidence >= ? AND scientific_name != ? '
+      'AND scientific_name NOT IN (SELECT scientific_name FROM detections '
+      "WHERE review_status = 'confirmed') "
+      'ORDER BY confidence DESC, start_ms DESC',
+      [minScore, DetectionRecord.unknownSpeciesName],
+    );
+    return rows.map(IndexedDetection.fromRow).toList();
+  }
+
+  /// Keys of the detections of [scientificName] waiting in the quick review.
+  Future<Set<String>> reviewKeysFor(String scientificName) async {
+    final rows = await _db.rawQuery(
+      "SELECT key FROM detections WHERE review_status = 'unreviewed' "
+      'AND scientific_name = ? AND key NOT IN (SELECT key FROM review_skipped)',
+      [scientificName],
+    );
+    return {for (final row in rows) row['key']! as String};
+  }
+
+  /// Every indexed listening: id, start, end and place (J6e: série, early
+  /// starts, dawn chorus).
+  Future<List<IndexedListening>> listenings() async {
+    final rows = await _db.rawQuery(
+      'SELECT id, start_ms, end_ms, latitude, longitude FROM sessions',
+    );
+    return [
+      for (final row in rows)
+        IndexedListening(
+          id: row['id']! as String,
+          start: DateTime.fromMillisecondsSinceEpoch(
+            row['start_ms']! as int,
+            isUtc: true,
+          ),
+          end: switch (row['end_ms']) {
+            final int ms => DateTime.fromMillisecondsSinceEpoch(
+              ms,
+              isUtc: true,
+            ),
+            _ => null,
+          },
+          latitude: row['latitude'] as double?,
+          longitude: row['longitude'] as double?,
+        ),
+    ];
+  }
+
+  /// Detections confirmed, or unreviewed with a score of at least
+  /// [minScore], in the listenings [sessionIds] (J6e: dawn chorus).
+  Future<List<IndexedDetection>> verifiedCandidatesIn(
+    Set<String> sessionIds, {
+    required double minScore,
+  }) async {
+    if (sessionIds.isEmpty) return const [];
+    // Filtered in Dart, like [reviewQueue]: too many ids for SQLite.
+    final rows = await _db.rawQuery(
+      "SELECT * FROM detections WHERE (review_status = 'confirmed' OR "
+      "(review_status = 'unreviewed' AND confidence >= ?)) "
+      'AND scientific_name != ?',
+      [minScore, DetectionRecord.unknownSpeciesName],
+    );
+    return [
+      for (final row in rows)
+        if (sessionIds.contains(row['session_id']))
+          IndexedDetection.fromRow(row),
+    ];
+  }
+
+  /// Detections answered in the quick review: confirmed, rejected or
+  /// « Je ne sais pas » (J6e: Réviseur badge).
+  Future<int> reviewedCount() async {
+    final answered = Sqflite.firstIntValue(
+      await _db.rawQuery(
+        "SELECT COUNT(*) FROM detections WHERE review_status != 'unreviewed'",
+      ),
+    );
+    final skipped = Sqflite.firstIntValue(
+      await _db.rawQuery('SELECT COUNT(*) FROM review_skipped'),
+    );
+    return (answered ?? 0) + (skipped ?? 0);
   }
 
   /// Number of detections waiting in the quick review.

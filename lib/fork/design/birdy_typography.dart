@@ -147,6 +147,17 @@ abstract final class BirdyText {
     letterSpacing: 0,
   );
 
+  /// Hero number 64, tabular figures: one per screen at most (the quiz
+  /// score).
+  static const TextStyle numberHero = TextStyle(
+    fontFamily: BirdyFonts.sans,
+    fontSize: 64,
+    height: 1,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   /// Number XL 34, tabular figures.
   static const TextStyle numberXL = TextStyle(
     fontFamily: BirdyFonts.sans,

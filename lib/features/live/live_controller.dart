@@ -56,6 +56,7 @@ import '../inference/species_ignore_filter.dart';
 import '../../fork/replay/replay_guard.dart'; // FORK: replay during listening
 import '../../fork/live/inference_timing.dart'; // FORK: timing (J6c-bis-a)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
+import '../../fork/live/live_position.dart'; // FORK: GPS track (J6c)
 import '../recording/recording_service.dart';
 import 'live_session.dart';
 
@@ -130,6 +131,10 @@ class LiveController {
 
   /// FORK: « Analyse… » and quick end of « chante », per cycle (J6c-bis-b).
   final LiveCycleTracker _forkCycleTracker = LiveCycleTracker();
+  Timer? _forkCycleExpiryTimer; // FORK: J6c-bis-b cycle expiry
+
+  /// FORK: follows the phone during a Live session (J6c GPS track).
+  final LivePositionTracker forkPosition = LivePositionTracker();
   final ValueNotifier<LiveCycleSignal> forkCycle = ValueNotifier(
     LiveCycleSignal.empty,
   );
@@ -443,6 +448,8 @@ class LiveController {
     double? latitude,
     double? longitude,
     bool clearRingBuffer = true,
+    bool forkTrackPosition = false, // FORK: GPS track (J6c)
+    bool forkStartPositionUncertain = false, // FORK: GPS track (J6c)
   }) async {
     if (_state != LiveState.ready) return;
 
@@ -492,6 +499,7 @@ class LiveController {
     );
     _clipWriter.reset();
     _replayGuard.reset(); // FORK: replay (J2)
+    _cancelForkCycleExpiry(); // FORK: J6c-bis-b cycle expiry
     _forkCycleTracker.reset(); // FORK: J6c-bis-b
     _sessionGeneration++;
     _confidenceThreshold = confidenceThreshold;
@@ -561,6 +569,13 @@ class LiveController {
     _state = LiveState.active;
     onSessionStarted?.call();
     _notifyListeners();
+    if (forkTrackPosition) {
+      // FORK: GPS track (J6c), never delays the listening.
+      forkPosition.begin(
+        startingSession,
+        startPositionUncertain: forkStartPositionUncertain,
+      );
+    }
 
     startingSession.startSegment();
     _segmentStart = DateTime.now();
@@ -592,7 +607,8 @@ class LiveController {
     }
     _syncSessionDetections();
     _closeRecordingSegment();
-    forkCycle.value = _forkCycleTracker.pause(); // FORK: J6c-bis-b
+    _pauseForkCycle(); // FORK: J6c-bis-b cycle expiry
+    forkPosition.pause(); // FORK: GPS track (J6c)
 
     _state = LiveState.paused;
     _notifyListeners();
@@ -615,6 +631,7 @@ class LiveController {
 
     _session?.startSegment();
     _segmentStart = DateTime.now();
+    forkPosition.resume(); // FORK: GPS track (J6c)
 
     debugPrint('[LiveController] session resumed');
 
@@ -642,6 +659,8 @@ class LiveController {
 
     // If still active, stop the schedule first.
     _windowDriver.cancelPendingWakeup();
+    _pauseForkCycle(); // FORK: J6c-bis-b cycle expiry
+    forkPosition.end(); // FORK: GPS track (J6c)
 
     _sessionGeneration++;
     _closeRecordingSegment();
@@ -722,7 +741,7 @@ class LiveController {
   Future<void> replayClip(String clipPath) async {
     await stopReplay();
     _replayGuard.begin(ringBuffer.totalWritten);
-    forkCycle.value = _forkCycleTracker.pause(); // FORK: J6c-bis-b
+    _pauseForkCycle(); // FORK: J6c-bis-b cycle expiry
     replayingClip.value = clipPath;
     try {
       await _replayPlayer.setFilePath(clipPath);
@@ -822,6 +841,9 @@ class LiveController {
 
   /// Dispose of all resources.
   Future<void> dispose() async {
+    _sessionGeneration++; // FORK: J6c-bis-b cycle expiry
+    _cancelForkCycleExpiry();
+    forkPosition.end(); // FORK: GPS track (J6c)
     _windowDriver.stop();
     await _isolate.stop();
     await _player.dispose();
@@ -919,6 +941,7 @@ class LiveController {
         final cycle = _accumulator!.processCycle(
           detections: filteredDetections,
           windowEnd: audioReadAt,
+          createRecord: forkPosition.createRecord, // FORK: GPS track (J6c)
         );
         for (final closed in cycle.closedRecords) {
           _clipWriter.forget(closed);
@@ -954,7 +977,8 @@ class LiveController {
               AnnouncementDetection(
                 speciesId: d.species.scientificName,
                 displayName: d.species.commonName,
-                score: d.confidence,
+                score:
+                    d.effectiveDecisionConfidence, // FORK: pooled decision score
                 at: d.timestamp ?? DateTime.now(),
               ),
           ];
@@ -978,11 +1002,20 @@ class LiveController {
         geoNames: geoNames,
         windowEnd: audioReadAt,
         window: Duration(seconds: windowDuration),
+        // FORK: J6c-bis-b cycle expiry.
+        expectedHop: Duration(
+          microseconds:
+              (Duration.microsecondsPerSecond /
+                      _session!.settings.inferenceRate)
+                  .round(),
+        ),
+        processedAt: DateTime.now(),
         replayHeard: forkReplayHeard(
           window.windowEndSample - audioSamples.length,
           window.windowEndSample,
         ),
       );
+      _armForkCycleExpiry(); // FORK: J6c-bis-b cycle expiry
 
       // Always notify — even when the list becomes empty (species dropped
       // below threshold), so the current-vocalizing UI clears stale rows.
@@ -992,10 +1025,45 @@ class LiveController {
     } catch (e, st) {
       // Inference errors are logged but don't stop the session.
       debugPrint('[LiveController] inference ERROR: $e\n$st');
+      // FORK: J6c-bis-b cycle expiry.
+      if (generation != _sessionGeneration) return;
       _errorMessage = e.toString();
+      _pauseForkCycle(); // FORK: J6c-bis-b cycle expiry
     } finally {
       _inferring = false;
     }
+  }
+
+  // FORK: J6c-bis-b cycle expiry.
+  void _cancelForkCycleExpiry() {
+    _forkCycleExpiryTimer?.cancel();
+    _forkCycleExpiryTimer = null;
+  }
+
+  void _pauseForkCycle() {
+    _cancelForkCycleExpiry();
+    forkCycle.value = _forkCycleTracker.pause();
+  }
+
+  /// A stopped capture or failed inference must not leave a bird looking
+  /// active indefinitely. The tracker also rejects old backlogged results.
+  void _armForkCycleExpiry() {
+    _cancelForkCycleExpiry();
+    final remaining = _forkCycleTracker.remainingLifetime(DateTime.now());
+    if (remaining == null || _state != LiveState.active) return;
+    final generation = _sessionGeneration;
+    _forkCycleExpiryTimer = Timer(remaining, () {
+      _forkCycleExpiryTimer = null;
+      if (generation != _sessionGeneration || _state != LiveState.active) {
+        return;
+      }
+      final expired = _forkCycleTracker.expire(DateTime.now());
+      if (expired != null) {
+        forkCycle.value = expired;
+      } else {
+        _armForkCycleExpiry();
+      }
+    });
   }
 
   void _closeRecordingSegment() {
@@ -1026,6 +1094,8 @@ class LiveController {
   /// Clear the session state to prepare for a fresh run.
   void clearSessionState() {
     _sessionGeneration++;
+    _cancelForkCycleExpiry(); // FORK: J6c-bis-b cycle expiry
+    forkPosition.end(); // FORK: GPS track (J6c)
     _session = null;
     _segmentStart = null;
     _errorMessage = null;

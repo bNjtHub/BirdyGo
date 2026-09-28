@@ -287,6 +287,8 @@ abstract final class PostProcessor {
   ///
   /// This is separate from LME scoring: LME preserves high peaks, while this
   /// gate prevents a single unsupported peak from becoming a first detection.
+  /// A new detection also needs support in the current window: old evidence
+  /// alone must not open a contact after the sound has ended.
   static bool hasTemporalSupport({
     required List<List<double>> windowScores,
     required int index,
@@ -298,6 +300,8 @@ abstract final class PostProcessor {
     if (minSupportWindows <= 1) return true;
 
     final latest = windowScores.last[index];
+    // FORK: a new contact needs support in the current window.
+    if (latest < supportThreshold) return false;
     if (latest >= veryHighImmediateThreshold) return true;
 
     var supportingWindows = 0;

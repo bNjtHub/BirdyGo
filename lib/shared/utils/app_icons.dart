@@ -21,6 +21,8 @@ abstract final class AppIcons {
   static const IconData airplaneTicket = Symbols.airplane_ticket;
   static const IconData arrowBackRounded = Symbols.arrow_back_rounded;
   static const IconData arrowDownward = Symbols.arrow_downward;
+  static const IconData arrowForwardRounded =
+      Symbols.arrow_forward_rounded; // FORK: quiz « Continuer » (J6e)
   static const IconData arrowDropUpRounded = Symbols.arrow_drop_up_rounded;
   // Keep style-explicit names when outlined and rounded variants are both used.
   static const IconData audioFileOutlined = Symbols.audio_file;
@@ -55,6 +57,7 @@ abstract final class AppIcons {
   static const IconData cloud = Symbols.cloud;
   static const IconData cloudy = Symbols.cloudy;
   static const IconData code = Symbols.code;
+  static const IconData contrast = Symbols.contrast; // FORK: « peu commun » mark (J6e)
   static const IconData contentCut = Symbols.content_cut;
   static const IconData darkMode = Symbols.dark_mode;
   static const IconData deleteOutline = Symbols.delete;
@@ -89,9 +92,12 @@ abstract final class AppIcons {
   static const IconData graphicEqRounded = Symbols.graphic_eq_rounded;
   static const IconData gridViewRounded = Symbols.grid_view_rounded;
   static const IconData hearing = Symbols.hearing;
+  static const IconData headphones =
+      Symbols.headphones; // FORK: « Oreille fine » badge (J6e)
   static const IconData helpOutline = Symbols.help;
   static const IconData helpOutlineRounded = Symbols.help_outline_rounded;
   static const IconData hourglassTopRounded = Symbols.hourglass_top_rounded;
+  static const IconData home = Symbols.home; // FORK: bottom navigation (J6e)
   static const IconData imageNotSupported = Symbols.image_not_supported;
   static const IconData infoOutline = Symbols.info;
   static const IconData landscapeRounded = Symbols.landscape_rounded;
@@ -106,6 +112,7 @@ abstract final class AppIcons {
   static const IconData locationOnFilled = Icons.location_on;
   static const IconData locationOnRounded = Symbols.location_on_rounded;
   static const IconData layers = Symbols.layers; // FORK: map base layers (J5)
+  static const IconData leaderboard = Symbols.leaderboard; // FORK: Palmarès (J6e)
   static const IconData lockOutline = Symbols.lock;
   static const IconData map = Symbols.location_on;
   static const IconData mapSheet = Symbols.map;
@@ -222,4 +229,11 @@ abstract final class AppIcons {
   static const IconData wbSunny = Symbols.wb_sunny;
   static const IconData wbTwilightRounded = Symbols.wb_twilight_rounded;
   static const IconData weatherSnowy = Symbols.weather_snowy;
+  // FORK: quiz « Qui chante ? » v2, Material Symbols Rounded (J6e).
+  static const IconData quizBird = Symbols.raven_rounded; // FORK: quiz
+  static const IconData quizCheck = Symbols.check_rounded; // FORK: quiz
+  static const IconData quizClose = Symbols.close_rounded; // FORK: quiz
+  static const IconData quizSpark = Symbols.auto_awesome_rounded; // FORK: quiz
+  static const IconData quizStar = Symbols.star_rounded; // FORK: quiz
+  static const IconData quizStop = Symbols.stop_rounded; // FORK: quiz
 }

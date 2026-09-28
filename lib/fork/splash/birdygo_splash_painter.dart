@@ -1,83 +1,411 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../design/birdy_tokens.dart';
 import '../home/birdygo_logo.dart';
 
-/// Keeps the exact brand paths and colors, framed like the supplied SVG.
-class BirdyGoSplashPainter extends CustomPainter {
-  BirdyGoSplashPainter({required this.progress, this.reducedMotion = false})
-    : super(repaint: progress);
+/// Timeline of the startup screen, in milliseconds since it appeared
+/// (Claude Design board « BirdyGo Splash »), in three acts: the bird arrives
+/// (0 to 1 s), sings (from [firstPhrase]), then the name comes
+/// ([wordmark], [taglineFirst], [taglineSecond], [footer]).
+abstract final class BirdyGoSplashTimeline {
+  // Act 1: arrival.
 
-  final Animation<double> progress;
-  final bool reducedMotion;
+  /// Fade-in of the bird.
+  static const double birdFade = 380;
 
-  static final _bird = BirdyGoLogoPainter(
-    progress: const AlwaysStoppedAnimation(1),
-  );
+  /// Rise and back-eased growth of the bird.
+  static const double arrival = 850;
+
+  /// Travel of the rise, in view-box units.
+  static const double arrivalTravel = 12;
+
+  /// Wing bars: the first starts to draw at [barsStart], each next one
+  /// [barsStagger] later, each in [barsDraw].
+  static const double barsStart = 450;
+  static const double barsStagger = 60;
+  static const double barsDraw = 500;
+
+  // Act 2: song.
+
+  /// First phrase, time between two phrases, between two syllables, and the
+  /// length of a syllable.
+  static const double firstPhrase = 1150;
+  static const double phrasePeriod = 6500;
+  static const double syllable = 400;
+  static const double syllableLength = 360;
+
+  /// A note leaves the beak [noteDelay] after its syllable starts and flies
+  /// for [noteLife].
+  static const double noteDelay = 80;
+  static const double noteLife = 1300;
+
+  /// Breathing of the resting bird: starts at [breatheStart], fades in over
+  /// [breatheRamp], period 2π × [breathePeriod], amplitude [breatheAmount].
+  static const double breatheStart = 2400;
+  static const double breatheRamp = 900;
+  static const double breathePeriod = 540;
+  static const double breatheAmount = .007;
+
+  /// Blinks: the first at [blinkStart], then every [blinkEvery], each
+  /// lasting [blinkLength].
+  static const double blinkStart = 4300;
+  static const double blinkEvery = 4200;
+  static const double blinkLength = 150;
+
+  // Act 3: the name.
+
+  /// The centred block (mark, wordmark, tagline) starts [columnTravel] dp
+  /// lower and rises from [columnRise] for [columnRiseLength].
+  static const double columnRise = 2150;
+  static const double columnRiseLength = 800;
+  static const double columnTravel = 56;
+
+  /// When each text block starts to enter.
+  static const double wordmark = 2350;
+  static const double taglineFirst = 2750;
+  static const double taglineSecond = 3300;
+
+  /// Length of a text entrance, its travel and its starting blur, in dp.
+  static const double textEnter = 650;
+  static const double textTravel = 10;
+  static const double textBlur = 4;
+
+  /// Fade-in of the footer (loading bar, attribution).
+  static const double footer = 3800;
+  static const double footerFade = 700;
+
+  /// Everything has entered: the intro is settled.
+  static const double settled = footer + footerFade;
+
+  /// Time constant of the loading bar catching up with the real progress.
+  static const double barEase = 180;
+
+  /// Quartic ease-out of the board, clamped to 0..1.
+  static double easeOut(double v) =>
+      1 - math.pow(1 - v.clamp(0.0, 1.0), 4).toDouble();
+
+  /// Smoothstep, clamped to 0..1.
+  static double smooth(double v) {
+    final c = v.clamp(0.0, 1.0);
+    return c * c * (3 - 2 * c);
+  }
+
+  /// Cubic ease-in-out, clamped to 0..1.
+  static double easeInOut(double v) {
+    final c = v.clamp(0.0, 1.0);
+    return c < .5 ? 4 * c * c * c : 1 - math.pow(-2 * c + 2, 3).toDouble() / 2;
+  }
+
+  /// Back ease-out: overshoots a little past 1, then settles.
+  static double backOut(double v) {
+    final c = v.clamp(0.0, 1.0) - 1;
+    return 1 + 2.2 * c * c * c + 1.2 * c * c;
+  }
+
+  /// Progress of a text entrance starting at [at], 0..1.
+  static double textEntrance(double t, double at) =>
+      easeOut((t - at) / textEnter);
+
+  /// Downward offset of the centred block, in dp.
+  static double columnOffset(double t) =>
+      columnTravel * (1 - easeInOut((t - columnRise) / columnRiseLength));
+
+  /// Opacity of the footer.
+  static double footerOpacity(double t) => smooth((t - footer) / footerFade);
+}
+
+typedef _Timeline = BirdyGoSplashTimeline;
+
+/// The BirdyGo mark singing: three syllables per phrase. On each one the beak
+/// opens, the body swells, the tail and the wing bars move and a note leaves
+/// the beak. Between phrases the bird breathes and blinks.
+///
+/// [clock] is the time since the splash appeared, in milliseconds. With
+/// [loop] off the bird sings one phrase only; [still] draws the settled mark
+/// (reduced motion).
+class BirdyGoSingingPainter extends CustomPainter {
+  BirdyGoSingingPainter({
+    required this.clock,
+    this.loop = true,
+    this.still = false,
+  }) : super(repaint: clock);
+
+  final ValueListenable<double> clock;
+  final bool loop;
+  final bool still;
+
+  /// Source view box of the board: x -80, y 10, 570 × 450.
+  static const Size viewBox = Size(570, 450);
+
+  /// Start of the first phrase and time between two phrases of the loop.
+  /// The home logo (`SingingLogo`) plays one phrase at a time with them.
+  static const double firstPhrase = BirdyGoSplashTimeline.firstPhrase;
+  static const double phrasePeriod = BirdyGoSplashTimeline.phrasePeriod;
+
+  /// Length of one phrase, until its last note has faded; the mark is
+  /// settled again after it.
+  static const double phraseLength = 2 * _syllable + _noteDelay + _noteLife;
+
+  static const double _syllable = BirdyGoSplashTimeline.syllable;
+  static const double _syllableLength = BirdyGoSplashTimeline.syllableLength;
+  static const double _noteDelay = BirdyGoSplashTimeline.noteDelay;
+  static const double _noteLife = BirdyGoSplashTimeline.noteLife;
+  static const double _settled = 1e7;
+  static const double _never = -1e9;
+
+  static const Offset _beakHinge = Offset(118.1, 202.6);
+
+  /// The tail swings about its root (Claude Design « BirdyGo Splash »).
+  static const Offset _tailHinge = Offset(414.2, 285.3);
+
+  /// The logo's tail, extended into the body: when it swings, no gap opens
+  /// between tail and body (the extension is hidden under the body).
+  static final Path _singingTail = Path.from(BirdyGoLogoPainter.tail)
+    ..addPolygon(const [
+      Offset(414.2, 285.3),
+      Offset(412, 300),
+      Offset(360, 295),
+      Offset(335, 205),
+      Offset(364.4, 181.4),
+    ], true);
+  static const Offset _feet = Offset(277.4, 423.7);
+  static const Offset _eye = Offset(176.2, 172.6);
+
+  /// Pulse of each wing bar while singing.
+  static const List<double> _barPulse = [.08, .13, .10, .16];
+
+  static const List<Color> _noteColors = [
+    BirdyBrand.kingfisher,
+    BirdyGoLogoPainter.lowerBeakColor,
+    BirdyGoLogoPainter.plumageBottom,
+  ];
+
+  static final Path _noteFlag =
+      Path()
+        ..moveTo(6, -14)
+        ..cubicTo(9, -8, 22, -6, 14, 5)
+        ..cubicTo(17, -4, 8, -3, 6, -5)
+        ..close();
+
+  static void _rotateAbout(Canvas canvas, Offset origin, double degrees) =>
+      canvas
+        ..translate(origin.dx, origin.dy)
+        ..rotate(degrees * math.pi / 180)
+        ..translate(-origin.dx, -origin.dy);
+
+  static void _stretchAbout(Canvas canvas, Offset origin, double scaleY) =>
+      canvas
+        ..translate(origin.dx, origin.dy)
+        ..scale(1, scaleY)
+        ..translate(-origin.dx, -origin.dy);
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.save();
-    canvas.scale(size.width / 530, size.height / 368);
-    canvas.translate(52, -72);
-    _bird.paint(canvas, const Size.square(512));
-
-    // Three notes leave the beak in sequence. Each follows its own small arc;
-    // their staggered fades end before the introduction completes.
+    final t = still ? _settled : clock.value;
+    final phrase =
+        still || t < firstPhrase
+            ? -1
+            : loop
+            ? ((t - firstPhrase) / phrasePeriod).floor()
+            : 0;
+    // Time inside the current phrase.
+    final p = phrase < 0 ? _never : t - (firstPhrase + phrase * phrasePeriod);
+    // How open the beak is, 0..1.
+    var song = 0.0;
     for (var i = 0; i < 3; i++) {
-      final t = ((progress.value - .1583 - i * .125) / .5).clamp(0.0, 1.0);
-      if (reducedMotion || t <= 0 || t >= 1) continue;
-      final fadeIn = Curves.easeOut.transform((t / .18).clamp(0.0, 1.0));
-      final fadeOut =
-          1 - Curves.easeInOut.transform(((t - .48) / .52).clamp(0.0, 1.0));
+      final u = (p - i * _syllable) / _syllableLength;
+      if (u > 0 && u < 1) song = math.max(song, math.sin(math.pi * u));
+    }
+
+    canvas.save();
+    canvas.scale(size.width / viewBox.width, size.height / viewBox.height);
+    canvas.translate(80, -10);
+
+    final lift = _Timeline.easeOut(t / _Timeline.arrival);
+    final breathe =
+        still
+            ? 1.0
+            : 1 +
+                _Timeline.breatheAmount *
+                    math.sin(
+                      (t - _Timeline.breatheStart) / _Timeline.breathePeriod,
+                    ) *
+                    _Timeline.smooth(
+                      (t - _Timeline.breatheStart) / _Timeline.breatheRamp,
+                    );
+    final grow = (.9 + .1 * _Timeline.backOut(t / _Timeline.arrival)) * breathe;
+    final opacity = (t / _Timeline.birdFade).clamp(0.0, 1.0);
+    if (opacity < 1) {
+      canvas.saveLayer(null, Paint()..color = Color.fromRGBO(0, 0, 0, opacity));
+    } else {
+      canvas.save();
+    }
+    canvas
+      ..translate(0, _Timeline.arrivalTravel * (1 - lift))
+      ..translate(_feet.dx, _feet.dy)
+      ..rotate(-2.5 * song * math.pi / 180)
+      ..scale(grow * (1 - .014 * song), grow * (1 + .045 * song))
+      ..translate(-_feet.dx, -_feet.dy);
+
+    final plumage =
+        Paint()
+          ..shader = ui.Gradient.linear(
+            const Offset(165, 97.7),
+            const Offset(361.7, 434.9),
+            const [
+              BirdyGoLogoPainter.plumageTop,
+              BirdyGoLogoPainter.plumageBottom,
+            ],
+          );
+
+    canvas.save();
+    _rotateAbout(canvas, _tailHinge, -5 * song);
+    canvas
+      ..drawPath(_singingTail, plumage)
+      ..restore();
+
+    for (final (path, color, degrees) in [
+      (
+        BirdyGoLogoPainter.lowerBeak,
+        BirdyGoLogoPainter.lowerBeakColor,
+        -11 * song,
+      ),
+      (BirdyGoLogoPainter.upperBeak, BirdyBrand.oriole, 13 * song),
+    ]) {
+      canvas.save();
+      _rotateAbout(canvas, _beakHinge, degrees);
+      canvas
+        ..drawPath(path, Paint()..color = color)
+        ..drawPath(
+          path,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 12
+            ..strokeJoin = StrokeJoin.round,
+        )
+        ..restore();
+    }
+
+    canvas.drawPath(BirdyGoLogoPainter.body, plumage);
+
+    for (final (i, (from, to, color)) in BirdyGoLogoPainter.bars.indexed) {
+      final drawn = _Timeline.easeOut(
+        (t - _Timeline.barsStart - i * _Timeline.barsStagger) /
+            _Timeline.barsDraw,
+      );
+      if (drawn == 0) continue;
+      final pulse =
+          song == 0
+              ? 1.0
+              : 1 + song * _barPulse[i] * math.sin(p / 60 + i * 1.7);
+      canvas.save();
+      _stretchAbout(canvas, Offset.lerp(from, to, .5)!, pulse);
+      canvas
+        ..drawLine(
+          from,
+          Offset.lerp(from, to, drawn)!,
+          Paint()
+            ..color = color
+            ..strokeWidth = 30
+            ..strokeCap = StrokeCap.round,
+        )
+        ..restore();
+    }
+
+    final b =
+        still || t < _Timeline.blinkStart
+            ? -1.0
+            : ((t - _Timeline.blinkStart) % _Timeline.blinkEvery) /
+                _Timeline.blinkLength;
+    final blink = b > 0 && b < 1 ? math.sin(math.pi * b) : 0.0;
+    canvas.save();
+    _stretchAbout(canvas, _eye, 1 - .9 * blink);
+    canvas
+      ..drawCircle(_eye, 18.7, Paint()..color = BirdyBrand.ink)
+      ..drawCircle(
+        const Offset(171, 166.6),
+        5.4,
+        Paint()..color = const Color(0xFFFFFFFF),
+      )
+      ..restore();
+    canvas.restore(); // Bird.
+
+    // One note per syllable; the notes of the previous phrase may still fly.
+    for (var i = 0; i < 3; i++) {
+      double? age;
+      for (final k in [phrase, phrase - 1]) {
+        if (k < 0) continue;
+        final a =
+            t - (firstPhrase + k * phrasePeriod + i * _syllable + _noteDelay);
+        if (a >= 0 && a < _noteLife) {
+          age = a;
+          break;
+        }
+      }
+      if (age == null) continue;
+      final u = age / _noteLife;
+      final rise = 1 - math.pow(1 - u, 2).toDouble();
       final paint =
           Paint()
-            ..color = BirdyBrand.kingfisher.withValues(
-              alpha: fadeIn * fadeOut * .9,
+            ..color = _noteColors[i].withValues(
+              alpha:
+                  _Timeline.easeOut(u / .15) *
+                  (1 - _Timeline.smooth((u - .5) / .5)),
             );
-      final eased = Curves.easeOut.transform(t);
-      canvas.save();
-      canvas.translate(
-        22 - i * 23 - 15 * eased + math.sin(t * math.pi * 2) * 3,
-        176 + i * 21 - (46 + i * 10) * eased,
-      );
-      canvas.rotate(-.12 + math.sin(t * math.pi) * .16);
-      canvas.scale(1 - i * .08);
-      canvas.drawOval(const Rect.fromLTWH(-8, 10, 15, 10), paint);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          const Rect.fromLTWH(3, -14, 4, 30),
-          const Radius.circular(2),
-        ),
-        paint,
-      );
-      canvas.drawPath(
-        Path()
-          ..moveTo(6, -14)
-          ..cubicTo(9, -8, 22, -6, 14, 5)
-          ..cubicTo(17, -4, 8, -3, 6, -5)
-          ..close(),
-        paint,
-      );
-      canvas.restore();
+      canvas
+        ..save()
+        ..translate(
+          40 - (34 + i * 18) * rise + math.sin(u * math.pi * 2 + i) * 5,
+          190 - (110 + i * 16) * rise,
+        )
+        ..rotate((-12 + math.sin(u * math.pi) * 14) * math.pi / 180)
+        ..scale((.6 + .4 * _Timeline.easeOut(u / .3)) * 1.7 * (1 - i * .08))
+        ..save();
+      _rotateAbout(canvas, const Offset(-.5, 15), -20);
+      canvas
+        ..drawOval(
+          Rect.fromCenter(center: const Offset(-.5, 15), width: 15, height: 10),
+          paint,
+        )
+        ..restore()
+        ..drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(3, -14, 4, 30),
+            const Radius.circular(2),
+          ),
+          paint,
+        )
+        ..drawPath(_noteFlag, paint)
+        ..restore();
     }
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(BirdyGoSplashPainter oldDelegate) =>
-      oldDelegate.progress != progress ||
-      oldDelegate.reducedMotion != reducedMotion;
+  bool shouldRepaint(BirdyGoSingingPainter oldDelegate) =>
+      oldDelegate.clock != clock ||
+      oldDelegate.loop != loop ||
+      oldDelegate.still != still;
 }
 
-/// An activity sweep, never a made-up percentage of bootstrap completion.
-/// It settles to a quiet track if initialization outlasts the introduction.
+/// The loading bar: filled to the real share of the startup work done
+/// ([fraction], 0..1), never a made-up percentage.
 class BirdyGoLoadingPainter extends CustomPainter {
-  BirdyGoLoadingPainter({required this.progress}) : super(repaint: progress);
+  BirdyGoLoadingPainter({required this.fraction, this.track = lightTrack})
+    : super(repaint: fraction);
 
-  final Animation<double> progress;
+  /// Empty part of the bar on Brume: Encre at 8 %.
+  static const Color lightTrack = Color(0x1413233A);
+
+  final ValueListenable<double> fraction;
+
+  /// Empty part of the bar: Encre at 8 % on Brume, Brume at 12 % on Encre.
+  final Color track;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -85,26 +413,19 @@ class BirdyGoLoadingPainter extends CustomPainter {
       Offset.zero & size,
       const Radius.circular(2),
     );
-    canvas.drawRRect(
-      bounds,
-      Paint()..color = BirdyBrand.ink.withValues(alpha: .1),
-    );
-    final t = progress.value;
-    if (t <= 0 || t >= 1) return;
-    final x = (t * 1.4 - .4) * size.width;
-    canvas.save();
-    canvas.clipRRect(bounds);
+    canvas.drawRRect(bounds, Paint()..color = track);
+    final filled = fraction.value.clamp(0.0, 1.0);
+    if (filled == 0) return;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(x, 0, size.width * .4, size.height),
+        Rect.fromLTWH(0, 0, size.width * filled, size.height),
         const Radius.circular(2),
       ),
       Paint()..color = BirdyBrand.kingfisher,
     );
-    canvas.restore();
   }
 
   @override
   bool shouldRepaint(BirdyGoLoadingPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.fraction != fraction;
 }

@@ -447,8 +447,11 @@ void main() {
       List<LiveTableEntry> entries, {
       bool practice = false,
       Widget Function(bool expanded)? spectrogram,
+      Widget? moment,
+      VoidCallback? onStop,
     }) => LiveListeningLayout(
       practice: practice,
+      moment: moment,
       statusText: 'En écoute',
       live: true,
       capturing: false,
@@ -468,12 +471,43 @@ void main() {
           (expanded) => Text(expanded ? 'spectre agrandi' : 'spectre'),
       phase: LiveControlPhase.active,
       onStart: () {},
-      onStop: () {},
+      onStop: onStop ?? () {},
       onTogglePause: () {},
       onBack: () {},
       onSettings: () {},
       onHelp: () {},
     );
+
+    testWidgets('a moment covers the table, never « Arrêter » (J6e)', (
+      tester,
+    ) async {
+      var stops = 0;
+      for (final size in const [Size(400, 900), Size(900, 400)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          _app(
+            layout(
+              [_entry('Merle', 0)],
+              moment: const ColoredBox(
+                color: Colors.black,
+                child: Center(child: Text('moment')),
+              ),
+              onStop: () => stops++,
+            ),
+            scaffold: false,
+          ),
+        );
+        await tester.pump();
+        expect(find.text('moment'), findsOneWidget);
+        // The row is under the veil: a tap does not reach it.
+        expect(find.text('Merle').hitTestable(), findsNothing);
+        await tester.tap(find.text('Arrêter'));
+      }
+      expect(stops, 2);
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('a recording shows the « Enregistrement » strip', (
       tester,

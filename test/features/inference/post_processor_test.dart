@@ -426,11 +426,11 @@ void main() {
 
     test('keeps a high score from being drowned by arithmetic averaging', () {
       final windows = [
-        [0.90],
-        [0.75],
         [0.10],
         [0.05],
         [0.05],
+        [0.90],
+        [0.75],
       ];
       final average = PostProcessor.average(windows);
       final pooled = PostProcessor.logMeanExp(
@@ -451,6 +451,29 @@ void main() {
       expect(average.single, lessThan(0.5));
       expect(pooled.single, greaterThan(0.85));
       expect(gated.single, pooled.single);
+    });
+
+    test('old support cannot open a new detection in a silent window', () {
+      final windows = [
+        [0.90],
+        [0.75],
+        [0.10],
+        [0.05],
+        [0.05],
+      ];
+      final pooled = PostProcessor.logMeanExp(windows);
+      final gated = PostProcessor.applyTemporalSupportGate(
+        scores: pooled,
+        windowScores: windows,
+        confirmedIndexes: const {},
+        confidenceThreshold: 0.5,
+        supportThreshold: 0.3,
+        minSupportWindows: 2,
+        veryHighImmediateThreshold: 0.98,
+      );
+
+      expect(pooled.single, greaterThan(0.5));
+      expect(gated.single, lessThan(0.0));
     });
 
     test('allows sustained moderate evidence with repeated support', () {

@@ -160,6 +160,13 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 - N'animer que la position, l'échelle et l'opacité. `RepaintBoundary` autour du spectrogramme.
   Pas de `BackdropFilter` sur une zone qui défile : utiliser des flous calculés à l'avance.
 - Animations réduites : si `MediaQuery.disableAnimationsOf(context)` est vrai, ne garder que les fondus.
+- Exception autorisée : le quiz « Qui chante ? » (J6e, maquette « Quiz v2 », `lib/fork/game/quiz_fx.dart`)
+  a droit à un léger rebond (pop 0,6 → 1,08 → 1), aux confettis, aux boucles (oiseau qui flotte,
+  rayons qui tournent, barres de son, halo pulsé), au balancement doux d'une mauvaise réponse et à des
+  effets de plus de 500 ms (« +1 Oreille fine » 1,4 s, barre 900 ms). C'est un jeu, pas un écran de
+  terrain. Avec les animations réduites, tout s'arrête : états finaux immobiles, aucun confetti.
+  Les bruitages (jingle, fanfare) suivent l'interrupteur « Avec son / Sans son » et jamais pendant
+  une écoute Live.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 
@@ -260,11 +267,38 @@ Code dans `lib/fork/home/`, affiché par `HomeScreen` (un seul branchement `// F
 la disposition upstream reste dans le fichier, et le préchargement `_warmUpApp` ne change pas).
 On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 
-- Logo : `birdygo_logo.dart` redessine `birdygo-logo-static.svg` en `CustomPainter` (pas de
-  `flutter_svg` avant J6d). À l'arrivée, les quatre barres de l'aile se dessinent de bas en haut,
-  l'une après l'autre, en 480 ms ; l'oiseau ne bouge pas. Animations réduites : dessiné d'un coup.
+- Logo : l'oiseau qui chante de l'écran de démarrage (`SingingLogo`, `singing_logo.dart`, qui
+  réutilise `BirdyGoSingingPainter`), à la taille de la maquette (40 × 32 dp), suivi du nom
+  « BirdyGo ». Seconde exception explicite, après le démarrage, aux règles des 500 ms et de
+  l'absence de rotation : à l'arrivée de l'accueil, l'oiseau apparaît et chante une phrase (trois
+  syllabes, notes qui s'envolent, environ 3,3 s), puis reste immobile ; il rechante une seule phrase
+  toutes les 2 minutes (`SingingLogo.singEvery`) tant que l'accueil est visible. Jamais de boucle :
+  le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
+  programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
+  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois (pas annoncé au lecteur
+  d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
+  L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
+  couleurs de la marque.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
+- Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
+  dernier oiseau, défi de la semaine, détections à vérifier. Le haut (logo, pastille de série, menu)
+  n'a pas d'entrée ; seul le logo bouge, quand il chante (voir Logo).
+- Objectif du jour, carte principale (`lib/fork/daily_goal/daily_goal_card.dart`) : carte blanche
+  (`surface1`, rayon 28, sans ombre ni dégradé) sur Brume, pastille drapeau, titre, « 5/8 espèces
+  entendues » (le rapport en gras), chevron ; dessous les oiseaux de l'objectif en ronds de 60 dp,
+  2 rangées de 4 (le rond rétrécit si la colonne est trop étroite). Oiseau entendu : rond sur sa
+  teinte d'espèce (`SpeciesAccents`, `tintLight` ou `tintDark`), visuel de 46 dp, coche de 22 dp sur
+  le vert du niveau Sûr (`sure.foreground`, Lichen foncé) cerclée de la couleur de la carte. Oiseau à
+  trouver : visuel gris estompé de 40 dp dans un cercle en pointillé (`dashed`). Chaque rond annonce
+  « <nom> : entendu » ou « <nom> : pas encore entendu ». Toute la carte ouvre l'écran de l'objectif
+  (une seule cible, bien plus grande que 48 dp). Sans objectif du jour : phrase d'invitation et
+  « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
+- La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
+  statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
+  au-dessus de la barre du bas, hors de la zone qui défile.
+- Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
+  sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
   jamais vérifiées avant : même règle que « Première fois » du Bilan, via `verifiedSpecies(before:)`).
   Sans écoute du jour : phrase d'invitation à la place des tuiles.
@@ -275,8 +309,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
 - Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
   Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
   fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
-- Paysage large : salutation et tuiles à gauche, cartes et « Écouter » à droite. Colonne de 600 dp
-  au plus sur tablette.
+- Paysage large : salutation et objectif du jour à gauche ; statut, tuiles, cartes et « Écouter » à
+  droite. Colonne de 600 dp au plus sur tablette.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
   navigation (Accueil, Carnet, Carte, Profil).
 
@@ -338,7 +372,19 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
 
-## Photos
+## Mise en œuvre (J6e-a, navigation et Carnet)
+
+- Barre du bas (`lib/fork/shell/fork_shell.dart`) : `NavigationBar` du thème (80 dp, pastille
+  Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
+  Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
+  garde toutes ses entrées.
+- Carnet (`lib/fork/notebook/`) : titre « Mon carnet » et bouton podium, carte de progression
+  (découvertes, « N sur M espèces attendues ici cette semaine », barre Martin-pêcheur sans gain
+  animé), puces en ligne qui défile, grille de 3 cartes `SpeciesCard` (écart 10). Ordre de « Toutes » :
+  nouvelles, à confirmer, puis par nombre de contacts, un mystère toutes les 3 cartes. Pas d'entrée
+  décalée : c'est un onglet. Marques en haut à droite : demi-disque Écorce (peu commun), losange et
+  étoile Loriot (rare, exceptionnel ici).
+
 
 - Pack embarqué en WebP 480×320 pour les espèces de la région (J6b), disponible hors ligne.
 - Version plus grande en ligne (iNaturalist), cache disque, fondu par-dessus la version embarquée,
@@ -355,6 +401,56 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
+- Quiz « Qui chante ? » v2 (`lib/fork/game/fine_ear_quiz_screen.dart`, pièces dans
+  `fine_ear_quiz_widgets.dart`, `quiz_intro.dart`, `quiz_trail.dart`, `quiz_stage.dart`,
+  `quiz_choices.dart`, `quiz_result.dart`, mouvement dans `quiz_fx.dart`, bruitages dans
+  `quiz_sfx.dart` ; maquette Claude Design « Quiz v2 ») en trois temps. Icônes d'oiseaux dessinées
+  (`assets/fork/species_icons`, `SpeciesIcons`, rendues avec flutter_svg) pour les espèces qui en ont,
+  photo ronde (`SpeciesAvatar`, crédit d'un appui) sinon ; oiseau mystère = icône « mystere »
+  éclaircie comme la maquette (`brightness(2.2)`, matrice de couleur). Couleurs propres au quiz dans
+  `BirdyQuizColors`.
+  Accueil : en-tête retour + interrupteur « Avec son / Sans son » (volume_up / volume_off, piste
+  Martin-pêcheur, choix mémorisé, `kQuizSoundPref`) qui coupe les bruitages, jamais le chant. Puits
+  sombre de 290 dp (dégradé Encre, un filet à 5 % tous les 24 px, rayon 28) : quatre de tes oiseaux
+  flottent dans les coins, au centre l'oiseau mystère (disque pointillé de 128) et cinq barres de son
+  animées. Titre en 34, une phrase, une bande blanche en trois colonnes séparées d'un filet (icône,
+  chiffre 20 en 800, libellé 13 : « 10 chants », « 4 choix », « N de tes oiseaux »), la carte Oreille
+  fine (médaille, « 5 sur 10 », barre Lichen), le bouton « C'est parti ! » de 72 dp avec sa lueur.
+  Question : une croix (« Quitter le quiz », retour à l'accueil) et le chemin de 10 étapes de 24 px
+  fixes : trait de 3 px `line` derrière, trait Martin-pêcheur par-dessus (450 ms) jusqu'au centre de
+  l'étape courante ; étapes à venir = points de 12 cerclés de 3 px de la couleur du fond (le trait ne
+  les traverse jamais), étape courante = cercle de 30 bordé Martin-pêcheur avec son numéro et un halo
+  pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
+  cercle de 20 avec une petite croix. Dessous, « Chant 3 sur 10 » et la pastille Loriot « 3 d'affilée ! ».
+  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : « Oiseau mystère », disque pointillé
+  de 116 qui flotte (±6 px, 3 s), bouton de lecture de 64 entre deux groupes de trois barres qui
+  s'animent seulement pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
+  2 × 2 de cartes de 136 dp (écart 10, rayon 24), icône de 76 sur son halo (elle rétrécit si le nom
+  prend de la place), nom en Fraunces 17 équilibré sur ses lignes. La hauteur de la scène et des cartes
+  s'adapte pour que les deux cartes du bas et « Touche l'oiseau qui chante » / « Continuer » restent
+  visibles en 360 × 640 ; défilement en dernier recours seulement.
+  Bonne réponse : confettis (package confetti, ~110, couleurs de l'oiseau + Loriot, Martin-pêcheur,
+  Lichen) partis de la carte touchée, disparus en ~2 s ; la scène passe sur la teinte claire avec des
+  rayons qui tournent (12 %, un tour en 14 s), l'oiseau apparaît (0,6 → 1,08 → 1, 500 ms), un
+  encouragement en Fraunces 34, puis « C'est bien le merle noir » (article déduit du nom,
+  `french_article.dart`, « C'est bien : Nom » si le genre est inconnu). La bonne carte passe en Lichen
+  (bordure 2,5) avec une coche et un pop, « +1 Oreille fine » s'envole (1,4 s) ; jingle et vibration
+  légère. Mauvaise réponse : carte blanche, « Presque ! », « C'était le … », la carte choisie se
+  balance (420 ms) et prend une croix Écorce, les autres passent à 40 %, la bonne en Lichen ; une
+  note douce, pas de confettis. « Réécouter » (48 dp) en haut à droite de la scène, jamais sur le texte.
+  Bilan : carte héros blanche rayon 28 dont le halo Loriot (32 % → 0 sur 190 px) est la décoration
+  même ; trois étoiles pleines (42/56/42, Loriot ou `line`) qui apparaissent l'une après l'autre, le
+  score en 64, un mot et une phrase ; « Tes oiseaux du jour » en grille 5 × 2 (en couleur avec coche,
+  grisés avec croix, en cascade de 50 ms) ; la carte Oreille fine dont la barre se remplit en 900 ms,
+  « Nouvelle plume » si un palier est franchi ; pluie de confettis et fanfare dès la moitié de bonnes
+  réponses (`GameConfig.quizPartyShare`) ; « Terminer » (contour) et « Rejouer » côte à côte.
+  Mouvement : exception autorisée aux règles de retenue (voir « Animations »), animations réduites =
+  tout est immobile et sans confettis.
+- Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
+  métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
+  est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
+  (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
+  remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
 - Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
   confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
   pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.
@@ -411,6 +507,35 @@ Règles :
 - Textes : clé `<écran>EmptyTitle` pour le titre, `<écran>Empty` pour la phrase, dans `app_fr.arb`
   et `app_en.arb`. Les trois situations sont visibles dans la galerie du design system.
 
+## Astuces (« Le saviez-vous ? »)
+
+Un seul composant, `BirdyTipCard` (`lib/fork/design/widgets/tip_card.dart`), pour toute astuce ou
+anecdote montrée pendant une attente (écoute sans oiseau, chargement long, fin de liste) ;
+`BirdyTipCarousel` pour en faire défiler plusieurs.
+
+- Carte `surface1`, bordure, rayon 20, largeur 460 au plus. À gauche, l'icône de l'astuce (`AppIcons`)
+  dans un disque Loriot clair (`orioleContainer` / `orioleText`) : le Loriot dit « petite découverte ».
+- En tête, une ampoule et « Le saviez-vous ? » en légende Loriot, en minuscules (clé `forkTipHeader`).
+  C'est le seul sur-titre admis, et il reste dans la carte. Puis le titre (`label`) et une ou deux
+  phrases (`bodyCompact`, `text2`).
+- Carrousel : départ au hasard, un appui passe à la suivante (léger enfoncement `Pressable`), défilement
+  seul toutes les 15 s sauf avec un lecteur d'écran, fondu enchaîné de 220 ms (aucun en animations
+  réduites). Des points en bas disent où on en est. La carte garde la hauteur de l'astuce la plus
+  longue : rien ne bouge autour.
+- Icône animée (`BirdyAnimatedIcon`, `lib/fork/design/widgets/birdy_animated_icon.dart`) : nos
+  Material Symbols, joués une fois quand l'astuce arrive, 150 ms après le fondu de la carte, en
+  450 ms. Quatre mouvements : `fill` (l'icône se remplit, par défaut), `drift` (glisse de 6 px :
+  vent, distance), `drop` (descend en place : téléchargement), `pulse` (1 → 1,08 → 1 : son, score).
+  Ni rotation, ni rebond, ni boucle ; état final direct en animations réduites. Pas de pack d'icônes
+  animées externe : les packs gratuits ne couvrent pas nos sujets dans un style unique, et Lordicon
+  gratuit exige un crédit et interdit de publier ses fichiers dans le dépôt public.
+- Une astuce ne fait jamais la leçon : elle donne un truc de terrain ou une curiosité sur les oiseaux.
+
+## Chiffres des tuiles
+
+Le chiffre d'une `StatTile` tient toujours sur une ligne : trop long (« 1:02:47 » après une heure
+d'écoute), il rétrécit à la largeur de la tuile au lieu de passer à la ligne.
+
 ## Contrôle qualité
 
 Contraste AA, thèmes clair et sombre, paysage et tablette (exigence d'upstream), texte agrandi à
@@ -420,25 +545,56 @@ profile sur le Xiaomi (120 quand l'écran le permet), écoute lancée en moins d
 
 ## Startup screen (J6c)
 
-The supplied Claude Design startup board defines the Mist background, 270 × 187 dp
-framing of the original turquoise/gold bird, Fraunces 40 dp wordmark, and bottom loading
-status with BirdNET attribution. The user's chosen tagline replaces the prototype's
-synthetic-song button: "Le monde chante. Écoute." / "The world is singing. Listen."
-No synthetic bird audio is played. The native Android launch background also uses Mist.
+The Claude Design board « BirdyGo Splash » defines the Mist background, the singing bird
+in a 310 × 245 dp frame (narrower screens shrink it), the wordmark « Birdy » in Fraunces
+44 dp, an Oriole dot, then « Go » in Atkinson 42 dp extra-bold (variant « Point Loriot »
+of the board, the user's choice), and the bottom loading status with BirdNET
+attribution. The tagline is "Le monde chante. Écoute." / "The world is singing. Listen."
+No synthetic bird audio is played. The startup follows the device theme, like App by
+default: Mist with Ink text in light mode, Ink with Mist text (secondary text `text2` of the
+dark theme) in dark mode. The native Android launch screen is the same plain color with no
+mark (transparent Android 12+ icon, `values-night/birdygo_colors.xml` for dark), so the bird
+appears only once, fading in with the Flutter splash.
 
-At the user's request, exactly three musical notes replace the decorative sound waves.
-They rise and fade successively in one 2.4-second introduction, with a 250 ms entrance.
-This startup-only motion is an explicit exception to the general 500 ms/no-rotation
-rules; it does not change Home's logo or other app animations. It does not repeat.
-The bottom track shows an activity sweep, not a percentage of bootstrap completion.
-Reduced motion draws the completed composition immediately and adds no intro wait.
-Normal launch waits for both the introduction and real initialization. Explicit audio
-shares and Quick Listen bypass any remaining introduction once their route is ready,
+The startup plays in three acts (times from the moment the splash appears, all in
+`BirdyGoSplashTimeline`). Arrival, 0 to 1 s: the bird fades in (380 ms), rises 12 view-box
+units and grows from 0.9 with a slight back-ease overshoot (850 ms); the wing bars draw
+from 450 ms, 60 ms apart, 500 ms each. Song, from 1.15 s: phrases of three syllables
+(400 ms apart, 360 ms each), every 6.5 s. On each syllable the beak opens, the body swells,
+the tail (extended into the body so no gap opens, swinging 5° about its root, as on the
+Claude Design board) and the wing bars move, and a note leaves the beak (Kingfisher, gold,
+deep teal) and flies for 1.3 s. From 2.4 s the bird breathes (scale ±0.7 %), and it blinks
+at 4.3 s, then every 4.2 s. Name: the centred block (mark, wordmark, tagline) starts 56 dp
+lower and rises from 2.15 s over 800 ms (cubic in-out); the wordmark enters at 2.35 s,
+« Le monde chante. » at 2.75 s and « Écoute. » at 3.3 s, each in 650 ms with 10 dp of
+travel and a blur fading from 4 dp; the footer (loading bar, « Propulsé par BirdNET »)
+fades in from 3.8 s over 700 ms. The phrase repeats for as long as initialization runs.
+This startup-only motion (rotation, back-ease overshoot, breathing, blur, longer
+durations) is an explicit exception to the general 500 ms/no-rotation rules. Home reuses
+the same painter for its logo, one phrase at a time (see « Mise en œuvre (J6c, Accueil) »);
+other app animations are unchanged.
+The splash is a real loading screen. After initialization (preferences, notifications,
+launch intents), it loads in App's provider container the audio model, the geo-model,
+the taxonomy, audio labels and species sheets, and opens (or fills) the observation
+index (`lib/fork/splash/birdygo_warm_up.dart`). The steps run side by side. The bottom
+bar (120 × 3 dp, Ink at 8 % on Mist, Mist at 12 % on Ink, Kingfisher fill) fills with the
+weighted share of the steps done (never a made-up percentage; the board's sweep is not
+used). As on the board, no step caption is shown; a screen reader still hears the first
+step still loading, then « C'est prêt. » (live region). A failed step counts
+as done: the screen that needs the resource reports the error. App opens when loading
+is done and the minimum display of 4.5 s (`BirdyGoSplash.minimumDisplay`: the whole
+intro, until the footer has faded in) has passed; past 25 s of loading
+(`BirdyGoStartup.loadTimeout`) it opens anyway. The location is not loaded here: it may
+ask for a permission, which belongs to the screen that needs it.
+Reduced motion draws the settled composition immediately and adds no wait. Explicit audio
+shares and Quick Listen bypass any remaining wait once their route is ready,
 so an active recording's controls are never hidden just to finish the animation.
+After a startup error the bird stops singing.
 A startup error offers a localized retry. Audio shares and Quick Listen launch intents
 are retained across retries. App mounts behind the splash while their storage checks
 prepare the destination, so Home does not flash during a cold handoff. The upstream
-five-second safety timeout remains. There is no added model load, network image, or dependency.
+five-second safety timeout remains. The models load earlier, not twice: the splash awaits
+the same futures the home screen warms up. No network image or dependency is added.
 
 The content remains centered within 480 dp, with a compact logo in landscape and scrolling
 as a fallback for large text or a short viewport. Android 12 uses a padded VectorDrawable;

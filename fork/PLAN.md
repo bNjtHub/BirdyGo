@@ -480,9 +480,21 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Reportés en J6e : pastille de série, carte de statut, défi de la semaine, barre de
             navigation Accueil, Carnet, Carte, Profil (le menu garde alors les autres entrées). À
             mesurer sur le Xiaomi : l'écoute démarre moins d'une seconde après l'appui.
+      - [x] Accueil visuel (maquette `Main.dc.html` de la PR #47) : l'objectif du jour devient la carte
+            principale sous la salutation, ses oiseaux en grands ronds (2 rangées de 4 ; entendu sur sa
+            teinte avec une coche, à trouver gris en pointillé, chaque rond annoncé au lecteur d'écran) ;
+            ordre de la maquette ; « Écouter » seule action forte, fixée au-dessus de la barre ; entrée
+            de 220 ms sur 5 blocs au plus, rien avec les animations réduites. Logo : l'oiseau qui
+            chante du démarrage, une phrase à l'arrivée puis une toutes les 2 minutes tant que
+            l'accueil est visible (immobile avec les animations réduites).
+            À vérifier sur le Xiaomi : ronds avec les vraies photos, thème sombre, texte à 130 %,
+            chant du logo (à l'arrivée, après 2 minutes, arrêté sur un autre onglet).
       - [x] Startup screen (`lib/fork/splash/`): supplied Claude Design composition,
-            Mist background, localized tagline, three rising/fading musical notes,
-            one 2.4-second introduction, immediate reduced-motion state,
+            Mist background, singing bird (beak, body, tail, wing bars, one note per
+            syllable), « Birdy » · « Go » wordmark with the Oriole dot, tagline in two beats,
+            real loading (audio model, geo-model, species, observation index) with a
+            weighted bar and a caption per step, 4.4-second minimum display, 25-second
+            loading limit, immediate reduced-motion state,
             real bootstrap loading and retry. Launch share and Quick Listen are retained
             across retry; normal launch waits for initialization and introduction. Android launch
             and normal window backgrounds match Flutter, with the current BirdyGo mark.
@@ -600,6 +612,25 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             À vérifier et « Rare ici · à confirmer » (`lib/fork/reliability/levels_sheet.dart`).
       - [x] Chevron agrandir / réduire dans le coin du spectre ; un appui sur le spectre bascule.
       À vérifier sur le Xiaomi : rotation pendant une écoute, lisibilité des noms en petit.
+- [ ] J6c Écoute : position GPS suivie pendant l'écoute (`lib/fork/live/live_position.dart`,
+      PR « J6c Écoute : position GPS suivie pendant l'écoute »).
+      - [x] `LivePositionTracker` sur `SurveyGpsTracker` (interface `LivePositionSource` pour iOS) :
+            démarre après le lancement de l'écoute, sans la retarder ; seulement si « Utiliser le GPS »
+            est actif, la localisation allumée et l'autorisation déjà donnée (jamais de demande).
+            Rien en écoute d'un enregistrement (J5c) ni en position manuelle.
+      - [x] Chaque nouvelle détection reçoit le dernier point mesuré (detLat, detLon) ; avant le
+            premier point, la position de la session si elle est fiable, sinon rien (les lecteurs
+            retombent sur la position de la session, corrigée au premier point).
+      - [x] Position de départ absente ou venue du cache de l'OS : remplacée par le premier point précis.
+      - [x] Trace mesurée gardée dans `gpsTrack` de la session (précision pour la LPO, carte du
+            rapport HTML). Arrêt à la pause, à la fin, en quittant ; reprise avec l'écoute.
+      - [x] Écran éteint : le service Live (J2b) démarre au premier plan et son type manifeste est
+            déjà `microphone|location`, rien à ajouter.
+      - [x] Seuils `liveGpsIntervalSeconds` (10 s), `liveGpsDistanceFilterMeters` (5 m),
+            `liveGpsMaxAccuracyMeters` (30 m) dans `reliability_config.dart`. Localisation
+            « approximative » d'Android seulement journalisée (les points de 2 km sont écartés).
+      - [ ] (Benjamin) Sur le Xiaomi : marche de 10 minutes écran éteint, puis vérifier sur la carte
+            que les contacts sont placés le long du chemin et non tous au point de départ.
 - [ ] J6d Icônes d'espèces en SVG, pour la carte, le tableau en direct et le carnet. Aucune base SVG
       d'oiseaux complète, en couleur et réutilisable n'existe (recherche de septembre 2026) : on la
       construit nous-mêmes, dans le style du logo.
@@ -619,6 +650,93 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau
       statut). Règles : seules les détections Sûr ou confirmées font progresser ; un oiseau rare se
       vérifie avant la fête ; ni notification culpabilisante ni série perdue pour un jour manqué.
+      Trois PR : J6e-a (navigation et Carnet), J6e-b (Profil), J6e-c (moments et défis).
+      - [x] J6e-a Navigation et Carnet (`lib/fork/shell/`, `lib/fork/notebook/`, `lib/fork/game/`) :
+            barre Accueil, Carnet, Carte, Profil (un point FORK dans `HomeScreen`, qui renvoie
+            `ForkShell`) ; chaque onglet est construit à sa première visite puis gardé, la carte ne
+            charge donc ses tuiles qu'à l'ouverture de l'onglet ; retour depuis un onglet = Accueil ;
+            la carte en onglet n'a pas de bouton retour. Profil : écran « bientôt » jusqu'à J6e-b.
+            Carnet : découvertes (Sûr ou confirmées, oiseaux seulement) en couleur avec « N fois » et
+            « Nouveau » jusqu'à l'ouverture de la fiche (à la première ouverture du carnet, les espèces
+            déjà trouvées ne sont pas nouvelles) ; « À confirmer » (entendue, jamais vérifiée, détections
+            dans la revue) ouvre la revue rapide sur ces seules détections ; silhouettes mystère des
+            oiseaux attendus ici cette semaine (liste d'Explorer, jamais de demande de localisation)
+            avec l'indice de la fiche IA, jamais le nom ; marques de rareté selon le palier du
+            géomodèle ici cette semaine (`uncommonTiers`, `rareTiers`, absente = étoile) ; puces Toutes,
+            Découvertes, À découvrir, Rares ; podium vers le Palmarès.
+            Règle du jeu (`gameVerifiedSpecies`) : confirmée, ou Sûr au sens de `reliabilityFor`
+            (score ≥ `sureMinScore` et espèce plausible au lieu et à la semaine de la détection). Plus
+            stricte que `verifiedSpecies` de l'index : un oiseau rare attend « C'est bien lui », une
+            détection sans position ne compte pas sur son seul score.
+            Écarts : silhouette générique (oiseau gris) en attendant les icônes de J6d, qui se
+            brancheront dans `notebook_visuals.dart` ; sans fiche en français, le mystère n'a pas
+            d'indice ; pas de mystères sans position (une phrase le dit).
+            À vérifier sur le Xiaomi : passage d'un onglet à l'autre sans saccade, carte ouverte
+            puis quittée, Carnet avec la localisation coupée, « Écouter » au-dessus de la barre.
+      - [x] J6e-b Profil (`lib/fork/profile/`, `lib/fork/game/`) : carte de statut (anneau de progression,
+            nom, espèces découvertes, « Encore N espèces pour devenir … », phrase du statut), échelle des
+            8 statuts (seuils 1, 5, 10, 20, 35, 50, 75, 100), série sur deux semaines (écoute, repos en
+            pointillé, jour manqué, aujourd'hui cerclé) avec record, badges en grille de 4 (médaille aux
+            couleurs de la plume, points de plumes ou « N sur M » tant qu'il est à gagner) ; un appui sur
+            un badge ouvre sa règle et ses paliers. Accueil : pastille de série (cachée sans série en
+            cours) et carte de statut, qui ouvrent l'onglet Profil.
+            Règles (`game_config.dart`, SPEC.md 7) : statut selon les oiseaux Sûrs ou confirmés
+            (`gameVerifiedSpecies`) ; série : un jour compte à partir de 5 minutes d'écoute, un jour de
+            repos par 7 jours, au-delà la série repart sans bruit et le record reste ; badges Chœur de
+            l'aube (10 espèces sûres dans une écoute commencée avant 8 h), Lève-tôt (avant le lever du
+            soleil, calcul NOAA d'upstream `estimateAruSunTimes`, lieu de l'écoute), Noctambule et Les
+            mésanges (par genre), Réviseur (confirmées, rejetées et « Je ne sais pas »), Migrateur (score
+            hebdomadaire du géomodèle ici : présent certaines semaines, absent d'autres), 7 jours
+            d'affilée (record de série).
+            Emblèmes : tracés de la maquette (SPEC.md 4.3) lus par `lib/fork/design/svg_path.dart`
+            (petit lecteur de chemins SVG, sans `flutter_svg`).
+            Écarts : badge Oreille fine arrivé avec J6e-d ; icône
+            générique pour Les mésanges en attendant J6d ; pas d'animation de gain sur l'anneau (elle
+            vient avec la célébration de nouveau statut en J6e-c).
+            À vérifier sur le Xiaomi : Lève-tôt sur une vraie écoute avant le lever du soleil, série
+            après un jour sans écoute.
+      - [x] J6e-c Moments et défis :
+            - Arrivée : déjà là depuis J6c (la ligne entre en haut, vibration légère).
+            - Première fois (`lib/fork/live/live_moments.dart`) : quand un oiseau jamais vérifié devient
+              Sûr pendant l'écoute, carte « Première rencontre ! » par-dessus le spectre et le tableau,
+              jamais sur Arrêter / Pause (`LiveListeningLayout.moment`) ; teinte de l'oiseau à 15 % au
+              plus, rang dans le carnet, statut et ce qui manque pour le suivant, Réécouter (lecteur du
+              Live, donc sans fausse détection), se referme seule après 6 s.
+            - Oiseau rare : carte dorée immobile quand un oiseau jamais vérifié est « Rare ici · à
+              confirmer » ; présence estimée ici, réécoute, « c'est bien lui ? » et les trois réponses,
+              écrites sur les détections de la session (enregistrées à « Arrêter »). La fête (un anneau,
+              « +1 espèce rare ») seulement après « C'est bien lui ».
+            - Une carte à la fois : un moment qui arrive pendant qu'une carte est ouverte attend le Bilan.
+            - Nouveau statut (`status_celebration.dart`) : dans le Bilan après « Arrêter », ou à
+              l'Accueil (statut atteint par la revue), jamais pendant une écoute ; une seule fois par
+              statut ; les statuts atteints avant cette version ne sont pas fêtés.
+            - Défis de la semaine (`challenges.dart`) : un par semaine à tour de rôle (3 matins avant
+              8 h, 5 jours d'écoute, 10 espèces sûres ou confirmées) ; rien ne compte avant « Commencer »,
+              pas de pénalité ; carte sur l'Accueil et le Profil.
+            Écarts : pas de défi saisonnier ni de défi débloqué par un statut, pas de notification ;
+            pas de bouton Partager sur le nouveau statut ; pas de vague ni de plumes (DESIGN.md prime).
+            À vérifier sur le Xiaomi : carte « Première rencontre » pendant une vraie écoute (l'écoute
+            continue, Arrêter reste accessible), réponse sur un oiseau rare retrouvée dans la session.
+      - [x] J6e-d Quiz « Qui chante ? » et badge Oreille fine (`lib/fork/game/fine_ear*.dart`) : un de
+            ses propres enregistrements d'un oiseau vérifié, quatre noms, un seul juste ; manches de
+            10 questions tirées au hasard, chaque espèce une fois ; il faut 4 oiseaux vérifiés avec un
+            extrait. Le clip vient d'une détection qui compte pour le jeu (confirmée, ou Sûr non revue),
+            jamais rejetée, fichier encore présent (sinon un autre extrait de l'espèce). Lecture par le
+            lecteur partagé (`speciesClipPlayerProvider`), donc l'inférence ignore la réécoute si une
+            écoute tourne. Seules les bonnes réponses sont gardées (un compteur). Badge Oreille fine :
+            10, 50, 150 bonnes réponses. Accès : carte « Qui chante ? » sous les badges du Profil, et
+            « Lancer le quiz » dans la fiche du badge. Repris de la branche `feat/j6e-notebook-game`
+            (le reste de cette branche doublait J6e-a à c).
+            Écarts : icône générique pour Les mésanges et silhouettes grises du carnet, J6d étant en
+            pause ; « Je ne sais pas » reste dans l'index (table `review_skipped`), pas dans les
+            sessions JSON.
+            Quiz v2 (maquette « Quiz v2 ») : accueil avec interrupteur « Avec son / Sans son »,
+            chemin de 10 étapes, oiseau mystère dessiné, confettis, rayons, pops, « +1 Oreille fine »
+            qui s'envole, bilan étoiles / grille 5 × 2 / barre animée, jingle et fanfare (lecteur
+            dédié `quiz_sfx.dart`, sons synthétisés par `tools/fork_quiz_sounds.py`). Oiseaux
+            toujours en photo (choix de Benjamin : aucune icône d'oiseau dessinée) ; seule la
+            silhouette mystère vient de `icons.json`. Dépendances
+            ajoutées : `confetti`, `flutter_svg`.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
@@ -667,6 +785,11 @@ Cette branche contient une fusion avec upstream dont les conflits sont encore ma
 
 - Activité de chant selon la météo (upstream a déjà un service météo).
 - Widget « dernier oiseau entendu ».
+- Audit des couleurs (skills `design:accessibility-review` et `design:design-system`) : contraste
+  mesuré de toutes les paires de `BirdyColors` en clair et en sombre (au-delà de
+  `test/fork/design/contrast_test.dart`), couleurs en dur (`Color(0x…)`, `Colors.*`) dans
+  `lib/fork/`, puis propositions de teintes avec avant/après et ratio. Rapport d'abord, aucune
+  modification sans choix de Benjamin.
 - Export au format eBird (CSV étendu), l'import eBird étant ouvert à tous.
 
 ## Phase iOS (après validation d'Android)
@@ -703,6 +826,16 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   `--profile` (le temps d'analyse ONNX y sera différent).
 - Live, « Analyse… » et fin rapide (J6c-bis-b) : aucun code natif. Vérifier qu'une réécoute par le
   haut-parleur de l'iPhone n'allume ni « Analyse… » ni le symbole « chante ».
+- Position GPS pendant l'écoute (J6c) : `GeolocatorLivePositionSource` marche au premier plan.
+  `UIBackgroundModes` contient déjà `location` et `audio` (upstream, pour le Survey). Écran éteint,
+  vérifier que le flux continue avec `buildLocationSettings(background: true)` (indicateur bleu) et
+  l'autorisation « Pendant l'utilisation », sans demander « Toujours ». Localisation approximative d'iOS :
+  même comportement (points écartés, position de la session gardée).
 
 - Startup screen (J6c): Flutter composition is shared. Native iOS launch assets remain
-  unchanged; align their mark/background during the iOS phase and check cold-launch timing.
+  unchanged; during the iOS phase make `LaunchScreen.storyboard` a plain Mist (#EEF1EC) view
+  with no mark, as on Android, so the Flutter splash fades the bird in without a jump, and check
+  cold-launch timing.
+- Quiz « Qui chante ? » (J6e) : aucun code natif. Bruitages en WAV lus par just_audio avec un
+  lecteur à part : sur iPhone, vérifier qu'ils ne coupent pas une musique en cours (session audio
+  « ambient » ou mixage) et que le mode silencieux est respecté.

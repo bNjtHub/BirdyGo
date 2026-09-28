@@ -1,4 +1,9 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -6,15 +11,31 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import 'birdygo_splash_painter.dart';
+import 'birdygo_warm_up.dart';
 
-/// The supplied startup design, with three staggered musical notes.
-/// Initialization and launch routing run alongside this one-shot introduction.
+/// The startup screen of the Claude Design board « BirdyGo Splash »: the mark
+/// arrives and sings, then the block rises and the wordmark and the tagline
+/// follow ([BirdyGoSplashTimeline]). The app loads alongside; the bar shows
+/// the real [progress] (a screen reader also hears the step loading), and
+/// the bird keeps singing for as long as loading takes.
 class BirdyGoSplash extends StatefulWidget {
-  const BirdyGoSplash({super.key, this.onRetry, this.onIntroComplete});
+  const BirdyGoSplash({
+    super.key,
+    required this.progress,
+    this.onRetry,
+    this.onIntroComplete,
+  });
 
-  static const introDuration = Duration(milliseconds: 2400);
+  final ValueListenable<BirdyGoLoadState> progress;
+
+  /// Shortest time the splash stays up on a normal launch, however fast the
+  /// app initializes: the whole intro, until the footer has faded in
+  /// ([BirdyGoSplashTimeline.settled]).
+  static const minimumDisplay = Duration(milliseconds: 4500);
 
   final VoidCallback? onRetry;
+
+  /// Called once, when [minimumDisplay] has elapsed.
   final VoidCallback? onIntroComplete;
 
   @override
@@ -23,21 +44,94 @@ class BirdyGoSplash extends StatefulWidget {
 
 class _BirdyGoSplashState extends State<BirdyGoSplash>
     with SingleTickerProviderStateMixin {
-  late final _intro = AnimationController(
-    vsync: this,
-    duration: BirdyGoSplash.introDuration,
-  )..addStatusListener(_onStatus);
-  bool _started = false;
+  /// Milliseconds since the splash appeared.
+  final _clock = ValueNotifier<double>(0);
+
+  /// Filled share of the loading bar: follows the real progress, eased.
+  final _bar = ValueNotifier<double>(0);
+  late final Ticker _ticker = createTicker(_onTick);
   bool _reported = false;
   bool _reduced = false;
 
-  void _onStatus(AnimationStatus status) {
-    if (status != AnimationStatus.completed || _reported) return;
+  // Brume or Encre, from the device theme; set at the top of [build].
+  Color _background = BirdyBrand.mist;
+  Color _text = BirdyBrand.ink;
+  Color _soft = BirdyBrand.bark;
+  Color _track = BirdyGoLoadingPainter.lightTrack;
+
+  /// The time the intro is drawn at: settled at once with reduced motion.
+  double _at(double clock) => _reduced ? BirdyGoSplashTimeline.settled : clock;
+
+  void _onTick(Duration elapsed) {
+    final now = elapsed.inMicroseconds / 1000;
+    final dt = now - _clock.value;
+    _clock.value = now;
+    final target = widget.progress.value.fraction;
+    _bar.value =
+        (target - _bar.value).abs() < .002
+            ? target
+            : _bar.value +
+                (target - _bar.value) *
+                    (1 - math.exp(-dt / BirdyGoSplashTimeline.barEase));
+    if (elapsed >= BirdyGoSplash.minimumDisplay) _reportIntroComplete();
+  }
+
+  /// Without the ticker (reduced motion), the bar jumps to the progress.
+  void _onProgress() {
+    if (!_ticker.isActive) _bar.value = widget.progress.value.fraction;
+  }
+
+  // Frame statistics, logged when the splash leaves, to measure smoothness
+  // on a device (debug builds are much slower than release ones).
+  int _frames = 0;
+  int _slowFrames = 0;
+  Duration _worstBuild = Duration.zero;
+  Duration _worstRaster = Duration.zero;
+
+  void _onTimings(List<FrameTiming> timings) {
+    for (final timing in timings) {
+      _frames++;
+      if (timing.buildDuration > _frameBudget ||
+          timing.rasterDuration > _frameBudget) {
+        _slowFrames++;
+        debugPrint(
+          '[BirdyGoSplash] slow frame at ${_clock.value.round()} ms '
+          '(${widget.progress.value.current?.name ?? 'loaded'}): '
+          'build ${timing.buildDuration.inMilliseconds} ms, '
+          'raster ${timing.rasterDuration.inMilliseconds} ms',
+        );
+      }
+      if (timing.buildDuration > _worstBuild) {
+        _worstBuild = timing.buildDuration;
+      }
+      if (timing.rasterDuration > _worstRaster) {
+        _worstRaster = timing.rasterDuration;
+      }
+    }
+  }
+
+  static const _frameBudget = Duration(microseconds: 16667);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.progress.addListener(_onProgress);
+    SchedulerBinding.instance.addTimingsCallback(_onTimings);
+  }
+
+  @override
+  void didUpdateWidget(BirdyGoSplash oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.progress != widget.progress) {
+      oldWidget.progress.removeListener(_onProgress);
+      widget.progress.addListener(_onProgress);
+    }
+  }
+
+  void _reportIntroComplete() {
+    if (_reported) return;
     _reported = true;
-    // Also safe when reduced motion completes during didChangeDependencies.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.onIntroComplete?.call();
-    });
+    widget.onIntroComplete?.call();
   }
 
   @override
@@ -45,189 +139,311 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
     super.didChangeDependencies();
     _reduced = BirdyMotion.reduced(context);
     if (_reduced) {
-      _intro.value = 1;
-    } else if (!_started) {
-      _intro.forward();
+      _ticker.stop();
+      _bar.value = widget.progress.value.fraction;
+      // Reduced motion adds no wait. Reported after the frame: this runs
+      // during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _reportIntroComplete();
+      });
+    } else if (!_ticker.isActive) {
+      _ticker.start();
     }
-    _started = true;
   }
 
   @override
   void dispose() {
-    _intro.dispose();
+    SchedulerBinding.instance.removeTimingsCallback(_onTimings);
+    debugPrint(
+      '[BirdyGoSplash] $_frames frames, $_slowFrames over 16.7 ms, '
+      'worst build ${_worstBuild.inMilliseconds} ms, '
+      'worst raster ${_worstRaster.inMilliseconds} ms',
+    );
+    widget.progress.removeListener(_onProgress);
+    _ticker.dispose();
+    _clock.dispose();
+    _bar.dispose();
     super.dispose();
   }
 
-  Widget _entrance({required Widget child, double delay = 0}) =>
-      AnimatedBuilder(
-        animation: _intro,
-        child: child,
-        builder: (context, child) {
-          final elapsed =
-              _intro.value * BirdyGoSplash.introDuration.inMilliseconds;
-          final t = BirdyMotion.standard.transform(
-            ((elapsed - delay) / 250).clamp(0.0, 1.0),
-          );
+  /// A text entering at [at]: fades in, rises and sharpens. Its picture is
+  /// kept, only the layers above it change.
+  Widget _entrance({required double at, required Widget child}) =>
+      ValueListenableBuilder<double>(
+        valueListenable: _clock,
+        child: RepaintBoundary(child: child),
+        builder: (context, clock, child) {
+          final u = BirdyGoSplashTimeline.textEntrance(_at(clock), at);
+          final blur = BirdyGoSplashTimeline.textBlur * (1 - u);
           return Opacity(
-            opacity: t,
+            opacity: u,
+            // A screen reader gets the text at once, not beat by beat.
+            alwaysIncludeSemantics: true,
             child: Transform.translate(
-              offset: Offset(0, _reduced ? 0 : 8 * (1 - t)),
-              child: child,
+              offset: Offset(0, BirdyGoSplashTimeline.textTravel * (1 - u)),
+              child: ImageFiltered(
+                enabled: blur > 0,
+                imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                child: child,
+              ),
             ),
           );
         },
       );
 
+  /// « Birdy », an Oriole dot, « Go » (variant « Point Loriot » of the board).
+  /// The brand name is never translated.
+  Widget _wordmark(BuildContext context, AppLocalizations l10n) {
+    final scaler = MediaQuery.textScalerOf(context);
+    return Semantics(
+      label: l10n.appTitle,
+      child: ExcludeSemantics(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Birdy',
+                  style: BirdyText.display.copyWith(
+                    fontSize: 44,
+                    letterSpacing: -.8,
+                    fontVariations: const [
+                      FontVariation('SOFT', 100),
+                      FontVariation('opsz', 44),
+                    ],
+                  ),
+                ),
+                // The dot floats at mid-height of the lowercase letters.
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(5, 0, 5, scaler.scale(5)),
+                    child: SizedBox.square(
+                      dimension: scaler.scale(9),
+                      child: const DecoratedBox(
+                        decoration: ShapeDecoration(
+                          color: BirdyBrand.oriole,
+                          shape: CircleBorder(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                TextSpan(
+                  text: 'Go',
+                  style: BirdyText.label.copyWith(
+                    fontSize: 42,
+                    height: 1.1,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ],
+            ),
+            style: TextStyle(color: _text),
+            softWrap: false,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The tagline enters in two beats; a screen reader hears one sentence.
+  Widget _tagline(AppLocalizations l10n) {
+    final style = BirdyText.body.copyWith(color: _soft);
+    return Semantics(
+      label: '${l10n.forkSplashTaglineFirst} ${l10n.forkSplashTaglineSecond}',
+      child: ExcludeSemantics(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 6,
+          children: [
+            _entrance(
+              at: BirdyGoSplashTimeline.taglineFirst,
+              child: Text(l10n.forkSplashTaglineFirst, style: style),
+            ),
+            _entrance(
+              at: BirdyGoSplashTimeline.taglineSecond,
+              child: Text(l10n.forkSplashTaglineSecond, style: style),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _error(AppLocalizations l10n) => Column(
+    children: [
+      Semantics(
+        liveRegion: true,
+        child: Text(
+          l10n.forkSplashError,
+          style: BirdyText.bodyCompact.copyWith(color: _text),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: 12),
+      FilledButton(onPressed: widget.onRetry, child: Text(l10n.retry)),
+    ],
+  );
+
+  /// What is loading right now, as a screen reader says it (the board
+  /// shows the bar only).
+  static String _stepCaption(AppLocalizations l10n, BirdyGoLoadStep? step) =>
+      switch (step) {
+        BirdyGoLoadStep.start => l10n.forkSplashLoading,
+        BirdyGoLoadStep.audioModel => l10n.forkSplashStepAudioModel,
+        BirdyGoLoadStep.geoModel => l10n.forkSplashStepGeoModel,
+        BirdyGoLoadStep.species => l10n.forkSplashStepSpecies,
+        BirdyGoLoadStep.observations => l10n.forkSplashStepObservations,
+        null => l10n.forkSplashReady,
+      };
+
+  Widget _loading(AppLocalizations l10n) => ValueListenableBuilder<double>(
+    valueListenable: _clock,
+    child: ValueListenableBuilder<BirdyGoLoadState>(
+      valueListenable: widget.progress,
+      builder:
+          (context, state, child) => Semantics(
+            liveRegion: true,
+            label: _stepCaption(l10n, state.current),
+            value: '${(state.fraction * 100).round()} %',
+            child: child,
+          ),
+      child: ExcludeSemantics(
+        child: RepaintBoundary(
+          child: Column(
+            children: [
+              RepaintBoundary(
+                child: CustomPaint(
+                  size: const Size(120, 3),
+                  painter: BirdyGoLoadingPainter(fraction: _bar, track: _track),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                l10n.forkPoweredByBirdnet,
+                style: BirdyText.caption.copyWith(color: _soft),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+    builder:
+        (context, clock, child) => Opacity(
+          opacity: BirdyGoSplashTimeline.footerOpacity(_at(clock)),
+          // A screen reader hears the loading from the start.
+          alwaysIncludeSemantics: true,
+          child: child,
+        ),
+  );
+
+  /// The centred block starts lower and rises as the name comes.
+  Widget _rising(Widget child) => RepaintBoundary(
+    child: ValueListenableBuilder<double>(
+      valueListenable: _clock,
+      child: child,
+      builder:
+          (context, clock, child) => Transform.translate(
+            offset: Offset(0, BirdyGoSplashTimeline.columnOffset(_at(clock))),
+            child: child,
+          ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    _background = dark ? BirdyBrand.ink : BirdyBrand.mist;
+    _text = dark ? BirdyBrand.mist : BirdyBrand.ink;
+    _soft = dark ? BirdyColors.dark.text2 : BirdyBrand.bark;
+    _track =
+        dark
+            ? BirdyBrand.mist.withValues(alpha: .12)
+            : BirdyGoLoadingPainter.lightTrack;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarContrastEnforced: false,
-      ),
+      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
+          ),
       child: Scaffold(
-        backgroundColor: BirdyBrand.mist,
+        backgroundColor: _background,
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxHeight < 480;
-              final logoWidth = compact ? 168.0 : 270.0;
+              final logoWidth =
+                  compact ? 168.0 : math.min(310.0, constraints.maxWidth - 56);
               final padding = compact ? 16.0 : 40.0;
+              // The mark sits in the middle of the room left above the
+              // footer; a screen too short for both scrolls.
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     minWidth: constraints.maxWidth,
                     minHeight: constraints.maxHeight,
                   ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(28, 16, 28, padding),
-                      child: Column(
-                        children: [
-                          const Spacer(),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(28, 16, 28, padding),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox.shrink(),
+                        _rising(
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 480),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                _entrance(
-                                  child: ExcludeSemantics(
-                                    child: RepaintBoundary(
-                                      child: CustomPaint(
-                                        size: Size(
-                                          logoWidth,
-                                          logoWidth * 368 / 530,
-                                        ),
-                                        painter: BirdyGoSplashPainter(
-                                          progress: _intro,
-                                          reducedMotion: _reduced,
-                                        ),
+                                ExcludeSemantics(
+                                  child: RepaintBoundary(
+                                    child: CustomPaint(
+                                      size: Size(
+                                        logoWidth,
+                                        logoWidth *
+                                            BirdyGoSingingPainter
+                                                .viewBox
+                                                .height /
+                                            BirdyGoSingingPainter.viewBox.width,
+                                      ),
+                                      painter: BirdyGoSingingPainter(
+                                        clock: _clock,
+                                        // A startup error is no time to sing on.
+                                        loop: widget.onRetry == null,
+                                        still: _reduced,
                                       ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(height: compact ? 10 : 20),
                                 _entrance(
-                                  delay: 60,
-                                  child: Text(
-                                    l10n.appTitle,
-                                    style: BirdyText.display.copyWith(
-                                      fontSize: 40,
-                                      height: 1.1,
-                                      letterSpacing: -.5,
-                                      color: BirdyBrand.ink,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  at: BirdyGoSplashTimeline.wordmark,
+                                  child: _wordmark(context, l10n),
                                 ),
                                 SizedBox(height: compact ? 10 : 20),
-                                _entrance(
-                                  delay: 120,
-                                  child: Text(
-                                    l10n.forkSplashTagline,
-                                    style: BirdyText.body.copyWith(
-                                      color: BirdyBrand.bark,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
+                                _tagline(l10n),
                               ],
                             ),
                           ),
-                          const Spacer(),
-                          SizedBox(height: compact ? 16 : 32),
-                          ConstrainedBox(
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: compact ? 16 : 32),
+                          child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 480),
                             child:
                                 widget.onRetry != null
-                                    ? Column(
-                                      children: [
-                                        Semantics(
-                                          liveRegion: true,
-                                          child: Text(
-                                            l10n.forkSplashError,
-                                            style: BirdyText.bodyCompact
-                                                .copyWith(
-                                                  color: BirdyBrand.ink,
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        FilledButton(
-                                          onPressed: widget.onRetry,
-                                          child: Text(l10n.retry),
-                                        ),
-                                      ],
-                                    )
-                                    : _entrance(
-                                      delay: 120,
-                                      child: Semantics(
-                                        liveRegion: true,
-                                        label: l10n.forkSplashLoading,
-                                        child: ExcludeSemantics(
-                                          child: Column(
-                                            children: [
-                                              RepaintBoundary(
-                                                child: CustomPaint(
-                                                  size: const Size(180, 4),
-                                                  painter:
-                                                      BirdyGoLoadingPainter(
-                                                        progress: _intro,
-                                                      ),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 14),
-                                              Text(
-                                                l10n.forkSplashLoading,
-                                                style: BirdyText.caption
-                                                    .copyWith(
-                                                      fontSize: 14,
-                                                      color: BirdyBrand.bark,
-                                                    ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              SizedBox(
-                                                height: compact ? 8 : 24,
-                                              ),
-                                              Text(
-                                                l10n.forkPoweredByBirdnet,
-                                                style: BirdyText.caption
-                                                    .copyWith(
-                                                      color: BirdyBrand.bark,
-                                                    ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    ? _error(l10n)
+                                    : _loading(l10n),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

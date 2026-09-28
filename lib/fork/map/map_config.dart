@@ -22,6 +22,9 @@ const double kMapHexMaxOpacity = 0.8;
 /// same color into one draw call.
 const int kMapHexOpacitySteps = 8;
 
+/// Failed tiles before the map says its background does not load.
+const int kMapTileErrorsBeforeNotice = 4;
+
 /// Zoom used when the map has a single point to show.
 const double kMapSinglePointZoom = 15;
 

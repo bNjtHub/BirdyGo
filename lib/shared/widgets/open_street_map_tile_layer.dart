@@ -97,15 +97,17 @@ BuiltInMapCachingProvider osmTileCachingProvider() =>
       overrideFreshAge: kOsmTileFreshAge,
     );
 
-TileLayer buildOpenStreetMapTileLayer() {
+// FORK: optional error reporting, so the contact map can say when tiles fail.
+TileLayer buildOpenStreetMapTileLayer({ErrorTileCallBack? errorTileCallback}) {
   return TileLayer(
+    errorTileCallback: errorTileCallback, // FORK: tile errors
     urlTemplate: kOpenStreetMapUrlTemplate,
     userAgentPackageName: AppConstants.packageName,
     tileProvider: NetworkTileProvider(
       headers: _openStreetMapTileHeaders(),
       httpClient: _osmHttpClient(),
       cachingProvider: osmTileCachingProvider(),
-      silenceExceptions: true,
+      silenceExceptions: errorTileCallback == null, // FORK: tile errors
     ),
     evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
   );

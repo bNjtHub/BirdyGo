@@ -14,9 +14,10 @@ String _read(String path) => File(path).readAsStringSync();
 
 /// Top-level `on:` block of a GitHub Actions workflow.
 String _triggers(String workflow) =>
-    RegExp(r'^on:\n((?:[ #].*\n|\n)*)', multiLine: true)
-        .firstMatch(workflow.replaceAll('\r\n', '\n'))!
-        .group(1)!;
+    RegExp(
+      r'^on:\n((?:[ #].*\n|\n)*)',
+      multiLine: true,
+    ).firstMatch(workflow.replaceAll('\r\n', '\n'))!.group(1)!;
 
 void main() {
   group('Android', () {
@@ -30,15 +31,41 @@ void main() {
       final manifest = _read('android/app/src/main/AndroidManifest.xml');
       expect(manifest, contains('android:label="$_appName"'));
     });
+
+    // The Flutter splash fades the bird in: a mark drawn natively first
+    // would show twice, with a jump in between.
+    test('native launch screen is a plain Mist, no mark', () {
+      const res = 'android/app/src/main/res';
+      for (final style in ['values-v31', 'values-night-v31']) {
+        expect(
+          _read('$res/$style/styles.xml'),
+          contains(
+            '"android:windowSplashScreenAnimatedIcon">'
+            '@android:color/transparent<',
+          ),
+        );
+      }
+      for (final drawable in ['drawable', 'drawable-v21']) {
+        final layers = _read('$res/$drawable/launch_background.xml');
+        expect(layers, contains('@color/birdygo_launch_background'));
+        expect(layers, isNot(contains('android:gravity')));
+      }
+      expect(_read('$res/values/birdygo_colors.xml'), contains('#EEF1EC'));
+      // Dark mode: Encre, like the dark app that follows.
+      expect(
+        _read('$res/values-night/birdygo_colors.xml'),
+        contains('#13233A'),
+      );
+    });
   });
 
   group('iOS', () {
     test('every bundle id is under the fork id', () {
       final pbxproj = _read('ios/Runner.xcodeproj/project.pbxproj');
-      final ids = RegExp(r'PRODUCT_BUNDLE_IDENTIFIER = "?([^";]+)"?;')
-          .allMatches(pbxproj)
-          .map((m) => m.group(1)!)
-          .toList();
+      final ids =
+          RegExp(
+            r'PRODUCT_BUNDLE_IDENTIFIER = "?([^";]+)"?;',
+          ).allMatches(pbxproj).map((m) => m.group(1)!).toList();
       expect(ids, isNotEmpty);
       for (final id in ids) {
         expect(id, startsWith(_appId));
@@ -61,19 +88,22 @@ void main() {
     });
 
     test('App Group is the fork one', () {
-      expect(_read('ios/Runner/Runner.entitlements'),
-          contains('group.$_appId'));
+      expect(
+        _read('ios/Runner/Runner.entitlements'),
+        contains('group.$_appId'),
+      );
       expect(_read('ios/Runner/AppDelegate.swift'), contains('group.$_appId'));
     });
   });
 
   group('Flutter', () {
     test('appTitle is BirdyGo in every locale', () {
-      final arbs = Directory('lib/l10n')
-          .listSync()
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.arb'))
-          .toList();
+      final arbs =
+          Directory('lib/l10n')
+              .listSync()
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.arb'))
+              .toList();
       expect(arbs, isNotEmpty);
       for (final arb in arbs) {
         final json = jsonDecode(arb.readAsStringSync()) as Map<String, dynamic>;
@@ -92,16 +122,18 @@ void main() {
     });
 
     test('no link to the private BirdyGo repository ships in the app', () {
-      final offenders = Directory('lib')
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.dart'))
-          .where((f) => f
-              .readAsStringSync()
-              .toLowerCase()
-              .contains('github.com/bnjthub'))
-          .map((f) => f.path)
-          .toList();
+      final offenders =
+          Directory('lib')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))
+              .where(
+                (f) => f.readAsStringSync().toLowerCase().contains(
+                  'github.com/bnjthub',
+                ),
+              )
+              .map((f) => f.path)
+              .toList();
       expect(offenders, isEmpty);
     });
   });
@@ -142,8 +174,10 @@ void main() {
     });
 
     test('ci still runs on pull requests', () {
-      expect(_triggers(_read('.github/workflows/ci.yml')),
-          contains('pull_request:'));
+      expect(
+        _triggers(_read('.github/workflows/ci.yml')),
+        contains('pull_request:'),
+      );
     });
   });
 }

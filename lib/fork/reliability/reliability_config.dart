@@ -21,17 +21,30 @@ abstract final class ReliabilityConfig {
   /// Abundance tiers that mean "rare here at this season".
   static const Set<ExploreTier> rareTiers = {ExploreTier.rare};
 
+  /// Abundance tiers marked « peu commun » (half disc) in the notebook
+  /// (J6e). Rarity never gives points or levels.
+  static const Set<ExploreTier> uncommonTiers = {ExploreTier.scarce};
+
   /// Reviews needed before a species' precision is shown.
   static const int minReviewsForSpeciesPrecision = 5;
 
   /// Live (J6c-bis-b): consecutive windows under the support threshold that
-  /// put out the « chante » symbol. One missed window between two phrases
-  /// keeps it on.
-  static const int liveSingingHoldWindows = 2;
+  /// put out the singing symbol. The first unsupported window ends it;
+  /// temporal pooling still preserves the contact in the results/history.
+  static const int liveSingingHoldWindows = 1;
 
   /// Live (J6c-bis-b): cycles « Analyse… » stays on after a candidate is
   /// confirmed, so the header does not fade while the row comes in.
   static const int analysingHoldWindows = 1;
+
+  /// Live GPS track: minimum seconds between two position updates.
+  static const int liveGpsIntervalSeconds = 10;
+
+  /// Live GPS track: minimum move (meters) before the OS reports a new fix.
+  static const int liveGpsDistanceFilterMeters = 5;
+
+  /// Live GPS track: fixes less accurate than this (meters) are dropped.
+  static const double liveGpsMaxAccuracyMeters = 30;
 }
 
 /// What the geo-model says about a species at a place and week.

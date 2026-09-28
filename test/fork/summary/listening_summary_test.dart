@@ -38,6 +38,68 @@ void main() {
       expect(s.dayPart, DayPart.morning);
     });
 
+    test('visual and unspecified manual records never imply hearing', () {
+      final session = morningSession();
+      for (final (name, source, evidence) in [
+        ('Seen bird', DetectionSource.manualGlobal, DetectionEvidence.seen),
+        ('Legacy bird', DetectionSource.manual, null),
+        ('Heard bird', DetectionSource.manualGlobal, DetectionEvidence.heard),
+        ('Both bird', DetectionSource.manual, DetectionEvidence.heardAndSeen),
+      ]) {
+        session.detections.add(
+          DetectionRecord(
+            scientificName: name,
+            commonName: name,
+            confidence: 1,
+            timestamp: session.startTime,
+            source: source,
+            evidence: evidence,
+            reviewStatus: ReviewStatus.confirmed,
+          ),
+        );
+      }
+      final summary = _morning(session: session);
+      expect(summary.contacts, 56);
+      expect(summary.heardSpecies, hasLength(15));
+      expect(summary.otherObservedSpecies.map((s) => s.scientificName), [
+        'Seen bird',
+        'Legacy bird',
+      ]);
+      final seen = summary.otherObservedSpecies.first;
+      expect(seen.seen, isTrue);
+      expect(seen.pending, isFalse);
+      expect(seen.hasPreciseVerifiedTime, isFalse);
+      final both = summary.heardSpecies.firstWhere(
+        (s) => s.scientificName == 'Both bird',
+      );
+      expect(both.seen, isTrue);
+    });
+
+    test('a visual report of a heard species keeps both types of evidence', () {
+      final session = morningSession();
+      session.detections.add(
+        DetectionRecord(
+          scientificName: 'Erithacus rubecula',
+          commonName: 'Robin',
+          confidence: 1,
+          timestamp: session.startTime,
+          source: DetectionSource.manualGlobal,
+          evidence: DetectionEvidence.seen,
+          reviewStatus: ReviewStatus.confirmed,
+        ),
+      );
+      final summary = _morning(session: session);
+      final robin = summary.species.first;
+      expect(robin.count, 10);
+      expect(robin.heard, isTrue);
+      expect(robin.seen, isTrue);
+      expect(summary.otherObservedSpecies, isEmpty);
+      expect(
+        summaryShareText(en, summary, nameOf: (s) => s.commonName),
+        contains('Robin ×10 · Heard and seen'),
+      );
+    });
+
     test('lists the species most heard first, ties by first contact', () {
       expect(_morning().species.map((s) => s.commonName), [
         'Rougegorge familier',

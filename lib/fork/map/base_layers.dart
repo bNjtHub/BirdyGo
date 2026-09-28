@@ -56,10 +56,17 @@ List<String> baseLayerAttributions(MapBaseLayer layer) => switch (layer) {
 http.Client? _ignClient;
 
 /// Tile layer of [layer]. Build it once per layer change, not per frame.
-TileLayer buildBaseTileLayer(MapBaseLayer layer) {
-  if (layer == MapBaseLayer.osm) return buildOpenStreetMapTileLayer();
+/// With [onTileError], failed tiles are reported instead of silenced.
+TileLayer buildBaseTileLayer(
+  MapBaseLayer layer, {
+  ErrorTileCallBack? onTileError,
+}) {
+  if (layer == MapBaseLayer.osm) {
+    return buildOpenStreetMapTileLayer(errorTileCallback: onTileError);
+  }
   return TileLayer(
     key: ValueKey(layer),
+    errorTileCallback: onTileError,
     urlTemplate:
         layer == MapBaseLayer.ignPlan
             ? kIgnPlanUrlTemplate
@@ -67,12 +74,14 @@ TileLayer buildBaseTileLayer(MapBaseLayer layer) {
     userAgentPackageName: AppConstants.packageName,
     maxNativeZoom: kIgnMaxNativeZoom,
     tileProvider: NetworkTileProvider(
-      headers: const {'User-Agent': AppConstants.networkUserAgent},
+      // Not const: TileLayer writes its default User-Agent into this map
+      // (putIfAbsent), which throws on an unmodifiable one.
+      headers: {'User-Agent': AppConstants.networkUserAgent},
       // Shared across rebuilds: NetworkTileProvider only closes clients it
       // created itself (see open_street_map_tile_layer.dart).
       httpClient: _ignClient ??= RetryClient(http.Client()),
       cachingProvider: osmTileCachingProvider(),
-      silenceExceptions: true,
+      silenceExceptions: onTileError == null,
     ),
     evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
   );
