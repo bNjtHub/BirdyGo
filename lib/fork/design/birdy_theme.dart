@@ -185,6 +185,32 @@ abstract final class BirdyTheme {
         ),
       ),
       dividerTheme: base.dividerTheme.copyWith(color: c.lineOpaque),
+      // FORK: upstream's off-state switch (colorScheme.outline on
+      // surfaceContainerHighest) only reached ~1.3:1 to 1.5:1 on our
+      // surfaces, effectively invisible (J6f-b feedback). text2 keeps the
+      // selected state as upstream drew it and gives the off thumb/outline
+      // WCAG 1.4.11's 3:1 non-text contrast (measured >=5.9:1 both themes,
+      // see test/fork/design/switch_contrast_test.dart).
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? base.switchTheme.thumbColor?.resolve(states)
+                  : c.text2,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? base.switchTheme.trackColor?.resolve(states)
+                  : c.surface2,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? Colors.transparent
+                  : c.text2,
+        ),
+      ),
     );
   }
 }
