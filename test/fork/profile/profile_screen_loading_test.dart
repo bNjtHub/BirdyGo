@@ -1,7 +1,7 @@
-/// Loading skeleton of the profile (J6f skeletons): the status card, the
-/// ladder, the série and the badges all depend on the game progress, which
-/// resolves after the first frame; nothing above or around them should
-/// move once it lands.
+/// Loading skeleton of the profile (J6f skeletons): the level card, the
+/// série and the earn card all depend on the game progress, which resolves
+/// after the first frame; nothing above or around them should move once it
+/// lands.
 library;
 
 import 'dart:async';
@@ -36,13 +36,6 @@ Future<void> _loadRealFonts() async {
   );
 }
 
-// The skeleton's calendar strip (`_skeletonCalendar` in profile_screen.dart)
-// is anchored to the real clock, since which day is "today" doesn't depend
-// on the loaded game facts. So the mock streak here is too, or its "today"
-// cell (the one `_DayDot` draws with an extra ring) would land on a
-// different day than the skeleton reserved space for — a test-only mismatch
-// that would never happen in the app itself (loading takes moments, not
-// days).
 GameProgress _player() {
   final now = DateTime.now();
   DateTime day(int daysAgo) =>
@@ -69,53 +62,55 @@ GameProgress _player() {
 class _Snapshot {
   _Snapshot(WidgetTester tester)
     : header = tester.getRect(find.byKey(const ValueKey('profile-header'))),
-      statusCard = tester.getRect(
-        find.byKey(const ValueKey('profile-status-card')),
+      levelCard = tester.getRect(
+        find.byKey(const ValueKey('profile-level-card')),
       ),
-      ladder = tester.getRect(find.byKey(const ValueKey('profile-ladder'))),
       streak = tester.getRect(find.byKey(const ValueKey('profile-streak'))),
-      badges = tester.getRect(find.byKey(const ValueKey('profile-badges')));
+      earn = tester.getRect(find.byKey(const ValueKey('profile-earn')));
 
   final Rect header;
-  final Rect statusCard;
-  final Rect ladder;
+  final Rect levelCard;
   final Rect streak;
-  final Rect badges;
+  final Rect earn;
 
   void expectUnchanged(_Snapshot other) {
     expect(other.header, header, reason: 'header');
-    expect(other.statusCard, statusCard, reason: 'status card');
-    expect(other.ladder, ladder, reason: 'ladder');
-    // Left/top/right are exact; the bottom is allowed a small settle at
-    // 130 % text (the calendar strip's `FittedBox`es scale to fit their
-    // own natural size, and a skeleton's filler glyphs don't measure to
-    // quite the same natural size as the real weekday letters and digits).
+    // The level card's ladder and info box do not depend on which
+    // placeholder text they show (only which level is current does, and
+    // the skeleton already lays out the full ring + 2 rows + info box
+    // shape): left/top are exact; the bottom may settle within a couple of
+    // grid lines as real strings replace the skeleton's fillers (a picked
+    // level's name, or the info box's segmented bar/detail line, can wrap
+    // differently once real data lands). Everything below cascades: the
+    // streak and earn cards shift down by whatever the level card settled
+    // by, so only their left stays exact.
+    const tolerance = 40.0;
+    expect(other.levelCard.left, levelCard.left, reason: 'level card left');
+    expect(other.levelCard.top, levelCard.top, reason: 'level card top');
+    expect(other.levelCard.right, levelCard.right, reason: 'level card right');
+    expect(
+      (levelCard.bottom - other.levelCard.bottom).abs(),
+      lessThan(tolerance),
+      reason: 'level card should not resize by more than a couple of lines',
+    );
     expect(other.streak.left, streak.left, reason: 'streak card left');
-    expect(other.streak.top, streak.top, reason: 'streak card top');
     expect(other.streak.right, streak.right, reason: 'streak card right');
     expect(
-      (streak.bottom - other.streak.bottom).abs(),
-      lessThan(24),
-      reason: 'streak card should not resize by more than one grid line',
-    );
-    // The top never moves (nothing above it grew or shrank); its own
-    // bottom can settle within a line's height once real data lands, since
-    // a badge's tier dots (earned) are shorter than its progress line
-    // (locked) and which one a given badge shows is exactly the fact the
-    // skeleton is still waiting on. The skeleton always reserves the
-    // taller of the two, so it only ever shrinks, never grows past it.
-    expect(other.badges.left, badges.left, reason: 'badges block left');
-    expect(other.badges.top, badges.top, reason: 'badges block top');
-    expect(other.badges.right, badges.right, reason: 'badges block right');
-    expect(
-      other.badges.bottom,
-      lessThanOrEqualTo(badges.bottom),
-      reason: 'badges block must not grow past its skeleton',
+      (streak.top - other.streak.top).abs(),
+      lessThan(tolerance),
+      reason: 'streak card should not move more than the level card resized',
     );
     expect(
-      badges.bottom - other.badges.bottom,
-      lessThan(24),
-      reason: 'badges block should not shrink by more than one tile line',
+      (streak.height - other.streak.height).abs(),
+      lessThan(tolerance),
+      reason: 'streak card should not resize by more than a couple of lines',
+    );
+    expect(other.earn.left, earn.left, reason: 'earn card left');
+    expect(other.earn.right, earn.right, reason: 'earn card right');
+    expect(
+      (earn.top - other.earn.top).abs(),
+      lessThan(2 * tolerance),
+      reason: 'earn card should not move more than the cards above resized',
     );
   }
 }
@@ -130,7 +125,12 @@ void main() {
     double textScale = 1,
     bool reducedMotion = false,
   }) async {
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    // Tall enough that the header, the level card, the streak card and the
+    // earn card are all on screen at once (even at 130 % text): a plain
+    // `ListView` only builds children near the viewport, so comparing rects
+    // across two snapshots needs them all built and at a fixed scroll
+    // position (0) throughout, not scrolled into view one at a time.
+    tester.view.physicalSize = const Size(390, 2200) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -192,12 +192,12 @@ void main() {
     await pump(tester, completer: completer, reducedMotion: true);
     await tester.pump();
     final before = tester.getRect(
-      find.byKey(const ValueKey('profile-status-card')),
+      find.byKey(const ValueKey('profile-level-card')),
     );
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
       expect(
-        tester.getRect(find.byKey(const ValueKey('profile-status-card'))),
+        tester.getRect(find.byKey(const ValueKey('profile-level-card'))),
         before,
       );
     }
@@ -235,15 +235,16 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('the ladder always shows the 8 statuses, loading or loaded', (
+  testWidgets('the ladder always shows the 8 levels, loading or loaded', (
     tester,
   ) async {
     final completer = Completer<GameProgress>();
     await pump(tester, completer: completer);
     await tester.pump();
+    // 2 rows of 4 skeleton emblem boxes reserved from the first frame.
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('profile-ladder')),
+        of: find.byKey(const ValueKey('profile-level-card')),
         matching: find.byWidgetPredicate((w) => w is DecoratedBox),
       ),
       findsWidgets,
