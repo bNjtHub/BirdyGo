@@ -409,6 +409,12 @@ abstract final class BirdySpace {
 
   /// Gutter of the live list.
   static const double gutterLive = 8;
+
+  /// Page margin of the block layout (J6f, « App finale » boards).
+  static const double page = 16;
+
+  /// Gap between two blocks (J6f).
+  static const double block = 10;
 }
 
 /// Component sizes (SPEC.md 2.8).
@@ -442,4 +448,47 @@ abstract final class BirdySizes {
   static const double spectrumReduced = 56;
   static const double spectrumNormal = 120;
   static const double spectrumExpanded = 450;
+
+  /// Progress ring of a block (daily goal), and its stroke.
+  static const double ring = 76;
+  static const double ringStroke = 8;
+
+  /// Progress bar of a block (status, notebook).
+  static const double progressBar = 8;
+
+  /// Day dot of the série (7 per week).
+  static const double dayDot = 14;
+
+  /// Dashed silhouette slot of a species still to find (daily goal block,
+  /// empty live state uses [expectedSlot]).
+  static const double goalSlot = 36;
+  static const double expectedSlot = 52;
+
+  /// Tinted species card of a scrolling row (home « Aujourd'hui »).
+  static const double speciesChipCard = 92;
+
+  /// Hero block (« Dernier oiseau entendu »): minimum height, decorative
+  /// disc behind the bird, and the bird itself.
+  static const double heroMinHeight = 196;
+  static const double heroDisc = 176;
+  static const double heroBird = 120;
+
+  /// Status disc of the status block.
+  static const double statusDisc = 52;
+
+  /// Small icon disc leading a block (weekly challenge).
+  static const double blockIconDisc = 40;
+}
+
+/// Opacities of layered block details (J6f). Colors themselves come from
+/// [BirdyColors] or the species tint.
+abstract final class BirdyAlpha {
+  /// Decorative disc of the species accent behind the hero bird.
+  static const double heroDisc = 0.18;
+
+  /// White fill of a dashed slot on a tonal block.
+  static const double slotFill = 0.55;
+
+  /// White track of a bar or ring on a tinted block.
+  static const double trackOnTint = 0.8;
 }
