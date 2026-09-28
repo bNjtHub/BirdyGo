@@ -43,6 +43,7 @@ class ListeningSummaryView extends StatelessWidget {
     this.onAddObservation,
     this.savingObservation = false,
     this.onMarkRecording,
+    this.notice,
     this.footer,
   });
 
@@ -76,6 +77,10 @@ class ListeningSummaryView extends StatelessWidget {
   /// recording (true) or back as real birds (false). Hidden when null.
   final void Function(bool recording)? onMarkRecording;
 
+  /// Above the hero: the « non enregistrée » note of an unsaved listening
+  /// (J6g-e).
+  final Widget? notice;
+
   /// Below the actions: the Faune-France button.
   final Widget? footer;
 
@@ -85,6 +90,7 @@ class ListeningSummaryView extends StatelessWidget {
     final c = BirdyColors.of(context);
     final toCheck = summary.keysToCheck;
     final blocks = <Widget>[
+      if (notice != null) notice!,
       _Hero(
         headline: summaryHeadline(l10n, summary),
         caption: summaryCaption(l10n, summary, place: place),
@@ -752,6 +758,58 @@ class _RecordingLink extends StatelessWidget {
         ),
         link,
       ],
+    );
+  }
+}
+
+/// « Écoute non enregistrée » with a save button (J6g-e): shown while the
+/// listening is not in the library yet.
+class UnsavedListeningNotice extends StatelessWidget {
+  const UnsavedListeningNotice({super.key, required this.onSave});
+
+  /// Null while a save is in flight.
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Semantics(
+      container: true,
+      child: Container(
+        padding: const EdgeInsets.all(BirdySpace.l),
+        decoration: BoxDecoration(
+          color: c.surface1,
+          borderRadius: BorderRadius.circular(BirdyRadii.card),
+          border: Border.all(color: c.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.forkSummaryUnsavedTitle,
+                style: BirdyText.heading.copyWith(color: c.text1),
+              ),
+            ),
+            const SizedBox(height: BirdySpace.xs),
+            Text(
+              l10n.forkSummaryUnsavedBody,
+              style: BirdyText.body.copyWith(color: c.text2),
+            ),
+            const SizedBox(height: BirdySpace.m),
+            Pressable(
+              enabled: onSave != null,
+              child: FilledButton(
+                style: BirdyButtonStyles.primary(context),
+                onPressed: onSave,
+                child: Text(l10n.sessionSave),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

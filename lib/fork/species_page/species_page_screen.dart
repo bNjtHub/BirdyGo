@@ -117,7 +117,7 @@ class SpeciesPage extends ConsumerStatefulWidget {
   /// Shown until the taxonomy gives the localized name.
   final String commonName;
 
-  /// Set inside a sheet: no back button, the sheet scrolls.
+  /// Set inside a sheet: close X and grab handle, the sheet scrolls.
   final ScrollController? scrollController;
 
   @override
@@ -431,7 +431,9 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               tint: tint,
               photo: SpeciesPhoto(species: detail),
               onShare: () => _share(latin, heard),
-              onBack: inSheet ? null : () => Navigator.of(context).maybePop(),
+              // The sheet closes like the page (J6g-e).
+              onBack: () => Navigator.of(context).maybePop(),
+              inSheet: inSheet,
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(

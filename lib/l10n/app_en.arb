@@ -5890,5 +5890,9 @@
   "forkMapTitle": "My map",
   "@forkMapTitle": {"description": "BirdyGo fork: tabs (J6f)."},
   "forkMapCaption": "Your contacts over {period} · {places, plural, =1{1 place} other{{places} places}}",
-  "@forkMapCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"period": {"type": "String"}, "places": {"type": "int"}}}
+  "@forkMapCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"period": {"type": "String"}, "places": {"type": "int"}}},
+  "forkSummaryUnsavedTitle": "Not saved yet",
+  "@forkSummaryUnsavedTitle": {"description": "BirdyGo fork: listening summary of a session that is not saved (J6g-e). Title of the note and of the leave dialog."},
+  "forkSummaryUnsavedBody": "This listening is not in your library yet. Save it to keep it, or discard it.",
+  "@forkSummaryUnsavedBody": {"description": "BirdyGo fork: listening summary of a session that is not saved (J6g-e). Explains the save button below it."}
 }
