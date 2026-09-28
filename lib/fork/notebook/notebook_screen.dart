@@ -297,20 +297,23 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                   : BirdySkeleton.text(numberStyle, placeholder: '00'),
               const SizedBox(width: BirdySpace.s),
               Expanded(
-                // One line, truncated if need be (see the header caption):
-                // the digit count of the geo-model's total must not change
-                // how many lines this needs.
+                // Up to 2 lines: the sentence was cut with an ellipsis on
+                // one line at a normal phone width, so both the real text
+                // and its skeleton reserve the same 2 lines (never more)
+                // no matter the geo-model's digit count.
                 child:
                     ready
                         ? Text(
                           l10n.forkNotebookProgressCaption(notebook.expected!),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: captionStyle,
                         )
                         : BirdySkeleton.text(
                           captionStyle,
-                          placeholder: '0000000000000000000000000000000000',
+                          placeholder:
+                              '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                          maxLines: 2,
                         ),
               ),
             ],
@@ -506,40 +509,50 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   /// (name, caption) as a real [SpeciesCard], at [BirdySizes.collectionCard]
   /// minimum. Built from the real text styles (not a plain box) so it grows
   /// with the text scale exactly like a real card does, instead of
-  /// undershooting it at 130 %.
-  Widget _cardSkeleton(BirdyColors c, double width, double visualSize) =>
-      DecoratedBox(
-        decoration: BoxDecoration(
-          color: c.surface1,
-          borderRadius: BorderRadius.circular(BirdyRadii.card),
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: BirdySizes.collectionCard,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BirdySkeleton.box(
-                  width: visualSize,
-                  height: visualSize,
-                  radius: BirdyRadii.thumb,
-                ),
-                const SizedBox(height: 6),
-                BirdySkeleton.text(
+  /// undershooting it at 130 %. The name reserves the same fixed 2-line
+  /// height as the real card, and the caption line sits at the card's
+  /// bottom edge the same way, so a real card taking over never shifts.
+  Widget _cardSkeleton(
+    BuildContext context,
+    BirdyColors c,
+    double width,
+    double visualSize,
+  ) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: c.surface1,
+      borderRadius: BorderRadius.circular(BirdyRadii.card),
+    ),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: BirdySizes.collectionCard),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            BirdySkeleton.box(
+              width: visualSize,
+              height: visualSize,
+              radius: BirdyRadii.thumb,
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: twoLineTextHeight(context, BirdyText.speciesCompact),
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                child: BirdySkeleton.text(
                   BirdyText.speciesCompact,
                   placeholder: '0000000000000000',
                 ),
-                const SizedBox(height: 6),
-                BirdySkeleton.text(BirdyText.caption, placeholder: '00000000'),
-              ],
+              ),
             ),
-          ),
+            const Spacer(),
+            BirdySkeleton.text(BirdyText.caption, placeholder: '00000000'),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   /// Same column geometry as the real grid, filled with card-shaped
   /// skeletons at the real card size ([BirdySizes.collectionCard]): the
@@ -548,7 +561,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   List<Widget> _gridSkeleton(BirdyColors c) {
     const skeletonRows = 2;
     return _columnRows(skeletonRows, (index, width, visualSize) {
-      final card = _cardSkeleton(c, width, visualSize);
+      final card = _cardSkeleton(context, c, width, visualSize);
       return index == 0
           ? KeyedSubtree(
             key: const ValueKey('notebook-grid-cell-0'),
