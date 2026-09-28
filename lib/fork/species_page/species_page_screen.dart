@@ -34,6 +34,7 @@ import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
+import 'species_page_drag_close.dart';
 import 'species_page_loader.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -125,6 +126,11 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
   String? _description;
   SpeciesRecord? _record;
   YearPresence? _year;
+
+  /// Only used outside a sheet (a sheet already carries its own drag
+  /// controller): lets the drag-to-close gesture tell whether the page is
+  /// scrolled to the top (J6f-b fix).
+  final ScrollController _pageScroll = ScrollController();
 
   /// Unexpected here this week (J3b): the page explains why.
   bool _unexpectedNow = false;
@@ -319,7 +325,6 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
         HereNowCard(
           year: _year!,
           sentence: presenceSentence(l10n, language, _year!, now: now),
-          monthsCaption: monthsCaption(language),
           currentMonth: now.month,
           rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
@@ -443,12 +448,24 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       ),
     );
 
+    // The sheet already scrolls with its own controller; outside a sheet,
+    // this page needs one of its own to tell the drag-to-close gesture
+    // whether it is scrolled to the top.
+    final effectiveController = widget.scrollController ?? _pageScroll;
     final scroll = SingleChildScrollView(
-      controller: widget.scrollController,
+      controller: effectiveController,
       child: content,
     );
-    if (inSheet) return ColoredBox(color: c.background, child: scroll);
-    return Scaffold(backgroundColor: c.background, body: scroll);
+    // Drag down to close, like a sheet, on Android too (J6f-b fix): a drag
+    // from the header, or anywhere once scrolled back to the top, follows
+    // the finger and pops the page past a threshold or a fling.
+    final body = SpeciesPageDragClose(
+      scrollController: effectiveController,
+      onClose: () => Navigator.of(context).maybePop(),
+      child: scroll,
+    );
+    if (inSheet) return ColoredBox(color: c.background, child: body);
+    return Scaffold(backgroundColor: c.background, body: body);
   }
 
   void _openMap() => _push(
