@@ -371,6 +371,10 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   « espèces » en dessous.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
+- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est dessiné en silhouette de
+  l'oiseau du logo (queue, corps et bec réunis, œil évidé), 40 dp, centrée sur la case :
+  remplissage Martin-pêcheur dont l'opacité suit le nombre de contacts, contour opaque de 1,5 dp.
+  Un seul chemin mis en cache, une couche peinte en quelques appels (`place_bird_layer.dart`).
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 
