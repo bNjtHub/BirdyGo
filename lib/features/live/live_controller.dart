@@ -453,6 +453,10 @@ class LiveController {
         gainLinear: gainLinear,
         highPassHz: highPassHz,
         recordingMode: recordingMode.name,
+        clipContextSeconds:
+            recordingMode == RecordingMode.detectionsOnly
+                ? recordingService.clipContextSeconds
+                : 0,
         recordingFormat: recordingFormat,
         targetDurationSeconds: targetDurationSeconds,
       ),
@@ -558,7 +562,8 @@ class LiveController {
     _windowDriver.cancelPendingWakeup();
 
     _sessionGeneration++;
-    for (final closed in _accumulator?.closeAll() ?? const <DetectionRecord>[]) {
+    for (final closed
+        in _accumulator?.closeAll() ?? const <DetectionRecord>[]) {
       _clipWriter.forget(closed);
     }
     _syncSessionDetections();
