@@ -737,6 +737,26 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             toujours en photo (choix de Benjamin : aucune icône d'oiseau dessinée) ; seule la
             silhouette mystère vient de `icons.json`. Dépendances
             ajoutées : `confetti`, `flutter_svg`.
+- [ ] J6f Interface finale (maquettes « App finale » du canevas, design system mis à jour). Base
+      commune : `BirdyBlock` (tons plain, tonal, sure, oriole, toCheck), barre et anneau de
+      progression, `BirdyTabHeader`, `BirdyOverlayHeader`, `BirdyFilterChip`, jetons 16 / 10 dp.
+      - [x] J6f-a Accueil en blocs et Écoute (PR « J6f-a Accueil et Écoute : … ») : héros « Dernier
+            oiseau entendu », grille objectif / série / à vérifier, statut, « Aujourd'hui », défi ;
+            « Écouter » lance l'écoute (`forceAutoStart`). Live : état vide « Attendus ici ce
+            matin », ligne de lieu, pilule de mode à la place du menu ⋮ (Aide et Réglages passent
+            dans la feuille « i »).
+      - [x] J6f-b Onglets et écrans par-dessus (PR « J6f-b Carnet, Profil, Carte, Fiche, Palmarès,
+            Bilan, Revue : … ») : grands titres, blocs teintés, filtres colorés, en-tête retour et
+            titre 20 (croix « Fermer » pour le Bilan et la Revue).
+      - [x] J6f-c Modes d'écoute (PR « J6f-c Écoute : modes d'écoute »), `lib/fork/listening_mode/` :
+            Normal, Vent (passe-haut 250 Hz), Boost (gain ×2, passe-haut 120 Hz) écrivent les réglages
+            gain et passe-haut existants ; Ville (réduction des bruits continus, une ligne FORK dans
+            `audio_capture_service.dart`) derrière `kCityModeEnabled = !kReleaseMode`.
+      - [ ] (Benjamin) Terrain : Vent par vent réel (chouettes et pigeons toujours reconnus),
+            Boost sur oiseaux lointains, Ville près d'une route (scores, spectre, coût en profile,
+            écran éteint), changement de mode en pleine écoute, mode retrouvé après redémarrage.
+      - [ ] Décider de garder Ville après le terrain (lever le drapeau ou retirer le mode).
+      - [ ] Enregistrer le mode dans la session (champ `SessionSettings`, hors fork aujourd'hui).
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
