@@ -6,7 +6,6 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
@@ -23,6 +22,7 @@ import '../game/game_progress.dart';
 import '../game/game_text.dart';
 import '../game/game_widgets.dart';
 import '../game/streak.dart';
+import '../game/streak_dots.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'home_model.dart';
@@ -421,22 +421,9 @@ class HomeGrid extends StatelessWidget {
   }
 }
 
-/// The 7 days ending today (today last), from the two-week calendar
-/// ([Streak.calendar]: two ISO weeks Monday to Sunday, current week last).
-/// A calendar-week slice would hide yesterday on a Monday; this rolling
-/// window always shows the days that actually count toward the série.
-/// Falls back to the calendar week when today is missing from the
-/// calendar (should not happen).
-List<StreakDay> lastSevenDays(Streak streak) {
-  final days = streak.calendar;
-  final todayIndex = days.indexWhere((d) => d.isToday);
-  if (todayIndex < 6) {
-    return days.length <= 7 ? days : days.sublist(days.length - 7);
-  }
-  return days.sublist(todayIndex - 6, todayIndex + 1);
-}
-
-/// « 9 jours de suite » and this week's day dots, on Loriot.
+/// « 9 jours de suite » and this week's day dots, on Loriot. The 7 dots
+/// are [StreakDots] (J6f-b), shared with the Profil série block so both
+/// show the exact same look.
 class StreakBlock extends StatelessWidget {
   const StreakBlock({super.key, required this.streak, this.onTap});
 
@@ -447,7 +434,6 @@ class StreakBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final weekday = DateFormat('EEEEE', l10n.localeName);
     final week = lastSevenDays(streak);
     final listened =
         week.where((d) => d.state == StreakDayState.listened).length;
@@ -479,30 +465,7 @@ class StreakBlock extends StatelessWidget {
             ],
           ),
           const SizedBox(height: BirdySpace.s),
-          Row(
-            children: [
-              for (final day in week)
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Column(
-                      children: [
-                        _DayDot(listened: day.state == StreakDayState.listened),
-                        const SizedBox(height: BirdySpace.xs),
-                        Text(
-                          weekday.format(day.date).toUpperCase(),
-                          style: BirdyText.caption.copyWith(
-                            color: c.orioleText,
-                            fontWeight:
-                                day.isToday ? FontWeight.w700 : FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          StreakDots(days: week, localeName: l10n.localeName),
         ],
       ),
     );
@@ -538,29 +501,9 @@ class StreakBlockSkeleton extends StatelessWidget {
               ],
             ),
             const SizedBox(height: BirdySpace.s),
-            Row(
-              children: [
-                for (var i = 0; i < 7; i++)
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        children: [
-                          BirdySkeleton.box(
-                            width: BirdySizes.dayDot,
-                            height: BirdySizes.dayDot,
-                            radius: BirdyRadii.pill,
-                          ),
-                          const SizedBox(height: BirdySpace.xs),
-                          BirdySkeleton.text(
-                            BirdyText.caption,
-                            placeholder: '0',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+            StreakDotsSkeleton(
+              days: _skeletonWeek(),
+              localeName: Localizations.localeOf(context).toString(),
             ),
           ],
         ),
@@ -569,36 +512,13 @@ class StreakBlockSkeleton extends StatelessWidget {
   }
 }
 
-/// Filled when listened, outlined otherwise. Loriot text color, not the
-/// Loriot fill: the fill is too pale on its own container.
-class _DayDot extends StatelessWidget {
-  const _DayDot({required this.listened});
-
-  final bool listened;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return Container(
-      key: ValueKey(listened ? 'day-listened' : 'day-open'),
-      width: BirdySizes.dayDot,
-      height: BirdySizes.dayDot,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: listened ? c.orioleText : null,
-        border:
-            listened
-                ? null
-                : Border.all(
-                  color: c.orioleText.withValues(
-                    alpha: BirdyAlpha.dayDotOutline,
-                  ),
-                  width: BirdySizes.dayDotStroke,
-                ),
-      ),
-    );
-  }
-}
+/// The last 7 days shown while the streak facts are still loading: dates
+/// and which one is today come from the clock alone, not from the loaded
+/// data, so they can be exact from the first frame ([computeStreak] with
+/// nothing listened yet gives the same 7-day window [StreakBlock] will
+/// later show, just with every day unresolved).
+List<StreakDay> _skeletonWeek() =>
+    lastSevenDays(computeStreak(const {}, DateTime.now()));
 
 /// « 12 à vérifier · 2 min de revue », white with the dashed outline.
 class ToCheckBlock extends StatelessWidget {
