@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
 import 'challenges.dart';
 import 'game_config.dart';
@@ -53,91 +54,86 @@ class ChallengeCard extends StatelessWidget {
     final started = challenge.started;
     final done = challenge.done;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surface1,
-        borderRadius: BorderRadius.circular(BirdyRadii.card),
-        border: done ? Border.all(color: c.oriole, width: 1.5) : null,
+    // J6f: a plain block, on Loriot once done (fills, never borders).
+    return BirdyBlock(
+      tone: done ? BirdyBlockTone.oriole : BirdyBlockTone.plain,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BirdySpace.l,
+        vertical: 14,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: BirdySpace.l,
-          vertical: 14,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: c.tonal,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    challengeIcon(challenge.kind),
-                    size: 22,
-                    color: c.accentText,
-                  ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: BirdySizes.blockIconDisc,
+                height: BirdySizes.blockIconDisc,
+                decoration: BoxDecoration(
+                  color: done ? c.oriole : c.tonal,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(width: BirdySpace.m),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.forkChallengeWeek, style: caption),
-                      Text(
-                        challengeTitle(l10n, challenge),
-                        style: BirdyText.species.copyWith(color: c.text1),
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  done ? AppIcons.check : challengeIcon(challenge.kind),
+                  size: 22,
+                  color: done ? c.onOriole : c.accentText,
                 ),
-                if (started) ...[
-                  const SizedBox(width: BirdySpace.s),
-                  _Progress(challenge: challenge),
-                ],
+              ),
+              const SizedBox(width: BirdySpace.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.forkChallengeWeek, style: caption),
+                    Text(
+                      challengeTitle(l10n, challenge),
+                      style: BirdyText.species.copyWith(color: c.text1),
+                    ),
+                  ],
+                ),
+              ),
+              if (started) ...[
+                const SizedBox(width: BirdySpace.s),
+                _Progress(challenge: challenge),
               ],
+            ],
+          ),
+          const SizedBox(height: BirdySpace.s),
+          if (done) ...[
+            Text(
+              l10n.forkChallengeDone,
+              style: BirdyText.label.copyWith(
+                color: c.orioleText,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(l10n.forkChallengeDoneBody, style: caption),
+          ] else if (started)
+            Text(
+              l10n.forkChallengeProgress(
+                challenge.value.clamp(0, challenge.target),
+                challenge.target,
+              ),
+              style: caption,
+            )
+          else ...[
+            Text(
+              challengeBody(l10n, challenge.kind),
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
             ),
             const SizedBox(height: BirdySpace.s),
-            if (done) ...[
-              Text(
-                l10n.forkChallengeDone,
-                style: BirdyText.label.copyWith(
-                  color: c.orioleText,
-                  fontWeight: FontWeight.w700,
-                ),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FilledButton(
+                style: BirdyButtonStyles.tonal(context),
+                onPressed: onStart,
+                child: Text(l10n.forkChallengeStart),
               ),
-              Text(l10n.forkChallengeDoneBody, style: caption),
-            ] else if (started)
-              Text(
-                l10n.forkChallengeProgress(
-                  challenge.value.clamp(0, challenge.target),
-                  challenge.target,
-                ),
-                style: caption,
-              )
-            else ...[
-              Text(
-                challengeBody(l10n, challenge.kind),
-                style: BirdyText.bodyCompact.copyWith(color: c.text1),
-              ),
-              const SizedBox(height: BirdySpace.s),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: FilledButton(
-                  style: BirdyButtonStyles.tonal(context),
-                  onPressed: onStart,
-                  child: Text(l10n.forkChallengeStart),
-                ),
-              ),
-              const SizedBox(height: BirdySpace.xs),
-              Text(l10n.forkChallengeOptIn, style: caption),
-            ],
+            ),
+            const SizedBox(height: BirdySpace.xs),
+            Text(l10n.forkChallengeOptIn, style: caption),
           ],
-        ),
+        ],
       ),
     );
   }

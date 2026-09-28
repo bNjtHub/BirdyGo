@@ -1,5 +1,7 @@
 /// Small bar charts of activity by hour or by month (J4), drawn with a
-/// CustomPainter: no chart dependency.
+/// CustomPainter: no chart dependency. Also supports a per-bar sequential
+/// color scale, a tap/long-press selection and one highlighted bar (J6f-b
+/// fix).
 library;
 
 import 'dart:math' as math;
@@ -15,6 +17,11 @@ class ActivityBars extends StatelessWidget {
     required this.semanticLabel,
     this.height = 64,
     this.color,
+    this.colorForValue,
+    this.trackColor,
+    this.onSelect,
+    this.highlightIndex,
+    this.highlightColor,
   });
 
   final List<int> values;
@@ -24,8 +31,36 @@ class ActivityBars extends StatelessWidget {
   final String semanticLabel;
   final double height;
 
-  /// Bar color; the theme's primary by default.
+  /// Flat bar color; the theme's primary by default. Ignored when
+  /// [colorForValue] is set.
   final Color? color;
+
+  /// Per-bar color from its value and the busiest value, for a sequential
+  /// scale (J6f-b fix); overrides [color] when set. Never called with a
+  /// zero value: those always use [trackColor].
+  final Color Function(int value, int maxValue)? colorForValue;
+
+  /// Bar color for a zero value; the theme's surfaceContainerHighest by
+  /// default.
+  final Color? trackColor;
+
+  /// Called with a bar's index and value on tap or long press (J6f-b fix).
+  final void Function(int index, int value)? onSelect;
+
+  /// Bar marked as the current one (e.g. today's month), with a small dot
+  /// at its base, independent of its color (J6f-b fix).
+  final int? highlightIndex;
+
+  /// Color of the [highlightIndex] dot; the theme's primary by default.
+  final Color? highlightColor;
+
+  void _select(Offset local, double width) {
+    final onSelect = this.onSelect;
+    if (onSelect == null || values.isEmpty || width <= 0) return;
+    final slot = width / values.length;
+    final index = (local.dx / slot).floor().clamp(0, values.length - 1);
+    onSelect(index, values[index]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +75,30 @@ class ActivityBars extends StatelessWidget {
         children: [
           SizedBox(
             height: height,
-            child: CustomPaint(
-              painter: _BarsPainter(
-                values: values,
-                color: color ?? theme.colorScheme.primary,
-                emptyColor: theme.colorScheme.surfaceContainerHighest,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final chart = CustomPaint(
+                  painter: _BarsPainter(
+                    values: values,
+                    color: color ?? theme.colorScheme.primary,
+                    emptyColor:
+                        trackColor ?? theme.colorScheme.surfaceContainerHighest,
+                    colorForValue: colorForValue,
+                    highlightIndex: highlightIndex,
+                    highlightColor: highlightColor ?? theme.colorScheme.primary,
+                  ),
+                );
+                if (onSelect == null) return chart;
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  excludeFromSemantics: true,
+                  onTapDown:
+                      (d) => _select(d.localPosition, constraints.maxWidth),
+                  onLongPressStart:
+                      (d) => _select(d.localPosition, constraints.maxWidth),
+                  child: chart,
+                );
+              },
             ),
           ),
           const SizedBox(height: 4),
@@ -93,11 +146,17 @@ class _BarsPainter extends CustomPainter {
     required this.values,
     required this.color,
     required this.emptyColor,
+    this.colorForValue,
+    this.highlightIndex,
+    required this.highlightColor,
   });
 
   final List<int> values;
   final Color color;
   final Color emptyColor;
+  final Color Function(int value, int maxValue)? colorForValue;
+  final int? highlightIndex;
+  final Color highlightColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -115,16 +174,33 @@ class _BarsPainter extends CustomPainter {
         barWidth,
         h,
       );
+      final barColor =
+          values[i] == 0
+              ? emptyColor
+              : (colorForValue?.call(values[i], maxValue) ?? color);
       canvas.drawRRect(
         RRect.fromRectAndCorners(rect, topLeft: radius, topRight: radius),
-        Paint()..color = values[i] == 0 ? emptyColor : color,
+        Paint()..color = barColor,
       );
+      if (i == highlightIndex) {
+        final dotRadius = math.min(barWidth / 2, 3.0);
+        canvas.drawCircle(
+          Offset(i * slot + slot / 2, size.height - dotRadius),
+          dotRadius,
+          Paint()..color = highlightColor,
+        );
+      }
     }
   }
 
   @override
   bool shouldRepaint(_BarsPainter old) =>
-      old.color != color || !_sameValues(old.values, values);
+      old.color != color ||
+      old.emptyColor != emptyColor ||
+      old.colorForValue != colorForValue ||
+      old.highlightIndex != highlightIndex ||
+      old.highlightColor != highlightColor ||
+      !_sameValues(old.values, values);
 
   static bool _sameValues(List<int> a, List<int> b) {
     if (a.length != b.length) return false;

@@ -72,7 +72,15 @@ class RankingHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 2),
-        Text(caption, style: BirdyText.caption.copyWith(color: c.text2)),
+        // Capped so its loading skeleton (ranking_screen.dart) can reserve
+        // a fixed number of lines instead of however many this sentence
+        // (period + new-this-year count) happens to wrap to.
+        Text(
+          caption,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: BirdyText.caption.copyWith(color: c.text2),
+        ),
       ],
     );
   }

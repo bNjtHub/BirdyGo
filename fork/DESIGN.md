@@ -371,6 +371,12 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   « espèces » en dessous.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
+- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est le logo BirdyGo en
+  couleurs (dégradé Martin-pêcheur, ailes en barres, bec Loriot, œil), centré sur la case, sur un
+  halo blanc de 3 dp qui le détache de n'importe quel fond. Le nombre de contacts se lit à la
+  taille, de 24 à 40 dp, jamais à l'opacité : un lieu calme est un petit oiseau, pas un oiseau
+  délavé. Les plus gros sont dessinés en dernier. Logo enregistré une fois en image, puis
+  seulement déplacé et mis à l'échelle (`place_bird_layer.dart`).
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 
@@ -378,6 +384,17 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
   Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
   garde toutes ses entrées.
+- Gestes (J6f) : un balayage horizontal passe à l'onglet voisin, dans l'ordre de la barre, et la
+  pastille suit dès que la page voisine dépasse la moitié de l'écran. Sur l'onglet Carte, le
+  balayage est coupé (la carte se déplace au doigt) : on en sort par la barre ou par le retour ;
+  entrer dans la carte depuis Carnet ou Profil par un balayage reste possible. Les défileurs
+  horizontaux des onglets (puces du Carnet, rangée « Aujourd'hui ») gardent leur geste. Un appui
+  sur la barre fait glisser les pages (`BirdyMotion.reorder`, 250 ms, courbe `BirdyMotion.move`) ;
+  avec les animations réduites, l'onglet change d'un coup (le balayage suit toujours le doigt).
+  Chaque onglet reste en vie hors de l'écran (défilement, filtres, carte) et n'est construit
+  qu'à sa première visite ; une fois entièrement hors de l'écran, il est masqué pour
+  `Visibility.of` (le logo de l'Accueil ne chante pas quand on ne le voit pas). Le retour
+  système depuis un autre onglet ramène à l'Accueil, puis quitte l'application.
 - Carnet (`lib/fork/notebook/`) : titre « Mon carnet » et bouton podium, carte de progression
   (découvertes, « N sur M espèces attendues ici cette semaine », barre Martin-pêcheur sans gain
   animé), puces en ligne qui défile, grille de 3 cartes `SpeciesCard` (écart 10). Ordre de « Toutes » :
@@ -451,6 +468,11 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
   (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
   remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
+- Profil en couleur (J6f), langage de blocs de l'Accueil : statut sur bloc Sûr, échelle dans un bloc
+  blanc avec le statut en cours sur une pastille tonale (seuil en Martin-pêcheur texte), série sur
+  bloc Loriot, badges en mini-blocs Loriot / tonal / Sûr en alternance (jamais deux voisins pareils),
+  « Qui chante ? » sur bloc tonal avec un disque Martin-pêcheur de 60 dp (casque) et un « ? » Loriot,
+  défi réussi en bloc Loriot avec une coche sur disque Loriot (aussi sur l'Accueil).
 - Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
   confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
   pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.

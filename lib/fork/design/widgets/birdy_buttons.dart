@@ -118,7 +118,8 @@ class ListenButton extends StatelessWidget {
 }
 
 /// Round 48 px icon button. The label is required: it is read by screen
-/// readers and shown as tooltip.
+/// readers and shown as tooltip. White without border on light screens
+/// (J6f); a faint fill and outline on dark ones, where white would glare.
 class BirdyIconButton extends StatelessWidget {
   const BirdyIconButton({
     super.key,
@@ -144,7 +145,7 @@ class BirdyIconButton extends StatelessWidget {
           fixedSize: const Size.square(BirdySizes.target),
           backgroundColor: c.isDark ? c.line : c.surface1,
           foregroundColor: c.text1,
-          side: BorderSide(color: c.isDark ? c.border : c.line),
+          side: c.isDark ? BorderSide(color: c.border) : BorderSide.none,
         ),
       ),
     );

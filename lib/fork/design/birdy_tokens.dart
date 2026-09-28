@@ -145,6 +145,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.sure,
     required this.probable,
     required this.toCheck,
+    required this.skeleton,
   });
 
   final Brightness brightness;
@@ -215,6 +216,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
+  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
+  /// loops, so no shimmer or pulse).
+  final Color skeleton;
+
   final LevelColors sure;
   final LevelColors probable;
   final LevelColors toCheck;
@@ -270,6 +275,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0xFFFBEFC8),
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFFD6DCD2),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -310,6 +316,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0x29F4C542),
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFF29425F),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -366,6 +373,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       orioleContainer: c(orioleContainer, other.orioleContainer),
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
+      skeleton: c(skeleton, other.skeleton),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
@@ -409,6 +417,12 @@ abstract final class BirdySpace {
 
   /// Gutter of the live list.
   static const double gutterLive = 8;
+
+  /// Page margin of the block layout (J6f, « App finale » boards).
+  static const double page = 16;
+
+  /// Gap between two blocks (J6f).
+  static const double block = 10;
 }
 
 /// Component sizes (SPEC.md 2.8).
@@ -442,4 +456,58 @@ abstract final class BirdySizes {
   static const double spectrumReduced = 56;
   static const double spectrumNormal = 120;
   static const double spectrumExpanded = 450;
+
+  /// Progress ring of a block (daily goal), and its stroke.
+  static const double ring = 76;
+  static const double ringStroke = 8;
+
+  /// Progress bar of a block (status, notebook).
+  static const double progressBar = 8;
+
+  /// Day dot of the série (7 per week).
+  static const double dayDot = 14;
+
+  /// Outline of a day dot without listening.
+  static const double dayDotStroke = 2;
+
+  /// Dashed silhouette slot of a species still to find (daily goal block,
+  /// empty live state uses [expectedSlot]).
+  static const double goalSlot = 36;
+  static const double expectedSlot = 52;
+
+  /// Tinted species card of a scrolling row (home « Aujourd'hui »).
+  static const double speciesChipCard = 92;
+
+  /// Hero block (« Dernier oiseau entendu »): minimum height, decorative
+  /// disc behind the bird, and the bird itself.
+  static const double heroMinHeight = 196;
+  static const double heroDisc = 176;
+  static const double heroBird = 120;
+
+  /// Status disc of the status block.
+  static const double statusDisc = 52;
+
+  /// Small icon disc leading a block (weekly challenge).
+  static const double blockIconDisc = 40;
+
+  /// Illustration disc of the « Qui chante ? » block on the Profil, and the
+  /// Loriot question mark pinned on its corner.
+  static const double quizDisc = 60;
+  static const double quizDiscBadge = 24;
+}
+
+/// Opacities of layered block details (J6f). Colors themselves come from
+/// [BirdyColors] or the species tint.
+abstract final class BirdyAlpha {
+  /// Decorative disc of the species accent behind the hero bird.
+  static const double heroDisc = 0.18;
+
+  /// White fill of a dashed slot on a tonal block.
+  static const double slotFill = 0.55;
+
+  /// White track of a bar or ring on a tinted block.
+  static const double trackOnTint = 0.8;
+
+  /// Outline of a day dot without listening (série block).
+  static const double dayDotOutline = 0.45;
 }
