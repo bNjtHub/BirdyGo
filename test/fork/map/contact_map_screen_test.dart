@@ -145,6 +145,18 @@ void main() {
     expect(find.text('Toutes les espèces'), findsOneWidget);
   });
 
+  testWidgets('landscape: the header and map still lay out (J6f-b)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 420);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpMap(tester, withData: true);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Ma carte'), findsOneWidget);
+    expect(find.byType(FlutterMap), findsOneWidget);
+  });
+
   testWidgets('area sheet: title, contacts, replay and privacy line', (
     tester,
   ) async {
