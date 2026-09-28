@@ -384,6 +384,17 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
   Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
   garde toutes ses entrées.
+- Gestes (J6f) : un balayage horizontal passe à l'onglet voisin, dans l'ordre de la barre, et la
+  pastille suit dès que la page voisine dépasse la moitié de l'écran. Sur l'onglet Carte, le
+  balayage est coupé (la carte se déplace au doigt) : on en sort par la barre ou par le retour ;
+  entrer dans la carte depuis Carnet ou Profil par un balayage reste possible. Les défileurs
+  horizontaux des onglets (puces du Carnet, rangée « Aujourd'hui ») gardent leur geste. Un appui
+  sur la barre fait glisser les pages (`BirdyMotion.reorder`, 250 ms, courbe `BirdyMotion.move`) ;
+  avec les animations réduites, l'onglet change d'un coup (le balayage suit toujours le doigt).
+  Chaque onglet reste en vie hors de l'écran (défilement, filtres, carte) et n'est construit
+  qu'à sa première visite ; une fois entièrement hors de l'écran, il est masqué pour
+  `Visibility.of` (le logo de l'Accueil ne chante pas quand on ne le voit pas). Le retour
+  système depuis un autre onglet ramène à l'Accueil, puis quitte l'application.
 - Carnet (`lib/fork/notebook/`) : titre « Mon carnet » et bouton podium, carte de progression
   (découvertes, « N sur M espèces attendues ici cette semaine », barre Martin-pêcheur sans gain
   animé), puces en ligne qui défile, grille de 3 cartes `SpeciesCard` (écart 10). Ordre de « Toutes » :

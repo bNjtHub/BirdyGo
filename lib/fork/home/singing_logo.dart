@@ -88,7 +88,7 @@ class _SingingLogoState extends State<SingingLogo>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reduced = BirdyMotion.reduced(context);
-    // Visibility.of follows the bottom navigation (IndexedStack); a screen
+    // Visibility.of follows the bottom navigation (the shell's pages); a screen
     // pushed above the home makes its route not current.
     _visible =
         Visibility.of(context) && (ModalRoute.isCurrentOf(context) ?? true);

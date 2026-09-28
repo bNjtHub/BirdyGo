@@ -35,8 +35,12 @@ class _FakeHome implements HomeLoader {
 }
 
 class _FakeNotebook implements NotebookLoader {
+  _FakeNotebook([this._heard = const []]);
+
+  final List<HeardSpecies> _heard;
+
   @override
-  Future<List<HeardSpecies>> heard() async => const [];
+  Future<List<HeardSpecies>> heard() async => _heard;
 
   @override
   Future<List<ExpectedSpecies>?> expected() async => null;
@@ -56,10 +60,15 @@ class _PendingIndex extends ObservationIndexService {
 }
 
 void main() {
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    List<HeardSpecies> heard = const [],
+    double width = 390,
+    bool reducedMotion = false,
+  }) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    tester.view.physicalSize = Size(width, 844) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -67,7 +76,7 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           homeLoaderProvider.overrideWithValue(_FakeHome()),
-          notebookLoaderProvider.overrideWithValue(_FakeNotebook()),
+          notebookLoaderProvider.overrideWithValue(_FakeNotebook(heard)),
           gameProgressProvider.overrideWith(
             (ref) async => GameProgress(
               GameFacts(
@@ -92,6 +101,12 @@ void main() {
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(disableAnimations: reducedMotion),
+            child: child!,
+          ),
           home: const ForkShell(),
         ),
       ),
@@ -169,4 +184,165 @@ void main() {
     );
     expect(find.text('Série : 9 jours'), findsOneWidget);
   });
+
+  int selected(WidgetTester tester) =>
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex;
+
+  Future<void> swipe(WidgetTester tester, double dx, {Finder? from}) async {
+    await tester.fling(from ?? find.byType(PageView), Offset(dx, 0), 1000);
+    await tester.pumpAndSettle();
+  }
+
+  // The map keeps animating (tiles, location): no pumpAndSettle there.
+  Future<void> settleOnMap(WidgetTester tester) async {
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  testWidgets('swiping left from Accueil opens Carnet, the bar follows', (
+    tester,
+  ) async {
+    await pump(tester);
+    await swipe(tester, -300);
+    expect(selected(tester), 1);
+    expect(find.text('Mon carnet'), findsOneWidget);
+
+    await swipe(tester, 300);
+    expect(selected(tester), 0);
+    expect(find.byType(ForkHome), findsOneWidget);
+  });
+
+  testWidgets('swiping is off on the Carte tab, allowed into it', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(tab('Profil'));
+    await tester.pumpAndSettle();
+    // Swiping right from Profil enters the map.
+    await tester.fling(find.byType(PageView), const Offset(300, 0), 1000);
+    await settleOnMap(tester);
+    expect(selected(tester), 2);
+    expect(find.byType(ContactMapScreen), findsOneWidget);
+    expect(
+      tester.widget<PageView>(find.byType(PageView)).physics,
+      isA<NeverScrollableScrollPhysics>(),
+    );
+
+    // On the map, a horizontal drag does not leave the tab.
+    await tester.dragFrom(const Offset(200, 400), const Offset(300, 0));
+    await settleOnMap(tester);
+    await tester.dragFrom(const Offset(200, 400), const Offset(-300, 0));
+    await settleOnMap(tester);
+    expect(selected(tester), 2);
+    expect(find.byType(ContactMapScreen), findsOneWidget);
+
+    // The bar still leaves it.
+    await tester.tap(tab('Carnet'));
+    await settleOnMap(tester);
+    expect(selected(tester), 1);
+    expect(find.text('Mon carnet'), findsOneWidget);
+  });
+
+  testWidgets('tapping the bar with reduced motion changes tab at once', (
+    tester,
+  ) async {
+    await pump(tester, reducedMotion: true);
+    await tester.tap(tab('Profil'));
+    await tester.pump();
+    expect(selected(tester), 3);
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    // The notebook and the map, crossed on the way, are not built.
+    expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('a tap that skips tabs jumps, never flashing those between', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(tab('Profil'));
+    // First frame after the tap: already on the Profil, nothing slid.
+    await tester.pump();
+    expect(selected(tester), 3);
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('each tab keeps its state across swipes', (tester) async {
+    await pump(tester, heard: _heard);
+    await swipe(tester, -300);
+    expect(find.text('Mon carnet'), findsOneWidget);
+    final state = tester.state(find.byType(NotebookScreen));
+
+    // From the title: the middle of the notebook may be its chips row.
+    await swipe(tester, 300, from: find.text('Mon carnet'));
+    expect(selected(tester), 0);
+    // Kept alive off screen, not rebuilt.
+    expect(find.byType(NotebookScreen, skipOffstage: false), findsOneWidget);
+    await swipe(tester, -300);
+    expect(tester.state(find.byType(NotebookScreen)), same(state));
+  });
+
+  testWidgets('home is hidden for Visibility.of once off screen', (
+    tester,
+  ) async {
+    await pump(tester);
+    final home = find.byType(ForkHome, skipOffstage: false);
+    expect(Visibility.of(tester.element(home)), isTrue);
+    await swipe(tester, -300);
+    expect(Visibility.of(tester.element(home)), isFalse);
+    await tester.tap(tab('Accueil'));
+    await tester.pumpAndSettle();
+    expect(Visibility.of(tester.element(home)), isTrue);
+  });
+
+  testWidgets('the notebook filter chips scroll without changing tab', (
+    tester,
+  ) async {
+    await pump(tester, heard: _heard);
+    await tester.tap(tab('Carnet'));
+    await tester.pumpAndSettle();
+    final chips = find.descendant(
+      of: find.byKey(const ValueKey('notebook-filter-chips')),
+      matching: find.byType(Scrollable),
+    );
+    expect(chips, findsOneWidget);
+    final position = tester.state<ScrollableState>(chips).position;
+    expect(position.maxScrollExtent, greaterThan(0));
+
+    await tester.drag(chips, const Offset(-120, 0));
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(0));
+    expect(selected(tester), 1);
+  });
+
+  testWidgets('back from Profil returns to Accueil', (tester) async {
+    await pump(tester);
+    await tester.tap(tab('Profil'));
+    await tester.pumpAndSettle();
+    expect(selected(tester), 3);
+
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await tester.pumpAndSettle();
+    expect(selected(tester), 0);
+    expect(find.byType(ForkHome), findsOneWidget);
+  });
 }
+
+const _heard = [
+  HeardSpecies(
+    scientificName: 'Erithacus rubecula',
+    commonName: 'Rougegorge familier',
+    contacts: 3,
+    verified: true,
+    inQueue: 0,
+  ),
+  HeardSpecies(
+    scientificName: 'Upupa epops',
+    commonName: 'Huppe fasciée',
+    contacts: 1,
+    verified: false,
+    inQueue: 1,
+  ),
+];
