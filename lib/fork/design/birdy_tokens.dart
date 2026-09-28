@@ -490,6 +490,13 @@ abstract final class BirdySizes {
 
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
+
+  /// Icon of a one-line tip (empty live table).
+  static const double tipIcon = 18;
+
+  /// Icon and chevron of the listening mode pill (live header).
+  static const double modeIcon = 20;
+  static const double modeChevron = 16;
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from
@@ -509,4 +516,11 @@ abstract final class BirdyAlpha {
 
   /// Outline of a day dot without listening (série block).
   static const double dayDotOutline = 0.45;
+
+  /// [BirdyColors.surface1] of an expected species row in the empty live
+  /// table (it is not there yet).
+  static const double expectedRow = 0.55;
+
+  /// [BirdyColors.accentText] outline of the listening mode pill.
+  static const double modePillBorder = 0.4;
 }

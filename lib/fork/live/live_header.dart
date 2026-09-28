@@ -1,5 +1,6 @@
-/// Header of the listening screen (J6c, SPEC.md 9.2): status, spectrogram
-/// size, menu, then three stat tiles (duration, species, contacts).
+/// Header of the listening screen (J6c, SPEC.md 9.2; J6f): status and
+/// place, the « i » sheet (levels, help, settings), the listening mode pill,
+/// then three stat tiles (duration, species, contacts).
 library;
 
 import 'dart:async';
@@ -32,10 +33,10 @@ class LiveHeader extends StatelessWidget {
     required this.elapsed,
     required this.expanded,
     this.showTiles = true,
+    this.place,
+    this.modeChip,
     required this.onLevelsInfo,
     required this.onBack,
-    required this.onSettings,
-    required this.onHelp,
   });
 
   /// « En écoute », « En pause », « Chargement du modèle… ».
@@ -56,11 +57,15 @@ class LiveHeader extends StatelessWidget {
   /// height to the spectrogram.
   final bool showTiles;
 
-  /// Opens what the reliability levels mean (the « i » button).
+  /// Where the phone listens (« Le jardin · Beaulieu »), under the status.
+  final String? place;
+
+  /// Pill on the right: the listening mode ([ListeningModePill]), 48 dp.
+  final Widget? modeChip;
+
+  /// Opens the « i » sheet: what the levels mean, help and settings.
   final VoidCallback onLevelsInfo;
   final VoidCallback onBack;
-  final VoidCallback onSettings;
-  final VoidCallback onHelp;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +112,14 @@ class LiveHeader extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (place != null)
+                        Text(
+                          place!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: BirdyText.caption.copyWith(color: c.text2),
+                        ),
                       if (!tiles)
                         Text(
                           l10n.forkLiveSummary(stats.species, stats.contacts),
@@ -116,13 +129,17 @@ class LiveHeader extends StatelessWidget {
                   ),
                 ),
                 // The enlarge chevron moved onto the spectrogram (J6c-bis-c).
+                // J6f: help and settings moved into the « i » sheet; the
+                // listening mode pill took the menu's place.
                 BirdyIconButton(
                   icon: AppIcons.infoOutline,
-                  semanticLabel: l10n.forkLevelsInfoButton,
+                  semanticLabel: l10n.forkLiveInfoButton,
                   onPressed: onLevelsInfo,
                 ),
-                const SizedBox(width: BirdySpace.xs),
-                _Menu(onSettings: onSettings, onHelp: onHelp),
+                if (modeChip != null) ...[
+                  const SizedBox(width: BirdySpace.xs),
+                  modeChip!,
+                ],
               ],
             ),
             if (tiles) ...[
@@ -192,49 +209,6 @@ class _LiveDot extends StatelessWidget {
                   : null,
         ),
       ),
-    );
-  }
-}
-
-class _Menu extends StatelessWidget {
-  const _Menu({required this.onSettings, required this.onHelp});
-
-  final VoidCallback onSettings;
-  final VoidCallback onHelp;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    return PopupMenuButton<VoidCallback>(
-      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-      icon: const Icon(AppIcons.moreVert),
-      style: IconButton.styleFrom(
-        fixedSize: const Size.square(BirdySizes.target),
-        backgroundColor: c.line,
-        foregroundColor: c.text1,
-        side: BorderSide(color: c.border),
-      ),
-      onSelected: (action) => action(),
-      itemBuilder:
-          (context) => [
-            PopupMenuItem(
-              value: onSettings,
-              child: ListTile(
-                leading: const Icon(AppIcons.tuneRounded),
-                title: Text(l10n.settings),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            PopupMenuItem(
-              value: onHelp,
-              child: ListTile(
-                leading: const Icon(AppIcons.helpOutlineRounded),
-                title: Text(l10n.liveScreenHelpTitle),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ],
     );
   }
 }

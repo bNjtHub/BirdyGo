@@ -233,8 +233,6 @@ void main() {
                           expanded: false,
                           onLevelsInfo: () {},
                           onBack: () {},
-                          onSettings: () {},
-                          onHelp: () {},
                         ),
                         Expanded(child: LiveTable(entries: entries)),
                       ],
