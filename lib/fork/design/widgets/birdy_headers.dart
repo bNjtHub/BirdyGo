@@ -19,6 +19,7 @@ class BirdyTabHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.caption,
+    this.captionWidget,
     this.actions = const [],
   });
 
@@ -26,6 +27,10 @@ class BirdyTabHeader extends StatelessWidget {
 
   /// One line under the title (« 24 espèces découvertes »).
   final String? caption;
+
+  /// Replaces [caption]'s default `Text` when set (a loading skeleton, or a
+  /// caption that itself fades between states).
+  final Widget? captionWidget;
 
   /// Round white buttons ([BirdyIconButton]), top right.
   final List<Widget> actions;
@@ -47,7 +52,10 @@ class BirdyTabHeader extends StatelessWidget {
                   style: BirdyText.display.copyWith(color: c.text1),
                 ),
               ),
-              if (caption case final caption?) ...[
+              if (captionWidget case final captionWidget?) ...[
+                const SizedBox(height: BirdySpace.xs),
+                captionWidget,
+              ] else if (caption case final caption?) ...[
                 const SizedBox(height: BirdySpace.xs),
                 Text(
                   caption,
