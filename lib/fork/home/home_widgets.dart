@@ -5,6 +5,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
@@ -24,17 +25,20 @@ import '../game/streak.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'home_model.dart';
+import 'logo_tweet.dart';
 import 'singing_logo.dart';
 
 /// Singing mark and name, small, alone above the header (Accueil only; the
 /// menu button now sits in [BirdyTabHeader]'s action row).
-class HomeLogoRow extends StatelessWidget {
+class HomeLogoRow extends ConsumerWidget {
   const HomeLogoRow({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = BirdyColors.of(context);
     return SingingLogo(
+      // A tap sings the phrase and plays the BirdyGo tweet.
+      onTap: () => playLogoTweet(ref),
       // The startup screen's wordmark, header size.
       wordmark: FittedBox(
         fit: BoxFit.scaleDown,

@@ -32,10 +32,14 @@ void main() {
       // Sunday 27 September 2026: the rolling window and the calendar week
       // agree when today is the last day of the ISO week.
       final now = DateTime(2026, 9, 27, 12);
-      final streak = computeStreak(
-        {_d(21), _d(22), _d(23), _d(24), _d(25), _d(26)},
-        now,
-      );
+      final streak = computeStreak({
+        _d(21),
+        _d(22),
+        _d(23),
+        _d(24),
+        _d(25),
+        _d(26),
+      }, now);
       final week = lastSevenDays(streak);
       expect(week.map((d) => d.date), [
         for (var day = 21; day <= 27; day++) _d(day),

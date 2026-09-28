@@ -23,7 +23,12 @@ class SingingLogo extends StatefulWidget {
     this.wordmark,
     this.width = markWidth,
     this.interval = singEvery,
+    this.onTap,
   });
+
+  /// Called on every tap, even when the mark stays still (reduced motion):
+  /// the home plays the BirdyGo tweet.
+  final VoidCallback? onTap;
 
   /// Name shown after the mark, part of the tap area.
   final Widget? wordmark;
@@ -149,6 +154,7 @@ class _SingingLogoState extends State<SingingLogo>
   }
 
   void _onTap() {
+    widget.onTap?.call();
     if (_canSing && !_controller.isAnimating) _sing();
   }
 
