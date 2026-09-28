@@ -172,6 +172,7 @@ void main() {
     SpeciesSheets? sheets,
     LiveState liveState = LiveState.ready,
     SessionRepository? lpoRepository,
+    bool reduceMotion = false,
   }) async {
     tester.view.physicalSize = size * 2;
     tester.view.devicePixelRatio = 2;
@@ -213,7 +214,10 @@ void main() {
               (context, child) => MediaQuery(
                 data: MediaQuery.of(
                   context,
-                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                ).copyWith(
+                  textScaler: TextScaler.linear(textScale),
+                  disableAnimations: reduceMotion,
+                ),
                 child: child!,
               ),
           home:
@@ -552,5 +556,61 @@ void main() {
     // Only this species goes to the send screen.
     expect(screen.detections, hasLength(1));
     expect(screen.detections!.single.scientificName, _robin);
+  });
+
+  for (final dark in [false, true]) {
+    testWidgets(
+      'LPO entry at 320 dp, 130 % text: no overflow, 48 dp target '
+      '(${dark ? 'dark' : 'light'})',
+      (tester) async {
+        loader.lpoSession = 'sess-1';
+        await pump(
+          tester,
+          dark: dark,
+          textScale: 1.3,
+          size: const Size(320, 640),
+        );
+        final button = find.byKey(const ValueKey('fiche-lpo-send'));
+        await tester.scrollUntilVisible(
+          button,
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(tester.takeException(), isNull);
+        final size = tester.getSize(button);
+        expect(size.height, greaterThanOrEqualTo(48));
+        expect(size.width, greaterThanOrEqualTo(48));
+      },
+    );
+  }
+
+  testWidgets('reduced motion: the sheet closes with the X, no animation', (
+    tester,
+  ) async {
+    Widget home() => opener(
+      (context, ref) => showSpeciesPage(
+        context,
+        ref,
+        scientificName: _robin,
+        commonName: 'Rougegorge familier',
+      ),
+    );
+    await pump(
+      tester,
+      liveState: LiveState.active,
+      home: home(),
+      reduceMotion: true,
+      size: const Size(320, 640),
+      textScale: 1.3,
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsOneWidget);
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }
