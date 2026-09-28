@@ -149,6 +149,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.sure,
     required this.probable,
     required this.toCheck,
+    required this.skeleton,
   });
 
   final Brightness brightness;
@@ -219,6 +220,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
+  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
+  /// loops, so no shimmer or pulse).
+  final Color skeleton;
+
   final LevelColors sure;
   final LevelColors probable;
   final LevelColors toCheck;
@@ -248,6 +253,16 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 10), blurRadius: 28),
   ];
 
+  /// Glow of the home « Écouter » button: centered around it and at most
+  /// [listenGlowExtent] past its edge, so it fits the equal margins above
+  /// the bottom bar without being cut.
+  List<BoxShadow> get listenGlow => const [
+    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 4), blurRadius: 16),
+  ];
+
+  /// How far [listenGlow] reaches below the button (offset + blur).
+  static const double listenGlowExtent = 20;
+
   /// Light theme (notebook), SPEC.md 2.3.
   static const BirdyColors light = BirdyColors(
     brightness: Brightness.light,
@@ -274,6 +289,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0xFFFBEFC8),
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFFD6DCD2),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -314,6 +330,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     orioleContainer: Color(0x29F4C542),
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
+    skeleton: Color(0xFF29425F),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -370,6 +387,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       orioleContainer: c(orioleContainer, other.orioleContainer),
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
+      skeleton: c(skeleton, other.skeleton),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
@@ -434,6 +452,10 @@ abstract final class BirdySizes {
 
   /// « Arrêter » and « Pause » in the live control bar.
   static const double liveControl = 64;
+
+  /// The home logo's double-tap flight (J6f): bigger than the resting mark
+  /// so the bird stays readable while it crosses the screen.
+  static const double logoFlightBird = 56;
 
   static const double navBar = 80;
   static const double topBar = 56;
@@ -501,6 +523,11 @@ abstract final class BirdySizes {
   /// Icon and chevron of the listening mode pill (live header).
   static const double modeIcon = 20;
   static const double modeChevron = 16;
+
+  /// Illustration disc of the « Qui chante ? » block on the Profil, and the
+  /// Loriot question mark pinned on its corner.
+  static const double quizDisc = 60;
+  static const double quizDiscBadge = 24;
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from

@@ -77,6 +77,10 @@ abstract final class BirdyMotion {
   /// Upper bound of any celebration.
   static const Duration celebrationMax = Duration(milliseconds: 500);
 
+  /// The home logo's double-tap flight (J6f): explicit, user-triggered
+  /// exception to [celebrationMax], see DESIGN.md's Logo section.
+  static const Duration logoFlight = Duration(milliseconds: 2300);
+
   /// Delay between list items entering, over [staggerMaxItems] items.
   static const Duration staggerStep = Duration(milliseconds: 40);
   static const int staggerMaxItems = 5;

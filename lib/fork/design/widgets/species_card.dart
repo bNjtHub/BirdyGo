@@ -87,24 +87,40 @@ class SpeciesCard extends StatelessWidget {
     }
     final nameStyle = (hero ? BirdyText.heading : BirdyText.speciesCompact)
         .copyWith(color: isMystery ? c.text2 : c.text1);
+    final effectiveNameStyle =
+        isMystery
+            ? BirdyText.badge.copyWith(color: c.text2, height: 1.2)
+            : nameStyle;
+    // Two lines, always: a 1-line name and a 2-line name must leave the
+    // caption / « Nouveau » badge below at the exact same spot in every
+    // grid card, not one row shorter than the next.
+    final nameHeight = twoLineTextHeight(context, effectiveNameStyle);
 
     Widget content = Padding(
       padding: EdgeInsets.all(hero ? BirdySpace.l : 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        // Hero cards size to their own content (no bounded height to fill);
+        // grid cards fill the row's intrinsic height so the spacer below
+        // can push the caption down to the card's bottom edge.
+        mainAxisSize: hero ? MainAxisSize.min : MainAxisSize.max,
         children: [
           visual,
           const SizedBox(height: 6),
-          Text(
-            name,
-            style:
-                isMystery
-                    ? BirdyText.badge.copyWith(color: c.text2, height: 1.2)
-                    : nameStyle,
+          SizedBox(
+            height: nameHeight,
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: effectiveNameStyle,
+              ),
+            ),
           ),
           if (caption != null) ...[
-            const SizedBox(height: 6),
+            if (hero) const SizedBox(height: 6) else const Spacer(),
             DefaultTextStyle.merge(
               style: BirdyText.caption.copyWith(
                 color: isMystery || !c.isDark ? c.text2 : c.text1,
@@ -149,4 +165,20 @@ class SpeciesCard extends StatelessWidget {
     }
     return card;
   }
+}
+
+/// Height of two lines of [style] at the current text scale: a name box
+/// reserving it never resizes depending on whether the name wraps to one
+/// line or two (same trick as `heroNameHeight` on the home screen). Public
+/// so the notebook grid's loading skeleton ([NotebookScreen]) can reserve
+/// the exact same space for its placeholder name.
+double twoLineTextHeight(BuildContext context, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: 'A\nA', style: style),
+    textScaler: MediaQuery.textScalerOf(context),
+    textDirection: Directionality.of(context),
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
 }

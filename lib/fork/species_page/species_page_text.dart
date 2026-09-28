@@ -65,3 +65,83 @@ String speciesShareText({required String name, String? latin, String? heard}) {
   final title = latin == null ? name : '$name ($latin)';
   return heard == null ? title : '$title\n$heard';
 }
+
+/// Busiest local hour (0 to 23) of [hours] (24 values), or null when every
+/// hour is at zero (J6f-b fix).
+int? peakHour(List<int> hours) {
+  var best = -1;
+  for (var h = 0; h < hours.length; h++) {
+    if (hours[h] > 0 && (best == -1 || hours[h] > hours[best])) best = h;
+  }
+  return best == -1 ? null : best;
+}
+
+/// « Surtout vers 7 h », the default caption under the activity-by-hour
+/// chart. Null without any activity (J6f-b fix).
+String? peakHourCaption(AppLocalizations l10n, List<int> hours) {
+  final hour = peakHour(hours);
+  return hour == null ? null : l10n.forkFichePeakHour(hour);
+}
+
+/// « 7 h — 42 contacts », the caption while a bar is selected (J6f-b fix).
+String hourDetailCaption(AppLocalizations l10n, int hour, int count) =>
+    // Generated signature puts the plural argument (count) first.
+    l10n.forkFicheHourDetail(count, hour);
+
+/// One summary for the whole activity-by-hour chart: the peak hour and the
+/// total, so its semantics stay a single node instead of 24 (J6f-b fix,
+/// SPEC.md 9.13).
+String activityByHourSemanticLabel(AppLocalizations l10n, List<int> hours) {
+  final peak = peakHourCaption(l10n, hours);
+  final total = hours.fold<int>(0, (sum, h) => sum + h);
+  final base = l10n.forkActivityByHour;
+  return peak == null ? base : '$base. $peak. ${l10n.forkFicheHourTotal(total)}';
+}
+
+/// Busiest month (1 to 12) of [months] (the geo-model's best week per
+/// month, `YearPresence.months`), or null when every month is at zero
+/// (J6f-b fix).
+int? peakMonth(List<double> months) {
+  var best = -1;
+  for (var m = 0; m < months.length; m++) {
+    if (months[m] > 0 && (best == -1 || months[m] > months[best])) best = m;
+  }
+  return best == -1 ? null : best + 1;
+}
+
+/// « Surtout en mai », the default caption under the seasons chart. Null
+/// without any presence (J6f-b fix).
+String? peakMonthCaption(
+  AppLocalizations l10n,
+  String languageCode,
+  List<double> months,
+) {
+  final month = peakMonth(months);
+  return month == null
+      ? null
+      : l10n.forkFichePeakMonth(_monthName(languageCode, month));
+}
+
+/// « Mai — 82 % du pic », the caption while a bar is selected: [percent] is
+/// the month's share of the year's busiest month, 0 to 100 (J6f-b fix).
+String monthDetailCaption(
+  AppLocalizations l10n,
+  String languageCode,
+  int month,
+  int percent,
+) => l10n.forkFicheMonthDetail(_capitalized(_monthName(languageCode, month)), percent);
+
+/// One summary for the whole seasons chart: the peak month, so its
+/// semantics stay a single node instead of 12 (J6f-b fix, SPEC.md 9.13).
+String seasonsChartSemanticLabel(
+  AppLocalizations l10n,
+  String languageCode,
+  List<double> months,
+) {
+  final peak = peakMonthCaption(l10n, languageCode, months);
+  final base = l10n.forkFichePresenceChart;
+  return peak == null ? base : '$base. $peak';
+}
+
+String _capitalized(String text) =>
+    text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);

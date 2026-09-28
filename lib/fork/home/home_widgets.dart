@@ -6,7 +6,6 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
@@ -14,6 +13,7 @@ import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdygo_wordmark.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
@@ -22,6 +22,7 @@ import '../game/game_progress.dart';
 import '../game/game_text.dart';
 import '../game/game_widgets.dart';
 import '../game/streak.dart';
+import '../game/streak_dots.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'home_model.dart';
@@ -121,12 +122,26 @@ class HomeHero extends StatelessWidget {
                   Text(
                     l10n.forkHomeLastBirdAt(when),
                     style: BirdyText.caption.copyWith(color: c.text2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: BirdySpace.block),
-                  Text(name, style: BirdyText.title.copyWith(color: c.text1)),
+                  // Fixed line counts, shared with [HomeHeroSkeleton], so
+                  // the hero never changes height when the data lands.
+                  SizedBox(
+                    height: heroNameHeight(context),
+                    child: Text(
+                      name,
+                      style: BirdyText.title.copyWith(color: c.text1),
+                      maxLines: heroNameLines,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   Text(
                     last.scientificName,
                     style: BirdyText.latinCompact.copyWith(color: c.text2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -195,6 +210,143 @@ class HomeHero extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Lines kept for the hero's species name: two-word names wrap at 130 %.
+const int heroNameLines = 2;
+
+/// Height of [heroNameLines] lines of the hero name at the current text
+/// scale: the name always takes it, so the hero height does not depend on
+/// the name's length.
+double heroNameHeight(BuildContext context) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: List.filled(heroNameLines, 'A').join('\n'),
+      style: BirdyText.title,
+    ),
+    textScaler: MediaQuery.textScalerOf(context),
+    textDirection: Directionality.of(context),
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
+}
+
+/// Loading placeholder of [HomeHero], same [BirdySizes.heroMinHeight]
+/// minimum and padding. The common case for a returning user is a last
+/// bird already on record, so the skeleton fills that shape; a fresh
+/// install with no last bird ever collapses the block instead once loaded,
+/// which is the one case allowed to change the layout (J6f skeletons).
+class HomeHeroSkeleton extends StatelessWidget {
+  const HomeHeroSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return ExcludeSemantics(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: BirdySizes.heroMinHeight),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surface1,
+            borderRadius: BorderRadius.circular(BirdyRadii.hero),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(BirdySpace.l),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    end: BirdySizes.heroBird - BirdySpace.xl,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Same fixed line counts as [HomeHero].
+                      BirdySkeleton.text(
+                        BirdyText.caption,
+                        placeholder: l10n.forkHomeLastBirdAt('07:52'),
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: BirdySpace.block),
+                      SizedBox(
+                        height: heroNameHeight(context),
+                        child: Align(
+                          alignment: AlignmentDirectional.topStart,
+                          child: BirdySkeleton.text(
+                            BirdyText.title,
+                            placeholder: 'Rougegorge familier',
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                      BirdySkeleton.text(
+                        BirdyText.latinCompact,
+                        placeholder: 'Erithacus rubecula',
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: BirdySpace.block),
+                // Same Wrap config as [HomeHero]'s bottom row: the badge
+                // and the total text are real widget-shaped (not plain
+                // boxes), since their width — and so whether this row
+                // wraps to one or two lines — grows with the text scale
+                // exactly like the real ones do.
+                Wrap(
+                  spacing: BirdySpace.s,
+                  runSpacing: BirdySpace.s,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    BirdySkeleton.box(
+                      width: BirdySizes.target,
+                      height: BirdySizes.target,
+                      radius: BirdyRadii.pill,
+                    ),
+                    const _ReliabilityBadgeSkeleton(),
+                    BirdySkeleton.text(
+                      BirdyText.caption,
+                      placeholder: l10n.forkLiveTotal(142),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [ReliabilityBadge] (its non-compact [BirdyPill]
+/// shape): same padding, glyph size and [BirdySizes.pill] minimum height,
+/// built from [BirdyText.badge] so its width grows with the text scale
+/// like the real pill's label does.
+class _ReliabilityBadgeSkeleton extends StatelessWidget {
+  const _ReliabilityBadgeSkeleton();
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(minHeight: BirdySizes.pill),
+    child: Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(7, 4, 10, 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BirdySkeleton.box(width: 12, height: 12, radius: BirdyRadii.thumb),
+          const SizedBox(width: 5),
+          // « Sûr », the shortest level label: a longer one only grows
+          // this pill a little once real, never shrinks it.
+          BirdySkeleton.text(BirdyText.badge, placeholder: 'Sûr'),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Round « Réécouter » button on the species accent.
@@ -269,22 +421,9 @@ class HomeGrid extends StatelessWidget {
   }
 }
 
-/// The 7 days ending today (today last), from the two-week calendar
-/// ([Streak.calendar]: two ISO weeks Monday to Sunday, current week last).
-/// A calendar-week slice would hide yesterday on a Monday; this rolling
-/// window always shows the days that actually count toward the série.
-/// Falls back to the calendar week when today is missing from the
-/// calendar (should not happen).
-List<StreakDay> lastSevenDays(Streak streak) {
-  final days = streak.calendar;
-  final todayIndex = days.indexWhere((d) => d.isToday);
-  if (todayIndex < 6) {
-    return days.length <= 7 ? days : days.sublist(days.length - 7);
-  }
-  return days.sublist(todayIndex - 6, todayIndex + 1);
-}
-
-/// « 9 jours de suite » and this week's day dots, on Loriot.
+/// « 9 jours de suite » and this week's day dots, on Loriot. The 7 dots
+/// are [StreakDots] (J6f-b), shared with the Profil série block so both
+/// show the exact same look.
 class StreakBlock extends StatelessWidget {
   const StreakBlock({super.key, required this.streak, this.onTap});
 
@@ -295,7 +434,6 @@ class StreakBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final weekday = DateFormat('EEEEE', l10n.localeName);
     final week = lastSevenDays(streak);
     final listened =
         week.where((d) => d.state == StreakDayState.listened).length;
@@ -327,66 +465,60 @@ class StreakBlock extends StatelessWidget {
             ],
           ),
           const SizedBox(height: BirdySpace.s),
-          Row(
-            children: [
-              for (final day in week)
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Column(
-                      children: [
-                        _DayDot(listened: day.state == StreakDayState.listened),
-                        const SizedBox(height: BirdySpace.xs),
-                        Text(
-                          weekday.format(day.date).toUpperCase(),
-                          style: BirdyText.caption.copyWith(
-                            color: c.orioleText,
-                            fontWeight:
-                                day.isToday ? FontWeight.w700 : FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          StreakDots(days: week, localeName: l10n.localeName),
         ],
       ),
     );
   }
 }
 
-/// Filled when listened, outlined otherwise. Loriot text color, not the
-/// Loriot fill: the fill is too pale on its own container.
-class _DayDot extends StatelessWidget {
-  const _DayDot({required this.listened});
-
-  final bool listened;
+/// Loading placeholder of [StreakBlock], same shape (number row, then the
+/// 7 day dots): the common case for a returning user is an active série,
+/// so the skeleton fills that shape; a fresh série (0 days) collapses the
+/// block once loaded instead, which is the one case allowed to change the
+/// layout (J6f skeletons).
+class StreakBlockSkeleton extends StatelessWidget {
+  const StreakBlockSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return Container(
-      key: ValueKey(listened ? 'day-listened' : 'day-open'),
-      width: BirdySizes.dayDot,
-      height: BirdySizes.dayDot,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: listened ? c.orioleText : null,
-        border:
-            listened
-                ? null
-                : Border.all(
-                  color: c.orioleText.withValues(
-                    alpha: BirdyAlpha.dayDotOutline,
-                  ),
-                  width: BirdySizes.dayDotStroke,
+    final numberStyle = BirdyText.numberXL;
+    return ExcludeSemantics(
+      child: BirdyBlock(
+        tone: BirdyBlockTone.tonal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: BirdySpace.s,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                BirdySkeleton.text(numberStyle, placeholder: '00'),
+                BirdySkeleton.text(
+                  BirdyText.caption,
+                  placeholder: '0000000000',
                 ),
+              ],
+            ),
+            const SizedBox(height: BirdySpace.s),
+            StreakDotsSkeleton(
+              days: _skeletonWeek(),
+              localeName: Localizations.localeOf(context).toString(),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+/// The last 7 days shown while the streak facts are still loading: dates
+/// and which one is today come from the clock alone, not from the loaded
+/// data, so they can be exact from the first frame ([computeStreak] with
+/// nothing listened yet gives the same 7-day window [StreakBlock] will
+/// later show, just with every day unresolved).
+List<StreakDay> _skeletonWeek() =>
+    lastSevenDays(computeStreak(const {}, DateTime.now()));
 
 /// « 12 à vérifier · 2 min de revue », white with the dashed outline.
 class ToCheckBlock extends StatelessWidget {
@@ -438,6 +570,48 @@ class ToCheckBlock extends StatelessWidget {
           ),
           Text(time, style: BirdyText.caption.copyWith(color: c.text2)),
         ],
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [ToCheckBlock], same shape (number + icon row,
+/// label, review time): the common case for a returning user is
+/// detections waiting for review, so the skeleton fills that shape; 0 to
+/// check collapses the block once loaded instead, which is the one case
+/// allowed to change the layout (J6f skeletons).
+class ToCheckBlockSkeleton extends StatelessWidget {
+  const ToCheckBlockSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final numberStyle = BirdyText.numberXL;
+    return ExcludeSemantics(
+      child: BirdyBlock(
+        tone: BirdyBlockTone.tonal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: BirdySkeleton.text(numberStyle, placeholder: '00'),
+                  ),
+                ),
+                BirdySkeleton.box(
+                  width: BirdySizes.blockIcon,
+                  height: BirdySizes.blockIcon,
+                  radius: BirdyRadii.thumb,
+                ),
+              ],
+            ),
+            BirdySkeleton.text(BirdyText.caption, placeholder: '0000000000'),
+            BirdySkeleton.text(BirdyText.caption, placeholder: '00000000'),
+          ],
+        ),
       ),
     );
   }
@@ -528,6 +702,95 @@ class StatusBlock extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [StatusBlock], same shape (disc, name row,
+/// fraction, bar, caption): the status block is always shown once the
+/// game progress resolves (even a fresh account has a "no status yet"
+/// state), so this is the only home skeleton with no collapsing case.
+class StatusBlockSkeleton extends StatelessWidget {
+  const StatusBlockSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    // A real, representative phrase for the caption's wrapping (one line
+    // or two, at 130 %): the actual status name is not known yet, so this
+    // uses the longest one, or the block would still resize once a
+    // shorter real caption turns out to wrap less than this reserved.
+    final longestStatus = GameConfig.statuses.fold(
+      GameConfig.statuses.first,
+      (longest, status) =>
+          statusName(l10n, status).length > statusName(l10n, longest).length
+              ? status
+              : longest,
+    );
+    // The widest gap between two statuses (SPEC.md 7.2): a smaller
+    // remaining count only shrinks the digits, never grows them.
+    final widestGap = Iterable.generate(
+      GameConfig.statuses.length - 1,
+      (i) => GameConfig.statuses[i + 1].from - GameConfig.statuses[i].from,
+    ).reduce((a, b) => a > b ? a : b);
+    final placeholderCaption = l10n.forkStatusNext(
+      widestGap,
+      statusName(l10n, longestStatus),
+    );
+    return ExcludeSemantics(
+      child: BirdyBlock(
+        tone: BirdyBlockTone.sure,
+        child: Row(
+          children: [
+            BirdySkeleton.box(
+              width: BirdySizes.statusDisc,
+              height: BirdySizes.statusDisc,
+              radius: BirdyRadii.pill,
+            ),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      // No maxLines: the longest status name (« Sentinelle
+                      // des haies ») can wrap to two lines at 130 %.
+                      Expanded(
+                        child: BirdySkeleton.text(
+                          BirdyText.species,
+                          placeholder: statusName(l10n, longestStatus),
+                          maxLines: null,
+                        ),
+                      ),
+                      const SizedBox(width: BirdySpace.s),
+                      BirdySkeleton.text(
+                        BirdyText.labelCompact,
+                        placeholder: '0000',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: BirdySpace.s),
+                  BirdyProgressBar(
+                    value: 0,
+                    color: c.sure.foreground,
+                    track: birdyTrackOnTint(c),
+                  ),
+                  const SizedBox(height: BirdySpace.s),
+                  BirdySkeleton.text(
+                    BirdyText.caption,
+                    placeholder: placeholderCaption,
+                    maxLines: null,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -630,6 +893,118 @@ class TodayBlock extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [TodayBlock], same padding, title/numbers row
+/// and one scrolling row of chip-shaped cards: the common case for a
+/// returning user is at least one species heard today, so the skeleton
+/// fills that shape. A day with nothing heard yet swaps to the smaller
+/// empty state instead of this block once loaded, which is the one case
+/// allowed to change the layout (J6f skeletons).
+class TodayBlockSkeleton extends StatelessWidget {
+  const TodayBlockSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    // A real, plural-correct phrase (species · contacts · new), not a run
+    // of zeros: its wrapping (one line or two, at 130 %) must match the
+    // real numbers row, or the block would still resize once it lands.
+    final placeholderNumbers = [
+      '00 ${l10n.forkHomeSpeciesStat(2)}',
+      '00 ${l10n.forkLiveContactsStat(2)}',
+      '0 ${l10n.forkHomeNewStat(1)}',
+    ].join(' · ');
+    return ExcludeSemantics(
+      child: BirdyBlock(
+        padding: const EdgeInsetsDirectional.only(
+          start: BirdySpace.l,
+          top: BirdySpace.l,
+          bottom: BirdySpace.l,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+              child: Wrap(
+                spacing: BirdySpace.m,
+                runSpacing: BirdySpace.xs,
+                crossAxisAlignment: WrapCrossAlignment.end,
+                children: [
+                  Text(
+                    l10n.forkHomeTodayTitle,
+                    style: BirdyText.heading.copyWith(color: c.text1),
+                  ),
+                  BirdySkeleton.text(
+                    BirdyText.caption,
+                    placeholder: placeholderNumbers,
+                    maxLines: null,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: BirdySpace.block),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < 3; i++) ...[
+                      if (i > 0) const SizedBox(width: BirdySpace.s),
+                      const _SpeciesChipCardSkeleton(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [_SpeciesChipCard]: same width, padding, avatar
+/// size and two lines of name, so [TodayBlockSkeleton]'s row is exactly
+/// the height the real one will be. Most French common names (« Rougegorge
+/// familier », « Mésange charbonnière »…) wrap to two lines at this card's
+/// width, so the skeleton reserves two; a short one-word name is the rarer
+/// case, and shrinks the row when it lands.
+class _SpeciesChipCardSkeleton extends StatelessWidget {
+  const _SpeciesChipCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: BirdySizes.speciesChipCard,
+      child: BirdyBlock(
+        padding: const EdgeInsets.fromLTRB(
+          BirdySpace.xs,
+          BirdySpace.m,
+          BirdySpace.xs,
+          BirdySpace.m,
+        ),
+        child: Column(
+          children: [
+            BirdySkeleton.box(
+              width: BirdySizes.speciesChipAvatar,
+              height: BirdySizes.speciesChipAvatar,
+              radius: BirdyRadii.pill,
+            ),
+            const SizedBox(height: BirdySpace.s),
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: '00000000000000000000',
+              maxLines: 2,
+            ),
+          ],
+        ),
       ),
     );
   }

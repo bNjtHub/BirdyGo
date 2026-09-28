@@ -1,5 +1,5 @@
 import 'package:birdnet_live/fork/game/streak.dart';
-import 'package:birdnet_live/fork/home/home_widgets.dart';
+import 'package:birdnet_live/fork/game/streak_dots.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 DateTime _d(int day, [int month = 9]) => DateTime(2026, month, day);

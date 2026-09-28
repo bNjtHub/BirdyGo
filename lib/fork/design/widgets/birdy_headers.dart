@@ -19,6 +19,7 @@ class BirdyTabHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.caption,
+    this.captionWidget,
     this.actions = const [],
   });
 
@@ -26,6 +27,10 @@ class BirdyTabHeader extends StatelessWidget {
 
   /// One line under the title (« 24 espèces découvertes »).
   final String? caption;
+
+  /// Replaces [caption]'s default `Text` when set (a loading skeleton, or a
+  /// caption that itself fades between states).
+  final Widget? captionWidget;
 
   /// Round white buttons ([BirdyIconButton]), top right.
   final List<Widget> actions;
@@ -47,7 +52,10 @@ class BirdyTabHeader extends StatelessWidget {
                   style: BirdyText.display.copyWith(color: c.text1),
                 ),
               ),
-              if (caption case final caption?) ...[
+              if (captionWidget case final captionWidget?) ...[
+                const SizedBox(height: BirdySpace.xs),
+                captionWidget,
+              ] else if (caption case final caption?) ...[
                 const SizedBox(height: BirdySpace.xs),
                 Text(
                   caption,
@@ -73,6 +81,8 @@ class BirdyOverlayHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.onBack,
+    this.closing = false,
+    this.enabled = true,
     this.actions = const [],
   });
 
@@ -80,6 +90,13 @@ class BirdyOverlayHeader extends StatelessWidget {
 
   /// Defaults to popping the route.
   final VoidCallback? onBack;
+
+  /// A cross (« Fermer ») instead of the back arrow: screens that end a
+  /// flow (Bilan, Revue rapide).
+  final bool closing;
+
+  /// False greys the button out (a save in progress); it never pops then.
+  final bool enabled;
   final List<Widget> actions;
 
   @override
@@ -90,9 +107,15 @@ class BirdyOverlayHeader extends StatelessWidget {
       child: Row(
         children: [
           BirdyIconButton(
-            icon: AppIcons.arrowBackRounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+            icon: closing ? AppIcons.closeRounded : AppIcons.arrowBackRounded,
+            semanticLabel:
+                closing
+                    ? MaterialLocalizations.of(context).closeButtonTooltip
+                    : MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed:
+                enabled
+                    ? onBack ?? () => Navigator.of(context).maybePop()
+                    : null,
           ),
           const SizedBox(width: BirdySpace.m),
           Expanded(

@@ -15,6 +15,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/empty_state.dart';
 import '../lpo/lpo_config.dart';
 import 'garden_count.dart';
@@ -226,10 +227,9 @@ class _Running extends ConsumerWidget {
     BuildContext context,
     TaxonomyService? taxonomy,
     String locale,
-  ) => showModalBottomSheet<String>(
+  ) => showBirdySheet<String>(
     context: context,
     isScrollControlled: true,
-    showDragHandle: true,
     builder: (_) => _SpeciesPicker(taxonomy: taxonomy, locale: locale),
   );
 }

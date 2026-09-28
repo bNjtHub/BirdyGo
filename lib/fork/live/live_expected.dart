@@ -26,9 +26,11 @@ import '../daily_goal/daily_goal_providers.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_pill.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/dashed_border.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../notebook/notebook_loader.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
@@ -113,11 +115,17 @@ class LiveExpectedEmpty extends ConsumerWidget {
   const LiveExpectedEmpty({
     super.key,
     required this.commonness,
+    this.loading = false,
     this.imageFor,
     this.now,
   });
 
   final Map<String, GeoCommonnessEntry>? commonness;
+
+  /// The geo-model/position have not resolved yet: [commonness] is not the
+  /// final word, so the view reserves skeleton rows instead of reading it
+  /// as "nothing expected here" (J6f skeletons).
+  final bool loading;
   final ImageProvider? Function(String scientificName)? imageFor;
 
   /// Clock for tests.
@@ -142,6 +150,7 @@ class LiveExpectedEmpty extends ConsumerWidget {
     return LiveExpectedView(
       now: (now ?? DateTime.now)(),
       species: species,
+      loading: loading,
       imageFor: imageFor,
     );
   }
@@ -153,12 +162,20 @@ class LiveExpectedView extends StatelessWidget {
     super.key,
     required this.now,
     required this.species,
+    this.loading = false,
     this.imageFor,
   });
 
   final DateTime now;
   final List<LiveExpectedSpecies> species;
+
+  /// See [LiveExpectedEmpty.loading].
+  final bool loading;
   final ImageProvider? Function(String scientificName)? imageFor;
+
+  /// Fades [child] in in place: a skeleton row or caption replaced by its
+  /// loaded content, no move, no scale (DESIGN.md, J6f skeletons).
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +193,21 @@ class LiveExpectedView extends StatelessWidget {
       l10n.forkLiveExpectedIntro,
       if (goals > 0) l10n.forkLiveExpectedGoalCount(goals),
     ].join(' ');
+    // The common case (SPEC.md's geo-model/position present) fills all
+    // `liveExpectedCount` rows; the skeleton reserves exactly that many so
+    // the tip below never moves once the real rows land. Only the rare
+    // case — no geo-model, no position, or truly nothing expected — ends
+    // up with fewer (or zero) rows, and the tip may then shift up.
+    final rowCount =
+        loading ? ReliabilityConfig.liveExpectedCount : species.length;
+    // The caption reserves its line whenever rows do, real or skeleton, so
+    // it never appears or disappears once the geo-model resolves.
+    final showCaption = loading || species.isNotEmpty;
+    // The intro alone, without a goal count: most expected species are
+    // not part of today's goal, so this is the common-case shape. A goal
+    // count added to it only grows this line once real, which is the
+    // one part of this caption allowed to shift.
+    final placeholderIntro = l10n.forkLiveExpectedIntro;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -197,38 +229,122 @@ class LiveExpectedView extends StatelessWidget {
                       style: BirdyText.heading.copyWith(color: c.text1),
                     ),
                   ),
-                  if (species.isNotEmpty) ...[
+                  if (showCaption) ...[
                     const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      intro,
-                      style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                    _crossFade(
+                      loading
+                          ? BirdySkeleton.text(
+                            BirdyText.bodyCompact,
+                            key: const ValueKey('expected-intro-skeleton'),
+                            placeholder: placeholderIntro,
+                            maxLines: null,
+                          )
+                          : Text(
+                            intro,
+                            key: const ValueKey('expected-intro-real'),
+                            style: BirdyText.bodyCompact.copyWith(
+                              color: c.text2,
+                            ),
+                          ),
                     ),
                   ],
                 ],
               ),
             ),
           ),
-          for (final (i, bird) in species.indexed)
+          for (var i = 0; i < rowCount; i++)
             Padding(
+              key: ValueKey('expected-row-$i'),
               padding: const EdgeInsets.only(top: BirdySpace.s),
               child: BirdyEntrance.staggered(
                 index: i + 1,
-                child: LiveExpectedRow(
-                  species: bird,
-                  reason: switch (bird.reason) {
-                    LiveExpectedReason.frequent => l10n
-                        .forkLiveExpectedReasonFrequent(month),
-                    LiveExpectedReason.peak => l10n.forkLiveExpectedReasonPeak,
-                    LiveExpectedReason.possible => l10n
-                        .forkLiveExpectedReasonPossible(month),
-                  },
-                  image: imageFor?.call(bird.scientificName),
+                child: _crossFade(
+                  loading
+                      ? const LiveExpectedRowSkeleton(
+                        key: ValueKey('expected-row-skeleton'),
+                      )
+                      : LiveExpectedRow(
+                        key: ValueKey(
+                          'expected-row-real-${species[i].scientificName}',
+                        ),
+                        species: species[i],
+                        reason: switch (species[i].reason) {
+                          LiveExpectedReason.frequent => l10n
+                              .forkLiveExpectedReasonFrequent(month),
+                          LiveExpectedReason.peak =>
+                            l10n.forkLiveExpectedReasonPeak,
+                          LiveExpectedReason.possible => l10n
+                              .forkLiveExpectedReasonPossible(month),
+                        },
+                        image: imageFor?.call(species[i].scientificName),
+                      ),
                 ),
               ),
             ),
           const SizedBox(height: BirdySpace.m),
           const LiveExpectedTip(),
         ],
+      ),
+    );
+  }
+}
+
+/// Loading placeholder of [LiveExpectedRow], same [BirdySizes.rowCompact]
+/// minimum height and [BirdySizes.expectedSlot] silhouette slot.
+///
+/// Uses one line for the name and one for the reason: most expected
+/// species have a short common name and a short reason, and no
+/// « Objectif » pill, so this is the shape that keeps the common case
+/// from moving. A long two-word name, a reason that wraps, or a goal
+/// pill narrowing the row are all real but less common — that one row
+/// (and the rows after it) may then grow a little once real, which is
+/// the one part of this block allowed to shift.
+class LiveExpectedRowSkeleton extends StatelessWidget {
+  const LiveExpectedRowSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return ExcludeSemantics(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surface1.withValues(alpha: BirdyAlpha.expectedRow),
+          borderRadius: BorderRadius.circular(BirdyRadii.card),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BirdySizes.rowCompact),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BirdySpace.s,
+              vertical: BirdySpace.xs,
+            ),
+            child: Row(
+              children: [
+                BirdySkeleton.box(
+                  width: BirdySizes.expectedSlot,
+                  height: BirdySizes.expectedSlot,
+                  radius: BirdyRadii.pill,
+                ),
+                const SizedBox(width: BirdySpace.m),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BirdySkeleton.text(
+                        BirdyText.speciesCompact,
+                        placeholder: '000000000000000',
+                      ),
+                      BirdySkeleton.text(
+                        BirdyText.caption,
+                        placeholder: '00000000000000000000',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

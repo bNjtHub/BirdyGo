@@ -16,8 +16,11 @@ import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
-import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import 'ranking_logic.dart';
 import 'ranking_widgets.dart';
 
@@ -194,6 +197,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                   firstContact: firstContact,
                 );
                 final newLine = l10n.forkRankingNewThisYear(newCount, now.year);
+                final loading = tallies == null;
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -202,31 +206,57 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _topBar(l10n),
-                          if (tallies != null) ...[
-                            RankingHeader(
-                              count: ranked.length,
-                              label: l10n.forkRankingSpeciesWord(
-                                ranked.length,
-                                periodPhrase(l10n, _period, now),
-                              ),
-                              caption:
-                                  dates == null || _period == RankingPeriod.year
-                                      ? newLine
-                                      : '$newLine · $dates',
+                          Semantics(
+                            key: const ValueKey('ranking-header'),
+                            liveRegion: true,
+                            label: loading ? l10n.forkRankingLoading : null,
+                            child: BirdyOverlayHeader(title: l10n.forkRanking),
+                          ),
+                          // The shell (row, spacing) is always built the same
+                          // way; only its counts cross-fade, so the chips and
+                          // options below never move once the ranking lands.
+                          KeyedSubtree(
+                            key: const ValueKey('ranking-count'),
+                            child: _crossFade(
+                              loading
+                                  ? const _RankingHeaderSkeleton(
+                                    key: ValueKey('ranking-header-skeleton'),
+                                  )
+                                  : RankingHeader(
+                                    key: const ValueKey('ranking-header-real'),
+                                    count: ranked.length,
+                                    label: l10n.forkRankingSpeciesWord(
+                                      ranked.length,
+                                      periodPhrase(l10n, _period, now),
+                                    ),
+                                    caption:
+                                        dates == null ||
+                                                _period == RankingPeriod.year
+                                            ? newLine
+                                            : '$newLine · $dates',
+                                  ),
                             ),
-                            const SizedBox(height: BirdySpace.m),
-                          ],
-                          _periodChips(l10n),
+                          ),
+                          const SizedBox(height: BirdySpace.m),
+                          Container(
+                            key: const ValueKey('ranking-chips'),
+                            child: _periodChips(l10n),
+                          ),
                           const SizedBox(height: BirdySpace.xs),
-                          _optionsRow(l10n, c),
+                          Container(
+                            key: const ValueKey('ranking-options'),
+                            child: _optionsRow(l10n, c),
+                          ),
                           const SizedBox(height: BirdySpace.m),
                         ],
                       ),
                     ),
-                    if (tallies == null)
-                      const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()),
+                    if (loading)
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: BirdySpace.gutter,
+                        ),
+                        sliver: const _RankingListSkeleton(),
                       )
                     else if (ranked.isEmpty)
                       SliverFillRemaining(
@@ -324,38 +354,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     );
   }
 
-  Widget _topBar(AppLocalizations l10n) {
-    final c = BirdyColors.of(context);
-    return SizedBox(
-      height: BirdySizes.topBar,
-      child: Row(
-        children: [
-          BirdyIconButton(
-            icon: AppIcons.arrowBackRounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          const SizedBox(width: BirdySpace.m),
-          Expanded(
-            child: Text(
-              l10n.forkRanking,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _periodChips(AppLocalizations l10n) => Wrap(
     spacing: BirdySpace.s,
     runSpacing: BirdySpace.s,
     children: [
       for (final p in RankingPeriod.values)
-        ChoiceChip(
-          label: Text(_periodLabel(l10n, p)),
+        BirdyFilterChip(
+          label: _periodLabel(l10n, p),
           selected: _period == p,
-          onSelected: (_) => setState(() => _period = p),
+          onSelected: () => setState(() => _period = p),
         ),
     ],
   );
@@ -418,4 +425,106 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
       ),
     ],
   );
+
+  /// Fades [child] in in place: a loaded value replacing its skeleton.
+  /// [child]'s own key tells the switcher when to cross-fade.
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
+}
+
+/// Same shape as [RankingHeader]: big number, label, caption line — so the
+/// period chips right under it never move once the ranking lands.
+class _RankingHeaderSkeleton extends StatelessWidget {
+  const _RankingHeaderSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.end,
+          spacing: BirdySpace.s,
+          children: [
+            BirdySkeleton.text(
+              BirdyText.numberXL.copyWith(color: c.text1),
+              placeholder: '00',
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: BirdySkeleton.text(
+                BirdyText.body.copyWith(color: c.text1),
+                placeholder: '000000000000000000',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        // Two lines, like the real caption's cap (ranking_widgets.dart).
+        BirdySkeleton.text(
+          BirdyText.caption.copyWith(color: c.text2),
+          placeholder:
+              '00000000000000000000000000000000000000000000000000000000000000000000000000',
+          maxLines: 2,
+        ),
+      ],
+    );
+  }
+}
+
+/// A sensible number of skeleton rows, at [RankingRow]'s own minimum
+/// height, filling a typical viewport under the header and chips.
+class _RankingListSkeleton extends StatelessWidget {
+  const _RankingListSkeleton();
+
+  static const int _rows = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return SliverList.builder(
+      itemCount: _rows,
+      itemBuilder: (context, index) {
+        final key = index == 0 ? const ValueKey('ranking-list-first') : null;
+        return Padding(
+          key: key,
+          padding: const EdgeInsets.symmetric(vertical: BirdySpace.xs),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 28,
+                  child: BirdySkeleton.text(BirdyText.label, placeholder: '00'),
+                ),
+                BirdySkeleton.box(width: 36, height: 36, radius: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BirdySkeleton.text(
+                        BirdyText.species,
+                        placeholder: '000000000000000',
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                        child: SizedBox(
+                          height: 8,
+                          child: ColoredBox(color: c.skeleton),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: BirdySpace.m),
+                BirdySkeleton.text(BirdyText.numberM, placeholder: '00'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
