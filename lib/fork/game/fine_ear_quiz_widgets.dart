@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/models/taxonomy_species.dart';
 import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/species_icons.dart';
 import '../design/species_tint.dart';
@@ -205,6 +206,56 @@ class QuizDashedCircle extends CustomPainter {
       oldDelegate.color != color;
 }
 
+/// The mystery bird's speech bubble: a white pill with a tail, wiggling
+/// forever (Quiz v2 mockup, J6f-e).
+class QuizSpeechBubble extends StatelessWidget {
+  const QuizSpeechBubble({super.key, required this.label, this.tailLeft});
+
+  final String label;
+
+  /// Offset of the little tail from the bubble's left edge; centred when
+  /// null (the intro's bubble, over the mystery disc).
+  final double? tailLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return QuizWiggle(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: c.surface1,
+          borderRadius: BorderRadius.circular(BirdyRadii.pill),
+          boxShadow: const [
+            BoxShadow(color: Color(0x40000000), blurRadius: 16),
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Text(
+              label,
+              style: BirdyText.species.copyWith(color: c.text1, fontSize: 15),
+            ),
+            Positioned(
+              left: tailLeft,
+              right: tailLeft == null ? 0 : null,
+              bottom: -5,
+              child: Align(
+                alignment: Alignment.center,
+                child: Transform.rotate(
+                  angle: 0.785398,
+                  child: Container(width: 10, height: 10, color: c.surface1),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Lichen progress bar, 8 dp. With [from], it fills from there to [value]
 /// once, [QuizMotion.fill] after [QuizMotion.fillDelay] (reduced motion:
 /// [value] straight away).
@@ -242,6 +293,43 @@ class QuizBadgeBar extends StatelessWidget {
       builder:
           (context, t, _) =>
               bar(start + (value - start) * QuizMotion.ease.transform(t)),
+    );
+  }
+}
+
+/// [filled] of [total] segments in a row (Quiz v2 mockup's badge progress
+/// dots): a continuous look when they are many, one dot per right answer
+/// when there are few.
+class QuizProgressSegments extends StatelessWidget {
+  const QuizProgressSegments({
+    super.key,
+    required this.total,
+    required this.filled,
+  });
+
+  final int total;
+  final int filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return SizedBox(
+      height: 12,
+      child: Row(
+        children: [
+          for (var i = 0; i < total; i++) ...[
+            if (i > 0) const SizedBox(width: 3),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: i < filled ? c.sure.foreground : c.lineOpaque,
+                  borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

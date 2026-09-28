@@ -60,6 +60,9 @@ abstract final class QuizMotion {
   static const Duration newTier = Duration(milliseconds: 400);
   static const Duration newTierDelay = Duration(milliseconds: 900);
   static const Duration knob = Duration(milliseconds: 180);
+  static const Duration wiggle = Duration(milliseconds: 3000);
+  static const Duration ring = Duration(milliseconds: 1400);
+  static const Duration ringStep = Duration(milliseconds: 700);
 }
 
 /// Value at [t] (0 to 1) of keyframes [values] at [stops], [curve] applied
@@ -418,6 +421,83 @@ class QuizFloat extends StatelessWidget {
           child: child,
         ),
   );
+}
+
+/// qz-wiggle: a small forever tilt, side to side (a speech bubble).
+class QuizWiggle extends StatelessWidget {
+  const QuizWiggle({super.key, required this.child, this.angle = 3});
+
+  final Widget child;
+
+  /// Degrees each way.
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) => QuizLoop(
+    period: QuizMotion.wiggle,
+    child: child,
+    builder: (context, t, child) {
+      final deg = quizKeyframes(
+        t,
+        const [0, 0.5, 1],
+        [-angle, angle, -angle],
+        QuizMotion.inOut,
+      );
+      return Transform.rotate(angle: deg * math.pi / 180, child: child);
+    },
+  );
+}
+
+/// qz-ring: a stroked circle spreading from the child's size to 1.7× while
+/// fading out, forever; only while [running] (the clip plays).
+class QuizRing extends StatelessWidget {
+  const QuizRing({
+    super.key,
+    required this.color,
+    this.delay = Duration.zero,
+    this.running = true,
+  });
+
+  final Color color;
+  final Duration delay;
+  final bool running;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!running) return const SizedBox.shrink();
+    return IgnorePointer(
+      child: QuizLoop(
+        period: QuizMotion.ring,
+        delay: delay,
+        builder: (context, t, child) {
+          final scale = quizKeyframes(
+            t,
+            const [0, 1],
+            const [1, 1.7],
+            Curves.linear,
+          );
+          final opacity = quizKeyframes(
+            t,
+            const [0, 1],
+            const [.7, 0],
+            Curves.linear,
+          );
+          return Transform.scale(
+            scale: scale,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: color.withValues(alpha: opacity),
+                  width: 2,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 /// qz-bar: one equalizer bar, scaleY 0.35 ↔ 1 from its middle.
