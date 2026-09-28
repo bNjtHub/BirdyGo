@@ -12,6 +12,7 @@ import 'package:birdnet_live/fork/daily_goal/daily_goal_providers.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/fork/design/widgets/birdygo_wordmark.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
@@ -258,7 +259,7 @@ void main() {
 
   testWidgets('the morning overview, block by block', (tester) async {
     await pump(tester, sunrise: DateTime(2026, 9, 26, 7, 36), withGoal: true);
-    // Top row: the startup wordmark and the menu, no série chip any more.
+    // Small logo row above the header, and the menu in the header's actions.
     expect(find.byType(BirdyGoWordmark), findsOneWidget);
     expect(find.bySemanticsLabel('BirdyGo'), findsOneWidget);
     expect(find.byTooltip('Menu'), findsOneWidget);
@@ -284,7 +285,7 @@ void main() {
     }
     expect(
       find.bySemanticsLabel(
-        '9 jours de suite. Écoute 6 jours sur 7 cette semaine',
+        '9 jours de suite. Écoute 6 jours sur les 7 derniers',
       ),
       findsOneWidget,
     );
@@ -467,7 +468,7 @@ void main() {
       expect(tops[i], greaterThan(tops[i - 1]));
     }
     // 10 dp between blocks, 16 dp page margin.
-    final greeting = tester.getRect(find.byType(HomeGreeting));
+    final greeting = tester.getRect(find.byType(BirdyTabHeader));
     final hero = tester.getRect(find.byType(HomeHero));
     expect(hero.top - greeting.bottom, BirdySpace.block);
     expect(hero.left, BirdySpace.page);
