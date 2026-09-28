@@ -1139,6 +1139,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                           )
                           : LiveExpectedEmpty(
                             commonness: commonness,
+                            // FORK: skeleton rows while the geo-model/position
+                            // resolves, so the tip does not move (J6f).
+                            loading: !ref.watch(geoCommonnessProvider).hasValue,
                             imageFor: (name) {
                               final path = imagePath(name);
                               return path == null ? null : AssetImage(path);
