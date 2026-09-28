@@ -16,11 +16,12 @@ import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
+import '../design/widgets/birdy_switch.dart';
 import '../design/widgets/empty_state.dart';
-import '../design/widgets/birdy_cross_fade.dart';
 import 'ranking_logic.dart';
 import 'ranking_widgets.dart';
 
@@ -309,6 +310,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                               rank: i + 4,
                               species: species,
                               fraction: species.value / leader,
+                              index: i,
                               onTap: () => _open(species),
                             );
                           },
@@ -370,15 +372,32 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
   /// « Confirmées seulement » switch, then the sort and filter menu.
   Widget _optionsRow(AppLocalizations l10n, BirdyColors c) => Row(
     children: [
-      Switch(
-        value: _confirmedOnly,
-        onChanged: (v) => setState(() => _confirmedOnly = v),
-      ),
-      const SizedBox(width: BirdySpace.s),
       Expanded(
-        child: Text(
-          l10n.forkConfirmedOnly,
-          style: BirdyText.bodyCompact.copyWith(color: c.text1),
+        child: Semantics(
+          toggled: _confirmedOnly,
+          label: l10n.forkConfirmedOnly,
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: () => setState(() => _confirmedOnly = !_confirmedOnly),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: BirdySizes.target),
+              child: Row(
+                children: [
+                  BirdySwitch(
+                    value: _confirmedOnly,
+                    onChanged: (v) => setState(() => _confirmedOnly = v),
+                  ),
+                  const SizedBox(width: BirdySpace.s),
+                  Flexible(
+                    child: Text(
+                      l10n.forkConfirmedOnly,
+                      style: BirdyText.bodyCompact.copyWith(color: c.text1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       const SizedBox(width: BirdySpace.s),
