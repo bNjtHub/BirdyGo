@@ -41,22 +41,38 @@ class ChallengeCard extends StatelessWidget {
     super.key,
     required this.challenge,
     required this.onStart,
+    this.background,
+    this.captionColor,
   });
 
   final WeeklyChallenge challenge;
   final VoidCallback onStart;
+
+  /// Overrides the block's own tone fill (J6f Profil « À gagner »: an inset
+  /// on the tonal color instead of its own plain/Loriot block).
+  final Color? background;
+
+  /// Overrides the leading caption's color (defaults to [BirdyColors.text2],
+  /// the Profil inset uses [BirdyColors.accentText] instead).
+  final Color? captionColor;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final caption = BirdyText.caption.copyWith(color: c.text2);
+    final leadCaption = BirdyText.caption.copyWith(
+      color: captionColor ?? c.text2,
+      fontWeight: captionColor == null ? null : FontWeight.w700,
+    );
     final started = challenge.started;
     final done = challenge.done;
 
-    // J6f: a plain block, on Loriot once done (fills, never borders).
+    // J6f: a plain block, on Loriot once done (fills, never borders); the
+    // Profil « À gagner » inset overrides the fill entirely.
     return BirdyBlock(
       tone: done ? BirdyBlockTone.oriole : BirdyBlockTone.plain,
+      color: background,
       padding: const EdgeInsets.symmetric(
         horizontal: BirdySpace.l,
         vertical: 14,
@@ -84,7 +100,7 @@ class ChallengeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.forkChallengeWeek, style: caption),
+                    Text(l10n.forkChallengeWeek, style: leadCaption),
                     Text(
                       challengeTitle(l10n, challenge),
                       style: BirdyText.species.copyWith(color: c.text1),

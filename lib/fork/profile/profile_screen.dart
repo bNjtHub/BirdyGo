@@ -1,5 +1,6 @@
-/// Profil (J6e, SPEC.md 9.11): status and its ring, the ladder of the 8
-/// statuses, the forgiving série and the badges.
+/// Profil (J6f, Claude Design « AppProfil »): the « Mon niveau » card (ring,
+/// interactive ladder of the 8 levels, info box), the « Série » card and the
+/// « À gagner » card (plumes counter, weekly challenge, badges, quiz entry).
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -16,6 +17,8 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_sheet.dart';
+import '../design/widgets/dashed_border.dart';
+import '../design/widgets/pressable.dart';
 import '../design/widgets/species_card.dart' show twoLineTextHeight;
 import '../game/streak_dots.dart';
 import '../game/challenge_card.dart';
@@ -26,6 +29,7 @@ import '../game/game_progress.dart';
 import '../game/game_text.dart';
 import '../game/fine_ear_quiz_screen.dart';
 import '../game/game_widgets.dart';
+import '../game/quiz_logo.dart';
 import '../game/streak.dart';
 import '../ranking/ranking_screen.dart';
 
@@ -57,33 +61,13 @@ class ProfileScreen extends ConsumerWidget {
                 BirdySpace.page,
               ),
               children: [
-                // Announced once, while the game progress is still loading;
-                // the skeletons below are excluded from semantics.
+                // Announced once, while the game progress is still loading.
                 Semantics(
                   key: const ValueKey('profile-header'),
                   liveRegion: true,
                   label: loading ? l10n.forkProfileLoading : null,
                   child: BirdyTabHeader(
                     title: l10n.forkProfileTitle,
-                    captionWidget: _crossFade(
-                      loading
-                          ? BirdySkeleton.text(
-                            BirdyText.caption,
-                            key: const ValueKey('profile-caption-skeleton'),
-                            placeholder: '00000000000000000000000000',
-                          )
-                          : Text(
-                            l10n.forkProfileCaption(
-                              progress.verified,
-                              progress.facts.streak.current,
-                              progress.facts.streak.record,
-                            ),
-                            key: const ValueKey('profile-caption-real'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: BirdyText.caption.copyWith(color: c.text2),
-                          ),
-                    ),
                     actions: [
                       BirdyIconButton(
                         icon: AppIcons.leaderboard,
@@ -102,36 +86,17 @@ class ProfileScreen extends ConsumerWidget {
                 // The card shell (fill, radius, padding) is always built the
                 // same way; only its content cross-fades, so the card never
                 // resizes once the game progress lands.
-                Material(
-                  key: const ValueKey('profile-status-card'),
-                  color: c.sure.background,
-                  borderRadius: BorderRadius.circular(BirdyRadii.hero),
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.all(BirdySpace.xl),
-                    child: _crossFade(
-                      loading
-                          ? const _StatusCardSkeletonBody(
-                            key: ValueKey('status-skeleton'),
-                          )
-                          : _StatusCardRealBody(
-                            key: const ValueKey('status-real'),
-                            progress: progress,
-                          ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: BirdySpace.block),
                 BirdyBlock(
-                  key: const ValueKey('profile-ladder'),
+                  key: const ValueKey('profile-level-card'),
+                  tone: BirdyBlockTone.sure,
+                  radius: BirdyRadii.hero,
+                  padding: const EdgeInsets.all(BirdySpace.xl),
                   child: _crossFade(
                     loading
-                        ? const _LadderSkeleton(
-                          key: ValueKey('ladder-skeleton'),
-                        )
-                        : _Ladder(
-                          key: const ValueKey('ladder-real'),
-                          verified: progress.verified,
+                        ? const _LevelCardSkeleton(key: ValueKey('level-skeleton'))
+                        : _LevelCard(
+                          key: const ValueKey('level-real'),
+                          progress: progress,
                         ),
                   ),
                 ),
@@ -153,46 +118,25 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: BirdySpace.block),
                 BirdyBlock(
-                  key: const ValueKey('profile-badges'),
+                  key: const ValueKey('profile-earn'),
                   tone: BirdyBlockTone.plain,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          l10n.forkBadges,
-                          style: BirdyText.heading.copyWith(color: c.text1),
+                  radius: BirdyRadii.hero,
+                  padding: const EdgeInsets.all(BirdySpace.xl),
+                  child: _crossFade(
+                    loading
+                        ? const _EarnCardSkeleton(key: ValueKey('earn-skeleton'))
+                        : _EarnCard(
+                          key: const ValueKey('earn-real'),
+                          progress: progress,
+                          onStartChallenge: () async {
+                            await ref
+                                .read(challengeStoreProvider)
+                                .start(DateTime.now());
+                            ref.invalidate(gameProgressProvider);
+                          },
                         ),
-                      ),
-                      const SizedBox(height: BirdySpace.m),
-                      _crossFade(
-                        loading
-                            ? const _BadgesSkeleton(
-                              key: ValueKey('badges-skeleton'),
-                            )
-                            : _Badges(
-                              key: const ValueKey('badges-real'),
-                              badges: progress.badges,
-                            ),
-                      ),
-                    ],
                   ),
                 ),
-                const SizedBox(height: BirdySpace.block),
-                const _QuizEntry(),
-                if (!loading && progress.facts.challenge != null) ...[
-                  const SizedBox(height: BirdySpace.block),
-                  ChallengeCard(
-                    challenge: progress.facts.challenge!,
-                    onStart: () async {
-                      await ref
-                          .read(challengeStoreProvider)
-                          .start(DateTime.now());
-                      ref.invalidate(gameProgressProvider);
-                    },
-                  ),
-                ],
               ],
             ),
           ),
@@ -206,14 +150,18 @@ class ProfileScreen extends ConsumerWidget {
   static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 }
 
-/// Same shape as [StatusCard]'s content (full, not compact): ring, status
-/// name, discovered line, next-status caption, then the status line — so the
-/// card never resizes once the game progress lands.
-class _StatusCardSkeletonBody extends StatelessWidget {
-  const _StatusCardSkeletonBody({super.key});
+// ---------------------------------------------------------------------------
+// « Mon niveau » card
+// ---------------------------------------------------------------------------
+
+/// Same overall shape as [_LevelCard] (ring row, ladder, info box, hint), so
+/// the card never resizes once the game progress lands.
+class _LevelCardSkeleton extends StatelessWidget {
+  const _LevelCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final nameStyle = BirdyText.title.copyWith(color: c.text1);
     final bodyStyle = BirdyText.body.copyWith(color: c.text1);
@@ -222,6 +170,7 @@ class _StatusCardSkeletonBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             BirdySkeleton.box(width: 96, height: 96, radius: 48),
             const SizedBox(width: BirdySpace.l),
@@ -229,10 +178,10 @@ class _StatusCardSkeletonBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Two lines, like the real status name (see
-                  // `_StatusCardRealBody`): a long name (« Sentinelle des
-                  // haies ») must never wrap the real card past what its
-                  // skeleton reserved.
+                  BirdySkeleton.text(captionStyle, placeholder: '00000000000000'),
+                  const SizedBox(height: BirdySpace.xs),
+                  BirdySkeleton.text(bodyStyle, placeholder: '00000000000000000'),
+                  const SizedBox(height: BirdySpace.xs),
                   SizedBox(
                     height: twoLineTextHeight(context, nameStyle),
                     child: Align(
@@ -245,65 +194,130 @@ class _StatusCardSkeletonBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: BirdySpace.xs),
-                  BirdySkeleton.text(
-                    bodyStyle,
-                    placeholder: '00000000000000000',
-                  ),
-                  const SizedBox(height: BirdySpace.xs),
-                  // Up to 2 lines, like the real caption (see
-                  // `_StatusCardRealBody`): « Encore N espèces pour devenir
-                  // Oreille de chouette » was cut on one line (J6f-b fix).
-                  SizedBox(
-                    height: twoLineTextHeight(context, captionStyle),
-                    child: Align(
-                      alignment: AlignmentDirectional.topStart,
-                      child: BirdySkeleton.text(
-                        captionStyle,
-                        placeholder: '00000000000000000000000000000000',
-                        maxLines: 2,
-                      ),
-                    ),
-                  ),
+                  BirdySkeleton.text(bodyStyle, placeholder: '00000000000000000'),
                 ],
               ),
             ),
           ],
         ),
         const SizedBox(height: BirdySpace.l),
-        // Two lines, like the real status line.
-        BirdySkeleton.text(
-          bodyStyle,
-          placeholder:
-              '000000000000000000000000000000000000000000000000000000000000000000000000000000',
-          maxLines: 2,
+        for (var row = 0; row < 2; row++) ...[
+          if (row > 0) const SizedBox(height: BirdySpace.xs),
+          Row(
+            children: [
+              for (var i = 0; i < 4; i++) ...[
+                if (i > 0) const SizedBox(width: BirdySpace.xs),
+                Expanded(
+                  child: Column(
+                    children: [
+                      BirdySkeleton.box(
+                        width: BirdySizes.levelEmblem,
+                        height: BirdySizes.levelEmblem,
+                        radius: BirdySizes.levelEmblem / 2,
+                      ),
+                      const SizedBox(height: BirdySpace.xs),
+                      BirdySkeleton.text(BirdyText.caption, placeholder: '000'),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+        const SizedBox(height: BirdySpace.l),
+        // Same shape as `_LevelInfoBox` in its default (next-level) state:
+        // icon, caption, name, segmented-bar placeholder, detail line.
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surface1,
+            borderRadius: BorderRadius.circular(BirdyRadii.card),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(BirdySpace.l),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BirdySkeleton.box(
+                  width: BirdySizes.levelInfoIcon,
+                  height: BirdySizes.levelInfoIcon,
+                  radius: BirdySizes.levelInfoIcon / 2,
+                ),
+                const SizedBox(width: BirdySpace.m),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BirdySkeleton.text(captionStyle, placeholder: '00000000000000'),
+                      SizedBox(
+                        height: twoLineTextHeight(
+                          context,
+                          BirdyText.heading.copyWith(color: c.text1),
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.topStart,
+                          child: BirdySkeleton.text(
+                            BirdyText.heading.copyWith(color: c.text1),
+                            placeholder: '000000000000000',
+                            maxLines: 2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: BirdySpace.xs),
+                      BirdySkeleton.box(
+                        width: double.infinity,
+                        height: BirdySizes.segmentHeight,
+                        radius: BirdyRadii.pill,
+                      ),
+                      const SizedBox(height: BirdySpace.xs),
+                      BirdySkeleton.text(bodyStyle, placeholder: '000000000000000'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
+        const SizedBox(height: BirdySpace.s),
+        BirdySkeleton.text(captionStyle, placeholder: l10n.forkLevelHint),
       ],
     );
   }
 }
 
-/// Full (non-compact, no [onTap]) content of [StatusCard], split out so the
-/// profile screen's card shell can share it with [_StatusCardSkeletonBody].
-class _StatusCardRealBody extends StatelessWidget {
-  const _StatusCardRealBody({super.key, required this.progress});
+/// « Mon niveau »: ring, interactive ladder of the 8 levels and its info
+/// box. Tapping an emblem picks it (tapping it again clears the pick); with
+/// nothing picked, the info box shows the next level (or, at the top, a
+/// short message).
+class _LevelCard extends StatefulWidget {
+  const _LevelCard({super.key, required this.progress});
 
   final GameProgress progress;
+
+  @override
+  State<_LevelCard> createState() => _LevelCardState();
+}
+
+class _LevelCardState extends State<_LevelCard> {
+  int? _picked;
+
+  void _togglePick(int index) =>
+      setState(() => _picked = _picked == index ? null : index);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
+    final progress = widget.progress;
     final status = progress.status;
-    final next = progress.next;
+    final statuses = GameConfig.statuses;
+    final currentIndex = status == null ? -1 : statuses.indexOf(status);
     final percent = (progress.progress * 100).round();
-    final caption =
-        next == null
-            ? l10n.forkStatusTop
-            : l10n.forkStatusNext(progress.remaining, statusName(l10n, next));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             StatusRing(
               status: status,
@@ -316,10 +330,24 @@ class _StatusCardRealBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Up to 2 lines: a long status name (« Sentinelle des
-                  // haies ») was cut with an ellipsis on one line; the
-                  // skeleton reserves the same fixed 2-line height (see
-                  // `_StatusCardSkeletonBody`), so nothing shifts either way.
+                  if (status != null) ...[
+                    Text(
+                      l10n.forkLevelRankCaption(currentIndex + 1, statuses.length),
+                      style: BirdyText.caption.copyWith(
+                        color: c.sure.foreground,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      l10n.forkLevelCongrats,
+                      style: BirdyText.body.copyWith(
+                        color: c.text1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: BirdySpace.xs),
                   SizedBox(
                     height: twoLineTextHeight(
                       context,
@@ -339,30 +367,12 @@ class _StatusCardRealBody extends StatelessWidget {
                   ),
                   const SizedBox(height: BirdySpace.xs),
                   Text(
-                    l10n.forkNotebookDiscovered(progress.verified),
+                    status == null
+                        ? statusLine(l10n, null)
+                        : l10n.forkNotebookDiscovered(progress.verified),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: BirdyText.body.copyWith(color: c.text1),
-                  ),
-                  const SizedBox(height: BirdySpace.xs),
-                  // Up to 2 lines (J6f-b fix): « Encore 10 espèces pour
-                  // devenir Oreille de chouette » was cut on one line. The
-                  // skeleton above reserves the same fixed 2-line height, so
-                  // nothing shifts either way.
-                  SizedBox(
-                    height: twoLineTextHeight(
-                      context,
-                      BirdyText.caption.copyWith(color: c.text2),
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional.topStart,
-                      child: Text(
-                        caption,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: BirdyText.caption.copyWith(color: c.text2),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -370,87 +380,371 @@ class _StatusCardRealBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: BirdySpace.l),
-        // Same reason: a long status line must not grow the card past what
-        // its skeleton reserved.
+        _Ladder(
+          currentIndex: currentIndex,
+          picked: _picked,
+          onPick: _togglePick,
+        ),
+        const SizedBox(height: BirdySpace.l),
+        _LevelInfoBox(progress: progress, picked: _picked),
+        const SizedBox(height: BirdySpace.s),
         Text(
-          statusLine(l10n, status),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: BirdyText.body.copyWith(color: c.text2),
+          l10n.forkLevelHint,
+          style: BirdyText.caption.copyWith(color: c.sure.foreground),
         ),
       ],
     );
   }
 }
 
-/// Same layout as [_Ladder] (equal cells, current-status pill, caption),
-/// filled with skeleton emblems: [_Ladder] itself needs `verified` to know
-/// the current status, not in yet while loading.
-class _LadderSkeleton extends StatelessWidget {
-  const _LadderSkeleton({super.key});
+/// The 8 levels, 2 rows of 4. Each row's connecting line is colored (thick,
+/// [BirdyColors.sure]'s foreground) only when every level in that row is
+/// reached; otherwise it stays a plain thin [BirdyColors.border] line.
+class _Ladder extends StatelessWidget {
+  const _Ladder({
+    required this.currentIndex,
+    required this.picked,
+    required this.onPick,
+  });
+
+  final int currentIndex;
+  final int? picked;
+  final ValueChanged<int> onPick;
+
+  static const int _perRow = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    final statuses = GameConfig.statuses;
+    final rows = <Widget>[];
+    for (var start = 0; start < statuses.length; start += _perRow) {
+      if (rows.isNotEmpty) rows.add(const SizedBox(height: BirdySpace.xs));
+      final count = (statuses.length - start).clamp(0, _perRow);
+      final rowReached = start + count - 1 <= currentIndex;
+      rows.add(
+        _LadderRow(
+          startIndex: start,
+          count: count,
+          lineColor: rowReached ? c.sure.foreground : c.border,
+          lineWidth: rowReached ? 4 : 2,
+          currentIndex: currentIndex,
+          picked: picked,
+          onPick: onPick,
+        ),
+      );
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows);
+  }
+}
+
+class _LadderRow extends StatelessWidget {
+  const _LadderRow({
+    required this.startIndex,
+    required this.count,
+    required this.lineColor,
+    required this.lineWidth,
+    required this.currentIndex,
+    required this.picked,
+    required this.onPick,
+  });
+
+  final int startIndex;
+  final int count;
+  final Color lineColor;
+  final double lineWidth;
+  final int currentIndex;
+  final int? picked;
+  final ValueChanged<int> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    const emblem = BirdySizes.levelEmblem;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final cell = box.maxWidth / count;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (var j = 0; j < count - 1; j++)
+              Positioned(
+                left: cell * j + cell / 2 + emblem / 2,
+                right: box.maxWidth - (cell * (j + 1) + cell / 2 - emblem / 2),
+                top: emblem / 2 - lineWidth / 2,
+                height: lineWidth,
+                child: ColoredBox(color: lineColor),
+              ),
+            Row(
+              children: [
+                for (var j = 0; j < count; j++)
+                  Expanded(
+                    child: _LadderCell(
+                      index: startIndex + j,
+                      currentIndex: currentIndex,
+                      picked: picked,
+                      onPick: onPick,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _LadderCell extends StatelessWidget {
+  const _LadderCell({
+    required this.index,
+    required this.currentIndex,
+    required this.picked,
+    required this.onPick,
+  });
+
+  final int index;
+  final int currentIndex;
+  final int? picked;
+  final ValueChanged<int> onPick;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
-          builder: (context, box) {
-            final cell = box.maxWidth / GameConfig.statuses.length;
-            final size = (cell - 4).clamp(20.0, 40.0);
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (var i = 0; i < GameConfig.statuses.length - 1; i++)
-                  Positioned(
-                    left: cell * i + cell / 2 + size / 2,
-                    right:
-                        box.maxWidth - (cell * (i + 1) + cell / 2 - size / 2),
-                    top: size / 2 - 1,
-                    height: 2,
-                    child: ColoredBox(color: c.line),
-                  ),
-                Row(
+    final status = GameConfig.statuses[index];
+    final reached = index <= currentIndex;
+    final isCurrent = index == currentIndex;
+    final selected = picked == index;
+
+    var label = l10n.forkLevelEmblemLabel(
+      status.rank,
+      statusName(l10n, status),
+      status.from,
+    );
+    if (isCurrent) {
+      label += l10n.forkLevelEmblemSuffixCurrent;
+    } else if (reached) {
+      label += l10n.forkLevelEmblemSuffixReached;
+    }
+
+    return Pressable(
+      child: Semantics(
+        label: label,
+        button: true,
+        selected: selected,
+        excludeSemantics: true,
+        child: Material(
+          color: selected ? c.surface1 : Colors.transparent,
+          borderRadius: BorderRadius.circular(BirdyRadii.inset),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BirdyRadii.inset),
+            onTap: () => onPick(index),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: BirdySizes.levelCellMinHeight,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: BirdySpace.s),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    for (var i = 0; i < GameConfig.statuses.length; i++)
-                      Expanded(
-                        child: Column(
-                          children: [
-                            BirdySkeleton.box(
-                              width: size,
-                              height: size,
-                              radius: size / 2,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        StatusEmblem(
+                          status: status,
+                          size: BirdySizes.levelEmblem,
+                          reached: reached,
+                          current: isCurrent,
+                          innerRing: reached,
+                        ),
+                        if (isCurrent)
+                          Positioned(
+                            top: -3,
+                            right: -3,
+                            child: Container(
+                              width: BirdySizes.levelCheckBadge,
+                              height: BirdySizes.levelCheckBadge,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: BirdyBrand.checkGreen,
+                                border: Border.all(
+                                  color: c.sure.background,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Icon(
+                                AppIcons.check,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
-                            const SizedBox(height: BirdySpace.xs),
-                            BirdySkeleton.text(
-                              BirdyText.caption,
-                              placeholder: '00',
-                            ),
-                          ],
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: BirdySpace.xs),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '${status.from}',
+                        style: BirdyText.caption.copyWith(
+                          color: isCurrent ? c.text1 : c.sure.foreground,
+                          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w400,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
+                    ),
                   ],
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ),
         ),
-        const SizedBox(height: BirdySpace.s),
-        BirdySkeleton.text(
-          BirdyText.caption,
-          placeholder: l10n.forkStatusLadder,
-        ),
-      ],
+      ),
     );
   }
 }
 
+/// Below the ladder: the picked level, or (nothing picked) the next one to
+/// reach with its segmented bar, or (nothing picked, top level) a short
+/// message. A live region: it changes on every tap.
+class _LevelInfoBox extends StatelessWidget {
+  const _LevelInfoBox({required this.progress, required this.picked});
+
+  final GameProgress progress;
+  final int? picked;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final statuses = GameConfig.statuses;
+    final current = progress.status;
+    final next = progress.next;
+    final currentIndex = current == null ? -1 : statuses.indexOf(current);
+    final nextIndex = next == null ? -1 : currentIndex + 1;
+    final showIndex = picked ?? (next != null ? nextIndex : currentIndex);
+    final status = statuses[showIndex];
+    final reached = showIndex <= currentIndex;
+    final isNext = next != null && showIndex == nextIndex;
+    final isTopDefault = picked == null && next == null;
+
+    final String caption;
+    if (isNext) {
+      caption = l10n.forkStatusNextTitle;
+    } else if (showIndex == currentIndex) {
+      caption = l10n.forkLevelYours;
+    } else if (reached) {
+      caption = l10n.forkLevelPickedReached(status.rank);
+    } else {
+      caption = l10n.forkLevelPicked(status.rank);
+    }
+
+    Widget? segments;
+    String? detail;
+    String? line;
+    String? topMessage;
+
+    if (isTopDefault) {
+      topMessage = l10n.forkStatusTop;
+    } else if (isNext) {
+      final from = current?.from ?? 0;
+      final to = status.from;
+      final total = to - from;
+      final filled = (progress.verified - from).clamp(0, total);
+      segments = Semantics(
+        label: l10n.forkLevelSegmentsLabel(filled, total),
+        excludeSemantics: true,
+        child: SegmentedBar(
+          count: total,
+          filled: filled,
+          color: c.accentText,
+          track: c.line,
+        ),
+      );
+      detail = l10n.forkLevelRemainingCount(status.from - progress.verified);
+    } else {
+      detail =
+          reached
+              ? l10n.forkLevelFrom(status.from)
+              : l10n.forkLevelRemainingCount(status.from - progress.verified);
+      line = statusLine(l10n, status);
+    }
+
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsets.all(BirdySpace.l),
+        decoration: BoxDecoration(
+          color: c.surface1,
+          borderRadius: BorderRadius.circular(BirdyRadii.card),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            StatusEmblem(
+              status: status,
+              size: BirdySizes.levelInfoIcon,
+              reached: reached,
+              innerRing: reached,
+            ),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(caption, style: BirdyText.caption.copyWith(color: c.text2)),
+                  Text(
+                    statusName(l10n, status),
+                    style: BirdyText.heading.copyWith(color: c.text1),
+                  ),
+                  if (segments != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    segments,
+                  ],
+                  if (detail != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      detail,
+                      style: BirdyText.body.copyWith(
+                        color: c.text1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                  if (line != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(line, style: BirdyText.body.copyWith(color: c.text1)),
+                  ],
+                  if (topMessage != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      topMessage,
+                      style: BirdyText.body.copyWith(
+                        color: c.text1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// « Série » card
+// ---------------------------------------------------------------------------
+
 /// Real body of [_StreakCard] (title, record, the last 7 days), split out
 /// so the loading state can share the exact same [BirdyBlock] shell. The
-/// 7-day dot strip is [StreakDots] (J6f-b), shared with the home série
-/// block so both show the exact same look.
+/// 7-day dot strip is [StreakDots] (J6f), shared with the home série block
+/// so both show the exact same look.
 class _StreakCardBody extends StatelessWidget {
   const _StreakCardBody({super.key, required this.streak});
 
@@ -552,12 +846,56 @@ class _StreakCardSkeletonBody extends StatelessWidget {
 List<StreakDay> _skeletonWeek() =>
     lastSevenDays(computeStreak(const {}, DateTime.now()));
 
-/// Same 4-column grid as [_Badges], filled with skeleton tiles at the same
-/// tones, one per [BadgeKind] (8, so 2 rows).
-class _BadgesSkeleton extends StatelessWidget {
-  const _BadgesSkeleton({super.key});
+// ---------------------------------------------------------------------------
+// « À gagner » card
+// ---------------------------------------------------------------------------
 
-  static const int _columns = 4;
+/// Same shape as [_EarnCard]: title row, an inset placeholder for the
+/// weekly challenge, the badges title and a 3-column grid, then the quiz
+/// entry row. The quiz row does not depend on the loaded progress, so it is
+/// shown for real from this skeleton too.
+class _EarnCardSkeleton extends StatelessWidget {
+  const _EarnCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.forkProfileEarnTitle,
+                style: BirdyText.title.copyWith(color: c.text1),
+              ),
+            ),
+            BirdySkeleton.box(width: 64, height: 36, radius: BirdyRadii.pill),
+          ],
+        ),
+        const SizedBox(height: BirdySpace.m),
+        BirdySkeleton.box(
+          width: double.infinity,
+          height: 118,
+          radius: BirdyRadii.card,
+        ),
+        const SizedBox(height: BirdySpace.l),
+        Text(l10n.forkBadges, style: BirdyText.heading.copyWith(color: c.text1)),
+        const SizedBox(height: BirdySpace.m),
+        _BadgesSkeleton(),
+        const SizedBox(height: BirdySpace.m),
+        const _QuizEntry(),
+      ],
+    );
+  }
+}
+
+class _BadgesSkeleton extends StatelessWidget {
+  const _BadgesSkeleton();
+
+  static const int _columns = 3;
   static const int _count = 8;
 
   @override
@@ -573,11 +911,10 @@ class _BadgesSkeleton extends StatelessWidget {
               for (var i = start; i < start + _columns; i++) ...[
                 if (i > start) const SizedBox(width: BirdySpace.s),
                 Expanded(
-                  child: _badgeTileSkeleton(
-                    context,
-                    BadgeKind.values[i],
-                    badgeTileTone(i),
-                  ),
+                  child:
+                      i < _count
+                          ? _tileSkeleton(context)
+                          : const SizedBox.shrink(),
                 ),
               ],
             ],
@@ -585,267 +922,148 @@ class _BadgesSkeleton extends StatelessWidget {
         ),
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: rows,
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows);
   }
 
-  // The badge's name doesn't depend on the loaded progress (only its tier
-  // does): shown for real, right from this skeleton, so a name long enough
-  // to wrap to its second line (« Chœur de l'aube », « 7 jours d'affilée »)
-  // reserves that same second line instead of a one-line skeleton falling
-  // short of it once the real tile takes over.
-  Widget _badgeTileSkeleton(
-    BuildContext context,
-    BadgeKind kind,
-    BirdyBlockTone tone,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _tileSkeleton(BuildContext context) {
     final c = BirdyColors.of(context);
-    return BirdyBlock(
-      tone: tone,
-      radius: BirdyRadii.inset,
-      padding: const EdgeInsets.symmetric(
-        horizontal: BirdySpace.xs,
-        vertical: BirdySpace.s,
-      ),
-      child: Column(
-        children: [
-          BirdySkeleton.box(width: 52, height: 52, radius: 26),
-          const SizedBox(height: BirdySpace.xs),
-          Text(
-            badgeName(l10n, kind),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: BirdyText.labelCompact.copyWith(color: c.text1),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: BirdySizes.badgeTile),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.surface1,
+          borderRadius: BorderRadius.circular(BirdyRadii.inset),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: BirdySpace.m,
+            vertical: 6,
           ),
-          const Spacer(),
-          const SizedBox(height: BirdySpace.xs),
-          BirdySkeleton.text(BirdyText.caption, placeholder: '000000'),
-        ],
-      ),
-    );
-  }
-}
-
-/// Status card: ring, status name, species count and what comes next.
-/// Also on the home screen ([compact], with [onTap]).
-class StatusCard extends StatelessWidget {
-  const StatusCard({
-    super.key,
-    required this.progress,
-    this.compact = false,
-    this.onTap,
-    this.background,
-  });
-
-  final GameProgress progress;
-  final bool compact;
-  final VoidCallback? onTap;
-
-  /// Fill of the card. Defaults to [BirdyColors.surface1]; the full Profil
-  /// screen (J6f) uses the sure tone instead.
-  final Color? background;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final status = progress.status;
-    final next = progress.next;
-    final percent = (progress.progress * 100).round();
-    final caption =
-        next == null
-            ? l10n.forkStatusTop
-            : l10n.forkStatusNext(progress.remaining, statusName(l10n, next));
-    final radius = compact ? BirdyRadii.card : BirdyRadii.hero;
-
-    final content = Padding(
-      padding: EdgeInsets.all(compact ? BirdySpace.l : BirdySpace.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StatusRing(
-                status: status,
-                progress: progress.progress,
-                size: compact ? 84 : 96,
-                semanticLabel: l10n.forkStatusRingLabel(percent),
-              ),
-              const SizedBox(width: BirdySpace.l),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      status == null
-                          ? l10n.forkStatusNone
-                          : statusName(l10n, status),
-                      style: (compact ? BirdyText.heading : BirdyText.title)
-                          .copyWith(color: c.text1),
-                    ),
-                    const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      l10n.forkNotebookDiscovered(progress.verified),
-                      style: BirdyText.body.copyWith(color: c.text1),
-                    ),
-                    const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      caption,
-                      style: BirdyText.caption.copyWith(color: c.text2),
-                    ),
-                  ],
-                ),
-              ),
-              if (onTap != null)
-                Icon(AppIcons.chevronRight, size: 20, color: c.text2),
+              BirdySkeleton.box(width: 56, height: 56, radius: 28),
+              const SizedBox(height: BirdySpace.xs),
+              BirdySkeleton.text(BirdyText.labelCompact, placeholder: '0000000'),
             ],
           ),
-          if (!compact) ...[
-            const SizedBox(height: BirdySpace.l),
-            Text(
-              statusLine(l10n, status),
-              style: BirdyText.body.copyWith(color: c.text2),
-            ),
-          ],
-        ],
+        ),
       ),
-    );
-    return Material(
-      color: background ?? c.surface1,
-      borderRadius: BorderRadius.circular(radius),
-      clipBehavior: Clip.antiAlias,
-      child: onTap == null ? content : InkWell(onTap: onTap, child: content),
     );
   }
 }
 
-/// The 8 statuses in a row, the current one ringed.
-class _Ladder extends StatelessWidget {
-  const _Ladder({super.key, required this.verified});
+class _EarnCard extends StatelessWidget {
+  const _EarnCard({super.key, required this.progress, required this.onStartChallenge});
 
-  final int verified;
+  final GameProgress progress;
+  final VoidCallback onStartChallenge;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final current = statusFor(verified);
+    final challenge = progress.facts.challenge;
+    final totalPlumes = progress.badges.fold<int>(0, (sum, b) => sum + b.tier);
+    final earned = progress.badges.where((b) => b.tier > 0).toList();
+    final locked = progress.badges.where((b) => b.tier == 0).toList();
+    final sortedBadges = [...earned, ...locked];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LayoutBuilder(
-          builder: (context, box) {
-            // Equal cells: one segment per gap, from one emblem's edge to
-            // the next one's, so the line never runs behind an emblem
-            // (it showed through the current status's ring gap otherwise).
-            final cell = box.maxWidth / GameConfig.statuses.length;
-            final size = (cell - 4).clamp(20.0, 40.0);
-            final currentIndex =
-                current == null ? -1 : GameConfig.statuses.indexOf(current);
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (var i = 0; i < GameConfig.statuses.length - 1; i++)
-                  Positioned(
-                    left: cell * i + cell / 2 + size / 2,
-                    right:
-                        box.maxWidth - (cell * (i + 1) + cell / 2 - size / 2),
-                    top: size / 2 - 1,
-                    height: 2,
-                    child: ColoredBox(color: c.line),
-                  ),
-                // J6f: the current status sits on a tonal pill.
-                if (currentIndex >= 0)
-                  Positioned(
-                    left: cell * currentIndex,
-                    width: cell,
-                    top: -BirdySpace.xs,
-                    bottom: -BirdySpace.xs,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: c.tonal,
-                        borderRadius: BorderRadius.circular(BirdyRadii.thumb),
-                      ),
-                    ),
-                  ),
-                Row(
-                  children: [
-                    for (final status in GameConfig.statuses)
-                      Expanded(
-                        child: Semantics(
-                          label: statusName(l10n, status),
-                          selected: status == current,
-                          child: Column(
-                            children: [
-                              StatusEmblem(
-                                status: status,
-                                size: size,
-                                reached: verified >= status.from,
-                                current: status == current,
-                              ),
-                              const SizedBox(height: BirdySpace.xs),
-                              ExcludeSemantics(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    '${status.from}',
-                                    style: BirdyText.caption.copyWith(
-                                      color:
-                                          status == current
-                                              ? c.accentText
-                                              : c.text2,
-                                      fontWeight:
-                                          status == current
-                                              ? FontWeight.w800
-                                              : null,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l10n.forkProfileEarnTitle,
+                  style: BirdyText.title.copyWith(color: c.text1),
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+            const SizedBox(width: BirdySpace.m),
+            _PlumesPill(total: totalPlumes),
+          ],
         ),
-        const SizedBox(height: BirdySpace.s),
-        Text(
-          l10n.forkStatusLadder,
-          style: BirdyText.caption.copyWith(color: c.text2),
+        if (challenge != null) ...[
+          const SizedBox(height: BirdySpace.m),
+          ChallengeCard(
+            challenge: challenge,
+            onStart: onStartChallenge,
+            background: c.tonal,
+            captionColor: c.accentText,
+          ),
+        ],
+        const SizedBox(height: BirdySpace.l),
+        Semantics(
+          header: true,
+          child: Text(l10n.forkBadges, style: BirdyText.heading.copyWith(color: c.text1)),
         ),
+        const SizedBox(height: BirdySpace.m),
+        _Badges(badges: sortedBadges),
+        const SizedBox(height: BirdySpace.m),
+        const _QuizEntry(),
       ],
     );
   }
 }
 
-/// Tones of the badge tiles (J6f), in turn so neighbours never share one.
-const List<BirdyBlockTone> kBadgeTileTones = [
-  BirdyBlockTone.oriole,
-  BirdyBlockTone.tonal,
-  BirdyBlockTone.sure,
-];
+/// The plumes counter pill: the feather glyph of level 2 (« Jeune plume »,
+/// the feather emblem in [GameConfig]) and the total plumes across badges.
+class _PlumesPill extends StatelessWidget {
+  const _PlumesPill({required this.total});
 
-/// Tone of the badge tile at [index] in the grid.
-BirdyBlockTone badgeTileTone(int index) =>
-    kBadgeTileTones[index % kBadgeTileTones.length];
+  final int total;
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Semantics(
+      label: l10n.forkPlumesEarned(total),
+      excludeSemantics: true,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: c.orioleContainer,
+          borderRadius: BorderRadius.circular(BirdyRadii.pill),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GlyphIcon(
+              glyph: GameConfig.statuses[1].glyph,
+              color: c.orioleText,
+              size: 20,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$total',
+              style: BirdyText.labelCompact.copyWith(
+                color: c.orioleText,
+                fontWeight: FontWeight.w800,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Badges grid, 3 columns, earned badges first: earned tiles take their
+/// medal's own pale tone, locked ones stay white with a dashed outline.
 class _Badges extends StatelessWidget {
-  const _Badges({super.key, required this.badges});
+  const _Badges({required this.badges});
 
   final List<BadgeProgress> badges;
 
-  static const int _columns = 4;
+  static const int _columns = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -862,7 +1080,7 @@ class _Badges extends StatelessWidget {
                 Expanded(
                   child:
                       i < badges.length
-                          ? _badgeTile(context, badges[i], badgeTileTone(i))
+                          ? _badgeTile(context, badges[i])
                           : const SizedBox.shrink(),
                 ),
               ],
@@ -872,54 +1090,103 @@ class _Badges extends StatelessWidget {
       );
     }
     return Column(
+      key: const ValueKey('profile-badges-grid'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: rows,
     );
   }
 
-  Widget _badgeTile(
-    BuildContext context,
-    BadgeProgress badge,
-    BirdyBlockTone tone,
-  ) {
+  Widget _badgeTile(BuildContext context, BadgeProgress badge) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return BirdyBlock(
-      tone: tone,
-      radius: BirdyRadii.inset,
-      padding: const EdgeInsets.symmetric(
-        horizontal: BirdySpace.xs,
-        vertical: BirdySpace.s,
+    final earned = badge.tier > 0;
+    final metal = earned ? GameConfig.badgeMedals[badge.tier - 1] : null;
+    // The mockup's pale medal tone (bronze/silver/gold) is a light-theme
+    // wash: on dark it fails AA for `text1` (near-white). The dark theme
+    // keeps the same idea with a faint metal tint over its own surface
+    // instead, the same trick as `BirdyColors.tonal` on dark.
+    final tileColor =
+        !earned
+            ? c.surface1
+            : c.isDark
+            ? Color.alphaBlend(metal!.base.withValues(alpha: 0.22), c.surface1)
+            : metal!.tone;
+
+    Widget card = Material(
+      color: tileColor,
+      borderRadius: BorderRadius.circular(BirdyRadii.inset),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showBadge(context, badge),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BirdySizes.badgeTile),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BirdySpace.m,
+              vertical: 6,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Opacity(
+                  opacity: earned ? 1 : 0.6,
+                  child: BadgeMedal(
+                    tier: badge.tier,
+                    icon: badgeIcon(badge.kind),
+                    glyph: badgeGlyph(badge.kind),
+                    size: 56,
+                  ),
+                ),
+                const SizedBox(height: BirdySpace.xs),
+                Text(
+                  badgeName(l10n, badge.kind),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: BirdyText.labelCompact.copyWith(color: c.text1),
+                ),
+                const Spacer(),
+                const SizedBox(height: BirdySpace.xs),
+                if (earned)
+                  TierDots(filled: badge.tier)
+                else ...[
+                  FractionallySizedBox(
+                    widthFactor: 0.72,
+                    child: BirdyProgressBar(
+                      value: badge.value / badge.nextTarget!,
+                      color: c.accentText,
+                      track: c.line,
+                    ),
+                  ),
+                  const SizedBox(height: BirdySpace.xs),
+                  Text(
+                    l10n.forkBadgeProgress(badge.value, badge.nextTarget!),
+                    textAlign: TextAlign.center,
+                    style: BirdyText.caption.copyWith(color: c.text2),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
-      semanticLabel:
-          '${badgeName(l10n, badge.kind)}, ${l10n.forkBadgeTier(badge.tier)}',
-      onTap: () => _showBadge(context, badge),
-      child: Column(
-        children: [
-          BadgeMedal(
-            tier: badge.tier,
-            icon: badgeIcon(badge.kind),
-            glyph: badgeGlyph(badge.kind),
-          ),
-          const SizedBox(height: BirdySpace.xs),
-          Text(
-            badgeName(l10n, badge.kind),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: BirdyText.labelCompact.copyWith(color: c.text1),
-          ),
-          const Spacer(),
-          const SizedBox(height: BirdySpace.xs),
-          if (badge.tier == 0)
-            Text(
-              l10n.forkBadgeProgress(badge.value, badge.nextTarget!),
-              textAlign: TextAlign.center,
-              style: BirdyText.caption.copyWith(color: c.text2),
-            )
-          else
-            TierDots(filled: badge.tier),
-        ],
+    );
+    if (!earned) {
+      card = CustomPaint(
+        foregroundPainter: DashedBorderPainter(
+          color: c.dashed,
+          radius: BirdyRadii.inset,
+        ),
+        child: card,
+      );
+    }
+    return Pressable(
+      child: Semantics(
+        label:
+            '${badgeName(l10n, badge.kind)}, ${l10n.forkBadgeTier(badge.tier)}',
+        button: true,
+        excludeSemantics: true,
+        child: card,
       ),
     );
   }
@@ -1004,8 +1271,7 @@ void _openQuiz(BuildContext context) => Navigator.of(
   context,
 ).push(MaterialPageRoute<void>(builder: (_) => const FineEarQuizScreen()));
 
-/// « Qui chante ? »: the quiz behind the Oreille fine badge. A tonal block
-/// (J6f) led by a Martin-pêcheur disc with a Loriot question mark.
+/// « Qui chante ? »: the quiz behind the Oreille fine badge.
 class _QuizEntry extends StatelessWidget {
   const _QuizEntry();
 
@@ -1013,88 +1279,48 @@ class _QuizEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return BirdyBlock(
-      tone: BirdyBlockTone.tonal,
-      onTap: () => _openQuiz(context),
-      child: Row(
-        children: [
-          const ExcludeSemantics(child: _QuizIllustration()),
-          const SizedBox(width: BirdySpace.l),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.forkQuizTitle,
-                  style: BirdyText.heading.copyWith(color: c.text1),
-                ),
-                const SizedBox(height: BirdySpace.xs),
-                Text(
-                  l10n.forkQuizEntrySubtitle,
-                  style: BirdyText.bodyCompact.copyWith(color: c.text2),
-                ),
-              ],
-            ),
+    return Semantics(
+      label: '${l10n.forkQuizTitle}. ${l10n.forkQuizEntrySubtitle}',
+      button: true,
+      excludeSemantics: true,
+      child: Pressable(
+        child: Material(
+          color: c.surface1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BirdyRadii.card),
+            side: BorderSide(color: c.line),
           ),
-          Icon(AppIcons.chevronRight, color: c.accentText),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuizIllustration extends StatelessWidget {
-  const _QuizIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    const disc = BirdySizes.quizDisc;
-    const badge = BirdySizes.quizDiscBadge;
-    return SizedBox.square(
-      dimension: disc + badge / 3,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            bottom: 0,
-            child: Container(
-              width: disc,
-              height: disc,
-              decoration: BoxDecoration(
-                color: c.accent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                AppIcons.headphones,
-                size: disc / 2,
-                color: c.onAccent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BirdyRadii.card),
+            onTap: () => _openQuiz(context),
+            child: Padding(
+              padding: const EdgeInsets.all(BirdySpace.l),
+              child: Row(
+                children: [
+                  const ExcludeSemantics(child: QuizLogo()),
+                  const SizedBox(width: BirdySpace.l),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.forkQuizTitle,
+                          style: BirdyText.heading.copyWith(color: c.text1),
+                        ),
+                        const SizedBox(height: BirdySpace.xs),
+                        Text(
+                          l10n.forkQuizEntrySubtitle,
+                          style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(AppIcons.chevronRight, color: c.text2),
+                ],
               ),
             ),
           ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              width: badge,
-              height: badge,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: c.oriole,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                '?',
-                textScaler: TextScaler.noScaling,
-                style: BirdyText.label.copyWith(
-                  color: c.onOriole,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
