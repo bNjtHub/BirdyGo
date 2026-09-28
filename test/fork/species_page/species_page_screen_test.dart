@@ -9,6 +9,7 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/ranking/activity_bars.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
@@ -217,6 +218,13 @@ void main() {
     expect(find.text('Voir les 9 enregistrements'), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.summary]!), findsOneWidget);
     expect(find.text('Activité par heure'), findsOneWidget);
+    // J6f-b fix: hour labels every 6 h, and the peak hour named below the
+    // chart (hour 7 has the tally's only busy value).
+    expect(find.text('0 h'), findsOneWidget);
+    expect(find.text('6 h'), findsOneWidget);
+    expect(find.text('12 h'), findsOneWidget);
+    expect(find.text('18 h'), findsOneWidget);
+    expect(find.text('Surtout vers 7 h'), findsOneWidget);
     expect(find.text('Voir sur la carte'), findsOneWidget);
     expect(find.textContaining('Garde le son pour toi'), findsOneWidget);
     // The upstream description gives way to the AI sheet.
@@ -245,6 +253,24 @@ void main() {
     await pump(tester);
     expect(find.text(explanation), findsOneWidget);
   });
+
+  testWidgets(
+    'tapping an hour bar shows its own hour and count (J6f-b fix)',
+    (tester) async {
+      await pump(tester);
+      expect(find.text('Surtout vers 7 h'), findsOneWidget);
+
+      await tester.ensureVisible(find.byType(ActivityBars));
+      final rect = tester.getRect(find.byType(ActivityBars));
+      final slot = rect.width / 24;
+      // Hour 4 has a single contact: distinct from the busy hour 7.
+      await tester.tapAt(Offset(rect.left + slot * 4.5, rect.top + 5));
+      await tester.pump();
+
+      expect(find.text('Surtout vers 7 h'), findsNothing);
+      expect(find.text('4 h — 1 contact'), findsOneWidget);
+    },
+  );
 
   testWidgets('play a recording and change a favorite', (tester) async {
     await pump(tester);

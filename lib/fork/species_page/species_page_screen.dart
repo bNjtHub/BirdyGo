@@ -383,7 +383,6 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                   key: const ValueKey('fiche-activity-real'),
                   child: ActivityAndMap(
                     hours: record.hours,
-                    barColor: c.isDark ? tint.accent : tint.deep,
                     map:
                         record.spots.isEmpty
                             ? null

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
+import '../design/activity_scale.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -22,6 +23,7 @@ import '../reliability/reliability_screen.dart';
 import '../species_sheet/species_sheet.dart';
 import '../species_sheet/species_sheet_section.dart';
 import 'species_page_model.dart';
+import 'species_page_text.dart';
 
 /// Widest column on tablets and in landscape.
 const double kSpeciesPageMaxWidth = 600;
@@ -681,17 +683,10 @@ class DescriptionBlock extends StatelessWidget {
 /// Activity by hour and the mini map, side by side (or stacked when narrow
 /// or with large text).
 class ActivityAndMap extends StatelessWidget {
-  const ActivityAndMap({
-    super.key,
-    required this.hours,
-    required this.barColor,
-    this.map,
-    this.onSeeOnMap,
-  });
+  const ActivityAndMap({super.key, required this.hours, this.map, this.onSeeOnMap});
 
   /// 24 values, or empty.
   final List<int> hours;
-  final Color barColor;
 
   /// The mini map, null without positioned contacts.
   final Widget? map;
@@ -700,36 +695,7 @@ class ActivityAndMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final activity =
-        hours.any((h) => h > 0)
-            ? DecoratedBox(
-              decoration: BoxDecoration(
-                color: c.surface1,
-                borderRadius: BorderRadius.circular(BirdyRadii.card),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(BirdySpace.m),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.forkActivityByHour,
-                      style: BirdyText.caption.copyWith(color: c.text2),
-                    ),
-                    const SizedBox(height: BirdySpace.s),
-                    ActivityBars(
-                      values: hours,
-                      height: 52,
-                      color: barColor,
-                      labels: const {0: '0 h', 12: '12 h'},
-                      semanticLabel: l10n.forkActivityByHour,
-                    ),
-                  ],
-                ),
-              ),
-            )
-            : null;
+    final activity = hours.any((h) => h > 0) ? _HourActivityCard(hours: hours) : null;
     final mapColumn =
         map == null
             ? null
@@ -803,6 +769,13 @@ class ActivityAndMap extends StatelessWidget {
               height: 52,
               radius: BirdyRadii.thumb,
             ),
+            const SizedBox(height: BirdySpace.xs),
+            // Reserves the peak-hour caption's line (J6f-b fix): whether
+            // one shows at all depends on data not in yet.
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: '00000000000000000',
+            ),
           ],
         ),
       ),
@@ -846,6 +819,68 @@ class ActivityAndMap extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Activity-by-hour card (J6f-b fix): bars colored on a sequential
+/// Martin-pêcheur scale, hour labels every 6 h, the peak hour named in a
+/// caption, and a tap/long-press on a bar showing its hour and count
+/// instead.
+class _HourActivityCard extends StatefulWidget {
+  const _HourActivityCard({required this.hours});
+
+  /// 24 values, at least one above zero.
+  final List<int> hours;
+
+  @override
+  State<_HourActivityCard> createState() => _HourActivityCardState();
+}
+
+class _HourActivityCardState extends State<_HourActivityCard> {
+  int? _selectedHour;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final scale = ActivityScale.kingfisher(c.surface1);
+    final selected = _selectedHour;
+    final caption =
+        selected == null
+            ? peakHourCaption(l10n, widget.hours)
+            : hourDetailCaption(l10n, selected, widget.hours[selected]);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(BirdySpace.m),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.forkActivityByHour,
+              style: BirdyText.caption.copyWith(color: c.text2),
+            ),
+            const SizedBox(height: BirdySpace.s),
+            ActivityBars(
+              values: widget.hours,
+              height: 52,
+              colorForValue: scale.of,
+              trackColor: c.line,
+              labels: const {0: '0 h', 6: '6 h', 12: '12 h', 18: '18 h'},
+              semanticLabel: activityByHourSemanticLabel(l10n, widget.hours),
+              onSelect: (index, _) => setState(() => _selectedHour = index),
+            ),
+            if (caption != null) ...[
+              const SizedBox(height: BirdySpace.xs),
+              Text(caption, style: BirdyText.caption.copyWith(color: c.text2)),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
