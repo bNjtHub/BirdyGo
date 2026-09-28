@@ -699,8 +699,11 @@ void main() {
       }
       expect(find.text('10/10'), findsOneWidget);
       for (var i = 0; i < 3; i++) {
-        final star = tester.widget<Icon>(find.byKey(ValueKey('quiz-star-$i')));
+        final star = tester.widget<QuizRimStar>(
+          find.byKey(ValueKey('quiz-star-$i')),
+        );
         expect(star.color, BirdyColors.light.oriole);
+        expect(star.rim, BirdyQuizColors.starRim);
         expect(star.size, i == 1 ? 56 : 42);
       }
       for (var r = 0; r < 2; r++) {
@@ -736,10 +739,11 @@ void main() {
         await tapChoice(tester, french(i == 0 ? answer : wrong));
         await next(tester, last: i == 3);
       }
-      final star = tester.widget<Icon>(
+      final star = tester.widget<QuizRimStar>(
         find.byKey(const ValueKey('quiz-star-0')),
       );
       expect(star.color, BirdyColors.light.lineOpaque);
+      expect(star.rim, BirdyColors.light.border);
       expect(find.byType(ConfettiWidget), findsNothing);
       expect(sfx.played, isNot(contains(QuizSound.fanfare)));
     });

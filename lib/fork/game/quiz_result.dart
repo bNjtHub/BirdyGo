@@ -5,6 +5,8 @@
 /// bar filling up; then « Terminer » and « Rejouer ».
 library;
 
+import 'dart:math' as math;
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,7 @@ import 'game_config.dart';
 import 'game_progress.dart';
 import 'game_text.dart';
 import 'game_widgets.dart';
+import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
 class QuizResult extends StatelessWidget {
@@ -29,6 +32,7 @@ class QuizResult extends StatelessWidget {
     required this.results,
     required this.badge,
     required this.before,
+    this.party = false,
     required this.onAgain,
     required this.onDone,
   });
@@ -44,6 +48,9 @@ class QuizResult extends StatelessWidget {
 
   /// Oreille fine when the round started.
   final BadgeProgress before;
+
+  /// A good enough score for the confetti rain and, here, the star burst.
+  final bool party;
 
   final VoidCallback onAgain;
   final VoidCallback onDone;
@@ -66,6 +73,7 @@ class QuizResult extends StatelessWidget {
                     right: right,
                     total: total,
                     stars: quizStars(right, total),
+                    party: party,
                   ),
                 ),
                 const SizedBox(height: BirdySpace.m),
@@ -127,11 +135,13 @@ class _ScoreCard extends StatelessWidget {
     required this.right,
     required this.total,
     required this.stars,
+    required this.party,
   });
 
   final int right;
   final int total;
   final int stars;
+  final bool party;
 
   static const double glowRadius = 190;
 
@@ -163,24 +173,37 @@ class _ScoreCard extends StatelessWidget {
             child: ExcludeSemantics(
               child: SizedBox(
                 height: 56,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
                   children: [
-                    for (var i = 0; i < 3; i++) ...[
-                      if (i > 0) const SizedBox(width: 6),
-                      QuizPop(
-                        duration: QuizMotion.star,
-                        delay: QuizMotion.starDelay + QuizMotion.starStep * i,
-                        child: Icon(
-                          AppIcons.quizStar,
-                          key: ValueKey('quiz-star-$i'),
-                          size: i == 1 ? 56 : 42,
-                          fill: 1,
-                          color: i < stars ? c.oriole : c.lineOpaque,
-                        ),
+                    const Positioned.fill(
+                      child: QuizTwinkleField(count: 4, seed: 21),
+                    ),
+                    if (party)
+                      const Positioned.fill(
+                        child: QuizStarBurstField(),
                       ),
-                    ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (var i = 0; i < 3; i++) ...[
+                          if (i > 0) const SizedBox(width: 6),
+                          QuizPop(
+                            duration: QuizMotion.star,
+                            delay:
+                                QuizMotion.starDelay + QuizMotion.starStep * i,
+                            child: QuizRimStar(
+                              key: ValueKey('quiz-star-$i'),
+                              size: i == 1 ? 56 : 42,
+                              color: i < stars ? c.oriole : c.lineOpaque,
+                              rim: i < stars ? BirdyQuizColors.starRim : c.border,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -227,6 +250,59 @@ class _ScoreCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A 5-point star with its own rim stroke, earned (Loriot fill, a shaded
+/// gold rim) or not (the theme's line color both ways).
+class QuizRimStar extends StatelessWidget {
+  const QuizRimStar({super.key, required this.size, required this.color, required this.rim});
+
+  final double size;
+  final Color color;
+  final Color rim;
+
+  @override
+  Widget build(BuildContext context) =>
+      CustomPaint(size: Size.square(size), painter: _RimStarPainter(color, rim));
+}
+
+class _RimStarPainter extends CustomPainter {
+  _RimStarPainter(this.color, this.rim);
+
+  final Color color;
+  final Color rim;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final outer = size.width / 2 * 0.94;
+    final inner = outer * 0.42;
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final r = i.isEven ? outer : inner;
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final p = center + Offset(math.cos(angle), math.sin(angle)) * r;
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, Paint()..color = color);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 1.4 / 24
+        ..strokeJoin = StrokeJoin.round
+        ..color = rim,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RimStarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.rim != rim;
 }
 
 /// The round's birds, five per row, popping in 50 ms apart.

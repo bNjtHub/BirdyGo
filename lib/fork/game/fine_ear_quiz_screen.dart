@@ -703,6 +703,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       results: _results,
       badge: fineEarBadge(store.correct()),
       before: fineEarBadge(_startCorrect),
+      party: _party,
       onAgain: _start,
       // pop, not maybePop: PopScope turns a back in a round into « intro ».
       onDone: () => Navigator.of(context).pop(),
