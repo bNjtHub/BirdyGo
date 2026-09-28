@@ -11,6 +11,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
@@ -28,6 +29,7 @@ class ReviewTopBar extends StatelessWidget {
     required this.total,
     required this.onClose,
     required this.onReliability,
+    this.loading = false,
   });
 
   /// 1-based position, or null when nothing is left.
@@ -35,6 +37,9 @@ class ReviewTopBar extends StatelessWidget {
   final int total;
   final VoidCallback onClose;
   final VoidCallback onReliability;
+
+  /// The queue is still loading: a skeleton stands in for the count.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +50,9 @@ class ReviewTopBar extends StatelessWidget {
       onBack: onClose,
       closing: true,
       actions: [
-        if (position != null)
+        if (loading)
+          BirdySkeleton.text(BirdyText.label, placeholder: '00000')
+        else if (position != null)
           Text(
             l10n.forkQuickReviewProgress(position!, total),
             style: BirdyText.label.copyWith(color: c.text1),
@@ -97,6 +104,22 @@ class ReviewProgress extends StatelessWidget {
           l10n.forkQuickReviewSorted(sorted),
           style: BirdyText.caption.copyWith(color: c.text2),
         ),
+      ],
+    );
+  }
+
+  /// Same bar-then-caption shape, before the queue's length is known.
+  static Widget skeleton(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(BirdyRadii.pill),
+          child: SizedBox(height: 6, child: ColoredBox(color: c.skeleton)),
+        ),
+        const SizedBox(height: 6),
+        BirdySkeleton.text(BirdyText.caption, placeholder: '00000000000000000000'),
       ],
     );
   }
@@ -301,6 +324,75 @@ class ReviewCard extends StatelessWidget {
               style: BirdyText.caption.copyWith(color: c.text2),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// Same shell (padding, border, shadow) as the real card, filled with
+  /// placeholders: badge, avatar, name/latin/when/detail lines and a
+  /// spectrogram-sized box, at the sizes those take once a real detection
+  /// lands.
+  static Widget skeleton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Container(
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.hero),
+        border: Border.all(color: Colors.transparent, width: 3),
+        boxShadow: c.floatShadow,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BirdySkeleton.box(width: 110, height: 26, radius: BirdyRadii.pill),
+          const SizedBox(height: BirdySpace.m),
+          Row(
+            children: [
+              BirdySkeleton.box(width: 96, height: 96, radius: 48),
+              const SizedBox(width: BirdySpace.l),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BirdySkeleton.text(
+                      BirdyText.title,
+                      placeholder: '000000000000000',
+                    ),
+                    const SizedBox(height: BirdySpace.xs),
+                    BirdySkeleton.text(
+                      BirdyText.bodyCompact,
+                      placeholder: '00000000000000',
+                    ),
+                    BirdySkeleton.text(
+                      BirdyText.caption,
+                      placeholder: '0000000000',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: BirdySpace.m),
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: 80,
+            radius: BirdyRadii.inset,
+          ),
+          const SizedBox(height: BirdySpace.m),
+          BirdySkeleton.box(
+            width: BirdySizes.target,
+            height: BirdySizes.target,
+            radius: BirdySizes.target / 2,
+          ),
+          const SizedBox(height: BirdySpace.xs),
+          BirdySkeleton.text(
+            BirdyText.caption,
+            placeholder: l10n.forkQuickReviewHeadphones,
+          ),
         ],
       ),
     );
