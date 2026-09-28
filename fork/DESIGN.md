@@ -649,15 +649,23 @@ Accueil
   pas encore trouvées. Conseil d'une ligne sur `orioleContainer` en bas.
 - L'état s'efface en 150 ms quand la première espèce entre (rien sous animations réduites). Sans
   géomodèle : titre et conseil seulement. Une écoute d'enregistrement garde le carrousel d'astuces.
-- En-tête : ligne de lieu en caption sous le statut (cache de géocodage ou OSM avec accord, jamais
-  de demande). À droite, le bouton « i » (niveaux, aide et réglages : le menu ⋮ a disparu) puis la
-  pilule de mode. Les moments (Première fois, Oiseau rare) gardent l'en-tête et sa pilule.
+- En-tête : retour, point vivant, statut et ligne de lieu en caption dessous (cache de géocodage ou
+  OSM avec accord, jamais de demande), puis un seul bouton rond de 48 dp « Options d'écoute » (style
+  `BirdyIconButton`, le menu ⋮, le bouton « i » et la pilule de mode ont disparu). Statut et lieu
+  prennent toute la largeur restante et ne s'ellipsent qu'en dernier recours (320 dp à 130 %). Le
+  mode actif reste visible dans le statut : « En écoute · Vent », « En écoute · Personnalisé »,
+  rien de plus en Normal. Les moments (Première fois, Oiseau rare) gardent l'en-tête et ce bouton.
 
 Modes d'écoute (`lib/fork/listening_mode/`)
-- Pilule de 48 dp (fond tonal, contour accentText à 40 %, icône et nom du mode, chevron) qui ouvre
-  la feuille « Conditions d'écoute » : 4 options d'une phrase chacune, l'option choisie sur
-  surface2 avec contour accentText et coche. Un appui applique le mode sans couper l'écoute, ferme
-  la feuille, et une snackbar confirme « Mode Vent activé ». Le dernier mode est gardé.
+- Bouton « Options d'écoute » de l'en-tête (`lib/fork/live/listening_options.dart`) : icône du
+  mode actif (vent, boost, ville, réglage pour Personnalisé), icône neutre « tune » en Normal.
+  Lecteur d'écran : « Options d'écoute, mode Vent ». Il ouvre une seule feuille : d'abord la
+  section « Conditions d'écoute » (4 options d'une phrase, 3 sans Ville, l'option choisie sur
+  surface2 avec contour accentText et coche), puis un trait et trois lignes de 48 dp :
+  « À quel point l'app est sûre » (chevron, ouvre la feuille des niveaux par-dessus, retour à la
+  feuille des options), « Aide du mode En direct » et « Paramètres » (ferment la feuille puis
+  ouvrent l'aide ou les réglages). Un appui sur un mode l'applique sans couper l'écoute, ferme la
+  feuille, et une snackbar confirme « Mode Vent activé ». Le dernier mode est gardé.
 - Normal : réglages par défaut. Vent : passe-haut 250 Hz (−2 dB au plus à 400 Hz, chouettes et
   pigeons passent). Boost : gain ×2 et passe-haut 120 Hz. Ville : réduction des bruits continus
   (trames de 16 ms, bruit de fond appris en 1,5 s, −15 dB au plus, retard 16 ms, environ 0,3 % du
