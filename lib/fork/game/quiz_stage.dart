@@ -151,22 +151,6 @@ class _ListeningCard extends StatelessWidget {
               ],
             ),
           ),
-          // The bubble overlays the well rather than adding to the column's
-          // height: the stage shrinks on small phones, and the disc always
-          // gets the room it needs.
-          Positioned(
-            top: 34,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: QuizSpeechBubble(
-                label:
-                    playing
-                        ? l10n.forkQuizStageBubblePlaying
-                        : l10n.forkQuizStageBubbleIdle,
-              ),
-            ),
-          ),
           Positioned(
             left: 0,
             right: 0,
@@ -174,7 +158,9 @@ class _ListeningCard extends StatelessWidget {
             bottom: 44,
             child: Center(
               child: SizedBox(
-                // Room for the play button overlapping bottom-right.
+                // Room for the play button overlapping bottom-right and,
+                // above that, the bubble overlapping the top-right corner
+                // (Clip.none: neither adds to the card's own layout).
                 width: disc * 1.16,
                 height: disc * 1.09,
                 child: Stack(
@@ -202,6 +188,19 @@ class _ListeningCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    // Mockup placement: overlapping the disc's top-right,
+                    // tail pointing down toward it.
+                    Positioned(
+                      top: -8,
+                      left: disc * 0.68,
+                      child: QuizSpeechBubble(
+                        label:
+                            playing
+                                ? l10n.forkQuizStageBubblePlaying
+                                : l10n.forkQuizStageBubbleIdle,
+                        tailLeft: 10,
                       ),
                     ),
                     Positioned(
