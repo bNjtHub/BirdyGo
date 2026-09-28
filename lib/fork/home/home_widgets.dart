@@ -14,7 +14,6 @@ import '../design/species_accents.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdygo_wordmark.dart';
-import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
 import '../game/game_config.dart';
@@ -27,68 +26,28 @@ import '../reliability/reliability_config.dart';
 import 'home_model.dart';
 import 'singing_logo.dart';
 
-/// Singing mark, name and menu button.
-class HomeTopBar extends StatelessWidget {
-  const HomeTopBar({super.key, required this.onMenu});
-
-  final VoidCallback onMenu;
+/// Singing mark and name, small, alone above the header (Accueil only; the
+/// menu button now sits in [BirdyTabHeader]'s action row).
+class HomeLogoRow extends StatelessWidget {
+  const HomeLogoRow({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: BirdySizes.target),
-      child: Row(
-        children: [
-          Expanded(
-            child: SingingLogo(
-              // The startup screen's wordmark, header size.
-              wordmark: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: AlignmentDirectional.centerStart,
-                child: BirdyGoWordmark(size: _wordmarkSize, color: c.text1),
-              ),
-            ),
-          ),
-          BirdyIconButton(
-            icon: AppIcons.menu,
-            semanticLabel: l10n.forkHomeMenu,
-            onPressed: onMenu,
-          ),
-        ],
+    return SingingLogo(
+      // The startup screen's wordmark, header size.
+      wordmark: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: BirdyGoWordmark(size: _wordmarkSize, color: c.text1),
       ),
     );
   }
 }
 
-/// Wordmark size in the home header: the startup letters, a little above
+/// Wordmark size in the home logo row: the startup letters, a little above
 /// the board's 20 px name so the Oriole dot stays readable.
 const double _wordmarkSize = 24;
-
-/// « Bonjour » and the date line.
-class HomeGreeting extends StatelessWidget {
-  const HomeGreeting({super.key, required this.title, required this.dateLine});
-
-  final String title;
-  final String dateLine;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(title, style: BirdyText.display.copyWith(color: c.text1)),
-        ),
-        const SizedBox(height: BirdySpace.xs),
-        Text(dateLine, style: BirdyText.caption.copyWith(color: c.text2)),
-      ],
-    );
-  }
-}
 
 /// Icon color on a species [accent] fill: Encre de nuit when it keeps 3:1
 /// (non-text contrast), else Brume.
@@ -306,10 +265,19 @@ class HomeGrid extends StatelessWidget {
   }
 }
 
-/// Current week of the série (Monday to Sunday), from its two-week calendar.
-List<StreakDay> streakWeek(Streak streak) {
+/// The 7 days ending today (today last), from the two-week calendar
+/// ([Streak.calendar]: two ISO weeks Monday to Sunday, current week last).
+/// A calendar-week slice would hide yesterday on a Monday; this rolling
+/// window always shows the days that actually count toward the série.
+/// Falls back to the calendar week when today is missing from the
+/// calendar (should not happen).
+List<StreakDay> lastSevenDays(Streak streak) {
   final days = streak.calendar;
-  return days.length <= 7 ? days : days.sublist(days.length - 7);
+  final todayIndex = days.indexWhere((d) => d.isToday);
+  if (todayIndex < 6) {
+    return days.length <= 7 ? days : days.sublist(days.length - 7);
+  }
+  return days.sublist(todayIndex - 6, todayIndex + 1);
 }
 
 /// « 9 jours de suite » and this week's day dots, on Loriot.
@@ -324,7 +292,7 @@ class StreakBlock extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final weekday = DateFormat('EEEEE', l10n.localeName);
-    final week = streakWeek(streak);
+    final week = lastSevenDays(streak);
     final listened =
         week.where((d) => d.state == StreakDayState.listened).length;
     final days = l10n.forkHomeStreakDays(streak.current);

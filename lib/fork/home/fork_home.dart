@@ -42,6 +42,7 @@ import '../daily_goal/daily_goal_screen.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../game/challenge_card.dart';
@@ -292,19 +293,27 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final game = ref.watch(gameProgressProvider).value;
     final streak = game?.facts.streak;
     final toVerify = snapshot?.toVerify ?? 0;
-    final topBar = HomeTopBar(onMenu: _showMenu);
+    // The singing logo, small, alone above the tab header (Accueil only).
+    const topBar = HomeLogoRow();
     final sunrise = _sunrise;
     final head = <(String, Widget)>[
       (
         'greeting',
-        HomeGreeting(
+        BirdyTabHeader(
           title: homeGreeting(l10n, now),
-          dateLine: homeDateLine(
+          caption: homeDateLine(
             localeName,
             now,
             place: _place,
             sunrise: sunrise == null ? null : homeSunrise(l10n, sunrise),
           ),
+          actions: [
+            BirdyIconButton(
+              icon: AppIcons.menu,
+              semanticLabel: l10n.forkHomeMenu,
+              onPressed: _showMenu,
+            ),
+          ],
         ),
       ),
       if (last != null)
