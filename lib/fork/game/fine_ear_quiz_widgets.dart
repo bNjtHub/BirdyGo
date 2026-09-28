@@ -186,6 +186,9 @@ class QuizMysteryDisc extends StatelessWidget {
   final double size;
   final double silhouette;
 
+  /// Height of the question mark, as a share of [silhouette].
+  static const double _markShare = 0.42;
+
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: CustomPaint(
@@ -207,17 +210,13 @@ class QuizMysteryDisc extends StatelessWidget {
               size: silhouette,
               color: BirdyBrand.mist.withValues(alpha: 0.35),
             ),
-            Positioned(
-              right: size * 0.22,
-              bottom: size * 0.16,
-              child: Text(
-                '?',
-                style: BirdyText.species.copyWith(
-                  color: BirdyBrand.oriole,
-                  fontWeight: FontWeight.w700,
-                  fontSize: size * 0.22,
-                  height: 1,
-                ),
+            // Centered on the bird's wing, not on the disc: the mark reads
+            // as sitting on the bird's body whatever the disc's margin.
+            Transform.translate(
+              offset: birdyGoWingCenter * silhouette,
+              child: CustomPaint(
+                size: Size.square(silhouette * _markShare),
+                painter: const QuizQuestionMark(color: BirdyBrand.oriole),
               ),
             ),
           ],
@@ -225,6 +224,57 @@ class QuizMysteryDisc extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// The Quiz mockup's question mark (a round hook and a dot, stroked with
+/// round caps), scaled so its whole height fills the box and centered in it.
+class QuizQuestionMark extends CustomPainter {
+  const QuizQuestionMark({required this.color});
+
+  final Color color;
+
+  // The mockup's 64 box: hook path, dot and stroke width.
+  static final Path _hook =
+      Path()
+        ..moveTo(29.5, 31.5)
+        ..relativeArcToPoint(
+          const Offset(6.2, 4.2),
+          radius: const Radius.circular(4.5),
+          largeArc: true,
+        )
+        ..relativeCubicTo(-1.4, 0.6, -2.2, 1.6, -2.2, 3.2)
+        ..relativeLineTo(0, 0.8);
+  static const Offset _dot = Offset(33.5, 45.2);
+  static const double _dotRadius = 2.2;
+  static const double _stroke = 3.6;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final hook = _hook.getBounds().inflate(_stroke / 2);
+    final bounds = hook.expandToInclude(
+      Rect.fromCircle(center: _dot, radius: _dotRadius),
+    );
+    final scale = size.height / bounds.height;
+    canvas
+      ..save()
+      ..translate(size.width / 2, size.height / 2)
+      ..scale(scale)
+      ..translate(-bounds.center.dx, -bounds.center.dy)
+      ..drawPath(
+        _hook,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round,
+      )
+      ..drawCircle(_dot, _dotRadius, Paint()..color = color)
+      ..restore();
+  }
+
+  @override
+  bool shouldRepaint(QuizQuestionMark old) => old.color != color;
 }
 
 /// A 1.5 px dashed circle, inside the box.
@@ -274,37 +324,37 @@ class QuizSpeechBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
+    // The tail hangs from the bubble's outer bottom edge (half of it shows
+    // below), painted under the pill so it never covers the label.
+    final tail = Transform.rotate(
+      angle: 0.785398,
+      child: Container(width: 10, height: 10, color: c.surface1),
+    );
     return QuizWiggle(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: c.surface1,
-          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-          boxShadow: const [
-            BoxShadow(color: Color(0x40000000), blurRadius: 16),
-          ],
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Text(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: tailLeft ?? 0,
+            right: tailLeft == null ? 0 : null,
+            bottom: -5,
+            child: tailLeft == null ? Center(child: tail) : tail,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: c.surface1,
+              borderRadius: BorderRadius.circular(BirdyRadii.pill),
+              boxShadow: const [
+                BoxShadow(color: Color(0x40000000), blurRadius: 16),
+              ],
+            ),
+            child: Text(
               label,
               style: BirdyText.species.copyWith(color: c.text1, fontSize: 15),
             ),
-            Positioned(
-              left: tailLeft,
-              right: tailLeft == null ? 0 : null,
-              bottom: -5,
-              child: Align(
-                alignment: Alignment.center,
-                child: Transform.rotate(
-                  angle: 0.785398,
-                  child: Container(width: 10, height: 10, color: c.surface1),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -18,6 +18,19 @@ final Path birdyGoSilhouette = _unit(_outline(withEye: false));
 /// use this to center [BirdyGoLogoPainter]'s own picture the same way.
 final Rect birdyGoLogoBounds = _outline(withEye: true).getBounds();
 
+/// Center of the logo's wing (the middle of its bars) in
+/// [birdyGoSilhouette]'s unit space: the visual middle of the body, where a
+/// mark drawn on the bird (the quiz's question mark) sits.
+final Offset birdyGoWingCenter = () {
+  final bounds = _outline(withEye: false).getBounds();
+  var sum = Offset.zero;
+  for (final (bottom, top, _) in BirdyGoLogoPainter.bars) {
+    sum += (bottom + top) / 2;
+  }
+  final wing = sum / BirdyGoLogoPainter.bars.length.toDouble();
+  return (wing - bounds.center) / bounds.longestSide;
+}();
+
 Path _outline({required bool withEye}) {
   var shape = Path.combine(
     PathOperation.union,

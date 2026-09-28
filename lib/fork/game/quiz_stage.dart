@@ -97,6 +97,11 @@ class _ListeningCard extends StatelessWidget {
   final VoidCallback onPlay;
   final double height;
 
+  /// How far the play button reaches past the disc, right and bottom, as a
+  /// share of the disc (Quiz v2 mockup).
+  static const double _buttonOverhangX = 0.16;
+  static const double _buttonOverhangY = 0.09;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -158,17 +163,19 @@ class _ListeningCard extends StatelessWidget {
             bottom: 44,
             child: Center(
               child: SizedBox(
-                // Room for the play button overlapping bottom-right and,
-                // above that, the bubble overlapping the top-right corner
-                // (Clip.none: neither adds to the card's own layout).
-                width: disc * 1.16,
-                height: disc * 1.09,
+                // The disc sits in the middle; the same margin on every side
+                // makes room for the play button overlapping its bottom-right
+                // (inside the box, so all of it stays tappable). The bubble
+                // overlaps the top-right corner (Clip.none: it adds nothing
+                // to the card's own layout).
+                width: disc + 2 * disc * _buttonOverhangX,
+                height: disc + 2 * disc * _buttonOverhangY,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
                     Positioned(
-                      left: 0,
-                      top: 0,
+                      left: disc * _buttonOverhangX,
+                      top: disc * _buttonOverhangY,
                       width: disc,
                       height: disc,
                       child: QuizBounce(
@@ -193,8 +200,8 @@ class _ListeningCard extends StatelessWidget {
                     // Mockup placement: overlapping the disc's top-right,
                     // tail pointing down toward it.
                     Positioned(
-                      top: -8,
-                      left: disc * 0.68,
+                      top: disc * _buttonOverhangY - 8,
+                      left: disc * (_buttonOverhangX + 0.68),
                       child: QuizSpeechBubble(
                         label:
                             playing
