@@ -98,10 +98,16 @@ class BirdyFilterChip extends StatelessWidget {
                         ),
                         const SizedBox(width: BirdySpace.s),
                       ],
-                      Text(
-                        label,
-                        style: BirdyText.labelCompact.copyWith(
-                          color: foreground,
+                      // Ellipsized only when its row is narrower than the
+                      // label (large text in a tight row); natural otherwise.
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: BirdyText.labelCompact.copyWith(
+                            color: foreground,
+                          ),
                         ),
                       ),
                     ],
