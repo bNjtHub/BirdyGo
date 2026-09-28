@@ -26,6 +26,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_confetti.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/pressable.dart';
@@ -90,10 +91,10 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     (_) => GlobalKey(),
   );
   final ConfettiController _burst = ConfettiController(
-    duration: QuizMotion.confetti,
+    duration: BirdyConfettiMotion.emission,
   );
   final ConfettiController _rain = ConfettiController(
-    duration: QuizMotion.confetti,
+    duration: BirdyConfettiMotion.emission,
   );
 
   /// The round ended well enough for the rain of confetti.
@@ -101,7 +102,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   /// Where the last burst starts (center of the tapped card) and its colors.
   Offset? _burstOrigin;
-  List<Color> _burstColors = BirdyQuizColors.burst;
+  List<Color> _burstColors = BirdyConfettiColors.burst;
 
   @override
   void initState() {
@@ -205,7 +206,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       _results.add(right);
       if (right) {
         _burstOrigin = _centerOf(index);
-        _burstColors = [tint.accent, ...BirdyQuizColors.burst, tint.deep];
+        _burstColors = [tint.accent, ...BirdyConfettiColors.burst, tint.deep];
       }
     });
     // The clip stops: the reveal takes the stage.
@@ -362,21 +363,21 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                 Positioned(
                   left: origin.dx,
                   top: origin.dy,
-                  child: QuizConfetti.burst(
+                  child: BirdyConfetti.burst(
                     key: ValueKey('quiz-burst $_current'),
                     controller: _burst,
                     colors: _burstColors,
                   ),
                 ),
               if (!reduced && _party && _phase == _Phase.result)
-                for (final spot in QuizMotion.rainSpots)
+                for (final spot in BirdyConfettiMotion.rainSpots)
                   Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
                     child: Align(
                       alignment: Alignment(spot * 2 - 1, -1),
-                      child: QuizConfetti.rain(
+                      child: BirdyConfetti.rain(
                         key: ValueKey('quiz-rain $spot'),
                         controller: _rain,
                       ),

@@ -1,7 +1,11 @@
 /// Moments of the Live screen (J6e, fork/DESIGN.md « Animations »):
 /// « Première rencontre » and the golden card of a rare bird, over the
-/// spectrogram and the table, never over « Arrêter » / « Pause ». No
-/// sound (the microphone would hear it), no confetti, one light vibration.
+/// spectrogram and the table, never over « Arrêter » / « Pause » nor the
+/// header. No sound (the microphone would hear it), one light vibration.
+/// « Première rencontre » plays the AppPremiere sequence (J6f): card pop,
+/// bird pop with one ring, texts rising, status landing, and a single
+/// confetti burst from the bird (`BirdyConfetti`, never looping, none with
+/// reduced motion).
 library;
 
 import 'dart:async';
@@ -18,7 +22,9 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_confetti.dart';
 import '../design/widgets/birdy_pill.dart';
+import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
 import '../game/game_progress.dart';
 import '../game/game_text.dart';
@@ -183,68 +189,114 @@ class _LiveMomentsState extends ConsumerState<LiveMoments> {
     if (moment == null) return const SizedBox.shrink();
     final c = BirdyColors.of(context);
     final tint = SpeciesAccents.tintOf(moment.entry.scientificName);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // The veil takes the taps meant for the table below.
-        MomentAppear(
-          duration: BirdyMotion.enter,
-          child: ColoredBox(
-            color: c.background.withValues(alpha: 0.82),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    (moment.kind == LiveMomentKind.rare
-                            ? BirdyBrand.oriole
-                            : tint.accent)
-                        .withValues(alpha: BirdyMotion.tintMaxOpacity),
-                    Colors.transparent,
-                  ],
+    // The confetti and the ring overflow the card, not the moment's area.
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // The veil takes the taps meant for the table below.
+          MomentAppear(
+            duration: BirdyMotion.enter,
+            child: ColoredBox(
+              color: c.background.withValues(alpha: 0.82),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      (moment.kind == LiveMomentKind.rare
+                              ? BirdyBrand.oriole
+                              : tint.accent)
+                          .withValues(alpha: BirdyMotion.tintMaxOpacity),
+                      Colors.transparent,
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(BirdySpace.l),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 380),
-              child: MomentAppear(
-                key: ValueKey(moment.entry.scientificName),
-                duration:
-                    moment.kind == LiveMomentKind.rare
-                        ? BirdyMotion.rareBird
-                        : BirdyMotion.firstEncounter,
-                child:
-                    moment.kind == LiveMomentKind.firstTime
-                        ? _FirstTimeCard(
-                          moment: moment,
-                          image: widget.imageFor?.call(
-                            moment.entry.scientificName,
+          Center(
+            child: SingleChildScrollView(
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.all(BirdySpace.l),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: MomentAppear(
+                  key: ValueKey(moment.entry.scientificName),
+                  duration:
+                      moment.kind == LiveMomentKind.rare
+                          ? BirdyMotion.rareBird
+                          : BirdyMotion.firstEncounter,
+                  child:
+                      moment.kind == LiveMomentKind.firstTime
+                          ? _FirstTimeCard(
+                            moment: moment,
+                            image: widget.imageFor?.call(
+                              moment.entry.scientificName,
+                            ),
+                            clipPath: widget.clips[moment.entry.scientificName],
+                            controller: widget.controller,
+                            onClose: _close,
+                          )
+                          : _RareCard(
+                            moment: moment,
+                            image: widget.imageFor?.call(
+                              moment.entry.scientificName,
+                            ),
+                            clipPath: widget.clips[moment.entry.scientificName],
+                            controller: widget.controller,
+                            presenceScore: widget.presenceScoreOf(
+                              moment.entry.scientificName,
+                            ),
+                            answer: _answer,
+                            onAnswer: _answerRare,
+                            onClose: _close,
                           ),
-                          clipPath: widget.clips[moment.entry.scientificName],
-                          controller: widget.controller,
-                          onClose: _close,
-                        )
-                        : _RareCard(
-                          moment: moment,
-                          image: widget.imageFor?.call(
-                            moment.entry.scientificName,
-                          ),
-                          clipPath: widget.clips[moment.entry.scientificName],
-                          controller: widget.controller,
-                          presenceScore: widget.presenceScoreOf(
-                            moment.entry.scientificName,
-                          ),
-                          answer: _answer,
-                          onAnswer: _answerRare,
-                          onClose: _close,
-                        ),
+                ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Species picture of a moment.
+const double _avatarSize = 112;
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({super.key, required this.moment, required this.image});
+
+  final LiveMoment moment;
+  final ImageProvider? image;
+
+  @override
+  Widget build(BuildContext context) => SpeciesAvatar(
+    image: image,
+    tint: SpeciesAccents.tintOf(moment.entry.scientificName),
+    size: _avatarSize,
+  );
+}
+
+class _Names extends StatelessWidget {
+  const _Names({required this.moment});
+
+  final LiveMoment moment;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      children: [
+        Text(
+          moment.entry.commonName,
+          textAlign: TextAlign.center,
+          style: BirdyText.title.copyWith(color: c.text1),
+        ),
+        Text(
+          moment.entry.scientificName,
+          textAlign: TextAlign.center,
+          style: BirdyText.latin.copyWith(color: c.text2),
         ),
       ],
     );
@@ -258,30 +310,13 @@ class _Header extends StatelessWidget {
   final ImageProvider? image;
 
   @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    final entry = moment.entry;
-    return Column(
-      children: [
-        SpeciesAvatar(
-          image: image,
-          tint: SpeciesAccents.tintOf(entry.scientificName),
-          size: 112,
-        ),
-        const SizedBox(height: BirdySpace.m),
-        Text(
-          entry.commonName,
-          textAlign: TextAlign.center,
-          style: BirdyText.title.copyWith(color: c.text1),
-        ),
-        Text(
-          entry.scientificName,
-          textAlign: TextAlign.center,
-          style: BirdyText.latin.copyWith(color: c.text2),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    children: [
+      _Avatar(moment: moment, image: image),
+      const SizedBox(height: BirdySpace.m),
+      _Names(moment: moment),
+    ],
+  );
 }
 
 class _FirstTimeCard extends StatelessWidget {
@@ -307,6 +342,11 @@ class _FirstTimeCard extends StatelessWidget {
     final status = statusFor(moment.rank);
     final next = nextStatus(status);
     final caption = BirdyText.caption.copyWith(color: c.text2);
+    // AppPremiere: once the bird is in, the texts rise one after the other.
+    Duration textDelay(int index) =>
+        BirdyMotion.firstEncounterTextDelay + BirdyMotion.staggerDelay(index);
+    Widget rise(int index, Widget child) =>
+        BirdyEntrance(delay: textDelay(index), child: child);
     return _Card(
       border: tint.accent.withValues(alpha: 0.5),
       children: [
@@ -314,53 +354,78 @@ class _FirstTimeCard extends StatelessWidget {
         const SizedBox(height: BirdySpace.s),
         const NoveltyPill(kind: NoveltyKind.firstTime),
         const SizedBox(height: BirdySpace.m),
-        _Header(moment: moment, image: image),
+        _Encounter(
+          color: tint.accent,
+          confetti: [tint.accent, ...BirdyConfettiColors.burst, tint.deep],
+          child: _Avatar(
+            key: const ValueKey('first-time-bird'),
+            moment: moment,
+            image: image,
+          ),
+        ),
         const SizedBox(height: BirdySpace.m),
-        Semantics(
-          liveRegion: true,
-          child: Text(
-            l10n.forkMomentFirstTitle,
-            textAlign: TextAlign.center,
-            style: BirdyText.heading.copyWith(color: c.text1),
+        rise(0, _Names(moment: moment)),
+        const SizedBox(height: BirdySpace.m),
+        rise(
+          1,
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              l10n.forkMomentFirstTitle,
+              textAlign: TextAlign.center,
+              style: BirdyText.heading.copyWith(color: c.text1),
+            ),
           ),
         ),
         const SizedBox(height: BirdySpace.xs),
-        Text(
-          l10n.forkMomentAdded(moment.rank),
-          textAlign: TextAlign.center,
-          style: BirdyText.label.copyWith(color: c.text1),
+        rise(
+          2,
+          Text(
+            l10n.forkMomentAdded(moment.rank),
+            textAlign: TextAlign.center,
+            style: BirdyText.label.copyWith(color: c.text1),
+          ),
         ),
         if (status != null) ...[
           const SizedBox(height: BirdySpace.m),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StatusEmblem(status: status, size: 28),
-              const SizedBox(width: BirdySpace.s),
-              Flexible(
-                child: Text(
-                  statusName(l10n, status),
-                  style: BirdyText.label.copyWith(
-                    color: c.text1,
-                    fontWeight: FontWeight.w700,
+          // bg-land: the status lands, a little slower than the texts.
+          BirdyEntrance(
+            delay: textDelay(3),
+            duration: BirdyMotion.firstEncounter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StatusEmblem(status: status, size: 28),
+                const SizedBox(width: BirdySpace.s),
+                Flexible(
+                  child: Text(
+                    statusName(l10n, status),
+                    style: BirdyText.label.copyWith(
+                      color: c.text1,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
         if (next != null) ...[
           const SizedBox(height: BirdySpace.xs),
-          Text(
-            l10n.forkStatusNext(
-              next.from - moment.rank,
-              statusName(l10n, next),
+          rise(
+            4,
+            Text(
+              l10n.forkStatusNext(
+                next.from - moment.rank,
+                statusName(l10n, next),
+              ),
+              textAlign: TextAlign.center,
+              style: caption,
             ),
-            textAlign: TextAlign.center,
-            style: caption,
           ),
         ],
         const SizedBox(height: BirdySpace.l),
+        // The buttons come with the card: tappable at once.
         _Buttons(
           clipPath: clipPath,
           controller: controller,
@@ -369,6 +434,118 @@ class _FirstTimeCard extends StatelessWidget {
         ),
         const SizedBox(height: BirdySpace.s),
         Text(l10n.forkMomentClosesSoon, style: caption),
+      ],
+    );
+  }
+}
+
+/// The bird of « Première rencontre » (AppPremiere, J6f): it pops in just
+/// after the card (bg-pop), a soft glow and one ring spread behind it once
+/// (bg-glow, bg-ring), and a single confetti burst leaves its center. With
+/// reduced motion: the bird fades in, no glow, ring nor confetti.
+class _Encounter extends StatefulWidget {
+  const _Encounter({
+    required this.color,
+    required this.confetti,
+    required this.child,
+  });
+
+  final Color color;
+  final List<Color> confetti;
+  final Widget child;
+
+  @override
+  State<_Encounter> createState() => _EncounterState();
+}
+
+class _EncounterState extends State<_Encounter>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ring = AnimationController(
+    vsync: this,
+    duration: BirdyMotion.firstEncounterRing,
+  );
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(BirdyMotion.firstEncounterBirdDelay, () {
+      if (mounted) _ring.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _ring.dispose();
+    super.dispose();
+  }
+
+  /// The ring and glow start a little outside the picture.
+  static const double _ringBase =
+      (_avatarSize + 2 * BirdySpace.m) / _avatarSize;
+
+  /// CSS keyframes 0 → [peak] at [at] → 0, each interval eased.
+  static double _peak(double t, double at, double peak) {
+    const e = BirdyMotion.standard;
+    if (t <= at) return peak * e.transform(t / at);
+    return peak * (1 - e.transform((t - at) / (1 - at)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bird = MomentAppear(
+      duration: BirdyMotion.firstEncounter,
+      delay: BirdyMotion.firstEncounterBirdDelay,
+      child: widget.child,
+    );
+    if (BirdyMotion.reduced(context)) return bird;
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        ExcludeSemantics(
+          child: AnimatedBuilder(
+            animation: _ring,
+            builder: (context, _) {
+              final t = _ring.value;
+              final grow = BirdyMotion.standard.transform(t);
+              return Transform.scale(
+                // Around the picture, without taking layout room.
+                scale: _ringBase * (1 + (BirdyMotion.ringScale - 1) * grow),
+                child: Container(
+                  width: _avatarSize,
+                  height: _avatarSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.color.withValues(
+                      alpha: _peak(
+                        t,
+                        BirdyMotion.glowPeakAt,
+                        BirdyMotion.tintMaxOpacity,
+                      ),
+                    ),
+                    border: Border.all(
+                      color: widget.color.withValues(
+                        alpha: _peak(
+                          t,
+                          BirdyMotion.ringPeakAt,
+                          BirdyMotion.ringPeakOpacity,
+                        ),
+                      ),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        bird,
+        BirdyConfetti.burst(
+          colors: widget.confetti,
+          delay: BirdyMotion.firstEncounterConfettiDelay,
+        ),
       ],
     );
   }
@@ -581,8 +758,8 @@ class _RingState extends State<_Ring> with SingleTickerProviderStateMixin {
               child: Transform.scale(
                 scale: 1 + 0.35 * t,
                 child: Container(
-                  width: 112,
-                  height: 112,
+                  width: _avatarSize,
+                  height: _avatarSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: BirdyBrand.oriole, width: 2),

@@ -2,12 +2,12 @@
 /// is an authorized exception to DESIGN.md's restraint rules (slight
 /// bounce, loops, confetti, effects over 500 ms). Every effect here stops
 /// with reduced motion ([BirdyMotion.reduced]): the widgets show their
-/// final, still state.
+/// final, still state. The confetti are the shared `BirdyConfetti`
+/// (lib/fork/design/widgets/birdy_confetti.dart).
 library;
 
 import 'dart:math' as math;
 
-import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
@@ -60,18 +60,6 @@ abstract final class QuizMotion {
   static const Duration newTier = Duration(milliseconds: 400);
   static const Duration newTierDelay = Duration(milliseconds: 900);
   static const Duration knob = Duration(milliseconds: 180);
-
-  /// Confetti: emission window (a single burst), particle count, and when
-  /// the particles fade out (quiz-fx.js: 1.9 → 2.3 s, rain 4.2 → 4.6 s).
-  static const Duration confetti = Duration(milliseconds: 300);
-  static const int burstParticles = 110;
-  static const int rainParticles = 132;
-  static const Duration burstLife = Duration(milliseconds: 2300);
-  static const Duration rainLife = Duration(milliseconds: 4600);
-  static const Duration confettiFade = Duration(milliseconds: 400);
-
-  /// The rain falls from three points across the top.
-  static const List<double> rainSpots = [1 / 6, 1 / 2, 5 / 6];
 }
 
 /// Value at [t] (0 to 1) of keyframes [values] at [stops], [curve] applied
@@ -608,84 +596,4 @@ class _RaysPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RaysPainter oldDelegate) => oldDelegate.color != color;
-}
-
-/// Confetti of the quiz: a [burst] from a tapped card, or a [rain] over
-/// the result. Never built with reduced motion.
-class QuizConfetti extends StatelessWidget {
-  const QuizConfetti.burst({
-    super.key,
-    required this.controller,
-    required this.colors,
-  }) : rain = false;
-
-  const QuizConfetti.rain({
-    super.key,
-    required this.controller,
-    this.colors = BirdyQuizColors.rain,
-  }) : rain = true;
-
-  final ConfettiController controller;
-  final List<Color> colors;
-  final bool rain;
-
-  static final math.Random _random = math.Random();
-
-  /// Mostly rectangles, 30 % dots (quiz-fx.js).
-  static Path _shape(Size size) {
-    if (_random.nextDouble() < 0.3) {
-      final r = size.height / 1.6;
-      return Path()..addOval(Rect.fromCircle(center: Offset.zero, radius: r));
-    }
-    return Path()..addRect(
-      Rect.fromCenter(
-        center: Offset.zero,
-        width: size.width,
-        height: size.height,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final life = rain ? QuizMotion.rainLife : QuizMotion.burstLife;
-    final fadeFrom =
-        1 - QuizMotion.confettiFade.inMilliseconds / life.inMilliseconds;
-    return IgnorePointer(
-      child: QuizOnce(
-        duration: life,
-        builder:
-            (context, t, child) => Opacity(
-              opacity: quizKeyframes(
-                t,
-                [0, fadeFrom, 1],
-                const [1, 1, 0],
-                Curves.linear,
-              ),
-              child: child,
-            ),
-        child: _particles(),
-      ),
-    );
-  }
-
-  Widget _particles() => ConfettiWidget(
-    confettiController: controller,
-    blastDirectionality: BlastDirectionality.explosive,
-    emissionFrequency: 0,
-    numberOfParticles:
-        rain
-            ? QuizMotion.rainParticles ~/ QuizMotion.rainSpots.length
-            : QuizMotion.burstParticles,
-    minBlastForce: rain ? 4 : 12,
-    maxBlastForce: rain ? 14 : 34,
-    gravity: rain ? 0.08 : 0.3,
-    particleDrag: 0.05,
-    minimumSize: const Size(6, 4),
-    maximumSize: const Size(11, 7),
-    colors: colors,
-    shouldLoop: false,
-    pauseEmissionOnLowFrameRate: false,
-    createParticlePath: _shape,
-  );
 }
