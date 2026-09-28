@@ -1618,6 +1618,7 @@
   "forkNotebookToDiscoverLabel": "à découvrir",
   "forkNotebookRareLabel": "{count, plural, =1{oiseau rare} other{oiseaux rares}}",
   "forkNotebookLoading": "Chargement du carnet",
+  "forkProfileLoading": "Chargement du profil",
   "forkProfileCaption": "{species} espèces · série de {streak} jours · record {record}",
   "forkMapTitle": "Ma carte",
   "forkMapCaption": "Tes contacts sur {period} · {places, plural, =1{1 lieu} other{{places} lieux}}"

@@ -5754,6 +5754,8 @@
   "@forkNotebookRareLabel": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"count": {"type": "int"}}},
   "forkNotebookLoading": "Loading the notebook",
   "@forkNotebookLoading": {"description": "BirdyGo fork: notebook loading skeleton (fix/j6f-b)."},
+  "forkProfileLoading": "Loading the profile",
+  "@forkProfileLoading": {"description": "BirdyGo fork: profile loading skeleton (J6f)."},
   "forkProfileCaption": "{species} species · {streak}-day streak · record {record}",
   "@forkProfileCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"species": {"type": "int"}, "streak": {"type": "int"}, "record": {"type": "int"}}},
   "forkMapTitle": "My map",
