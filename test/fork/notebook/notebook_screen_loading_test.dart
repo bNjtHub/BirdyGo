@@ -12,6 +12,8 @@ import 'package:birdnet_live/features/inference/geo_abundance.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_block.dart'
+    show BirdyProgressRing;
 import 'package:birdnet_live/fork/notebook/notebook_loader.dart';
 import 'package:birdnet_live/fork/notebook/notebook_model.dart';
 import 'package:birdnet_live/fork/notebook/notebook_screen.dart';
@@ -38,7 +40,10 @@ Future<void> _loadRealFonts() async {
   }
 
   await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load('AtkinsonHyperlegibleNext', 'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf');
+  await load(
+    'AtkinsonHyperlegibleNext',
+    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
+  );
 }
 
 /// `heard()` and `expected()` resolve only when their completer is told to,
@@ -76,7 +81,8 @@ class _PendingIndex extends ObservationIndexService {
     : super(repository: SessionRepository(), prefs: prefs);
 
   @override
-  Future<ObservationIndex> ensureReady() => Completer<ObservationIndex>().future;
+  Future<ObservationIndex> ensureReady() =>
+      Completer<ObservationIndex>().future;
 }
 
 // Fake scientific names, unknown to the real (bundled) taxonomy: `nameOf`
@@ -147,18 +153,6 @@ class _Snapshot {
   }
 }
 
-/// Absolute Y of `finder`'s alphabetic baseline (its `RenderParagraph`'s
-/// distance-to-baseline, plus its own top).
-double _baselineY(WidgetTester tester, Finder finder) {
-  final renderObject = tester.renderObject(finder);
-  final paragraph = renderObject as RenderParagraph;
-  final distance = paragraph.computeDistanceToActualBaseline(
-    TextBaseline.alphabetic,
-  );
-  expect(distance, isNotNull, reason: 'no baseline for $finder');
-  return tester.getTopLeft(finder).dy + distance;
-}
-
 void main() {
   setUpAll(_loadRealFonts);
 
@@ -182,7 +176,9 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           notebookLoaderProvider.overrideWithValue(loader),
-          taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
           effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
           observationIndexServiceProvider.overrideWith(
             (ref) => _PendingIndex(prefs),
@@ -277,44 +273,51 @@ void main() {
   );
 
   testWidgets(
-    'the big number and its caption share a baseline, loaded and while '
-    'the skeleton is up',
+    'the found count sits in the middle of the progress ring, loaded and '
+    'while the skeleton is up',
     (tester) async {
       await pump(tester);
       await tester.pump();
-      // While loading, both sides of the row are skeletons; they still sit
-      // on the row's shared baseline (built from real `Text` glyphs, just
+      final block = find.byKey(const ValueKey('notebook-progress-block'));
+      // While loading, the ring and the caption are skeletons (real glyphs
       // painted invisible over a filled background).
-      final numberSkeleton = find.descendant(
-        of: find.byKey(const ValueKey('notebook-progress-block')),
-        matching: find.byWidgetPredicate(
-          (w) => w is Text && w.style?.color == Colors.transparent,
+      expect(
+        find.descendant(
+          of: block,
+          matching: find.byWidgetPredicate(
+            (w) => w is Text && w.style?.color == Colors.transparent,
+          ),
         ),
+        findsWidgets,
       );
-      expect(numberSkeleton, findsWidgets);
 
       loader.resolveHeard();
       loader.resolveExpected();
       await tester.pumpAndSettle();
 
-      final number = find.descendant(
-        of: find.byKey(const ValueKey('notebook-progress-block')),
-        matching: find.text('1'),
+      final ring = find.descendant(
+        of: block,
+        matching: find.byType(BirdyProgressRing),
       );
-      final caption = find.descendant(
-        of: find.byKey(const ValueKey('notebook-progress-block')),
-        matching: find.textContaining('sur 2 espèces'),
+      expect(ring, findsOneWidget);
+      final number = find.descendant(of: ring, matching: find.text('1'));
+      expect(number, findsOneWidget);
+      expect(
+        tester.getCenter(number).dx,
+        closeTo(tester.getCenter(ring).dx, 0.5),
       );
       expect(
-        _baselineY(tester, number),
-        closeTo(_baselineY(tester, caption), 0.5),
+        tester.getCenter(number).dy,
+        closeTo(tester.getCenter(ring).dy, 0.5),
+      );
+      expect(
+        find.bySemanticsLabel('1 sur 2 espèces attendues trouvées'),
+        findsOneWidget,
       );
     },
   );
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     await pump(tester, reducedMotion: true);
     await tester.pump();
     final before = tester.getRect(

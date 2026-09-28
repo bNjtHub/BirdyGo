@@ -538,6 +538,9 @@ abstract final class BirdySizes {
   /// Ring of the home level block (J6g-b), the Profil ring's little sibling.
   static const double homeLevelRing = 72;
 
+  /// Ring of the notebook progress block (J6g-b).
+  static const double notebookRing = 88;
+
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
 

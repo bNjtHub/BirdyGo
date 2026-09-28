@@ -8,6 +8,7 @@ import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
 import '../species_tint.dart';
 import 'dashed_border.dart';
+import 'pressable.dart';
 
 enum _CardVariant { tinted, mystery, toConfirm }
 
@@ -163,7 +164,8 @@ class SpeciesCard extends StatelessWidget {
         child: card,
       );
     }
-    return card;
+    // Tactile: the tile shrinks a little under the finger (J6g-b).
+    return onTap == null ? card : Pressable(child: card);
   }
 }
 
