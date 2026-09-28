@@ -4,6 +4,7 @@ import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart';
 import 'package:birdnet_live/fork/game/streak.dart';
+import 'package:birdnet_live/fork/game/streak_dots.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +72,21 @@ void main() {
   ) async {
     await pump(tester);
     expect(find.text('Sentinelle des haies'), findsWidgets);
+    // J6f-b: the status name on the card wraps up to 2 lines instead of
+    // being cut with an ellipsis on 1 line (« Sentinelle des … »).
+    expect(
+      tester
+          .widget<Text>(
+            find
+                .descendant(
+                  of: find.byKey(const ValueKey('profile-status-card')),
+                  matching: find.text('Sentinelle des haies'),
+                )
+                .first,
+          )
+          .maxLines,
+      2,
+    );
     expect(find.text('24 espèces découvertes'), findsOneWidget);
     expect(
       find.text('Encore 11 espèces pour devenir Oreille de chouette'),
@@ -88,6 +104,10 @@ void main() {
     );
     expect(find.text('Série : 9 jours'), findsOneWidget);
     expect(find.text('Record : 9 jours'), findsOneWidget);
+    // J6f-b: the série block now shows the last 7 days with the shared
+    // `StreakDots` widget (same look as the home série block), not the
+    // old 14-day calendar.
+    expect(find.byType(StreakDots), findsOneWidget);
 
     await tester.scrollUntilVisible(find.text('Les mésanges'), 200);
     for (final name in [

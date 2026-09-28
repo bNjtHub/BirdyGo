@@ -15,6 +15,8 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/species_card.dart' show twoLineTextHeight;
+import '../game/streak_dots.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_config.dart';
@@ -226,9 +228,20 @@ class _StatusCardSkeletonBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  BirdySkeleton.text(
-                    nameStyle,
-                    placeholder: '000000000000000000000',
+                  // Two lines, like the real status name (see
+                  // `_StatusCardRealBody`): a long name (« Sentinelle des
+                  // haies ») must never wrap the real card past what its
+                  // skeleton reserved.
+                  SizedBox(
+                    height: twoLineTextHeight(context, nameStyle),
+                    child: Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: BirdySkeleton.text(
+                        nameStyle,
+                        placeholder: '000000000000000000000',
+                        maxLines: 2,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: BirdySpace.xs),
                   BirdySkeleton.text(
@@ -293,15 +306,26 @@ class _StatusCardRealBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // One line, truncated if need be: same reason as the
-                  // caption below.
-                  Text(
-                    status == null
-                        ? l10n.forkStatusNone
-                        : statusName(l10n, status),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: BirdyText.title.copyWith(color: c.text1),
+                  // Up to 2 lines: a long status name (« Sentinelle des
+                  // haies ») was cut with an ellipsis on one line; the
+                  // skeleton reserves the same fixed 2-line height (see
+                  // `_StatusCardSkeletonBody`), so nothing shifts either way.
+                  SizedBox(
+                    height: twoLineTextHeight(
+                      context,
+                      BirdyText.title.copyWith(color: c.text1),
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: Text(
+                        status == null
+                            ? l10n.forkStatusNone
+                            : statusName(l10n, status),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: BirdyText.title.copyWith(color: c.text1),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: BirdySpace.xs),
                   Text(
@@ -403,8 +427,10 @@ class _LadderSkeleton extends StatelessWidget {
   }
 }
 
-/// Real body of [_StreakCard] (title, record, 14-day grid, notes), split out
-/// so the loading state can share the exact same [BirdyBlock] shell.
+/// Real body of [_StreakCard] (title, record, the last 7 days), split out
+/// so the loading state can share the exact same [BirdyBlock] shell. The
+/// 7-day dot strip is [StreakDots] (J6f-b), shared with the home série
+/// block so both show the exact same look.
 class _StreakCardBody extends StatelessWidget {
   const _StreakCardBody({super.key, required this.streak});
 
@@ -415,7 +441,6 @@ class _StreakCardBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final localeName = Localizations.localeOf(context).toString();
-    final weekday = DateFormat('EEEEE', localeName);
     final dateLabel = DateFormat.MMMMEEEEd(localeName);
     final caption = BirdyText.caption.copyWith(
       color: c.text2,
@@ -437,50 +462,14 @@ class _StreakCardBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: BirdySpace.m),
-        Row(
-          children: [
-            for (final day in streak.calendar)
-              Expanded(
-                child: Semantics(
-                  label:
-                      '${dateLabel.format(day.date)}, ${switch (day.state) {
-                        StreakDayState.listened => l10n.forkStreakDayListened,
-                        StreakDayState.rest => l10n.forkStreakDayRest,
-                        StreakDayState.missed => l10n.forkStreakDayMissed,
-                        StreakDayState.open => l10n.forkStreakDayOpen,
-                      }}',
-                  child: ExcludeSemantics(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        children: [
-                          Text(
-                            weekday.format(day.date).toUpperCase(),
-                            style: caption,
-                          ),
-                          const SizedBox(height: BirdySpace.xs),
-                          _DayDot(day: day),
-                          const SizedBox(height: BirdySpace.xs),
-                          Text('${day.date.day}', style: caption),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        StreakDots(
+          days: lastSevenDays(streak),
+          localeName: localeName,
+          dayLabel:
+              (day) =>
+                  '${dateLabel.format(day.date)}, ${day.state == StreakDayState.listened ? l10n.forkStreakDayListened : l10n.forkStreakDayMissed}',
         ),
         const SizedBox(height: BirdySpace.m),
-        // Capped, like the status card's caption above: its skeleton must
-        // reserve a fixed number of lines, not however many this sentence
-        // happens to wrap to at the current text scale.
-        Text(
-          l10n.forkStreakRestNote,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: caption,
-        ),
-        const SizedBox(height: BirdySpace.xs),
         Text(
           l10n.forkStreakRule,
           maxLines: 1,
@@ -492,8 +481,8 @@ class _StreakCardBody extends StatelessWidget {
   }
 }
 
-/// Same shape as [_StreakCardBody]: title/record line, 14 skeleton dots,
-/// two note lines.
+/// Same shape as [_StreakCardBody]: title/record line, the 7 skeleton
+/// dots, one note line.
 class _StreakCardSkeletonBody extends StatelessWidget {
   const _StreakCardSkeletonBody({super.key});
 
@@ -501,10 +490,6 @@ class _StreakCardSkeletonBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final caption = BirdyText.caption.copyWith(color: c.text2);
-    final weekday = DateFormat(
-      'EEEEE',
-      Localizations.localeOf(context).toString(),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -521,40 +506,15 @@ class _StreakCardSkeletonBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: BirdySpace.m),
-        // The 14 dates and which one is today do not depend on the loaded
-        // game facts (only the per-day state does): shown for real, right
-        // from this skeleton, each `FittedBox` cell is pixel-identical to
+        // The 7 dates and which one is today do not depend on the loaded
+        // game facts (only which ones were listened to does): shown for
+        // real, right from this skeleton, each cell is pixel-identical to
         // its loaded self, only its dot's fill still a placeholder.
-        Row(
-          children: [
-            for (final day in _skeletonCalendar())
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    children: [
-                      Text(
-                        weekday.format(day.date).toUpperCase(),
-                        style: caption,
-                      ),
-                      const SizedBox(height: BirdySpace.xs),
-                      _DayDotSkeleton(isToday: day.isToday),
-                      const SizedBox(height: BirdySpace.xs),
-                      Text('${day.date.day}', style: caption),
-                    ],
-                  ),
-                ),
-              ),
-          ],
+        StreakDotsSkeleton(
+          days: _skeletonWeek(),
+          localeName: Localizations.localeOf(context).toString(),
         ),
         const SizedBox(height: BirdySpace.m),
-        BirdySkeleton.text(
-          caption,
-          placeholder:
-              '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-          maxLines: 2,
-        ),
-        const SizedBox(height: BirdySpace.xs),
         BirdySkeleton.text(
           caption,
           placeholder: '0000000000000000000000000000',
@@ -563,6 +523,14 @@ class _StreakCardSkeletonBody extends StatelessWidget {
     );
   }
 }
+
+/// The last 7 days shown while the streak facts are still loading: dates
+/// and which one is today come from the clock alone, not from the loaded
+/// data, so they can be exact from the first frame ([computeStreak] with
+/// nothing listened yet gives the same 7-day window [_StreakCardBody] will
+/// later show, just with every day unresolved).
+List<StreakDay> _skeletonWeek() =>
+    lastSevenDays(computeStreak(const {}, DateTime.now()));
 
 /// Same 4-column grid as [_Badges], filled with skeleton tiles at the same
 /// tones, one per [BadgeKind] (8, so 2 rows).
@@ -839,110 +807,6 @@ class _Ladder extends StatelessWidget {
       ],
     );
   }
-}
-
-class _DayDot extends StatelessWidget {
-  const _DayDot({required this.day});
-
-  final StreakDay day;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    const size = BirdySizes.dayDot;
-    final Widget dot = switch (day.state) {
-      StreakDayState.listened => Container(
-        width: size,
-        height: size,
-        decoration: const BoxDecoration(
-          color: BirdyBrand.oriole,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(AppIcons.check, size: 10, color: BirdyBrand.ink),
-      ),
-      StreakDayState.rest => CustomPaint(
-        size: const Size.square(size),
-        painter: _DashedCircle(BirdyBrand.oriole),
-      ),
-      StreakDayState.missed => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: c.line, shape: BoxShape.circle),
-      ),
-      StreakDayState.open => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: c.borderStrong, width: 1.5),
-        ),
-      ),
-    };
-    if (!day.isToday) return dot;
-    return Container(
-      padding: const EdgeInsets.all(1.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: c.text1, width: 1.5),
-      ),
-      child: dot,
-    );
-  }
-}
-
-/// The 14 calendar days shown while the game facts (streak included) are
-/// still loading: dates and which one is today come from the clock alone,
-/// not from the loaded data, so they can be exact from the first frame
-/// (`computeStreak` with nothing listened yet gives the same calendar shape
-/// `_StreakCardBody` will later show, just with every day unresolved).
-List<StreakDay> _skeletonCalendar() =>
-    computeStreak(const {}, DateTime.now()).calendar;
-
-/// Same outer size as [_DayDot] (including its "today" ring), filled with a
-/// skeleton placeholder instead of the day's real state.
-class _DayDotSkeleton extends StatelessWidget {
-  const _DayDotSkeleton({required this.isToday});
-
-  final bool isToday;
-
-  @override
-  Widget build(BuildContext context) {
-    const size = BirdySizes.dayDot;
-    final dot = BirdySkeleton.box(width: size, height: size, radius: size / 2);
-    if (!isToday) return dot;
-    return Container(
-      padding: const EdgeInsets.all(1.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.transparent, width: 1.5),
-      ),
-      child: dot,
-    );
-  }
-}
-
-class _DashedCircle extends CustomPainter {
-  const _DashedCircle(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5;
-    final rect = (Offset.zero & size).deflate(1);
-    const dashes = 10;
-    const sweep = 2 * 3.141592653589793 / dashes;
-    for (var i = 0; i < dashes; i++) {
-      canvas.drawArc(rect, i * sweep, sweep * 0.55, false, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedCircle old) => old.color != color;
 }
 
 /// Tones of the badge tiles (J6f), in turn so neighbours never share one.
