@@ -169,6 +169,13 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   une écoute Live.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
+- Seconde exception, plus discrète : le logo de l'écoute (J6f, `lib/fork/live/live_header.dart`
+  `_LiveLogo`, `BirdyGoLogoPainter`). Il remplace le point vivant qui pulsait ; tant que l'écoute
+  est active, ses quatre barres d'aile oscillent seules, comme un petit vumètre, décalées entre
+  elles, calmes (courbe standard, jamais de rebond, période `BirdyMotion.listeningLevelPeriod`,
+  1,3 s) ; l'oiseau ne bouge jamais. En pause, les barres se figent à une longueur moyenne. Hors
+  écoute ou animations réduites : le logo plein, immobile. Une seule `AnimationController`, un
+  seul `CustomPainter` (`repaint: level`), aucune reconstruction de l'en-tête à chaque image.
 
 ## Mise en œuvre (J6a)
 
@@ -649,23 +656,34 @@ Accueil
   pas encore trouvées. Conseil d'une ligne sur `orioleContainer` en bas.
 - L'état s'efface en 150 ms quand la première espèce entre (rien sous animations réduites). Sans
   géomodèle : titre et conseil seulement. Une écoute d'enregistrement garde le carrousel d'astuces.
-- En-tête : retour, point vivant, statut et ligne de lieu en caption dessous (cache de géocodage ou
-  OSM avec accord, jamais de demande), puis un seul bouton rond de 48 dp « Options d'écoute » (style
-  `BirdyIconButton`, le menu ⋮, le bouton « i » et la pilule de mode ont disparu). Statut et lieu
-  prennent toute la largeur restante et ne s'ellipsent qu'en dernier recours (320 dp à 130 %). Le
-  mode actif reste visible dans le statut : « En écoute · Vent », « En écoute · Personnalisé »,
-  rien de plus en Normal. Les moments (Première fois, Oiseau rare) gardent l'en-tête et ce bouton.
+- En-tête : retour, le logo BirdyGo (`_LiveLogo`, voir Animations) à la place de l'ancien point
+  vivant, statut et ligne de lieu en caption dessous (cache de géocodage ou OSM avec accord, jamais
+  de demande), puis un seul bouton rond de 48 dp « Options d'écoute » (style `BirdyIconButton`, le
+  menu ⋮, le bouton « i » et la pilule de mode ont disparu). Statut et lieu prennent toute la
+  largeur restante et ne s'ellipsent qu'en dernier recours (320 dp à 130 %). Le mode actif reste
+  toujours visible dans le statut, y compris Normal : « En écoute · Vent », « En écoute · Normal »,
+  « En écoute · Personnalisé », son mot et son icône (petite, avant le mot) dans la couleur du mode.
+  Les moments (Première fois, Oiseau rare) gardent l'en-tête et ce bouton.
 
 Modes d'écoute (`lib/fork/listening_mode/`)
-- Bouton « Options d'écoute » de l'en-tête (`lib/fork/live/listening_options.dart`) : icône du
-  mode actif (vent, boost, ville, réglage pour Personnalisé), icône neutre « tune » en Normal.
-  Lecteur d'écran : « Options d'écoute, mode Vent ». Il ouvre une seule feuille : d'abord la
-  section « Conditions d'écoute » (4 options d'une phrase, 3 sans Ville, l'option choisie sur
-  surface2 avec contour accentText et coche), puis un trait et trois lignes de 48 dp :
+- Chaque mode a sa couleur (`ListeningModeColors`, `lib/fork/design/birdy_tokens.dart`), distincte
+  en teinte et en clarté, à 4,5:1 au moins sur le fond sombre de l'écoute et sur les surfaces de la
+  feuille, comme sur leurs équivalents du thème clair (test de contraste) : Normal reprend
+  `accentText` (Martin-pêcheur), Vent un vert proche de Lichen, Boost reprend `orioleText` (Loriot),
+  Ville un rose. Le mot et l'icône du mode sont toujours dans cette couleur, dans le statut, dans le
+  bouton « Options d'écoute » et dans la feuille des modes ; « Personnalisé » reste en `text2`
+  neutre.
+- Bouton « Options d'écoute » de l'en-tête (`lib/fork/live/listening_options.dart`) : icône et
+  couleur du mode actif (vent, boost, ville, réglage pour Personnalisé), icône neutre « tune » en
+  Normal (mais dans la couleur de Normal). Lecteur d'écran : « Options d'écoute, mode Vent ». Il
+  ouvre une seule feuille : d'abord la section « Conditions d'écoute » (4 options d'une phrase, 3
+  sans Ville, chacune avec son icône et son nom dans sa couleur ; l'option choisie garde son
+  contour accentText et sa coche, sans se recolorer), puis un trait et trois lignes de 48 dp :
   « À quel point l'app est sûre » (chevron, ouvre la feuille des niveaux par-dessus, retour à la
   feuille des options), « Aide du mode En direct » et « Paramètres » (ferment la feuille puis
   ouvrent l'aide ou les réglages). Un appui sur un mode l'applique sans couper l'écoute, ferme la
-  feuille, et une snackbar confirme « Mode Vent activé ». Le dernier mode est gardé.
+  feuille, et une snackbar confirme « Mode Vent activé » avec l'icône du mode dans sa couleur. Le
+  dernier mode est gardé.
 - Normal : réglages par défaut. Vent : passe-haut 250 Hz (−2 dB au plus à 400 Hz, chouettes et
   pigeons passent). Boost : gain ×2 et passe-haut 120 Hz. Ville : réduction des bruits continus
   (trames de 16 ms, bruit de fond appris en 1,5 s, −15 dB au plus, retard 16 ms, environ 0,3 % du

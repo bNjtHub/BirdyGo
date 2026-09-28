@@ -1,6 +1,6 @@
 /// « Options d'écoute » of the live header (J6f): one round button whose icon
-/// is the active listening mode, and the sheet it opens (listening modes,
-/// what the levels mean, help, settings).
+/// and color are the active listening mode's, and the sheet it opens
+/// (listening modes, what the levels mean, help, settings).
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -38,6 +38,7 @@ class ListeningOptionsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     final label = l10n.forkLiveOptionsButton(listeningModeLabel(l10n, mode));
     // One node read « Options d'écoute, mode Vent », as a button.
     return Semantics(
@@ -48,6 +49,7 @@ class ListeningOptionsButton extends StatelessWidget {
       excludeSemantics: true,
       child: BirdyIconButton(
         icon: listeningOptionsIcon(mode),
+        iconColor: listeningModeColor(c, mode),
         semanticLabel: label,
         onPressed: onPressed,
       ),

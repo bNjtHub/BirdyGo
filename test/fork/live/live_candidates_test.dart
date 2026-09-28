@@ -9,6 +9,7 @@ import 'package:birdnet_live/features/inference/species_filter.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/live/live_candidates.dart';
+import 'package:birdnet_live/fork/live/live_control_bar.dart';
 import 'package:birdnet_live/fork/live/live_header.dart';
 import 'package:birdnet_live/fork/live/live_table.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
@@ -227,7 +228,7 @@ void main() {
                               analysing
                                   ? l10n.forkLiveAnalysing
                                   : l10n.forkLiveListening,
-                          live: true,
+                          phase: LiveControlPhase.active,
                           stats: LiveStats.of(entries),
                           elapsed: () => Duration.zero,
                           expanded: false,
@@ -243,8 +244,14 @@ void main() {
             ),
           );
 
+      // The status line's `Text.rich` embeds the mode icon as a `WidgetSpan`
+      // placeholder character (J6f): match its semantics label instead.
+      Text statusText() => tester
+          .widgetList<Text>(find.byType(Text))
+          .firstWhere((t) => t.textSpan != null);
+
       await pump(const [], false);
-      expect(find.text('En écoute'), findsOneWidget);
+      expect(statusText().semanticsLabel, 'En écoute · Normal');
       for (final c in cycles) {
         await pump(
           buildLiveTable(
@@ -258,13 +265,13 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 400));
         if (c == cycles.first) {
-          expect(find.text('Analyse…'), findsOneWidget);
+          expect(statusText().semanticsLabel, 'Analyse… · Normal');
           expect(find.text('Turdus merula'), findsNothing, reason: 'no name');
           expect(vibrations, 0, reason: '« Analyse… » never vibrates');
         }
       }
       expect(vibrations, 1);
-      expect(find.text('En écoute'), findsOneWidget);
+      expect(statusText().semanticsLabel, 'En écoute · Normal');
     });
   });
 

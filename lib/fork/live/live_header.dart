@@ -1,7 +1,7 @@
-/// Header of the listening screen (J6c, SPEC.md 9.2; J6f): status (with the
-/// listening mode when it is not Normal) and place, the « Options d'écoute »
-/// button (modes, levels, help, settings), then three stat tiles (duration,
-/// species, contacts).
+/// Header of the listening screen (J6c, SPEC.md 9.2; J6f): the BirdyGo logo,
+/// status (always with the listening mode, coloured with its icon) and
+/// place, the « Options d'écoute » button (modes, levels, help, settings),
+/// then three stat tiles (duration, species, contacts).
 library;
 
 import 'dart:async';
@@ -15,8 +15,10 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../home/birdygo_logo.dart';
 import '../listening_mode/listening_mode.dart';
 import 'listening_options.dart';
+import 'live_control_bar.dart';
 import 'live_table_model.dart';
 
 /// « 12:47 », or « 1:02:47 » after an hour.
@@ -31,7 +33,7 @@ class LiveHeader extends StatelessWidget {
   const LiveHeader({
     super.key,
     required this.statusText,
-    required this.live,
+    required this.phase,
     required this.stats,
     required this.elapsed,
     required this.expanded,
@@ -45,8 +47,10 @@ class LiveHeader extends StatelessWidget {
   /// « En écoute », « En pause », « Chargement du modèle… ».
   final String statusText;
 
-  /// Listening now: the dot glows.
-  final bool live;
+  /// Drives the logo (J6f): only its wing bars move, and only while
+  /// [LiveControlPhase.active] — frozen mid-length while
+  /// [LiveControlPhase.paused], full and still otherwise.
+  final LiveControlPhase phase;
 
   final LiveStats stats;
 
@@ -64,8 +68,8 @@ class LiveHeader extends StatelessWidget {
   final String? place;
 
   /// Active listening mode; null when the Settings sliders were moved by
-  /// hand (« Personnalisé »). Anything but Normal follows the status
-  /// (« En écoute · Vent ») and gives its icon to the options button.
+  /// hand (« Personnalisé »). Always shown in the status, coloured with its
+  /// icon (« En écoute · Vent »), and given to the options button.
   final ListeningMode? listeningMode;
 
   /// Opens the « Options d'écoute » sheet: modes, levels, help, settings.
@@ -78,13 +82,7 @@ class LiveHeader extends StatelessWidget {
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
     final tiles = showTiles && !expanded;
-    final status =
-        listeningMode == ListeningMode.normal
-            ? statusText
-            : l10n.forkLiveStatusWithMode(
-              statusText,
-              listeningModeLabel(l10n, listeningMode),
-            );
+    final running = phase == LiveControlPhase.active;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BirdySpace.gutterDark,
@@ -114,11 +112,12 @@ class LiveHeader extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          _LiveDot(live: live),
+                          _LiveLogo(phase: phase),
                           const SizedBox(width: BirdySpace.s),
                           Expanded(
                             child: _StatusText(
-                              text: status,
+                              status: statusText,
+                              mode: listeningMode,
                               style: BirdyText.label.copyWith(color: c.text1),
                             ),
                           ),
@@ -157,7 +156,7 @@ class LiveHeader extends StatelessWidget {
                 children: [
                   Expanded(
                     child: StatTile(
-                      value: _ElapsedText(elapsed: elapsed, running: live),
+                      value: _ElapsedText(elapsed: elapsed, running: running),
                       label: l10n.forkLiveDuration,
                     ),
                   ),
@@ -191,30 +190,69 @@ class LiveHeader extends StatelessWidget {
   }
 }
 
-class _LiveDot extends StatelessWidget {
-  const _LiveDot({required this.live});
+/// BirdyGo mark next to the status (J6f), replacing the pulsing dot. Only
+/// its four wing bars move, like a small level meter, and only while
+/// [LiveControlPhase.active]; the bird itself never moves. Paused: bars
+/// frozen at a mid length. Idle or reduced motion: the full static logo.
+/// One [AnimationController], repainted through [BirdyGoLogoPainter]'s own
+/// `repaint` listenable — the header around it never rebuilds per frame.
+class _LiveLogo extends StatefulWidget {
+  const _LiveLogo({required this.phase});
 
-  final bool live;
+  final LiveControlPhase phase;
+
+  @override
+  State<_LiveLogo> createState() => _LiveLogoState();
+}
+
+class _LiveLogoState extends State<_LiveLogo>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: BirdyMotion.listeningLevelPeriod,
+  );
+
+  bool _shouldRun(BuildContext context) =>
+      widget.phase == LiveControlPhase.active && !BirdyMotion.reduced(context);
+
+  void _sync() {
+    if (_shouldRun(context)) {
+      if (!_controller.isAnimating) _controller.repeat();
+    } else if (_controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(_LiveLogo old) {
+    super.didUpdateWidget(old);
+    _sync();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    final color = live ? c.accentText : c.text2;
-    return SizedBox.square(
-      dimension: 8,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow:
-              live
-                  ? [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.6),
-                      blurRadius: 6,
-                    ),
-                  ]
-                  : null,
+    final reduced = BirdyMotion.reduced(context);
+    final active = widget.phase == LiveControlPhase.active && !reduced;
+    final paused = widget.phase == LiveControlPhase.paused && !reduced;
+    return RepaintBoundary(
+      child: CustomPaint(
+        size: const Size.square(BirdySizes.liveLogo),
+        painter: BirdyGoLogoPainter(
+          progress: kAlwaysCompleteAnimation,
+          level: active ? _controller : null,
+          frozenLevel: paused ? BirdyGoLogoPainter.pausedBarLevel : null,
         ),
       ),
     );
@@ -224,33 +262,60 @@ class _LiveDot extends StatelessWidget {
 /// Listening time, refreshed every second in this widget only, so the rest
 /// of the screen does not rebuild with the clock.
 /// Status on one line; a new text fades in over the old one, the height
-/// stays that of one line whatever the text (room for « Analyse… »).
+/// stays that of one line whatever the text (room for « Analyse… »). The
+/// listening mode always follows, its word and icon in the mode's color
+/// (J6f); « Personnalisé » stays neutral.
 class _StatusText extends StatelessWidget {
-  const _StatusText({required this.text, required this.style});
+  const _StatusText({
+    required this.status,
+    required this.mode,
+    required this.style,
+  });
 
-  final String text;
+  final String status;
+  final ListeningMode? mode;
   final TextStyle style;
 
   @override
-  Widget build(BuildContext context) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    reverseDuration: BirdyMotion.exit,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    layoutBuilder:
-        (current, previous) => Stack(
-          alignment: AlignmentDirectional.centerStart,
-          children: [...previous, if (current != null) current],
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final modeWord = listeningModeLabel(l10n, mode);
+    final modeColor = listeningModeColor(c, mode);
+    return AnimatedSwitcher(
+      duration: BirdyMotion.enter,
+      reverseDuration: BirdyMotion.exit,
+      switchInCurve: BirdyMotion.standard,
+      switchOutCurve: BirdyMotion.standard,
+      layoutBuilder:
+          (current, previous) => Stack(
+            alignment: AlignmentDirectional.centerStart,
+            children: [...previous, if (current != null) current],
+          ),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: status, style: style),
+            TextSpan(text: ' · ', style: style),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Icon(
+                listeningModeIcon(mode),
+                size: BirdySizes.statusModeIcon,
+                color: modeColor,
+              ),
+            ),
+            TextSpan(text: ' $modeWord', style: style.copyWith(color: modeColor)),
+          ],
         ),
-    child: Text(
-      text,
-      key: ValueKey(text),
-      style: style,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      softWrap: false,
-    ),
-  );
+        key: ValueKey('$status·${mode?.name}'),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        softWrap: false,
+        semanticsLabel: l10n.forkLiveStatusWithMode(status, modeWord),
+      ),
+    );
+  }
 }
 
 class _ElapsedText extends StatefulWidget {

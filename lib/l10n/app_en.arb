@@ -5804,7 +5804,7 @@
   "forkLiveOptionsLevels": "How sure the app is",
   "@forkLiveOptionsLevels": {"description": "BirdyGo fork: listening screen (J6f), options sheet row opening the levels explanation."},
   "forkLiveStatusWithMode": "{status} · {mode}",
-  "@forkLiveStatusWithMode": {"description": "BirdyGo fork: listening screen (J6f), status line with the listening mode when it is not Normal (« En écoute · Vent »).", "placeholders": {"status": {"type": "String"}, "mode": {"type": "String"}}},
+  "@forkLiveStatusWithMode": {"description": "BirdyGo fork: listening screen (J6f), status line always followed by the listening mode, including Normal (« En écoute · Vent », « En écoute · Normal »); also used as the accessible label of the colored, icon-carrying status text.", "placeholders": {"status": {"type": "String"}, "mode": {"type": "String"}}},
   "forkListeningModeTitle": "Listening conditions",
   "@forkListeningModeTitle": {"description": "BirdyGo fork: listening modes (J6f)."},
   "forkListeningModeSubtitle": "Change it anytime: listening goes on, the analysis adapts right away.",

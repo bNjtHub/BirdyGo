@@ -55,7 +55,7 @@ Future<void> applyListeningModeChoice(
         backgroundColor: c.surface3,
         content: Row(
           children: [
-            Icon(mode.icon, size: 20, color: c.accentText),
+            Icon(mode.icon, size: 20, color: listeningModeColor(c, mode)),
             const SizedBox(width: BirdySpace.s),
             Expanded(
               child: Text(
@@ -165,6 +165,7 @@ class _ModeOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
+    final modeColor = listeningModeColor(c, mode);
     final radius = BorderRadius.circular(BirdyRadii.inset);
     return Semantics(
       button: true,
@@ -191,11 +192,9 @@ class _ModeOption extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    mode.icon,
-                    size: 24,
-                    color: selected ? c.accentText : c.text2,
-                  ),
+                  // Always the mode's own color, selected or not: the outline
+                  // and the check already say which one is active (J6f).
+                  Icon(mode.icon, size: 24, color: modeColor),
                   const SizedBox(width: BirdySpace.m),
                   Expanded(
                     child: Column(
@@ -204,7 +203,7 @@ class _ModeOption extends StatelessWidget {
                         Text(
                           listeningModeLabel(l10n, mode),
                           style: BirdyText.bodyCompact.copyWith(
-                            color: c.text1,
+                            color: modeColor,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
