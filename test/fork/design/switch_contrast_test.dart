@@ -26,7 +26,11 @@ void main() {
     final offOutline = switchTheme.trackOutlineColor!.resolve(offStates)!;
 
     test('$mode off switch thumb reaches 3:1', () {
-      expectUiContrast(offThumb, theme.colorScheme.surface, '$mode thumb/surface');
+      expectUiContrast(
+        offThumb,
+        theme.colorScheme.surface,
+        '$mode thumb/surface',
+      );
     });
 
     test('$mode off switch outline reaches 3:1', () {

@@ -60,7 +60,14 @@ class BirdyFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final on = selectedColors ?? BirdyChipColors.tonal(c);
-    final background = selected ? on.background : c.surface1;
+    // Over a map, a translucent fill (tonal is 16 % on the dark theme)
+    // would let the tiles through: floating chips lay it on white/surface1.
+    final background =
+        selected
+            ? (floating
+                ? Color.alphaBlend(on.background, c.surface1)
+                : on.background)
+            : c.surface1;
     final foreground = selected ? on.foreground : c.text1;
     return Semantics(
       button: true,

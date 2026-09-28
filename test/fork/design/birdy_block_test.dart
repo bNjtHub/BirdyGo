@@ -127,6 +127,33 @@ void main() {
     expect(closed, 0);
   });
 
+  for (final dark in [false, true]) {
+    testWidgets('a floating selected chip is opaque over a map (dark: $dark)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          Center(
+            child: BirdyFilterChip(
+              label: 'Ce mois',
+              selected: true,
+              floating: true,
+              onSelected: () {},
+            ),
+          ),
+          dark: dark,
+        ),
+      );
+      final material = tester.widget<Material>(
+        find.descendant(
+          of: find.byType(BirdyFilterChip),
+          matching: find.byType(Material),
+        ),
+      );
+      expect(material.color!.a, 1.0);
+    });
+  }
+
   testWidgets('filter chip: 48 dp, selected state announced', (tester) async {
     var picked = false;
     await tester.pumpWidget(
