@@ -143,6 +143,18 @@ void main() {
     expect(home.toVerify, 0);
   });
 
+  test("sunrise: today's, only with a position", () async {
+    expect(await loader().sunrise(), isNull);
+    final sunrise =
+        await loader(position: (latitude: 46.7, longitude: 1.2)).sunrise();
+    expect(sunrise, isNotNull);
+    final local = sunrise!.toLocal();
+    expect(
+      local.difference(DateTime(now.year, now.month, now.day)).inHours.abs(),
+      lessThan(24),
+    );
+  });
+
   test('no position, no place; no consent, no network', () async {
     expect(await loader().placeName(), isNull);
     expect(

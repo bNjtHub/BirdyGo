@@ -1613,5 +1613,15 @@
   "forkQuizBirdsLabel": "de tes oiseaux",
   "forkQuizRightArticle": "C'est bien {name}",
   "forkQuizWrongArticle": "C'était {name}",
-  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo."
+  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo.",
+  "forkHomeSunrise": "lever du soleil {time}",
+  "forkHomeLastBirdAt": "Dernier oiseau entendu · {when}",
+  "forkHomeStreakDays": "{count, plural, =0{jour de suite} =1{jour de suite} other{jours de suite}}",
+  "forkHomeStreakWeek": "{count, plural, =0{Aucune écoute cette semaine} =1{Écoute 1 jour sur 7 cette semaine} other{Écoute {count} jours sur 7 cette semaine}}",
+  "forkHomeToCheckLabel": "à vérifier",
+  "forkHomeReviewTime": "{count, plural, =1{1 min de revue} other{{count} min de revue}}",
+  "forkHomeTodayTitle": "Aujourd'hui",
+  "forkHomeSpeciesStat": "{count, plural, =0{espèce} =1{espèce} other{espèces}}",
+  "forkDailyGoalLeft": "{count, plural, =0{Objectif atteint} =1{Encore 1 espèce} other{Encore {count} espèces}}",
+  "forkDailyGoalInvite": "Huit oiseaux à trouver près d'ici aujourd'hui."
 }

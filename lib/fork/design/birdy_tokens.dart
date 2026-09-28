@@ -459,13 +459,25 @@ abstract final class BirdySizes {
   /// Day dot of the série (7 per week).
   static const double dayDot = 14;
 
+  /// Outline of a day dot without listening.
+  static const double dayDotStroke = 2;
+
+  /// Small icon in a block's corner (« À vérifier »).
+  static const double blockIcon = 20;
+
   /// Dashed silhouette slot of a species still to find (daily goal block,
   /// empty live state uses [expectedSlot]).
   static const double goalSlot = 36;
+
+  /// Grey species visual inside a [goalSlot].
+  static const double goalSlotVisual = 26;
   static const double expectedSlot = 52;
 
   /// Tinted species card of a scrolling row (home « Aujourd'hui »).
   static const double speciesChipCard = 92;
+
+  /// Species visual of a [speciesChipCard].
+  static const double speciesChipAvatar = 56;
 
   /// Hero block (« Dernier oiseau entendu »): minimum height, decorative
   /// disc behind the bird, and the bird itself.
@@ -491,4 +503,10 @@ abstract final class BirdyAlpha {
 
   /// White track of a bar or ring on a tinted block.
   static const double trackOnTint = 0.8;
+
+  /// Brume track of a bar or ring on a tinted block, dark theme.
+  static const double trackOnTintDark = 0.16;
+
+  /// Outline of a day dot without listening (série block).
+  static const double dayDotOutline = 0.45;
 }

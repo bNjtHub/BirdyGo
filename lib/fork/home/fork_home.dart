@@ -1,11 +1,12 @@
-/// BirdyGo home screen (J6c, fork/maquette/Main.dc.html and SPEC.md 9.1).
+/// BirdyGo home screen (J6f blocks, « App finale » board AppAccueil; first
+/// version J6c, SPEC.md 9.1).
 ///
 /// First tab of the bottom navigation (`ForkShell`, J6e), shown by the
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
-/// geo-model, index). The daily goal is the hero card under the greeting;
-/// série chip, status card and weekly challenge come from the game (J6e);
-/// « Écouter » is the one strong action, pinned above the bottom bar; the
-/// menu keeps every upstream entry.
+/// geo-model, index). Blocks, told apart by their fill: greeting, last bird
+/// hero, goal / série / to-check grid, status, today's species, weekly
+/// challenge. « Écouter » is the one strong action, pinned above the bottom
+/// bar, and starts listening at once; the menu keeps every upstream entry.
 library;
 
 import 'dart:async';
@@ -25,6 +26,7 @@ import '../../features/explore/explore_screen.dart';
 import '../../features/explore/widgets/species_info_overlay.dart';
 import '../../features/file_analysis/file_analysis_screen.dart';
 import '../../features/history/session_library_screen.dart';
+import '../../features/history/widgets/clip_player_sheet.dart';
 import '../../features/home/help_screen.dart';
 import '../../features/live/live_screen.dart';
 import '../../features/live/live_session.dart';
@@ -35,7 +37,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
-import '../daily_goal/daily_goal_card.dart';
+import '../daily_goal/daily_goal_block.dart';
 import '../daily_goal/daily_goal_screen.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
@@ -45,7 +47,6 @@ import '../design/widgets/entrance.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_loader.dart';
-import '../game/game_widgets.dart';
 import '../game/status_celebration.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
@@ -72,6 +73,7 @@ class ForkHome extends ConsumerStatefulWidget {
 class _ForkHomeState extends ConsumerState<ForkHome> {
   HomeSnapshot? _snapshot;
   String? _place;
+  DateTime? _sunrise;
   int _generation = 0;
 
   @override
@@ -94,9 +96,39 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }
 
   Future<void> _loadPlace() async {
-    final place = await ref.read(homeLoaderProvider).placeName();
+    final loader = ref.read(homeLoaderProvider);
+    final sunrise = await loader.sunrise();
+    if (mounted && sunrise != null) setState(() => _sunrise = sunrise);
+    final place = await loader.placeName();
     if (mounted && place != null) setState(() => _place = place);
   }
+
+  /// « Réécouter »: the clip of the last bird, in the shared player sheet.
+  void _replay(LastBird last, String name) {
+    final d = last.detection;
+    showClipPlayerSheet(
+      context,
+      detection: DetectionRecord(
+        scientificName: d.scientificName,
+        commonName: name,
+        confidence: d.confidence,
+        timestamp: d.start,
+        endTimestamp: d.end,
+        audioClipPath: d.clipPath,
+        latitude: d.latitude,
+        longitude: d.longitude,
+        reviewStatus: d.reviewStatus,
+      ),
+    );
+  }
+
+  void _openSpecies(String scientificName, String name) =>
+      SpeciesInfoOverlay.show(
+        context,
+        ref,
+        scientificName: scientificName,
+        commonName: name,
+      );
 
   void _open(Widget screen) => Navigator.of(
     context,
@@ -248,33 +280,77 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final snapshot = _snapshot;
     final last = snapshot?.last;
 
+    String nameOf(String scientificName, String fallback) =>
+        taxonomy?.lookup(scientificName)?.commonNameForLocale(speciesLocale) ??
+        fallback;
+    ImageProvider? imageOf(String scientificName) => switch (taxonomy
+        ?.assetImagePath(scientificName)) {
+      final String path => AssetImage(path),
+      null => null,
+    };
+
     final game = ref.watch(gameProgressProvider).value;
-    final streak = game?.facts.streak.current ?? 0;
-    final topBar = HomeTopBar(
-      onMenu: _showMenu,
-      // No chip without a running série: nothing to lose, nothing shown.
-      streak: streak > 0 ? StreakChip(days: streak, onTap: _openProfile) : null,
-    );
-    // The daily goal is the hero card, right under the greeting.
+    final streak = game?.facts.streak;
+    final toVerify = snapshot?.toVerify ?? 0;
+    final topBar = HomeTopBar(onMenu: _showMenu);
+    final sunrise = _sunrise;
     final head = <(String, Widget)>[
       (
         'greeting',
         HomeGreeting(
           title: homeGreeting(l10n, now),
-          dateLine: homeDateLine(localeName, now, place: _place),
+          dateLine: homeDateLine(
+            localeName,
+            now,
+            place: _place,
+            sunrise: sunrise == null ? null : homeSunrise(l10n, sunrise),
+          ),
         ),
       ),
+      if (last != null)
+        (
+          'last',
+          HomeHero(
+            last: last,
+            name: nameOf(last.scientificName, last.detection.commonName),
+            when: homeHeardWhen(l10n, localeName, last.detection.start, now),
+            image: imageOf(last.scientificName),
+            onTap:
+                () => _openSpecies(
+                  last.scientificName,
+                  nameOf(last.scientificName, last.detection.commonName),
+                ),
+            onReplay:
+                last.clipPath == null
+                    ? null
+                    : () => _replay(
+                      last,
+                      nameOf(last.scientificName, last.detection.commonName),
+                    ),
+          ),
+        ),
       (
-        'daily-goal',
-        DailyGoalCard(onTap: () => _open(const DailyGoalScreen())),
+        'grid',
+        HomeGrid(
+          goal: DailyGoalBlock(onTap: () => _open(const DailyGoalScreen())),
+          // No série block without a running série: nothing to lose.
+          streak:
+              streak != null && streak.current > 0
+                  ? StreakBlock(streak: streak, onTap: _openProfile)
+                  : null,
+          toCheck:
+              toVerify > 0
+                  ? ToCheckBlock(
+                    count: toVerify,
+                    onTap: () => _open(const QuickReviewScreen()),
+                  )
+                  : null,
+        ),
       ),
     ];
     final cards = <(String, Widget)>[
       if (game != null)
-        (
-          'status',
-          StatusCard(progress: game, compact: true, onTap: _openProfile),
-        ),
+        ('status', StatusBlock(progress: game, onTap: _openProfile)),
       if (snapshot != null)
         snapshot.today.isEmpty
             ? (
@@ -285,47 +361,19 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                 body: l10n.forkHomeEmptyDay,
               ),
             )
-            : ('today', DayTiles(today: snapshot.today)),
-      if (last != null)
-        (
-          'last',
-          LastBirdCard(
-            last: last,
-            name:
-                taxonomy
-                    ?.lookup(last.scientificName)
-                    ?.commonNameForLocale(speciesLocale) ??
-                last.detection.commonName,
-            when: homeHeardWhen(l10n, localeName, last.detection.start, now),
-            image: switch (taxonomy?.assetImagePath(last.scientificName)) {
-              final String path => AssetImage(path),
-              null => null,
-            },
-            onTap:
-                () => SpeciesInfoOverlay.show(
-                  context,
-                  ref,
-                  scientificName: last.scientificName,
-                  commonName:
-                      taxonomy
-                          ?.lookup(last.scientificName)
-                          ?.commonNameForLocale(speciesLocale) ??
-                      last.detection.commonName,
-                ),
-          ),
-        ),
+            : (
+              'today',
+              TodayBlock(
+                today: snapshot.today,
+                nameOf: (s) => nameOf(s.scientificName, s.commonName),
+                imageOf: imageOf,
+                onSpecies: (s, name) => _openSpecies(s.scientificName, name),
+              ),
+            ),
       if (game?.facts.challenge case final challenge?)
         (
           'challenge',
           ChallengeCard(challenge: challenge, onStart: _startChallenge),
-        ),
-      if (snapshot != null && snapshot.toVerify > 0)
-        (
-          'verify',
-          ToVerifyCard(
-            count: snapshot.toVerify,
-            onTap: () => _open(const QuickReviewScreen()),
-          ),
         ),
     ];
     final listen = Padding(
@@ -335,7 +383,10 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         BirdySpace.xl,
         BirdySpace.l,
       ),
-      child: ListenButton(onPressed: () => _open(const LiveScreen())),
+      // Straight into listening: the live screen starts on arrival.
+      child: ListenButton(
+        onPressed: () => _open(const LiveScreen(forceAutoStart: true)),
+      ),
     );
 
     return Scaffold(
@@ -391,19 +442,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }) {
     final still = BirdyMotion.reduced(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        BirdySpace.xl,
-        BirdySpace.l,
-        BirdySpace.xl,
-        BirdySpace.l,
-      ),
+      padding: const EdgeInsets.all(BirdySpace.page),
       children: [
         if (topBar != null) topBar,
         for (final (i, (key, block)) in blocks.indexed)
           Padding(
             key: ValueKey('home-$key'),
             padding: EdgeInsets.only(
-              top: i == 0 && topBar == null ? 0 : BirdySpace.m,
+              top: i == 0 && topBar == null ? 0 : BirdySpace.block,
             ),
             child:
                 still || firstIndex + i >= BirdyMotion.staggerMaxItems

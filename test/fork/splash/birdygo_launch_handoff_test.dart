@@ -53,6 +53,9 @@ class _EmptyHome extends Fake implements HomeLoader {
 
   @override
   Future<String?> placeName() async => null;
+
+  @override
+  Future<DateTime?> sunrise() async => null;
 }
 
 class _NoDiskIndex extends ChangeNotifier implements ObservationIndexService {

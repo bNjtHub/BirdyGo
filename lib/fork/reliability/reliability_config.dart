@@ -45,7 +45,18 @@ abstract final class ReliabilityConfig {
 
   /// Live GPS track: fixes less accurate than this (meters) are dropped.
   static const double liveGpsMaxAccuracyMeters = 30;
+
+  /// Home « À vérifier » block (J6f): rough time to review one detection in
+  /// the quick review (listen once, answer), for « 2 min de revue ».
+  static const int reviewSecondsPerDetection = 10;
 }
+
+/// Whole minutes to review [count] detections in the quick review, at least
+/// one when there is anything to review.
+int reviewMinutes(int count) =>
+    count <= 0
+        ? 0
+        : (count * ReliabilityConfig.reviewSecondsPerDetection / 60).ceil();
 
 /// What the geo-model says about a species at a place and week.
 class GeoPresence {

@@ -5,6 +5,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/reverse_geocoding_service.dart';
+import '../../features/aru/aru_schedule.dart';
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../data/observation_index.dart';
@@ -95,6 +96,23 @@ class HomeLoader {
     longitude: d.longitude,
     time: d.start,
   );
+
+  /// Today's sunrise where the phone is (J6f date line), estimated like the
+  /// ARU schedule. Null without a position; never asks for one.
+  Future<DateTime?> sunrise() async {
+    try {
+      final position = await _position();
+      if (position == null) return null;
+      final now = _now();
+      return estimateAruSunTimes(
+        date: DateTime(now.year, now.month, now.day),
+        latitude: position.latitude,
+        longitude: position.longitude,
+      ).sunrise;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Name of the place where the phone is: geocoding cache, or network with
   /// the user's consent. Null without position or offline.
