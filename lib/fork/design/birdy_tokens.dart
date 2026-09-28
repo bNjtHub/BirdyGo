@@ -535,6 +535,9 @@ abstract final class BirdySizes {
   /// Status disc of the status block.
   static const double statusDisc = 52;
 
+  /// Ring of the home level block (J6g-b), the Profil ring's little sibling.
+  static const double homeLevelRing = 72;
+
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
 

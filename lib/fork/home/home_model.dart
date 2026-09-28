@@ -32,6 +32,8 @@ class DaySummary {
     required this.contacts,
     required this.newSpecies,
     this.heard = const [],
+    this.latestSessionId,
+    this.sessionCount = 0,
   });
 
   static const DaySummary empty = DaySummary(
@@ -49,6 +51,14 @@ class DaySummary {
 
   /// Today's species, the most recently heard first.
   final List<DaySpecies> heard;
+
+  /// Session of the most recent detection of the day: the one whose Bilan
+  /// « Aujourd'hui » opens (the Bilan sums up a single session). Null when
+  /// nothing was heard today.
+  final String? latestSessionId;
+
+  /// Sessions with at least one detection today.
+  final int sessionCount;
 
   bool get isEmpty => contacts == 0;
 }
@@ -92,12 +102,20 @@ DaySummary buildDaySummary({
       }
     }
   }
+  IndexedDetection? newest;
+  final sessions = <String>{};
+  for (final d in detections) {
+    sessions.add(d.sessionId);
+    if (newest == null || d.start.isAfter(newest.start)) newest = d;
+  }
   final heard =
       latest.values.toList()..sort((a, b) => b.start.compareTo(a.start));
   return DaySummary(
     species: levels.length,
     contacts: detections.length,
     newSpecies: newSpecies,
+    latestSessionId: newest?.sessionId,
+    sessionCount: sessions.length,
     heard: [
       for (final d in heard)
         DaySpecies(

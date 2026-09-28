@@ -29,6 +29,7 @@ import '../../features/history/session_library_screen.dart';
 import '../../features/history/widgets/clip_player_sheet.dart';
 import '../../features/home/help_screen.dart';
 import '../../features/live/live_screen.dart';
+import '../../features/live/live_providers.dart';
 import '../../features/live/live_session.dart';
 import '../../features/point_count/point_count_setup_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -43,7 +44,6 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
-import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
@@ -58,6 +58,7 @@ import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../shell/fork_shell.dart';
 import '../sound_library/sound_library_screen.dart';
+import '../summary/listening_summary_screen.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
 import 'home_text.dart';
@@ -140,6 +141,35 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   Future<void> _startChallenge() async {
     await ref.read(challengeStoreProvider).start(DateTime.now());
     ref.invalidate(gameProgressProvider);
+  }
+
+  /// « Aujourd'hui »: the Bilan of today's latest listening. The Bilan sums
+  /// up one session, so with several listenings today it opens the most
+  /// recent one (the block says so). The session comes from its saved JSON,
+  /// the source of truth; a session gone since the index was built shows a
+  /// message instead.
+  Future<void> _openTodayBilan(String sessionId) async {
+    final LiveSession? session;
+    try {
+      session = await ref.read(sessionRepositoryProvider).load(sessionId);
+    } catch (_) {
+      if (mounted) _showBilanFailure();
+      return;
+    }
+    if (!mounted) return;
+    if (session == null) {
+      _showBilanFailure();
+      return;
+    }
+    _open(ListeningSummaryScreen(session: session));
+  }
+
+  void _showBilanFailure() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.forkHomeTodayOpenFailed),
+      ),
+    );
   }
 
   /// The Profil tab, or the profile page outside the bottom navigation.
@@ -388,11 +418,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         return (
           'empty',
           _crossFade(
-            BirdyEmptyState.inline(
+            TodayEmptyBlock(
               key: const ValueKey('home-today-empty'),
-              icon: AppIcons.hearing,
-              title: l10n.forkHomeEmptyDayTitle,
-              body: l10n.forkHomeEmptyDay,
+              onListen: () => _open(const LiveScreen(forceAutoStart: true)),
             ),
           ),
         );
@@ -406,6 +434,10 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
             nameOf: (s) => nameOf(s.scientificName, s.commonName),
             imageOf: imageOf,
             onSpecies: (s, name) => _openSpecies(s.scientificName, name),
+            onOpen:
+                snapshot.today.latestSessionId == null
+                    ? null
+                    : () => _openTodayBilan(snapshot.today.latestSessionId!),
           ),
         ),
       );
