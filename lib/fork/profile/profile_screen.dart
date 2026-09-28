@@ -15,6 +15,7 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/species_card.dart' show twoLineTextHeight;
 import '../game/streak_dots.dart';
 import '../game/challenge_card.dart';
@@ -925,10 +926,8 @@ class _Badges extends StatelessWidget {
 
   void _showBadge(BuildContext context, BadgeProgress badge) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
+    showBirdySheet<void>(
       context: context,
-      showDragHandle: true,
-      useSafeArea: true,
       builder: (context) {
         final c = BirdyColors.of(context);
         final next = badge.nextTarget;

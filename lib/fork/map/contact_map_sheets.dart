@@ -16,6 +16,7 @@ import '../data/observation_index.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/clip_play_button.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
@@ -78,11 +79,9 @@ Future<void> showAreaSheet(
   required List<SpeciesInArea> species,
   required String filterSummary,
 }) {
-  return showModalBottomSheet<void>(
+  return showBirdySheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -255,11 +254,9 @@ Future<SpeciesChoice?> showSpeciesPicker(
   BuildContext context, {
   required List<SpeciesTally> tallies,
 }) {
-  return showModalBottomSheet<SpeciesChoice>(
+  return showBirdySheet<SpeciesChoice>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -369,39 +366,35 @@ Future<T?> showChoiceSheet<T>(
   required T selected,
   required String Function(T option) label,
 }) {
-  return showModalBottomSheet<T>(
+  return showBirdySheet<T>(
     context: context,
-    useSafeArea: true,
-    showDragHandle: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
     builder:
-        (context) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+        (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              RadioGroup<T>(
-                groupValue: selected,
-                onChanged: (v) => Navigator.pop(context, v),
-                child: Column(
-                  children: [
-                    for (final o in options)
-                      RadioListTile<T>(value: o, title: Text(label(o))),
-                  ],
-                ),
+            ),
+            RadioGroup<T>(
+              groupValue: selected,
+              onChanged: (v) => Navigator.pop(context, v),
+              child: Column(
+                children: [
+                  for (final o in options)
+                    RadioListTile<T>(value: o, title: Text(label(o))),
+                ],
               ),
-              const SizedBox(height: 8),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
   );
 }

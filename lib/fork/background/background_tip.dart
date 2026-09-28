@@ -15,6 +15,7 @@ import '../../shared/providers/app_providers.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_sheet.dart';
 
 /// Preference set once the tip has been shown.
 const String kBackgroundTipShownKey = 'fork_background_tip_shown';
@@ -30,10 +31,8 @@ Future<void> showBackgroundTipOnce(
   if (prefs.getBool(kBackgroundTipShownKey) ?? false) return;
   await prefs.setBool(kBackgroundTipShownKey, true);
   if (!context.mounted) return;
-  await showModalBottomSheet<void>(
+  await showBirdySheet<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
     isScrollControlled: true,
     builder: (_) => const BackgroundTipSheet(),
   );
@@ -46,44 +45,42 @@ class BackgroundTipSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          BirdySpace.gutter,
-          0,
-          BirdySpace.gutter,
-          BirdySpace.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.forkBackgroundTipTitle,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-            const SizedBox(height: BirdySpace.s),
-            Text(
-              l10n.forkBackgroundTipBody,
-              style: BirdyText.body.copyWith(color: c.text1),
-            ),
-            const SizedBox(height: BirdySpace.l),
-            FilledButton(
-              style: BirdyButtonStyles.primary(context),
-              onPressed: () {
-                Navigator.of(context).pop();
-                openAppSettings();
-              },
-              child: Text(l10n.forkBackgroundTipSettings),
-            ),
-            const SizedBox(height: BirdySpace.s),
-            OutlinedButton(
-              style: BirdyButtonStyles.secondary(context),
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.forkBackgroundTipLater),
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.gutter,
+        0,
+        BirdySpace.gutter,
+        BirdySpace.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.forkBackgroundTipTitle,
+            style: BirdyText.heading.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.s),
+          Text(
+            l10n.forkBackgroundTipBody,
+            style: BirdyText.body.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.l),
+          FilledButton(
+            style: BirdyButtonStyles.primary(context),
+            onPressed: () {
+              Navigator.of(context).pop();
+              openAppSettings();
+            },
+            child: Text(l10n.forkBackgroundTipSettings),
+          ),
+          const SizedBox(height: BirdySpace.s),
+          OutlinedButton(
+            style: BirdyButtonStyles.secondary(context),
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.forkBackgroundTipLater),
+          ),
+        ],
       ),
     );
   }

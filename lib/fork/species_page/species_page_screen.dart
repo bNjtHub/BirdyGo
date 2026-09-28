@@ -25,6 +25,7 @@ import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
@@ -61,10 +62,17 @@ Future<void> showSpeciesPage(
       ),
     );
   }
-  return showModalBottomSheet<void>(
+  return showBirdySheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
+    showDragHandle: false,
+    // The DraggableScrollableSheet below already sizes itself to (nearly)
+    // the full screen height: wrapping it in the helper's usual outer
+    // bottom padding would shrink that available height instead of just
+    // clearing the nav bar. SpeciesPage adds the same inset itself, as
+    // trailing padding inside its own scroll view (species_page_screen.dart
+    // `MediaQuery.viewPaddingOf(context).bottom`).
+    addBottomInset: false,
     clipBehavior: Clip.antiAlias,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
@@ -430,7 +438,11 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                 BirdySpace.gutter,
                 BirdySpace.l,
                 BirdySpace.gutter,
-                BirdySpace.xxxl + MediaQuery.paddingOf(context).bottom,
+                // FORK: viewPaddingOf, not paddingOf — inside a sheet
+                // (showBirdySheet, useSafeArea: true) the ambient padding
+                // does not carry the bottom nav bar inset, only viewPadding
+                // does (J6f-b bugfix).
+                BirdySpace.xxxl + MediaQuery.viewPaddingOf(context).bottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
