@@ -70,7 +70,7 @@ class ChallengeCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: c.tonal,
+                  color: done ? c.oriole : c.tonal,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
