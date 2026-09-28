@@ -18,7 +18,10 @@ import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_card.dart';
@@ -154,7 +157,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
             );
 
     final slivers = <Widget>[
-      SliverToBoxAdapter(child: _titleRow(l10n, c)),
+      SliverToBoxAdapter(child: _header(l10n, c, notebook)),
       if (notebook != null) ...[
         if (notebook.cards.isEmpty)
           SliverFillRemaining(
@@ -166,8 +169,9 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
             ),
           )
         else ...[
-          SliverToBoxAdapter(child: _progressCard(l10n, c, notebook)),
-          SliverToBoxAdapter(child: _filterChips(l10n)),
+          SliverToBoxAdapter(child: _progressBlock(l10n, c, notebook)),
+          SliverToBoxAdapter(child: _countBlocks(l10n, c, notebook)),
+          SliverToBoxAdapter(child: _filterChips(l10n, c)),
           ..._grid(l10n, c, notebook.filtered(_filter)),
         ],
       ],
@@ -184,10 +188,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    BirdySpace.xl,
-                    BirdySpace.l,
-                    BirdySpace.xl,
-                    BirdySpace.xl,
+                    BirdySpace.page,
+                    BirdySpace.page,
+                    BirdySpace.page,
+                    BirdySpace.page,
                   ),
                   sliver: SliverMainAxisGroup(slivers: slivers),
                 ),
@@ -199,81 +203,130 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     );
   }
 
-  Widget _titleRow(AppLocalizations l10n, BirdyColors c) => SizedBox(
-    height: BirdySizes.topBar,
-    child: Row(
-      children: [
-        Expanded(
-          child: Semantics(
-            header: true,
-            child: Text(
-              l10n.forkNotebookTitle,
-              style: BirdyText.title.copyWith(color: c.text1),
+  Widget _header(AppLocalizations l10n, BirdyColors c, Notebook? notebook) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: BirdySpace.block),
+        child: BirdyTabHeader(
+          title: l10n.forkNotebookTitle,
+          caption:
+              notebook == null
+                  ? null
+                  : l10n.forkNotebookDiscovered(notebook.discovered),
+          actions: [
+            BirdyIconButton(
+              icon: AppIcons.leaderboard,
+              semanticLabel: l10n.forkRanking,
+              onPressed: () => _open(const RankingScreen()),
             ),
-          ),
+          ],
         ),
-        BirdyIconButton(
-          icon: AppIcons.leaderboard,
-          semanticLabel: l10n.forkRanking,
-          onPressed: () => _open(const RankingScreen()),
-        ),
-      ],
-    ),
-  );
+      );
 
-  Widget _progressCard(
+  Widget _progressBlock(
     AppLocalizations l10n,
     BirdyColors c,
     Notebook notebook,
   ) {
     final expected = notebook.expected;
     final hasExpected = expected != null && expected > 0;
-    final caption = BirdyText.caption.copyWith(color: c.text2);
-    return Padding(
-      padding: const EdgeInsets.only(top: BirdySpace.m),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: c.surface1,
-          borderRadius: BorderRadius.circular(BirdyRadii.card),
+    if (!hasExpected) {
+      if (expected != null || !_expectedDone) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: const EdgeInsets.only(bottom: BirdySpace.block),
+        child: BirdyBlock(
+          tone: BirdyBlockTone.tonal,
+          child: Text(
+            l10n.forkNotebookNoPlace,
+            style: BirdyText.body.copyWith(color: c.text1),
+          ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BirdySpace.l,
-            vertical: 14,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.forkNotebookDiscovered(notebook.discovered),
-                style: BirdyText.body.copyWith(
-                  color: c.text1,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              if (hasExpected) ...[
-                const SizedBox(height: BirdySpace.xs),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BirdySpace.block),
+      child: BirdyBlock(
+        key: const ValueKey('notebook-progress-block'),
+        tone: BirdyBlockTone.tonal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
                 Text(
-                  l10n.forkNotebookProgress(notebook.expectedFound, expected),
-                  style: BirdyText.body.copyWith(color: c.text1),
+                  '${notebook.expectedFound}',
+                  style: BirdyText.display.copyWith(
+                    color: c.text1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-                const SizedBox(height: BirdySpace.s),
-                _ProgressBar(value: notebook.expectedFound / expected),
-                const SizedBox(height: BirdySpace.s),
-                Text(l10n.forkNotebookSilhouettes, style: caption),
-              ] else if (expected == null && _expectedDone) ...[
-                const SizedBox(height: BirdySpace.xs),
-                Text(l10n.forkNotebookNoPlace, style: caption),
+                const SizedBox(width: BirdySpace.s),
+                Expanded(
+                  child: Text(
+                    l10n.forkNotebookProgressCaption(expected),
+                    style: BirdyText.body.copyWith(
+                      color: c.text1,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ],
-            ],
-          ),
+            ),
+            const SizedBox(height: BirdySpace.s),
+            BirdyProgressBar(
+              value: notebook.expectedFound / expected,
+              color: c.accent,
+              track: c.surface1,
+            ),
+            const SizedBox(height: BirdySpace.s),
+            Text(
+              l10n.forkNotebookSilhouettes,
+              style: BirdyText.caption.copyWith(color: c.accentText),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _filterChips(AppLocalizations l10n) => Padding(
-    padding: const EdgeInsets.only(top: BirdySpace.m, bottom: BirdySpace.m),
+  Widget _countBlocks(AppLocalizations l10n, BirdyColors c, Notebook notebook) {
+    final toDiscover = notebook.filtered(NotebookFilter.toDiscover).length;
+    final rare = notebook.filtered(NotebookFilter.rare).length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BirdySpace.block),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _CountBlock(
+                count: toDiscover,
+                label: l10n.forkNotebookToDiscoverLabel,
+                tone: BirdyBlockTone.toCheck,
+                onTap:
+                    () => setState(() => _filter = NotebookFilter.toDiscover),
+              ),
+            ),
+            const SizedBox(width: BirdySpace.block),
+            Expanded(
+              child: _CountBlock(
+                count: rare,
+                label: l10n.forkNotebookRareLabel(rare),
+                tone: BirdyBlockTone.oriole,
+                onTap: () => setState(() => _filter = NotebookFilter.rare),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _filterChips(AppLocalizations l10n, BirdyColors c) => Padding(
+    padding: const EdgeInsets.only(bottom: BirdySpace.block),
     child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -281,17 +334,23 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           for (final filter in NotebookFilter.values)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
-              child: ChoiceChip(
-                label: Text(switch (filter) {
+              child: BirdyFilterChip(
+                label: switch (filter) {
                   NotebookFilter.all => l10n.forkNotebookFilterAll,
                   NotebookFilter.discovered =>
                     l10n.forkNotebookFilterDiscovered,
                   NotebookFilter.toDiscover =>
                     l10n.forkNotebookFilterToDiscover,
                   NotebookFilter.rare => l10n.forkNotebookFilterRare,
-                }),
+                },
                 selected: _filter == filter,
-                onSelected: (_) => setState(() => _filter = filter),
+                selectedColors: switch (filter) {
+                  NotebookFilter.all => BirdyChipColors.ink(c),
+                  NotebookFilter.discovered => BirdyChipColors.sure(c),
+                  NotebookFilter.toDiscover => BirdyChipColors.tonal(c),
+                  NotebookFilter.rare => BirdyChipColors.oriole(c),
+                },
+                onSelected: () => setState(() => _filter = filter),
               ),
             ),
         ],
@@ -440,35 +499,48 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   }
 }
 
-/// Light progress bar (SPEC.md 5.7), Martin-pêcheur, no gain animation.
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.value});
+/// « N à découvrir » / « N rares » block: tappable, sets the matching
+/// filter. Big tabular number, label underneath (J6f).
+class _CountBlock extends StatelessWidget {
+  const _CountBlock({
+    required this.count,
+    required this.label,
+    required this.tone,
+    required this.onTap,
+  });
 
-  final double value;
+  final int count;
+  final String label;
+  final BirdyBlockTone tone;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(BirdyRadii.pill),
-      child: SizedBox(
-        height: 10,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ColoredBox(color: c.line),
-            FractionallySizedBox(
-              alignment: AlignmentDirectional.centerStart,
-              widthFactor: value.clamp(0.0, 1.0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.accent,
-                  borderRadius: BorderRadius.circular(BirdyRadii.pill),
-                ),
-              ),
+    return BirdyBlock(
+      tone: tone,
+      onTap: onTap,
+      semanticLabel: '$count $label',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$count',
+            style: BirdyText.display.copyWith(
+              color: c.text1,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: BirdySpace.xs),
+          Text(
+            label,
+            style: BirdyText.body.copyWith(
+              color: c.text1,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

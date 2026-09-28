@@ -5745,5 +5745,17 @@
   "forkQuizWrongArticle": "It was {name}",
   "@forkQuizWrongArticle": {"description": "BirdyGo fork: « Qui chante ? » quiz v2 (J6e).", "placeholders": {"name": {"type": "String"}}},
   "forkMapTilesFailed": "The map background does not load. Check BirdyGo's internet connection.",
-  "@forkMapTilesFailed": {"description": "BirdyGo fork: contact map, tiles that do not load."}
+  "@forkMapTilesFailed": {"description": "BirdyGo fork: contact map, tiles that do not load."},
+  "forkNotebookProgressCaption": "of {expected} species expected here this week",
+  "@forkNotebookProgressCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"expected": {"type": "int"}}},
+  "forkNotebookToDiscoverLabel": "to discover",
+  "@forkNotebookToDiscoverLabel": {"description": "BirdyGo fork: tabs (J6f)."},
+  "forkNotebookRareLabel": "{count, plural, =1{rare bird} other{rare birds}}",
+  "@forkNotebookRareLabel": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"count": {"type": "int"}}},
+  "forkProfileCaption": "{species} species · {streak}-day streak · record {record}",
+  "@forkProfileCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"species": {"type": "int"}, "streak": {"type": "int"}, "record": {"type": "int"}}},
+  "forkMapTitle": "My map",
+  "@forkMapTitle": {"description": "BirdyGo fork: tabs (J6f)."},
+  "forkMapCaption": "Your contacts over {period} · {places, plural, =1{1 place} other{{places} places}}",
+  "@forkMapCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"period": {"type": "String"}, "places": {"type": "int"}}}
 }
