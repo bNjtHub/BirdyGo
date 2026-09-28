@@ -15,6 +15,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 
 import '../design/birdy_tokens.dart';
+import '../design/birdygo_silhouette.dart';
 import '../home/birdygo_logo.dart';
 import 'map_config.dart';
 
@@ -33,53 +34,6 @@ double placeBirdSize(double opacity) {
   )!;
 }
 
-/// The BirdyGo bird as one filled shape: tail, body and beak joined, the
-/// eye cut out. Centered on the origin, its longest side is 1.
-final Path birdyGoSilhouette = _unit(_outline(withEye: false));
-
-/// Bounds of the whole bird in the logo's 512 box.
-final Rect _logoBirdBounds = _outline(withEye: true).getBounds();
-
-Path _outline({required bool withEye}) {
-  var shape = Path.combine(
-    PathOperation.union,
-    BirdyGoLogoPainter.body,
-    BirdyGoLogoPainter.tail,
-  );
-  shape = Path.combine(
-    PathOperation.union,
-    shape,
-    BirdyGoLogoPainter.upperBeak,
-  );
-  shape = Path.combine(
-    PathOperation.union,
-    shape,
-    BirdyGoLogoPainter.lowerBeak,
-  );
-  if (withEye) return shape;
-  return Path.combine(
-    PathOperation.difference,
-    shape,
-    Path()..addOval(
-      Rect.fromCircle(
-        center: BirdyGoLogoPainter.eyeCenter,
-        radius: BirdyGoLogoPainter.eyeRadius,
-      ),
-    ),
-  );
-}
-
-Path _unit(Path shape) {
-  final bounds = shape.getBounds();
-  final scale = 1 / bounds.longestSide;
-  return shape.transform(
-    (Matrix4.identity()
-          ..scaleByDouble(scale, scale, 1, 1)
-          ..translateByDouble(-bounds.center.dx, -bounds.center.dy, 0, 1))
-        .storage,
-  );
-}
-
 /// The colored logo, recorded once: the bird's longest side is 1, centered
 /// on the origin.
 final ui.Picture _logoPicture = _recordLogo();
@@ -87,7 +41,7 @@ final ui.Picture _logoPicture = _recordLogo();
 ui.Picture _recordLogo() {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
-  final bird = _logoBirdBounds;
+  final bird = birdyGoLogoBounds;
   final scale = 1 / bird.longestSide;
   // The painter maps its 512 box onto the size it is given.
   const box = Size.square(512);

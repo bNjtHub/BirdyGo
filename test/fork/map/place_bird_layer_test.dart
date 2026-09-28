@@ -1,3 +1,4 @@
+import 'package:birdnet_live/fork/design/birdygo_silhouette.dart';
 import 'package:birdnet_live/fork/home/birdygo_logo.dart';
 import 'package:birdnet_live/fork/map/map_config.dart';
 import 'package:birdnet_live/fork/map/place_bird_layer.dart';
