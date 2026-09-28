@@ -34,8 +34,31 @@ abstract final class BirdyMotion {
   /// New species in the live table: 8 px slide, 0.97 → 1, fade, light haptic.
   static const Duration newSpecies = Duration(milliseconds: 220);
 
-  /// Very first species: « Première rencontre » card fading in, once.
+  /// Very first species: « Première rencontre » card popping in (fade,
+  /// 0.97 → 1), once.
   static const Duration firstEncounter = Duration(milliseconds: 250);
+
+  /// « Première fois » sequence (J6f, AppPremiere mockup, bg-pop, bg-ring,
+  /// bg-rise, bg-land): the bird pops [firstEncounterBirdDelay] after the
+  /// card, its ring spreads over [firstEncounterRing], the texts rise from
+  /// [firstEncounterTextDelay] in [staggerStep]s, and one confetti burst
+  /// leaves the bird at [firstEncounterConfettiDelay]. The ring and the
+  /// confetti outlast [celebrationMax]: an accepted exception (DESIGN.md).
+  static const Duration firstEncounterBirdDelay = Duration(milliseconds: 60);
+  static const Duration firstEncounterRing = Duration(milliseconds: 1200);
+  static const Duration firstEncounterTextDelay = Duration(milliseconds: 120);
+  static const Duration firstEncounterConfettiDelay = Duration(
+    milliseconds: 250,
+  );
+
+  /// bg-ring: peak opacity (at [ringPeakAt] of the ring) and final scale.
+  static const double ringPeakOpacity = 0.6;
+  static const double ringPeakAt = 0.35;
+  static const double ringScale = 1.1;
+
+  /// bg-glow: the soft disc behind the bird peaks at this share of the
+  /// ring, at [tintMaxOpacity].
+  static const double glowPeakAt = 0.4;
 
   /// Rare bird, after « C'est bien lui »: one soft ring and the pill.
   static const Duration rareBird = Duration(milliseconds: 450);
@@ -86,6 +109,40 @@ abstract final class BirdyMotion {
   /// after the fifth enter with the fifth.
   static Duration staggerDelay(int index) =>
       staggerStep * (index.clamp(0, staggerMaxItems - 1));
+}
+
+/// Shared confetti (`BirdyConfetti`, quiz-fx.js of the Quiz v2 mockup):
+/// one emission window, then particles fading out. Physics are the
+/// confetti package's units.
+abstract final class BirdyConfettiMotion {
+  /// Emission window: a single burst.
+  static const Duration emission = Duration(milliseconds: 300);
+
+  /// Particles of a burst, and of a whole rain (split between [rainSpots]).
+  static const int burstParticles = 110;
+  static const int rainParticles = 132;
+
+  /// Life of the layer: particles fade out over the last [fade]
+  /// (quiz-fx.js: 1.9 → 2.3 s, rain 4.2 → 4.6 s).
+  static const Duration burstLife = Duration(milliseconds: 2300);
+  static const Duration rainLife = Duration(milliseconds: 4600);
+  static const Duration fade = Duration(milliseconds: 400);
+
+  /// The rain falls from three points across the top.
+  static const List<double> rainSpots = [1 / 6, 1 / 2, 5 / 6];
+
+  static const double burstMinForce = 12;
+  static const double burstMaxForce = 34;
+  static const double burstGravity = 0.3;
+  static const double rainMinForce = 4;
+  static const double rainMaxForce = 14;
+  static const double rainGravity = 0.08;
+  static const double drag = 0.05;
+
+  /// Particle sizes, and the share of dots among the rectangles.
+  static const Size minSize = Size(6, 4);
+  static const Size maxSize = Size(11, 7);
+  static const double dotShare = 0.3;
 }
 
 /// Haptics of BirdyGo moments (new species, first encounter, new status).

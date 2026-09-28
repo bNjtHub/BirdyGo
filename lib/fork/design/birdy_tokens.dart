@@ -34,9 +34,30 @@ abstract final class BirdyBrand {
   static const Color wellBottom = Color(0xFF0F1E33);
 }
 
+/// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
+/// the same in both themes.
+abstract final class BirdyConfettiColors {
+  /// Rain over a good quiz score.
+  static const List<Color> rain = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF3B8FDB),
+    Color(0xFFE9836B),
+  ];
+
+  /// Burst from a bird or an emblem, besides its own colors.
+  static const List<Color> burst = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+  ];
+}
+
 /// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not
-/// theme tokens: the equalizer bars on the dark well, the confetti and the
-/// small marks of the round's recap.
+/// theme tokens: the equalizer bars on the dark well and the small marks of
+/// the round's recap. Its confetti use [BirdyConfettiColors].
 abstract final class BirdyQuizColors {
   /// Equalizer bars, from the deepest to the lightest Martin-pêcheur shade.
   static const Color bar1 = Color(0xFF52C0C9);
@@ -55,23 +76,6 @@ abstract final class BirdyQuizColors {
     bar3,
     bar2,
     bar1,
-  ];
-
-  /// Rain of confetti on a good score.
-  static const List<Color> rain = [
-    BirdyBrand.oriole,
-    BirdyBrand.kingfisher,
-    BirdyBrand.lichen,
-    Color(0xFFEC7A3C),
-    Color(0xFF3B8FDB),
-    Color(0xFFE9836B),
-  ];
-
-  /// Burst on a right answer, besides the bird's own colors.
-  static const List<Color> burst = [
-    BirdyBrand.oriole,
-    BirdyBrand.kingfisher,
-    BirdyBrand.lichen,
   ];
 
   /// Cross mark of a missed bird in the recap, light and dark.
