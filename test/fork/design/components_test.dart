@@ -5,6 +5,7 @@ import 'package:birdnet_live/fork/design/design_gallery_screen.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart';
 import 'package:birdnet_live/fork/design/widgets/animated_count.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_buttons.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_pill.dart';
 import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
@@ -16,6 +17,7 @@ import 'package:birdnet_live/fork/reliability/reliability_badge.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _app(
@@ -23,22 +25,24 @@ Widget _app(
   bool dark = false,
   double textScale = 1,
   bool reduceMotion = false,
-}) => MaterialApp(
-  theme: BirdyTheme.light(),
-  darkTheme: BirdyTheme.dark(),
-  themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-  locale: const Locale('fr'),
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
-  supportedLocales: AppLocalizations.supportedLocales,
-  builder:
-      (context, app) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(textScale),
-          disableAnimations: reduceMotion,
+}) => ProviderScope(
+  child: MaterialApp(
+    theme: BirdyTheme.light(),
+    darkTheme: BirdyTheme.dark(),
+    themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+    locale: const Locale('fr'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    builder:
+        (context, app) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: reduceMotion,
+          ),
+          child: app!,
         ),
-        child: app!,
-      ),
-  home: Scaffold(body: child),
+    home: Scaffold(body: child),
+  ),
 );
 
 void main() {
@@ -460,8 +464,46 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 500));
       expect(tester.takeException(), isNull);
+      await tester.dragUntilVisible(
+        find.text('Ligne « Attendus ici »'),
+        find.byType(ListView),
+        const Offset(0, -300),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull);
       await tester.drag(find.byType(ListView), const Offset(0, 20000));
       await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull);
     }
+  });
+
+  testWidgets('gallery J6f blocks: filter chip selects one at a time', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(const DesignGalleryScreen()));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // BirdyBlock progress ring shows the sample fraction.
+    await tester.dragUntilVisible(
+      find.text('5/8'),
+      find.byType(ListView),
+      const Offset(0, -300),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+
+    final rareChip = find.ancestor(
+      of: find.text('Rares'),
+      matching: find.byType(BirdyFilterChip),
+    );
+    await tester.dragUntilVisible(
+      rareChip.first,
+      find.byType(ListView),
+      const Offset(0, -300),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(rareChip.first);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }
