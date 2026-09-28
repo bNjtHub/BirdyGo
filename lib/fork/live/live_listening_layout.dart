@@ -142,7 +142,7 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
       bottom: false,
       child: LiveHeader(
         statusText: widget.statusText,
-        live: widget.live,
+        phase: widget.phase,
         stats: stats,
         elapsed: widget.elapsed,
         expanded: _expanded,
