@@ -13,6 +13,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
@@ -150,8 +151,13 @@ class HeardBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Capped so its loading skeleton (HeardBlock.skeleton below) can
+        // reserve a fixed number of lines instead of however many contacts
+        // and days happen to wrap to.
         Text(
           heard ?? l10n.forkFicheNeverHeard,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: BirdyText.body.copyWith(color: c.text1),
         ),
         if (record.verified || precision != null) ...[
@@ -171,6 +177,39 @@ class HeardBlock extends StatelessWidget {
             ],
           ),
         ],
+      ],
+    );
+  }
+
+  /// Same first line as the real block (capped at 2 lines), a placeholder
+  /// for the level badge and review count while [record] is still loading:
+  /// whether that second row will show at all depends on data not in yet,
+  /// so it is shown for real once the record lands, even if that means the
+  /// block settles a little shorter.
+  static Widget skeleton(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BirdySkeleton.text(
+          BirdyText.body.copyWith(color: c.text1),
+          placeholder:
+              '00000000000000000000000000000000000000000000000000000000',
+          maxLines: 2,
+        ),
+        const SizedBox(height: BirdySpace.s),
+        Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            BirdySkeleton.box(width: 88, height: 26, radius: BirdyRadii.pill),
+            BirdySkeleton.text(
+              BirdyText.caption,
+              placeholder: '00000000000000000000000',
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -399,6 +438,51 @@ class MySoundsBlock extends StatelessWidget {
             child: TextButton(
               onPressed: onMore,
               child: Text(l10n.forkFicheAllSounds(moreCount)),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Title row (real, static text) then [rows] placeholder recordings at
+  /// the real row's own minimum height: how many recordings there really
+  /// are is exactly what is still loading.
+  static Widget skeleton(BuildContext context, {int rows = 2}) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.forkFicheMySounds,
+          style: BirdyText.heading.copyWith(color: c.text1),
+        ),
+        for (var i = 0; i < rows; i++)
+          Padding(
+            padding: const EdgeInsets.only(top: BirdySpace.s),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Row(
+                children: [
+                  BirdySkeleton.box(
+                    width: BirdySizes.target,
+                    height: BirdySizes.target,
+                    radius: BirdySizes.target / 2,
+                  ),
+                  const SizedBox(width: BirdySpace.m),
+                  Expanded(
+                    child: BirdySkeleton.text(
+                      BirdyText.bodyCompact,
+                      placeholder: '00000000000000000000000000',
+                    ),
+                  ),
+                  BirdySkeleton.box(
+                    width: BirdySizes.target,
+                    height: BirdySizes.target,
+                    radius: 8,
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -666,6 +750,69 @@ class ActivityAndMap extends StatelessWidget {
     if (activity == null && mapColumn == null) return const SizedBox.shrink();
     if (activity == null) return mapColumn!;
     if (mapColumn == null) return activity;
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (large || constraints.maxWidth < 320) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              activity,
+              const SizedBox(height: BirdySpace.m),
+              mapColumn,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: activity),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(child: mapColumn),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Both the chart and the map area, side by side like the real layout:
+  /// whether the species turns out to have activity data or positioned
+  /// contacts at all is exactly what is still loading, so this reserves the
+  /// fuller case and settles down if the real content turns out smaller or
+  /// absent (see `ActivityAndMap`'s own `null` cases).
+  static Widget skeleton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final activity = DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(BirdySpace.m),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            BirdySkeleton.text(BirdyText.caption, placeholder: l10n.forkActivityByHour),
+            const SizedBox(height: BirdySpace.s),
+            BirdySkeleton.box(width: double.infinity, height: 52, radius: BirdyRadii.thumb),
+          ],
+        ),
+      ),
+    );
+    final mapColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        BirdySkeleton.box(width: double.infinity, height: 96, radius: BirdyRadii.card),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: BirdySkeleton.text(
+            BirdyText.label,
+            placeholder: l10n.forkFicheSeeOnMap,
+          ),
+        ),
+      ],
+    );
     final large = MediaQuery.textScalerOf(context).scale(1) > 1.15;
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -22,6 +22,7 @@ import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/share_sheet.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
 import '../map/base_layers.dart';
@@ -288,8 +289,32 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final referenceUrl = detail?.ebirdListenUrl;
     final inSheet = widget.scrollController != null;
 
+    final loadingRecord = record == null;
+    final showSounds =
+        loadingRecord ||
+        (record.clips.isNotEmpty || referenceUrl != null);
+    final showActivity = loadingRecord || record.heard;
+
     final blocks = <Widget>[
-      if (record != null) HeardBlock(record: record, heard: heard),
+      // The counters, recordings and activity/map blocks are always in
+      // place from the first frame (their skeletons reserve the same shape
+      // `_load...` will fill in): only the AI sheet/description and the
+      // links block below still wait on their own data to appear, since
+      // whether they will show at all is not knowable ahead of time.
+      KeyedSubtree(
+        key: const ValueKey('fiche-heard'),
+        child: _crossFade(
+          loadingRecord
+              ? KeyedSubtree(
+                key: const ValueKey('fiche-heard-skeleton'),
+                child: HeardBlock.skeleton(context),
+              )
+              : KeyedSubtree(
+                key: const ValueKey('fiche-heard-real'),
+                child: HeardBlock(record: record, heard: heard),
+              ),
+        ),
+      ),
       if (_year != null)
         HereNowCard(
           year: _year!,
@@ -298,30 +323,44 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           currentMonth: now.month,
           rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
-      if ((record?.clips.isNotEmpty ?? false) || referenceUrl != null)
-        ValueListenableBuilder<String?>(
-          valueListenable: _player.playing,
-          builder:
-              (context, playing, _) => MySoundsBlock(
-                clips: record?.clips ?? const [],
-                favorites: record?.favorites ?? const {},
-                playing: playing,
-                lineOf: (clip) => clipLine(l10n, language, clip, now: now),
-                onPlay: _play,
-                onFavorite: _setFavorite,
-                onReference:
-                    referenceUrl == null
-                        ? null
-                        : () => openExternalUrl(context, referenceUrl),
-                moreCount: record?.clipCount ?? 0,
-                onMore:
-                    () => _push(
-                      SpeciesClipsScreen(
-                        scientificName: widget.scientificName,
-                        fallbackName: _name,
-                      ),
-                    ),
-              ),
+      if (showSounds)
+        KeyedSubtree(
+          key: const ValueKey('fiche-sounds'),
+          child: _crossFade(
+            loadingRecord
+                ? KeyedSubtree(
+                  key: const ValueKey('fiche-sounds-skeleton'),
+                  child: MySoundsBlock.skeleton(context),
+                )
+                : KeyedSubtree(
+                  key: const ValueKey('fiche-sounds-real'),
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: _player.playing,
+                    builder:
+                        (context, playing, _) => MySoundsBlock(
+                          clips: record.clips,
+                          favorites: record.favorites,
+                          playing: playing,
+                          lineOf:
+                              (clip) => clipLine(l10n, language, clip, now: now),
+                          onPlay: _play,
+                          onFavorite: _setFavorite,
+                          onReference:
+                              referenceUrl == null
+                                  ? null
+                                  : () => openExternalUrl(context, referenceUrl),
+                          moreCount: record.clipCount,
+                          onMore:
+                              () => _push(
+                                SpeciesClipsScreen(
+                                  scientificName: widget.scientificName,
+                                  fallbackName: _name,
+                                ),
+                              ),
+                        ),
+                  ),
+                ),
+          ),
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
         SheetChipsBlock(sheet: sheet)
@@ -330,20 +369,33 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           text: _description!,
           source: detail?.descriptionSource,
         ),
-      if (record != null && record.heard)
-        ActivityAndMap(
-          hours: record.hours,
-          barColor: c.isDark ? tint.accent : tint.deep,
-          map:
-              record.spots.isEmpty
-                  ? null
-                  : SpeciesMiniMap(
-                    spots: record.spots,
-                    tileLayer: ref.watch(speciesMiniMapTilesProvider),
-                    semanticLabel: l10n.forkFicheMapLabel,
-                    onTap: _openMap,
+      if (showActivity)
+        KeyedSubtree(
+          key: const ValueKey('fiche-activity'),
+          child: _crossFade(
+            loadingRecord
+                ? KeyedSubtree(
+                  key: const ValueKey('fiche-activity-skeleton'),
+                  child: ActivityAndMap.skeleton(context),
+                )
+                : KeyedSubtree(
+                  key: const ValueKey('fiche-activity-real'),
+                  child: ActivityAndMap(
+                    hours: record.hours,
+                    barColor: c.isDark ? tint.accent : tint.deep,
+                    map:
+                        record.spots.isEmpty
+                            ? null
+                            : SpeciesMiniMap(
+                              spots: record.spots,
+                              tileLayer: ref.watch(speciesMiniMapTilesProvider),
+                              semanticLabel: l10n.forkFicheMapLabel,
+                              onTap: _openMap,
+                            ),
+                    onSeeOnMap: record.spots.isEmpty ? null : _openMap,
                   ),
-          onSeeOnMap: record.spots.isEmpty ? null : _openMap,
+                ),
+          ),
         ),
       if (detail != null)
         LinksBlock(
@@ -402,6 +454,17 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     ContactMapScreen(
       initialSpecies: SpeciesChoice(widget.scientificName, _name),
     ),
+  );
+
+  /// Fades [child] in in place: a loaded block replacing its skeleton.
+  /// [child]'s own key tells the switcher when to cross-fade.
+  static Widget _crossFade(Widget child) => AnimatedSwitcher(
+    duration: BirdyMotion.enter,
+    switchInCurve: BirdyMotion.standard,
+    switchOutCurve: BirdyMotion.standard,
+    transitionBuilder:
+        (child, animation) => FadeTransition(opacity: animation, child: child),
+    child: child,
   );
 }
 
