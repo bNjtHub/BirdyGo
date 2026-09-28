@@ -3,6 +3,7 @@ import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/home/home_widgets.dart';
 import 'package:birdnet_live/fork/home/logo_tweet.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,7 +51,9 @@ void main() {
   testWidgets('a tap on the logo plays the tweet', (tester) async {
     final (tweet, _) = await pump(tester);
     await tester.tap(find.byType(HomeLogoRow));
-    await tester.pump();
+    // A double-tap recognizer is also armed (J6f flight): a single tap only
+    // fires once the double-tap timeout has passed with no second tap.
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     expect(tweet.plays, 1);
     await tester.pump(const Duration(seconds: 5));
   });
@@ -58,6 +61,7 @@ void main() {
   testWidgets('the tweet plays with reduced motion too', (tester) async {
     final (tweet, _) = await pump(tester, reduced: true);
     await tester.tap(find.byType(HomeLogoRow));
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     expect(tweet.plays, 1);
   });
 
@@ -65,6 +69,7 @@ void main() {
     final (tweet, container) = await pump(tester);
     container.read(liveStateProvider.notifier).state = LiveState.active;
     await tester.tap(find.byType(HomeLogoRow));
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     await tester.pump(const Duration(seconds: 5));
     expect(tweet.plays, 0);
   });

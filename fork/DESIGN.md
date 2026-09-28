@@ -167,6 +167,12 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   terrain. Avec les animations réduites, tout s'arrête : états finaux immobiles, aucun confetti.
   Les bruitages (jingle, fanfare) suivent l'interrupteur « Avec son / Sans son » et jamais pendant
   une écoute Live.
+- Exception autorisée : un double appui sur le logo de l'accueil (J6f, `lib/fork/home/logo_flight.dart`)
+  fait s'envoler l'oiseau à travers l'écran (chemin courbe, une boucle, retour à sa place), 2 à 2,5 s,
+  au-delà des 500 ms. Explicite et voulu par la personne (deux appuis, jamais tout seul), donc pas
+  une célébration au sens de la règle. Le cri BirdyGo joue une fois au décollage ; pendant ce temps le
+  logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un double appui se
+  comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 - Seconde exception, plus discrète : le logo de l'écoute (J6f, `lib/fork/live/live_header.dart`
@@ -287,7 +293,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
-  couleurs de la marque.
+  couleurs de la marque. Un double appui (J6f, `logo_flight.dart`) le fait s'envoler à travers
+  l'écran à la place : voir l'exception de la section Animations.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
 - Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
@@ -305,7 +312,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
 - La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
   statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
-  au-dessus de la barre du bas, hors de la zone qui défile.
+  au-dessus de la barre du bas, hors de la zone qui défile. Sa marge basse (J6f) tient toute la
+  lueur (`ctaGlow`, rayon de flou 28) : moins, et la barre de navigation en coupe le bas.
 - Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
   sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
