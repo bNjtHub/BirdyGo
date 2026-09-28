@@ -1613,5 +1613,18 @@
   "forkQuizBirdsLabel": "de tes oiseaux",
   "forkQuizRightArticle": "C'est bien {name}",
   "forkQuizWrongArticle": "C'était {name}",
-  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo."
+  "forkMapTilesFailed": "Le fond de carte ne se charge pas. Vérifie la connexion internet de BirdyGo.",
+  "forkListeningModeTitle": "Conditions d'écoute",
+  "forkListeningModeSubtitle": "Change à tout moment : l'écoute continue, l'analyse s'adapte tout de suite.",
+  "forkListeningModeNormal": "Normal",
+  "forkListeningModeWind": "Vent",
+  "forkListeningModeBoost": "Boost",
+  "forkListeningModeCity": "Ville",
+  "forkListeningModeCustom": "Personnalisé",
+  "forkListeningModeNormalDesc": "Réglage de base, pour un temps calme.",
+  "forkListeningModeWindDesc": "Coupe les sons très graves du vent et des frottements. Les chants restent intacts.",
+  "forkListeningModeBoostDesc": "Monte le volume du micro pour les chants faibles ou lointains. Garde le téléphone immobile.",
+  "forkListeningModeCityDesc": "Atténue les bruits continus : route, ventilation, pluie fine.",
+  "forkListeningModeActivated": "Mode {mode} activé",
+  "forkListeningModeSelected": "Sélectionné"
 }

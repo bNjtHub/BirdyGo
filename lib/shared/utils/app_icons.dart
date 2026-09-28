@@ -236,4 +236,10 @@ abstract final class AppIcons {
   static const IconData quizSpark = Symbols.auto_awesome_rounded; // FORK: quiz
   static const IconData quizStar = Symbols.star_rounded; // FORK: quiz
   static const IconData quizStop = Symbols.stop_rounded; // FORK: quiz
+  // FORK: listening modes « Conditions d'écoute » (J6f).
+  static const IconData listeningNormal = Symbols.wb_sunny_rounded; // FORK
+  static const IconData listeningWind = Symbols.air_rounded; // FORK
+  static const IconData listeningBoost = Symbols.volume_up_rounded; // FORK
+  static const IconData listeningCity = Symbols.location_city_rounded; // FORK
+  static const IconData listeningSelected = Symbols.check_circle_rounded; // FORK
 }
