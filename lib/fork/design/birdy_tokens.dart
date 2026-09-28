@@ -467,6 +467,9 @@ abstract final class BirdySizes {
   /// Day dot of the série (7 per week).
   static const double dayDot = 14;
 
+  /// Outline of a day dot without listening.
+  static const double dayDotStroke = 2;
+
   /// Dashed silhouette slot of a species still to find (daily goal block,
   /// empty live state uses [expectedSlot]).
   static const double goalSlot = 36;
@@ -504,4 +507,7 @@ abstract final class BirdyAlpha {
 
   /// White track of a bar or ring on a tinted block.
   static const double trackOnTint = 0.8;
+
+  /// Outline of a day dot without listening (série block).
+  static const double dayDotOutline = 0.45;
 }
