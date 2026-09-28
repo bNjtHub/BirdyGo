@@ -275,7 +275,9 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   toutes les 2 minutes (`SingingLogo.singEvery`) tant que l'accueil est visible. Jamais de boucle :
   le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
   programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
-  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois (pas annoncé au lecteur
+  arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois et joue le cri BirdyGo
+  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part, muet pendant une écoute pour que
+  le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
   couleurs de la marque.
