@@ -233,7 +233,9 @@ void main() {
   testWidgets('share and map buttons have labels', (tester) async {
     await pump(tester, _morning());
 
-    expect(find.byTooltip('Terminer'), findsOneWidget);
+    // The header's back button carries the system tooltip (« Retour »),
+    // like every `BirdyOverlayHeader` (J6f).
+    expect(find.byTooltip('Retour'), findsOneWidget);
     expect(find.byTooltip('Revoir sur la carte'), findsOneWidget);
     await tester.tap(find.byTooltip('Partager'));
     expect(shared, 1);
@@ -253,6 +255,16 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets(
+    'BirdyOverlayHeader shows the back button and the title at 130 % text',
+    (tester) async {
+      await pump(tester, _morning(), textScale: 1.3);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Bilan de l\'écoute'), findsOneWidget);
+      expect(find.byTooltip('Retour'), findsOneWidget);
+    },
+  );
 
   testWidgets('landscape keeps a readable column', (tester) async {
     await pump(tester, _morning(), size: const Size(800, 360));

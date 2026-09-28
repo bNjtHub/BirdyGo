@@ -12,7 +12,9 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/pressable.dart';
@@ -128,57 +130,68 @@ class ListeningSummaryView extends StatelessWidget {
           onMark: onMarkRecording!,
         ),
     ];
+    // Guards the button (never falls back to a bare pop) while a save is
+    // in flight: `onDone` is null then, same as the former disabled icon.
+    void back() => onDone?.call();
     return Scaffold(
       backgroundColor: c.background,
-      appBar: AppBar(
-        backgroundColor: c.background,
-        leading: IconButton(
-          icon: const Icon(AppIcons.close),
-          tooltip: l10n.forkSummaryDone,
-          onPressed: onDone,
-        ),
-        title: Text(l10n.forkSummaryTitle, style: BirdyText.heading),
-        actions: [
-          if (onMap != null)
-            IconButton(
-              icon: const Icon(AppIcons.mapSheet),
-              tooltip: l10n.forkSummaryOnMap,
-              onPressed: onMap,
-            ),
-          if (onShare != null && !summary.isEmpty)
-            IconButton(
-              icon: const Icon(AppIcons.share),
-              tooltip: l10n.forkSummaryShare,
-              onPressed: onShare,
-            ),
-          const SizedBox(width: BirdySpace.xs),
-        ],
-      ),
       body: SafeArea(
-        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: ListView(
-              padding: const EdgeInsets.only(
-                top: BirdySpace.xs,
-                bottom: BirdySpace.xxl,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < blocks.length; i++)
-                  BirdyEntrance.staggered(
-                    index: i,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        BirdySpace.gutter,
-                        0,
-                        BirdySpace.gutter,
-                        BirdySpace.m,
-                      ),
-                      child: blocks[i],
-                    ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    BirdySpace.page,
+                    BirdySpace.xs,
+                    BirdySpace.page,
+                    0,
                   ),
-                if (footer != null) footer!,
+                  child: BirdyOverlayHeader(
+                    title: l10n.forkSummaryTitle,
+                    onBack: back,
+                    actions: [
+                      if (onMap != null)
+                        BirdyIconButton(
+                          icon: AppIcons.mapSheet,
+                          semanticLabel: l10n.forkSummaryOnMap,
+                          onPressed: onMap,
+                        ),
+                      if (onShare != null && !summary.isEmpty)
+                        BirdyIconButton(
+                          icon: AppIcons.share,
+                          semanticLabel: l10n.forkSummaryShare,
+                          onPressed: onShare,
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.only(
+                      top: BirdySpace.m,
+                      bottom: BirdySpace.xxl,
+                    ),
+                    children: [
+                      for (var i = 0; i < blocks.length; i++)
+                        BirdyEntrance.staggered(
+                          index: i,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              BirdySpace.gutter,
+                              0,
+                              BirdySpace.gutter,
+                              BirdySpace.m,
+                            ),
+                            child: blocks[i],
+                          ),
+                        ),
+                      if (footer != null) footer!,
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -227,22 +240,30 @@ class _Numbers extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    Widget cell(String value, String label) => Expanded(
-      child: MergeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: BirdyText.numberL.copyWith(color: c.text1),
+    Widget cell(String value, String label, BirdyBlockTone tone) => Expanded(
+      child: BirdyBlock(
+        tone: tone,
+        padding: const EdgeInsets.symmetric(
+          horizontal: BirdySpace.m,
+          vertical: BirdySpace.s,
+        ),
+        semanticLabel: '$value $label',
+        child: MergeSemantics(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: BirdyText.numberL.copyWith(color: c.text1),
+                ),
               ),
-            ),
-            Text(label, style: BirdyText.caption.copyWith(color: c.text2)),
-          ],
+              Text(label, style: BirdyText.caption.copyWith(color: c.text2)),
+            ],
+          ),
         ),
       ),
     );
@@ -252,16 +273,19 @@ class _Numbers extends StatelessWidget {
         cell(
           '${summary.species.length}',
           l10n.forkSummarySpeciesLabel(summary.species.length),
+          BirdyBlockTone.tonal,
         ),
-        const SizedBox(width: BirdySpace.s),
+        const SizedBox(width: BirdySpace.block),
         cell(
           '${summary.contacts}',
           l10n.forkSummaryContactsLabel(summary.contacts),
+          BirdyBlockTone.plain,
         ),
-        const SizedBox(width: BirdySpace.s),
+        const SizedBox(width: BirdySpace.block),
         cell(
           summaryDuration(l10n, summary.duration),
           l10n.forkSummaryDurationLabel,
+          BirdyBlockTone.plain,
         ),
       ],
     );
