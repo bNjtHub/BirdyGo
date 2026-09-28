@@ -1,6 +1,7 @@
-/// Header of the listening screen (J6c, SPEC.md 9.2; J6f): status and
-/// place, the « i » sheet (levels, help, settings), the listening mode pill,
-/// then three stat tiles (duration, species, contacts).
+/// Header of the listening screen (J6c, SPEC.md 9.2; J6f): status (with the
+/// listening mode when it is not Normal) and place, the « Options d'écoute »
+/// button (modes, levels, help, settings), then three stat tiles (duration,
+/// species, contacts).
 library;
 
 import 'dart:async';
@@ -14,6 +15,8 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../listening_mode/listening_mode.dart';
+import 'listening_options.dart';
 import 'live_table_model.dart';
 
 /// « 12:47 », or « 1:02:47 » after an hour.
@@ -34,8 +37,8 @@ class LiveHeader extends StatelessWidget {
     required this.expanded,
     this.showTiles = true,
     this.place,
-    this.modeChip,
-    required this.onLevelsInfo,
+    this.listeningMode = ListeningMode.normal,
+    required this.onOptions,
     required this.onBack,
   });
 
@@ -60,11 +63,13 @@ class LiveHeader extends StatelessWidget {
   /// Where the phone listens (« Le jardin · Beaulieu »), under the status.
   final String? place;
 
-  /// Pill on the right: the listening mode ([ListeningModePill]), 48 dp.
-  final Widget? modeChip;
+  /// Active listening mode; null when the Settings sliders were moved by
+  /// hand (« Personnalisé »). Anything but Normal follows the status
+  /// (« En écoute · Vent ») and gives its icon to the options button.
+  final ListeningMode? listeningMode;
 
-  /// Opens the « i » sheet: what the levels mean, help and settings.
-  final VoidCallback onLevelsInfo;
+  /// Opens the « Options d'écoute » sheet: modes, levels, help, settings.
+  final VoidCallback onOptions;
   final VoidCallback onBack;
 
   @override
@@ -73,6 +78,13 @@ class LiveHeader extends StatelessWidget {
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
     final tiles = showTiles && !expanded;
+    final status =
+        listeningMode == ListeningMode.normal
+            ? statusText
+            : l10n.forkLiveStatusWithMode(
+              statusText,
+              listeningModeLabel(l10n, listeningMode),
+            );
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BirdySpace.gutterDark,
@@ -106,7 +118,7 @@ class LiveHeader extends StatelessWidget {
                           const SizedBox(width: BirdySpace.s),
                           Expanded(
                             child: _StatusText(
-                              text: statusText,
+                              text: status,
                               style: BirdyText.label.copyWith(color: c.text1),
                             ),
                           ),
@@ -129,17 +141,13 @@ class LiveHeader extends StatelessWidget {
                   ),
                 ),
                 // The enlarge chevron moved onto the spectrogram (J6c-bis-c).
-                // J6f: help and settings moved into the « i » sheet; the
-                // listening mode pill took the menu's place.
-                BirdyIconButton(
-                  icon: AppIcons.infoOutline,
-                  semanticLabel: l10n.forkLiveInfoButton,
-                  onPressed: onLevelsInfo,
+                // J6f: one options button (modes, levels, help, settings)
+                // leaves the width to the status and the place.
+                const SizedBox(width: BirdySpace.s),
+                ListeningOptionsButton(
+                  mode: listeningMode,
+                  onPressed: onOptions,
                 ),
-                if (modeChip != null) ...[
-                  const SizedBox(width: BirdySpace.xs),
-                  modeChip!,
-                ],
               ],
             ),
             if (tiles) ...[

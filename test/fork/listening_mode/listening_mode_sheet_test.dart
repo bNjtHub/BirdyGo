@@ -88,6 +88,21 @@ void main() {
     expect(find.text('Vent'), findsOneWidget);
   });
 
+  testWidgets('the section alone (options sheet) reports the pick', (
+    tester,
+  ) async {
+    ListeningMode? picked;
+    final container = await pump(
+      tester,
+      ListeningModeSection(onSelected: (m) => picked = m),
+    );
+    expect(find.text("Conditions d'écoute"), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('listening-mode-boost')));
+    expect(picked, ListeningMode.boost);
+    // Only the callback decides: nothing is applied by the section itself.
+    expect(container.read(listeningModeProvider), ListeningMode.normal);
+  });
+
   testWidgets('picking Vent applies it and confirms', (tester) async {
     final container = await pump(
       tester,

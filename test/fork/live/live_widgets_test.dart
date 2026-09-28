@@ -12,7 +12,6 @@ import 'package:birdnet_live/fork/live/live_table.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/widgets/confirm_destructive.dart';
-import 'package:birdnet_live/fork/reliability/levels_sheet.dart';
 import 'package:birdnet_live/fork/design/species_accents.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
@@ -362,7 +361,7 @@ void main() {
       stats: const LiveStats(species: 5, contacts: 12),
       elapsed: () => const Duration(minutes: 12, seconds: 47),
       expanded: expanded,
-      onLevelsInfo: () {},
+      onOptions: () {},
       onBack: () {},
     );
 
@@ -385,7 +384,7 @@ void main() {
                 elapsed: () => const Duration(minutes: 12, seconds: 47),
                 expanded: false,
                 showTiles: tiles,
-                onLevelsInfo: () {},
+                onOptions: () {},
                 onBack: () {},
               ),
             ),
@@ -423,8 +422,8 @@ void main() {
       expect(find.text('12:47'), findsOneWidget);
       expect(find.text('espèces'), findsOneWidget);
       expect(find.text('contacts'), findsOneWidget);
-      // The « i » button replaced the enlarge chevron (J6c-bis-c).
-      expect(find.byTooltip('Niveaux, aide et réglages'), findsOneWidget);
+      // The options button replaced the enlarge chevron (J6c-bis-c, J6f).
+      expect(find.byTooltip("Options d'écoute, mode Normal"), findsOneWidget);
       expect(find.byTooltip('Agrandir le spectre'), findsNothing);
 
       await tester.pumpWidget(_app(header(expanded: true)));
@@ -673,19 +672,6 @@ void main() {
       await tester.pumpWidget(app(live()));
       final dot = tester.widget<SpeciesColorDot>(find.byType(SpeciesColorDot));
       expect(dot.color, SpeciesAccents.accentOf('Merle'));
-    });
-
-    testWidgets('the « i » button explains the levels', (tester) async {
-      tester.view.physicalSize = const Size(400, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(app(live()));
-      await tester.tap(find.byTooltip('Niveaux, aide et réglages'));
-      await tester.pumpAndSettle();
-      expect(find.byType(LevelsSheet), findsOneWidget);
-      expect(find.text("À quel point l'app est sûre ?"), findsOneWidget);
-      expect(find.text('Rare ici · à confirmer'), findsOneWidget);
-      expect(tester.takeException(), isNull);
     });
   });
 }

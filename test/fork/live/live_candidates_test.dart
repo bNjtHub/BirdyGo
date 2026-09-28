@@ -231,7 +231,7 @@ void main() {
                           stats: LiveStats.of(entries),
                           elapsed: () => Duration.zero,
                           expanded: false,
-                          onLevelsInfo: () {},
+                          onOptions: () {},
                           onBack: () {},
                         ),
                         Expanded(child: LiveTable(entries: entries)),

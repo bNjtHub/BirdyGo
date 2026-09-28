@@ -12,8 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/utils/app_icons.dart';
 import '../game/game_widgets.dart';
 import '../live/live_expected.dart';
-import '../live/listening_mode_pill.dart';
-import '../listening_mode/listening_mode_sheet.dart';
+import '../listening_mode/listening_mode.dart';
+import '../live/listening_options.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'birdy_motion.dart';
@@ -166,9 +166,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 _Section(l10n.forkGalleryBlocks, _blocks(c, l10n)),
                 _Section(l10n.forkGalleryHeaders, _headers(context, l10n)),
                 _Section(l10n.forkGalleryFilters, _filters(l10n)),
-                _Section(l10n.forkGalleryListeningMode, [
-                  _listeningMode(l10n),
-                ]),
+                _Section(l10n.forkGalleryListeningMode, [_listeningMode(l10n)]),
                 _Section(l10n.forkGalleryExpected, [_expected(l10n)]),
               ],
             ),
@@ -691,14 +689,27 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
     return [row(), const SizedBox(height: BirdySpace.m), row(floating: true)];
   }
 
-  /// Plain [ListeningModePill]: a tap opens the modes sheet via the
-  /// [ProviderScope] the gallery already runs in (see `main.dart`).
-  Widget _listeningMode(AppLocalizations l10n) => Consumer(
-    builder:
-        (context, ref, _) => ListeningModePill(
-          label: 'Normal',
-          onPressed: () => showListeningModeSheet(context, ref),
+  /// The live header's « Options d'écoute » button for Normal, Vent and
+  /// Personnalisé; a tap opens the options sheet via the [ProviderScope] the
+  /// gallery already runs in (see `main.dart`). Help and settings do nothing
+  /// here.
+  Widget _listeningMode(AppLocalizations l10n) => Wrap(
+    spacing: BirdySpace.s,
+    children: [
+      for (final mode in const [ListeningMode.normal, ListeningMode.wind, null])
+        Builder(
+          builder:
+              (context) => ListeningOptionsButton(
+                mode: mode,
+                onPressed:
+                    () => showListeningOptionsSheet(
+                      context,
+                      onHelp: () {},
+                      onSettings: () {},
+                    ),
+              ),
         ),
+    ],
   );
 
   /// One [LiveExpectedRow], built from sample data only (no model needed).

@@ -22,40 +22,87 @@ Future<void> showListeningModeSheet(BuildContext context, WidgetRef ref) {
     isScrollControlled: true,
     builder:
         (sheetContext) => ListeningModeSheet(
-          onSelected: (mode) async {
-            final l10n = AppLocalizations.of(sheetContext)!;
-            final c = BirdyColors.of(sheetContext);
-            Navigator.of(sheetContext).pop();
-            await ref.read(listeningModeProvider.notifier).select(mode);
-            messenger
-              ?..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: c.surface3,
-                  content: Row(
-                    children: [
-                      Icon(mode.icon, size: 20, color: c.accentText),
-                      const SizedBox(width: BirdySpace.s),
-                      Expanded(
-                        child: Text(
-                          l10n.forkListeningModeActivated(
-                            listeningModeLabel(l10n, mode),
-                          ),
-                          style: BirdyText.bodyCompact.copyWith(color: c.text1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-          },
+          onSelected:
+              (mode) => applyListeningModeChoice(
+                sheetContext,
+                ref,
+                mode,
+                messenger: messenger,
+              ),
         ),
   );
 }
 
-class ListeningModeSheet extends ConsumerWidget {
+/// Closes the sheet of [sheetContext], applies [mode] (listening keeps going)
+/// and confirms it in [messenger] (« Mode Vent activé »).
+Future<void> applyListeningModeChoice(
+  BuildContext sheetContext,
+  WidgetRef ref,
+  ListeningMode mode, {
+  ScaffoldMessengerState? messenger,
+}) async {
+  final l10n = AppLocalizations.of(sheetContext)!;
+  final c = BirdyColors.of(sheetContext);
+  // Read before the pop: the sheet's ref goes with it.
+  final modes = ref.read(listeningModeProvider.notifier);
+  Navigator.of(sheetContext).pop();
+  await modes.select(mode);
+  messenger
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: c.surface3,
+        content: Row(
+          children: [
+            Icon(mode.icon, size: 20, color: c.accentText),
+            const SizedBox(width: BirdySpace.s),
+            Expanded(
+              child: Text(
+                l10n.forkListeningModeActivated(listeningModeLabel(l10n, mode)),
+                style: BirdyText.bodyCompact.copyWith(color: c.text1),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+}
+
+class ListeningModeSheet extends StatelessWidget {
   const ListeningModeSheet({
+    super.key,
+    required this.onSelected,
+    this.cityEnabled = kCityModeEnabled,
+  });
+
+  final ValueChanged<ListeningMode> onSelected;
+
+  /// Whether « Ville » is offered; [kCityModeEnabled] by default.
+  final bool cityEnabled;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.gutter,
+        0,
+        BirdySpace.gutter,
+        BirdySpace.xxl,
+      ),
+      child: ListeningModeSection(
+        onSelected: onSelected,
+        cityEnabled: cityEnabled,
+      ),
+    ),
+  );
+}
+
+/// « Conditions d'écoute »: title, subtitle and one option per mode, the
+/// active one checked. The body of [ListeningModeSheet] and the first section
+/// of the live options sheet.
+class ListeningModeSection extends ConsumerWidget {
+  const ListeningModeSection({
     super.key,
     required this.onSelected,
     this.cityEnabled = kCityModeEnabled,
@@ -71,44 +118,34 @@ class ListeningModeSheet extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final active = ref.watch(activeListeningModeProvider);
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          BirdySpace.gutter,
-          0,
-          BirdySpace.gutter,
-          BirdySpace.xxl,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.forkListeningModeTitle,
+            style: BirdyText.heading.copyWith(color: c.text1),
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Semantics(
-              header: true,
-              child: Text(
-                l10n.forkListeningModeTitle,
-                style: BirdyText.heading.copyWith(color: c.text1),
-              ),
-            ),
-            const SizedBox(height: BirdySpace.xs),
-            Text(
-              l10n.forkListeningModeSubtitle,
-              style: BirdyText.caption.copyWith(color: c.text2),
-            ),
-            const SizedBox(height: BirdySpace.l),
-            for (final mode in availableListeningModes(
-              cityEnabled: cityEnabled,
-            )) ...[
-              _ModeOption(
-                mode: mode,
-                selected: mode == active,
-                onTap: () => onSelected(mode),
-              ),
-              const SizedBox(height: BirdySpace.s),
-            ],
-          ],
+        const SizedBox(height: BirdySpace.xs),
+        Text(
+          l10n.forkListeningModeSubtitle,
+          style: BirdyText.caption.copyWith(color: c.text2),
         ),
-      ),
+        const SizedBox(height: BirdySpace.l),
+        for (final mode in availableListeningModes(
+          cityEnabled: cityEnabled,
+        )) ...[
+          _ModeOption(
+            mode: mode,
+            selected: mode == active,
+            onTap: () => onSelected(mode),
+          ),
+          const SizedBox(height: BirdySpace.s),
+        ],
+      ],
     );
   }
 }
