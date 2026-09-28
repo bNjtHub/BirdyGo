@@ -256,6 +256,7 @@ class BadgeMedal extends StatelessWidget {
     required this.tier,
     this.icon,
     this.glyph,
+    this.child,
     this.size = 52,
   });
 
@@ -263,6 +264,10 @@ class BadgeMedal extends StatelessWidget {
   final int tier;
   final IconData? icon;
   final Glyph? glyph;
+
+  /// Replaces the icon/glyph face (the palmarès podium's rank number,
+  /// J6f-f), built with the medal's own ink color.
+  final Widget Function(Color ink)? child;
   final double size;
 
   @override
@@ -273,7 +278,9 @@ class BadgeMedal extends StatelessWidget {
     final rim = math.max(1.5, size / 26);
     final glyphSize = size / 2;
     final face =
-        glyph != null
+        child != null
+            ? child!(ink)
+            : glyph != null
             ? CustomPaint(
               size: Size.square(glyphSize),
               painter: _GlyphPainter(glyph!, ink),

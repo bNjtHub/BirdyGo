@@ -3,6 +3,7 @@ import 'package:birdnet_live/features/history/session_repository.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_switch.dart';
 import 'package:birdnet_live/fork/ranking/ranking_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -147,7 +148,7 @@ void main() {
   testWidgets('confirmed only and the period go to the index', (tester) async {
     await pump(tester);
     expect(index.calls.last.confirmedOnly, isFalse);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(BirdySwitch));
     await tester.pumpAndSettle();
     expect(index.calls.last.confirmedOnly, isTrue);
 

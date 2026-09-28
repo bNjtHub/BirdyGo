@@ -85,6 +85,21 @@ abstract final class BirdyMotion {
   static const Duration staggerStep = Duration(milliseconds: 40);
   static const int staggerMaxItems = 5;
 
+  /// Palmarès podium (J6f-f, `AppPalmares` mockup): fade and scale
+  /// [appearScale] → 1, no bounce (the mockup's 0.7 → 1.05 → 1 keyframes
+  /// are not used, DESIGN.md bans bounce and a scale under 0.97 except this
+  /// from-nothing case). Steps enter in visual order (2nd, 1st, 3rd).
+  static const Duration podiumPopIn = Duration(milliseconds: 380);
+  static const List<Duration> podiumPopInDelay = [
+    Duration(milliseconds: 80),
+    Duration.zero,
+    Duration(milliseconds: 160),
+  ];
+
+  /// Palmarès row bar filling in (J6f-f): capped by [staggerMaxItems] like
+  /// any other list, not the mockup's uncapped 30 ms/row.
+  static const Duration rankingBarGrow = Duration(milliseconds: 500);
+
   static const double pressScale = 0.97;
 
   /// Starting scale of an element entering.
