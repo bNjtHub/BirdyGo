@@ -1391,6 +1391,7 @@
   "forkQuickReviewScore": "Score {score}",
   "forkQuickReviewPlaying": "Lecture de l'extrait",
   "forkQuickReviewClose": "Fermer la revue",
+  "forkRankingLoading": "Chargement du palmarès",
   "forkRankingSpeciesWord": "{count, plural, =1{espèce} other{espèces}} {period}",
   "forkRankingIn30Days": "en 30 jours",
   "forkRankingThisSeason": "cette saison",

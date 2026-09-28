@@ -5302,6 +5302,8 @@
   "@forkQuickReviewPlaying": {"description": "BirdyGo fork: quick review screen (J6c)."},
   "forkQuickReviewClose": "Close the review",
   "@forkQuickReviewClose": {"description": "BirdyGo fork: quick review screen (J6c)."},
+  "forkRankingLoading": "Loading the top species",
+  "@forkRankingLoading": {"description": "BirdyGo fork: ranking loading skeleton (J6f)."},
   "forkRankingSpeciesWord": "{count, plural, =1{species} other{species}} {period}",
   "@forkRankingSpeciesWord": {"description": "BirdyGo fork: palmarès screen (J6c).", "placeholders": {"count": {"type": "int"}, "period": {"type": "String"}}},
   "forkRankingIn30Days": "in 30 days",
