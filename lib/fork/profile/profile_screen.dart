@@ -232,18 +232,22 @@ class _Ladder extends StatelessWidget {
       children: [
         LayoutBuilder(
           builder: (context, box) {
-            // Equal cells: the line runs from the first center to the last.
+            // Equal cells: one segment per gap, from one emblem's edge to
+            // the next one's, so the line never runs behind an emblem
+            // (it showed through the current status's ring gap otherwise).
             final cell = box.maxWidth / GameConfig.statuses.length;
             final size = (cell - 4).clamp(20.0, 40.0);
             return Stack(
               children: [
-                Positioned(
-                  left: cell / 2,
-                  right: cell / 2,
-                  top: size / 2 - 1,
-                  height: 2,
-                  child: ColoredBox(color: c.line),
-                ),
+                for (var i = 0; i < GameConfig.statuses.length - 1; i++)
+                  Positioned(
+                    left: cell * i + cell / 2 + size / 2,
+                    right:
+                        box.maxWidth - (cell * (i + 1) + cell / 2 - size / 2),
+                    top: size / 2 - 1,
+                    height: 2,
+                    child: ColoredBox(color: c.line),
+                  ),
                 Row(
                   children: [
                     for (final status in GameConfig.statuses)

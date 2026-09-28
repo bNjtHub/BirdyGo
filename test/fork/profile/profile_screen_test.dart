@@ -1,6 +1,8 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
+import 'package:birdnet_live/fork/game/game_widgets.dart';
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -117,6 +119,48 @@ void main() {
     expect(find.text('36 sur 50'), findsOneWidget);
     expect(find.text('Plumes à : 10 · 50 · 200'), findsOneWidget);
   });
+
+  testWidgets(
+    'ladder connector: one segment per gap, none behind an emblem (J6f-b)',
+    (tester) async {
+      await pump(tester);
+
+      // One line segment per gap between the 8 emblems, not a single line
+      // running the whole row (it used to show through the current
+      // status's ring gap).
+      final segments = tester.widgetList<Positioned>(
+        find.ancestor(
+          of: find.byType(ColoredBox),
+          matching: find.byType(Positioned),
+        ),
+      );
+      expect(segments.length, GameConfig.statuses.length - 1);
+
+      final emblemRects = [
+        for (final finder in find.byType(StatusEmblem).evaluate())
+          tester.getRect(find.byWidget(finder.widget)),
+      ];
+      for (final segmentFinder
+          in find
+              .ancestor(
+                of: find.byType(ColoredBox),
+                matching: find.byType(Positioned),
+              )
+              .evaluate()) {
+        final rect = tester.getRect(find.byWidget(segmentFinder.widget));
+        for (final emblem in emblemRects) {
+          // The segment must stop at the emblem's edges, not cross under it
+          // (only emblems on the same row as the segment can overlap it).
+          final sameRow =
+              rect.top < emblem.bottom - 1 && rect.bottom > emblem.top + 1;
+          if (!sameRow) continue;
+          final overlaps =
+              rect.left < emblem.right - 1 && rect.right > emblem.left + 1;
+          expect(overlaps, isFalse, reason: '$rect overlaps $emblem');
+        }
+      }
+    },
+  );
 
   testWidgets('before the first species', (tester) async {
     await pump(tester, progress: const GameProgress(GameFacts.empty));
