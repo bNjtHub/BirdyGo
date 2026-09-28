@@ -122,12 +122,26 @@ class HomeHero extends StatelessWidget {
                   Text(
                     l10n.forkHomeLastBirdAt(when),
                     style: BirdyText.caption.copyWith(color: c.text2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: BirdySpace.block),
-                  Text(name, style: BirdyText.title.copyWith(color: c.text1)),
+                  // Fixed line counts, shared with [HomeHeroSkeleton], so
+                  // the hero never changes height when the data lands.
+                  SizedBox(
+                    height: heroNameHeight(context),
+                    child: Text(
+                      name,
+                      style: BirdyText.title.copyWith(color: c.text1),
+                      maxLines: heroNameLines,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   Text(
                     last.scientificName,
                     style: BirdyText.latinCompact.copyWith(color: c.text2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -198,6 +212,26 @@ class HomeHero extends StatelessWidget {
   }
 }
 
+/// Lines kept for the hero's species name: two-word names wrap at 130 %.
+const int heroNameLines = 2;
+
+/// Height of [heroNameLines] lines of the hero name at the current text
+/// scale: the name always takes it, so the hero height does not depend on
+/// the name's length.
+double heroNameHeight(BuildContext context) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: List.filled(heroNameLines, 'A').join('\n'),
+      style: BirdyText.title,
+    ),
+    textScaler: MediaQuery.textScalerOf(context),
+    textDirection: Directionality.of(context),
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
+}
+
 /// Loading placeholder of [HomeHero], same [BirdySizes.heroMinHeight]
 /// minimum and padding. The common case for a returning user is a last
 /// bird already on record, so the skeleton fills that shape; a fresh
@@ -231,34 +265,28 @@ class HomeHeroSkeleton extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // No maxLines: « Dernier oiseau entendu · 07:52 »
-                      // can wrap at this narrowed width once the text
-                      // scale grows.
+                      // Same fixed line counts as [HomeHero].
                       BirdySkeleton.text(
                         BirdyText.caption,
                         placeholder: l10n.forkHomeLastBirdAt('07:52'),
-                        maxLines: null,
+                        maxLines: 1,
                       ),
                       const SizedBox(height: BirdySpace.block),
-                      // No maxLines, and a real representative two-word
-                      // name (most common names are, e.g. « Rougegorge
-                      // familier »): whether this wraps at this narrowed
-                      // width depends on the text scale exactly like the
-                      // real name would, and a run of zeros of some
-                      // arbitrary length would not track that the same
-                      // way.
-                      BirdySkeleton.text(
-                        BirdyText.title,
-                        placeholder: 'Rougegorge familier',
-                        maxLines: null,
+                      SizedBox(
+                        height: heroNameHeight(context),
+                        child: Align(
+                          alignment: AlignmentDirectional.topStart,
+                          child: BirdySkeleton.text(
+                            BirdyText.title,
+                            placeholder: 'Rougegorge familier',
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                      // No maxLines either: a two-word Latin binomial
-                      // (« Erithacus rubecula ») can also wrap once the
-                      // text scale grows.
                       BirdySkeleton.text(
                         BirdyText.latinCompact,
                         placeholder: 'Erithacus rubecula',
-                        maxLines: null,
+                        maxLines: 1,
                       ),
                     ],
                   ),
@@ -660,10 +688,7 @@ class ToCheckBlockSkeleton extends StatelessWidget {
                 ),
               ],
             ),
-            BirdySkeleton.text(
-              BirdyText.caption,
-              placeholder: '0000000000',
-            ),
+            BirdySkeleton.text(BirdyText.caption, placeholder: '0000000000'),
             BirdySkeleton.text(BirdyText.caption, placeholder: '00000000'),
           ],
         ),

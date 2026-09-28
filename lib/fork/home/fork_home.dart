@@ -313,7 +313,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       if (loadingSnapshot) {
         return (
           'last',
-          _crossFade(const HomeHeroSkeleton(key: ValueKey('home-last-skeleton'))),
+          _crossFade(
+            const HomeHeroSkeleton(key: ValueKey('home-last-skeleton')),
+          ),
         );
       }
       if (last == null) return null;
@@ -350,7 +352,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       if (loadingGame) {
         return (
           'status',
-          _crossFade(const StatusBlockSkeleton(key: ValueKey('home-status-skeleton'))),
+          _crossFade(
+            const StatusBlockSkeleton(key: ValueKey('home-status-skeleton')),
+          ),
         );
       }
       if (game == null) return null;
@@ -374,7 +378,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       if (loadingSnapshot) {
         return (
           'today',
-          _crossFade(const TodayBlockSkeleton(key: ValueKey('home-today-skeleton'))),
+          _crossFade(
+            const TodayBlockSkeleton(key: ValueKey('home-today-skeleton')),
+          ),
         );
       }
       if (snapshot.today.isEmpty) {
