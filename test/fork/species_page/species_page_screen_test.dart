@@ -161,7 +161,11 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           taxonomyServiceProvider.overrideWith(
-            (ref) async => TaxonomyService(),
+            (ref) async =>
+                TaxonomyService()..loadFromCsv(
+                  'scientific_name,common_name\n'
+                  '$_robin,Rougegorge familier',
+                ),
           ),
           effectiveSpeciesLocaleProvider.overrideWithValue('fr'),
           speciesSheetsProvider.overrideWith(
@@ -227,6 +231,9 @@ void main() {
     expect(find.text('18 h'), findsOneWidget);
     expect(find.text('Surtout vers 7 h'), findsOneWidget);
     expect(find.text('Voir sur la carte'), findsOneWidget);
+    // J6f-b fix: the label is short enough to stay on one line.
+    expect(find.text('En savoir plus'), findsOneWidget);
+    expect(find.text('En savoir plus sur cette espèce'), findsNothing);
     expect(find.textContaining('Garde le son pour toi'), findsOneWidget);
     // The upstream description gives way to the AI sheet.
     expect(find.text('Description upstream.'), findsNothing);

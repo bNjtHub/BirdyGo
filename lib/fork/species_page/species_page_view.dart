@@ -918,7 +918,9 @@ class LinksBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.speciesLearnMore,
+          // Short on purpose: on one line even at 130 % text (J6f-b fix).
+          l10n.forkFicheLearnMore,
+          maxLines: 1,
           style: BirdyText.label.copyWith(color: c.text1),
         ),
         const SizedBox(height: BirdySpace.s),

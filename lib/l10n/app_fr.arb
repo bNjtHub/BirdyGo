@@ -1379,6 +1379,7 @@
   "forkFichePeakHour": "Surtout vers {hour} h",
   "forkFicheHourDetail": "{hour} h — {count, plural, =0{aucun contact} =1{1 contact} other{{count} contacts}}",
   "forkFicheHourTotal": "{count, plural, =0{aucun contact} =1{1 contact} other{{count} contacts}} en tout",
+  "forkFicheLearnMore": "En savoir plus",
   "forkFicheNeverHeard": "Tu ne l'as pas encore entendu.",
   "forkFicheEthics": "Garde le son pour toi : un chant diffusé fort dérange les oiseaux, surtout au printemps.",
   "forkRareHereToConfirm": "Rare ici · à confirmer",
