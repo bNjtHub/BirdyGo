@@ -16,6 +16,7 @@ import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/pressable.dart';
 import 'fine_ear.dart';
 import 'fine_ear_quiz_widgets.dart';
+import 'game_config.dart';
 import 'game_progress.dart';
 import 'game_text.dart';
 import 'game_widgets.dart';
@@ -75,7 +76,7 @@ class QuizResult extends StatelessWidget {
                 const SizedBox(height: BirdySpace.m),
                 QuizRise(
                   delay: QuizMotion.cardStep * 2,
-                  child: _MedalCard(badge: badge, before: before),
+                  child: _MedalCard(badge: badge, before: before, right: right),
                 ),
                 const SizedBox(height: BirdySpace.m),
               ],
@@ -274,12 +275,29 @@ class _RecapCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Semantics(
-            header: true,
-            child: Text(
-              l10n.forkQuizRecap,
-              style: BirdyText.species.copyWith(color: c.text1),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    l10n.forkQuizRecap,
+                    style: BirdyText.species.copyWith(color: c.text1),
+                  ),
+                ),
+              ),
+              Text(
+                l10n.forkQuizFoundCount(
+                  results.where((r) => r).length,
+                ),
+                style: BirdyText.caption.copyWith(
+                  color: c.sure.foreground,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: BirdySpace.m),
           LayoutBuilder(
@@ -400,10 +418,13 @@ class _RecapBird extends StatelessWidget {
 /// Oreille fine after the round: the medal, « Nouvelle plume » when a tier
 /// was just reached, the bar filling up to the new count.
 class _MedalCard extends StatelessWidget {
-  const _MedalCard({required this.badge, required this.before});
+  const _MedalCard({required this.badge, required this.before, required this.right});
 
   final BadgeProgress badge;
   final BadgeProgress before;
+
+  /// Right answers this round (the card's « +N cette partie »).
+  final int right;
 
   @override
   Widget build(BuildContext context) {
@@ -424,10 +445,23 @@ class _MedalCard extends StatelessWidget {
         child: medal,
       );
     }
+    // The medal's own metal wash once earned; a plain card while locked. A
+    // soft blend in dark mode, the flat mockup tone in light.
+    final cardColor =
+        badge.tier == 0
+            ? c.surface1
+            : c.isDark
+            ? Color.alphaBlend(
+              GameConfig.badgeMedals[badge.tier - 1].tone.withValues(
+                alpha: 0.14,
+              ),
+              c.surface1,
+            )
+            : GameConfig.badgeMedals[badge.tier - 1].tone;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: c.surface1,
+        color: cardColor,
         borderRadius: BorderRadius.circular(BirdyRadii.card),
       ),
       child: Row(
@@ -480,11 +514,26 @@ class _MedalCard extends StatelessWidget {
                   from: newTier ? 0 : toNextTier(before),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  next == null
-                      ? l10n.forkBadgeAllTiers
-                      : l10n.forkQuizToTier(badge.value, next, badge.tier + 1),
-                  style: BirdyText.caption.copyWith(color: c.text2),
+                Text.rich(
+                  TextSpan(
+                    style: BirdyText.caption.copyWith(color: c.text2),
+                    children: [
+                      TextSpan(
+                        text: l10n.forkQuizThisRoundCount(right),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: c.sure.foreground,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            ' · ${next == null ? l10n.forkBadgeAllTiers : l10n.forkQuizToTier(badge.value, next, badge.tier + 1)}',
+                      ),
+                    ],
+                  ),
+                  style: const TextStyle(
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
                 ),
               ],
             ),
