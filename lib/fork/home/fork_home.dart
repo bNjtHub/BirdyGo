@@ -45,6 +45,7 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_loader.dart';
@@ -553,14 +554,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   /// Fades [child] in in place (no move, no scale): a skeleton replaced by
   /// its loaded content. [child]'s own key tells the switcher when to
   /// cross-fade (J6f skeletons, same pattern as the notebook screen's).
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   /// A scrolling column of [blocks]. The first
   /// [BirdyMotion.staggerMaxItems] rise once, 40 ms apart; the others, and

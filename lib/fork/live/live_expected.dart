@@ -25,12 +25,12 @@ import '../../shared/utils/app_icons.dart';
 import '../daily_goal/daily_goal_providers.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
-import '../design/birdy_motion.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/dashed_border.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../notebook/notebook_loader.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
@@ -175,14 +175,7 @@ class LiveExpectedView extends StatelessWidget {
 
   /// Fades [child] in in place: a skeleton row or caption replaced by its
   /// loaded content, no move, no scale (DESIGN.md, J6f skeletons).
-  static Widget _crossFade(Widget child) => AnimatedSwitcher(
-    duration: BirdyMotion.enter,
-    switchInCurve: BirdyMotion.standard,
-    switchOutCurve: BirdyMotion.standard,
-    transitionBuilder:
-        (child, animation) => FadeTransition(opacity: animation, child: child),
-    child: child,
-  );
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +198,8 @@ class LiveExpectedView extends StatelessWidget {
     // the tip below never moves once the real rows land. Only the rare
     // case — no geo-model, no position, or truly nothing expected — ends
     // up with fewer (or zero) rows, and the tip may then shift up.
-    final rowCount = loading ? ReliabilityConfig.liveExpectedCount : species.length;
+    final rowCount =
+        loading ? ReliabilityConfig.liveExpectedCount : species.length;
     // The caption reserves its line whenever rows do, real or skeleton, so
     // it never appears or disappears once the geo-model resolves.
     final showCaption = loading || species.isNotEmpty;
