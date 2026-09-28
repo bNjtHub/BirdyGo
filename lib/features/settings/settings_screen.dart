@@ -1436,6 +1436,9 @@ const _speciesLanguages = <String, String>{
   'et': 'Eesti',
 };
 
+// FORK: shared with the simple settings (J6g-c)
+const speciesLanguageNames = _speciesLanguages;
+
 class _SpeciesLanguageTile extends ConsumerWidget {
   const _SpeciesLanguageTile({required this.l10n});
   final AppLocalizations l10n;

@@ -1685,5 +1685,10 @@
   "forkProfileLoading": "Chargement du profil",
   "forkProfileCaption": "{species} espèces · série de {streak} jours · record {record}",
   "forkMapTitle": "Ma carte",
-  "forkMapCaption": "Tes contacts sur {period} · {places, plural, =1{1 lieu} other{{places} lieux}}"
+  "forkMapCaption": "Tes contacts sur {period} · {places, plural, =1{1 lieu} other{{places} lieux}}",
+  "forkMoreTitle": "Plus",
+  "forkMoreAdvancedTools": "Outils avancés",
+  "forkSettingsTitle": "Réglages",
+  "forkSettingsAdvanced": "Réglages avancés",
+  "forkSettingsAdvancedWarning": "Pour les experts : score, filtres, audio."
 }
