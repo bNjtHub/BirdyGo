@@ -22,6 +22,8 @@ import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart' as birdy;
@@ -449,51 +451,62 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _FilterBar(
-                  speciesLabel: _species.commonName ?? l10n.forkMapAllSpecies,
-                  speciesSelected: _species.scientificName != null,
-                  periodLabel: _periodLabel(l10n, _period),
-                  confirmedOnly: _confirmedOnly,
-                  onBack:
-                      widget.showBack
-                          ? () => Navigator.of(context).maybePop()
-                          : null,
-                  onSpecies: _pickSpecies,
-                  onPeriod: () => _pickPeriod(l10n),
-                  onConfirmed: (v) {
-                    setState(() => _confirmedOnly = v);
-                    unawaited(_load());
-                  },
-                ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.fromLTRB(
+                    BirdySpace.page,
+                    BirdySpace.page,
+                    BirdySpace.page,
+                    0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child:
-                            hasConsent
-                                ? _tilesFailing
-                                    ? _Notice(
-                                      text: l10n.forkMapTilesFailed,
-                                      action: l10n.retry,
-                                      onAction: _retryTiles,
-                                    )
-                                    : const SizedBox.shrink()
-                                : _Notice(
-                                  text: l10n.forkMapTilesOff,
-                                  action: l10n.mapTileConsentAllow,
-                                  onAction: () => _requestTileConsent(l10n),
-                                ),
+                      _MapTopCard(
+                        title: l10n.forkMapTitle,
+                        caption: l10n.forkMapCaption(
+                          _periodLabel(l10n, _period),
+                          data?.spots.map((s) => s.spot).toSet().length ?? 0,
+                        ),
+                        onBack:
+                            widget.showBack
+                                ? () => Navigator.of(context).maybePop()
+                                : null,
+                        onBaseLayer: () => _pickBaseLayer(l10n),
+                        baseLayerLabel: l10n.forkMapBaseLayer,
                       ),
-                      const SizedBox(width: 8),
-                      _MapButton(
-                        icon: AppIcons.layers,
-                        tooltip: l10n.forkMapBaseLayer,
-                        onPressed: () => _pickBaseLayer(l10n),
+                      const SizedBox(height: BirdySpace.block),
+                      _FilterBar(
+                        speciesLabel:
+                            _species.commonName ?? l10n.forkMapAllSpecies,
+                        speciesSelected: _species.scientificName != null,
+                        periodLabel: _periodLabel(l10n, _period),
+                        confirmedOnly: _confirmedOnly,
+                        onSpecies: _pickSpecies,
+                        onPeriod: () => _pickPeriod(l10n),
+                        onConfirmed: (v) {
+                          setState(() => _confirmedOnly = v);
+                          unawaited(_load());
+                        },
                       ),
                     ],
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child:
+                      hasConsent
+                          ? _tilesFailing
+                              ? _Notice(
+                                text: l10n.forkMapTilesFailed,
+                                action: l10n.retry,
+                                onAction: _retryTiles,
+                              )
+                              : const SizedBox.shrink()
+                          : _Notice(
+                            text: l10n.forkMapTilesOff,
+                            action: l10n.mapTileConsentAllow,
+                            onAction: () => _requestTileConsent(l10n),
+                          ),
                 ),
                 const Spacer(),
                 if (data != null && data.isEmpty)
@@ -539,14 +552,14 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
   }
 }
 
-/// Filter chips over the map: species, period, confirmed only.
+/// Filter chips over the map: species, period, confirmed only. White,
+/// floating, the chosen one turns tonal (J6f).
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
     required this.speciesLabel,
     required this.speciesSelected,
     required this.periodLabel,
     required this.confirmedOnly,
-    this.onBack,
     required this.onSpecies,
     required this.onPeriod,
     required this.onConfirmed,
@@ -556,9 +569,6 @@ class _FilterBar extends StatelessWidget {
   final bool speciesSelected;
   final String periodLabel;
   final bool confirmedOnly;
-
-  /// Null: no back button (map tab).
-  final VoidCallback? onBack;
   final VoidCallback onSpecies;
   final VoidCallback onPeriod;
   final ValueChanged<bool> onConfirmed;
@@ -566,39 +576,37 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       clipBehavior: Clip.none,
       child: Row(
         children: [
-          if (onBack != null) ...[
-            _MapButton(
-              icon: AppIcons.arrowBackRounded,
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: onBack!,
-            ),
-            const SizedBox(width: 8),
-          ],
-          _MapChip(
+          BirdyFilterChip(
             label: speciesLabel,
             selected: speciesSelected,
-            trailing: AppIcons.expandMore,
-            onPressed: onSpecies,
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: const Icon(AppIcons.expandMore),
+            onSelected: onSpecies,
           ),
-          const SizedBox(width: 8),
-          _MapChip(
+          const SizedBox(width: BirdySpace.s),
+          BirdyFilterChip(
             label: periodLabel,
             selected: true,
-            trailing: AppIcons.expandMore,
-            onPressed: onPeriod,
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: const Icon(AppIcons.expandMore),
+            onSelected: onPeriod,
           ),
-          const SizedBox(width: 8),
-          _MapChip(
+          const SizedBox(width: BirdySpace.s),
+          BirdyFilterChip(
             label: l10n.forkMapConfirmedOnly,
             selected: confirmedOnly,
-            toggle: true,
-            onPressed: () => onConfirmed(!confirmedOnly),
+            selectedColors: BirdyChipColors.tonal(c),
+            floating: true,
+            leading: confirmedOnly ? const Icon(AppIcons.check) : null,
+            onSelected: () => onConfirmed(!confirmedOnly),
           ),
         ],
       ),
@@ -606,79 +614,74 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-/// A 48 dp filter chip over the map (SPEC.md 5.10): selected chips take
-/// the text color as fill, toggles show a check.
-class _MapChip extends StatelessWidget {
-  const _MapChip({
-    required this.label,
-    required this.selected,
-    required this.onPressed,
-    this.trailing,
-    this.toggle = false,
+/// White floating card at the top of the map: title, caption and the
+/// « Fond de carte » button (J6f).
+class _MapTopCard extends StatelessWidget {
+  const _MapTopCard({
+    required this.title,
+    required this.caption,
+    required this.onBaseLayer,
+    required this.baseLayerLabel,
+    this.onBack,
   });
 
-  final String label;
-  final bool selected;
-  final VoidCallback onPressed;
-  final IconData? trailing;
+  final String title;
+  final String caption;
+  final VoidCallback onBaseLayer;
+  final String baseLayerLabel;
 
-  /// On/off chip: a check when selected.
-  final bool toggle;
+  /// Null: no back button (map tab).
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    final background = selected ? c.text1 : c.surface1;
-    final foreground = selected ? c.background : c.text1;
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: Pressable(
-        child: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: const StadiumBorder(),
-            shadows: c.floatShadow,
-          ),
-          child: Material(
-            color: background,
-            shape: StadiumBorder(
-              side: BorderSide(color: selected ? c.text1 : c.borderStrong),
-            ),
-            child: InkWell(
-              customBorder: const StadiumBorder(),
-              onTap: onPressed,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: BirdySizes.target),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    toggle && selected ? 12 : 16,
-                    0,
-                    trailing == null ? 16 : 12,
-                    0,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+        boxShadow: c.floatShadow,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(BirdySpace.l),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (onBack != null) ...[
+              BirdyIconButton(
+                icon: AppIcons.arrowBackRounded,
+                semanticLabel:
+                    MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: onBack!,
+              ),
+              const SizedBox(width: BirdySpace.m),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      title,
+                      style: BirdyText.heading.copyWith(color: c.text1),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (toggle && selected) ...[
-                        Icon(AppIcons.check, size: 18, color: foreground),
-                        const SizedBox(width: 6),
-                      ],
-                      Text(
-                        label,
-                        style: BirdyText.labelCompact.copyWith(
-                          color: foreground,
-                        ),
-                      ),
-                      if (trailing != null) ...[
-                        const SizedBox(width: 4),
-                        Icon(trailing, size: 20, color: foreground),
-                      ],
-                    ],
+                  const SizedBox(height: BirdySpace.xs),
+                  Text(
+                    caption,
+                    style: BirdyText.caption.copyWith(color: c.text2),
                   ),
-                ),
+                ],
               ),
             ),
-          ),
+            const SizedBox(width: BirdySpace.s),
+            BirdyIconButton(
+              icon: AppIcons.layers,
+              semanticLabel: baseLayerLabel,
+              onPressed: onBaseLayer,
+            ),
+          ],
         ),
       ),
     );
