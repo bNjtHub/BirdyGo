@@ -281,7 +281,7 @@ void main() {
       await pump(tester, textScale: 1.3);
       expect(tester.takeException(), isNull);
       expect(find.text('Revue rapide'), findsOneWidget);
-      expect(find.byTooltip('Retour'), findsOneWidget);
+      expect(find.byTooltip('Fermer'), findsOneWidget);
     },
   );
 }

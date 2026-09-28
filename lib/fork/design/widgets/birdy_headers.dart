@@ -73,6 +73,8 @@ class BirdyOverlayHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.onBack,
+    this.closing = false,
+    this.enabled = true,
     this.actions = const [],
   });
 
@@ -80,6 +82,13 @@ class BirdyOverlayHeader extends StatelessWidget {
 
   /// Defaults to popping the route.
   final VoidCallback? onBack;
+
+  /// A cross (« Fermer ») instead of the back arrow: screens that end a
+  /// flow (Bilan, Revue rapide).
+  final bool closing;
+
+  /// False greys the button out (a save in progress); it never pops then.
+  final bool enabled;
   final List<Widget> actions;
 
   @override
@@ -90,9 +99,15 @@ class BirdyOverlayHeader extends StatelessWidget {
       child: Row(
         children: [
           BirdyIconButton(
-            icon: AppIcons.arrowBackRounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+            icon: closing ? AppIcons.closeRounded : AppIcons.arrowBackRounded,
+            semanticLabel:
+                closing
+                    ? MaterialLocalizations.of(context).closeButtonTooltip
+                    : MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed:
+                enabled
+                    ? onBack ?? () => Navigator.of(context).maybePop()
+                    : null,
           ),
           const SizedBox(width: BirdySpace.m),
           Expanded(

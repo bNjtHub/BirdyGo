@@ -234,7 +234,7 @@ void main() {
 
     // J6f: the header is now `BirdyOverlayHeader`, whose back button
     // carries the system back tooltip (« Retour »), not « Terminer ».
-    await tester.tap(find.byTooltip('Retour'));
+    await tester.tap(find.byTooltip('Fermer'));
     await tester.pumpAndSettle();
     expect(find.text('Accueil'), findsOneWidget);
     expect(find.text('Bibliothèque'), findsNothing);

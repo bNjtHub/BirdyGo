@@ -152,6 +152,8 @@ class ListeningSummaryView extends StatelessWidget {
                   child: BirdyOverlayHeader(
                     title: l10n.forkSummaryTitle,
                     onBack: back,
+                    closing: true,
+                    enabled: onDone != null,
                     actions: [
                       if (onMap != null)
                         BirdyIconButton(

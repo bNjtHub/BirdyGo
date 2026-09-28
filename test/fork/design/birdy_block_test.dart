@@ -108,6 +108,25 @@ void main() {
     });
   }
 
+  testWidgets('overlay header: closing cross, disabled while saving', (
+    tester,
+  ) async {
+    var closed = 0;
+    await tester.pumpWidget(
+      _app(
+        BirdyOverlayHeader(
+          title: 'Bilan',
+          closing: true,
+          enabled: false,
+          onBack: () => closed++,
+        ),
+      ),
+    );
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fermer'));
+    expect(closed, 0);
+  });
+
   testWidgets('filter chip: 48 dp, selected state announced', (tester) async {
     var picked = false;
     await tester.pumpWidget(

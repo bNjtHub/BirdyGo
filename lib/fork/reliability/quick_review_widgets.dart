@@ -43,6 +43,7 @@ class ReviewTopBar extends StatelessWidget {
     return BirdyOverlayHeader(
       title: l10n.forkQuickReview,
       onBack: onClose,
+      closing: true,
       actions: [
         if (position != null)
           Text(
