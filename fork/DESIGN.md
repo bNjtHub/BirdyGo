@@ -160,6 +160,13 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 - N'animer que la position, l'échelle et l'opacité. `RepaintBoundary` autour du spectrogramme.
   Pas de `BackdropFilter` sur une zone qui défile : utiliser des flous calculés à l'avance.
 - Animations réduites : si `MediaQuery.disableAnimationsOf(context)` est vrai, ne garder que les fondus.
+- Exception autorisée : le quiz « Qui chante ? » (J6e, maquette « Quiz v2 », `lib/fork/game/quiz_fx.dart`)
+  a droit à un léger rebond (pop 0,6 → 1,08 → 1), aux confettis, aux boucles (oiseau qui flotte,
+  rayons qui tournent, barres de son, halo pulsé), au balancement doux d'une mauvaise réponse et à des
+  effets de plus de 500 ms (« +1 Oreille fine » 1,4 s, barre 900 ms). C'est un jeu, pas un écran de
+  terrain. Avec les animations réduites, tout s'arrête : états finaux immobiles, aucun confetti.
+  Les bruitages (jingle, fanfare) suivent l'interrupteur « Avec son / Sans son » et jamais pendant
+  une écoute Live.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 
@@ -394,6 +401,51 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
+- Quiz « Qui chante ? » v2 (`lib/fork/game/fine_ear_quiz_screen.dart`, pièces dans
+  `fine_ear_quiz_widgets.dart`, `quiz_intro.dart`, `quiz_trail.dart`, `quiz_stage.dart`,
+  `quiz_choices.dart`, `quiz_result.dart`, mouvement dans `quiz_fx.dart`, bruitages dans
+  `quiz_sfx.dart` ; maquette Claude Design « Quiz v2 ») en trois temps. Icônes d'oiseaux dessinées
+  (`assets/fork/species_icons`, `SpeciesIcons`, rendues avec flutter_svg) pour les espèces qui en ont,
+  photo ronde (`SpeciesAvatar`, crédit d'un appui) sinon ; oiseau mystère = icône « mystere »
+  éclaircie comme la maquette (`brightness(2.2)`, matrice de couleur). Couleurs propres au quiz dans
+  `BirdyQuizColors`.
+  Accueil : en-tête retour + interrupteur « Avec son / Sans son » (volume_up / volume_off, piste
+  Martin-pêcheur, choix mémorisé, `kQuizSoundPref`) qui coupe les bruitages, jamais le chant. Puits
+  sombre de 290 dp (dégradé Encre, un filet à 5 % tous les 24 px, rayon 28) : quatre de tes oiseaux
+  flottent dans les coins, au centre l'oiseau mystère (disque pointillé de 128) et cinq barres de son
+  animées. Titre en 34, une phrase, une bande blanche en trois colonnes séparées d'un filet (icône,
+  chiffre 20 en 800, libellé 13 : « 10 chants », « 4 choix », « N de tes oiseaux »), la carte Oreille
+  fine (médaille, « 5 sur 10 », barre Lichen), le bouton « C'est parti ! » de 72 dp avec sa lueur.
+  Question : une croix (« Quitter le quiz », retour à l'accueil) et le chemin de 10 étapes de 24 px
+  fixes : trait de 3 px `line` derrière, trait Martin-pêcheur par-dessus (450 ms) jusqu'au centre de
+  l'étape courante ; étapes à venir = points de 12 cerclés de 3 px de la couleur du fond (le trait ne
+  les traverse jamais), étape courante = cercle de 30 bordé Martin-pêcheur avec son numéro et un halo
+  pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
+  cercle de 20 avec une petite croix. Dessous, « Chant 3 sur 10 » et la pastille Loriot « 3 d'affilée ! ».
+  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : « Oiseau mystère », disque pointillé
+  de 116 qui flotte (±6 px, 3 s), bouton de lecture de 64 entre deux groupes de trois barres qui
+  s'animent seulement pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
+  2 × 2 de cartes de 136 dp (écart 10, rayon 24), icône de 76 sur son halo (elle rétrécit si le nom
+  prend de la place), nom en Fraunces 17 équilibré sur ses lignes. La hauteur de la scène et des cartes
+  s'adapte pour que les deux cartes du bas et « Touche l'oiseau qui chante » / « Continuer » restent
+  visibles en 360 × 640 ; défilement en dernier recours seulement.
+  Bonne réponse : confettis (package confetti, ~110, couleurs de l'oiseau + Loriot, Martin-pêcheur,
+  Lichen) partis de la carte touchée, disparus en ~2 s ; la scène passe sur la teinte claire avec des
+  rayons qui tournent (12 %, un tour en 14 s), l'oiseau apparaît (0,6 → 1,08 → 1, 500 ms), un
+  encouragement en Fraunces 34, puis « C'est bien le merle noir » (article déduit du nom,
+  `french_article.dart`, « C'est bien : Nom » si le genre est inconnu). La bonne carte passe en Lichen
+  (bordure 2,5) avec une coche et un pop, « +1 Oreille fine » s'envole (1,4 s) ; jingle et vibration
+  légère. Mauvaise réponse : carte blanche, « Presque ! », « C'était le … », la carte choisie se
+  balance (420 ms) et prend une croix Écorce, les autres passent à 40 %, la bonne en Lichen ; une
+  note douce, pas de confettis. « Réécouter » (48 dp) en haut à droite de la scène, jamais sur le texte.
+  Bilan : carte héros blanche rayon 28 dont le halo Loriot (32 % → 0 sur 190 px) est la décoration
+  même ; trois étoiles pleines (42/56/42, Loriot ou `line`) qui apparaissent l'une après l'autre, le
+  score en 64, un mot et une phrase ; « Tes oiseaux du jour » en grille 5 × 2 (en couleur avec coche,
+  grisés avec croix, en cascade de 50 ms) ; la carte Oreille fine dont la barre se remplit en 900 ms,
+  « Nouvelle plume » si un palier est franchi ; pluie de confettis et fanfare dès la moitié de bonnes
+  réponses (`GameConfig.quizPartyShare`) ; « Terminer » (contour) et « Rejouer » côte à côte.
+  Mouvement : exception autorisée aux règles de retenue (voir « Animations »), animations réduites =
+  tout est immobile et sans confettis.
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
   métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème

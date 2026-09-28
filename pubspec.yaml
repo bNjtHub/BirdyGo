@@ -85,6 +85,9 @@ dependencies:
   flutter_map_marker_cluster: ^8.2.2
   # FORK: observation index (J1, fork/PLAN.md).
   sqflite: ^2.4.4
+  # FORK: « Qui chante ? » v2 confetti and species icons (J6e, PR #45).
+  confetti: ^0.8.0
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -114,6 +117,9 @@ flutter:
     - assets/announcements/
     # FORK: AI species sheets (J4b).
     - assets/fork/
+    # FORK: quiz species icons and sound effects (J6e).
+    - assets/fork/species_icons/
+    - assets/fork/sounds/
     # FORK: OFL licenses of the bundled fonts (J6a).
     - assets/fonts/OFL-Fraunces.txt
     - assets/fonts/OFL-AtkinsonHyperlegibleNext.txt

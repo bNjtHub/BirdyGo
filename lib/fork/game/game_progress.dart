@@ -58,6 +58,7 @@ class GameFacts {
     required this.migrants,
     required this.streak,
     this.challenge,
+    this.fineEarCorrect = 0,
   });
 
   static const empty = GameFacts(
@@ -88,6 +89,9 @@ class GameFacts {
 
   /// This week's challenge; null when unknown.
   final WeeklyChallenge? challenge;
+
+  /// Right answers in the « Qui chante ? » quiz, all rounds together.
+  final int fineEarCorrect;
 }
 
 class GameProgress {
@@ -122,5 +126,6 @@ class GameProgress {
       facts.verifiedBirds
           .where((s) => GameConfig.titGenera.contains(genusOf(s)))
           .length,
+    BadgeKind.fineEar => facts.fineEarCorrect,
   };
 }

@@ -42,6 +42,7 @@ String badgeName(AppLocalizations l10n, BadgeKind kind) => switch (kind) {
   BadgeKind.migrant => l10n.forkBadgeMigrant,
   BadgeKind.streak => l10n.forkBadgeStreak,
   BadgeKind.tits => l10n.forkBadgeTits,
+  BadgeKind.fineEar => l10n.forkBadgeFineEar,
 };
 
 String badgeRule(AppLocalizations l10n, BadgeKind kind) => switch (kind) {
@@ -52,6 +53,7 @@ String badgeRule(AppLocalizations l10n, BadgeKind kind) => switch (kind) {
   BadgeKind.migrant => l10n.forkBadgeMigrantRule,
   BadgeKind.streak => l10n.forkBadgeStreakRule,
   BadgeKind.tits => l10n.forkBadgeTitsRule,
+  BadgeKind.fineEar => l10n.forkBadgeFineEarRule,
 };
 
 /// UI icon of a badge; null when it uses a glyph ([badgeGlyph]).
@@ -64,6 +66,7 @@ IconData? badgeIcon(BadgeKind kind) => switch (kind) {
   BadgeKind.streak => AppIcons.calendarToday,
   // Until the species icons of J6d.
   BadgeKind.tits => AppIcons.bird,
+  BadgeKind.fineEar => AppIcons.headphones,
 };
 
 Glyph? badgeGlyph(BadgeKind kind) =>
