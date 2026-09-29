@@ -15,6 +15,7 @@ Point Count setup uses four steps.
 Choose:
 
 - one of the available duration chips
+- whether the count continues with the screen off (on by default)
 - current GPS with :material-crosshairs-gps:
 - manual coordinates with :material-map-marker-plus:
 - no location with :material-map-marker-off:
@@ -62,8 +63,8 @@ This screen presents a short in-app checklist to run through before starting.
 
 ### 4. Ready
 
-The ready screen summarizes the selected duration and recording choice, then
-lets you start with :material-play:.
+The ready screen summarizes the selected duration, recording choice, and
+screen-off behavior, then lets you start with :material-play:.
 
 ## Live Point Count Screen
 
@@ -84,6 +85,8 @@ The live point-count screen focuses on a timed dashboard.
 - detection list
 
 ## After the Count
+
+With **Continue with screen off** on in Point Count setup, the count continues when you lock the screen or switch to another app while the screen stays on. It stops at its selected duration; the countdown uses elapsed clock time, so a suspended screen cannot lengthen the count. Android shows a persistent notification with Open and Stop actions. Turn the switch off in setup to end the count early when you lock the screen or switch to another app. Point Counts do not pause and resume because that would interrupt a timed count. If you leave the app while the count is still starting, it is canceled with a message; set it up again to start a new count. On Windows, minimizing the window does not end a count.
 
 When the point count ends, BirdNET Live opens [Session Review](session-review.md).
 It saves the Session automatically when that setting is enabled; otherwise,

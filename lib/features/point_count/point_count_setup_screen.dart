@@ -27,6 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../shared/providers/settings_providers.dart';
+import '../../shared/services/audio_background_notification.dart';
 import '../../shared/utils/locale_time_format.dart';
 import '../../shared/widgets/app_help_bottom_sheet.dart';
 import '../../shared/widgets/map_picker_screen.dart';
@@ -236,7 +237,16 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
     }
   }
 
-  void _start() {
+  bool _startPending = false;
+
+  Future<void> _start() async {
+    if (_startPending) return;
+    _startPending = true;
+    final continueWithScreenOff = ref.read(pointCountBackgroundEnabledProvider);
+    if (continueWithScreenOff) {
+      await AudioBackgroundNotificationService.ensureNotificationPermission();
+    }
+    if (!mounted) return;
     final durationMin = ref.read(pointCountDurationProvider);
     final lat = _locationChoice == _LocationChoice.skip ? null : _latitude;
     final lon = _locationChoice == _LocationChoice.skip ? null : _longitude;
@@ -253,6 +263,7 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
         builder:
             (_) => PointCountLiveScreen(
               durationMinutes: durationMin,
+              continueWithScreenOff: continueWithScreenOff,
               latitude: lat,
               longitude: lon,
               customName: name.isEmpty ? null : name,
@@ -489,6 +500,21 @@ class _DurationStep extends ConsumerWidget {
                   },
                 );
               }).toList(),
+        ),
+
+        const SizedBox(height: 20),
+        Card(
+          child: SwitchListTile(
+            title: SettingHelpTitle(
+              title: l10n.settingsLiveBackground,
+              helpBody: l10n.settingsHelpPointCountBackground,
+            ),
+            value: ref.watch(pointCountBackgroundEnabledProvider),
+            onChanged:
+                (value) => ref
+                    .read(pointCountBackgroundEnabledProvider.notifier)
+                    .set(value),
+          ),
         ),
 
         const SizedBox(height: 32),
@@ -1068,6 +1094,7 @@ class _ReadyStep extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final durationMin = ref.watch(pointCountDurationProvider);
     final recordingMode = ref.watch(pointCountRecordingModeProvider);
+    final backgroundEnabled = ref.watch(pointCountBackgroundEnabledProvider);
 
     return LayoutBuilder(
       builder:
@@ -1106,6 +1133,14 @@ class _ReadyStep extends ConsumerWidget {
                         'off' => l10n.surveyRecordingOff,
                         _ => l10n.surveyRecordingFull,
                       }}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      backgroundEnabled
+                          ? l10n.pointCountBackgroundReadyOn
+                          : l10n.pointCountBackgroundReadyOff,
+                      textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium,
                     ),
                     // Site context: place name + current weather, fetched live so

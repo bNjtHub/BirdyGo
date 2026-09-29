@@ -89,6 +89,42 @@ void main() {
       expect(container.read(recordingModeProvider), 'detections');
     });
 
+    test('background defaults are separate for Live and Point Count', () {
+      expect(container.read(liveBackgroundEnabledProvider), isFalse);
+      expect(container.read(liveBackgroundMaxMinutesProvider), 30);
+      expect(container.read(pointCountBackgroundEnabledProvider), isTrue);
+    });
+
+    test('background choices persist independently', () async {
+      await container.read(liveBackgroundEnabledProvider.notifier).set(true);
+      await container.read(liveBackgroundMaxMinutesProvider.notifier).set(60);
+      await container
+          .read(pointCountBackgroundEnabledProvider.notifier)
+          .set(false);
+      final prefs = await SharedPreferences.getInstance();
+      final reopened = ProviderContainer(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(reopened.dispose);
+
+      expect(reopened.read(liveBackgroundEnabledProvider), isTrue);
+      expect(reopened.read(liveBackgroundMaxMinutesProvider), 60);
+      expect(reopened.read(pointCountBackgroundEnabledProvider), isFalse);
+    });
+
+    test('invalid saved background limit falls back to 30 minutes', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(PrefKeys.liveBackgroundMaxMinutes, 999);
+      final reopened = ProviderContainer(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(reopened.dispose);
+
+      expect(reopened.read(liveBackgroundMaxMinutesProvider), 30);
+      await reopened.read(liveBackgroundMaxMinutesProvider.notifier).set(0);
+      expect(reopened.read(liveBackgroundMaxMinutesProvider), 30);
+    });
+
     test('clipContext defaults to 1', () {
       expect(container.read(clipContextProvider), 1);
     });

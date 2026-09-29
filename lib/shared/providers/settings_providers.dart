@@ -397,6 +397,39 @@ final liveAutoStartProvider = StateNotifierProvider<BoolSettingNotifier, bool>((
   return BoolSettingNotifier(prefs, PrefKeys.liveAutoStart, false);
 });
 
+/// Opt-in background listening for Live Mode. Point Count is independent.
+final liveBackgroundEnabledProvider =
+    StateNotifierProvider<BoolSettingNotifier, bool>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return BoolSettingNotifier(prefs, PrefKeys.liveBackgroundEnabled, false);
+    });
+
+/// Maximum length of one unattended Live Mode background interval.
+const liveBackgroundMaxMinuteOptions = [15, 30, 60, 120];
+
+final liveBackgroundMaxMinutesProvider =
+    StateNotifierProvider<LiveBackgroundMaxMinutesNotifier, int>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return LiveBackgroundMaxMinutesNotifier(prefs);
+    });
+
+class LiveBackgroundMaxMinutesNotifier extends StateNotifier<int> {
+  LiveBackgroundMaxMinutesNotifier(this._prefs) : super(_read(_prefs));
+
+  final SharedPreferences _prefs;
+
+  static int _read(SharedPreferences prefs) {
+    final value = prefs.getInt(PrefKeys.liveBackgroundMaxMinutes);
+    return liveBackgroundMaxMinuteOptions.contains(value) ? value! : 30;
+  }
+
+  Future<void> set(int minutes) async {
+    if (!liveBackgroundMaxMinuteOptions.contains(minutes)) return;
+    state = minutes;
+    await _prefs.setInt(PrefKeys.liveBackgroundMaxMinutes, minutes);
+  }
+}
+
 /// When true (default), completed Live and Point Count sessions are saved to
 /// the library automatically as soon as they finish. When false, the session
 /// opens in review as *unsaved*: the floppy-disk save icon is highlighted, the
@@ -740,6 +773,17 @@ final pointCountDurationProvider =
     StateNotifierProvider<IntSettingNotifier, int>((ref) {
       final prefs = ref.watch(sharedPreferencesProvider);
       return IntSettingNotifier(prefs, PrefKeys.pointCountDuration, 5);
+    });
+
+/// Point Counts are continuous and timed; background operation is on by default.
+final pointCountBackgroundEnabledProvider =
+    StateNotifierProvider<BoolSettingNotifier, bool>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return BoolSettingNotifier(
+        prefs,
+        PrefKeys.pointCountBackgroundEnabled,
+        true,
+      );
     });
 
 /// Point Count recording mode ('full', 'detections', 'off'; default 'full').

@@ -611,6 +611,35 @@ class SettingsScreen extends ConsumerWidget {
                   onChanged:
                       (v) => ref.read(liveAutoStartProvider.notifier).set(v),
                 ),
+              if (settingsContext == SettingsContext.live ||
+                  settingsContext == SettingsContext.all) ...[
+                SwitchListTile(
+                  title: SettingHelpTitle(
+                    title: l10n.settingsLiveBackground,
+                    helpBody: l10n.settingsHelpLiveBackground,
+                  ),
+                  subtitle: Text(l10n.settingsLiveBackgroundDescription),
+                  value: ref.watch(liveBackgroundEnabledProvider),
+                  onChanged:
+                      (v) => ref
+                          .read(liveBackgroundEnabledProvider.notifier)
+                          .set(v),
+                ),
+                if (ref.watch(liveBackgroundEnabledProvider))
+                  _ChoiceTile<int>(
+                    title: l10n.settingsLiveBackgroundMaxTime,
+                    helpBody: l10n.settingsHelpLiveBackgroundMaxTime,
+                    value: ref.watch(liveBackgroundMaxMinutesProvider),
+                    options: {
+                      for (final minutes in liveBackgroundMaxMinuteOptions)
+                        minutes: l10n.pointCountDurationMinutes(minutes),
+                    },
+                    onChanged:
+                        (v) => ref
+                            .read(liveBackgroundMaxMinutesProvider.notifier)
+                            .set(v),
+                  ),
+              ],
               const Divider(),
             ],
 
