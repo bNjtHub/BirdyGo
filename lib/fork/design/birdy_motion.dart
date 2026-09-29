@@ -100,6 +100,17 @@ abstract final class BirdyMotion {
   /// any other list, not the mockup's uncapped 30 ms/row.
   static const Duration rankingBarGrow = Duration(milliseconds: 500);
 
+  /// Loading skeleton shimmer (the only allowed loop, DESIGN.md): a diagonal
+  /// light band sweeps left to right in [shimmerSweep], then rests for
+  /// [shimmerPause]. Only while loading; static with reduced motion.
+  static const Duration shimmerSweep = Duration(milliseconds: 1100);
+  static const Duration shimmerPause = Duration(milliseconds: 300);
+  static const Curve shimmerCurve = Curves.easeInOut;
+
+  /// Band width as a share of the screen width, and its tilt in degrees.
+  static const double shimmerBandWidth = 0.5;
+  static const double shimmerTiltDegrees = 20;
+
   static const double pressScale = 0.97;
 
   /// Starting scale of an element entering.
