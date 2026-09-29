@@ -11,6 +11,7 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdygo_wordmark.dart';
 import 'birdygo_splash_painter.dart';
 import 'birdygo_warm_up.dart';
 
@@ -195,62 +196,11 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
 
   /// « Birdy », an Oriole dot, « Go » (variant « Point Loriot » of the board).
   /// The brand name is never translated.
-  Widget _wordmark(BuildContext context, AppLocalizations l10n) {
-    final scaler = MediaQuery.textScalerOf(context);
-    return Semantics(
-      label: l10n.appTitle,
-      child: ExcludeSemantics(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Birdy',
-                  style: BirdyText.display.copyWith(
-                    fontSize: 44,
-                    letterSpacing: -.8,
-                    fontVariations: const [
-                      FontVariation('SOFT', 100),
-                      FontVariation('opsz', 44),
-                    ],
-                  ),
-                ),
-                // The dot floats at mid-height of the lowercase letters.
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.baseline,
-                  baseline: TextBaseline.alphabetic,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(5, 0, 5, scaler.scale(5)),
-                    child: SizedBox.square(
-                      dimension: scaler.scale(9),
-                      child: const DecoratedBox(
-                        decoration: ShapeDecoration(
-                          color: BirdyBrand.oriole,
-                          shape: CircleBorder(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(
-                  text: 'Go',
-                  style: BirdyText.label.copyWith(
-                    fontSize: 42,
-                    height: 1.1,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ],
-            ),
-            style: TextStyle(color: _text),
-            softWrap: false,
-          ),
-        ),
-      ),
-    );
-  }
+  // FORK: reuse BirdyGoWordmark (wordmark 2c) instead of a second copy.
+  Widget _wordmark(BuildContext context, AppLocalizations l10n) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: BirdyGoWordmark(color: _text),
+  );
 
   /// The tagline enters in two beats; a screen reader hears one sentence.
   Widget _tagline(AppLocalizations l10n) {

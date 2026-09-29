@@ -586,6 +586,13 @@ dégradé `accentHi` → `accentDeep` ; bec supérieur et barre 2 : `highlight` 
 `highlightDeep` ; barres 1 et 3 : Brume ; barre 4 : `accentLight` ; notes du chant : `accent`,
 `highlightDeep`, `accentDeep`. L'œil et le reflet ne changent pas.
 
+Wordmark 2c (`BirdyGoWordmark`, accueil, écran de démarrage, onboarding) : « Birdy » en Nunito 800
+couleur encre, puis un point de diamètre 0,2 × la taille (`dotRatio`), avec la même marge de chaque
+côté (0,125 × la taille, soit 3 px à 24 ; `dotMarginRatio`), centré à mi-hauteur des minuscules
+(x-height de Nunito 0,484 em, `nunitoXHeight`), couleur `wordmarkDot` du thème ; puis « Go » en
+Nunito 900, même taille, en `accentText` (`accentTextDark` en sombre). Le point suit l'échelle du
+texte. Libellé d'accessibilité « BirdyGo », jamais traduit ; les trois parties sont exclues.
+
 ## Textes
 
 Français simple, tutoiement, phrases courtes. Une action garde le même nom partout : « Écouter »,
