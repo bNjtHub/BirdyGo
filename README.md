@@ -44,10 +44,12 @@ carnet de terrain.
 ## Ce que fait BirdyGo
 
 Tout est hors ligne : le modèle BirdNET+ (plus de 9 000 espèces) tourne sur le téléphone. Les éléments
-marqués *(en cours)* ne sont pas encore fusionnés dans la version principale.
+marqués *(en cours)* ne sont pas encore terminés.
 
 ### Écouter
 
+- **Premier lancement** en 3 pages qui expliquent l'app et demandent les autorisations (micro, position).
+- Après chaque écoute, l'app ouvre toujours le **Bilan** de la session.
 - Identification en direct avec spectrogramme défilant, et un tableau où l'oiseau entendu remonte en tête.
 - Écoute **écran éteint**, avec la position GPS suivie pendant la sortie.
 - **Modes d'écoute** : Normal, Vent et Boost (Ville est encore à l'essai).
@@ -66,32 +68,35 @@ marqués *(en cours)* ne sont pas encore fusionnés dans la version principale.
 
 ### Collectionner et apprendre
 
-- **Carnet** façon collection : les espèces découvertes en couleur, les autres en silhouette.
+- **Accueil** avec le dernier oiseau entendu, ton niveau et l'objectif du jour ; toucher « Aujourd'hui » rouvre le
+  Bilan du jour.
+- **Carnet** façon collection : les espèces découvertes en couleur, à confirmer en pointillés, les autres en silhouette.
 - **Jeu** : niveaux (« niveau »), badges, **série** de jours sans pénalité pour un jour manqué, **défi de la
   semaine**, petites célébrations pour la première rencontre d'un oiseau. Seules les détections Sûr ou
   confirmées comptent.
 - **Quiz « Qui chante ? »** : écoute un chant, devine l'oiseau, gagne le badge Oreille fine.
 - **Fiches espèces** : photo, taille, comportement, migration, comment le reconnaître à l'oreille, anecdote.
   Les textes sont rédigés à l'avance, hors ligne ; les 100 oiseaux les plus courants de France sont prêts, leur
-  relecture est *(en cours)*.
+  relecture est *(en cours)*. Le mois en cours est visible dans la fiche, qui s'ouvre en feuille refermable
+  pendant l'écoute.
 - **Palmarès** : classement par contacts, jours ou dernière écoute, activité par heure et par mois
-  (nouveau podium *(en cours)*).
+  avec un podium à médailles pour les trois premiers.
 - **Sonothèque** : tous tes meilleurs clips, par espèce, avec favoris.
+
+### Réglages et interface
+
+- Menu **« Plus »** en grandes tuiles, les outils avancés repliés.
+- **Réglages simples** (langues, thème, sons, photos en ligne, floutage), les réglages d'expert restent à part.
+- Même style partout : Objectif du jour, Oiseaux des jardins, Fiabilité, envoi LPO et Sonothèque.
+- **Squelettes de chargement** animés d'un balayage de lumière, figés si les animations sont réduites.
 
 ### Partager
 
 - **Carte** de tous tes contacts, avec les fonds OSM, Plan IGN et photos aériennes IGN.
 - **Envoi guidé à la LPO** (Faune-France) : fiche prête à reporter pour chaque observation confirmée, avec des
-  alertes pour les espèces sensibles ou rares. BirdyGo n'imite pas NaturaList et ne demande jamais ton mot de passe.
+  alertes pour les espèces sensibles ou rares. Depuis une fiche espèce, « Envoyer à Faune-France » prépare l'envoi. BirdyGo n'imite pas NaturaList et ne demande jamais ton mot de passe.
 - Mode **Oiseaux des jardins** (LPO et MNHN) avec minuteur.
 - Exports CSV, GPX, Raven et JSON (option pour flouter la position des espèces sensibles).
-
-### En cours
-
-Une série « J6g » refait l'apparence de l'app : onboarding de premier lancement en 3 pages, accueil et carnet
-restylés, menu « Plus » et réglages simples, navigation corrigée, carte restylée, écrans restants alignés sur le
-même style, squelettes de chargement animés. S'y ajoutent le nouveau podium du Palmarès et un correctif de la
-fiche espèce.
 
 ## Feuille de route
 
@@ -113,8 +118,8 @@ encore un essai sur le téléphone.
 | J6a, J6b, J6c | Design system, photos d'espèces, écrans refaits, écoute améliorée | fait |
 | J6d | Icônes d'espèces en SVG | à faire |
 | J6e | Jeu : carnet, profil, niveaux, badges, défis, quiz | fait |
-| J6f | Interface finale (accueil, écoute, modes, profil, quiz) | en cours (Palmarès, essais terrain) |
-| J6g | Onboarding, restyle accueil, carnet, menu, carte et écrans restants | en cours |
+| J6f | Interface finale (accueil, écoute, modes, profil, quiz) | fait, essais terrain restants (modes d'écoute) |
+| J6g | Critique générale : onboarding, accueil, carnet, menu, réglages, carte, écrans restants, squelettes | fait |
 | J7 | Publication Android (Play Store, licences des contenus, dernier renommage) | à faire |
 | iOS | Même code Flutter, après validation d'Android | à faire |
 

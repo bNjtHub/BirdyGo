@@ -747,7 +747,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             dans la feuille « i »).
       - [x] J6f-b Onglets et écrans par-dessus (PR « J6f-b Carnet, Profil, Carte, Fiche, Palmarès,
             Bilan, Revue : … ») : grands titres, blocs teintés, filtres colorés, en-tête retour et
-            titre 20 (croix « Fermer » pour le Bilan et la Revue).
+            titre 20 (croix « Fermer » pour le Bilan et la Revue). Fiche espèce : le mois en cours
+            est visible dans la frise (PR #57).
       - [x] J6f-c Modes d'écoute (PR « J6f-c Écoute : modes d'écoute »), `lib/fork/listening_mode/` :
             Normal, Vent (passe-haut 250 Hz), Boost (gain ×2, passe-haut 120 Hz) écrivent les réglages
             gain et passe-haut existants ; Ville (réduction des bruits continus, une ligne FORK dans
@@ -773,7 +774,31 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             lignes de 60 dp avec barre proportionnelle au premier qui pousse une fois ; nombre de
             nouvelles de l'année en Loriot ; interrupteur partagé `BirdySwitch`. Pas de boucle ni de
             rebond (DESIGN.md prime sur la maquette).
-      - [ ] (Benjamin) Téléphone : Palmarès, podium et barres, clair et sombre.
+      - [x] (Benjamin) Téléphone : Palmarès, podium et barres, clair et sombre.
+- [ ] J6g Critique générale : style unifié et navigation (une PR par chantier, titres « J6g-x … »).
+      - [x] J6g-a Premier lancement (PR « J6g-a Premier lancement : … », `lib/fork/onboarding/`) :
+            onboarding BirdyGo en 3 pages (l'app, trois cartes, Sûr / Probable / À vérifier) puis
+            autorisations (micro nécessaire, position facultative, carte en ligne coupée par défaut).
+      - [x] J6g-b Accueil et Carnet (PR « J6g-b Accueil et Carnet : … ») : style Profil (héros avec
+            halo, bloc niveau, tuiles du Carnet par état) ; « Aujourd'hui » rouvre le Bilan du jour.
+      - [x] J6g-c Menu et Réglages (PR « J6g-c Menu et Réglages : … ») : feuille « Plus » en 8
+            tuiles et « Outils avancés » repliés ; Réglages simples, réglages BirdNET en « avancés ».
+      - [x] J6g-d Écrans BirdyGo (PR « J6g-d Écrans BirdyGo : … ») : Objectif du jour, Jardin,
+            Fiabilité, envoi LPO et Sonothèque passés aux composants maison.
+      - [x] J6g-e Navigation (PR « J6g-e Navigation : … ») : toujours le Bilan après l'écoute (même
+            sans sauvegarde automatique), fiche en feuille refermable, « Envoyer à Faune-France »
+            depuis la fiche espèce.
+      - [x] J6g-f Carte (PR « J6g-f Carte : … ») : marqueurs et regroupements sur jetons
+            (`BirdyMapStyle`), feuilles au style Profil, squelette de chargement.
+      - [x] J6g-g Squelettes (PR « J6g-g Squelettes : … ») : `BirdyShimmer`, balayage de lumière
+            partagé, figé en animations réduites ; boucle autorisée dans DESIGN.md.
+      - [x] (Benjamin) Téléphone : série J6g validée.
+      - [ ] Retirer `HomeMenuEntry` et `HomeMenuSheet`, devenus inutilisés (J6g-c).
+      - [ ] Confirmer que la phrase de consentement de l'onboarding (liens Politique d'utilisation
+            acceptable et de confidentialité) remplace bien l'étape de la charte d'usage BirdNET.
+      - [ ] Envoi à Faune-France depuis la fiche : une session à la fois (pas de logique serveur
+            nouvelle) ; à revoir si le besoin se confirme.
+      - [ ] Faire passer « Aujourd'hui » par `openListeningSummary` (retour d'un seul écran).
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
