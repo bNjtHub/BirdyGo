@@ -1756,5 +1756,11 @@
   "forkListeningModeBoostDesc": "Monte le volume du micro pour les chants faibles ou lointains. Garde le téléphone immobile.",
   "forkListeningModeCityDesc": "Atténue les bruits continus : route, ventilation, pluie fine.",
   "forkListeningModeActivated": "Mode {mode} activé",
-  "forkListeningModeSelected": "Sélectionné"
+  "forkListeningModeSelected": "Sélectionné",
+  "forkUncommonHere": "Peu commun ici",
+  "forkRareHere": "Rare ici",
+  "forkExceptionalHere": "Exceptionnel ici",
+  "forkUncommonShort": "Peu commun",
+  "forkRareShort": "Rare",
+  "forkExceptionalShort": "Exceptionnel"
 }

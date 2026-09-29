@@ -802,7 +802,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
 
 - [ ] J6h Passe d'homogénéité, ligne Profil / Quiz (handoff `fork/handoff/README.md`, règles dans
       DESIGN.md « Ligne J6h »). Un écran = une PR « J6h <Écran> : … », PR empilées dans l'ordre.
-      - [ ] Socle : silhouette dans `SpeciesAvatar`, pastilles, `AppIcons`, jeton #8CD3D9 et aile,
+      - [x] Socle : silhouette dans `SpeciesAvatar`, pastilles, `AppIcons`, jeton #8CD3D9 et aile,
             ligne de liste unique, préférences `firstName` et `liveTheme`, config des heures du jour.
       - [ ] Accueil : bande « Ta journée » et son tiroir, salutation avec prénom, aile sur « Écouter ».
       - [ ] Écoute : thème clair (`liveTheme`), étiquettes de rareté, noms du spectrogramme sans chevauchement.

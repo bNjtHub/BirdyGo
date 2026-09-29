@@ -4,7 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
+import '../birdygo_silhouette.dart';
 import '../species_tint.dart';
 
 class SpeciesAvatar extends StatelessWidget {
@@ -79,5 +79,5 @@ class SpeciesAvatar extends StatelessWidget {
   );
 
   Widget _silhouette(SpeciesTint t) =>
-      Icon(AppIcons.bird, size: size * 0.6, color: t.deep, fill: 1);
+      BirdyGoSilhouetteIcon(size: size * 0.6, color: t.deep);
 }

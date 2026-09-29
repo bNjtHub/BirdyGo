@@ -91,7 +91,7 @@ class BirdyGoLogoPainter extends CustomPainter {
   static const Color plumageTop = Color(0xFF1CAEBA);
   static const Color plumageBottom = Color(0xFF0E7C86);
   static const Color lowerBeakColor = Color(0xFFE3A22B);
-  static const Color paleKingfisher = Color(0xFF8CD3D9);
+  static const Color paleKingfisher = BirdyBrand.wingSky;
 
   /// Wing bars, bottom point first (the SVG draws them upward).
   static const List<(Offset, Offset, Color)> bars = [

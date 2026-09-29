@@ -39,6 +39,12 @@ abstract final class BirdyBrand {
 
   /// Faint radial highlight over the well (Quiz v2 mockup's hero and stage).
   static const Color wellHighlight = Color(0xFF173A55);
+
+  /// The light blue bar of the logo's wing (fork/brand/birdygo-logo.svg).
+  static const Color wingSky = Color(0xFF8CD3D9);
+
+  /// Soft shadow of the wing icon (J6h): dark teal at 45 %.
+  static const Color wingShadow = Color(0x730B3C46);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -493,6 +499,12 @@ abstract final class BirdySizes {
 
   /// Minimum height of a live row, and of a compact row.
   static const double row = 72;
+
+  /// Tinted disc leading a list row (J6h [BirdyListRow]).
+  static const double rowDisc = 44;
+
+  /// Knowledge disc of the species page's « Faire connaissance » block.
+  static const double knowledgeDisc = 52;
   static const double rowCompact = 60;
 
   /// Minimum height of a collection card (notebook grid of 3).

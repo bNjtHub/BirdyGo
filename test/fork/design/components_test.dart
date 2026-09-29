@@ -1,5 +1,6 @@
 import 'package:birdnet_live/fork/design/birdy_motion.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdygo_silhouette.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/design_gallery_screen.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart';
@@ -371,7 +372,7 @@ void main() {
 
     testWidgets('avatar falls back to a silhouette', (tester) async {
       await tester.pumpWidget(_app(const Center(child: SpeciesAvatar())));
-      expect(find.byType(Icon), findsOneWidget);
+      expect(find.byType(BirdyGoSilhouetteIcon), findsOneWidget);
       expect(find.byType(ColorFiltered), findsNothing);
 
       await tester.pumpWidget(

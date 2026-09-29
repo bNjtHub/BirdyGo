@@ -39,6 +39,17 @@ void main() {
       expectAA(c.orioleText, c.orioleContainer, 'orioleText/container');
     });
 
+    test('rarity pills (J6h)', () {
+      for (final bg in [c.surface1, c.background]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
+    });
+
     test('reliability badges', () {
       for (final (name, level) in [
         ('sure', c.sure),
@@ -82,6 +93,17 @@ void main() {
         'orioleText/container',
       );
       expectAA(BirdyBrand.ink, BirdyBrand.mist, 'stop button');
+    });
+
+    test('rarity pills (J6h)', () {
+      for (final bg in [c.surface1, c.background]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
     });
 
     test('reliability badges', () {

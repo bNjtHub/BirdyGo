@@ -6033,5 +6033,17 @@
   "forkListeningModeActivated": "{mode} mode on",
   "@forkListeningModeActivated": {"description": "BirdyGo fork: listening modes (J6f).", "placeholders": {"mode": {"type": "String"}}},
   "forkListeningModeSelected": "Selected",
-  "@forkListeningModeSelected": {"description": "BirdyGo fork: listening modes (J6f)."}
+  "@forkListeningModeSelected": {"description": "BirdyGo fork: listening modes (J6f)."},
+  "forkUncommonHere": "Uncommon here",
+  "@forkUncommonHere": {"description": "BirdyGo fork: rarity pill (J6h)."},
+  "forkRareHere": "Rare here",
+  "@forkRareHere": {"description": "BirdyGo fork: rarity pill (J6h)."},
+  "forkExceptionalHere": "Exceptional here",
+  "@forkExceptionalHere": {"description": "BirdyGo fork: rarity pill (J6h)."},
+  "forkUncommonShort": "Uncommon",
+  "@forkUncommonShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkRareShort": "Rare",
+  "@forkRareShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkExceptionalShort": "Exceptional",
+  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."}
 }
