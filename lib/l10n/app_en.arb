@@ -6085,5 +6085,7 @@
   "forkDaySunsetText": "Keep listening a little longer: the tawny owl often sings at nightfall.",
   "@forkDaySunsetText": {"description": "BirdyGo fork: home day strip and sheet (J6h)."},
   "forkHomeGreetingName": "{greeting} {name}",
-  "@forkHomeGreetingName": {"description": "BirdyGo fork: home greeting with the first name (J6h).", "placeholders": {"greeting": {"type": "String"}, "name": {"type": "String"}}}
+  "@forkHomeGreetingName": {"description": "BirdyGo fork: home greeting with the first name (J6h).", "placeholders": {"greeting": {"type": "String"}, "name": {"type": "String"}}},
+  "forkLiveLightScreen": "Light screen",
+  "@forkLiveLightScreen": {"description": "BirdyGo fork: listening options sheet (J6h), switch for the light listening screen."}
 }

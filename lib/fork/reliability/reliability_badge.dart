@@ -24,6 +24,20 @@ String reliabilityLabel(AppLocalizations l10n, ReliabilityLevel level) =>
       ReliabilityLevel.toCheck => l10n.forkLevelToCheck,
     };
 
+/// True when [ReliabilityBadge] merges the level and « Inattendu ici » into
+/// the single « Rare ici · à confirmer » pill (J3b).
+bool showsRareHereToConfirm({
+  required ReliabilityLevel level,
+  required bool unexpected,
+  double? score,
+}) =>
+    level == ReliabilityLevel.toCheck &&
+    score != null &&
+    placeOnlyToCheck(
+      score: score,
+      presence: GeoPresence(unexpected: unexpected),
+    );
+
 /// Level badge: three rising bars plus short label (J6a look).
 class ReliabilityBadge extends StatelessWidget {
   const ReliabilityBadge({
@@ -32,9 +46,14 @@ class ReliabilityBadge extends StatelessWidget {
     this.unexpected = false,
     this.score,
     this.compact = false,
+    this.showUnexpectedMark = true,
   });
 
   final ReliabilityLevel level;
+
+  /// False when another tag already says why the species is unexpected
+  /// (the rarity tag of the live rows, J6h); the semantics keep the text.
+  final bool showUnexpectedMark;
 
   /// Adds the "Inattendu ici" mark.
   final bool unexpected;
@@ -53,13 +72,11 @@ class ReliabilityBadge extends StatelessWidget {
     final c = BirdyColors.of(context);
     final colors = c.level(level);
     final label = reliabilityLabel(l10n, level);
-    final rareHere =
-        level == ReliabilityLevel.toCheck &&
-        score != null &&
-        placeOnlyToCheck(
-          score: score!,
-          presence: GeoPresence(unexpected: unexpected),
-        );
+    final rareHere = showsRareHereToConfirm(
+      level: level,
+      unexpected: unexpected,
+      score: score,
+    );
     if (rareHere) return _RareHereBadge(compact: compact);
     final semantics = unexpected ? '$label, ${l10n.forkUnexpectedHere}' : label;
     final glyph = ReliabilityGlyph(level: level, color: colors.foreground);
@@ -84,7 +101,7 @@ class ReliabilityBadge extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             badge,
-            if (unexpected)
+            if (unexpected && showUnexpectedMark)
               compact
                   ? Icon(
                     AppIcons.diamond,

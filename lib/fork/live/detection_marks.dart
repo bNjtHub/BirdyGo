@@ -14,6 +14,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import 'live_heard.dart';
+import 'spectrogram_label_layout.dart';
 
 /// Time span of one detected passage.
 @immutable
@@ -169,6 +170,7 @@ class DetectionMark {
     required this.left,
     required this.right,
     required this.lane,
+    this.startsBeforeWindow = false,
   });
 
   final MarkSpan span;
@@ -177,6 +179,10 @@ class DetectionMark {
 
   /// Row of the mark when passages overlap (0 = top).
   final int lane;
+
+  /// The passage began before the visible window (J6h): [left] is clamped
+  /// to 0, and its name is not written.
+  final bool startsBeforeWindow;
 }
 
 /// Places the [spans] (sorted by start) visible in the last
@@ -210,6 +216,7 @@ List<DetectionMark> layoutDetectionMarks({
       continue;
     }
     final left = fraction(span.start);
+    final startsBefore = age(span.start) > displayMicros;
     final right = fraction(end);
     var lane = laneEnds.indexWhere((e) => e + minGap <= left);
     if (lane < 0) {
@@ -226,7 +233,15 @@ List<DetectionMark> layoutDetectionMarks({
     if (lane < laneEnds.length) {
       laneEnds[lane] = right > laneEnds[lane] ? right : laneEnds[lane];
     }
-    marks.add(DetectionMark(span: span, left: left, right: right, lane: lane));
+    marks.add(
+      DetectionMark(
+        span: span,
+        left: left,
+        right: right,
+        lane: lane,
+        startsBeforeWindow: startsBefore,
+      ),
+    );
   }
   return marks;
 }
@@ -422,29 +437,37 @@ class DetectionMarksPainter extends CustomPainter {
     }
     if (!showLabels) return;
     final labelTop = top + lanes * step + 2;
-    var freeFrom = double.negativeInfinity;
-    for (final m in marks) {
-      final left = m.left * size.width;
-      if (left < freeFrom) continue;
-      final text = _labels.putIfAbsent(
-        '${m.span.scientificName}|${m.span.label}',
-        () => TextPainter(
-          text: TextSpan(
-            text: m.span.label,
-            style: labelStyle.copyWith(
-              color: SpeciesAccents.accentOf(m.span.scientificName),
+    final texts = [
+      for (final m in marks)
+        _labels.putIfAbsent(
+          '${m.span.scientificName}|${m.span.label}',
+          () => TextPainter(
+            text: TextSpan(
+              text: m.span.label,
+              style: labelStyle.copyWith(
+                color: SpeciesAccents.accentOf(m.span.scientificName),
+              ),
             ),
-          ),
-          textDirection: textDirection,
-          textScaler: textScaler,
-          maxLines: 1,
-        )..layout(),
-      );
-      if (labelTop + text.height > size.height) break;
-      final x = left.clamp(0.0, size.width - text.width).toDouble();
-      if (x < freeFrom) continue;
-      text.paint(canvas, Offset(x, labelTop));
-      freeFrom = x + text.width + 8;
+            textDirection: textDirection,
+            textScaler: textScaler,
+            maxLines: 1,
+          )..layout(),
+        ),
+    ];
+    // J6h: names never touch (8 px), none is cut by the left edge.
+    final xs = placeMarkLabels([
+      for (var i = 0; i < marks.length; i++)
+        MarkLabelSlot(
+          left: marks[i].left * size.width,
+          width: texts[i].width,
+          startsBeforeWindow: marks[i].startsBeforeWindow,
+        ),
+    ], maxWidth: size.width);
+    for (var i = 0; i < marks.length; i++) {
+      final x = xs[i];
+      if (x == null) continue;
+      if (labelTop + texts[i].height > size.height) break;
+      texts[i].paint(canvas, Offset(x, labelTop));
     }
   }
 

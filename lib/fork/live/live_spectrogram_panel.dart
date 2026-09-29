@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme.dart';
 import '../design/birdy_tokens.dart';
 import 'detection_marks.dart';
 
@@ -46,8 +47,13 @@ class LiveSpectrogramPanel extends StatelessWidget {
   /// What a tap does (« Agrandir le spectre »).
   final String toggleLabel;
 
+  // J6h: the well stays dark on the light listening screen too (its
+  // marks, names and chevron use the dark tokens).
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      ListeningTheme(child: Builder(builder: _well));
+
+  Widget _well(BuildContext context) {
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
     const strip = DetectionMarks.heightLabeled;

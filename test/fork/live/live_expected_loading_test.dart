@@ -124,11 +124,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       _app(
-        LiveExpectedView(
-          now: _morning,
-          species: [],
-          loading: true,
-        ),
+        LiveExpectedView(now: _morning, species: [], loading: true),
         dark: dark,
         textScale: textScale,
         reduceMotion: reduceMotion,
@@ -162,19 +158,14 @@ void main() {
       final loading = _Snapshot(tester);
 
       await tester.pumpWidget(
-        _app(
-          LiveExpectedView(now: _morning, species: _five),
-          textScale: 1.3,
-        ),
+        _app(LiveExpectedView(now: _morning, species: _five), textScale: 1.3),
       );
       await tester.pump(const Duration(seconds: 1));
       loading.expectUnchanged(_Snapshot(tester));
     },
   );
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     await pumpLoading(tester, reduceMotion: true);
     final before = tester.getRect(find.byType(LiveExpectedTip));
     for (var i = 0; i < 5; i++) {

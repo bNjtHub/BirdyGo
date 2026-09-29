@@ -1782,5 +1782,6 @@
   "forkDayGoldenText": "La lumière est douce et chaude : idéal pour les photos, et les oiseaux se remettent à chanter.",
   "forkDaySunsetTitle": "Coucher du soleil",
   "forkDaySunsetText": "Écoute encore un peu après : la chouette hulotte chante souvent à la tombée de la nuit.",
-  "forkHomeGreetingName": "{greeting} {name}"
+  "forkHomeGreetingName": "{greeting} {name}",
+  "forkLiveLightScreen": "Écran clair"
 }

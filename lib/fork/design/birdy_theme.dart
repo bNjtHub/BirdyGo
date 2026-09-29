@@ -215,22 +215,28 @@ abstract final class BirdyTheme {
   }
 }
 
-/// Forces the dark theme below it: listening opens dark by default
-/// (fork/DESIGN.md). Keeps an already dark theme, and the upstream
-/// high-contrast palette when the user chose it.
+/// Forces the theme below it: listening opens dark by default
+/// (fork/DESIGN.md), or light when [light] is set (J6h « Écran clair »).
+/// Keeps an already matching theme, and the upstream high-contrast palette
+/// when the user chose it.
 class ListeningTheme extends StatelessWidget {
-  const ListeningTheme({super.key, required this.child});
+  const ListeningTheme({super.key, required this.child, this.light = false});
 
   final Widget child;
+
+  /// The user chose the light listening screen (`liveThemeProvider`).
+  final bool light;
 
   @override
   Widget build(BuildContext context) {
     final current = Theme.of(context);
-    if (current.brightness == Brightness.dark) return child;
+    final wanted = light ? Brightness.light : Brightness.dark;
+    if (current.brightness == wanted) return child;
+    final highContrast = AppTheme.isHighContrastTheme(current);
     final data =
-        AppTheme.isHighContrastTheme(current)
-            ? AppTheme.highContrastDark()
-            : BirdyTheme.dark();
+        light
+            ? (highContrast ? AppTheme.highContrastLight() : BirdyTheme.light())
+            : (highContrast ? AppTheme.highContrastDark() : BirdyTheme.dark());
     return Theme(data: data, child: child);
   }
 }
