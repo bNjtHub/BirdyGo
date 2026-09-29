@@ -1,0 +1,176 @@
+/// « New species » notifications (J6h): while the app is in the background
+/// (screen off), one local notification per species, the first time it is
+/// heard reliably (Sûr or Probable) in the current listening session.
+///
+/// Tapping a notification brings the app back on the live screen, which is
+/// still the top route: the listening never left it (J2b foreground service).
+library;
+
+import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../features/announcements/geo_commonness_provider.dart';
+import '../../features/explore/explore_providers.dart';
+import '../../features/live/live_session.dart';
+import '../../shared/providers/settings_providers.dart';
+import '../reliability/geo_presence_service.dart';
+import '../settings/fork_prefs.dart';
+import '../reliability/reliability_config.dart';
+import 'notifications_gateway.dart';
+
+/// First id of the species notifications; the group summary takes the id
+/// just below.
+const int kSpeciesNotificationBaseId = 200000;
+const int _summaryId = kSpeciesNotificationBaseId - 1;
+
+/// Localized texts, built by the live screen from AppLocalizations.
+class SpeciesNotifierStrings {
+  const SpeciesNotifierStrings({
+    required this.channelName,
+    required this.channelDescription,
+    required this.body,
+    required this.summaryTitle,
+  });
+
+  final String channelName;
+  final String channelDescription;
+
+  /// « Entendu à 7:38 · Sûr », with « · Rare ici » when [rare].
+  final String Function(DateTime heardAt, ReliabilityLevel level, bool rare)
+  body;
+
+  /// « 3 nouvelles espèces ».
+  final String Function(int count) summaryTitle;
+}
+
+class SpeciesNotifier {
+  SpeciesNotifier({
+    required NotificationsGateway gateway,
+    bool Function()? isBackground,
+  }) : _gateway = gateway,
+       _isBackground = isBackground ?? _appNotResumed;
+
+  final NotificationsGateway _gateway;
+  final bool Function() _isBackground;
+
+  String? _sessionId;
+  final Set<String> _seen = {};
+  final List<int> _posted = [];
+
+  static bool _appNotResumed() {
+    final state = WidgetsBinding.instance.lifecycleState;
+    return state != null && state != AppLifecycleState.resumed;
+  }
+
+  /// Asks the notification permission (when the switch is turned on).
+  Future<bool> requestPermission() => _gateway.requestPermission();
+
+  /// Looks at the session's [detections]. [presenceOf] gives the geo-model's
+  /// opinion for a species; [nameOf] its localized common name.
+  Future<void> onDetections({
+    required String sessionId,
+    required List<DetectionRecord> detections,
+    required bool enabled,
+    required GeoPresence? Function(String scientificName) presenceOf,
+    required String Function(DetectionRecord detection) nameOf,
+    required SpeciesNotifierStrings strings,
+  }) async {
+    if (sessionId != _sessionId) {
+      // New session: forget the old one and clear its notifications.
+      final old = List<int>.of(_posted);
+      _sessionId = sessionId;
+      _seen.clear();
+      _posted.clear();
+      if (old.isNotEmpty) await _gateway.cancel([...old, _summaryId]);
+    }
+    for (final record in detections) {
+      final name = record.scientificName;
+      if (record.isUnknown || _seen.contains(name)) continue;
+      final presence = presenceOf(name);
+      final level = reliabilityFor(
+        score: record.confidence,
+        review: record.reviewStatus,
+        presence: presence,
+      );
+      if (level == ReliabilityLevel.toCheck) continue;
+      // Heard reliably: it is no longer new, in the foreground as well.
+      _seen.add(name);
+      if (!enabled || !_isBackground()) continue;
+      final id = kSpeciesNotificationBaseId + _posted.length;
+      _posted.add(id);
+      final groupKey = 'birdygo_species_$sessionId';
+      await _gateway.show(
+        id: id,
+        title: nameOf(record),
+        body: strings.body(
+          record.timestamp,
+          level,
+          presence?.unexpected ?? false,
+        ),
+        groupKey: groupKey,
+        channelName: strings.channelName,
+        channelDescription: strings.channelDescription,
+      );
+      if (_posted.length >= 2) {
+        await _gateway.showSummary(
+          id: _summaryId,
+          title: strings.summaryTitle(_posted.length),
+          body: '',
+          groupKey: groupKey,
+          channelName: strings.channelName,
+          channelDescription: strings.channelDescription,
+        );
+      }
+    }
+  }
+}
+
+final speciesNotifierProvider = Provider<SpeciesNotifier>(
+  (ref) => SpeciesNotifier(gateway: LocalNotificationsGateway()),
+);
+
+/// Strings of the notifications from the app's localizations.
+SpeciesNotifierStrings speciesNotifierStrings(AppLocalizations l10n) =>
+    SpeciesNotifierStrings(
+      channelName: l10n.forkNewSpeciesChannel,
+      channelDescription: l10n.forkNewSpeciesChannelDesc,
+      body: (heardAt, level, rare) {
+        final time = DateFormat('H:mm').format(heardAt);
+        final label =
+            level == ReliabilityLevel.sure
+                ? l10n.forkLevelSure
+                : l10n.forkLevelProbable;
+        return rare
+            ? l10n.forkNewSpeciesBodyRare(time, label)
+            : l10n.forkNewSpeciesBody(time, label);
+      },
+      summaryTitle: l10n.forkNewSpeciesSummary,
+    );
+
+/// Feeds the notifier from the live screen after each controller update.
+Future<void> notifyNewSpecies(
+  WidgetRef ref,
+  AppLocalizations l10n,
+  LiveSession? session,
+  List<DetectionRecord> detections,
+) async {
+  if (session == null || session.practice) return;
+  final commonness = ref.read(geoCommonnessProvider).value;
+  final taxonomy = ref.read(taxonomyServiceProvider).value;
+  final locale = ref.read(effectiveSpeciesLocaleProvider);
+  await ref
+      .read(speciesNotifierProvider)
+      .onDetections(
+        sessionId: session.id,
+        detections: detections,
+        enabled: ref.read(newSpeciesNotifProvider),
+        presenceOf: (name) => livePresence(commonness, name),
+        nameOf:
+            (d) =>
+                taxonomy?.lookup(d.scientificName)?.commonNameForLocale(locale) ??
+                d.commonName,
+        strings: speciesNotifierStrings(l10n),
+      );
+}

@@ -3,6 +3,8 @@
 /// (listening modes, what the levels mean, help, settings).
 library;
 
+import 'dart:async';
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +18,7 @@ import '../listening_mode/listening_mode.dart';
 import '../listening_mode/listening_mode_config.dart';
 import '../listening_mode/listening_mode_sheet.dart';
 import '../reliability/levels_sheet.dart';
+import '../notifications/species_notifier.dart';
 import '../settings/fork_prefs.dart';
 
 /// Icon of the options button: the mode's own icon, except Normal which
@@ -143,6 +146,23 @@ class ListeningOptionsSheet extends ConsumerWidget {
                 (on) => ref
                     .read(liveThemeProvider.notifier)
                     .set(on ? LiveTheme.light : LiveTheme.dark),
+          ),
+          SwitchListTile(
+            key: const ValueKey('listening-options-notify'),
+            contentPadding: EdgeInsets.zero,
+            secondary: Icon(AppIcons.notifications, color: c.text1),
+            title: Text(
+              l10n.forkNewSpeciesSwitch,
+              style: BirdyText.label.copyWith(color: c.text1),
+            ),
+            value: ref.watch(newSpeciesNotifProvider),
+            onChanged: (on) {
+              ref.read(newSpeciesNotifProvider.notifier).set(on);
+              // Android 13+: ask the permission when the switch is used.
+              if (on) {
+                unawaited(ref.read(speciesNotifierProvider).requestPermission());
+              }
+            },
           ),
           _OptionRow(
             key: const ValueKey('listening-options-levels'),
