@@ -7,6 +7,10 @@ import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdygo_silhouette.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_block.dart'
+    show BirdyProgressRing;
+import 'package:birdnet_live/fork/game/game_widgets.dart' show SegmentedBar;
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/notebook/notebook_loader.dart';
 import 'package:birdnet_live/fork/notebook/notebook_model.dart';
@@ -333,5 +337,129 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.text('Mon carnet'), findsOneWidget);
+  });
+
+  group('tile states (J6g-b)', () {
+    testWidgets('discovered, to confirm and mystery look different', (
+      tester,
+    ) async {
+      await pump(tester);
+      final discovered = find.byKey(
+        const ValueKey('notebook-discovered-Erithacus rubecula'),
+      );
+      final toConfirm = find.byKey(
+        const ValueKey('notebook-toConfirm-Upupa epops'),
+      );
+      final mystery = find.byKey(
+        const ValueKey('notebook-mystery-Troglodytes troglodytes'),
+      );
+      expect(discovered, findsOneWidget);
+      expect(toConfirm, findsOneWidget);
+      expect(mystery, findsOneWidget);
+      // A check badge on a discovery, a question mark to confirm, the BirdyGo
+      // silhouette (no badge) for a mystery.
+      expect(
+        find.descendant(of: discovered, matching: find.byIcon(AppIcons.check)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: toConfirm,
+          matching: find.byIcon(AppIcons.question),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: mystery,
+          matching: find.byType(BirdyGoSilhouetteIcon),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: mystery, matching: find.byIcon(AppIcons.check)),
+        findsNothing,
+      );
+      // Spoken states.
+      expect(
+        find.bySemanticsLabel('Rougegorge familier. Découverte. 142 fois'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('Huppe fasciée. À confirmer. 1 fois')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a rare discovery wears a gold ring, a common one none', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        expected: const [
+          ExpectedSpecies(
+            scientificName: 'Erithacus rubecula',
+            commonName: 'Rougegorge familier',
+            score: 0.04,
+            tier: ExploreTier.rare,
+          ),
+          ExpectedSpecies(
+            scientificName: 'Dendrocopos major',
+            commonName: 'Pic épeiche',
+            score: 0.5,
+            tier: ExploreTier.common,
+          ),
+        ],
+      );
+      final robin = find.byKey(
+        const ValueKey('notebook-discovered-Erithacus rubecula'),
+      );
+      final woodpecker = find.byKey(
+        const ValueKey('notebook-discovered-Dendrocopos major'),
+      );
+      expect(
+        find.descendant(
+          of: robin,
+          matching: find.byKey(const ValueKey('notebook-metal-ring')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: woodpecker,
+          matching: find.byKey(const ValueKey('notebook-metal-ring')),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('the progress block is a ring and a segmented bar', (
+      tester,
+    ) async {
+      await pump(tester);
+      final block = find.byKey(const ValueKey('notebook-progress-block'));
+      expect(
+        find.descendant(of: block, matching: find.byType(BirdyProgressRing)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: block, matching: find.byType(SegmentedBar)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('small phone, 130 %, dark: tiles and header do not overflow', (
+      tester,
+    ) async {
+      await pump(tester, dark: true, textScale: 1.3);
+      tester.view.physicalSize = const Size(320, 640) * 2;
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(
+        find.byKey(const ValueKey('notebook-progress-block')),
+        findsOneWidget,
+      );
+      expect(tester.getSize(find.byType(NotebookScreen)).width, 320);
+    });
   });
 }

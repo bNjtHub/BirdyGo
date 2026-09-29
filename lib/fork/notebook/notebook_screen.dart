@@ -26,6 +26,7 @@ import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_card.dart';
+import '../game/game_widgets.dart' show SegmentedBar;
 import '../design/widgets/birdy_cross_fade.dart';
 import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
@@ -282,47 +283,91 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       color: c.text1,
       fontWeight: FontWeight.w700,
     );
+    const ringSize = BirdySizes.notebookRing;
+    final track = birdyTrackOnTint(c);
     return BirdyBlock(
       key: const ValueKey('notebook-progress-block'),
       tone: BirdyBlockTone.tonal,
+      radius: BirdyRadii.hero,
+      padding: const EdgeInsets.all(BirdySpace.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
             children: [
+              // Ring like the Profil « Mon niveau » one: the expected
+              // species found so far, their number in the middle.
               ready
-                  ? Text('${notebook.expectedFound}', style: numberStyle)
-                  : BirdySkeleton.text(numberStyle, placeholder: '00'),
-              const SizedBox(width: BirdySpace.s),
+                  ? Semantics(
+                    label: l10n.forkNotebookRingLabel(
+                      notebook.expectedFound,
+                      notebook.expected!,
+                    ),
+                    image: true,
+                    excludeSemantics: true,
+                    child: BirdyProgressRing(
+                      size: ringSize,
+                      stroke: 10,
+                      value: notebook.expectedFound / notebook.expected!,
+                      color: c.accent,
+                      track: track,
+                      child: Padding(
+                        padding: const EdgeInsets.all(BirdySpace.m + 4),
+                        child: FittedBox(
+                          child: Text(
+                            '${notebook.expectedFound}',
+                            style: numberStyle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  : BirdySkeleton.box(
+                    width: ringSize,
+                    height: ringSize,
+                    radius: ringSize / 2,
+                  ),
+              const SizedBox(width: BirdySpace.l),
               Expanded(
-                // Up to 2 lines: the sentence was cut with an ellipsis on
-                // one line at a normal phone width, so both the real text
-                // and its skeleton reserve the same 2 lines (never more)
-                // no matter the geo-model's digit count.
+                // Up to 3 lines, real text and skeleton alike, so the block
+                // never resizes whatever the geo-model's digit count.
                 child:
                     ready
                         ? Text(
                           l10n.forkNotebookProgressCaption(notebook.expected!),
-                          maxLines: 2,
+                          maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: captionStyle,
                         )
                         : BirdySkeleton.text(
                           captionStyle,
                           placeholder:
-                              '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                          maxLines: 2,
+                              '00000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                          maxLines: 3,
                         ),
               ),
             ],
           ),
-          const SizedBox(height: BirdySpace.s),
-          BirdyProgressBar(
-            value: ready ? notebook.expectedFound / notebook.expected! : 0,
-            color: c.accent,
-            track: c.surface1,
+          const SizedBox(height: BirdySpace.l),
+          // Segmented like the Profil's next-level bar (a continuous bar
+          // past BirdySizes.segmentBarMax expected species).
+          SizedBox(
+            height: BirdySizes.segmentHeight,
+            child: Align(
+              child:
+                  ready
+                      ? SegmentedBar(
+                        count: notebook.expected!,
+                        filled: notebook.expectedFound,
+                        color: c.accentText,
+                        track: track,
+                      )
+                      : BirdyProgressBar(
+                        value: 0,
+                        color: c.accent,
+                        track: track,
+                      ),
+            ),
           ),
           const SizedBox(height: BirdySpace.s),
           ready
@@ -369,6 +414,8 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           padding: const EdgeInsets.only(bottom: BirdySpace.block),
           child: BirdyBlock(
             tone: BirdyBlockTone.tonal,
+            radius: BirdyRadii.hero,
+            padding: const EdgeInsets.all(BirdySpace.xl),
             child: Text(
               l10n.forkNotebookNoPlace,
               style: BirdyText.body.copyWith(color: c.text1),
@@ -625,51 +672,82 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
         );
       case NotebookCardKind.toConfirm:
         final c = BirdyColors.of(context);
-        return SpeciesCard.toConfirm(
-          key: key,
-          name: card.commonName,
-          visual: NotebookVisuals.species(
-            ref,
-            card.scientificName,
-            size: visualSize,
-            muted: true,
-          ),
-          corner: _rarity(l10n, card.rarity),
-          caption: Text(
-            l10n.forkNotebookToConfirm,
-            style: TextStyle(
-              color: c.toCheck.foreground,
-              fontWeight: FontWeight.w700,
+        return Semantics(
+          container: true,
+          button: true,
+          excludeSemantics: true,
+          label:
+              '${card.commonName}. ${l10n.forkNotebookStateToConfirm}. '
+              '${l10n.forkNotebookTimes(card.contacts)}'
+              '${_rarityLabel(l10n, card.rarity)}',
+          child: SpeciesCard.toConfirm(
+            key: key,
+            name: card.commonName,
+            visual: NotebookVisuals.species(
+              ref,
+              card.scientificName,
+              size: visualSize,
+              muted: true,
+              badge: NotebookBadge.toConfirm,
             ),
+            corner: _rarity(l10n, card.rarity),
+            caption: Text(
+              l10n.forkNotebookToConfirm,
+              style: TextStyle(
+                color: c.toCheck.foreground,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            onTap: () => _openCard(card),
           ),
-          onTap: () => _openCard(card),
         );
       case NotebookCardKind.discovered:
-        return SpeciesCard(
-          key: key,
-          name: card.commonName,
-          visual: NotebookVisuals.species(
-            ref,
-            card.scientificName,
-            size: visualSize,
-          ),
-          tint: SpeciesAccents.tintOf(card.scientificName),
-          corner: _rarity(l10n, card.rarity),
-          caption: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.forkNotebookTimes(card.contacts)),
-              if (card.isNew) ...[
-                const SizedBox(height: 6),
-                const NoveltyPill(kind: NoveltyKind.isNew),
+        return Semantics(
+          container: true,
+          button: true,
+          excludeSemantics: true,
+          label:
+              '${card.commonName}. ${l10n.forkNotebookStateDiscovered}. '
+              '${l10n.forkNotebookTimes(card.contacts)}'
+              '${card.isNew ? ". ${l10n.forkNew}" : ""}'
+              '${_rarityLabel(l10n, card.rarity)}',
+          child: SpeciesCard(
+            key: key,
+            name: card.commonName,
+            visual: NotebookVisuals.species(
+              ref,
+              card.scientificName,
+              size: visualSize,
+              rarity: card.rarity,
+              badge: NotebookBadge.discovered,
+            ),
+            tint: SpeciesAccents.tintOf(card.scientificName),
+            corner: _rarity(l10n, card.rarity),
+            caption: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(l10n.forkNotebookTimes(card.contacts)),
+                if (card.isNew) ...[
+                  const SizedBox(height: 6),
+                  const NoveltyPill(kind: NoveltyKind.isNew),
+                ],
               ],
-            ],
+            ),
+            onTap: () => _openCard(card),
           ),
-          onTap: () => _openCard(card),
         );
     }
   }
+
+  /// « . Rare ici » (with its leading full stop) for a card's spoken label.
+  String _rarityLabel(AppLocalizations l10n, RarityMark mark) =>
+      switch (mark) {
+        RarityMark.none => '',
+        RarityMark.uncommon => '. ${l10n.forkRarityUncommon}',
+        RarityMark.rare => '. ${l10n.forkRarityRare}',
+        RarityMark.exceptional => '. ${l10n.forkRarityExceptional}',
+      };
 
   Widget? _rarity(AppLocalizations l10n, RarityMark mark) {
     final c = BirdyColors.of(context);
