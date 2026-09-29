@@ -826,6 +826,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Écoute : premières rencontres en série (file, « 1 sur 3 nouvelles », points, « Espèce suivante »),
             barre de décompte qui se fige en pause, retour d'arrière-plan, logo animé partagé
             (`BirdyListeningLogo`), feu d'artifice en deux salves et étincelles (`BirdySparkles`).
+      - [x] Accueil et Quiz : point du wordmark posé sur la ligne de base, « Avec effets / Sans effets »,
+            Réglages « Effets sonores du quiz ».
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.

@@ -529,7 +529,7 @@ class _GoButton extends StatelessWidget {
   }
 }
 
-/// « Avec son / Sans son »: the quiz's sound effects (never the bird song).
+/// « Avec effets / Sans effets »: the quiz's sound effects (never the bird song).
 class QuizSoundSwitch extends StatelessWidget {
   const QuizSoundSwitch({super.key, required this.on, required this.onChanged});
 
@@ -543,8 +543,8 @@ class QuizSoundSwitch extends StatelessWidget {
     final reduced = BirdyMotion.reduced(context);
     return Semantics(
       toggled: on,
-      label: l10n.forkQuizSoundSwitch,
-      value: on ? l10n.forkQuizSoundOn : l10n.forkQuizSoundOff,
+      label: l10n.forkSettingsQuizEffects,
+      value: on ? l10n.forkQuizEffectsOn : l10n.forkQuizEffectsOff,
       excludeSemantics: true,
       onTap: () => onChanged(!on),
       child: Pressable(
@@ -570,7 +570,7 @@ class QuizSoundSwitch extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        on ? l10n.forkQuizSoundOn : l10n.forkQuizSoundOff,
+                        on ? l10n.forkQuizEffectsOn : l10n.forkQuizEffectsOff,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: BirdyText.labelCompact.copyWith(color: c.text1),

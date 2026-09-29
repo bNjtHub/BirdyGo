@@ -160,7 +160,7 @@ class SimpleSettingsScreen extends ConsumerWidget {
                     BirdySwitchRow(
                       key: const ValueKey('settings-quiz-sound'),
                       icon: AppIcons.volumeUpRounded,
-                      title: l10n.forkQuizSoundSwitch,
+                      title: l10n.forkSettingsQuizEffects,
                       value: ref.watch(quizSoundOnProvider),
                       onChanged:
                           (on) =>
