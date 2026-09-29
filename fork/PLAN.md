@@ -821,6 +821,13 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Carte : puces en encre, bulle 13, retour quand elle est poussée.
       - [x] Revue : pile centrée verticalement.
       - [x] Premier lancement : étape prénom facultative.
+      - [x] J6i Icônes (Android) : 4 icônes adaptatives (fond dégradé tonal → blanc, logo du thème),
+            rendues par `test/fork/tool/render_launcher_icons_test.dart`
+            (`RENDER_LAUNCHER_ICONS=1 flutter test …`). 4 `activity-alias` (`.AliasLoriot` par défaut,
+            `.AliasMartin`, `.AliasFlamant`, `.AliasEtourneau`), canal `fr.justcodeit.birdygo/app_icon`,
+            `AppIconChannel.kt` applique le choix quand l'appli passe en arrière-plan.
+      - [ ] (Benjamin) Téléphone : l'icône change après avoir quitté l'appli, widgets et partage vers
+            l'appli fonctionnent toujours.
       - [x] Écoute : alerte « Volume coupé / Volume bas » (volume média sous `MediaVolumeConfig.lowBelow`,
             lu chaque seconde par `MediaVolume`) et bouton « Monter le son » (`comfortable`, avec le
             curseur système). Canal `fr.justcodeit.birdygo/media_volume`, `MediaVolumeChannel.kt`.
@@ -943,6 +950,14 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Volume média (J6h) : `AVAudioSession.outputVolume` en lecture seule ; iOS ne permet pas de régler
   le volume (`MPVolumeView` seulement) → bouton qui ouvre le curseur système. En attendant,
   `NoopMediaVolume` ne montre aucune alerte.
+- Icône d'appli par oiseau (J6i) : `AppIcon` (`lib/fork/app_icon/`) est un no-op hors Android
+  (`NoopAppIcon`). Côté iOS : `UIApplication.setAlternateIconName` depuis un canal Swift (même canal
+  `fr.justcodeit.birdygo/app_icon`, méthode `setIcon(bird)`), déclarer `CFBundleIcons` >
+  `CFBundleAlternateIcons` dans `Info.plist` (une entrée par oiseau : `martin`, `flamant`,
+  `etourneau`, Loriot = icône principale) et ajouter les images par thème (60x60 @2x/@3x, hors
+  catalogue d'assets, ou ensemble « Alternate App Icons » de Xcode). iOS affiche une alerte système
+  au changement : pas de report à l'arrière-plan. Le rendu des PNG existe déjà
+  (`test/fork/tool/render_launcher_icons_test.dart`, à étendre aux tailles iOS).
 - Modes d'écoute (J6f) : Dart pur, aucun code natif. Gain, filtre passe-haut et réducteur du mode
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même
