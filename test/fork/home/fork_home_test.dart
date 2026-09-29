@@ -651,6 +651,8 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       expect(screen, isA<ListeningSummaryScreen>());
       expect((screen as ListeningSummaryScreen).session.id, 'today-2');
+      // Through openListeningSummary: Back returns one level (J6 Fin).
+      expect(screen.fromLive, isFalse);
     });
 
     testWidgets('one listening: plain link', (tester) async {

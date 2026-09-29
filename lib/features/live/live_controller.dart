@@ -450,6 +450,7 @@ class LiveController {
     bool clearRingBuffer = true,
     bool forkTrackPosition = false, // FORK: GPS track (J6c)
     bool forkStartPositionUncertain = false, // FORK: GPS track (J6c)
+    String? forkListeningMode, // FORK: listening mode in the session (J6f)
   }) async {
     if (_state != LiveState.ready) return;
 
@@ -486,6 +487,7 @@ class LiveController {
         recordingMode: recordingMode.name,
         recordingFormat: recordingFormat,
         targetDurationSeconds: targetDurationSeconds,
+        listeningMode: forkListeningMode, // FORK: J6f
       ),
     );
     final startingSession = _session!;

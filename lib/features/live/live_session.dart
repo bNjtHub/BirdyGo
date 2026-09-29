@@ -63,6 +63,7 @@ class SessionSettings {
     this.targetDurationSeconds,
     this.autoStopBatteryPercent,
     this.backgroundGps,
+    this.listeningMode, // FORK: listening mode (J6f)
   });
 
   /// Window duration in seconds.
@@ -205,6 +206,10 @@ class SessionSettings {
   /// Whether Survey Mode used background GPS tracking.
   final bool? backgroundGps;
 
+  // FORK: listening mode chosen when the session started (J6f), by name:
+  // 'normal', 'wind', 'boost' or 'city'. Null for older sessions.
+  final String? listeningMode;
+
   /// Deserialize from JSON.
   factory SessionSettings.fromJson(Map<String, dynamic> json) {
     return SessionSettings(
@@ -253,6 +258,7 @@ class SessionSettings {
       targetDurationSeconds: (json['targetDurationSeconds'] as num?)?.toInt(),
       autoStopBatteryPercent: (json['autoStopBatteryPercent'] as num?)?.toInt(),
       backgroundGps: json['backgroundGps'] as bool?,
+      listeningMode: json['listeningMode'] as String?, // FORK: J6f
     );
   }
 
@@ -305,6 +311,7 @@ class SessionSettings {
     if (autoStopBatteryPercent != null)
       'autoStopBatteryPercent': autoStopBatteryPercent,
     if (backgroundGps != null) 'backgroundGps': backgroundGps,
+    if (listeningMode != null) 'listeningMode': listeningMode, // FORK: J6f
   };
 }
 
