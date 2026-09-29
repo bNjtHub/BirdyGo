@@ -146,7 +146,7 @@ class _Snapshot {
   void expectUnchanged(_Snapshot other) {
     expect(other.header, header, reason: 'header');
     expect(other.progressBlock, progressBlock, reason: 'progress block');
-    expect(other.toDiscoverBlock, toDiscoverBlock, reason: 'à découvrir block');
+    expect(other.toDiscoverBlock, toDiscoverBlock, reason: 'à trouver block');
     expect(other.rareBlock, rareBlock, reason: 'rares block');
     expect(other.filterChips, filterChips, reason: 'filter chips');
     expect(other.firstGridCell, firstGridCell, reason: 'first grid cell');
@@ -221,7 +221,7 @@ void main() {
 
     // The real numbers did take over.
     expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+    expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
   }
 
   testWidgets('light, 100 %: no layout shift as heard then expected land', (
@@ -248,7 +248,7 @@ void main() {
         find.byKey(const ValueKey('notebook-progress-block')),
       );
 
-      // Heard-based numbers (the header's "N espèces découvertes") land
+      // Heard-based numbers (the header's "N oiseaux dans ton carnet") land
       // first; the progress block ("N sur M") must still be a skeleton, at
       // its final height, since M (the geo-model's total) is not in yet.
       loader.resolveHeard();
@@ -258,8 +258,11 @@ void main() {
         tester.getRect(find.byKey(const ValueKey('notebook-progress-block'))),
         loading,
       );
-      expect(find.text('1 espèce découverte'), findsOneWidget);
-      expect(find.textContaining('sur'), findsNothing);
+      expect(find.text('1 oiseau dans ton carnet'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('notebook-progress-skeleton')),
+        findsOneWidget,
+      );
 
       // The total lands: same block, same rect, real numbers fade in.
       loader.resolveExpected();
@@ -268,7 +271,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey('notebook-progress-block'))),
         loading,
       );
-      expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+      expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
     },
   );
 
@@ -336,7 +339,7 @@ void main() {
     loader.resolveHeard();
     loader.resolveExpected();
     await tester.pumpAndSettle();
-    expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+    expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
   });
 
   testWidgets('the loading state is announced once, skeletons excluded', (

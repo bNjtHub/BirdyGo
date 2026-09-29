@@ -43,6 +43,7 @@ class BirdyFilterChip extends StatelessWidget {
     this.selectedColors,
     this.leading,
     this.floating = false,
+    this.unselectedColor,
   });
 
   final String label;
@@ -56,6 +57,9 @@ class BirdyFilterChip extends StatelessWidget {
   /// Over a map: white chips carry the float shadow.
   final bool floating;
 
+  /// Fill when not selected; white by default (Brume on a white block).
+  final Color? unselectedColor;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
@@ -67,7 +71,7 @@ class BirdyFilterChip extends StatelessWidget {
             ? (floating
                 ? Color.alphaBlend(on.background, c.surface1)
                 : on.background)
-            : c.surface1;
+            : (unselectedColor ?? c.surface1);
     final foreground = selected ? on.foreground : c.text1;
     return Semantics(
       button: true,

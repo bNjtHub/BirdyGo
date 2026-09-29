@@ -129,7 +129,8 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues(stored);
     prefs = await SharedPreferences.getInstance();
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    // Tall enough for the whole two-column grid (the sliver is lazy).
+    tester.view.physicalSize = const Size(390, 1500) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     final pushes = _Pushes();
@@ -190,7 +191,7 @@ void main() {
   ) async {
     await pump(tester);
     expect(find.text('Mon carnet'), findsOneWidget);
-    expect(find.text('2 espèces découvertes'), findsOneWidget);
+    expect(find.text('2 oiseaux dans ton carnet'), findsOneWidget);
     final progressBlock = find.byKey(const ValueKey('notebook-progress-block'));
     expect(
       find.descendant(of: progressBlock, matching: find.text('2')),
@@ -199,7 +200,7 @@ void main() {
     expect(
       find.descendant(
         of: progressBlock,
-        matching: find.text('sur 4 espèces attendues ici cette semaine'),
+        matching: find.textContaining('4 oiseaux vivent près de chez toi'),
       ),
       findsOneWidget,
     );
@@ -217,7 +218,8 @@ void main() {
     expect(prefs.getStringList(kNotebookSeenPref), hasLength(2));
     // The mystery card (Troglodyte mignon) draws the BirdyGo bird
     // silhouette, never a species-giving icon.
-    expect(find.byType(BirdyGoSilhouetteIcon), findsOneWidget);
+    // (Plus the mini one of the hero caption.)
+    expect(find.byType(BirdyGoSilhouetteIcon), findsNWidgets(2));
   });
 
   testWidgets('« Nouveau » stays until the card is opened', (tester) async {
@@ -262,7 +264,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    await pick('À découvrir');
+    await pick('À trouver');
     expect(find.text('Rougegorge familier'), findsNothing);
     expect(find.text('Huppe fasciée'), findsOneWidget);
     expect(
@@ -297,7 +299,7 @@ void main() {
   ) async {
     await pump(tester);
     // 1 species to confirm (Huppe fasciée) + 1 mystery (Troglodyte mignon).
-    await tester.tap(find.bySemanticsLabel('2 à découvrir'));
+    await tester.tap(find.bySemanticsLabel('2 à trouver'));
     await tester.pumpAndSettle();
     expect(find.text('Rougegorge familier'), findsNothing);
     expect(find.text('Huppe fasciée'), findsOneWidget);
@@ -460,6 +462,125 @@ void main() {
         findsOneWidget,
       );
       expect(tester.getSize(find.byType(NotebookScreen)).width, 320);
+    });
+  });
+
+  group('Carnet J6h', () {
+    const heard = [
+      HeardSpecies(
+        scientificName: 'Erithacus rubecula',
+        commonName: 'Rougegorge familier',
+        contacts: 3,
+        verified: true,
+        inQueue: 0,
+      ),
+      HeardSpecies(
+        scientificName: 'Dendrocopos major',
+        commonName: 'Pic épeiche',
+        contacts: 2,
+        verified: true,
+        inQueue: 0,
+      ),
+      HeardSpecies(
+        scientificName: 'Parus major',
+        commonName: 'Mésange charbonnière',
+        contacts: 1,
+        verified: true,
+        inQueue: 0,
+      ),
+      HeardSpecies(
+        scientificName: 'Upupa epops',
+        commonName: 'Huppe fasciée',
+        contacts: 1,
+        verified: false,
+        inQueue: 1,
+      ),
+    ];
+    const expected = [
+      ExpectedSpecies(
+        scientificName: 'Erithacus rubecula',
+        commonName: 'Rougegorge familier',
+        score: 0.2,
+        tier: ExploreTier.scarce,
+      ),
+      ExpectedSpecies(
+        scientificName: 'Dendrocopos major',
+        commonName: 'Pic épeiche',
+        score: 0.1,
+        tier: ExploreTier.rare,
+      ),
+      ExpectedSpecies(
+        scientificName: 'Upupa epops',
+        commonName: 'Huppe fasciée',
+        score: 0.9,
+        tier: ExploreTier.abundant,
+      ),
+      ExpectedSpecies(
+        scientificName: 'Troglodytes troglodytes',
+        commonName: 'Troglodyte mignon',
+        score: 0.8,
+        tier: ExploreTier.abundant,
+      ),
+    ];
+
+    testWidgets('rarity is written in words at the bottom of the card', (
+      tester,
+    ) async {
+      await pump(tester, heard: heard, expected: expected);
+      // Scarce = Peu commun, rare = Rare, absent from the geo-model's list
+      // = Exceptionnel. « Nouveau » is not shown (first opening seeds).
+      expect(find.text('Peu commun'), findsOneWidget);
+      expect(find.text('Rare'), findsOneWidget);
+      expect(find.text('Exceptionnel'), findsOneWidget);
+      expect(find.byIcon(AppIcons.visibility), findsOneWidget);
+      expect(find.byIcon(AppIcons.diamond), findsOneWidget);
+      expect(find.byIcon(AppIcons.star), findsOneWidget);
+      // No separate legend.
+      expect(find.text('Peu commun ici'), findsNothing);
+    });
+
+    testWidgets('the grid has two columns', (tester) async {
+      await pump(tester, heard: heard, expected: expected);
+      // Order: Huppe (to confirm), Rougegorge | Pic, mystery | Mésange.
+      Rect rect(String kind, String name) =>
+          tester.getRect(find.byKey(ValueKey('notebook-$kind-$name')));
+      final huppe = rect('toConfirm', 'Upupa epops');
+      final robin = rect('discovered', 'Erithacus rubecula');
+      final woodpecker = rect('discovered', 'Dendrocopos major');
+      final tit = rect('discovered', 'Parus major');
+      expect(robin.top, huppe.top);
+      expect(robin.left, greaterThan(huppe.right));
+      expect(woodpecker.top, greaterThan(huppe.top));
+      expect(woodpecker.left, huppe.left);
+      expect(tit.top, greaterThan(woodpecker.top));
+      expect(tit.left, huppe.left);
+    });
+
+    testWidgets('« À trouver » counts and keeps mysteries and to-confirm', (
+      tester,
+    ) async {
+      await pump(tester, heard: heard, expected: expected);
+      // Huppe (to confirm) + Troglodyte (mystery).
+      final count = find.byKey(const ValueKey('notebook-count-toDiscover'));
+      expect(
+        find.descendant(of: count, matching: find.text('2')),
+        findsOneWidget,
+      );
+      await tester.tap(count);
+      await tester.pumpAndSettle();
+      expect(find.text('Huppe fasciée'), findsOneWidget);
+      expect(find.text('Oiseau mystère'), findsOneWidget);
+      expect(find.text('Rougegorge familier'), findsNothing);
+      expect(find.text('2 cartes'), findsOneWidget);
+    });
+
+    testWidgets('the collection block carries its title and card count', (
+      tester,
+    ) async {
+      await pump(tester, heard: heard, expected: expected);
+      expect(find.text('Ma collection'), findsOneWidget);
+      expect(find.text('5 cartes'), findsOneWidget);
+      expect(find.byKey(const ValueKey('notebook-chips-fade')), findsOneWidget);
     });
   });
 }
