@@ -4,7 +4,7 @@
 </h1>
 
 <p align="center">
-  <b>Reconnais les oiseaux à leur chant, hors ligne, sur le terrain.</b>
+  <b>Reconnais les oiseaux à leur chant, hors ligne, et apprends en jouant.</b>
 </p>
 
 <p align="center">
@@ -15,13 +15,19 @@
   <a href="https://github.com/birdnet-team/birdnet-live-app"><img src="https://img.shields.io/badge/propuls%C3%A9%20par-BirdNET-13233A.svg" alt="Propulsé par BirdNET"></a>
 </p>
 
-BirdyGo est une app Flutter qui identifie les oiseaux au chant, en direct et sans connexion. C'est un fork de
-[BirdNET Live](https://github.com/birdnet-team/birdnet-live-app), l'app officielle de l'équipe BirdNET
-(Cornell Lab of Ornithology et TU Chemnitz). BirdyGo garde tout ce que BirdNET Live fait déjà et ajoute ce qui
-sert au quotidien : savoir quand l'app se trompe, réécouter ses meilleurs enregistrements, suivre ses espèces
-dans le temps et sur une carte, dans une interface pensée comme un carnet de terrain.
+BirdyGo est une app Android qui reconnaît les oiseaux à leur chant, en direct et sans connexion. Tu sors,
+tu lances l'écoute, et les oiseaux apparaissent avec leur photo. L'app te dit aussi **à quel point elle est
+sûre d'elle** (Sûr, Probable, À vérifier), garde tout dans un **carnet** qui se remplit au fil des sorties, et
+en fait un petit jeu : niveaux, badges, série de jours, défi de la semaine et quiz « Qui chante ? ». Elle est
+pensée pour être assez simple pour un enfant, et assez sérieuse pour un ornithologue amateur.
 
-> **Projet en cours.** BirdyGo n'est pas encore publié. Pour une app prête à l'emploi, installe
+C'est un fork de [BirdNET Live](https://github.com/birdnet-team/birdnet-live-app), l'app officielle de
+l'équipe BirdNET (Cornell Lab of Ornithology et TU Chemnitz). BirdyGo garde tout ce que BirdNET Live sait déjà
+faire et ajoute la vérification, la collection et l'apprentissage, dans une interface pensée comme un
+carnet de terrain.
+
+> **Projet en développement.** BirdyGo n'est pas encore publié : il s'installe pour l'instant depuis les
+> sources (voir [Démarrer](#démarrer)). Pour une app prête à l'emploi, installe
 > [BirdNET Live](https://play.google.com/store/apps/details?id=de.tu_chemnitz.mi.kahst.birdnet_live).
 
 ---
@@ -37,44 +43,80 @@ dans le temps et sur une carte, dans une interface pensée comme un carnet de te
 
 ## Ce que fait BirdyGo
 
-**Hérité de BirdNET Live**, et déjà fonctionnel :
+Tout est hors ligne : le modèle BirdNET+ (plus de 9 000 espèces) tourne sur le téléphone. Les éléments
+marqués *(en cours)* ne sont pas encore fusionnés dans la version principale.
 
-- identification en direct avec spectrogramme défilant, modèle BirdNET+ embarqué (plus de 9 000 espèces), sans internet ;
-- modes Live, Point d'écoute, Transect avec suivi GPS, analyse de fichiers audio et station fixe (ARU) ;
-- filtre géographique selon le lieu et la saison ;
-- bibliothèque de sessions, lecteur de clips, exports CSV, GPX, Raven et JSON.
+### Écouter
 
-**Ajouté par BirdyGo** (en préparation, voir la [feuille de route](#feuille-de-route)) :
+- Identification en direct avec spectrogramme défilant, et un tableau où l'oiseau entendu remonte en tête.
+- Écoute **écran éteint**, avec la position GPS suivie pendant la sortie.
+- **Modes d'écoute** : Normal, Vent et Boost (Ville est encore à l'essai).
+- **Écouter un enregistrement** déjà fait, sans qu'il compte dans tes statistiques.
+- Hérité de BirdNET Live : Point d'écoute, Transect avec GPS, analyse de fichiers, station fixe, filtre
+  géographique selon le lieu et la saison.
 
-- **Fiabilité** : trois niveaux (Sûr, Probable, À vérifier), badge « Inattendu ici », revue rapide par balayage
-  et précision mesurée sur tes propres vérifications.
-- **Réécoute** : rejouer un chant pendant l'écoute sans que le modèle ne se détecte lui-même, et une sonothèque
-  par espèce avec favoris.
-- **Palmarès** : espèces classées par contacts, jours ou dernière écoute, activité par heure et par mois.
-- **Fiches espèces** : taille, comportement, migration, anecdote, rédigées par IA à partir de Wikipédia,
-  vérifiées contre leurs sources, relues pour les plus courantes, disponibles hors ligne.
-- **Carte** : tous tes contacts sur une seule carte, avec les icônes des oiseaux et les fonds IGN.
-- **LPO** : envoi guidé des observations confirmées vers Faune-France, et un mode « Oiseaux des jardins ».
-- **Nouvelle interface** : simple, rapide et colorée grâce aux oiseaux, avec un jeu (statuts, badges,
-  carnet à compléter) et de belles animations pour les grands moments (voir [fork/DESIGN.md](fork/DESIGN.md)).
+### Vérifier
+
+- **Trois niveaux de fiabilité** partout dans l'app : Sûr, Probable, À vérifier.
+- Pastille **« Rare ici · à confirmer »** quand le géomodèle juge l'espèce peu probable à cet endroit et cette semaine.
+- **Revue rapide** : une pile de cartes à balayer pour confirmer ou écarter les détections.
+- **Précision mesurée** sur tes propres vérifications.
+- **Réécoute** d'un chant pendant l'écoute, sans que l'app détecte son propre haut-parleur. Elle sert à vérifier,
+  jamais à attirer les oiseaux.
+
+### Collectionner et apprendre
+
+- **Carnet** façon collection : les espèces découvertes en couleur, les autres en silhouette.
+- **Jeu** : niveaux (« niveau »), badges, **série** de jours sans pénalité pour un jour manqué, **défi de la
+  semaine**, petites célébrations pour la première rencontre d'un oiseau. Seules les détections Sûr ou
+  confirmées comptent.
+- **Quiz « Qui chante ? »** : écoute un chant, devine l'oiseau, gagne le badge Oreille fine.
+- **Fiches espèces** : photo, taille, comportement, migration, comment le reconnaître à l'oreille, anecdote.
+  Les textes sont rédigés à l'avance, hors ligne ; les 100 oiseaux les plus courants de France sont prêts, leur
+  relecture est *(en cours)*.
+- **Palmarès** : classement par contacts, jours ou dernière écoute, activité par heure et par mois
+  (nouveau podium *(en cours)*).
+- **Sonothèque** : tous tes meilleurs clips, par espèce, avec favoris.
+
+### Partager
+
+- **Carte** de tous tes contacts, avec les fonds OSM, Plan IGN et photos aériennes IGN.
+- **Envoi guidé à la LPO** (Faune-France) : fiche prête à reporter pour chaque observation confirmée, avec des
+  alertes pour les espèces sensibles ou rares. BirdyGo n'imite pas NaturaList et ne demande jamais ton mot de passe.
+- Mode **Oiseaux des jardins** (LPO et MNHN) avec minuteur.
+- Exports CSV, GPX, Raven et JSON (option pour flouter la position des espèces sensibles).
+
+### En cours
+
+Une série « J6g » refait l'apparence de l'app : onboarding de premier lancement en 3 pages, accueil et carnet
+restylés, menu « Plus » et réglages simples, navigation corrigée, carte restylée, écrans restants alignés sur le
+même style, squelettes de chargement animés. S'y ajoutent le nouveau podium du Palmarès et un correctif de la
+fiche espèce.
 
 ## Feuille de route
 
 Android d'abord, jusqu'à une version validée sur le Play Store, puis iOS avec le même code. Le détail de chaque
-jalon et ses critères de fin sont dans [fork/PLAN.md](fork/PLAN.md).
+jalon et ses critères de fin sont dans [fork/PLAN.md](fork/PLAN.md). Certains jalons « faits » attendent
+encore un essai sur le téléphone.
 
 | Jalon | Contenu | État |
 |---|---|---|
-| J0 | Renommage en BirdyGo, identifiant `fr.justcodeit.birdygo`, écran À propos | à faire |
-| J1 | Index des observations (SQLite dérivé des sessions) | à faire |
-| J2 | Réécoute pendant l'écoute et sonothèque | à faire |
-| J3 | Niveaux de fiabilité et revue rapide | à faire |
-| J4 | Palmarès | à faire |
-| J4b | Fiches espèces rédigées par IA | à faire |
-| J5 | Carte de tous les contacts | à faire |
-| J5b | Envoi guidé à la LPO, mode Oiseaux des jardins | à faire |
-| J6 | Refonte visuelle, icônes d'espèces, jeu | à faire |
-| J7 | Publication Android | à faire |
+| J0 | Renommage en BirdyGo, identifiant `fr.justcodeit.birdygo`, écran À propos | fait |
+| J1 | Index des observations (SQLite dérivé des sessions) | fait |
+| J2, J2b | Réécoute pendant l'écoute, sonothèque, écoute écran éteint | fait, essais terrain restants |
+| J3, J3b | Niveaux de fiabilité, revue rapide, « Rare ici » | fait |
+| J4 | Palmarès | fait |
+| J4b | Fiches espèces rédigées à l'avance | en cours (100 fiches livrées, relecture à faire) |
+| J5 | Carte de tous les contacts | fait |
+| J5b | Envoi guidé à la LPO, Oiseaux des jardins | fait |
+| J5c | Écouter un enregistrement | fait |
+| J6a, J6b, J6c | Design system, photos d'espèces, écrans refaits, écoute améliorée | fait |
+| J6d | Icônes d'espèces en SVG | à faire |
+| J6e | Jeu : carnet, profil, niveaux, badges, défis, quiz | fait |
+| J6f | Interface finale (accueil, écoute, modes, profil, quiz) | en cours (Palmarès, essais terrain) |
+| J6g | Onboarding, restyle accueil, carnet, menu, carte et écrans restants | en cours |
+| J7 | Publication Android (Play Store, licences des contenus, dernier renommage) | à faire |
+| iOS | Même code Flutter, après validation d'Android | à faire |
 
 ## Démarrer
 
@@ -105,6 +147,9 @@ git lfs pull
 ```
 
 ### Vérifier
+
+Le dossier `assets/species_data/` est déclaré dans `pubspec.yaml` mais ignoré par Git (il est généré sur le PC
+avec les photos et textes des espèces) : sans lui, `flutter analyze` et `flutter test` se plaignent d'un asset manquant.
 
 ```bash
 mkdir -p assets/species_data   # dossier généré, attendu par pubspec.yaml
@@ -151,6 +196,10 @@ affiliée à l'équipe BirdNET, au Cornell Lab ou à la TU Chemnitz, ni approuv�
 - **Usage responsable** : voir la [charte d'usage de BirdNET](ACCEPTABLE_USE.md), notamment sur la publication
   de la position d'espèces sensibles.
 - **Logo** : création originale du projet BirdyGo ([fork/brand/](fork/brand/)).
+- **Photos et textes des espèces** : les photos viennent de la taxonomie BirdNET (crédit et licence d'un appui sur
+  la photo) ou d'iNaturalist sous licence ouverte ; les fiches sont rédigées pour BirdyGo, avec Wikipédia et Wikidata
+  comme simples contrôles. Avant la publication (J7), les photos à droits réservés seront retirées et une page
+  « Licences des contenus » sera ajoutée dans À propos.
 
 Tout le mérite de la reconnaissance revient à l'équipe BirdNET, à ses financeurs et à ses partenaires, listés
 dans le [README d'origine](https://github.com/birdnet-team/birdnet-live-app#funding). Pour un usage
