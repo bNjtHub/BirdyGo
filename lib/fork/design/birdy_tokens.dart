@@ -506,6 +506,10 @@ abstract final class BirdySizes {
   /// White disc of the sound library hero (J6h).
   static const double soundHeroDisc = 76;
 
+  /// Species-tint disc leading a species page block title, and its icon.
+  static const double sectionDisc = 36;
+  static const double sectionIcon = 20;
+
   /// Knowledge disc of the species page's « Faire connaissance » block.
   static const double knowledgeDisc = 52;
 

@@ -111,4 +111,25 @@ void main() {
     await _pump(tester, _all);
     expect(find.text('Qui chante ?'), findsOneWidget);
   });
+
+  testWidgets('whyHere and confusions stay visible as their own blocks', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const SpeciesSheet(
+        name: 'Merle noir',
+        sections: {
+          SheetSection.byEar: 'Phrases flûtées.',
+          SheetSection.whyHere: 'Il aime les jardins.',
+          SheetSection.confusions: 'Le merle à plastron.',
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey('meet-extra-why_here')), findsOneWidget);
+    expect(find.text('Il aime les jardins.'), findsOneWidget);
+    expect(find.text('Le merle à plastron.'), findsOneWidget);
+    expect(find.text('Pourquoi il est là'), findsOneWidget);
+    expect(find.text('Confusions possibles'), findsOneWidget);
+  });
 }

@@ -21,6 +21,7 @@ import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import '../reliability/reliability_screen.dart';
+import 'section_title.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
 
@@ -397,10 +398,7 @@ class _HereNowCardState extends State<HereNowCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.forkFicheHereNow,
-            style: BirdyText.heading.copyWith(color: c.text1),
-          ),
+          SectionTitle(icon: AppIcons.calendarToday, text: l10n.forkFicheHereNow),
           const SizedBox(height: BirdySpace.m),
           Row(
           children: [
@@ -525,10 +523,7 @@ class MySoundsBlock extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(
-                l10n.forkFicheMySounds,
-                style: BirdyText.heading.copyWith(color: c.text1),
-              ),
+              child: SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheMySounds),
             ),
             if (onReference != null)
               FilledButton.icon(
@@ -594,15 +589,11 @@ class MySoundsBlock extends StatelessWidget {
   /// are is exactly what is still loading.
   static Widget skeleton(BuildContext context, {int rows = 2}) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     return BirdyBlock(
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.forkFicheMySounds,
-          style: BirdyText.heading.copyWith(color: c.text1),
-        ),
+        SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheMySounds),
         for (var i = 0; i < rows; i++)
           Padding(
             padding: const EdgeInsets.only(top: BirdySpace.s),
@@ -709,7 +700,6 @@ class ActivityAndMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     final activity = hours.any((h) => h > 0) ? _HourActivityCard(hours: hours) : null;
     final mapBlock =
         map == null
@@ -718,10 +708,7 @@ class ActivityAndMap extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    l10n.forkFicheMapLabel,
-                    style: BirdyText.heading.copyWith(color: c.text1),
-                  ),
+                  SectionTitle(icon: AppIcons.locationOn, text: l10n.forkFicheMapLabel),
                   const SizedBox(height: BirdySpace.m),
                   SizedBox(height: 96, child: map),
                   if (onSeeOnMap != null)
@@ -753,7 +740,6 @@ class ActivityAndMap extends StatelessWidget {
   /// the real content turns out smaller or absent.
   static Widget skeleton(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -761,10 +747,7 @@ class ActivityAndMap extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.forkActivityByHour,
-                style: BirdyText.heading.copyWith(color: c.text1),
-              ),
+              SectionTitle(icon: AppIcons.schedule, text: l10n.forkActivityByHour),
               const SizedBox(height: BirdySpace.m),
               BirdySkeleton.box(
                 width: double.infinity,
@@ -786,10 +769,7 @@ class ActivityAndMap extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.forkFicheMapLabel,
-                style: BirdyText.heading.copyWith(color: c.text1),
-              ),
+              SectionTitle(icon: AppIcons.locationOn, text: l10n.forkFicheMapLabel),
               const SizedBox(height: BirdySpace.m),
               BirdySkeleton.box(
                 width: double.infinity,
@@ -841,10 +821,7 @@ class _HourActivityCardState extends State<_HourActivityCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.forkActivityByHour,
-            style: BirdyText.heading.copyWith(color: c.text1),
-          ),
+          SectionTitle(icon: AppIcons.schedule, text: l10n.forkActivityByHour),
           const SizedBox(height: BirdySpace.m),
           ActivityBars(
             values: widget.hours,

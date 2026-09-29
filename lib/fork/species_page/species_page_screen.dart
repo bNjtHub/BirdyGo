@@ -35,6 +35,7 @@ import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
 import 'meet_species_block.dart';
+import 'section_title.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
 import 'species_page_drag_close.dart';
@@ -441,7 +442,10 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       const SpeciesPageFooter(),
     ];
 
-    final content = Center(
+    // FORK: species tint for the block titles (J6h fix)
+    final content = SpeciesTintScope(
+      tint: tint,
+      child: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: kSpeciesPageMaxWidth),
         child: Column(
@@ -481,6 +485,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
             ),
           ],
         ),
+      ),
       ),
     );
 
