@@ -97,10 +97,14 @@ void main() {
       expect(container.read(liveThemeProvider), LiveTheme.dark);
       final light = find.byKey(const ValueKey('live-theme-light'));
       await tester.ensureVisible(light);
+      await tester.pumpAndSettle();
       await tester.tap(light);
       await tester.pump();
       expect(container.read(liveThemeProvider), LiveTheme.light);
-      await tester.tap(find.byKey(const ValueKey('live-theme-dark')));
+      final dark = find.byKey(const ValueKey('live-theme-dark'));
+      await tester.ensureVisible(dark);
+      await tester.pumpAndSettle();
+      await tester.tap(dark);
       await tester.pump();
       expect(container.read(liveThemeProvider), LiveTheme.dark);
       expect(find.text(fr.forkLiveThemeCaption), findsOneWidget);
