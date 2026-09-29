@@ -18,10 +18,14 @@ class VolumeAlertBlock extends StatelessWidget {
     super.key,
     required this.state,
     required this.onRaise,
+    this.floating = false,
   });
 
   final MediaVolumeState state;
   final VoidCallback onRaise;
+
+  /// True for the toast over other content: it gets the float shadow.
+  final bool floating;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +37,9 @@ class VolumeAlertBlock extends StatelessWidget {
       liveRegion: true,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: c.surface1,
+          color: c.orioleContainer,
           borderRadius: BorderRadius.circular(BirdyRadii.card),
-          border: Border.all(color: c.border),
+          boxShadow: floating ? c.floatShadow : null,
         ),
         child: Padding(
           padding: const EdgeInsets.all(BirdySpace.m),
@@ -46,13 +50,13 @@ class VolumeAlertBlock extends StatelessWidget {
                   width: BirdySizes.alertDisc,
                   height: BirdySizes.alertDisc,
                   decoration: BoxDecoration(
-                    color: c.orioleContainer,
+                    color: c.oriole,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     muted ? AppIcons.volumeOffRounded : AppIcons.volumeDown,
                     size: BirdySizes.alertDiscIcon,
-                    color: c.orioleText,
+                    color: c.onOriole,
                   ),
                 ),
               ),
@@ -75,7 +79,11 @@ class VolumeAlertBlock extends StatelessWidget {
               const SizedBox(width: BirdySpace.s),
               Pressable(
                 child: FilledButton(
-                  style: BirdyButtonStyles.tonal(context),
+                  // The tonal pill turns oriole on the oriole tint (AA in both themes).
+                  style: BirdyButtonStyles.tonal(context).copyWith(
+                    backgroundColor: WidgetStatePropertyAll(c.oriole),
+                    foregroundColor: WidgetStatePropertyAll(c.onOriole),
+                  ),
                   onPressed: onRaise,
                   child: Text(l10n.forkVolumeRaise),
                 ),

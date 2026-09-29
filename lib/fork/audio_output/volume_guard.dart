@@ -164,6 +164,7 @@ class _VolumePromptState extends State<_VolumePrompt>
                 type: MaterialType.transparency,
                 child: VolumeAlertBlock(
                   state: widget.state,
+                  floating: true,
                   onRaise: () {
                     widget.onRaise();
                     _leave();

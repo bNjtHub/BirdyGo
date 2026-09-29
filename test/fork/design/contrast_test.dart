@@ -149,18 +149,12 @@ void main() {
       ('light', BirdyColors.light),
       ('dark', BirdyColors.dark),
     ]) {
-      expectAA(c.text1, c.surface1, '$mode title/surface1');
-      expectAA(c.text2, c.surface1, '$mode caption/surface1');
-      expectAA(
-        c.orioleText,
-        on(c.orioleContainer, c.surface1),
-        '$mode disc icon/orioleContainer',
-      );
-      expectAA(
-        c.accentText,
-        on(c.tonal, c.surface1),
-        '$mode button/tonal on surface1',
-      );
+      for (final bg in [c.background, c.surface1]) {
+        final tint = on(c.orioleContainer, bg);
+        expectAA(c.text1, tint, '$mode title/tint');
+        expectAA(c.text2, tint, '$mode caption/tint');
+      }
+      expectAA(c.onOriole, c.oriole, '$mode disc icon and button/oriole');
     }
   });
 
