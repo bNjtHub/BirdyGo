@@ -16,6 +16,7 @@ void main() {
       find.byType(BirdyGoSilhouetteIcon),
     );
     expect(icon.size, closeTo(48 * 0.6, 0.001));
+    expect(icon.role, SilhouetteRole.species);
     expect(find.byType(Image), findsNothing);
   });
 
@@ -25,5 +26,16 @@ void main() {
     );
     expect(find.byKey(const Key('own')), findsOneWidget);
     expect(find.byType(BirdyGoSilhouetteIcon), findsNothing);
+  });
+
+  testWidgets('mystery: the grey mystery bird with its « ? »', (tester) async {
+    await tester.pumpWidget(
+      _app(const Center(child: SpeciesAvatar(size: 56, mystery: true))),
+    );
+    final icon = tester.widget<BirdyGoSilhouetteIcon>(
+      find.byType(BirdyGoSilhouetteIcon),
+    );
+    expect(icon.role, SilhouetteRole.mystery);
+    expect(find.text('?'), findsOneWidget);
   });
 }

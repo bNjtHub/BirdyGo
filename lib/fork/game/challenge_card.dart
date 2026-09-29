@@ -42,7 +42,7 @@ Widget challengeGlyph(ChallengeKind kind, Color color, double size) =>
         size: size,
         color: color,
       ),
-      ChallengeKind.weekSpecies => BirdyGoSilhouetteIcon(
+      ChallengeKind.weekSpecies => BirdyGoSilhouetteIcon.glyph(
         size: size,
         color: color,
       ),

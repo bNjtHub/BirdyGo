@@ -308,7 +308,7 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
                 image: imagePath is String ? AssetImage(imagePath) : null,
                 tint: SpeciesAccents.tintOf(species.scientificName),
               )
-              : const SpeciesAvatar(size: BirdySizes.rowAvatar, muted: true),
+              : const SpeciesAvatar(size: BirdySizes.rowAvatar, mystery: true),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

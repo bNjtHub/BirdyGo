@@ -107,14 +107,14 @@ class _DaySheetState extends State<DaySheet> {
       rows: [
         row(
           moment: DayMoment.morningBirds,
-          icon: BirdyGoSilhouetteIcon(size: 24, color: c.accentText),
+          icon: BirdyGoSilhouetteIcon.glyph(size: 24, color: c.accentText),
           title: l10n.forkDayMorningTitle,
           time: range(times.morningBirds),
           text: l10n.forkDayMorningText,
         ),
         row(
           moment: DayMoment.eveningBirds,
-          icon: BirdyGoSilhouetteIcon(size: 24, color: c.accentText),
+          icon: BirdyGoSilhouetteIcon.glyph(size: 24, color: c.accentText),
           title: l10n.forkDayEveningTitle,
           time: range(times.eveningBirds),
           text: l10n.forkDayEveningText,

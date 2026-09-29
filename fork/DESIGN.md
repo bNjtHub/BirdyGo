@@ -796,8 +796,15 @@ Règles transverses :
   Nouveau, Nouveau cette année, rareté et fiabilité.
 - **Alignement.** Grand chiffre + libellé, ou titre + légende côte à côte : baseline alphabétique,
   jamais `end`.
-- **Oiseau générique.** Une espèce sans photo montre la silhouette BirdyGo (`BirdyGoSilhouetteIcon`)
-  dans la teinte `deep` de l'espèce sur son halo, pas `AppIcons.bird`.
+- **Oiseau générique : une variante par sens** (`BirdyGoSilhouetteIcon`, `SilhouetteRole`), jamais
+  `AppIcons.bird`. Un sens = un visuel, partout :
+  - `.mystery` (oiseau à découvrir : carte mystère du Carnet, oiseau du quiz, « à trouver » de l'Objectif
+    du jour, mini-silhouette du Carnet) : corps gris, pas d'aile, « ? » Loriot sur le centre de l'aile
+    (`BirdyMysteryMark`, partagé avec le quiz), masqué sous `BirdySizes.silhouetteMarkMin` (20).
+  - `.species` (espèce connue sans photo : repli de `SpeciesAvatar`) : teinte `deep` de l'espèce sur son
+    halo, avec l'aile aux couleurs du logo dès `BirdySizes.silhouetteWingMin` (32), sans en dessous.
+  - `.glyph` (icône : pastilles du bandeau du jour, feuille du jour, carte défi, « Toutes les espèces »
+    de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`

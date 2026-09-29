@@ -4,8 +4,6 @@
 /// the result live in their own files, exported here.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../../shared/models/taxonomy_species.dart';
@@ -185,12 +183,6 @@ class QuizMysteryDisc extends StatelessWidget {
   final double size;
   final double silhouette;
 
-  /// The « ? » is [BirdySizes.quizMark] tall on a [_markRef] silhouette (the
-  /// intro's disc at full size) and scales with it; tilted like the mockup
-  /// (degrees).
-  static const double _markRef = 104;
-  static const double _markTilt = -8;
-
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: CustomPaint(
@@ -205,32 +197,9 @@ class QuizMysteryDisc extends StatelessWidget {
           shape: BoxShape.circle,
           color: BirdyBrand.mist.withValues(alpha: 0.08),
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            BirdyGoSilhouetteIcon(
-              size: silhouette,
-              color: BirdyBrand.mist.withValues(alpha: 0.35),
-              muted: true,
-            ),
-            // Centered on the bird's wing, not on the disc: the mark reads
-            // as sitting on the bird's body whatever the disc's margin.
-            Transform.translate(
-              offset: birdyGoWingCenter * silhouette,
-              child: Transform.rotate(
-                angle: _markTilt * math.pi / 180,
-                child: Text(
-                  '?',
-                  style: BirdyText.display.copyWith(
-                    fontSize: BirdySizes.quizMark * silhouette / _markRef,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                    color: BirdyBrand.oriole,
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: BirdyGoSilhouetteIcon.mystery(
+          size: silhouette,
+          color: BirdyBrand.mist.withValues(alpha: 0.35),
         ),
       ),
     ),
