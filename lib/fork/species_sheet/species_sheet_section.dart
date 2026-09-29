@@ -12,9 +12,10 @@ String sheetSectionTitle(AppLocalizations l10n, SheetSection section) =>
     switch (section) {
       SheetSection.summary => l10n.forkSheetSummary,
       SheetSection.size => l10n.forkSheetSize,
-      SheetSection.behaviour => l10n.forkSheetBehaviour,
+      SheetSection.behaviour => l10n.forkSheetHabits,
       SheetSection.whyHere => l10n.forkSheetWhyHere,
       SheetSection.migration => l10n.forkSheetMigration,
+      SheetSection.enemies => l10n.forkSheetEnemies,
       SheetSection.byEar => l10n.forkSheetByEar,
       SheetSection.confusions => l10n.forkSheetConfusions,
       SheetSection.anecdote => l10n.forkSheetAnecdote,

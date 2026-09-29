@@ -77,14 +77,14 @@
     <div style="background:#FFFFFF;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:birdyIn .3s .12s both">
       <div style="display:flex;align-items:center;gap:8px"><div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Fais sa connaissance</div><span style="font-size:13px;font-weight:700;color:#0B6E77;font-variant-numeric:tabular-nums">{{ app.fiche.chipStep }}</span></div>
       <div style="font-size:15px;line-height:1.45;color:#6B5847">{{ app.fiche.summary }}</div>
-      <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px">
-        <sc-for list="{{ app.fiche.chips }}" as="ch" hint-placeholder-count="5">
-          <button onClick="{{ ch.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0" style-active="transform:scale(.94)">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 4px">
+        <sc-for list="{{ app.fiche.chips }}" as="ch" hint-placeholder-count="6">
+          <button onClick="{{ ch.pick }}" style="all:unset;cursor:pointer;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0" style-active="transform:scale(.94)">
             <div style="position:relative;width:52px;height:52px;border-radius:999px;background:{{ ch.bg }};box-shadow:{{ ch.ring }};display:flex;align-items:center;justify-content:center;transition:all .18s">
               <span class="ms" style="font-size:26px;color:{{ ch.ink }};font-variation-settings:'FILL' {{ ch.fill }}">{{ ch.icon }}</span>
               <div style="position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:999px;background:#9DB46A;border:2px solid #FFFFFF;box-sizing:border-box;display:flex;align-items:center;justify-content:center;opacity:{{ ch.seen }}"><span class="ms" style="font-size:11px;color:#13233A;font-variation-settings:'wght' 700">check</span></div>
             </div>
-            <span style="font-size:13px;line-height:1.2;font-weight:{{ ch.weight }};text-align:center">{{ ch.label }}</span>
+            <span style="font-size:13px;line-height:1.2;font-weight:{{ ch.weight }};text-align:center;max-width:100%;overflow-wrap:anywhere;hyphens:auto">{{ ch.label }}</span>
           </button>
         </sc-for>
       </div>
@@ -93,7 +93,7 @@
         <div style="font-size:13px;font-weight:700;color:{{ app.fiche.cardInk }}">{{ app.fiche.cardKicker }}</div>
         <div style="position:relative;font-size:17px;line-height:1.45">{{ app.fiche.chipText }}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <div style="flex:1;display:flex;gap:4px"><sc-for list="{{ app.fiche.chipDots }}" as="dot" hint-placeholder-count="5"><div style="height:6px;flex:1;border-radius:999px;background:{{ dot }}"></div></sc-for></div>
+          <div style="flex:1;display:flex;gap:4px"><sc-for list="{{ app.fiche.chipDots }}" as="dot" hint-placeholder-count="6"><div style="height:6px;flex:1;border-radius:999px;background:{{ dot }}"></div></sc-for></div>
           <button onClick="{{ app.fiche.nextChip }}" style="all:unset;cursor:pointer;height:48px;padding:0 14px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700">{{ app.fiche.nextLabel }}<span class="ms" style="font-size:18px">arrow_forward</span></button>
         </div>
       </div>

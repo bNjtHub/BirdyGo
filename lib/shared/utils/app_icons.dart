@@ -147,6 +147,7 @@ abstract final class AppIcons {
       Symbols.notifications_active_rounded;
   static const IconData openInNew = Symbols.open_in_new;
   static const IconData parkRounded = Symbols.park_rounded;
+  static const IconData pets = Symbols.pets; // FORK: J6h, Ennemis section
   static const IconData pause = Symbols.pause;
   static const IconData pauseRounded = Symbols.pause_rounded;
   static const IconData partlyCloudyDay = Symbols.partly_cloudy_day;
