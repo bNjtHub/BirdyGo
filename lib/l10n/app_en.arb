@@ -6045,5 +6045,7 @@
   "forkRareShort": "Rare",
   "@forkRareShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
   "forkExceptionalShort": "Exceptional",
-  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."}
+  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkDailyGoalHeardSure": "Heard · Sure",
+  "@forkDailyGoalHeardSure": {"description": "BirdyGo fork: daily goal row of a heard bird, reliability Sure (J6h)."}
 }

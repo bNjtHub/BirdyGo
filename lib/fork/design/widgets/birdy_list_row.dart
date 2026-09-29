@@ -16,6 +16,7 @@ class BirdyListRow extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
+    this.subtitleColor,
     this.icon,
     this.discColor,
     this.iconColor,
@@ -32,6 +33,9 @@ class BirdyListRow extends StatelessWidget {
 
   final String title;
   final String? subtitle;
+
+  /// Subtitle color; [BirdyColors.text2] when null.
+  final Color? subtitleColor;
 
   /// Icon of the leading disc ([BirdySizes.rowDisc]).
   final IconData? icon;
@@ -107,7 +111,9 @@ class BirdyListRow extends StatelessWidget {
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: BirdyText.caption.copyWith(color: c.text2),
+                      style: BirdyText.caption.copyWith(
+                        color: subtitleColor ?? c.text2,
+                      ),
                     ),
                 ],
               ),
