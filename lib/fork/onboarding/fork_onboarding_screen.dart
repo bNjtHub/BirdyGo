@@ -333,8 +333,8 @@ class _Dots extends StatelessWidget {
     return BirdyStepDots(
       count: count,
       current: page,
-      activeColor: c.accent,
-      inactiveColor: c.borderStrong,
+      activeColor: c.accentText,
+      inactiveColor: c.progressTrack,
       semanticLabel: l10n.forkOnbPageOf(page + 1, count),
     );
   }
