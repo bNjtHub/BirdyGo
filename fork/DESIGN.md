@@ -78,7 +78,9 @@ turquoise) reste tel quel : c'est son emblème.
 Contraste vérifié pour chaque thème (`test/fork/design/birdy_theme_choice_test.dart`) : encre sur
 `accent`, `accentText` sur blanc, Brume, `tonal` et `navIndicator`, `accentTextDark` sur Encre et sur
 les surfaces sombres, tous ≥ 4,5:1. Goldens de l'Accueil, 4 thèmes × clair / sombre :
-`test/fork/goldens/` (tolérance de 2 % : l'Accueil affiche la date et une salutation).
+`test/fork/goldens/` (tolérance de 2 % : l'Accueil affiche la date et une salutation). Références générées sous Windows, comparées
+seulement sous Windows (CI Linux : test de fumée par thème) ; les régénérer avec
+`flutter test --update-goldens test/fork/goldens`.
 
 ## Typographie
 
