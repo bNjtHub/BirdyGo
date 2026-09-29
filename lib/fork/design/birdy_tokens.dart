@@ -548,6 +548,14 @@ abstract final class BirdySizes {
   /// Progress bar of a block (status, notebook).
   static const double progressBar = 8;
 
+  /// Countdown bar of a first-encounter card (J6h).
+  static const double countdownBar = 6;
+
+  /// Current dot of a series (its length), and the icon after a main
+  /// button's label (« Espèce suivante »).
+  static const double countdownDotActive = 18;
+  static const double buttonIcon = 22;
+
   /// Day dot of the série (7 per week).
   static const double dayDot = 14;
 
@@ -600,7 +608,6 @@ abstract final class BirdySizes {
 
   /// Icon of a one-line tip (empty live table).
   static const double tipIcon = 18;
-
 
   /// Illustration disc of the « Qui chante ? » block on the Profil, and the
   /// Loriot question mark pinned on its corner.
@@ -658,8 +665,13 @@ abstract final class BirdySizes {
   /// Minimum height of a badge tile (Profil « À gagner »).
   static const double badgeTile = 136;
 
-  /// Live header logo (J6f): about the status line's height, a bit more.
-  static const double liveLogo = 22;
+  /// Listening logo (J6f, J6h): in the live header, and small in front of
+  /// « L'écoute continue » on the first-encounter card.
+  static const double liveLogo = 24;
+  static const double liveLogoSmall = 18;
+
+  /// Sparkle popping around the bird of a first encounter (J6h).
+  static const double sparkle = 20;
 
   /// Mode icon inline before the mode word in the live status line (J6f).
   static const double statusModeIcon = 14;
@@ -712,7 +724,6 @@ abstract final class BirdyAlpha {
   /// [BirdyColors.surface1] of an expected species row in the empty live
   /// table (it is not there yet).
   static const double expectedRow = 0.55;
-
 
   /// Big watermark icon of the species page's knowledge card.
   static const double knowledgeWatermark = 0.12;
