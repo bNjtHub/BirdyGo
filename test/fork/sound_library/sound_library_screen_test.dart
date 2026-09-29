@@ -4,6 +4,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -113,7 +115,14 @@ void main() {
     WidgetTester tester, {
     bool dark = false,
     double textScale = 1,
+    bool settle = true,
+    Size? size,
   }) async {
+    if (size != null) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -142,7 +151,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) await tester.pumpAndSettle();
   }
 
   testWidgets('species list, then the clips of a species', (tester) async {
@@ -191,6 +200,45 @@ void main() {
 
   testWidgets('dark at 130 %: no overflow', (tester) async {
     await pump(tester, dark: true, textScale: 1.3);
+    await tester.tap(find.text('Rougegorge familier'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('overlay header, skeleton while loading, no spinner', (
+    tester,
+  ) async {
+    await pump(tester, settle: false);
+    expect(find.byType(BirdyOverlayHeader), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byKey(const ValueKey('soundLibrarySkeleton')), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('soundLibrarySkeleton')), findsNothing);
+  });
+
+  testWidgets('sort and favorites chips are BirdyFilterChips that toggle', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.text('Rougegorge familier'));
+    await tester.pumpAndSettle();
+    BirdyFilterChip chip(String label) => tester.widget<BirdyFilterChip>(
+      find.widgetWithText(BirdyFilterChip, label),
+    );
+    expect(chip('Meilleur score').selected, isTrue);
+    expect(chip('Plus récents').selected, isFalse);
+    await tester.tap(find.text('Plus récents'));
+    await tester.pumpAndSettle();
+    expect(chip('Plus récents').selected, isTrue);
+    expect(chip('Favoris seulement').selected, isFalse);
+    await tester.tap(find.text('Favoris seulement'));
+    await tester.pumpAndSettle();
+    expect(chip('Favoris seulement').selected, isTrue);
+  });
+
+  testWidgets('small phone, 130 %, dark: no overflow', (tester) async {
+    await pump(tester, dark: true, textScale: 1.3, size: const Size(320, 640));
     await tester.tap(find.text('Rougegorge familier'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

@@ -236,7 +236,13 @@ void main() {
         ),
       ),
     );
-    if (settle) await tester.pumpAndSettle();
+    // Without the game provider the game skeletons shimmer forever:
+    // pumpAndSettle would time out, so pump past the entrance instead.
+    if (settle) {
+      withGame
+          ? await tester.pumpAndSettle()
+          : await tester.pump(const Duration(seconds: 1));
+    }
     return pushes;
   }
 

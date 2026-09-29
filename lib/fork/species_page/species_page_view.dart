@@ -39,6 +39,7 @@ class SpeciesPageHeader extends StatelessWidget {
     required this.photo,
     required this.onShare,
     this.onBack,
+    this.inSheet = false,
   });
 
   final String name;
@@ -51,8 +52,13 @@ class SpeciesPageHeader extends StatelessWidget {
   final Widget photo;
   final VoidCallback onShare;
 
-  /// Null inside a sheet (the sheet has its drag handle).
+  /// Closes the page: back arrow on the full page, X inside a sheet, same
+  /// place either way (J6g-e).
   final VoidCallback? onBack;
+
+  /// Inside a sheet over a listening: adds the grab handle and swaps the
+  /// back arrow for a close X.
+  final bool inSheet;
 
   @override
   Widget build(BuildContext context) {
@@ -84,11 +90,18 @@ class SpeciesPageHeader extends StatelessWidget {
                       children: [
                         if (onBack != null)
                           BirdyIconButton(
-                            icon: AppIcons.arrowBackRounded,
+                            icon:
+                                inSheet
+                                    ? AppIcons.close
+                                    : AppIcons.arrowBackRounded,
                             semanticLabel:
-                                MaterialLocalizations.of(
-                                  context,
-                                ).backButtonTooltip,
+                                inSheet
+                                    ? MaterialLocalizations.of(
+                                      context,
+                                    ).closeButtonTooltip
+                                    : MaterialLocalizations.of(
+                                      context,
+                                    ).backButtonTooltip,
                             onPressed: onBack,
                           ),
                         const Spacer(),
@@ -100,6 +113,30 @@ class SpeciesPageHeader extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (inSheet)
+                    Positioned(
+                      top: BirdySpace.xs,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: ExcludeSemantics(
+                          child: Container(
+                            key: const ValueKey('fiche-grab-handle'),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              // Readable on any photo, light or dark.
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(2),
+                              border: Border.all(
+                                color: Colors.black38,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

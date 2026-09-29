@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/taxonomy_species.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
+import '../design/birdy_tokens.dart';
 import 'photo_credit.dart';
 import 'photo_credit_sheet.dart';
 import 'species_photo_providers.dart';
@@ -72,12 +73,12 @@ class SpeciesPhoto extends ConsumerWidget {
               ),
             ),
             Positioned(
-              right: 4,
-              bottom: 4,
+              right: BirdySpace.xs,
+              bottom: BirdySpace.xs,
               child: IconButton(
                 onPressed: showCredit,
                 tooltip: l10n.forkPhotoCredit,
-                iconSize: 20,
+                iconSize: BirdySizes.blockIcon,
                 icon: const Icon(AppIcons.infoOutline),
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.black.withValues(alpha: 0.45),
