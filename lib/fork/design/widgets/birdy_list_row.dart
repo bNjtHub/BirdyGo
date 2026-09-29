@@ -76,13 +76,13 @@ class BirdyListRow extends StatelessWidget {
           color: discColor ?? c.tonal,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 22, color: iconColor ?? c.accentText, fill: 1),
+        child: Icon(icon, size: BirdyGlyph.xxl, color: iconColor ?? c.accentText, fill: 1),
       );
     }
     final end =
         trailing ??
         (showChevron && onTap != null
-            ? Icon(AppIcons.chevronRight, size: 24, color: c.text2)
+            ? Icon(AppIcons.chevronRight, size: BirdyGlyph.x3l, color: c.text2)
             : null);
     Widget row = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: BirdySizes.row),

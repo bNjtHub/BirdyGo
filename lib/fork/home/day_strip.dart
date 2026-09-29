@@ -148,7 +148,7 @@ class _DayPill extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         icon,
-                        const SizedBox(width: 5),
+                        const SizedBox(width: BirdySpace.tight),
                         Text(
                           time,
                           style: BirdyText.badge.copyWith(

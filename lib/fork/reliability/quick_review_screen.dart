@@ -60,7 +60,7 @@ final SpringDescription _returnSpring = SpringDescription.withDampingRatio(
 );
 
 /// Time for an answered card to leave the screen.
-const Duration _flyDuration = Duration(milliseconds: 260);
+const Duration _flyDuration = BirdyMotion.cardFly;
 
 /// Quick review screen.
 class QuickReviewScreen extends ConsumerStatefulWidget {

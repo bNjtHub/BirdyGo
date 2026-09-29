@@ -100,7 +100,7 @@ class StatTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(BirdyRadii.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: BirdySpace.comfy, vertical: BirdySpace.m),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

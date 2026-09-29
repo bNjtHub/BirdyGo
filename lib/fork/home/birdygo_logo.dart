@@ -29,7 +29,7 @@ class BirdyGoLogo extends StatefulWidget {
   final bool animate;
 
   /// Length of the whole wing animation.
-  static const Duration duration = Duration(milliseconds: 480);
+  static const Duration duration = BirdyMotion.logoWing;
 
   @override
   State<BirdyGoLogo> createState() => _BirdyGoLogoState();
@@ -327,7 +327,7 @@ class BirdyGoLogoPainter extends CustomPainter {
       canvas.drawCircle(
         const Offset(171, 166.6),
         5.4,
-        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: glint),
+        Paint()..color = BirdyBrand.white.withValues(alpha: glint),
       );
     }
     canvas.restore();

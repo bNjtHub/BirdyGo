@@ -158,7 +158,7 @@ class _PermissionCard extends StatelessWidget {
           children: [
             Icon(
               AppIcons.checkCircleRounded,
-              size: 28,
+              size: BirdyGlyph.x5l,
               fill: 1,
               color: c.sure.foreground,
             ),
@@ -177,7 +177,7 @@ class _PermissionCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(AppIcons.locationOffRounded, size: 24),
+            const Icon(AppIcons.locationOffRounded, size: BirdyGlyph.x3l),
             const SizedBox(width: BirdySpace.s),
             Expanded(
               child: Text(
@@ -238,7 +238,7 @@ class _PermissionCard extends StatelessWidget {
                   color: c.surface1,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 26, color: c.accentText),
+                child: Icon(icon, size: BirdyGlyph.x4l, color: c.accentText),
               ),
               const SizedBox(width: BirdySpace.m),
               Expanded(
@@ -256,7 +256,7 @@ class _PermissionCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: BirdySpace.s,
-                        vertical: 2,
+                        vertical: BirdySpace.xxs,
                       ),
                       decoration: BoxDecoration(
                         color: c.surface1,

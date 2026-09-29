@@ -374,7 +374,7 @@ class _FinishButton extends StatelessWidget {
             foregroundColor: c.onAccent,
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
-            textStyle: BirdyText.label.copyWith(fontSize: 20),
+            textStyle: BirdyText.labelLarge,
             iconSize: 32,
           ),
           onPressed: onPressed,

@@ -373,7 +373,7 @@ class BirdyGoSingingPainter extends CustomPainter {
       ..drawCircle(
         const Offset(171, 166.6),
         5.4,
-        Paint()..color = const Color(0xFFFFFFFF),
+        Paint()..color = BirdyBrand.white,
       )
       ..restore();
     canvas.restore(); // Bird.
@@ -414,7 +414,7 @@ class BirdyGoLoadingPainter extends CustomPainter {
   }) : super(repaint: fraction);
 
   /// Empty part of the bar on Brume: Encre at 8 %.
-  static const Color lightTrack = Color(0x1413233A);
+  static const Color lightTrack = BirdyBrand.splashTrackLight;
 
   final ValueListenable<double> fraction;
 

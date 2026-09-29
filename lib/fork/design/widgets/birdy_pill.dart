@@ -52,7 +52,7 @@ class BirdyPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[leading!, const SizedBox(width: 5)],
+            if (leading != null) ...[leading!, const SizedBox(width: BirdySpace.tight)],
             Flexible(
               child: Text(
                 label,
@@ -66,7 +66,7 @@ class BirdyPill extends StatelessWidget {
     final shape = StadiumBorder(
       side:
           outlined && !dashed
-              ? BorderSide(color: foreground, width: 1.5)
+              ? BorderSide(color: foreground, width: BirdyStroke.thin)
               : BorderSide.none,
     );
     final pill = DecoratedBox(
@@ -183,7 +183,7 @@ class NoveltyPill extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     Widget icon(IconData data, Color color) =>
-        Icon(data, size: 14, color: color, fill: 1);
+        Icon(data, size: BirdyGlyph.s, color: color, fill: 1);
     return switch (kind) {
       NoveltyKind.firstTime => BirdyPill(
         label: l10n.forkFirstTime,

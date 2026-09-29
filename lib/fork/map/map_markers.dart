@@ -60,7 +60,7 @@ class SpeciesMarkerView extends StatelessWidget {
               minWidth: BirdyMapStyle.badgeHeight,
             ),
             height: BirdyMapStyle.badgeHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 5),
+            padding: const EdgeInsets.symmetric(horizontal: BirdySpace.tight),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: BirdyMapStyle.badge,
@@ -112,7 +112,7 @@ class ClusterBubbleView extends StatelessWidget {
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Padding(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(BirdySpace.snug),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -164,7 +164,7 @@ class UserDotView extends StatelessWidget {
               width: BirdyMapStyle.userDotBorder,
             ),
             boxShadow: const [
-              BoxShadow(color: BirdyMapStyle.shadow, blurRadius: 8),
+              BoxShadow(color: BirdyMapStyle.shadow, blurRadius: BirdyBlur.m),
             ],
           ),
         ),

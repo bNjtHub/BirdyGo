@@ -427,7 +427,7 @@ class _MeetDisc extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: c.sure.foreground,
-                          border: Border.all(color: c.surface1, width: 1.5),
+                          border: Border.all(color: c.surface1, width: BirdyStroke.thin),
                         ),
                         child: Icon(
                           AppIcons.check,
@@ -490,7 +490,7 @@ class _MeetButton extends StatelessWidget {
           Text(label, style: BirdyText.labelCompact),
           if (trailing != null) ...[
             const SizedBox(width: BirdySpace.s),
-            Icon(trailing, size: 20),
+            Icon(trailing, size: BirdyGlyph.xl),
           ],
         ],
       ),

@@ -114,7 +114,7 @@ class BirdyTipCard extends StatelessWidget {
                           children: [
                             Icon(
                               AppIcons.lightbulbOutline,
-                              size: 16,
+                              size: BirdyGlyph.m,
                               color: c.orioleText,
                             ),
                             const SizedBox(width: BirdySpace.xs),
@@ -293,7 +293,7 @@ class _Dots extends StatelessWidget {
       current: current,
       activeColor: c.orioleText,
       inactiveColor: c.progressTrack,
-      height: 5,
+      height: BirdySpace.tight,
       activeWidth: 14,
       gap: 5,
     );

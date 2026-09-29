@@ -105,7 +105,7 @@ class ReliabilityBadge extends StatelessWidget {
               compact
                   ? Icon(
                     AppIcons.diamond,
-                    size: 14,
+                    size: BirdyGlyph.s,
                     fill: 1,
                     color: c.orioleText,
                   )
@@ -152,7 +152,7 @@ class _RareHereBadge extends StatelessWidget {
                 dimension: BirdySizes.pill,
                 child: Icon(
                   AppIcons.diamond,
-                  size: 14,
+                  size: BirdyGlyph.s,
                   fill: 1,
                   color: c.orioleText,
                 ),

@@ -144,7 +144,7 @@ class _StreakDot extends StatelessWidget {
             painter: DashedBorderPainter(
               color: c.accent,
               radius: BirdySizes.dayDot / 2,
-              strokeWidth: 2,
+              strokeWidth: BirdyStroke.regular,
               dash: 2,
               gap: 1.6,
             ),
@@ -157,7 +157,7 @@ class _StreakDot extends StatelessWidget {
           height: BirdySizes.dayDot,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: c.borderStrong, width: 1.5),
+            border: Border.all(color: c.borderStrong, width: BirdyStroke.thin),
           ),
         );
       case StreakDayState.missed:

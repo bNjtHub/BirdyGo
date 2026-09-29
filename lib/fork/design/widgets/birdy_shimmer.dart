@@ -175,8 +175,8 @@ class _BirdyShimmerState extends State<BirdyShimmer> {
                 (bounds) =>
                     _shader(bounds, progress, sheen, screenW) ??
                     ui.Gradient.linear(Offset.zero, const Offset(1, 0), const [
-                      Color(0x00000000),
-                      Color(0x00000000),
+                      BirdyBrand.clear,
+                      BirdyBrand.clear,
                     ]),
             child: child,
           );

@@ -46,6 +46,28 @@ abstract final class BirdyBrand {
 
   /// Soft shadow of the wing icon (J6h): dark teal at 45 %.
   static const Color wingShadow = Color(0x730B3C46);
+
+  /// Pure white and black, for marks on photos and painted highlights.
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+
+  /// Black at 38 % (thin outline of the fiche grab handle on any photo).
+  static const Color black38 = Color(0x61000000);
+
+  /// Fully transparent black (gradient and shimmer end stops).
+  static const Color clear = Color(0x00000000);
+
+  /// Soft black shadow, 25 %.
+  static const Color shadowSoft = Color(0x40000000);
+
+  /// [wellHighlight] faded to transparent (quiz stage glow end stop).
+  static const Color wellHighlightClear = Color(0x00173A55);
+
+  /// Light-theme track of the splash progress arcs (Encre at 8 %).
+  static const Color splashTrackLight = Color(0x1413233A);
+
+  /// Unselected rim of a quiz answer dot in the light theme.
+  static const Color mistTrack = Color(0xFFE1E5DE);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -529,12 +551,78 @@ abstract final class BirdyRadii {
   /// Small thumbnails.
   static const double thumb = 12;
 
+  /// Small skeleton blocks and inline chips.
+  static const double chip = 8;
+
+  /// Tick marks and tiny bars.
+  static const double xs = 2;
+
+  /// Small pill ends and thin bars.
+  static const double s = 3;
+
   /// Buttons, chips, badges, pills, rings.
   static const double pill = 999;
 }
 
+/// Blur radii of drop shadows.
+abstract final class BirdyBlur {
+  static const double s = 3;
+  static const double m = 8;
+  static const double l = 16;
+  static const double xl = 18;
+}
+
+/// Line and border widths.
+abstract final class BirdyStroke {
+  static const double hairline = 1;
+  static const double thin = 1.5;
+  static const double regular = 2;
+  static const double medium = 2.5;
+  static const double thick = 3;
+  static const double chunky = 4;
+}
+
+/// Icon glyph and avatar sizes.
+abstract final class BirdyGlyph {
+  static const double xxs = 12;
+  static const double xs = 13;
+  static const double s = 14;
+  static const double m = 16;
+  static const double l = 18;
+  static const double xl = 20;
+  static const double xxl = 22;
+  static const double x3l = 24;
+  static const double x4l = 26;
+  static const double x5l = 28;
+
+  /// Round icons and avatars, by diameter.
+  static const double disc36 = 36;
+  static const double disc40 = 40;
+  static const double disc44 = 44;
+  static const double disc48 = 48;
+  static const double disc56 = 56;
+  static const double disc72 = 72;
+  static const double disc96 = 96;
+  static const double disc136 = 136;
+}
+
 /// Spacing scale (SPEC.md 2.8).
 abstract final class BirdySpace {
+  /// Side gutter of the splash footer.
+  static const double splashSide = 28;
+
+  /// Half-steps of the scale, from a hairline to the wide gap.
+  static const double hairline = 1;
+  static const double xxs = 2;
+  static const double thin = 3;
+  static const double tight = 5;
+  static const double snug = 6;
+  static const double slim = 7;
+  static const double cozy = 10;
+  static const double comfy = 14;
+  static const double roomy = 18;
+  static const double wide = 22;
+
   static const double xs = 4;
   static const double s = 8;
   static const double m = 12;
@@ -589,6 +677,38 @@ abstract final class BirdySizes {
 
   /// Minimum height of badges and pills (they grow with text scale).
   static const double pill = 26;
+
+  /// Skeleton tag widths (pill-shaped placeholders in headers).
+  static const double skeletonTagS = 64;
+  static const double skeletonTagM = 88;
+  static const double skeletonTagL = 110;
+
+  /// Sample tile width in the design gallery.
+  static const double gallerySample = 140;
+
+  /// Activity bars of the species page: 24 monthly bars and the hourly ones.
+  static const double activityBarsWidth = 150;
+  static const double activityBarsHeight = 45;
+  static const double hourBarsHeight = 52;
+
+  /// Clip spectrogram height in the quick review.
+  static const double clipSpectrogram = 80;
+
+  /// Contact map: fit padding (sides, top under the header, bottom) and
+  /// cluster bubble size and padding.
+  static const double mapFitSide = 48;
+  static const double mapFitTop = 120;
+  static const double mapFitBottom = 48;
+  static const double mapClusterSize = 60;
+  static const double mapClusterPadding = 50;
+
+  /// Hero bird of the quiz intro (before the screen-height scale).
+  static const double quizIntroBird = 128;
+
+  /// Toggle switch: track size and knob diameter.
+  static const double switchWidth = 44;
+  static const double switchHeight = 28;
+  static const double switchKnob = 22;
 
   /// Minimum height of a live row, and of a compact row.
   static const double row = 72;
@@ -863,12 +983,18 @@ abstract final class BirdyAlpha {
 
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;
+
+  /// Scrim behind the photo credit button on a species photo.
+  static const double photoButtonScrim = 0.45;
 }
 
 /// Contact map markers (J6g-f). The map tiles stay light in both themes, so
 /// the marker disc and its ring do not follow the theme: they must read on
 /// any tile, and on the dark placeholder shown before tiles are allowed.
 abstract final class BirdyMapStyle {
+  /// Radius of a contact point dot on the species mini map.
+  static const double pointRadius = 5;
+
   /// Disc under a species photo and border of the cluster bubble.
   static const Color disc = Color(0xFFFFFFFF);
 

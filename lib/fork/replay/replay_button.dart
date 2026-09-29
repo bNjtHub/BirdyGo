@@ -45,7 +45,7 @@ Widget? buildReplayTrailing({
     mainAxisSize: MainAxisSize.min,
     children: [
       Padding(
-        padding: EdgeInsets.only(right: action == null ? 12 : 0),
+        padding: EdgeInsets.only(right: action == null ? BirdySpace.m : 0),
         child: badge,
       ),
       if (action != null) action,

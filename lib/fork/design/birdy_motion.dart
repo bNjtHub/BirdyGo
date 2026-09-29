@@ -10,6 +10,36 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 abstract final class BirdyMotion {
+  /// Welcome bird step of the onboarding (J6i).
+  static const Duration welcomeBird = Duration(milliseconds: 1500);
+
+  /// Staggered entrance of the intro / onboarding cards and rows: card `i`
+  /// enters 120 ms + 100 ms per index in, rows 80 ms + 100 ms per index in.
+  static Duration introCardDelay(int i) => Duration(milliseconds: 120 + i * 100);
+  static Duration introRowDelay(int i) => Duration(milliseconds: 80 + i * 100);
+
+  /// Wing flap of the BirdyGo logo, and the live table's singing bars.
+  static const Duration logoWing = Duration(milliseconds: 480);
+  static const Duration singingBars = Duration(milliseconds: 900);
+
+  /// An answered card leaving the quick review.
+  static const Duration cardFly = Duration(milliseconds: 260);
+
+  /// Shortest time the splash stays up (whole intro, footer faded in).
+  static const Duration splashMinimum = Duration(milliseconds: 4500);
+
+  /// Wait for one frame before yielding to the background.
+  static const Duration framePauseTimeout = Duration(milliseconds: 100);
+
+  /// Idle bars of the quiz stage: period and start delay of bar `i`.
+  static Duration quizBarPeriod(int i) => Duration(milliseconds: 700 + (i % 5) * 90);
+  static Duration quizBarDelay(int i) => Duration(milliseconds: (i * 70) % 600);
+
+  /// Loops of the quiz decor (sparks, twinkles, star burst).
+  static const Duration decorSparks = Duration(milliseconds: 2200);
+  static const Duration decorTwinkles = Duration(milliseconds: 2600);
+  static const Duration decorBurst = Duration(milliseconds: 1200);
+
   /// Enter, exit and press curve. Never use `Curves.easeIn` for UI.
   static const Curve standard = Cubic(0.23, 1, 0.32, 1);
 

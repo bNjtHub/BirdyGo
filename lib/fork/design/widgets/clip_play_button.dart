@@ -59,7 +59,7 @@ class ClipPlayButton extends StatelessWidget {
               child: SizedBox.square(
                 dimension: 18,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: BirdyStroke.regular,
                   color: c.accentText,
                 ),
               ),
@@ -72,7 +72,7 @@ class ClipPlayButton extends StatelessWidget {
     final playing = state == ClipPlayState.playing;
     final shape = CircleBorder(
       side:
-          playing ? BorderSide.none : BorderSide(color: c.accentText, width: 2),
+          playing ? BorderSide.none : BorderSide(color: c.accentText, width: BirdyStroke.regular),
     );
     Widget button = Material(
       color: playing ? c.accent : Colors.transparent,
@@ -103,7 +103,7 @@ class ClipPlayButton extends StatelessWidget {
               dimension: size - 4,
               child: CircularProgressIndicator(
                 value: ring.clamp(0, 1).toDouble(),
-                strokeWidth: 2.5,
+                strokeWidth: BirdyStroke.medium,
                 color: c.onAccent,
                 backgroundColor: Colors.transparent,
               ),

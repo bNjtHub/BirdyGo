@@ -56,7 +56,7 @@ class QuizLogo extends StatelessWidget {
         end: Alignment.bottomCenter,
         colors: [BirdyBrand.wellTop, BirdyBrand.wellBottom],
       ),
-      border: Border.all(color: BirdyBrand.kingfisher, width: 2),
+      border: Border.all(color: BirdyBrand.kingfisher, width: BirdyStroke.regular),
     ),
     child: SvgPicture.string(_svg(), width: size, height: size),
   );

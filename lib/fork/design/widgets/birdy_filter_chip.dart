@@ -104,7 +104,7 @@ class BirdyFilterChip extends StatelessWidget {
                     children: [
                       if (leading != null) ...[
                         IconTheme.merge(
-                          data: IconThemeData(color: foreground, size: 18),
+                          data: IconThemeData(color: foreground, size: BirdyGlyph.l),
                           child: leading!,
                         ),
                         const SizedBox(width: BirdySpace.s),

@@ -121,15 +121,15 @@ class SpeciesPageHeader extends StatelessWidget {
                         child: ExcludeSemantics(
                           child: Container(
                             key: const ValueKey('fiche-grab-handle'),
-                            width: 40,
-                            height: 4,
+                            width: BirdyGlyph.disc40,
+                            height: BirdySpace.xs,
                             decoration: BoxDecoration(
                               // Readable on any photo, light or dark.
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(2),
+                              color: BirdyBrand.white,
+                              borderRadius: BorderRadius.circular(BirdyRadii.xs),
                               border: Border.all(
-                                color: Colors.black38,
-                                width: 0.5,
+                                color: BirdyBrand.black38,
+                                width: BirdyStroke.hairline / 2,
                               ),
                             ),
                           ),
@@ -289,7 +289,7 @@ class HeardBlock extends StatelessWidget {
           runSpacing: BirdySpace.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            BirdySkeleton.box(width: 88, height: 26, radius: BirdyRadii.pill),
+            BirdySkeleton.box(width: BirdySizes.skeletonTagM, height: BirdySizes.pill, radius: BirdyRadii.pill),
             BirdySkeleton.text(
               BirdyText.caption,
               placeholder: '00000000000000',
@@ -416,10 +416,10 @@ class _HereNowCardState extends State<HereNowCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.only(top: BirdySpace.xxs),
                           child: Icon(
                             AppIcons.diamond,
-                            size: 14,
+                            size: BirdyGlyph.s,
                             fill: 1,
                             color: c.orioleText,
                           ),
@@ -441,13 +441,13 @@ class _HereNowCardState extends State<HereNowCard> {
             ),
             const SizedBox(width: BirdySpace.m),
             SizedBox(
-              width: 150,
+              width: BirdySizes.activityBarsWidth,
               child: Column(
                 children: [
                   ActivityBars(
                     values: percents,
                     // 36 px of bars plus the current month's dot strip.
-                    height: 45,
+                    height: BirdySizes.activityBarsHeight,
                     colorForValue: scale.of,
                     trackColor: c.line,
                     labels: labels,
@@ -529,7 +529,7 @@ class MySoundsBlock extends StatelessWidget {
               FilledButton.icon(
                 style: BirdyButtonStyles.tonal(context),
                 onPressed: onReference,
-                icon: const Icon(AppIcons.openInNew, size: 18),
+                icon: const Icon(AppIcons.openInNew, size: BirdyGlyph.l),
                 label: Text(l10n.forkFicheReference),
               ),
           ],
@@ -616,7 +616,7 @@ class MySoundsBlock extends StatelessWidget {
                   BirdySkeleton.box(
                     width: BirdySizes.target,
                     height: BirdySizes.target,
-                    radius: 8,
+                    radius: BirdyRadii.chip,
                   ),
                 ],
               ),
@@ -710,7 +710,7 @@ class ActivityAndMap extends StatelessWidget {
                 children: [
                   SectionTitle(icon: AppIcons.locationOn, text: l10n.forkFicheMapLabel),
                   const SizedBox(height: BirdySpace.m),
-                  SizedBox(height: 96, child: map),
+                  SizedBox(height: BirdyGlyph.disc96, child: map),
                   if (onSeeOnMap != null)
                     Align(
                       alignment: Alignment.centerLeft,
@@ -751,7 +751,7 @@ class ActivityAndMap extends StatelessWidget {
               const SizedBox(height: BirdySpace.m),
               BirdySkeleton.box(
                 width: double.infinity,
-                height: 52,
+                height: BirdySizes.hourBarsHeight,
                 radius: BirdyRadii.thumb,
               ),
               const SizedBox(height: BirdySpace.xs),
@@ -773,7 +773,7 @@ class ActivityAndMap extends StatelessWidget {
               const SizedBox(height: BirdySpace.m),
               BirdySkeleton.box(
                 width: double.infinity,
-                height: 96,
+                height: BirdyGlyph.disc96,
                 radius: BirdyRadii.inset,
               ),
               Align(
@@ -825,7 +825,7 @@ class _HourActivityCardState extends State<_HourActivityCard> {
           const SizedBox(height: BirdySpace.m),
           ActivityBars(
             values: widget.hours,
-            height: 52,
+            height: BirdySizes.hourBarsHeight,
             colorForValue: scale.of,
             trackColor: c.line,
             labels: const {0: '0 h', 6: '6 h', 12: '12 h', 18: '18 h'},
@@ -894,8 +894,8 @@ class LinksBlock extends StatelessWidget {
                 ActionChip(
                   avatar: Image.asset(
                     link.iconAsset,
-                    width: 18,
-                    height: 18,
+                    width: BirdySpace.roomy,
+                    height: BirdySpace.roomy,
                     errorBuilder: (_, _, _) => const Icon(AppIcons.public),
                   ),
                   label: Row(
@@ -903,7 +903,7 @@ class LinksBlock extends StatelessWidget {
                     children: [
                       Text(link.label, maxLines: 1),
                       const SizedBox(width: BirdySpace.xs),
-                      Icon(AppIcons.openInNew, size: 14, color: c.text2),
+                      Icon(AppIcons.openInNew, size: BirdyGlyph.s, color: c.text2),
                     ],
                   ),
                   onPressed: () => onOpen(link.url),

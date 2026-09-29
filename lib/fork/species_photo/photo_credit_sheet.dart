@@ -3,6 +3,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
@@ -45,7 +46,7 @@ class PhotoCreditSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(BirdySpace.l, 0, BirdySpace.l, BirdySpace.s),
             child: Text(
               l10n.forkPhotoCredit,
               style: theme.textTheme.titleLarge,
@@ -70,7 +71,7 @@ class PhotoCreditSheet extends StatelessWidget {
             ListTile(title: Text(l10n.forkPhotoSource(credit.source!))),
           if (pageUrl != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              padding: const EdgeInsets.fromLTRB(BirdySpace.l, BirdySpace.xs, BirdySpace.l, BirdySpace.s),
               child: OutlinedButton.icon(
                 onPressed: () => openExternalUrl(context, pageUrl),
                 icon: const Icon(AppIcons.openInNew),
@@ -79,7 +80,7 @@ class PhotoCreditSheet extends StatelessWidget {
             ),
           const Divider(),
           const OnlinePhotosTile(),
-          const SizedBox(height: 8),
+          const SizedBox(height: BirdySpace.s),
         ],
       ),
     );

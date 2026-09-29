@@ -346,7 +346,7 @@ class _TileDisc extends StatelessWidget {
         color: birdyBlockColor(c, tone),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: 22, color: c.text1),
+      child: Icon(icon, size: BirdyGlyph.xxl, color: c.text1),
     );
     if (tone == BirdyBlockTone.toCheck) {
       disc = CustomPaint(
@@ -478,7 +478,7 @@ class _ToolRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(entry.icon, size: 22, color: c.text2),
+                Icon(entry.icon, size: BirdyGlyph.xxl, color: c.text2),
                 const SizedBox(width: BirdySpace.m),
                 Expanded(
                   child: Text(

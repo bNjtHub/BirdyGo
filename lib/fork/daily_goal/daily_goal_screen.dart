@@ -226,7 +226,7 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
               foregroundColor: c.onAccent,
               minimumSize: const Size.fromHeight(BirdySizes.listen),
               shape: const StadiumBorder(),
-              textStyle: BirdyText.label.copyWith(fontSize: 20),
+              textStyle: BirdyText.labelLarge,
             ),
             icon: const Padding(
               padding: EdgeInsetsDirectional.only(end: BirdySpace.wingLabelGap),

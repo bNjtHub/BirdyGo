@@ -330,7 +330,7 @@ class _AreaSheet extends ConsumerWidget {
             const SizedBox(height: BirdySpace.m),
             Row(
               children: [
-                Icon(AppIcons.lockOutline, size: 16, color: c.text2),
+                Icon(AppIcons.lockOutline, size: BirdyGlyph.m, color: c.text2),
                 const SizedBox(width: BirdySpace.s),
                 Expanded(
                   child: Text(
@@ -472,7 +472,7 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                                     children: [
                                       ExcludeSemantics(
                                         child: BirdyGoSilhouetteIcon.glyph(
-                                          size: 24,
+                                          size: BirdyGlyph.x3l,
                                           color: c.accentText,
                                         ),
                                       ),

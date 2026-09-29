@@ -107,12 +107,12 @@ class _StateBadge extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: discovered ? BirdyBrand.checkGreen : c.toCheck.foreground,
-          border: Border.all(color: c.surface1, width: 2),
+          border: Border.all(color: c.surface1, width: BirdyStroke.regular),
         ),
         child: Icon(
           discovered ? AppIcons.check : AppIcons.question,
-          size: 12,
-          color: Colors.white,
+          size: BirdyGlyph.xxs,
+          color: BirdyBrand.white,
         ),
       ),
     );

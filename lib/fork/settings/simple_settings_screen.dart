@@ -474,7 +474,7 @@ class _FirstNameFieldState extends ConsumerState<_FirstNameField> {
             decoration: BoxDecoration(color: c.oriole, shape: BoxShape.circle),
             child: Icon(
               AppIcons.personOutline,
-              size: 22,
+              size: BirdyGlyph.xxl,
               color: c.onOriole,
               fill: 1,
             ),

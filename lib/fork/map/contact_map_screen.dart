@@ -158,7 +158,12 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     if (positions.length < 2) return null;
     return CameraFit.coordinates(
       coordinates: positions,
-      padding: const EdgeInsets.fromLTRB(48, 120, 48, 48),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySizes.mapFitSide,
+        BirdySizes.mapFitTop,
+        BirdySizes.mapFitSide,
+        BirdySizes.mapFitBottom,
+      ),
       maxZoom: kMapSinglePointZoom,
     );
   }
@@ -346,8 +351,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
         Marker(
           key: ValueKey((spot.spot, spot.scientificName)),
           point: spot.position,
-          width: 56,
-          height: 56,
+          width: BirdyGlyph.disc56,
+          height: BirdyGlyph.disc56,
           child: _ContactMarker(
             spot: spot,
             selected: spot.spot == _selectedSpot,
@@ -472,8 +477,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                               options: MarkerClusterLayerOptions(
                                 maxClusterRadius: 60,
                                 disableClusteringAtZoom: kMapSpotZoom,
-                                size: const Size(60, 60),
-                                padding: const EdgeInsets.all(50),
+                                size: const Size.square(BirdySizes.mapClusterSize),
+                                padding: const EdgeInsets.all(BirdySizes.mapClusterPadding),
                                 markers: _spotMarkers(data, l10n),
                                 builder:
                                     (context, markers) => _ClusterBubble(
@@ -486,8 +491,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                               markers: [
                                 Marker(
                                   point: _userPosition!,
-                                  width: 32,
-                                  height: 32,
+                                  width: BirdySpace.xxxl,
+                                  height: BirdySpace.xxxl,
                                   child: const UserDotView(),
                                 ),
                               ],
@@ -533,7 +538,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          padding: const EdgeInsets.fromLTRB(BirdySpace.l, BirdySpace.s, BirdySpace.l, 0),
                           child:
                               hasConsent
                                   ? _tilesFailing

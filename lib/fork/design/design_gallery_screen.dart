@@ -199,11 +199,11 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
       children: [
         for (final (name, color) in swatches)
           SizedBox(
-            width: 72,
+            width: BirdyGlyph.disc72,
             child: Column(
               children: [
                 Container(
-                  height: 48,
+                  height: BirdyGlyph.disc48,
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(BirdyRadii.thumb),
@@ -401,7 +401,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         name: _samples.first.name,
         hero: true,
         tint: tint(_samples.first),
-        visual: SpeciesAvatar(tint: tint(_samples.first), size: 96),
+        visual: SpeciesAvatar(tint: tint(_samples.first), size: BirdyGlyph.disc96),
         caption: Text(_samples.first.latin),
         onTap: () {},
       ),
@@ -417,17 +417,17 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 SpeciesCard(
                   name: _samples[2].name,
                   tint: tint(_samples[2]),
-                  visual: SpeciesAvatar(tint: tint(_samples[2]), size: 56),
+                  visual: SpeciesAvatar(tint: tint(_samples[2]), size: BirdyGlyph.disc56),
                   corner: const NoveltyPill(kind: NoveltyKind.isNew),
                   onTap: () {},
                 ),
                 SpeciesCard(
                   name: _samples[3].name,
                   tint: tint(_samples[3]),
-                  visual: SpeciesAvatar(tint: tint(_samples[3]), size: 56),
+                  visual: SpeciesAvatar(tint: tint(_samples[3]), size: BirdyGlyph.disc56),
                   corner: Icon(
                     AppIcons.diamond,
-                    size: 14,
+                    size: BirdyGlyph.s,
                     fill: 1,
                     color: BirdyColors.of(context).orioleText,
                   ),
@@ -437,14 +437,14 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                   name: _samples[4].name,
                   visual: SpeciesAvatar(
                     tint: tint(_samples[4]),
-                    size: 56,
+                    size: BirdyGlyph.disc56,
                     muted: true,
                   ),
                   onTap: () {},
                 ),
                 SpeciesCard.mystery(
                   name: l10n.forkMystery,
-                  visual: const SpeciesAvatar(size: 56, mystery: true),
+                  visual: const SpeciesAvatar(size: BirdyGlyph.disc56, mystery: true),
                 ),
               ])
                 SizedBox(width: width, child: card),
@@ -565,7 +565,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
             compact: true,
             avatar: SpeciesAvatar(
               tint: SpeciesTint.fromAccent(s.accent),
-              size: 40,
+              size: BirdyGlyph.disc40,
             ),
           ),
         ),
@@ -589,7 +589,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         children: [
           for (final (tone, number, label) in tones)
             SizedBox(
-              width: 140,
+              width: BirdySizes.gallerySample,
               child: BirdyBlock(
                 tone: tone,
                 child: Column(

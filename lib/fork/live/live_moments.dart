@@ -551,7 +551,7 @@ class _FirstTimeCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StatusEmblem(status: status, size: 28),
+                StatusEmblem(status: status, size: BirdyGlyph.x5l),
                 const SizedBox(width: BirdySpace.s),
                 Flexible(
                   child: Text(
@@ -698,7 +698,7 @@ class _EncounterState extends State<_Encounter>
                           BirdyMotion.ringPeakOpacity,
                         ),
                       ),
-                      width: 2,
+                      width: BirdyStroke.regular,
                     ),
                   ),
                 ),
@@ -1218,7 +1218,7 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.surface2,
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
-        border: Border.all(color: border, width: 1.5),
+        border: Border.all(color: border, width: BirdyStroke.thin),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(

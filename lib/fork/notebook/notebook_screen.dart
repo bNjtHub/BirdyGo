@@ -322,7 +322,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                       color: c.accent,
                       track: track,
                       child: Padding(
-                        padding: const EdgeInsets.all(BirdySpace.m + 4),
+                        padding: const EdgeInsets.all(BirdySpace.m + BirdySpace.xs),
                         child: FittedBox(
                           child: Text(
                             '${notebook.expectedFound}',
@@ -392,7 +392,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                 children: [
                   // The grey bird the caption talks about.
                   Padding(
-                    padding: const EdgeInsets.only(top: 2),
+                    padding: const EdgeInsets.only(top: BirdySpace.xxs),
                     child: BirdyGoSilhouetteIcon.mystery(
                       size: BirdySizes.notebookHeroSilhouette,
                       color: c.text2,
@@ -707,7 +707,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     child: ConstrainedBox(
       constraints: const BoxConstraints(minHeight: BirdySizes.collectionCard),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(BirdySpace.cozy),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
@@ -717,7 +717,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               height: visualSize,
               radius: BirdyRadii.thumb,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: BirdySpace.snug),
             SizedBox(
               height: twoLineTextHeight(context, BirdyText.species),
               child: Align(
@@ -899,7 +899,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     };
     if (rarity == null && !card.isNew) return const [];
     return [
-      const SizedBox(height: 6),
+      const SizedBox(height: BirdySpace.snug),
       Wrap(
         spacing: 6,
         runSpacing: 6,

@@ -27,9 +27,9 @@ class BirdySwitch extends StatelessWidget {
       child: AnimatedContainer(
         duration: duration,
         curve: BirdyMotion.standard,
-        width: 44,
-        height: 28,
-        padding: const EdgeInsets.all(3),
+        width: BirdyGlyph.disc44,
+        height: BirdyGlyph.x5l,
+        padding: const EdgeInsets.all(BirdySpace.thin),
         decoration: BoxDecoration(
           color: value ? c.accent : c.border,
           borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -46,11 +46,11 @@ class BirdySwitch extends StatelessWidget {
                 BoxShadow(
                   color: BirdyQuizColors.knobShadow,
                   offset: Offset(0, 1),
-                  blurRadius: 3,
+                  blurRadius: BirdyBlur.s,
                 ),
               ],
             ),
-            child: SizedBox(width: 22, height: 22),
+            child: SizedBox(width: BirdySizes.switchKnob, height: BirdySizes.switchKnob),
           ),
         ),
       ),
