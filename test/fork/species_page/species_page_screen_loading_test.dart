@@ -27,26 +27,12 @@ import 'package:birdnet_live/shared/services/species_description_service.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../helpers/fonts.dart';
 
 const _robin = 'Erithacus rubecula';
-
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
 
 IndexedDetection _clip(String key, double score) => IndexedDetection(
   key: key,
@@ -140,7 +126,7 @@ class _NoDescriptions extends SpeciesDescriptionService {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   late SharedPreferences prefs;
   late _DelayedLoader loader;

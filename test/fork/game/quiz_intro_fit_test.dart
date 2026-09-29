@@ -16,26 +16,10 @@ import 'package:birdnet_live/shared/providers/settings_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// The default test font has other metrics: whether the intro fits without
-/// scrolling only means something with the real bundled fonts.
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 class _FakePlayer implements SpeciesClipPlayer {
   final ValueNotifier<String?> _playing = ValueNotifier(null);
@@ -83,7 +67,7 @@ Future<void> _checkFit(
   double? wellHeight,
 }) async {
   {
-    await _loadRealFonts();
+    await loadAppFonts();
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     tester.view.physicalSize = size * 2;
