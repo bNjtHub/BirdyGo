@@ -854,7 +854,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Ménage : images d'échec des goldens ignorées (`**/goldens/failures/`), jetons pour les tailles
             de l'onboarding (`labelLarge`, `inputLarge`, `headingSmall`, `ctaIcon`, `inlineIcon`).
       - [ ] (Benjamin) Téléphone : premier lancement, 4 oiseaux, icône, clair/sombre.
-      - [ ] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
+      - [x] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
