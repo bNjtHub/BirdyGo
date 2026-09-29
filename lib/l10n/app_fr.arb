@@ -1868,5 +1868,15 @@
   "forkThemeAuto": "Auto",
   "forkLiveThemeTitle": "Écran d'écoute",
   "forkLiveThemeCaption": "Sombre par défaut : il éblouit moins à l'aube et économise la batterie",
-  "forkDailyGoalHeardSure": "Entendu · Sûr"
+  "forkDailyGoalHeardSure": "Entendu · Sûr",
+  "forkOnbNameTitle": "Comment tu t'appelles ?",
+  "@forkOnbNameTitle": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameHint": "Pour te saluer",
+  "@forkOnbNameHint": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameNote": "Il reste sur le téléphone.",
+  "@forkOnbNameNote": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameContinue": "Continuer",
+  "@forkOnbNameContinue": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameFieldLabel": "Prénom",
+  "@forkOnbNameFieldLabel": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."}
 }

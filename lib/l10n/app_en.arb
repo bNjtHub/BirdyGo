@@ -6196,5 +6196,15 @@
   "forkLiveThemeTitle": "Listening screen",
   "forkLiveThemeCaption": "Dark by default: it dazzles less at dawn and saves battery",
   "forkDailyGoalHeardSure": "Heard · Sure",
-  "@forkDailyGoalHeardSure": {"description": "BirdyGo fork: daily goal row of a heard bird, reliability Sure (J6h)."}
+  "@forkDailyGoalHeardSure": {"description": "BirdyGo fork: daily goal row of a heard bird, reliability Sure (J6h)."},
+  "forkOnbNameTitle": "What's your name?",
+  "@forkOnbNameTitle": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameHint": "So we can greet you",
+  "@forkOnbNameHint": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameNote": "It stays on your phone.",
+  "@forkOnbNameNote": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameContinue": "Continue",
+  "@forkOnbNameContinue": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkOnbNameFieldLabel": "First name",
+  "@forkOnbNameFieldLabel": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."}
 }

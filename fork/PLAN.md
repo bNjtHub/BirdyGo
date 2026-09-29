@@ -819,7 +819,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [ ] Carte : puces en encre, retour quand elle est poussée.
       - [x] Carte : puces en encre, bulle 13, retour quand elle est poussée.
       - [x] Revue : pile centrée verticalement.
-      - [ ] Premier lancement : étape prénom facultative.
+      - [x] Premier lancement : étape prénom facultative.
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
