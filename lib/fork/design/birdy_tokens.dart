@@ -683,6 +683,9 @@ abstract final class BirdyMapStyle {
   static const double cluster = 56;
   static const double clusterBorder = 3;
 
+  /// Unit label (« espèces ») under the count in the cluster bubble.
+  static const double clusterLabelSize = 11;
+
   /// User position dot and its border.
   static const double userDot = 14;
   static const double userDotBorder = 3;

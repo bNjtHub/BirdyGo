@@ -108,7 +108,8 @@ void main() {
       expect(border.top.width, BirdyMapStyle.clusterBorder);
       final unit = tester.widget<Text>(find.text('espèces'));
       expect(unit.style!.color, BirdyMapStyle.onCluster);
-      expect(unit.style!.fontSize, 13, reason: 'the 11 px label is gone');
+      expect(unit.style!.fontSize, BirdyMapStyle.clusterLabelSize);
+      expect(BirdyMapStyle.clusterLabelSize, 11);
       expect(
         contrastRatio(BirdyColors.dark.accent, BirdyMapStyle.onCluster),
         greaterThan(4.5),
