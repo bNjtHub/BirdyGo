@@ -160,3 +160,6 @@ app.*.symbols
 tools/fork_sheets/cache/
 tools/fork_sheets/review.html
 review_decisions.json
+
+# FORK: golden test failure images
+**/goldens/failures/

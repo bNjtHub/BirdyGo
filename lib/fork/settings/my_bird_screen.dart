@@ -38,9 +38,6 @@ class MyBirdScreen extends StatelessWidget {
 class MyBirdRow extends ConsumerWidget {
   const MyBirdRow({super.key});
 
-  /// Width of the logo in the row's disc.
-  static const double _mark = 28;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -48,7 +45,7 @@ class MyBirdRow extends ConsumerWidget {
     return BirdyListRow(
       avatar: const SingingThemeLogo(
         size: BirdySizes.rowDisc,
-        markWidth: _mark,
+        markWidth: BirdySizes.myBirdRowMark,
         halo: false,
         sings: false,
       ),

@@ -844,6 +844,18 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
 
+- [ ] J6i Thèmes, typo, wordmark, icônes, premier lancement (suite de J6h, PR #103 à #108).
+      - [x] Thèmes (#104, #105) : 4 palettes d'oiseau (loriot, martin, flamant, étourneau), choix clair / sombre.
+      - [x] Typo (#103) : échelle Nunito / Atkinson / Fraunces, jetons dans `birdy_typography.dart`.
+      - [x] Wordmark (#106) : point posé sur la ligne de base, logo animé du thème.
+      - [x] Icônes (#107) : icône d'appli par oiseau (4 alias Android), l'icône de l'application pointe
+            vers celle du loriot. Côté iOS : voir la section « Phase iOS », icône d'appli par oiseau.
+      - [x] Onboarding (#108) : choix de l'oiseau, prénom, bienvenue.
+      - [x] Ménage : images d'échec des goldens ignorées (`**/goldens/failures/`), jetons pour les tailles
+            de l'onboarding (`labelLarge`, `inputLarge`, `headingSmall`, `ctaIcon`, `inlineIcon`).
+      - [ ] (Benjamin) Téléphone : premier lancement, 4 oiseaux, icône, clair/sombre.
+      - [ ] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
+
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
 - l'écoute démarre moins d'une seconde après l'appui sur « Écouter » (le nouvel accueil garde le

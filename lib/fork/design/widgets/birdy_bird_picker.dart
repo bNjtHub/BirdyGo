@@ -151,10 +151,7 @@ class BirdyBirdCard extends StatelessWidget {
                       Text(
                         bird.label(l10n),
                         textAlign: TextAlign.center,
-                        style: BirdyText.heading.copyWith(
-                          fontSize: 17,
-                          color: c.text1,
-                        ),
+                        style: BirdyText.headingSmall.copyWith(color: c.text1),
                       ),
                       const SizedBox(height: BirdySpace.s),
                       _Dots(brand: brand),
@@ -177,7 +174,7 @@ class BirdyBirdCard extends StatelessWidget {
                       ),
                       child: Icon(
                         AppIcons.check,
-                        size: 16,
+                        size: BirdySizes.inlineIcon,
                         weight: 700,
                         color: BirdyBrand.ink,
                       ),
