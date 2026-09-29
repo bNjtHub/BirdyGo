@@ -2,12 +2,15 @@ import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_block.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_listening_logo.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_sparkles.dart';
 import 'package:birdnet_live/fork/live/live_moments.dart';
 import 'package:birdnet_live/fork/live/live_moments_model.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
+import 'package:birdnet_live/fork/live/rare_halo.dart';
+import 'package:birdnet_live/fork/reliability/quick_review_widgets.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -17,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 final _t0 = DateTime(2026, 9, 27, 7, 30);
 
@@ -27,10 +31,14 @@ DetectionRecord _record(String name, double score) => DetectionRecord(
   timestamp: _t0,
 );
 
-LiveTableEntry _entry(String name, double score, {DetectionRecord? record}) =>
-    LiveTableEntry(
+LiveTableEntry _entry(
+  String name,
+  double score, {
+  DetectionRecord? record,
+  String? commonName,
+}) => LiveTableEntry(
       scientificName: name,
-      commonName: name,
+      commonName: commonName ?? name,
       sessionCount: 1,
       total: 1,
       lastHeard: _t0,
@@ -203,6 +211,19 @@ void main() {
       });
     });
 
+    test('rareChanceN: n = round(1 / score), nothing without a score', () {
+      expect(rareChanceN(0.02), 50);
+      expect(rareChanceN(0.04), 25);
+      expect(rareChanceN(1 / 3), 3);
+      expect(rareChanceN(0.0333), 30);
+      expect(rareChanceN(0.5), 2);
+      expect(rareChanceN(0), isNull);
+      expect(rareChanceN(null), isNull);
+      // Under 1 % the card says « moins de 1 sur 100 » instead.
+      expect(0.004 < rareLowPresenceBelow, isTrue);
+      expect(0.02 < rareLowPresenceBelow, isFalse);
+    });
+
     test('non-birds and already verified species never trigger', () {
       final tracker = LiveMomentTracker(verifiedBefore: {'Turdus merula'});
       expect(
@@ -228,6 +249,7 @@ void main() {
       double textScale = 1,
       bool reduced = false,
       bool paused = false,
+      double presenceScore = 0.02,
       ThemeData? theme,
     }) => ProviderScope(
       overrides: [
@@ -252,7 +274,7 @@ void main() {
             entries: entries,
             controller: controller,
             presenceOf: _presence,
-            presenceScoreOf: (_) => 0.02,
+            presenceScoreOf: (_) => presenceScore,
             clips: const {},
             verifiedBefore: () async => verified,
             paused: paused,
@@ -269,6 +291,7 @@ void main() {
       double textScale = 1,
       bool reduced = false,
       bool paused = false,
+      double presenceScore = 0.02,
       ThemeData? theme,
     }) async {
       SharedPreferences.setMockInitialValues({});
@@ -283,6 +306,7 @@ void main() {
           textScale: textScale,
           reduced: reduced,
           paused: paused,
+          presenceScore: presenceScore,
           theme: theme,
         ),
       );
@@ -513,12 +537,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       expect(find.text('Première rencontre !'), findsNothing);
-      expect(
-        find.text('Écoute-le encore avant de fêter : c\'est bien lui ?'),
-        findsOneWidget,
-      );
-      await tester.ensureVisible(find.text("Ce n'est pas lui"));
-      await tester.tap(find.text("Ce n'est pas lui"));
+      expect(find.text("C'est bien lui ?"), findsOneWidget);
+      await tester.ensureVisible(find.text('Pas lui'));
+      await tester.tap(find.text('Pas lui'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 4));
       await tester.pump(const Duration(milliseconds: 600));
@@ -581,23 +602,141 @@ void main() {
       expect(find.text('Ajouté à ton carnet · 25e espèce'), findsOneWidget);
     });
 
-    testWidgets('rare bird: « C\'est bien lui » confirms, then the party', (
+    Finder verdict(String label) => find.descendant(
+      of: find.byType(VerdictButtons),
+      matching: find.text(label),
+    );
+
+    final hoopoe = _entry(
+      'Upupa epops',
+      0.93,
+      commonName: 'Huppe fasciée',
+    );
+
+    testWidgets('rare bird question: order, short labels, one chance in n', (
       tester,
     ) async {
-      await pump(tester, [_entry('Upupa epops', 0.93)], verified: {'A b'});
+      await pump(tester, [hoopoe], verified: {'A b'});
+      // The chance line rises in; measure once it has settled.
+      await tester.pump(const Duration(seconds: 1));
+      // From top to bottom: logo line, pill, name, chance, replay title,
+      // verdicts, note.
+      final ys = [
+        for (final finder in [
+          find.text("L'écoute continue"),
+          find.text('Rare ici · à confirmer'),
+          find.text('Huppe fasciée'),
+          find.text("1 chance sur 50 de l'entendre ici"),
+          find.text("C'est bien lui ?"),
+          find.text('Réécoute-le avant de fêter.'),
+          find.byType(VerdictButtons),
+          find.text('Il entre dans ton carnet après ta réponse.'),
+        ])
+          tester.getTopLeft(finder).dy,
+      ];
+      expect(ys, orderedEquals([...ys]..sort()));
+      expect(ys.toSet(), hasLength(ys.length));
+      expect(find.byType(BirdyListeningLogo), findsOneWidget);
+      expect(verdict('Pas lui'), findsOneWidget);
+      expect(verdict('Je ne sais pas'), findsOneWidget);
+      expect(verdict("C'est lui"), findsOneWidget);
+      // The long labels and the old copy are gone from the card.
+      expect(find.text("Ce n'est pas lui"), findsNothing);
+      expect(find.textContaining('Garde l\'extrait'), findsNothing);
+      expect(find.textContaining('Présence estimée'), findsNothing);
+      // No countdown on the question.
+      expect(find.byType(BirdyProgressBar), findsNothing);
+      // 20 between the groups.
+      final chanceBottom = tester.getBottomLeft(
+        find.text("1 chance sur 50 de l'entendre ici"),
+      );
+      final replayTop = tester.getTopLeft(find.text("C'est bien lui ?"));
+      expect(replayTop.dy - chanceBottom.dy, greaterThanOrEqualTo(20));
+    });
+
+    testWidgets('no Latin name on the rare card', (tester) async {
+      await pump(tester, [hoopoe], verified: {'A b'});
+      expect(find.text('Huppe fasciée'), findsOneWidget);
+      expect(find.text('Upupa epops'), findsNothing);
+    });
+
+    testWidgets('no Latin name on the first-encounter card', (tester) async {
+      await pump(tester, [
+        _entry('Dendrocopos major', 0.95, commonName: 'Pic épeiche'),
+      ]);
+      expect(find.text('Pic épeiche'), findsOneWidget);
+      expect(find.text('Dendrocopos major'), findsNothing);
+    });
+
+    testWidgets('chance under 1 % says « moins de 1 sur 100 »', (tester) async {
+      await pump(tester, [hoopoe], verified: {'A b'}, presenceScore: 0.004);
       expect(
-        find.text('Écoute-le encore avant de fêter : c\'est bien lui ?'),
+        find.text('Présence estimée ici cette semaine : moins de 1 sur 100.'),
         findsOneWidget,
       );
-      expect(
-        find.text('Présence estimée ici cette semaine : 2 sur 100.'),
-        findsOneWidget,
+      expect(find.textContaining('1 chance sur'), findsNothing);
+    });
+
+    testWidgets('chance: n follows the score', (tester) async {
+      await pump(tester, [hoopoe], verified: {'A b'}, presenceScore: 0.04);
+      expect(find.text("1 chance sur 25 de l'entendre ici"), findsOneWidget);
+    });
+
+    testWidgets('rare arrival: dotted ring, halo and three diamonds, once', (
+      tester,
+    ) async {
+      await pump(tester, [hoopoe], verified: {'A b'});
+      expect(find.byType(RareHalo), findsOneWidget);
+      Finder diamonds() => find.descendant(
+        of: find.byType(BirdySparkles),
+        matching: find.byType(Icon),
       );
+      expect(diamonds(), findsNWidgets(3));
+      // Over by ~2.4 s + the last diamond: nothing left but the ring.
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+      expect(diamonds(), findsNothing);
+      expect(find.byType(RareHalo), findsOneWidget);
+      expect(find.byType(ConfettiWidget), findsNothing);
+    });
+
+    testWidgets('rare arrival, reduced motion: no diamonds, ring only', (
+      tester,
+    ) async {
+      await pump(tester, [hoopoe], verified: {'A b'}, reduced: true);
+      expect(
+        find.descendant(
+          of: find.byType(BirdySparkles),
+          matching: find.byType(Icon),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(RareHalo), findsOneWidget);
+      await tester.tap(verdict("C'est lui"));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(find.text('Oiseau rare confirmé !'), findsOneWidget);
+    });
+
+    testWidgets('« C\'est lui » confirms, golden confetti, 6 s countdown', (
+      tester,
+    ) async {
+      await pump(tester, [hoopoe], verified: {'A b'});
       expect(find.text('Oiseau rare confirmé !'), findsNothing);
-      await tester.tap(find.text("C'est bien lui"));
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.tap(verdict("C'est lui"));
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('Oiseau rare confirmé !'), findsOneWidget);
       expect(find.text('+1 espèce rare'), findsOneWidget);
+      expect(find.text('Inattendu ici'), findsOneWidget);
+      expect(find.textContaining('entre dans ton carnet'), findsOneWidget);
+      expect(find.textContaining('Garde l\'extrait'), findsNothing);
+      expect(find.byType(ConfettiWidget), findsOneWidget);
+      expect(
+        tester.widget<RareHalo>(find.byType(RareHalo)).solid,
+        isTrue,
+      );
+      expect(find.text('Se referme seul dans 6 s'), findsOneWidget);
       expect(
         session.detections
             .where((d) => d.scientificName == 'Upupa epops')
@@ -605,19 +744,26 @@ void main() {
         isTrue,
       );
       expect(session.detections.last.reviewStatus, ReviewStatus.unreviewed);
+      // No auto-close before 6 s, then it closes by itself.
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('Oiseau rare confirmé !'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Oiseau rare confirmé !'), findsNothing);
     });
 
-    testWidgets('rare bird: « Ce n\'est pas lui » rejects it, quietly', (
+    testWidgets('« Pas lui » rejects it, quietly, 3 s countdown', (
       tester,
     ) async {
-      await pump(tester, [_entry('Upupa epops', 0.93)]);
-      await tester.ensureVisible(find.text("Ce n'est pas lui"));
-      await tester.tap(find.text("Ce n'est pas lui"));
+      await pump(tester, [hoopoe]);
+      await tester.tap(verdict('Pas lui'));
       await tester.pump(const Duration(milliseconds: 100));
       expect(
         find.text("C'est noté. Il ne comptera pas, merci."),
         findsOneWidget,
       );
+      expect(find.text('Se referme seul dans 3 s'), findsOneWidget);
+      expect(find.text("Continuer l'écoute"), findsOneWidget);
       expect(
         session.detections
             .where((d) => d.scientificName == 'Upupa epops')
@@ -625,7 +771,118 @@ void main() {
         isTrue,
       );
       await tester.pump(const Duration(seconds: 4));
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.text("C'est noté. Il ne comptera pas, merci."), findsNothing);
+    });
+
+    testWidgets(
+      '« Je ne sais pas » keeps it for the quick review, 3 s countdown',
+      (tester) async {
+        await pump(tester, [hoopoe]);
+        await tester.tap(verdict('Je ne sais pas'));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(
+          find.text('Gardé pour plus tard, dans la revue rapide.'),
+          findsOneWidget,
+        );
+        expect(find.text('Se referme seul dans 3 s'), findsOneWidget);
+        // Nothing written: the detections stay to check.
+        expect(
+          session.detections
+              .where((d) => d.scientificName == 'Upupa epops')
+              .every((d) => d.reviewStatus == ReviewStatus.unreviewed),
+          isTrue,
+        );
+        // And the quick review queue, fed by the session, takes them.
+        await tester.runAsync(() async {
+          sqfliteFfiInit();
+          final index = await ObservationIndex.open(
+            databaseFactoryFfi,
+            inMemoryDatabasePath,
+          );
+          await index.rebuild([session]);
+          final queue = await index.reviewQueue();
+          expect(
+            queue.where((q) => q.scientificName == 'Upupa epops'),
+            hasLength(2),
+          );
+          await index.close();
+        });
+        await tester.pump(const Duration(seconds: 4));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(find.text('Gardé pour plus tard, dans la revue rapide.'),
+            findsNothing);
+      },
+    );
+
+    testWidgets('an answered rare card counts down with the pause', (
+      tester,
+    ) async {
+      await pump(tester, [hoopoe]);
+      await tester.tap(verdict('Je ne sais pas'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Se referme seul dans 2 s'), findsOneWidget);
+      await tester.pumpWidget(app([hoopoe], paused: true));
+      await tester.pump();
+      expect(
+        find.text('Se referme seul dans 2 s · en pause'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 10));
+      expect(
+        find.text('Gardé pour plus tard, dans la revue rapide.'),
+        findsOneWidget,
+      );
+    });
+
+    for (final (label, size) in [
+      ('390 × 780', const Size(390, 780)),
+      ('390 × 600, room for the card only', const Size(390, 600)),
+    ]) {
+      testWidgets('rare card at $label: no scrolling', (tester) async {
+        await pump(tester, [hoopoe], verified: {'A b'}, size: size);
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.takeException(), isNull);
+        final scrollable = tester.state<ScrollableState>(
+          find.byType(Scrollable),
+        );
+        expect(scrollable.position.maxScrollExtent, 0);
+        // Everything is on screen, buttons big enough.
+        final verdicts = tester.getRect(find.byType(VerdictButtons));
+        expect(verdicts.bottom, lessThanOrEqualTo(size.height));
+        expect(verdicts.height, greaterThanOrEqualTo(48));
+      });
+    }
+
+    testWidgets('first encounter card at 390 × 780: no scrolling', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        [_entry('Dendrocopos major', 0.95)],
+        size: const Size(390, 780),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+      expect(scrollable.position.maxScrollExtent, 0);
+    });
+
+    testWidgets('rare card at 130 % text: no overflow, still reachable', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        [hoopoe],
+        verified: {'A b'},
+        size: const Size(320, 640),
+        textScale: 1.3,
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(verdict("C'est lui"));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('nothing new: no card, taps go through', (tester) async {

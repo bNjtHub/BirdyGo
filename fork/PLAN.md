@@ -826,6 +826,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Écoute : premières rencontres en série (file, « 1 sur 3 nouvelles », points, « Espèce suivante »),
             barre de décompte qui se fige en pause, retour d'arrière-plan, logo animé partagé
             (`BirdyListeningLogo`), feu d'artifice en deux salves et étincelles (`BirdySparkles`).
+      - [x] Écoute : carte de l'oiseau rare (arrivée avec anneau pointillé, halo et losanges ; « 1 chance sur n » ;
+            les 3 verdicts de la Revue rapide ; décomptes 6 s / 3 s ; « Je ne sais pas » laisse à vérifier) et
+            carte de première rencontre compacte (oiseau 96, sans nom latin, `BalancedText`, sans « n au total »).
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.

@@ -1111,5 +1111,11 @@
   "forkMomentSeriesPos": "{pos} of {total} new",
   "forkMomentClosesIn": "Closes by itself in {n} s",
   "forkMomentNextIn": "Next in {n} s",
-  "forkMomentPausedSuffix": "· paused"
+  "forkMomentPausedSuffix": "· paused",
+  "forkMomentRareChance": "1 chance in {n} of hearing it here",
+  "forkMomentRareAskShort": "Is it really this bird?",
+  "forkMomentRareListenFirst": "Listen again before celebrating.",
+  "forkMomentRareNoteShort": "It joins your notebook after your answer.",
+  "forkVerdictNotShort": "Not this one",
+  "forkVerdictYesShort": "It's this one"
 }

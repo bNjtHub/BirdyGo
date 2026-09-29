@@ -9,6 +9,17 @@ import 'live_table_model.dart';
 
 enum LiveMomentKind { firstTime, rare }
 
+/// The geo-model's presence score (0–1) under which the rare card says
+/// « moins de 1 sur 100 » instead of counting its chances.
+const double rareLowPresenceBelow = 0.01;
+
+/// « 1 chance sur n de l'entendre ici »: n = round(1 / score). Null
+/// without a usable score (unknown or not above zero).
+int? rareChanceN(double? presenceScore) =>
+    presenceScore == null || presenceScore <= 0
+        ? null
+        : (1 / presenceScore).round();
+
 class LiveMoment {
   LiveMoment({required this.kind, required this.entry, this.rank = 0});
 

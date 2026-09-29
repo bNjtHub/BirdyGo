@@ -1600,7 +1600,6 @@
   "forkMomentRareNote": "Il entre dans ton carnet seulement après ta réponse.",
   "forkMomentRareConfirmed": "Oiseau rare confirmé !",
   "forkMomentRareEnters": "{name} entre dans ton carnet. C'est ta {rank, plural, =1{1re} other{{rank}e}} espèce.",
-  "forkMomentRareKeep": "Garde l'extrait : si tu l'envoies à la LPO, ses bénévoles pourront l'écouter.",
   "forkMomentRarePlusOne": "+1 espèce rare",
   "forkMomentRareLater": "Gardé pour plus tard, dans la revue rapide.",
   "forkMomentRareNo": "C'est noté. Il ne comptera pas, merci.",
@@ -1893,5 +1892,11 @@
   "forkVolumeCaption": "Tu risques de ne pas entendre les chants.",
   "@forkVolumeCaption": {"description": "BirdyGo fork: media volume warning on the listening screen (J6h)."},
   "forkVolumeRaise": "Monter le son",
-  "@forkVolumeRaise": {"description": "BirdyGo fork: button that raises the media volume (J6h)."}
+  "@forkVolumeRaise": {"description": "BirdyGo fork: button that raises the media volume (J6h)."},
+  "forkMomentRareChance": "1 chance sur {n} de l'entendre ici",
+  "forkMomentRareAskShort": "C'est bien lui ?",
+  "forkMomentRareListenFirst": "Réécoute-le avant de fêter.",
+  "forkMomentRareNoteShort": "Il entre dans ton carnet après ta réponse.",
+  "forkVerdictNotShort": "Pas lui",
+  "forkVerdictYesShort": "C'est lui"
 }

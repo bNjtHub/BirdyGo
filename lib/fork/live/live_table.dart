@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
-import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/entrance.dart';
@@ -223,14 +222,6 @@ class LiveTableRow extends StatelessWidget {
         children: [
           SingingIndicator(singing: entry.singingVisual, color: tint.accent),
           if (badge != null) badge!,
-          if (!compact)
-            Text(
-              l10n.forkLiveTotal(entry.total),
-              style: BirdyText.caption.copyWith(
-                color: c.text2,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
         ],
       ),
       count: AnimatedCount(

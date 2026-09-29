@@ -26,6 +26,7 @@ class ClipPlayButton extends StatelessWidget {
     required this.semanticLabel,
     this.onPressed,
     this.progress,
+    this.size = BirdySizes.target,
   });
 
   final ClipPlayState state;
@@ -39,10 +40,13 @@ class ClipPlayButton extends StatelessWidget {
   /// [ClipPlayState.playing]. Null draws no ring.
   final double? progress;
 
+  /// Diameter: the touch target, or [BirdySizes.mainAction] on a card
+  /// where the replay leads (the icon is half of it).
+  final double size;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    const size = BirdySizes.target;
 
     if (state == ClipPlayState.pending) {
       return Tooltip(
@@ -81,7 +85,7 @@ class ClipPlayButton extends StatelessWidget {
           dimension: size,
           child: Icon(
             playing ? AppIcons.stop : AppIcons.playArrow,
-            size: 24,
+            size: size / 2,
             fill: 1,
             color: playing ? c.onAccent : c.accentText,
           ),

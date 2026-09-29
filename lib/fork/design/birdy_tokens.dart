@@ -66,6 +66,14 @@ abstract final class BirdyConfettiColors {
     BirdyBrand.kingfisher,
     BirdyBrand.lichen,
   ];
+
+  /// Golden burst of a confirmed rare bird (J6h).
+  static const List<Color> rare = [
+    BirdyBrand.oriole,
+    Color(0xFFE3A22B),
+    Color(0xFFFFE9A0),
+    BirdyBrand.kingfisher,
+  ];
 }
 
 /// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not
@@ -683,6 +691,19 @@ abstract final class BirdySizes {
 
   /// Sparkle popping around the bird of a first encounter (J6h).
   static const double sparkle = 20;
+
+  /// Bird picture of the moment cards (first encounter, rare bird).
+  static const double momentAvatar = 96;
+
+  /// Room the dotted ring of the rare card leaves around the picture, its
+  /// stroke and its dash and gap.
+  static const double rareRingGap = 10;
+  static const double rareRingStroke = 2.5;
+  static const double rareRingDash = 5;
+  static const double rareRingDashGap = 4;
+
+  /// Height of the moment area under which a card tightens its gaps.
+  static const double momentCompactBelow = 620;
 
   /// Mode icon inline before the mode word in the live status line (J6f).
   static const double statusModeIcon = 14;

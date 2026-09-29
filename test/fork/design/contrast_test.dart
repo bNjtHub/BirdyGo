@@ -318,4 +318,18 @@ void main() {
       expectAA(c.accentText, on(track, c.background), 'onboarding dot/idle dot', min: 3);
     }
   });
+  test('rare bird card (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final card = c.surface2;
+      // The chance line, and the pill, on the card.
+      expectAA(c.orioleText, card, 'chance line/card');
+      expectAA(c.orioleText, on(c.orioleContainer, card), 'rare pill/card');
+      // Captions, the answer note (on surface1 inside the card).
+      expectAA(c.text2, card, 'caption/card');
+      expectAA(c.text1, c.surface1, 'answer note/box');
+      expectAA(c.text2, c.surface1, 'answer note icon/box', min: 3);
+      // The dotted ring and the golden confetti are decoration.
+      expectAA(c.onOriole, c.oriole, '+1 espèce rare/pill');
+    }
+  });
 }

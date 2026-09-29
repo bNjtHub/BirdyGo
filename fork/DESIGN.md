@@ -151,7 +151,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
 | Nouvelle espèce en Live | 220 ms | glisse de 8 px, échelle 0,97 vers 1, fondu, vibration légère |
 | Toute première espèce | 250 ms pour la carte, séquence d'environ 2,5 s, une seule fois | carte « Première rencontre » (fondu, 0,97 vers 1), légère teinte de la couleur de l'oiseau derrière (opacité 15 % au plus), puis l'oiseau, son anneau, les textes et une gerbe de confettis (détail en J6f), vibration légère |
-| Oiseau rare | attente, puis 450 ms | carte dorée immobile (fin liseré Loriot) en attendant « C'est bien lui » ; puis un seul anneau doux et la pastille « +1 espèce rare » en fondu |
+| Oiseau rare | arrivée d'environ 2,4 s, une fois ; attente sans décompte ; puis réponse | carte dorée (fin liseré Loriot). À l'arrivée : anneau pointillé Loriot qui se dessine en tournant de −90° à 120°, halo Loriot qui pulse 2 fois, 3 losanges qui scintillent l'un après l'autre (décalage 220 ms), pastille en pop ; l'anneau reste ensuite pointillé. « C'est lui » : anneau plein et halo, confettis dorés, « +1 espèce rare », décompte 6 s ; « Je ne sais pas » et « Pas lui » : encadré de réponse, décompte 3 s |
 | Nouveau statut | 300 ms, une seule fois | l'emblème apparaît en fondu (échelle 0,97 vers 1), le texte suit 60 ms après, une gerbe de confettis part de l'emblème une fois celui-ci arrivé, vibration légère |
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
@@ -193,6 +193,17 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   l'en-tête), figé en pause. Feu d'artifice : deux salves de confettis (22 puis 14, `BirdyConfettiBurst`) et
   4 étincelles (`BirdySparkles`), une fois. Animations réduites : barre en paliers d'une seconde, texte mis à
   jour, ni confetti ni étincelles, logo immobile.
+- Carte de l'oiseau rare (J6h, `lib/fork/live/live_moments.dart`, `rare_halo.dart`) : logo « L'écoute continue »,
+  pastille « Rare ici · à confirmer », oiseau 96 (`BirdySizes.momentAvatar`) dans son anneau pointillé, nom sans nom
+  latin (`BalancedText`, lignes équilibrées), ligne Loriot « ◆ 1 chance sur n de l'entendre ici » (n = 1 / score
+  de présence arrondi, « moins de 1 sur 100 » sous 1 %), rejouer 56 rond + « C'est bien lui ? », les trois verdicts
+  de la Revue rapide (`VerdictButtons`, libellés courts), légende. Écarts de 20 entre groupes, resserrés sous
+  `momentCompactBelow` ; défilement en dernier recours seulement. La carte de première rencontre suit la même
+  règle (oiseau 96, sans nom latin). Arrivée : jetons `BirdyMotion.rare*` (anneau 2,4 s, halo 2 × 1,4 s, losanges
+  `BirdySparkles` avec l'icône `diamond`). Décomptes : 6 s après « C'est lui », 3 s après les deux autres
+  (`rareConfirmedShown`, `rareAnsweredShown`), mêmes barre et pause que la première rencontre. « Je ne sais pas »
+  n'écrit rien : les détections restent « à vérifier » et la Revue rapide les reprend. Animations réduites : anneau
+  pointillé immobile, ni halo, ni losanges, ni confettis.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 - Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule
