@@ -276,7 +276,10 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
                         queue == null
                             ? _loadingBody()
                             : current == null
-                            ? ReviewAllDone(sorted: _done)
+                            ? ReviewAllDone(
+                              sorted: _done,
+                              onBack: () => Navigator.of(context).maybePop(),
+                            )
                             : _body(l10n, queue, current),
                   ),
                 ],

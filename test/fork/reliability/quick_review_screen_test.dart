@@ -171,20 +171,21 @@ void main() {
     expect(find.textContaining('est une bonne réponse'), findsOneWidget);
   });
 
-  testWidgets('the card stack and hints are centered between progress and verdicts', (
-    tester,
-  ) async {
-    await pump(tester);
-    final progress = tester.getRect(find.byType(ReviewProgress));
-    final stack = tester.getRect(find.byType(ReviewCardStack));
-    final hints = tester.getRect(find.byType(SwipeHints));
-    final buttons = tester.getRect(find.byType(VerdictButtons));
-    final above = stack.top - progress.bottom;
-    final below = buttons.top - BirdySpace.m - hints.bottom;
-    expect(hints.top, greaterThan(stack.bottom));
-    expect(above, greaterThan(0));
-    expect((above - below).abs(), lessThan(2));
-  });
+  testWidgets(
+    'the card stack and hints are centered between progress and verdicts',
+    (tester) async {
+      await pump(tester);
+      final progress = tester.getRect(find.byType(ReviewProgress));
+      final stack = tester.getRect(find.byType(ReviewCardStack));
+      final hints = tester.getRect(find.byType(SwipeHints));
+      final buttons = tester.getRect(find.byType(VerdictButtons));
+      final above = stack.top - progress.bottom;
+      final below = buttons.top - BirdySpace.m - hints.bottom;
+      expect(hints.top, greaterThan(stack.bottom));
+      expect(above, greaterThan(0));
+      expect((above - below).abs(), lessThan(2));
+    },
+  );
 
   testWidgets('short screen at 130 % text: no overflow, verdicts reachable', (
     tester,
@@ -274,6 +275,36 @@ void main() {
     expect(find.text('Rien à vérifier'), findsOneWidget);
     expect(find.text('Toutes les détections sont triées.'), findsOneWidget);
     expect(find.text("C'est bien lui"), findsNothing);
+  });
+
+  testWidgets('empty queue: centered back button pops the screen', (
+    tester,
+  ) async {
+    index = _FakeIndex([]);
+    await pump(tester);
+    // The screen is the home route here: push a copy so there is a route to pop.
+    final nav = tester.state<NavigatorState>(find.byType(Navigator));
+    nav.push(
+      MaterialPageRoute<void>(builder: (_) => const QuickReviewScreen()),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(QuickReviewScreen, skipOffstage: false),
+      findsNWidgets(2),
+    );
+    final back = find.widgetWithText(FilledButton, 'Retour');
+    expect(back, findsOneWidget);
+    final center = tester.getCenter(back);
+    expect((center.dx - 195).abs(), lessThan(1));
+    // Under the message, in the middle area of the screen.
+    expect(
+      center.dy,
+      greaterThan(tester.getCenter(find.text('Rien à vérifier')).dy),
+    );
+    expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
+    await tester.tap(back);
+    await tester.pumpAndSettle();
+    expect(find.byType(QuickReviewScreen, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('reduced motion: the answer still goes through', (tester) async {
