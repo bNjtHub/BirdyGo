@@ -109,7 +109,7 @@ void main() {
       final unit = tester.widget<Text>(find.text('espèces'));
       expect(unit.style!.color, BirdyMapStyle.onCluster);
       expect(unit.style!.fontSize, BirdyMapStyle.clusterLabelSize);
-      expect(BirdyMapStyle.clusterLabelSize, 11);
+      expect(BirdyMapStyle.clusterLabelSize, 13);
       expect(
         contrastRatio(BirdyColors.dark.accent, BirdyMapStyle.onCluster),
         greaterThan(4.5),
