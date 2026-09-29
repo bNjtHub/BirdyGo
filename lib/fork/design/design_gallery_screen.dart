@@ -444,7 +444,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                 ),
                 SpeciesCard.mystery(
                   name: l10n.forkMystery,
-                  visual: const SpeciesAvatar(size: 56, muted: true),
+                  visual: const SpeciesAvatar(size: 56, mystery: true),
                 ),
               ])
                 SizedBox(width: width, child: card),

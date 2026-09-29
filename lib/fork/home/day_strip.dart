@@ -97,7 +97,7 @@ class _DayPill extends StatelessWidget {
       DayMoment.morningBirds || DayMoment.eveningBirds => (
         c.tonal,
         c.accentText,
-        BirdyGoSilhouetteIcon(size: _iconSize, color: c.accentText),
+        BirdyGoSilhouetteIcon.glyph(size: _iconSize, color: c.accentText),
       ),
       DayMoment.sunrise => (
         c.surface1,

@@ -10,9 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/explore/explore_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
-import '../design/birdygo_silhouette.dart';
 import '../design/species_accents.dart';
-import '../design/species_tint.dart';
 import '../design/widgets/species_avatar.dart';
 import '../game/game_config.dart';
 import 'notebook_model.dart';
@@ -84,15 +82,7 @@ abstract final class NotebookVisuals {
   /// gives the species away. [scientificName] is there for the J6d icons
   /// (their silhouette).
   static Widget mystery(String scientificName, {required double size}) =>
-      SpeciesAvatar(
-        size: size,
-        muted: true,
-        icon: BirdyGoSilhouetteIcon(
-          size: size * 0.6,
-          color: SpeciesTint.neutral.deep,
-          muted: true,
-        ),
-      );
+      SpeciesAvatar(size: size, mystery: true);
 }
 
 /// State mark on a notebook photo.

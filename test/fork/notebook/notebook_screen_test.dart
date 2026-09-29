@@ -220,6 +220,8 @@ void main() {
     // silhouette, never a species-giving icon.
     // (Plus the mini one of the hero caption.)
     expect(find.byType(BirdyGoSilhouetteIcon), findsNWidgets(2));
+    // The mystery card shows the « ? » (the 16 px hero one stays plain).
+    expect(find.text('?'), findsOneWidget);
   });
 
   testWidgets('« Nouveau » stays until the card is opened', (tester) async {

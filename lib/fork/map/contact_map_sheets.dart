@@ -471,7 +471,7 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                                   child: Row(
                                     children: [
                                       ExcludeSemantics(
-                                        child: BirdyGoSilhouetteIcon(
+                                        child: BirdyGoSilhouetteIcon.glyph(
                                           size: 24,
                                           color: c.accentText,
                                         ),

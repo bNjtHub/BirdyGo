@@ -39,23 +39,55 @@ void main() {
     }
   });
 
-  testWidgets('the icon draws at its size, wing on by default', (tester) async {
+  Widget host(List<Widget> children) => Directionality(
+    textDirection: TextDirection.ltr,
+    child: Column(children: children),
+  );
+
+  testWidgets('the icon draws at its size', (tester) async {
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Column(
-          children: [
-            BirdyGoSilhouetteIcon(size: 40, color: grey),
-            BirdyGoSilhouetteIcon(size: 15, color: grey, muted: true),
-            BirdyGoSilhouetteIcon(size: 40, color: grey, eyeClosed: 1),
-          ],
-        ),
-      ),
+      host(const [
+        BirdyGoSilhouetteIcon.glyph(size: 40, color: grey),
+        BirdyGoSilhouetteIcon.glyph(size: 15, color: grey, eyeClosed: 1),
+      ]),
     );
     final first = find.byType(BirdyGoSilhouetteIcon).first;
     expect(tester.getSize(first), const Size.square(40));
-    expect(tester.widget<BirdyGoSilhouetteIcon>(first).wing, isTrue);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('species: the wing from the wing size up, plain below', (
+    tester,
+  ) async {
+    const big = BirdyGoSilhouetteIcon.species(size: 40, color: grey);
+    const small = BirdyGoSilhouetteIcon.species(size: 28, color: grey);
+    await tester.pumpWidget(host(const [big, small]));
+    expect(big.showsWing, isTrue);
+    expect(small.showsWing, isFalse);
+    expect(big.showsMark || small.showsMark, isFalse);
+    expect(find.text('?'), findsNothing);
+  });
+
+  testWidgets('mystery: a « ? » from the mark size up, no wing ever', (
+    tester,
+  ) async {
+    const big = BirdyGoSilhouetteIcon.mystery(size: 40, color: grey);
+    const small = BirdyGoSilhouetteIcon.mystery(size: 16, color: grey);
+    await tester.pumpWidget(host(const [big, small]));
+    expect(big.showsMark, isTrue);
+    expect(small.showsMark, isFalse);
+    expect(big.showsWing || small.showsWing, isFalse);
+    expect(find.text('?'), findsOneWidget);
+    expect(tester.getSize(find.byWidget(big)), const Size.square(40));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('glyph: no wing, no « ? » at any size', (tester) async {
+    const big = BirdyGoSilhouetteIcon.glyph(size: 96, color: grey);
+    await tester.pumpWidget(host(const [big]));
+    expect(big.showsWing, isFalse);
+    expect(big.showsMark, isFalse);
+    expect(find.text('?'), findsNothing);
   });
 
   test('the closed eye is a curved line as wide as the open eye', () {

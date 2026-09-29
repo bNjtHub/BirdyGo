@@ -614,6 +614,11 @@ abstract final class BirdySizes {
   static const double quizIntroRest = 358;
   static const double quizIntroSlack = 4;
   static const double quizMark = 30;
+
+  /// Silhouette sizes: the logo's wing shows from this size on a species,
+  /// the mystery « ? » from this size on a mystery bird (below, plain).
+  static const double silhouetteWingMin = 32;
+  static const double silhouetteMarkMin = 20;
   static const double quizSheetDisc = 72;
 
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small

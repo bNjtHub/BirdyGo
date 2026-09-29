@@ -15,6 +15,7 @@ class SpeciesAvatar extends StatelessWidget {
     this.tint,
     this.size = 42,
     this.muted = false,
+    this.mystery = false,
     this.heroTag,
   });
 
@@ -31,6 +32,10 @@ class SpeciesAvatar extends StatelessWidget {
 
   /// "Heard but not confirmed": grey and faded.
   final bool muted;
+
+  /// An unknown bird to discover: the fallback is the grey mystery bird with
+  /// its « ? » (SilhouetteRole.mystery), not the species one. Implies [muted].
+  final bool mystery;
 
   /// Hero tag shared with the species sheet photo.
   final Object? heroTag;
@@ -63,7 +68,7 @@ class SpeciesAvatar extends StatelessWidget {
     } else {
       visual = _halo(t, icon ?? _silhouette(t));
     }
-    if (muted) {
+    if (muted || mystery) {
       visual = Opacity(
         opacity: 0.45,
         child: ColorFiltered(colorFilter: _greyscale, child: visual),
@@ -79,5 +84,10 @@ class SpeciesAvatar extends StatelessWidget {
   );
 
   Widget _silhouette(SpeciesTint t) =>
-      BirdyGoSilhouetteIcon(size: size * 0.6, color: t.deep, muted: muted);
+      mystery
+          ? BirdyGoSilhouetteIcon.mystery(
+            size: size * 0.6,
+            color: SpeciesTint.neutral.deep,
+          )
+          : BirdyGoSilhouetteIcon.species(size: size * 0.6, color: t.deep);
 }

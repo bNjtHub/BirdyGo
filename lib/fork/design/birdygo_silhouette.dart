@@ -5,9 +5,13 @@
 /// draw the exact same outline, just in different colors.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../home/birdygo_logo.dart';
+import 'birdy_tokens.dart';
+import 'birdy_typography.dart';
 
 /// The BirdyGo bird as one filled shape: tail, body and beak joined, the
 /// eye cut out. Centered on the origin, its longest side is 1.
@@ -100,39 +104,141 @@ Path _silhouetteWithEye(double closed) {
   return _cachedClosedPath!;
 }
 
+/// What a silhouette means (fork/DESIGN.md, "Oiseau générique"): one
+/// meaning, one look, everywhere.
+enum SilhouetteRole {
+  /// An unknown bird to discover: grey body, no wing, a « ? » on the wing
+  /// (the « ? » only from [BirdySizes.silhouetteMarkMin]).
+  mystery,
+
+  /// A known species with no photo: its deep tint, with the logo's wing
+  /// (the wing only from [BirdySizes.silhouetteWingMin]).
+  species,
+
+  /// An icon: the plain shape in the surrounding icon color.
+  glyph,
+}
+
 /// [birdyGoSilhouette] filled with one flat [color], drawn at [size] (its
-/// longest side): the mystery card's placeholder, in place of a generic
-/// species icon, so it reads as the BirdyGo bird rather than any bird.
-///
-/// The wing (the logo's four bars, same place, stroke and round caps) is
-/// drawn by default, in the logo's own colors. A [muted] bird (a species
-/// still to find, a translucent or grey mark) gets bars in a lighter tone
-/// of [color] instead, so it stays discreet. [wing] false draws the plain
-/// shape. [eyeClosed] (0 → 1) squashes the eye's hole into a curved line.
+/// longest side). Pick the look with the named constructors: [species],
+/// [mystery] or [glyph] ([SilhouetteRole]). [eyeClosed] (0 → 1) squashes
+/// the eye's hole into a curved line.
 class BirdyGoSilhouetteIcon extends StatelessWidget {
   const BirdyGoSilhouetteIcon({
     super.key,
     required this.size,
     required this.color,
-    this.muted = false,
-    this.wing = true,
+    required this.role,
     this.eyeClosed = 0,
   });
 
+  /// A known species without photo: [color] is its deep tint.
+  const BirdyGoSilhouetteIcon.species({
+    Key? key,
+    required double size,
+    required Color color,
+    double eyeClosed = 0,
+  }) : this(
+         key: key,
+         size: size,
+         color: color,
+         role: SilhouetteRole.species,
+         eyeClosed: eyeClosed,
+       );
+
+  /// An unknown bird to discover: [color] is a grey.
+  const BirdyGoSilhouetteIcon.mystery({
+    Key? key,
+    required double size,
+    required Color color,
+    double eyeClosed = 0,
+  }) : this(
+         key: key,
+         size: size,
+         color: color,
+         role: SilhouetteRole.mystery,
+         eyeClosed: eyeClosed,
+       );
+
+  /// A plain icon: [color] is the text or icon color around it.
+  const BirdyGoSilhouetteIcon.glyph({
+    Key? key,
+    required double size,
+    required Color color,
+    double eyeClosed = 0,
+  }) : this(
+         key: key,
+         size: size,
+         color: color,
+         role: SilhouetteRole.glyph,
+         eyeClosed: eyeClosed,
+       );
+
   final double size;
   final Color color;
-  final bool muted;
-  final bool wing;
+  final SilhouetteRole role;
   final double eyeClosed;
 
+  /// Whether the logo's wing is drawn at this size and role.
+  bool get showsWing =>
+      role == SilhouetteRole.species && size >= BirdySizes.silhouetteWingMin;
+
+  /// Whether the « ? » is drawn at this size and role.
+  bool get showsMark =>
+      role == SilhouetteRole.mystery && size >= BirdySizes.silhouetteMarkMin;
+
   @override
-  Widget build(BuildContext context) => CustomPaint(
-    size: Size.square(size),
-    painter: BirdyGoSilhouettePainter(
-      color,
-      muted: muted,
-      wing: wing,
-      eyeClosed: eyeClosed,
+  Widget build(BuildContext context) {
+    final shape = CustomPaint(
+      size: Size.square(size),
+      painter: BirdyGoSilhouettePainter(
+        color,
+        wing: showsWing,
+        eyeClosed: eyeClosed,
+      ),
+    );
+    if (!showsMark) return shape;
+    return SizedBox.square(
+      dimension: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [shape, BirdyMysteryMark(silhouette: size)],
+      ),
+    );
+  }
+}
+
+/// The « ? » of a mystery bird: Fraunces bold, oriole, tilted, centered on
+/// the wing of a [silhouette]-sized BirdyGo bird (so it reads as sitting on
+/// the body). Scales with the silhouette. Put it in a stack over the
+/// silhouette; [BirdyGoSilhouetteIcon.mystery] and the quiz do.
+class BirdyMysteryMark extends StatelessWidget {
+  const BirdyMysteryMark({super.key, required this.silhouette});
+
+  /// Size of the silhouette this mark sits on.
+  final double silhouette;
+
+  /// The « ? » is [BirdySizes.quizMark] tall on a [_markRef] silhouette (the
+  /// quiz intro's disc at full size); tilted like the mockup (degrees).
+  static const double _markRef = 104;
+  static const double _markTilt = -8;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Transform.translate(
+      offset: birdyGoWingCenter * silhouette,
+      child: Transform.rotate(
+        angle: _markTilt * math.pi / 180,
+        child: Text(
+          '?',
+          style: BirdyText.display.copyWith(
+            fontSize: BirdySizes.quizMark * silhouette / _markRef,
+            fontWeight: FontWeight.w700,
+            height: 1,
+            color: BirdyBrand.oriole,
+          ),
+        ),
+      ),
     ),
   );
 }
