@@ -4,6 +4,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/reliability/quick_review_widgets.dart';
 import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
 import 'package:birdnet_live/fork/reliability/quick_review_screen.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -167,6 +169,29 @@ void main() {
     expect(find.text("Ce n'est pas lui"), findsNWidgets(2));
     expect(find.text('Je ne sais pas'), findsNWidgets(2));
     expect(find.textContaining('est une bonne réponse'), findsOneWidget);
+  });
+
+  testWidgets('the card stack and hints are centered between progress and verdicts', (
+    tester,
+  ) async {
+    await pump(tester);
+    final progress = tester.getRect(find.byType(ReviewProgress));
+    final stack = tester.getRect(find.byType(ReviewCardStack));
+    final hints = tester.getRect(find.byType(SwipeHints));
+    final buttons = tester.getRect(find.byType(VerdictButtons));
+    final above = stack.top - progress.bottom;
+    final below = buttons.top - BirdySpace.m - hints.bottom;
+    expect(hints.top, greaterThan(stack.bottom));
+    expect(above, greaterThan(0));
+    expect((above - below).abs(), lessThan(2));
+  });
+
+  testWidgets('short screen at 130 % text: no overflow, verdicts reachable', (
+    tester,
+  ) async {
+    await pump(tester, size: const Size(360, 640), textScale: 1.3);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Je ne sais pas'), findsWidgets);
   });
 
   testWidgets('buttons record the answers and move on', (tester) async {
