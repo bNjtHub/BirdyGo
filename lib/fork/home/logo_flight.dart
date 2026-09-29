@@ -16,6 +16,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
+import '../splash/birdygo_splash_painter.dart';
 import 'birdygo_logo.dart';
 
 /// Everything the winking bird does at [t] (0 → 1), for the header mark
@@ -180,6 +181,33 @@ class LogoWinkTimeline {
     return BirdyMotion.standard.transform(1 - (2 * p - 1).abs());
   }
 
+  /// Beak opening (0 → 1) while singing: one open-and-close per syllable,
+  /// like the header mark's. Reduced motion: never.
+  double mouthAt(double t) {
+    if (reduced) return 0;
+    var open = 0.0;
+    for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+      final u =
+          (t - _takeoff - i * BirdyMotion.logoWinkSyllable) /
+          BirdyMotion.logoWinkSyllableLength;
+      if (u > 0 && u < 1) open = math.max(open, math.sin(math.pi * u));
+    }
+    return open;
+  }
+
+  /// Age (0 → 1) of syllable [i]'s note at [t], or null while it is not in
+  /// flight. Reduced motion: never.
+  double? noteAt(double t, int i) {
+    if (reduced) return null;
+    final age =
+        t -
+        _takeoff -
+        i * BirdyMotion.logoWinkSyllable -
+        BirdyMotion.logoWinkNoteDelay;
+    if (age < 0 || age >= BirdyMotion.logoWinkNoteLife) return null;
+    return age / BirdyMotion.logoWinkNoteLife;
+  }
+
   /// Wing bars length (0 → 1): they beat while flying and rest, spread,
   /// while hovering.
   double wingAt(double t) {
@@ -224,6 +252,7 @@ class LogoWinkBird extends StatelessWidget {
         painter: BirdyGoLogoPainter(
           progress: animation.drive(_Curve(timeline.wingAt)),
           eyeClosed: animation.drive(_Curve(timeline.eyeClosedAt)),
+          mouth: animation.drive(_Curve(timeline.mouthAt)),
         ),
       ),
     );
@@ -233,7 +262,25 @@ class LogoWinkBird extends StatelessWidget {
           alignment: Alignment.topLeft,
           child: AnimatedBuilder(
             animation: animation,
-            child: SizedBox.square(dimension: size, child: picture),
+            child: SizedBox.square(
+              dimension: size,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  picture,
+                  if (!timeline.reduced)
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: Size.square(size),
+                        painter: LogoNotesPainter(
+                          animation: animation,
+                          timeline: timeline,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             builder: (context, child) {
               final t = animation.value;
               final pos = timeline.offsetAt(t);
@@ -253,6 +300,44 @@ class LogoWinkBird extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The notes of the song, the header mark's own glyphs and colors
+/// ([BirdyGoSingingPainter.paintNote]) in the bird's 512 box, so they follow
+/// its position and size. Paints nothing outside the song.
+class LogoNotesPainter extends CustomPainter {
+  LogoNotesPainter({required this.animation, required this.timeline})
+    : super(repaint: animation);
+
+  final Animation<double> animation;
+  final LogoWinkTimeline timeline;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = animation.value;
+    if (t < BirdyMotion.logoWinkTakeoffEnd ||
+        t > BirdyMotion.logoWinkHoverEnd) {
+      return;
+    }
+    canvas
+      ..save()
+      ..scale(size.shortestSide / 512);
+    for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+      final u = timeline.noteAt(t, i);
+      if (u == null) continue;
+      BirdyGoSingingPainter.paintNote(
+        canvas,
+        i,
+        u,
+        reach: BirdyMotion.logoWinkNoteReach,
+      );
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(LogoNotesPainter oldDelegate) =>
+      oldDelegate.animation != animation || oldDelegate.timeline != timeline;
 }
 
 class _Curve extends Animatable<double> {
