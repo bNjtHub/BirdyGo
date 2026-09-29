@@ -682,7 +682,7 @@ class _LevelInfoBox extends StatelessWidget {
           count: total,
           filled: filled,
           color: c.accentText,
-          track: c.line,
+          track: c.progressTrack,
         ),
       );
       detail = l10n.forkLevelRemainingCount(status.from - progress.verified);
@@ -1177,7 +1177,7 @@ class _Badges extends StatelessWidget {
                     child: BirdyProgressBar(
                       value: badge.value / badge.nextTarget!,
                       color: c.accentText,
-                      track: c.line,
+                      track: c.progressTrack,
                     ),
                   ),
                   const SizedBox(height: BirdySpace.xs),

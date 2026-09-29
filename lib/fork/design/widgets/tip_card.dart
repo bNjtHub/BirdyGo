@@ -292,7 +292,7 @@ class _Dots extends StatelessWidget {
       count: count,
       current: current,
       activeColor: c.orioleText,
-      inactiveColor: c.borderStrong,
+      inactiveColor: c.progressTrack,
       height: 5,
       activeWidth: 14,
       gap: 5,

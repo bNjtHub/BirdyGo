@@ -226,6 +226,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
           return;
         }
         _seriesPos--;
+        _tracker?.released(shown);
         final at = _queue.indexWhere((m) => m.kind == LiveMomentKind.firstTime);
         _queue.insert(at < 0 ? _queue.length : at, shown);
       }
@@ -241,6 +242,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
     _count.stop();
     _shown = moment;
     _answer = null;
+    _tracker?.shown(moment);
     if (moment.kind == LiveMomentKind.firstTime) {
       _seriesPos++;
       if (!widget.paused) _count.forward(from: 0);
@@ -284,7 +286,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
         for (final d in detections.where((d) => d.scientificName == name)) {
           d.markConfirmed();
         }
-        _tracker?.confirmed();
+        _tracker?.confirmed(moment);
         BirdyHaptics.light();
       case _RareAnswer.no:
         for (final d in detections.where((d) => d.scientificName == name)) {
@@ -1036,7 +1038,7 @@ class _Countdown extends StatelessWidget {
     final c = BirdyColors.of(context);
     final reduced = BirdyMotion.reduced(context);
     final total = BirdyMotion.firstEncounterShown.inSeconds;
-    final track = c.isDark ? c.borderStrong : c.line;
+    final track = c.progressTrack;
     return Column(
       children: [
         if (seriesPos > 0) ...[
@@ -1045,7 +1047,7 @@ class _Countdown extends StatelessWidget {
             current: seriesPos - 1,
             activeColor: c.accentText,
             doneColor: c.accentText,
-            inactiveColor: c.borderStrong,
+            inactiveColor: c.progressTrack,
             height: BirdySizes.countdownBar,
             activeWidth: BirdySizes.countdownDotActive,
             gap: BirdySpace.xs,

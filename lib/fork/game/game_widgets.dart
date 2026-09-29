@@ -187,10 +187,7 @@ class StatusRing extends StatelessWidget {
               size: Size.square(size),
               painter: _RingPainter(
                 progress: progress,
-                track:
-                    c.isDark
-                        ? BirdyBrand.mist.withValues(alpha: 0.14)
-                        : const Color(0xFFDCE2DA),
+                track: c.progressTrack,
                 color: shown.color,
               ),
             ),
