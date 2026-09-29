@@ -104,7 +104,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   /// Where the last burst starts (center of the tapped card) and its colors.
   Offset? _burstOrigin;
-  List<Color> _burstColors = BirdyConfettiColors.burst;
+  List<Color>? _burstColors;
 
   @override
   void initState() {
@@ -212,7 +212,11 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       _results.add(right);
       if (right) {
         _burstOrigin = _centerOf(index);
-        _burstColors = [tint.accent, ...BirdyConfettiColors.burst, tint.deep];
+        _burstColors = [
+          tint.accent,
+          ...BirdyConfettiColors.burstOf(context),
+          tint.deep,
+        ];
       }
     });
     // The clip stops: the reveal takes the stage.

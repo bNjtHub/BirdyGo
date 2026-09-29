@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
@@ -28,26 +27,10 @@ import '../helpers/fonts.dart';
 
 /// Goldens of the Accueil in the four bird themes, light and dark (J6i).
 ///
-/// The Accueil shows the date and a greeting that depend on the clock, so
-/// the comparison tolerates a small share of different pixels (text only);
-/// a theme change recolors far more than that. Regenerate with
+/// The clock of the Accueil is fixed (`homeClockProvider`), so the date and
+/// the greeting are stable and the comparison is exact. Regenerate with
 /// `flutter test test/fork/goldens --update-goldens`.
-const double _tolerance = 0.02;
-
-class _TolerantComparator extends LocalFileComparator {
-  _TolerantComparator(super.testFile);
-
-  @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final result = await GoldenFileComparator.compareLists(
-      imageBytes,
-      await getGoldenBytes(golden),
-    );
-    if (result.passed || result.diffPercent <= _tolerance) return true;
-    final error = await generateFailureOutput(result, golden, basedir);
-    throw FlutterError(error);
-  }
-}
+final DateTime _fixedNow = DateTime(2026, 9, 29, 9, 30);
 
 class _Loader implements HomeLoader {
   @override
@@ -73,7 +56,7 @@ class _PendingIndex extends ObservationIndexService {
 }
 
 HomeSnapshot _snapshot() {
-  final now = DateTime.now();
+  final now = _fixedNow;
   return HomeSnapshot(
     today: const DaySummary(
       species: 13,
@@ -142,15 +125,9 @@ GameProgress _game() {
 }
 
 void main() {
-  final previous = goldenFileComparator;
   setUpAll(() async {
     await loadAppFonts(icons: true);
-    final dir = (goldenFileComparator as LocalFileComparator).basedir;
-    goldenFileComparator = _TolerantComparator(
-      Uri.parse('${dir}home_themes_golden_test.dart'),
-    );
   });
-  tearDownAll(() => goldenFileComparator = previous);
 
   for (final bird in BirdyBird.values) {
     for (final dark in [false, true]) {
@@ -165,6 +142,7 @@ void main() {
           ProviderScope(
             overrides: [
               sharedPreferencesProvider.overrideWithValue(prefs),
+              homeClockProvider.overrideWithValue(() => _fixedNow),
               homeLoaderProvider.overrideWithValue(_Loader()),
               gameProgressProvider.overrideWith((ref) async => _game()),
               taxonomyServiceProvider.overrideWith(

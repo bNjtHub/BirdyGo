@@ -142,7 +142,7 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
                               BirdyConfetti.burst(
                                 colors: [
                                   status.color,
-                                  ...BirdyConfettiColors.burst,
+                                  ...BirdyConfettiColors.burstOf(context),
                                 ],
                                 delay: BirdyMotion.newStatus,
                               ),

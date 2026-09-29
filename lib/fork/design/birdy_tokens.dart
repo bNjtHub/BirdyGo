@@ -75,6 +75,24 @@ abstract final class BirdyConfettiColors {
     Color(0xFFFFE9A0),
     BirdyBrand.kingfisher,
   ];
+
+  // The kingfisher entry of each list is the accent slot: the lists below
+  // swap it for the active bird's accent (oriole and lichen stay fixed).
+  static List<Color> _follow(List<Color> colors, Color accent) => [
+    for (final c in colors) c == BirdyBrand.kingfisher ? accent : c,
+  ];
+
+  /// [rain] with the active bird's accent.
+  static List<Color> rainOf(BuildContext context) =>
+      _follow(rain, BirdyBrandColors.of(context).accent);
+
+  /// [burst] with the active bird's accent.
+  static List<Color> burstOf(BuildContext context) =>
+      _follow(burst, BirdyBrandColors.of(context).accent);
+
+  /// [rare] with the active bird's accent.
+  static List<Color> rareOf(BuildContext context) =>
+      _follow(rare, BirdyBrandColors.of(context).accent);
 }
 
 /// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not

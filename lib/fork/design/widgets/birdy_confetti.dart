@@ -19,12 +19,12 @@ import '../birdy_tokens.dart';
 
 class BirdyConfetti extends StatefulWidget {
   /// A burst from this point, in [colors] (the bird's own colors plus
-  /// [BirdyConfettiColors.burst], usually). [settings] set its count, force,
+  /// [BirdyConfettiColors.burstOf], usually). [settings] set its count, force,
   /// gravity and life; the default is the quiz's burst.
   const BirdyConfetti.burst({
     super.key,
     this.controller,
-    this.colors = BirdyConfettiColors.burst,
+    this.colors,
     this.delay = Duration.zero,
     this.settings = BirdyConfettiBurst.standard,
   }) : rain = false;
@@ -34,7 +34,7 @@ class BirdyConfetti extends StatefulWidget {
   const BirdyConfetti.rain({
     super.key,
     this.controller,
-    this.colors = BirdyConfettiColors.rain,
+    this.colors,
     this.delay = Duration.zero,
   }) : settings = BirdyConfettiBurst.standard,
        rain = true;
@@ -43,7 +43,9 @@ class BirdyConfetti extends StatefulWidget {
   /// first build. When null, the widget plays its own once, [delay] after
   /// its first build.
   final ConfettiController? controller;
-  final List<Color> colors;
+
+  /// Null: the default list of the kind, with the active bird's accent.
+  final List<Color>? colors;
   final Duration delay;
 
   /// Physics of a burst (ignored by a rain).
@@ -144,13 +146,13 @@ class _BirdyConfettiState extends State<BirdyConfetti>
                 t <= fadeFrom ? 1.0 : (1 - (t - fadeFrom) / (1 - fadeFrom));
             return Opacity(opacity: opacity.clamp(0.0, 1.0), child: child);
           },
-          child: _particles(),
+          child: _particles(context),
         ),
       ),
     );
   }
 
-  Widget _particles() {
+  Widget _particles(BuildContext context) {
     final rain = widget.rain;
     return ConfettiWidget(
       confettiController: _controller,
@@ -169,7 +171,11 @@ class _BirdyConfettiState extends State<BirdyConfetti>
       particleDrag: BirdyConfettiMotion.drag,
       minimumSize: BirdyConfettiMotion.minSize,
       maximumSize: BirdyConfettiMotion.maxSize,
-      colors: widget.colors,
+      colors:
+          widget.colors ??
+          (rain
+              ? BirdyConfettiColors.rainOf(context)
+              : BirdyConfettiColors.burstOf(context)),
       shouldLoop: false,
       pauseEmissionOnLowFrameRate: false,
       createParticlePath: _shape,
