@@ -6,6 +6,8 @@ import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_list_block.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_list_row.dart';
 import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -42,6 +44,9 @@ class _FakeIndex implements ObservationIndex {
   ];
   final asked = <({bool byDate, bool favoritesOnly})>[];
 
+  /// Extra species without any favorite recording.
+  bool withSecondSpecies = false;
+
   @override
   Future<
     List<({String scientificName, String commonName, int clips, int favorites})>
@@ -53,6 +58,13 @@ class _FakeIndex implements ObservationIndex {
       clips: 2,
       favorites: favorites.length,
     ),
+    if (withSecondSpecies)
+      (
+        scientificName: 'Parus major',
+        commonName: 'Mésange charbonnière',
+        clips: 3,
+        favorites: 0,
+      ),
   ];
 
   @override
@@ -242,5 +254,72 @@ void main() {
     await tester.tap(find.text('Rougegorge familier'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hero counts recordings, species and favorites', (tester) async {
+    index.withSecondSpecies = true;
+    await pump(tester);
+    final hero = find.byKey(const ValueKey('soundLibraryHero'));
+    expect(hero, findsOneWidget);
+    expect(find.descendant(of: hero, matching: find.text('5')), findsOneWidget);
+    expect(
+      find.descendant(of: hero, matching: find.text('enregistrements')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: hero, matching: find.text('2 espèces · 1 ★ favori')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('species sit in one block, one row each', (tester) async {
+    index.withSecondSpecies = true;
+    await pump(tester);
+    expect(find.byType(BirdyListBlock), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(BirdyListBlock),
+        matching: find.byType(BirdyListRow),
+      ),
+      findsNWidgets(2),
+    );
+  });
+
+  testWidgets('favorites filter also applies to the species list', (
+    tester,
+  ) async {
+    index.withSecondSpecies = true;
+    await pump(tester);
+    BirdyFilterChip chip(String label) => tester.widget<BirdyFilterChip>(
+      find.widgetWithText(BirdyFilterChip, label),
+    );
+    expect(chip('Toutes').selected, isTrue);
+    expect(find.text('Mésange charbonnière'), findsOneWidget);
+
+    await tester.tap(find.text('Favoris seulement'));
+    await tester.pumpAndSettle();
+    expect(chip('Favoris seulement').selected, isTrue);
+    expect(find.text('Rougegorge familier'), findsOneWidget);
+    expect(find.text('Mésange charbonnière'), findsNothing);
+    // The hero keeps the whole library's counts.
+    expect(find.text('5'), findsOneWidget);
+
+    await tester.tap(find.text('Toutes'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mésange charbonnière'), findsOneWidget);
+  });
+
+  testWidgets('favorites filter without any favorite shows the empty state', (
+    tester,
+  ) async {
+    index.favorites.clear();
+    await pump(tester);
+    await tester.tap(find.text('Favoris seulement'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pas encore de favori'), findsOneWidget);
+    expect(find.byType(BirdyListBlock), findsNothing);
+    await tester.tap(find.text('Tous les enregistrements'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BirdyListBlock), findsOneWidget);
   });
 }

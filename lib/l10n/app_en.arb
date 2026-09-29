@@ -6045,5 +6045,13 @@
   "forkRareShort": "Rare",
   "@forkRareShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
   "forkExceptionalShort": "Exceptional",
-  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."}
+  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkSoundLibraryAll": "All",
+  "@forkSoundLibraryAll": {"description": "BirdyGo fork: sound library filter chip, no filter (J6h)."},
+  "forkSoundLibraryHeroLabel": "{count, plural, =1{recording} other{recordings}}",
+  "@forkSoundLibraryHeroLabel": {"description": "BirdyGo fork: sound library hero, label next to the big count (J6h).", "placeholders": {"count": {"type": "int"}}},
+  "forkSoundLibrarySpeciesCount": "{count, plural, =1{1 species} other{{count} species}}",
+  "@forkSoundLibrarySpeciesCount": {"description": "BirdyGo fork: sound library hero caption (J6h).", "placeholders": {"count": {"type": "int"}}},
+  "forkSoundLibraryFavoritesCount": "{count, plural, =1{1 ★ favorite} other{{count} ★ favorites}}",
+  "@forkSoundLibraryFavoritesCount": {"description": "BirdyGo fork: sound library hero caption (J6h).", "placeholders": {"count": {"type": "int"}}}
 }

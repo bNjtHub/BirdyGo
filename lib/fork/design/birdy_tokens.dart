@@ -503,6 +503,9 @@ abstract final class BirdySizes {
   /// Tinted disc leading a list row (J6h [BirdyListRow]).
   static const double rowDisc = 44;
 
+  /// White disc of the sound library hero (J6h).
+  static const double soundHeroDisc = 76;
+
   /// Knowledge disc of the species page's « Faire connaissance » block.
   static const double knowledgeDisc = 52;
   static const double rowCompact = 60;

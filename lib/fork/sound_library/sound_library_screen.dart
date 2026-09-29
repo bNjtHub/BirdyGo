@@ -22,11 +22,15 @@ import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_list_block.dart';
+import '../design/widgets/birdy_list_row.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/empty_state.dart';
+import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_badge.dart';
@@ -52,9 +56,13 @@ ImageProvider? _imageOf(WidgetRef ref, String scientificName) {
   return path == null ? null : AssetImage(path);
 }
 
-/// Placeholder rows shaped like the final list (species or clip rows).
+/// Placeholder shaped like the final list: hero, chips and one block of
+/// rows (species or clip rows).
 class _RowsSkeleton extends StatelessWidget {
-  const _RowsSkeleton();
+  const _RowsSkeleton({this.withHero = false});
+
+  /// Species list only: hero and chips above the block.
+  final bool withHero;
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +71,33 @@ class _RowsSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: BirdySpace.xxl),
       children: [
-        for (var i = 0; i < 6; i++) ...[
+        if (withHero) ...[
           BirdySkeleton.box(
             width: double.infinity,
-            height: BirdySizes.row,
+            height: BirdySizes.soundHeroDisc + 2 * BirdySpace.xl,
+            radius: BirdyRadii.hero,
+          ),
+          const SizedBox(height: BirdySpace.m),
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: BirdySizes.target,
+            radius: BirdyRadii.pill,
+          ),
+          const SizedBox(height: BirdySpace.m),
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: BirdySizes.row * 5,
             radius: BirdyRadii.card,
           ),
-          const SizedBox(height: BirdySpace.s),
-        ],
+        ] else
+          for (var i = 0; i < 6; i++) ...[
+            BirdySkeleton.box(
+              width: double.infinity,
+              height: BirdySizes.row,
+              radius: BirdyRadii.card,
+            ),
+            const SizedBox(height: BirdySpace.s),
+          ],
       ],
     );
   }
@@ -114,102 +141,214 @@ class _Page extends StatelessWidget {
 }
 
 /// List of species that have recordings.
-class SoundLibraryScreen extends ConsumerWidget {
+class SoundLibraryScreen extends ConsumerStatefulWidget {
   const SoundLibraryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SoundLibraryScreen> createState() => _SoundLibraryScreenState();
+}
+
+typedef _SpeciesRow =
+    ({String scientificName, String commonName, int clips, int favorites});
+
+class _SoundLibraryScreenState extends ConsumerState<SoundLibraryScreen> {
+  bool _favoritesOnly = false;
+  late final Future<List<_SpeciesRow>> _species = ref
+      .read(observationIndexServiceProvider)
+      .ensureReady()
+      .then((index) => index.speciesWithClips());
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final service = ref.watch(observationIndexServiceProvider);
     return _Page(
       title: l10n.forkSoundLibrary,
       child: FutureBuilder(
-        // Re-queried whenever the index notifies (session saved, rebuilt).
-        future: service.ensureReady().then((index) => index.speciesWithClips()),
+        future: _species,
         builder: (context, snapshot) {
           final species = snapshot.data;
-          if (species == null) {
-            return const _RowsSkeleton();
-          }
-          if (species.isEmpty) {
-            return BirdyEmptyState(
-              icon: AppIcons.libraryMusic,
-              title: l10n.forkSoundLibraryEmptyTitle,
-              body: l10n.forkSoundLibraryEmpty,
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.only(
-              top: BirdySpace.s,
-              bottom: BirdySpace.xxl,
-            ),
-            itemCount: species.length,
-            itemBuilder: (context, i) {
-              final s = species[i];
-              final name = _speciesName(ref, s.scientificName, s.commonName);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: BirdySpace.s),
-                child: BirdyBlock(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: BirdySpace.m,
-                    vertical: BirdySpace.s,
-                  ),
-                  onTap:
-                      () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder:
-                              (_) => SpeciesClipsScreen(
-                                scientificName: s.scientificName,
-                                fallbackName: s.commonName,
-                              ),
-                        ),
-                      ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: BirdySizes.rowCompact,
-                    ),
-                    child: Row(
-                      children: [
-                        SpeciesAvatar(
-                          image: _imageOf(ref, s.scientificName),
-                          tint: SpeciesAccents.tintOf(s.scientificName),
-                          size: BirdySizes.target,
-                        ),
-                        const SizedBox(width: BirdySpace.m),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                style: BirdyText.species.copyWith(
-                                  color: c.text1,
-                                ),
-                              ),
-                              Text(
-                                s.favorites > 0
-                                    ? l10n.forkSoundLibraryCountsWithFavorites(
-                                      s.clips,
-                                      s.favorites,
-                                    )
-                                    : l10n.forkSoundLibraryCounts(s.clips),
-                                style: BirdyText.caption.copyWith(
-                                  color: c.text2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(AppIcons.chevronRight, color: c.text2),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          return BirdyCrossFade(
+            child:
+                species == null
+                    ? const _RowsSkeleton(withHero: true)
+                    : species.isEmpty
+                    ? BirdyEmptyState(
+                      key: const ValueKey('soundLibraryEmpty'),
+                      icon: AppIcons.libraryMusic,
+                      title: l10n.forkSoundLibraryEmptyTitle,
+                      body: l10n.forkSoundLibraryEmpty,
+                    )
+                    : _content(context, species),
           );
         },
+      ),
+    );
+  }
+
+  Widget _content(BuildContext context, List<_SpeciesRow> species) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final shown = [
+      for (final s in species)
+        if (!_favoritesOnly || s.favorites > 0) s,
+    ];
+    return ListView(
+      key: const ValueKey('soundLibraryContent'),
+      padding: const EdgeInsets.only(bottom: BirdySpace.xxl),
+      children: [
+        BirdyEntrance.staggered(
+          index: 0,
+          child: _Hero(
+            recordings: species.fold(0, (n, s) => n + s.clips),
+            species: species.length,
+            favorites: species.fold(0, (n, s) => n + s.favorites),
+          ),
+        ),
+        const SizedBox(height: BirdySpace.m),
+        Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.s,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            BirdyFilterChip(
+              label: l10n.forkSoundLibraryAll,
+              selected: !_favoritesOnly,
+              selectedColors: BirdyChipColors.ink(c),
+              onSelected: () => setState(() => _favoritesOnly = false),
+            ),
+            BirdyFilterChip(
+              leading: Icon(AppIcons.star, fill: 1, color: c.orioleText),
+              label: l10n.forkSoundLibraryFavoritesOnly,
+              selected: _favoritesOnly,
+              selectedColors: BirdyChipColors.ink(c),
+              onSelected: () => setState(() => _favoritesOnly = true),
+            ),
+          ],
+        ),
+        const SizedBox(height: BirdySpace.m),
+        if (shown.isEmpty)
+          BirdyEmptyState.inline(
+            kind: BirdyEmptyKind.filtered,
+            icon: AppIcons.star,
+            title: l10n.forkSoundLibraryNoFavoritesTitle,
+            body: l10n.forkSoundLibraryNoFavorites,
+            action: l10n.forkSoundLibraryAllClips,
+            onAction: () => setState(() => _favoritesOnly = false),
+          )
+        else
+          BirdyEntrance.staggered(
+            index: 1,
+            child: BirdyListBlock(
+              key: const ValueKey('soundLibrarySpeciesBlock'),
+              children: [
+                for (final s in shown)
+                  BirdyListRow(
+                    avatar: SpeciesAvatar(
+                      image: _imageOf(ref, s.scientificName),
+                      tint: SpeciesAccents.tintOf(s.scientificName),
+                      size: BirdySizes.target,
+                    ),
+                    title: _speciesName(ref, s.scientificName, s.commonName),
+                    titleStyle: BirdyText.species,
+                    subtitle:
+                        s.favorites > 0
+                            ? l10n.forkSoundLibraryCountsWithFavorites(
+                              s.clips,
+                              s.favorites,
+                            )
+                            : l10n.forkSoundLibraryCounts(s.clips),
+                    onTap:
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder:
+                                (_) => SpeciesClipsScreen(
+                                  scientificName: s.scientificName,
+                                  fallbackName: s.commonName,
+                                ),
+                          ),
+                        ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Tonal hero: white disc, big recording count baseline-aligned with its
+/// label, then species and favorites counts.
+class _Hero extends StatelessWidget {
+  const _Hero({
+    required this.recordings,
+    required this.species,
+    required this.favorites,
+  });
+
+  final int recordings;
+  final int species;
+  final int favorites;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final label = l10n.forkSoundLibraryHeroLabel(recordings);
+    final caption = [
+      l10n.forkSoundLibrarySpeciesCount(species),
+      l10n.forkSoundLibraryFavoritesCount(favorites),
+    ].join(' · ');
+    return BirdyBlock(
+      key: const ValueKey('soundLibraryHero'),
+      tone: BirdyBlockTone.tonal,
+      radius: BirdyRadii.hero,
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      child: Semantics(
+        label: '$recordings $label, $caption',
+        excludeSemantics: true,
+        child: Row(
+          children: [
+            Container(
+              width: BirdySizes.soundHeroDisc,
+              height: BirdySizes.soundHeroDisc,
+              decoration: BoxDecoration(
+                color: c.surface1,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(AppIcons.graphicEq, size: 36, color: c.accentText),
+            ),
+            const SizedBox(width: BirdySpace.l),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$recordings',
+                        style: BirdyText.numberXL.copyWith(color: c.text1),
+                      ),
+                      const SizedBox(width: BirdySpace.s),
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: BirdyText.label.copyWith(color: c.text1),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: BirdySpace.xs),
+                  Text(
+                    caption,
+                    style: BirdyText.caption.copyWith(color: c.text1),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
