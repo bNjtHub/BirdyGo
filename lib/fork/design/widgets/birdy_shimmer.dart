@@ -137,6 +137,9 @@ class _BirdyShimmerState extends State<BirdyShimmer> {
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return null;
     final left = box.localToGlobal(Offset.zero).dx;
+    // Mid page transition (a collapsed transform) the position can be NaN:
+    // skip the sheen for that frame rather than hand the gradient a NaN.
+    if (!left.isFinite || !screenW.isFinite || screenW <= 0) return null;
     final band = screenW * BirdyMotion.shimmerBandWidth;
     final angle = BirdyMotion.shimmerTiltDegrees * math.pi / 180;
     // Gradient vector along the tilted direction, its x extent being `band`.
