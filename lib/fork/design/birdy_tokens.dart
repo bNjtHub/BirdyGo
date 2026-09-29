@@ -560,6 +560,15 @@ abstract final class BirdySizes {
   /// Ring of the notebook progress block (J6g-b).
   static const double notebookRing = 88;
 
+  /// Species visual of a notebook card (two-column grid, J6h).
+  static const double notebookVisual = 88;
+
+  /// White fade on the right edge of a scrolling chip row (J6h).
+  static const double chipFade = 40;
+
+  /// Grey mini-silhouette in the notebook hero caption (J6h).
+  static const double notebookHeroSilhouette = 16;
+
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
 
