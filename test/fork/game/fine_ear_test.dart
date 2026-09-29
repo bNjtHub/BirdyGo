@@ -663,10 +663,10 @@ void main() {
       await pump(tester, _species(4), start: false);
       final toggle = find.byType(QuizSoundSwitch);
       expect(toggle, findsOneWidget);
-      expect(find.text('Avec son'), findsOneWidget);
+      expect(find.text('Avec effets'), findsOneWidget);
       await tester.tap(toggle);
       await settle(tester, seconds: 0.5);
-      expect(find.text('Sans son'), findsOneWidget);
+      expect(find.text('Sans effets'), findsOneWidget);
       expect(prefs.getBool(kQuizSoundPref), isFalse);
 
       await tester.tap(find.text("C'est parti !"));
@@ -680,7 +680,7 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4), start: false, soundOn: false);
-      expect(find.text('Sans son'), findsOneWidget);
+      expect(find.text('Sans effets'), findsOneWidget);
       await tester.tap(find.byType(QuizSoundSwitch));
       await settle(tester, seconds: 0.5);
       expect(prefs.getBool(kQuizSoundPref), isTrue);

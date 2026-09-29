@@ -1,6 +1,6 @@
 /// The BirdyGo wordmark, variant « Point Loriot » of the Claude Design board:
-/// « Birdy » in Fraunces, an Oriole dot at mid-height of the lowercase
-/// letters, « Go » in Atkinson extra-bold. The same letters as the startup
+/// « Birdy » in Fraunces, an Oriole dot sitting on the baseline,
+/// « Go » in Atkinson extra-bold. The same letters as the startup
 /// screen, at any [size]; the brand name is never translated.
 library;
 
@@ -20,6 +20,11 @@ class BirdyGoWordmark extends StatelessWidget {
 
   /// Size on the startup screen (board: Fraunces 44, Atkinson 42, dot 9).
   static const double startupSize = 44;
+
+  /// Gap between the « o » and the dot, and between the dot and « Go »
+  /// (board units at [startupSize]).
+  static const double dotGapBefore = 2;
+  static const double dotGapAfter = 5;
 
   static const String _name = 'BirdyGo';
 
@@ -49,11 +54,12 @@ class BirdyGoWordmark extends StatelessWidget {
                 alignment: PlaceholderAlignment.baseline,
                 baseline: TextBaseline.alphabetic,
                 child: Padding(
+                  // Bottom on the baseline (no raise), 2 px after the « o ».
                   padding: EdgeInsets.fromLTRB(
-                    5 * scale,
+                    dotGapBefore * scale,
                     0,
-                    5 * scale,
-                    scaler.scale(5 * scale),
+                    dotGapAfter * scale,
+                    0,
                   ),
                   child: SizedBox.square(
                     dimension: scaler.scale(9 * scale),

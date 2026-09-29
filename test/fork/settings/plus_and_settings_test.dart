@@ -247,6 +247,9 @@ void main() {
       await pump(tester, home: const SimpleSettingsScreen());
       expect(find.text(fr.forkSettingsTitle), findsOneWidget);
 
+      // The switch is labelled « Effets sonores du quiz ».
+      expect(find.text('Effets sonores du quiz'), findsOneWidget);
+      expect(find.text('Bruitages du quiz'), findsNothing);
       // Quiz sounds: on by default.
       expect(container.read(quizSoundOnProvider), isTrue);
       await tester.ensureVisible(find.byKey(const ValueKey('settings-quiz-sound')));
