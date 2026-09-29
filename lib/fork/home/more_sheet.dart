@@ -28,6 +28,9 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_list_block.dart';
+import '../design/widgets/birdy_list_row.dart';
+import '../design/widgets/dashed_border.dart';
 import '../design/widgets/birdy_sheet.dart';
 import '../garden/garden_count_screen.dart';
 import '../map/contact_map_screen.dart';
@@ -70,11 +73,14 @@ Future<void> showMoreSheet(BuildContext context, WidgetRef ref) {
 
 /// One entry: icon, label and the screen it opens.
 class _Entry {
-  const _Entry(this.icon, this.label, this.screen);
+  const _Entry(this.icon, this.label, this.screen, [this.tone]);
 
   final IconData icon;
   final String label;
   final Widget Function() screen;
+
+  /// Tint of the tile's disc; null for the tools of the advanced list.
+  final BirdyBlockTone? tone;
 }
 
 /// Content of the « Plus » sheet. [onOpen] closes the sheet and opens a
@@ -101,37 +107,49 @@ class _MoreSheetState extends State<MoreSheet> {
         AppIcons.leaderboard,
         l10n.forkRanking,
         () => const RankingScreen(),
+        BirdyBlockTone.oriole,
       ),
-      _Entry(AppIcons.mapSheet, l10n.forkMap, () => const ContactMapScreen()),
+      _Entry(
+        AppIcons.mapSheet,
+        l10n.forkMap,
+        () => const ContactMapScreen(),
+        BirdyBlockTone.tonal,
+      ),
       _Entry(
         AppIcons.verifiedRounded,
         l10n.forkQuickReview,
         () => const QuickReviewScreen(),
+        BirdyBlockTone.toCheck,
       ),
       _Entry(
         AppIcons.graphicEqRounded,
         l10n.forkSoundLibrary,
         () => const SoundLibraryScreen(),
+        BirdyBlockTone.tonal,
       ),
       _Entry(
         AppIcons.parkRounded,
         l10n.forkGardenTitle,
         () => const GardenCountScreen(),
+        BirdyBlockTone.sure,
       ),
       _Entry(
         AppIcons.searchRounded,
         l10n.exploreMode,
         () => const ExploreScreen(),
+        BirdyBlockTone.tonal,
       ),
       _Entry(
         AppIcons.libraryMusic,
         l10n.sessionLibraryTitle,
         () => const SessionLibraryScreen(),
+        BirdyBlockTone.tonal,
       ),
       _Entry(
         AppIcons.helpOutlineRounded,
         l10n.helpTitle,
         () => const HelpScreen(),
+        BirdyBlockTone.plain,
       ),
     ];
     final tools = <_Entry>[
@@ -191,18 +209,29 @@ class _MoreSheetState extends State<MoreSheet> {
             onTap: (e) => widget.onOpen(e.screen()),
           ),
           const SizedBox(height: BirdySpace.block),
-          _LinkRow(
-            key: const ValueKey('more-settings'),
-            icon: AppIcons.tuneRounded,
-            label: l10n.forkSettingsTitle,
-            onTap: () => widget.onOpen(const SimpleSettingsScreen()),
-          ),
-          const SizedBox(height: BirdySpace.block),
-          _LinkRow(
-            key: const ValueKey('more-about'),
-            icon: AppIcons.infoOutline,
-            label: l10n.about,
-            onTap: () => widget.onOpen(const AboutScreen()),
+          BirdyListBlock(
+            key: const ValueKey('more-links'),
+            color: c.background,
+            children: [
+              BirdyListRow(
+                key: const ValueKey('more-settings'),
+                icon: AppIcons.tuneRounded,
+                iconColor: c.text1,
+                discColor: c.surface1,
+                title: l10n.forkSettingsTitle,
+                semanticLabel: l10n.forkSettingsTitle,
+                onTap: () => widget.onOpen(const SimpleSettingsScreen()),
+              ),
+              BirdyListRow(
+                key: const ValueKey('more-about'),
+                icon: AppIcons.infoOutline,
+                iconColor: c.text1,
+                discColor: c.surface1,
+                title: l10n.about,
+                semanticLabel: l10n.about,
+                onTap: () => widget.onOpen(const AboutScreen()),
+              ),
+            ],
           ),
         ],
       ),
@@ -216,12 +245,6 @@ class _TileGrid extends StatelessWidget {
 
   final List<_Entry> entries;
   final void Function(_Entry entry) onTap;
-
-  static const _tones = [
-    BirdyBlockTone.tonal,
-    BirdyBlockTone.sure,
-    BirdyBlockTone.oriole,
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +266,6 @@ class _TileGrid extends StatelessWidget {
                           i < entries.length
                               ? _Tile(
                                 entry: entries[i],
-                                tone: _tones[i % _tones.length],
                                 onTap: () => onTap(entries[i]),
                               )
                               : const SizedBox.shrink(),
@@ -264,10 +286,9 @@ class _TileGrid extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.entry, required this.tone, required this.onTap});
+  const _Tile({required this.entry, required this.onTap});
 
   final _Entry entry;
-  final BirdyBlockTone tone;
   final VoidCallback onTap;
 
   @override
@@ -275,7 +296,7 @@ class _Tile extends StatelessWidget {
     final c = BirdyColors.of(context);
     return BirdyBlock(
       key: ValueKey('more-tile-${entry.label}'),
-      tone: tone,
+      color: c.background,
       onTap: onTap,
       semanticLabel: entry.label,
       padding: const EdgeInsets.all(BirdySpace.m),
@@ -285,14 +306,9 @@ class _Tile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: BirdySizes.blockIconDisc,
-              height: BirdySizes.blockIconDisc,
-              decoration: BoxDecoration(
-                color: birdyTrackOnTint(c),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(entry.icon, size: 22, color: c.text1),
+            _TileDisc(
+              icon: entry.icon,
+              tone: entry.tone ?? BirdyBlockTone.plain,
             ),
             const SizedBox(height: BirdySpace.s),
             Text(
@@ -308,6 +324,40 @@ class _Tile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// The 40 disc of a tile: it alone carries the entry's tint. White for
+/// [BirdyBlockTone.plain]; [BirdyBlockTone.toCheck] is white with the dashed
+/// outline of « À vérifier ».
+class _TileDisc extends StatelessWidget {
+  const _TileDisc({required this.icon, required this.tone});
+
+  final IconData icon;
+  final BirdyBlockTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    Widget disc = Container(
+      width: BirdySizes.blockIconDisc,
+      height: BirdySizes.blockIconDisc,
+      decoration: BoxDecoration(
+        color: birdyBlockColor(c, tone),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 22, color: c.text1),
+    );
+    if (tone == BirdyBlockTone.toCheck) {
+      disc = CustomPaint(
+        foregroundPainter: DashedBorderPainter(
+          color: c.toCheck.foreground,
+          radius: BirdySizes.blockIconDisc / 2,
+        ),
+        child: disc,
+      );
+    }
+    return disc;
   }
 }
 
@@ -439,56 +489,6 @@ class _ToolRow extends StatelessWidget {
                 Icon(AppIcons.chevronRight, color: c.text2),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A full-width row (Réglages, À propos).
-class _LinkRow extends StatelessWidget {
-  const _LinkRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return BirdyBlock(
-      color: c.background,
-      onTap: onTap,
-      semanticLabel: label,
-      padding: EdgeInsets.zero,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: BirdySizes.row),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BirdySpace.l,
-            vertical: BirdySpace.s,
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: c.text1),
-              const SizedBox(width: BirdySpace.m),
-              Expanded(
-                child: Text(
-                  label,
-                  style: BirdyText.body.copyWith(
-                    color: c.text1,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Icon(AppIcons.chevronRight, color: c.text2),
-            ],
           ),
         ),
       ),
