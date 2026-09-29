@@ -26,7 +26,8 @@ class BirdyShimmerClock {
   static final BirdyShimmerClock instance = BirdyShimmerClock._();
 
   /// Sweep progress in [0, 1] while the band crosses, or null while resting.
-  final _ProgressNotifier progress = _ProgressNotifier();
+  ValueNotifier<double?> get progress => _progress;
+  final _ProgressNotifier _progress = _ProgressNotifier();
 
   Ticker? _ticker;
   int _users = 0;
@@ -52,7 +53,7 @@ class BirdyShimmerClock {
   void acquire() {
     _users++;
     if (_ticker != null) return;
-    _ticker = Ticker((elapsed) => progress.value = progressAt(elapsed))
+    _ticker = Ticker((elapsed) => _progress.value = progressAt(elapsed))
       ..start();
   }
 
@@ -62,7 +63,7 @@ class BirdyShimmerClock {
     _users = 0;
     _ticker?.dispose();
     _ticker = null;
-    progress.reset();
+    _progress.reset();
   }
 }
 
