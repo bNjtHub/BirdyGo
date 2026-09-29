@@ -6194,5 +6194,7 @@
   "forkFirstNameNote": "It stays on the phone. Asked at first launch, never required.",
   "forkThemeAuto": "Auto",
   "forkLiveThemeTitle": "Listening screen",
-  "forkLiveThemeCaption": "Dark by default: it dazzles less at dawn and saves battery"
+  "forkLiveThemeCaption": "Dark by default: it dazzles less at dawn and saves battery",
+  "forkDailyGoalHeardSure": "Heard · Sure",
+  "@forkDailyGoalHeardSure": {"description": "BirdyGo fork: daily goal row of a heard bird, reliability Sure (J6h)."}
 }

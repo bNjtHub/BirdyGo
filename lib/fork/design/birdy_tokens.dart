@@ -531,6 +531,10 @@ abstract final class BirdySizes {
 
   /// Progress ring of a block (daily goal), and its stroke.
   static const double ring = 76;
+
+  /// Ring of the daily goal hero (J6h), and the avatar of a list row.
+  static const double dailyGoalRing = 120;
+  static const double rowAvatar = 48;
   static const double ringStroke = 8;
 
   /// Progress bar of a block (status, notebook).

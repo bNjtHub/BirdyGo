@@ -1867,5 +1867,6 @@
   "forkFirstNameNote": "Il reste sur le téléphone. Demandé au premier lancement, jamais obligatoire.",
   "forkThemeAuto": "Auto",
   "forkLiveThemeTitle": "Écran d'écoute",
-  "forkLiveThemeCaption": "Sombre par défaut : il éblouit moins à l'aube et économise la batterie"
+  "forkLiveThemeCaption": "Sombre par défaut : il éblouit moins à l'aube et économise la batterie",
+  "forkDailyGoalHeardSure": "Entendu · Sûr"
 }
