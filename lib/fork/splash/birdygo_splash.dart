@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import 'birdygo_splash_painter.dart';
@@ -58,6 +59,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   Color _text = BirdyBrand.ink;
   Color _soft = BirdyBrand.bark;
   Color _track = BirdyGoLoadingPainter.lightTrack;
+  BirdyBrandColors _brand = const BirdyBrandColors(BirdyBird.loriot);
 
   /// The time the intro is drawn at: settled at once with reduced motion.
   double _at(double clock) => _reduced ? BirdyGoSplashTimeline.settled : clock;
@@ -319,7 +321,11 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
               RepaintBoundary(
                 child: CustomPaint(
                   size: const Size(120, 3),
-                  painter: BirdyGoLoadingPainter(fraction: _bar, track: _track),
+                  painter: BirdyGoLoadingPainter(
+                    fraction: _bar,
+                    track: _track,
+                    fill: _brand.accent,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -359,6 +365,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    _brand = BirdyBrandColors.of(context);
     _background = dark ? BirdyBrand.ink : BirdyBrand.mist;
     _text = dark ? BirdyBrand.mist : BirdyBrand.ink;
     _soft = dark ? BirdyColors.dark.text2 : BirdyBrand.bark;
@@ -418,6 +425,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                                         // A startup error is no time to sing on.
                                         loop: widget.onRetry == null,
                                         still: _reduced,
+                                        brand: _brand,
                                       ),
                                     ),
                                   ),

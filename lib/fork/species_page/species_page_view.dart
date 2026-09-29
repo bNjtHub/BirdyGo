@@ -382,7 +382,7 @@ class _HereNowCardState extends State<HereNowCard> {
     final language = Localizations.localeOf(context).languageCode;
     final months = widget.year.months;
     final percents = [for (final b in widget.year.bars) (b * 100).round()];
-    final scale = ActivityScale.kingfisher(c.surface1);
+    final scale = ActivityScale.kingfisher(c.surface1, hue: c.accent);
     final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
     final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
     final labels = {
@@ -811,7 +811,7 @@ class _HourActivityCardState extends State<_HourActivityCard> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final scale = ActivityScale.kingfisher(c.surface1);
+    final scale = ActivityScale.kingfisher(c.surface1, hue: c.accent);
     final selected = _selectedHour;
     final caption =
         selected == null

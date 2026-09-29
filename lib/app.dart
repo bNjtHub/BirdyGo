@@ -22,6 +22,7 @@ import 'features/live/live_providers.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/live_session.dart';
 import 'fork/design/birdy_theme.dart'; // FORK: BirdyGo design system (J6a)
+import 'fork/settings/fork_prefs.dart'; // FORK: bird theme provider (J6i)
 import 'fork/splash/birdygo_launch_handoff.dart'; // FORK: visible launch handoff
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
@@ -76,6 +77,7 @@ class App extends ConsumerWidget {
     final useDynamicColor = ref.watch(dynamicColorProvider);
     final useHighContrastTheme = ref.watch(highContrastThemeProvider);
     final locale = ref.watch(localeProvider);
+    final bird = ref.watch(birdyBirdProvider); // FORK: bird theme (J6i)
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -93,8 +95,8 @@ class App extends ConsumerWidget {
           lightTheme = AppTheme.fromColorScheme(lightDynamic.harmonized());
           darkTheme = AppTheme.fromColorScheme(darkDynamic.harmonized());
         } else {
-          lightTheme = BirdyTheme.light(); // FORK: BirdyGo theme (J6a)
-          darkTheme = BirdyTheme.dark(); // FORK: BirdyGo theme (J6a)
+          lightTheme = BirdyTheme.light(bird: bird); // FORK: BirdyGo theme (J6a, J6i)
+          darkTheme = BirdyTheme.dark(bird: bird); // FORK: BirdyGo theme (J6a, J6i)
         }
 
         return MaterialApp(

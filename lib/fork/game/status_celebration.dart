@@ -15,6 +15,7 @@ import '../../features/live/live_controller.dart';
 import '../../shared/providers/app_providers.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_theme.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
@@ -99,7 +100,7 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
     final status = progress.status ?? GameConfig.statuses.first;
     final next = progress.next;
     return Theme(
-      data: BirdyTheme.dark(),
+      data: BirdyTheme.dark(bird: BirdyBrandColors.of(context).bird),
       child: Builder(
         builder: (context) {
           final l10n = AppLocalizations.of(context)!;

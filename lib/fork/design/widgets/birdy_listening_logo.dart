@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../home/birdygo_logo.dart';
 import '../birdy_motion.dart';
+import '../birdy_theme_choice.dart';
 
 class BirdyListeningLogo extends StatefulWidget {
   const BirdyListeningLogo({
@@ -85,6 +86,7 @@ class _BirdyListeningLogoState extends State<BirdyListeningLogo>
             progress: kAlwaysCompleteAnimation,
             level: active ? _controller : null,
             frozenLevel: paused ? BirdyGoLogoPainter.pausedBarLevel : null,
+            brand: BirdyBrandColors.of(context),
           ),
         ),
       ),

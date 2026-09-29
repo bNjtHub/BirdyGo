@@ -1,5 +1,5 @@
 /// The logo's wing as an icon (J6h): the four bars of
-/// [BirdyGoLogoPainter.bars] in their own colors, round caps, a soft shadow,
+/// [BirdyGoLogoPainter.bars] in the bird theme's colors, round caps, a soft shadow,
 /// no outline. Used on « Écouter », « Commencer à écouter » and the quiz's
 /// question mark.
 ///
@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../home/birdygo_logo.dart';
 import '../birdy_motion.dart';
+import '../birdy_theme_choice.dart';
 import '../birdy_tokens.dart';
 
 class BirdyWingIcon extends StatefulWidget {
@@ -115,14 +116,17 @@ class _BirdyWingIconState extends State<BirdyWingIcon>
     child: RepaintBoundary(
       child: CustomPaint(
         size: Size.square(widget.size),
-        painter: _WingPainter(_wave),
+        painter: _WingPainter(_wave, BirdyBrandColors.of(context)),
       ),
     ),
   );
 }
 
 class _WingPainter extends CustomPainter {
-  _WingPainter(this.wave) : super(repaint: wave);
+  _WingPainter(this.wave, this.brand) : super(repaint: wave);
+
+  /// Bars 2 and 4 follow the bird theme (J6i).
+  final BirdyBrandColors brand;
 
   /// Wave progress; 0 (rest) draws the bars exactly as the logo does.
   final Animation<double> wave;
@@ -178,7 +182,7 @@ class _WingPainter extends CustomPainter {
       );
     }
     i = 0;
-    for (final (from, to, color) in BirdyGoLogoPainter.bars) {
+    for (final (from, to, color) in BirdyGoLogoPainter.barsFor(brand)) {
       canvas.drawLine(
         from,
         _grown(from, to, i++),
@@ -192,5 +196,6 @@ class _WingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_WingPainter old) => old.wave != wave;
+  bool shouldRepaint(_WingPainter old) =>
+      old.wave != wave || old.brand != brand;
 }

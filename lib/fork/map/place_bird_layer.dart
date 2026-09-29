@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdygo_silhouette.dart';
 import '../home/birdygo_logo.dart';
@@ -36,9 +37,12 @@ double placeBirdSize(double opacity) {
 
 /// The colored logo, recorded once: the bird's longest side is 1, centered
 /// on the origin.
-final ui.Picture _logoPicture = _recordLogo();
+final Map<BirdyBird, ui.Picture> _logoPictures = {};
 
-ui.Picture _recordLogo() {
+ui.Picture _logoPicture(BirdyBird bird) =>
+    _logoPictures[bird] ??= _recordLogo(bird);
+
+ui.Picture _recordLogo(BirdyBird theme) {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   final bird = birdyGoLogoBounds;
@@ -50,6 +54,7 @@ ui.Picture _recordLogo() {
     ..translate(-bird.center.dx, -bird.center.dy);
   BirdyGoLogoPainter(
     progress: const AlwaysStoppedAnimation<double>(1),
+    brand: BirdyBrandColors(theme),
   ).paint(canvas, box);
   return recorder.endRecording();
 }
@@ -66,17 +71,26 @@ class PlaceBirdLayer extends StatelessWidget {
     return MobileLayerTransformer(
       child: CustomPaint(
         size: camera.size,
-        painter: _PlaceBirdPainter(camera: camera, places: places),
+        painter: _PlaceBirdPainter(
+          camera: camera,
+          places: places,
+          bird: BirdyBrandColors.of(context).bird,
+        ),
       ),
     );
   }
 }
 
 class _PlaceBirdPainter extends CustomPainter {
-  _PlaceBirdPainter({required this.camera, required this.places});
+  _PlaceBirdPainter({
+    required this.camera,
+    required this.places,
+    required this.bird,
+  });
 
   final MapCamera camera;
   final List<PlaceBird> places;
+  final BirdyBird bird;
 
   static final Paint _halo =
       Paint()
@@ -104,12 +118,12 @@ class _PlaceBirdPainter extends CustomPainter {
           birdyGoSilhouette,
           _halo..strokeWidth = 2 * kMapPlaceBirdHaloPx / side,
         )
-        ..drawPicture(_logoPicture)
+        ..drawPicture(_logoPicture(bird))
         ..restore();
     }
   }
 
   @override
   bool shouldRepaint(_PlaceBirdPainter old) =>
-      old.camera != camera || old.places != places;
+      old.camera != camera || old.places != places || old.bird != bird;
 }

@@ -313,7 +313,7 @@ class _BigPlayButton extends StatelessWidget {
               boxShadow: c.ctaGlow,
             ),
             child: Material(
-              color: BirdyBrand.kingfisher,
+              color: c.accent,
               shape: const CircleBorder(),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
