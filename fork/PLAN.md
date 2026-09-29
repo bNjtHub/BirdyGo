@@ -872,10 +872,10 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
-- [ ] Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
+- [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
-- [ ] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
+- [x] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
       exportés (`BirdNET_Live_…`), champ creator des exports GPX et JSON, rapport HTML. Adapter les
       tests upstream concernés.
 - [ ] Quelques semaines d'usage réel avant de passer à iOS.

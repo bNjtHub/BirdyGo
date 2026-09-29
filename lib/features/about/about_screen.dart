@@ -9,6 +9,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/widgets/content_width_constraint.dart';
+import '../../fork/licenses/content_licenses_screen.dart'; // FORK: J7
 
 /// Provider for app package info.
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
@@ -260,6 +261,19 @@ class AboutScreen extends ConsumerWidget {
                   () => openExternalUrl(
                     context,
                     '${AppConstants.docsUrl}${AppConstants.policyDocsLocalePrefix(Localizations.localeOf(context).languageCode)}/acceptable-use/',
+                  ),
+            ),
+            // FORK: J7 content licenses (photos, fonts, model, maps).
+            ListTile(
+              leading: const Icon(AppIcons.gavel),
+              title: Text(l10n.forkLicensesAboutRow),
+              subtitle: Text(l10n.forkLicensesAboutRowSub),
+              trailing: const Icon(AppIcons.chevronRight),
+              onTap:
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ContentLicensesScreen(),
+                    ),
                   ),
             ),
             // FORK: no "This app on GitHub" tile, the BirdyGo repository is private.

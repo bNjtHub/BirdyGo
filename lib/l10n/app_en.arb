@@ -28,7 +28,7 @@
   "@about": {
     "description": "About screen title"
   },
-  "onboardingWelcomeTitle": "Welcome to BirdNET Live",
+  "onboardingWelcomeTitle": "Welcome to BirdyGo",
   "@onboardingWelcomeTitle": {
     "description": "Onboarding welcome screen title"
   },
@@ -40,7 +40,7 @@
   "@onboardingHowItWorksTitle": {
     "description": "Onboarding how it works screen title"
   },
-  "onboardingHowItWorksBody": "BirdNET Live continuously listens to your surroundings. It analyzes audio using an on-device artificial intelligence model to identify species in real-time. Detections are highlighted on a live scrolling spectrogram. Everything is processed locally, meaning it works entirely offline and protects your privacy.",
+  "onboardingHowItWorksBody": "BirdyGo continuously listens to your surroundings. It analyzes audio using an on-device artificial intelligence model to identify species in real-time. Detections are highlighted on a live scrolling spectrogram. Everything is processed locally, meaning it works entirely offline and protects your privacy.",
   "@onboardingHowItWorksBody": {
     "description": "Onboarding how it works body text"
   },
@@ -56,7 +56,7 @@
   "@onboardingPermissionsTitle": {
     "description": "Onboarding permissions screen title"
   },
-  "onboardingPermissionsBody": "BirdNET Live needs microphone access for audio capture and (optionally) location access for geotagging detections, GPS tracks in surveys, and location-based species filtering. Both can be revoked at any time in system settings.",
+  "onboardingPermissionsBody": "BirdyGo needs microphone access for audio capture and (optionally) location access for geotagging detections, GPS tracks in surveys, and location-based species filtering. Both can be revoked at any time in system settings.",
   "@onboardingPermissionsBody": {
     "description": "Onboarding permissions screen body text"
   },
@@ -348,7 +348,7 @@
   "@settingsDataCleared": {
     "description": "Snackbar message after clearing all data"
   },
-  "settingsDataClearFailed": "Some data could not be cleared. Please close BirdNET Live and try again.",
+  "settingsDataClearFailed": "Some data could not be cleared. Please close BirdyGo and try again.",
   "@settingsDataClearFailed": {
     "description": "Snackbar message when clearing all data fails"
   },
@@ -2411,7 +2411,7 @@
   "@settingsHelpExportHtmlReport": {
     "description": "Help text for export HTML report setting"
   },
-  "settingsHelpExportAppMetadata": "When enabled, the export ZIP includes a `*.metadata.json` side-file with BirdNET Live provenance: app and model version, weather snapshot at the start of the session, and audio integrity warnings. Turn off to share only audio and the selected formats without any app-specific files.",
+  "settingsHelpExportAppMetadata": "When enabled, the export ZIP includes a `*.metadata.json` side-file with BirdyGo provenance: app and model version, weather snapshot at the start of the session, and audio integrity warnings. Turn off to share only audio and the selected formats without any app-specific files.",
   "@settingsHelpExportAppMetadata": {
     "description": "Help text for the include app metadata setting"
   },
@@ -3079,7 +3079,7 @@
     "description": "Metadata for surveyAlertBodyFirstInSession"
 
   },
-  "surveyAlertBodyFirstEver": "First detection ever in BirdNET Live",
+  "surveyAlertBodyFirstEver": "First detection ever in BirdyGo",
   "@surveyAlertBodyFirstEver": {
 
     "description": "Metadata for surveyAlertBodyFirstEver"
@@ -3458,7 +3458,7 @@
   "@helpTitle": {
     "description": "Help screen title and menu label"
   },
-  "helpIntro": "BirdNET Live is built around a small set of repeatable screens: Home, mode screens, Session Review, and Settings. This help page explains what the app is showing and where the main controls live.",
+  "helpIntro": "BirdyGo is built around a small set of repeatable screens: Home, mode screens, Session Review, and Settings. This help page explains what the app is showing and where the main controls live.",
   "@helpIntro": {
     "description": "Introduction paragraph on the help screen"
   },
@@ -3749,13 +3749,13 @@
   },
   "settingsExportAppMetadata": "Include app metadata",
   "@settingsExportAppMetadata": {
-    "description": "Checkbox: bundle the BirdNET Live metadata side-file inside the export ZIP"
+    "description": "Checkbox: bundle the BirdyGo metadata side-file inside the export ZIP"
   },
   "settingsPrivacy": "Privacy",
   "@settingsPrivacy": {
     "description": "Settings section header for third-party network gates"
   },
-  "settingsPrivacyDescription": "Choose which third-party services BirdNET Live may contact on your behalf. All toggles are off by default.",
+  "settingsPrivacyDescription": "Choose which third-party services BirdyGo may contact on your behalf. All toggles are off by default.",
   "@settingsPrivacyDescription": {
     "description": "Settings section subtitle"
   },
@@ -4563,7 +4563,7 @@
       }
     }
   },
-  "liveScreenHelpDetections": "Tap any species row to open the species details sheet. When you stop the session, BirdNET Live saves it and opens Session Review.",
+  "liveScreenHelpDetections": "Tap any species row to open the species details sheet. When you stop the session, BirdyGo saves it and opens Session Review.",
   "@liveScreenHelpDetections": {
     "description": "Explains the detection list on the Live Mode help overlay"
   },
@@ -6286,5 +6286,71 @@
   "forkThemeFactEtourneau": "It imitates other birds... and even phones.",
   "@forkThemeFactEtourneau": {"description": "BirdyGo fork: onboarding bird and name steps (J6i). Fun fact about the Étourneau theme bird."},
   "forkSettingsMyBird": "My bird",
-  "@forkSettingsMyBird": {"description": "BirdyGo fork: onboarding bird and name steps (J6i). Settings row that opens the bird choice."}
+  "@forkSettingsMyBird": {"description": "BirdyGo fork: onboarding bird and name steps (J6i). Settings row that opens the bird choice."},
+  "forkLicensesTitle": "Content licenses",
+  "@forkLicensesTitle": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesAboutRow": "Content licenses",
+  "@forkLicensesAboutRow": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesAboutRowSub": "Photos, fonts, model, maps",
+  "@forkLicensesAboutRowSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesSearchHint": "Search a species",
+  "@forkLicensesSearchHint": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesPhotosTitle": "Species photos",
+  "@forkLicensesPhotosTitle": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesPhotosIntro": "Each photo keeps its author and license. These are the ones in the app, sorted by license. Tap a row to open the photo's page.",
+  "@forkLicensesPhotosIntro": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesNoPhotos": "The photo pack is not installed: no photo to credit.",
+  "@forkLicensesNoPhotos": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesNoMatch": "No photo matches.",
+  "@forkLicensesNoMatch": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesUnknownAuthor": "Unknown author",
+  "@forkLicensesUnknownAuthor": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesShowMore": "Show {count} more",
+  "@forkLicensesShowMore": {"description": "BirdyGo fork: J7 content licenses screen (About).", "placeholders": {"count": {"type": "int"}}},
+  "forkLicensesDeed": "Read the license text",
+  "@forkLicensesDeed": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesFamilyPublicDomain": "Public domain",
+  "@forkLicensesFamilyPublicDomain": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesFamilyReserved": "All rights reserved",
+  "@forkLicensesFamilyReserved": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesFamilyOther": "Other licenses",
+  "@forkLicensesFamilyOther": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainBy": "Free to reuse, even commercially, as long as the author is credited.",
+  "@forkLicensesExplainBy": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainBySa": "Free to reuse with credit, as long as a modified version is shared under the same license.",
+  "@forkLicensesExplainBySa": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainByNc": "Free to reuse with credit, but not for commercial purposes.",
+  "@forkLicensesExplainByNc": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainByNd": "Free to share with credit, but the work may not be modified.",
+  "@forkLicensesExplainByNd": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainCc0": "The author gave up their rights: free to reuse, no conditions.",
+  "@forkLicensesExplainCc0": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainPublicDomain": "Work free of rights: free to reuse, no conditions.",
+  "@forkLicensesExplainPublicDomain": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainReserved": "All rights reserved by the author: the photo is shown here by permission or until it is replaced.",
+  "@forkLicensesExplainReserved": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesExplainOther": "Specific license: see the text shown on each row.",
+  "@forkLicensesExplainOther": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesOtherTitle": "Other content",
+  "@forkLicensesOtherTitle": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesFonts": "Fonts",
+  "@forkLicensesFonts": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesFontsSub": "Fraunces, Atkinson Hyperlegible Next and Nunito, under the SIL OFL 1.1 license",
+  "@forkLicensesFontsSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesModel": "BirdNET model",
+  "@forkLicensesModel": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesModelSub": "BirdNET+ model weights from the Cornell Lab of Ornithology, under the Apache 2.0 license",
+  "@forkLicensesModelSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesSheets": "Species sheets",
+  "@forkLicensesSheets": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesSheetsSub": "Texts written for BirdyGo",
+  "@forkLicensesSheetsSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesMaps": "Map tiles",
+  "@forkLicensesMaps": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesMapsSub": "© OpenStreetMap contributors (ODbL); © IGN – Géoplateforme (Etalab Open License 2.0)",
+  "@forkLicensesMapsSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesCode": "Code licenses",
+  "@forkLicensesCode": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkLicensesCodeSub": "Open-source software used by the app",
+  "@forkLicensesCodeSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."}
 }

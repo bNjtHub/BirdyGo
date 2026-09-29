@@ -75,7 +75,7 @@ TaxonomyService _localizedTaxonomy() {
 /// the test stays timezone-agnostic â€” export filenames are always rendered
 /// in the user's local time so they sort sensibly in their file browser.
 final _prefix =
-    'BirdNET_Live_${DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.utc(2025, 6, 15, 8, 0, 0).toLocal())}';
+    'BirdyGo_${DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.utc(2025, 6, 15, 8, 0, 0).toLocal())}';
 
 void main() {
   test('common names are localized consistently in every export format', () {
@@ -770,7 +770,7 @@ void main() {
       );
       expect(result, isNotNull);
       expect(result!.endsWith('.txt'), isTrue);
-      expect(p.basename(result), startsWith('BirdNET_Live_'));
+      expect(p.basename(result), startsWith('BirdyGo_'));
     });
 
     test(
@@ -2260,7 +2260,7 @@ void main() {
       expect(bulkZipPath, isNotNull);
       final file = File(bulkZipPath!);
       expect(file.existsSync(), isTrue);
-      expect(p.basename(file.path), startsWith('BirdNET_Live_Bulk_Export_'));
+      expect(p.basename(file.path), startsWith('BirdyGo_Bulk_Export_'));
 
       final zipBytes = file.readAsBytesSync();
       final archive = ZipDecoder().decodeBytes(zipBytes);

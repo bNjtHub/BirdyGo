@@ -9,7 +9,7 @@ void main() {
     test('uses the basename for title, override, and XFile name', () {
       final filePath = p.join(
         Directory.systemTemp.path,
-        'BirdNET_Live_2026-07-01.wav',
+        'BirdyGo_2026-07-01.wav',
       );
       final params = shareParamsForFile(
         filePath,
@@ -18,25 +18,25 @@ void main() {
       );
 
       expect(params.files, hasLength(1));
-      expect(params.files!.single.name, 'BirdNET_Live_2026-07-01.wav');
-      expect(params.fileNameOverrides, ['BirdNET_Live_2026-07-01.wav']);
-      expect(params.title, 'BirdNET_Live_2026-07-01.wav');
+      expect(params.files!.single.name, 'BirdyGo_2026-07-01.wav');
+      expect(params.fileNameOverrides, ['BirdyGo_2026-07-01.wav']);
+      expect(params.title, 'BirdyGo_2026-07-01.wav');
       expect(params.text, 'body');
       expect(params.subject, 'subject');
     });
 
     test('uses basename overrides for slash styles from other platforms', () {
       final androidParams = shareParamsForFile(
-        '/data/user/0/app/cache/BirdNET_Live_clip.wav',
+        '/data/user/0/app/cache/BirdyGo_clip.wav',
       );
-      expect(androidParams.fileNameOverrides, ['BirdNET_Live_clip.wav']);
-      expect(androidParams.title, 'BirdNET_Live_clip.wav');
+      expect(androidParams.fileNameOverrides, ['BirdyGo_clip.wav']);
+      expect(androidParams.title, 'BirdyGo_clip.wav');
 
       final windowsParams = shareParamsForFile(
-        r'C:\Temp\BirdNET_Live_clip.flac',
+        r'C:\Temp\BirdyGo_clip.flac',
       );
-      expect(windowsParams.fileNameOverrides, ['BirdNET_Live_clip.flac']);
-      expect(windowsParams.title, 'BirdNET_Live_clip.flac');
+      expect(windowsParams.fileNameOverrides, ['BirdyGo_clip.flac']);
+      expect(windowsParams.title, 'BirdyGo_clip.flac');
     });
 
     test('sets audio MIME types from file extensions', () {
