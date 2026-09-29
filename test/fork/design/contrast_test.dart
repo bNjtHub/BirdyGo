@@ -314,6 +314,8 @@ void main() {
       expectAA(c.accentText, card, 'countdown fill/card', min: 3);
       // Tip card step dots.
       expectAA(c.orioleText, on(track, c.surface1), 'tip dot/idle dot', min: 3);
+      // Onboarding page dots, on the screen background.
+      expectAA(c.accentText, on(track, c.background), 'onboarding dot/idle dot', min: 3);
     }
   });
 }
