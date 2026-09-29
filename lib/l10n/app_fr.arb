@@ -1858,5 +1858,14 @@
   "forkSoundLibraryAll": "Toutes",
   "forkSoundLibraryHeroLabel": "{count, plural, =1{enregistrement} other{enregistrements}}",
   "forkSoundLibrarySpeciesCount": "{count, plural, =1{1 espèce} other{{count} espèces}}",
-  "forkSoundLibraryFavoritesCount": "{count, plural, =0{0 ★ favori} =1{1 ★ favori} other{{count} ★ favoris}}"
+  "forkSoundLibraryFavoritesCount": "{count, plural, =0{0 ★ favori} =1{1 ★ favori} other{{count} ★ favoris}}",
+  "forkSettingsYou": "Toi",
+  "forkSettingsLanguages": "Langues",
+  "forkSettingsOptions": "Options",
+  "forkFirstNameLabel": "Ton prénom",
+  "forkFirstNameHint": "Pour te saluer",
+  "forkFirstNameNote": "Il reste sur le téléphone. Demandé au premier lancement, jamais obligatoire.",
+  "forkThemeAuto": "Auto",
+  "forkLiveThemeTitle": "Écran d'écoute",
+  "forkLiveThemeCaption": "Sombre par défaut : il éblouit moins à l'aube et économise la batterie"
 }

@@ -6185,5 +6185,14 @@
   "forkSoundLibrarySpeciesCount": "{count, plural, =1{1 species} other{{count} species}}",
   "@forkSoundLibrarySpeciesCount": {"description": "BirdyGo fork: sound library hero caption (J6h).", "placeholders": {"count": {"type": "int"}}},
   "forkSoundLibraryFavoritesCount": "{count, plural, =1{1 ★ favorite} other{{count} ★ favorites}}",
-  "@forkSoundLibraryFavoritesCount": {"description": "BirdyGo fork: sound library hero caption (J6h).", "placeholders": {"count": {"type": "int"}}}
+  "@forkSoundLibraryFavoritesCount": {"description": "BirdyGo fork: sound library hero caption (J6h).", "placeholders": {"count": {"type": "int"}}},
+  "forkSettingsYou": "You",
+  "forkSettingsLanguages": "Languages",
+  "forkSettingsOptions": "Options",
+  "forkFirstNameLabel": "Your first name",
+  "forkFirstNameHint": "So we can greet you",
+  "forkFirstNameNote": "It stays on the phone. Asked at first launch, never required.",
+  "forkThemeAuto": "Auto",
+  "forkLiveThemeTitle": "Listening screen",
+  "forkLiveThemeCaption": "Dark by default: it dazzles less at dawn and saves battery"
 }

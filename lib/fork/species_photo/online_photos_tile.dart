@@ -10,13 +10,17 @@ import '../settings/birdy_switch_row.dart';
 import 'species_photo_providers.dart';
 
 class OnlinePhotosTile extends ConsumerWidget {
-  const OnlinePhotosTile({super.key});
+  const OnlinePhotosTile({super.key, this.icon});
+
+  /// Leading disc icon (J6h simple settings).
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     return BirdySwitchRow(
       title: l10n.forkOnlinePhotos,
+      icon: icon,
       hint: l10n.forkOnlinePhotosHint,
       value: ref.watch(onlinePhotosAllowedProvider),
       onChanged: (v) => ref.read(onlinePhotosAllowedProvider.notifier).set(v),

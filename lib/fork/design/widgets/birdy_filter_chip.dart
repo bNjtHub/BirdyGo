@@ -44,6 +44,7 @@ class BirdyFilterChip extends StatelessWidget {
     this.leading,
     this.floating = false,
     this.unselectedColor,
+    this.centered = false,
   });
 
   final String label;
@@ -59,6 +60,8 @@ class BirdyFilterChip extends StatelessWidget {
 
   /// Fill when not selected; white by default (Brume on a white block).
   final Color? unselectedColor;
+  /// Centers the label (a chip stretched by a grid cell).
+  final bool centered;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +97,10 @@ class BirdyFilterChip extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment:
+                        centered
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.start,
                     children: [
                       if (leading != null) ...[
                         IconTheme.merge(
