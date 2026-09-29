@@ -810,7 +810,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [ ] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
       - [ ] Fiche : héros `sure`, bloc « Fais sa connaissance ».
       - [ ] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
-      - [ ] Quiz : intro sans défilement, croix et confirmation de sortie.
+      - [x] Quiz : intro sans défilement, croix et confirmation de sortie.
       - [ ] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.
       - [ ] Sonothèque : héros, filtre favoris sur la liste, bloc unique.
       - [ ] Réglages : blocs titrés, bloc « Toi » (prénom), thème Auto, écran d'écoute.

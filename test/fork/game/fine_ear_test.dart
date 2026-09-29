@@ -11,10 +11,10 @@ import 'package:birdnet_live/fork/game/fine_ear_quiz_screen.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_widgets.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
-import 'package:birdnet_live/fork/game/french_article.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart';
 import 'package:birdnet_live/fork/game/quiz_fx.dart';
 import 'package:birdnet_live/fork/game/quiz_sfx.dart';
+import 'package:birdnet_live/fork/game/quiz_stop_sheet.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -310,10 +310,7 @@ void main() {
       expect(find.text('+1 à chaque bonne réponse'), findsOneWidget);
       expect(find.text('Badge Oreille fine'), findsOneWidget);
       expect(find.text('Ta première plume'), findsOneWidget);
-      expect(
-        find.text('Encore 5 bonnes réponses · 5 sur 10'),
-        findsOneWidget,
-      );
+      expect(find.text('Encore 5 bonnes réponses · 5 sur 10'), findsOneWidget);
       expect(find.byType(BadgeMedal), findsOneWidget);
       expect(player.played, isEmpty);
 
@@ -379,7 +376,7 @@ void main() {
       expect(
         find.descendant(
           of: stage,
-          matching: find.text("C'est bien l'${french(answer).toLowerCase()}"),
+          matching: find.text("Bravo, c'est bien lui : ${french(answer)}"),
         ),
         findsOneWidget,
       );
@@ -426,9 +423,7 @@ void main() {
       await tapChoice(tester, french(wrong));
       expect(find.text('Presque !'), findsOneWidget);
       expect(
-        find.bySemanticsLabel(
-          RegExp("^Presque ! C'était l'${french(answer).toLowerCase()}"),
-        ),
+        find.bySemanticsLabel(RegExp("^Presque ! C'était : ${french(answer)}")),
         findsOneWidget,
       );
       expect(find.text('+1 Oreille fine'), findsNothing);
@@ -440,10 +435,7 @@ void main() {
       final answer = playing();
       final wrong = _species(4).keys.firstWhere((s) => s != answer);
       await tapChoice(tester, french(wrong));
-      expect(
-        find.text('Réécoute-le, tu le retiendras'),
-        findsOneWidget,
-      );
+      expect(find.text('Réécoute-le, tu le retiendras'), findsOneWidget);
     });
 
     testWidgets('the score chip counts right answers as they add up', (
@@ -457,9 +449,7 @@ void main() {
       expect(find.text('1'), findsOneWidget);
     });
 
-    testWidgets('the stage bubble switches text with playback', (
-      tester,
-    ) async {
+    testWidgets('the stage bubble switches text with playback', (tester) async {
       // The round's first clip plays right away (« Qui suis-je ? »).
       await pump(tester, _species(4));
       expect(find.text('Qui suis-je ?'), findsOneWidget);
@@ -470,13 +460,93 @@ void main() {
       expect(find.text('Qui suis-je ?'), findsNothing);
     });
 
-    testWidgets('quitting a round goes back to the intro', (tester) async {
+    testWidgets('the step cards keep their tilt while they pop in', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), start: false);
+      final cards = find.byType(QuizPop);
+      expect(cards, findsNWidgets(3));
+      for (final card in cards.evaluate()) {
+        final parent = find.ancestor(
+          of: find.byWidget(card.widget),
+          matching: find.byType(Transform),
+        );
+        expect(parent, findsWidgets);
+      }
+    });
+
+    testWidgets('the cross asks first, and keeps the round on « Continuer »', (
+      tester,
+    ) async {
       await pump(tester, _species(4));
       expect(player.playing.value, isNotNull);
+      expect(find.byTooltip('Retour'), findsNothing);
       await tester.tap(find.byTooltip('Quitter le quiz'));
       await settle(tester);
-      expect(find.text("C'est parti !"), findsOneWidget);
-      expect(player.playing.value, isNull);
+      expect(find.text('Arrêter la partie ?'), findsOneWidget);
+      expect(
+        find.text('Rien n\'est perdu : tu pourras rejouer quand tu veux.'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(QuizStopSheet),
+          matching: find.text('Continuer'),
+        ),
+      );
+      await settle(tester);
+      expect(find.text('Arrêter la partie ?'), findsNothing);
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+    });
+
+    testWidgets('the sheet counts the right answers so far', (tester) async {
+      await pump(tester, _species(4));
+      await tapChoice(tester, french(playing()));
+      await tester.tap(find.byTooltip('Quitter le quiz'));
+      await settle(tester);
+      expect(
+        find.text('Ta bonne réponse est gardée pour le badge Oreille fine.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the system back asks the same way', (tester) async {
+      await pump(tester, _species(4));
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text('Arrêter la partie ?'), findsOneWidget);
+      expect(find.byType(FineEarQuizScreen), findsOneWidget);
+    });
+
+    testWidgets('no confirmation on the intro or on the score', (tester) async {
+      await pump(tester, _species(4), start: false);
+      await tester.tap(find.byTooltip('Retour'));
+      await settle(tester);
+      expect(find.byType(QuizStopSheet), findsNothing);
+
+      await pump(tester, _species(4));
+      for (var i = 0; i < 4; i++) {
+        await tapChoice(tester, french(playing()));
+        await next(tester, last: i == 3);
+      }
+      expect(find.byTooltip('Quitter le quiz'), findsOneWidget);
+      await tester.tap(find.byTooltip('Quitter le quiz'));
+      await settle(tester);
+      expect(find.byType(QuizStopSheet), findsNothing);
+    });
+
+    testWidgets('the reveal: no article built by hand', (tester) async {
+      await pump(tester, _species(4));
+      final answer = playing();
+      await tapChoice(tester, french(answer));
+      expect(
+        find.text('Bravo, c\'est bien lui : ${french(answer)}'),
+        findsOneWidget,
+      );
+      await next(tester, last: false);
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      await tapChoice(tester, french(wrong));
+      expect(find.text('C\'était : ${french(playing())}'), findsOneWidget);
     });
 
     testWidgets('the end of a round: stars, score, birds and a new plume', (
@@ -921,23 +991,5 @@ void main() {
       expect(last.right, lessThanOrEqualTo(trail.right + .01));
       expect(tester.takeException(), isNull);
     });
-  });
-
-  test('French articles for the reveal', () {
-    expect(frenchWithArticle('Merle noir'), 'le merle noir');
-    expect(frenchWithArticle('Mésange bleue'), 'la mésange bleue');
-    expect(frenchWithArticle('Étourneau sansonnet'), "l'étourneau sansonnet");
-    expect(frenchWithArticle('Huppe fasciée'), 'la huppe fasciée');
-    expect(frenchWithArticle('Héron cendré'), 'le héron cendré');
-    expect(frenchWithArticle('Hirondelle rustique'), "l'hirondelle rustique");
-    expect(
-      frenchWithArticle('Pie-grièche écorcheur'),
-      'la pie-grièche écorcheur',
-    );
-    expect(
-      frenchWithArticle("Martin-pêcheur d'Europe"),
-      "le martin-pêcheur d'Europe",
-    );
-    expect(frenchWithArticle('Zostérops inconnu'), isNull);
   });
 }

@@ -6045,5 +6045,15 @@
   "forkRareShort": "Rare",
   "@forkRareShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
   "forkExceptionalShort": "Exceptional",
-  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."}
+  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkQuizRevealRight": "Yes, it's {name}",
+  "@forkQuizRevealRight": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Reveal after a right answer, no article.", "placeholders": {"name": {"type": "String"}}},
+  "forkQuizStopTitle": "Stop the game?",
+  "@forkQuizStopTitle": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Title of the exit confirmation sheet."},
+  "forkQuizStopBody": "{count, plural, =0{Nothing is lost: play again whenever you like.} =1{Your right answer is kept for the Fine ear badge.} other{Your {count} right answers are kept for the Fine ear badge.}}",
+  "@forkQuizStopBody": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, right answers so far.", "placeholders": {"count": {"type": "int"}}},
+  "forkQuizStopYes": "Stop",
+  "@forkQuizStopYes": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, leave."},
+  "forkQuizStopKeep": "Keep playing",
+  "@forkQuizStopKeep": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, stay."}
 }

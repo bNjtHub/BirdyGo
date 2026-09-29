@@ -37,6 +37,7 @@ import 'game_config.dart';
 import 'game_loader.dart';
 import 'quiz_fx.dart';
 import 'quiz_sfx.dart';
+import 'quiz_stop_sheet.dart';
 
 class FineEarQuizScreen extends ConsumerStatefulWidget {
   const FineEarQuizScreen({
@@ -154,15 +155,16 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     _playCurrent();
   }
 
-  void _toIntro() {
-    unawaited(_player.stop());
-    _burst.stop(clearAllParticles: true);
-    _rain.stop(clearAllParticles: true);
-    setState(() {
-      _phase = _Phase.intro;
-      _picked = null;
-      _burstOrigin = null;
-    });
+  /// The cross or the system back mid-game: asks before leaving. The right
+  /// answers so far are already counted for the badge.
+  Future<void> _confirmStop() async {
+    if (_phase != _Phase.question) return;
+    final stop = await showQuizStopSheet(
+      context,
+      right: _results.where((r) => r).length,
+    );
+    // pop, not maybePop: PopScope blocks a back in a question.
+    if (stop && mounted) Navigator.of(context).pop();
   }
 
   QuizQuestion? get _question =>
@@ -293,7 +295,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     final c = BirdyColors.of(context);
     final loading = _clips == null;
     final empty = !loading && _questions.isEmpty;
-    final inRound = !loading && !empty && _phase != _Phase.intro;
+    final inQuestion = !loading && !empty && _phase == _Phase.question;
     final reduced = BirdyMotion.reduced(context);
 
     final Widget body;
@@ -319,20 +321,26 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           header = _questionBar(context);
           body = _questionView(context);
         case _Phase.result:
-          header = _titleBar(context, onBack: _toIntro);
+          // A cross on the score: leaving the whole quiz.
+          header = _titleBar(
+            context,
+            icon: AppIcons.quizClose,
+            label: l10n.forkQuizQuit,
+            onBack: () => Navigator.of(context).pop(),
+          );
           body = _result();
       }
     }
 
     final origin = _burstOrigin;
     return PopScope(
-      // In a round, back returns to the intro, like the on-screen button.
-      canPop: !inRound,
+      // Mid-game, back asks first, like the cross.
+      canPop: !inQuestion,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
           _leave();
         } else {
-          _toIntro();
+          _confirmStop();
         }
       },
       child: Scaffold(
@@ -390,7 +398,12 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     );
   }
 
-  Widget _titleBar(BuildContext context, {required VoidCallback onBack}) {
+  Widget _titleBar(
+    BuildContext context, {
+    required VoidCallback onBack,
+    IconData icon = AppIcons.arrowBackRounded,
+    String? label,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     return Padding(
@@ -400,8 +413,8 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
         child: Row(
           children: [
             BirdyIconButton(
-              icon: AppIcons.arrowBackRounded,
-              semanticLabel: l10n.tooltipBack,
+              icon: icon,
+              semanticLabel: label ?? l10n.tooltipBack,
               onPressed: onBack,
             ),
             const SizedBox(width: BirdySpace.m),
@@ -469,7 +482,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     );
   }
 
-  /// Close (back to the intro) and the trail of stones.
+  /// Close (asks first) and the trail of stones.
   Widget _questionBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
@@ -479,7 +492,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           BirdyIconButton(
             icon: AppIcons.quizClose,
             semanticLabel: l10n.forkQuizQuit,
-            onPressed: _toIntro,
+            onPressed: _confirmStop,
           ),
           const SizedBox(width: BirdySpace.m),
           Expanded(
@@ -736,7 +749,10 @@ class _StreakPill extends StatelessWidget {
             width: 20,
             height: 20,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: c.surface1, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: c.surface1,
+              shape: BoxShape.circle,
+            ),
             child: QuizLoop(
               period: const Duration(milliseconds: 1600),
               builder:
@@ -749,7 +765,12 @@ class _StreakPill extends StatelessWidget {
                     ),
                     child: child,
                   ),
-              child: Icon(AppIcons.quizSpark, size: 13, fill: 1, color: c.oriole),
+              child: Icon(
+                AppIcons.quizSpark,
+                size: 13,
+                fill: 1,
+                color: c.oriole,
+              ),
             ),
           ),
           const SizedBox(width: BirdySpace.xs),
