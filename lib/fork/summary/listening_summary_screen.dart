@@ -20,8 +20,9 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/share_sheet.dart';
 import '../game/game_loader.dart';
 import '../game/status_celebration.dart';
-import '../lpo/lpo_send_button.dart';
+import '../lpo/lpo_send_screen.dart';
 import '../map/contact_map_screen.dart';
+import '../practice/practice.dart';
 import '../reliability/quick_review_screen.dart';
 import 'listening_summary.dart';
 import 'listening_summary_loader.dart';
@@ -414,7 +415,15 @@ class _ListeningSummaryScreenState
                 : UnsavedListeningNotice(
                   onSave: _saving ? null : () => unawaited(_saveSession()),
                 ),
-        footer: _saved ? LpoSendButton(session: _session) : null,
+        // A recording is not an observation (J5c): nothing to send.
+        onSendToFauneFrance:
+            _saved && countsAsObservation(_session)
+                ? () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => LpoSendScreen(session: _session),
+                  ),
+                )
+                : null,
       ),
     );
   }

@@ -1783,5 +1783,15 @@
   "forkDaySunsetTitle": "Coucher du soleil",
   "forkDaySunsetText": "Écoute encore un peu après : la chouette hulotte chante souvent à la tombée de la nuit.",
   "forkHomeGreetingName": "{greeting} {name}",
-  "forkLiveLightScreen": "Écran clair"
+  "forkLiveLightScreen": "Écran clair",
+  "forkSummaryMoreActions": "Autres actions",
+  "forkSummaryMinutesUnit": "min",
+  "forkSummarySendFauneFrance": "Envoyer à Faune-France",
+  "forkSummarySendFauneFranceHint": "Fiche prête pour chaque observation confirmée",
+  "forkSummaryAddObservationHint": "Vu mais pas entendu",
+  "forkSummaryDetailsRow": "Détail de l'écoute",
+  "forkSummaryDetailsHint": "Chaque détection, minute par minute",
+  "forkSummaryMarkRecording": "C'était un enregistrement",
+  "forkSummaryMarkRecordingHint": "Ne compte pas dans tes statistiques",
+  "forkSummaryUnmarkHint": "Elle comptera de nouveau dans tes statistiques"
 }

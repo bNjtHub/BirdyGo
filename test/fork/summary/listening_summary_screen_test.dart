@@ -110,15 +110,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> submitObservation(WidgetTester tester) async {
-    final context = tester.element(find.byType(ListeningSummaryView));
-    final label = AppLocalizations.of(context)!.forkSummaryAddObservation;
+  Future<void> openMoreActions(WidgetTester tester) async {
+    final more = find.text('Autres actions');
     await tester.scrollUntilVisible(
-      find.text(label),
+      more,
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.ensureVisible(find.text(label));
+    await tester.ensureVisible(more);
+    await tester.pumpAndSettle();
+    await tester.tap(more);
+  }
+
+  Future<void> submitObservation(WidgetTester tester) async {
+    final context = tester.element(find.byType(ListeningSummaryView));
+    final label = AppLocalizations.of(context)!.forkSummaryAddObservation;
+    await openMoreActions(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.text(label));
     await tester.pumpAndSettle();
@@ -235,15 +242,11 @@ void main() {
 
     expect(find.text('Belle matinée !'), findsOneWidget);
     expect(find.text('Ta 24e espèce, à 07:26.'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Envoyer à Faune-France (LPO)'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(
-      find.text('Seuls les oiseaux que tu confirmes partent à la LPO.'),
-      findsOneWidget,
-    );
+    await openMoreActions(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('Envoyer à Faune-France'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
 
     // J6f: the header is now `BirdyOverlayHeader`, whose back button
     // carries the system back tooltip (« Retour »), not « Terminer ».
@@ -296,7 +299,7 @@ void main() {
       expect(view.onAddObservation, isNull);
       expect(view.onMarkRecording, isNull);
       expect(view.onDetails, isNotNull);
-      expect(find.text('Envoyer à Faune-France (LPO)'), findsNothing);
+      expect(view.onSendToFauneFrance, isNull);
     });
 
     testWidgets('the save button keeps it and drops the note', (tester) async {
@@ -469,19 +472,17 @@ void main() {
       ),
       repository: repository,
     );
-    final page = find.byType(Scrollable).first;
-    final link = find.text("C'était un enregistrement ?");
-    await tester.scrollUntilVisible(link, 300, scrollable: page);
-    await tester.tap(link);
+    await openMoreActions(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("C'était un enregistrement"));
     await tester.pumpAndSettle();
 
     expect(repository.saved.last.practice, isTrue);
     expect(find.text('Première fois'), findsNothing);
-    await tester.scrollUntilVisible(
-      find.text("Non, c'étaient de vrais oiseaux"),
-      300,
-      scrollable: page,
-    );
-    expect(find.text('Envoyer à Faune-France (LPO)'), findsNothing);
+    await openMoreActions(tester);
+    await tester.pumpAndSettle();
+    expect(find.text("Non, c'étaient de vrais oiseaux"), findsOneWidget);
+    // A recording is no observation: nothing to send.
+    expect(find.text('Envoyer à Faune-France'), findsNothing);
   });
 }
