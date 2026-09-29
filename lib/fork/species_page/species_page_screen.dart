@@ -15,6 +15,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../features/explore/widgets/pick_wikipedia_url.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_providers.dart';
+import '../audio_output/volume_guard.dart';
 import '../../shared/models/taxonomy_species.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
@@ -258,6 +259,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     if (_player.playing.value == path) {
       await _player.stop();
     } else {
+      ensureAudible(context, ref);
       await _player.play(path);
     }
   }

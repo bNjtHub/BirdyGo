@@ -21,6 +21,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
+import '../audio_output/volume_guard.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_motion.dart';
@@ -124,6 +125,7 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
       await _player.stop();
       if (path == null || !File(path).existsSync()) return;
       await _player.setFilePath(path);
+      if (mounted) ensureAudible(context, ref);
       unawaited(_player.play());
     } catch (_) {
       // No sound: the card still shows the spectrogram.

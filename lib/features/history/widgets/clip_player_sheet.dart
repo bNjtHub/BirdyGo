@@ -36,6 +36,7 @@ import '../../../shared/widgets/detection_evidence_badge.dart';
 import '../../explore/explore_providers.dart';
 import '../../explore/widgets/species_info_overlay.dart';
 import '../../live/live_session.dart';
+import '../../../fork/audio_output/volume_guard.dart'; // FORK: volume prompt (J6h)
 import '../../recording/audio_decoder.dart';
 import '../../recording/native_audio_decoder.dart';
 import '../../recording/playback_normalizer.dart';
@@ -172,6 +173,7 @@ class _ClipPlayerSheetState extends ConsumerState<_ClipPlayerSheet> {
           _player.seek(Duration.zero);
         }
       });
+      if (mounted) ensureAudible(context, ref); // FORK: volume prompt (J6h)
       await _player.play();
     } catch (_) {
       // Playback unavailable — sheet still shows spectrogram + metadata.
@@ -761,7 +763,14 @@ class _ClipPlayerSheetState extends ConsumerState<_ClipPlayerSheet> {
                 IconButton.filled(
                   iconSize: 28,
                   onPressed:
-                      () => _isPlaying ? _player.pause() : _player.play(),
+                      () {
+                        if (_isPlaying) {
+                          _player.pause();
+                          return;
+                        }
+                        ensureAudible(context, ref); // FORK: volume prompt (J6h)
+                        _player.play();
+                      },
                   icon: Icon(
                     _isPlaying
                         ? AppIcons.pauseRounded

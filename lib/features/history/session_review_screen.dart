@@ -102,6 +102,7 @@ import '../survey/widgets/survey_map_widget.dart';
 import '../../core/services/reverse_geocoding_service.dart';
 import 'services/detection_sharing_service.dart';
 import 'services/session_audio_trim.dart';
+import '../../fork/audio_output/volume_guard.dart'; // FORK: volume prompt (J6h)
 import '../../fork/lpo/lpo_send_button.dart'; // FORK: LPO sending (J5b)
 
 part 'widgets/session_review_widgets.dart';
@@ -3285,6 +3286,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
       _positionNotifier.value = seekPos;
       _focusSpectrogramOnPlayhead();
       if (!_isPlaying) {
+        ensureAudible(context, ref); // FORK: volume prompt (J6h)
         _player.play();
       }
       return;
@@ -3322,6 +3324,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
         }
       }
     });
+    ensureAudible(context, ref); // FORK: volume prompt (J6h)
     _clipPlayer.play();
   }
 
@@ -4523,6 +4526,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
               if (_isPlaying) {
                 _player.pause();
               } else {
+                ensureAudible(context, ref); // FORK: volume prompt (J6h)
                 _player.play();
               }
             },

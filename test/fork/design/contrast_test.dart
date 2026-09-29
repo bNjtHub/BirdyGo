@@ -144,6 +144,20 @@ void main() {
     });
   });
 
+  test('volume alert block reaches AA in both themes (J6h)', () {
+    for (final (mode, c) in [
+      ('light', BirdyColors.light),
+      ('dark', BirdyColors.dark),
+    ]) {
+      for (final bg in [c.background, c.surface1]) {
+        final tint = on(c.orioleContainer, bg);
+        expectAA(c.text1, tint, '$mode title/tint');
+        expectAA(c.text2, tint, '$mode caption/tint');
+      }
+      expectAA(c.onOriole, c.oriole, '$mode disc icon and button/oriole');
+    }
+  });
+
   test('Material roles of both themes reach AA', () {
     for (final theme in [BirdyTheme.light(), BirdyTheme.dark()]) {
       final s = theme.colorScheme;

@@ -494,6 +494,10 @@ abstract final class BirdySizes {
   static const double navBar = 80;
   static const double topBar = 56;
 
+  /// Disc and icon of an alert block (volume alert, J6h).
+  static const double alertDisc = 44;
+  static const double alertDiscIcon = 22;
+
   /// Minimum height of badges and pills (they grow with text scale).
   static const double pill = 26;
 
