@@ -231,9 +231,14 @@ class BirdyMysteryMark extends StatelessWidget {
         angle: _markTilt * math.pi / 180,
         child: Text(
           '?',
-          style: BirdyText.display.copyWith(
+          // J6i: the titles moved to Nunito, the « ? » stays in Fraunces.
+          style: BirdyText.species.copyWith(
             fontSize: BirdySizes.quizMark * silhouette / _markRef,
             fontWeight: FontWeight.w700,
+            fontVariations: const [
+              FontVariation('SOFT', 100),
+              FontVariation('opsz', 34),
+            ],
             height: 1,
             color: BirdyBrand.oriole,
           ),

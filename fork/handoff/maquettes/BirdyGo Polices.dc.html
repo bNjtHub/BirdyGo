@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<script src="./themes.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&amp;family=Baloo+2:wght@500;600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Fredoka:wght@400..700&amp;family=Lexend:wght@400..800&amp;family=Nunito:wght@500..900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+@font-face{font-family:'Fraunces';src:url('assets/fonts/Fraunces-Variable.ttf') format('truetype');font-weight:100 900}
+@font-face{font-family:'Atkinson';src:url('assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf') format('truetype');font-weight:200 800}
+html,body{margin:0;background:#DDE2DA}
+a{color:#0B6E77;text-decoration:none}
+a:hover{color:#13233A;text-decoration:underline}
+</style>
+</helmet>
+<section id="logo-type" style="padding:56px 56px 0;font-family:Atkinson,sans-serif;color:#13233A;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:980px">
+    <div style="font-size:13px;font-weight:700;color:#0B6E77;letter-spacing:.04em">AUDIT TYPO · 2 · LE LOGO</div>
+    <div style="font-family:Nunito;font-size:44px;line-height:1.08;font-weight:800">Peaufiner « Birdy·Go »</div>
+    <div style="font-size:17px;line-height:1.45;max-width:840px;text-wrap:pretty">Aujourd'hui le logo mélange trois voix : l'oiseau rond, « Birdy » en serif douce, « Go » en grotesque très grasse. Avec Nunito dans les titres, le mot peut devenir plus rond et plus cohérent. Chaque option est montrée à trois tailles (écran de démarrage 44, en-tête 24, petite 16), en clair et sur l'écoute sombre, avec deux thèmes.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+    <sc-for list="{{ marks }}" as="m" hint-placeholder-count="5">
+      <div id="{{ m.id }}" style="width:340px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><a href="#{{ m.id }}" style="background:#13233A;color:#EEF1EC;font-weight:700;font-size:13px;padding:5px 10px;border-radius:999px;text-decoration:none">{{ m.id }}</a><span style="font-size:17px;font-weight:700">{{ m.name }}</span><sc-if value="{{ m.tag }}"><span style="font-size:12px;font-weight:700;color:{{ m.tagFg }};background:{{ m.tagBg }};padding:4px 9px;border-radius:999px">{{ m.tag }}</span></sc-if></div>
+        <div style="background:#EEF1EC;border-radius:28px;padding:20px 16px;display:flex;flex-direction:column;gap:18px;box-shadow:{{ m.ring }}">
+          <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:{{ r.gap }}">
+              <sc-if value="{{ r.logo }}"><img src="{{ r.logo }}" alt="" style="width:{{ r.mark }};height:{{ r.mark }};flex-shrink:0"></sc-if>
+              <span style="display:inline-flex;align-items:baseline;white-space:nowrap;line-height:1">
+                <sc-if value="{{ m.midDot }}" hint-placeholder-val="{{ true }}"><span style="font-family:{{ m.f1 }};font-size:{{ r.s1 }};font-weight:{{ m.w1 }};font-variation-settings:{{ m.fvs1 }};letter-spacing:{{ r.ls1 }};color:{{ r.c1 }}">Birdy</span><span style="display:inline-block;width:{{ r.dot }};height:{{ r.dot }};border-radius:999px;background:{{ r.hi }};margin:0 {{ r.dm }};transform:translateY({{ r.lift }})"></span></sc-if>
+                <sc-if value="{{ m.iDot }}"><span style="font-family:{{ m.f1 }};font-size:{{ r.s1 }};font-weight:{{ m.w1 }};letter-spacing:{{ r.ls1 }};color:{{ r.c1 }}">B<span style="position:relative;display:inline-block">ı<span style="position:absolute;left:50%;top:{{ r.iTop }};width:{{ r.iDot }};height:{{ r.iDot }};margin-left:{{ r.iShift }};border-radius:999px;background:{{ r.hi }}"></span></span>rdy</span></sc-if>
+                <sc-if value="{{ m.noDot }}"><span style="font-family:{{ m.f1 }};font-size:{{ r.s1 }};font-weight:{{ m.w1 }};letter-spacing:{{ r.ls1 }};color:{{ r.c1 }}">Birdy</span></sc-if>
+                <span style="font-family:{{ m.f2 }};font-size:{{ r.s2 }};font-weight:{{ m.w2 }};letter-spacing:{{ r.ls2 }};color:{{ r.c2 }}">Go</span>
+              </span>
+            </div>
+          </sc-for>
+          <div style="border-radius:20px;background:#13233A;padding:14px 16px;display:flex;align-items:center;gap:8px">
+            <sc-if value="{{ m.darkLogo }}"><img src="{{ m.darkLogo }}" alt="" style="width:28px;height:28px"></sc-if>
+            <span style="display:inline-flex;align-items:baseline;white-space:nowrap;line-height:1"><sc-if value="{{ m.midDot }}" hint-placeholder-val="{{ true }}"><span style="font-family:{{ m.f1 }};font-size:24px;font-weight:{{ m.w1 }};font-variation-settings:{{ m.fvs1 }};letter-spacing:{{ m.dLs1 }};color:#EEF1EC">Birdy</span><span style="display:inline-block;width:5px;height:5px;border-radius:999px;background:{{ m.darkHi }};margin:0 3px;transform:translateY(-3.5px)"></span></sc-if><sc-if value="{{ m.iDot }}"><span style="font-family:{{ m.f1 }};font-size:24px;font-weight:{{ m.w1 }};letter-spacing:{{ m.dLs1 }};color:#EEF1EC">B<span style="position:relative;display:inline-block">ı<span style="position:absolute;left:50%;top:{{ m.dITop }};width:{{ m.dIDot }};height:{{ m.dIDot }};margin-left:{{ m.dIShift }};border-radius:999px;background:{{ m.darkHi }}"></span></span>rdy</span></sc-if><sc-if value="{{ m.noDot }}"><span style="font-family:{{ m.f1 }};font-size:24px;font-weight:{{ m.w1 }};letter-spacing:{{ m.dLs1 }};color:#EEF1EC">Birdy</span></sc-if><span style="font-family:{{ m.f2 }};font-size:{{ m.dS2 }};font-weight:{{ m.w2 }};color:{{ m.darkGo }}">Go</span></span>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px;font-size:14px;line-height:1.45">{{ m.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;max-width:980px;display:flex;flex-direction:column;gap:8px;font-size:16px;line-height:1.5">
+    <div style="font-family:Nunito;font-size:24px;font-weight:800">Ma recommandation : <a href="#2c">2c</a></div>
+    <div>« Birdy » et « Go » dans la même famille ronde (Nunito), mais deux graisses : « Birdy » 800, « Go » 900 dans la couleur du thème. Le point est centré entre les deux, à mi-hauteur des minuscules, dans la 2e couleur de l'oiseau : jaune (Loriot), orange (Martin-pêcheur), doré (Étourneau), rose (Flamant, dont la 2e couleur est trop sombre). Le mot devient une seule voix, lisible petit, et le thème se voit dans le logo même sans l'oiseau.</div>
+    <div style="color:#6B5847;font-size:14px">Réglages optiques : approche resserrée aux grandes tailles (−2 %) et relâchée en petit (0), point de 20 % de la taille du texte, centré à mi-hauteur des minuscules, même espace de chaque côté. « Go » passe en couleur uniquement si le contraste reste ≥ 3:1 (titre) ; sinon encre.</div>
+  </div>
+</section>
+<section id="polices" style="padding:56px;font-family:Atkinson,sans-serif;color:#13233A;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:980px">
+    <div style="font-size:13px;font-weight:700;color:#0B6E77;letter-spacing:.04em">AUDIT TYPO · 1</div>
+    <div style="font-family:Fraunces;font-size:44px;line-height:1.08;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 44">Quelle police pour les titres ?</div>
+    <div style="font-size:17px;line-height:1.45;max-width:840px;text-wrap:pretty">Le « j » ondulé vient de <b>Fraunces</b> en réglage « doux » (SOFT 100) : c'est une serif à fort caractère, belle en grand, mais ses fantaisies (j, y, g, contrastes fins) se lisent moins bien chez un jeune lecteur. Le texte courant reste en <b>Atkinson Hyperlegible Next</b>, conçue pour la lisibilité : on ne la change pas. Seule la police des titres est en jeu. Même contenu, même taille, sur chaque carte.</div>
+  </div>
+
+  <div style="background:#FFFFFF;border-radius:20px;padding:16px;max-width:980px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 20px;font-size:14px;line-height:1.4">
+    <div style="grid-column:1/-1;font-family:Fraunces;font-size:20px;font-weight:600">Ce qu'on attend d'une police de titre pour enfants</div>
+    <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;gap:2px"><b>{{ c.t }}</b><span style="color:#6B5847">{{ c.d }}</span></div></sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+    <sc-for list="{{ fonts }}" as="f" hint-placeholder-count="7">
+      <div id="{{ f.id }}" style="width:340px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <a href="#{{ f.id }}" style="background:#13233A;color:#EEF1EC;font-weight:700;font-size:13px;padding:5px 10px;border-radius:999px;text-decoration:none">{{ f.id }}</a>
+          <span style="font-size:17px;font-weight:700">{{ f.name }}</span>
+          <sc-if value="{{ f.tag }}"><span style="font-size:12px;font-weight:700;color:{{ f.tagFg }};background:{{ f.tagBg }};padding:4px 9px;border-radius:999px">{{ f.tag }}</span></sc-if>
+        </div>
+        <div style="background:#EEF1EC;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:{{ f.ring }}">
+          <div style="font-family:{{ f.family }};font-size:34px;line-height:1.1;font-weight:{{ f.w }};font-variation-settings:{{ f.fvs }};letter-spacing:{{ f.ls }}">Bonjour Benjamin</div>
+          <div style="font-size:13px;color:#6B5847">Mardi 29 septembre · Le jardin</div>
+          <div style="background:#FDF1D8;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:13px;color:#6B5847">Dernier oiseau entendu · 07:52</div>
+            <div style="font-family:{{ f.family }};font-size:26px;line-height:1.15;font-weight:{{ f.w }};font-variation-settings:{{ f.fvs }};letter-spacing:{{ f.ls }}">Rougegorge familier</div>
+          </div>
+          <div style="background:#FFFFFF;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:6px">
+            <div style="font-family:{{ f.family }};font-size:20px;line-height:1.25;font-weight:{{ f.w }};font-variation-settings:{{ f.fvs }};letter-spacing:{{ f.ls }}">Première rencontre !</div>
+            <div style="font-size:15px;line-height:1.4">Ajouté à ton carnet · 25e espèce</div>
+          </div>
+          <div style="font-family:{{ f.family }};font-size:22px;font-weight:{{ f.w }};font-variation-settings:{{ f.fvs }};letter-spacing:.02em;color:#6B5847">a g j y · b d p q · I l 1 · 0 O</div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.4">
+          <sc-for list="{{ f.scores }}" as="s" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:8px"><span style="flex:1;color:#6B5847">{{ s.l }}</span><span style="display:flex;gap:3px"><sc-for list="{{ s.dots }}" as="d" hint-placeholder-count="5"><span style="width:10px;height:10px;border-radius:999px;background:{{ d }}"></span></sc-for></span></div></sc-for>
+          <div style="margin-top:4px">{{ f.note }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;max-width:980px;display:flex;flex-direction:column;gap:10px;font-size:16px;line-height:1.5">
+    <div style="font-family:Fraunces;font-size:24px;font-weight:600">Ma recommandation</div>
+    <div><b>1 · <a href="#1d">1d Nunito</a></b> pour les titres, avec Atkinson pour le texte. Ronde, chaleureuse, très lisible en gras, sans fantaisie sur le j ni le g ; elle va avec l'univers doux de BirdyGo (disques, pastilles, rayons 20–28) et reste sérieuse pour les parents. Graisses 700–800 pour les titres, chiffres tabulaires disponibles.</div>
+    <div><b>2 · <a href="#1c">1c Fredoka</a></b> si tu veux plus « jeu » : encore plus ronde et enfantine, parfaite pour le quiz et les moments, un peu moins neutre sur les écrans d'information (fiche, réglages).</div>
+    <div><b>À éviter ici :</b> garder Fraunces « doux » (le j ondulé) ; Baloo 2 est très sympa mais sa hauteur et ses formes chargent les écrans denses ; Andika est parfaite pour apprendre à lire mais trop scolaire en titre.</div>
+    <div style="color:#6B5847;font-size:14px">Le logo « Birdy·Go » peut garder Fraunces : c'est une marque, pas du texte à lire. Le changement ne touche que BirdyText.display / title / heading (un seul fichier dans l'app, birdy_typography.dart).</div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const dots = (n) => Array.from({ length: 5 }, (_, i) => (i < n ? '#0B6E77' : '#DCE2DA'));
+class Component extends DCLogic {
+  componentDidMount() { if (!window.BIRDY_THEMES) { const w = setInterval(() => { if (window.BIRDY_THEMES) { clearInterval(w); this.forceUpdate(); } }, 50); } }
+  logoMarks() {
+    const TH = window.BIRDY_THEMES || []; const lor = TH[0], mar = TH[1] || TH[0]; const uri = (x) => (x && window.birdyLogoUri ? window.birdyLogoUri(x) : '');
+    const opts = [
+      ['2a', 'Actuel', 'Fraunces', 600, "'SOFT' 100,'opsz' 44", 'Atkinson', 800, 'ink', 'Actuel', '#6B5847', '#EEF1EC', 'Trois voix différentes (oiseau rond, serif douce, grotesque). Charmant en grand, se brouille en petit ; « Go » paraît plus lourd que « Birdy ».'],
+      ['2b', 'Fraunces sobre + Nunito', 'Fraunces', 600, "'SOFT' 0,'WONK' 0,'opsz' 44", 'Nunito', 900, 'ink', '', '', '', 'Garde une touche serif pour la marque, mais « Go » arrondi rejoint les titres. Plus calme, un peu sage.'],
+      ['2c', 'Nunito, Go en couleur', 'Nunito', 800, 'normal', 'Nunito', 900, 'accent', 'Validée', '#4B6023', '#E6EDD6', 'Validée. Une seule famille, deux graisses. « Go » prend la couleur du thème : le logo change avec l’oiseau choisi, même sans le symbole. Très lisible à 16 px.'],
+      ['2d', 'Nunito tout encre', 'Nunito', 800, 'normal', 'Nunito', 900, 'ink', '', '', '', 'La même, sobre : seul le point porte la couleur. Parfait pour l’icône et les supports imprimés en une couleur.'],
+      ['2f', 'Point sur le i', 'Nunito', 800, 'normal', 'Nunito', 900, 'ink', 'Nouveau', '#0B6E77', '#D6EEF0', 'Le point coloré devient le point du « i » : un seul mot, BirdyGo, sans ambiguïté. La couleur du thème reste la signature. Lisible jusqu’à 16 px.', 'i'],
+      ['2g', 'Point sur le i + Go', 'Nunito', 800, 'normal', 'Nunito', 900, 'accent', 'Nouveau', '#0B6E77', '#D6EEF0', 'Un seul mot, deux touches de couleur : le point du « i » (jaune pour le Loriot) et « Go » dans la couleur du thème. Le plus coloré, le nom reste d’un bloc.', 'i'],
+      ['2e', 'Fredoka', "'Fredoka'", 600, 'normal', "'Fredoka'", 700, 'accent', '', '', '', 'Plus bulle, plus jeu. Très mignon sur l’écran de démarrage, moins sérieux sur les exports LPO et la boutique.'],
+    ];
+    const col = (t, mode) => (mode === 'accent' ? t.accT : '#13233A');
+    return opts.map(([id, name, f1, w1, fvs1, f2, w2, goMode, tag, tagFg, tagBg, note, dotMode = 'mid']) => {
+      const rows = [[44, 48, '12px', lor], [24, 30, '8px', lor], [16, 20, '6px', mar]].map(([s, mk, gap, th]) => ({ logo: uri(th), mark: mk + 'px', gap, s1: s + 'px', s2: Math.round(s * (f2 === 'Atkinson' ? 42 / 44 : 1)) + 'px', ls1: (s >= 40 ? -0.02 : s >= 24 ? -0.01 : 0) * s + 'px', ls2: (s >= 40 ? -0.02 : 0) * s + 'px', dot: Math.max(3, Math.round(s * 0.2)) + 'px', dm: Math.max(3, Math.round(s * 0.12)) + 'px', lift: -(Math.round(s * 0.25 * 10) / 10 - Math.max(3, Math.round(s * 0.2)) / 2) + 'px', hi: th ? th.dot : '#F4C542', iDot: Math.max(3, Math.round(s * 0.17)) + 'px', iShift: -Math.max(3, Math.round(s * 0.17)) / 2 + 'px', iTop: (s * 0.075).toFixed(1) + 'px', c1: '#13233A', c2: th ? col(th, goMode) : '#13233A' }));
+      return { id, name, f1, w1, fvs1, f2, w2, tag, tagFg, tagBg, note, rows, midDot: dotMode === 'mid', iDot: dotMode === 'i', noDot: dotMode === 'none', dITop: '1.8px', dIDot: '4px', dIShift: '-2px', ring: id === '2c' ? '0 0 0 3px #4B6023' : 'none', darkLogo: uri(mar), darkHi: mar ? mar.dotD : '#F4C542', darkGo: goMode === 'accent' && mar ? mar.accTD : '#EEF1EC', dLs1: '-.24px', dS2: f2 === 'Atkinson' ? '23px' : '24px' };
+    });
+  }
+  renderVals() {
+    const F = [
+      ['1a', 'Fraunces doux (actuel)', "Fraunces", 600, "'SOFT' 100,'opsz' 34", '-.01em', 'Actuel', '#6B5847', '#EEF1EC', [5, 2, 3, 2], "Beaucoup de charme, mais le j, le y et le g « ondulés » et les déliés fins fatiguent un jeune lecteur."],
+      ['1b', 'Fraunces sobre', "Fraunces", 600, "'SOFT' 0,'WONK' 0,'opsz' 34", '-.01em', '', '', '', [4, 3, 3, 3], 'Même famille sans l’effet doux : plus calme, mais reste une serif littéraire, moins enfantine.'],
+      ['1c', 'Fredoka', "'Fredoka'", 600, 'normal', '0', 'Alternative', '#7A5A00', '#FBEFC8', [5, 4, 5, 3], 'Très ronde et joyeuse, idéale quiz et moments. Un peu « jouet » sur les écrans d’info.'],
+      ['1d', 'Nunito', "'Nunito'", 800, 'normal', '-.01em', 'Recommandée', '#4B6023', '#E6EDD6', [5, 5, 4, 5], 'Ronde et chaleureuse sans être enfantine. Très lisible en gras, formes simples, marche partout.'],
+      ['1e', 'Baloo 2', "'Baloo 2'", 700, 'normal', '0', '', '', '', [4, 4, 5, 3], 'Très amicale, mais grosse et haute : charge vite la fiche et les listes.'],
+      ['1f', 'Lexend', "'Lexend'", 600, 'normal', '-.01em', '', '', '', [3, 5, 2, 4], 'Conçue pour la fluidité de lecture. Nette mais froide, peu de personnalité en titre.'],
+      ['1g', 'Andika', "'Andika'", 700, 'normal', '0', '', '', '', [2, 5, 3, 3], 'Pensée pour apprendre à lire (formes a et g scolaires). Parfaite en lecture, trop manuel scolaire en titre.'],
+    ];
+    return {
+      marks: this.logoMarks(),
+      criteria: [
+        { t: 'Formes simples', d: 'Pas de fioritures sur j, g, y ; lettres qui ne se confondent pas (b/d, I/l/1).' },
+        { t: 'Grosse hauteur d’x', d: 'Des minuscules hautes : lisibles en 20–34 px sur petit écran.' },
+        { t: 'Chaleur', d: 'Des formes rondes, cohérentes avec les disques et pastilles de BirdyGo.' },
+        { t: 'Sérieux pour les parents', d: 'Joyeuse sans faire « jouet » sur la fiche, la carte, les réglages.' },
+        { t: 'Gras solides', d: '700–800 nets pour les titres ; chiffres tabulaires pour les compteurs.' },
+        { t: 'Libre et multilingue', d: 'Licence OFL, accents FR/DE/ES/IT/NL, variable pour limiter le poids.' },
+      ],
+      fonts: F.map(([id, name, family, w, fvs, ls, tag, tagFg, tagBg, sc, note]) => ({ id, name, family, w, fvs, ls, tag, tagFg, tagBg, note, ring: id === '1d' ? '0 0 0 3px #4B6023' : 'none',
+        scores: ['Charme / chaleur', 'Lisibilité enfant', 'Côté ludique', 'Polyvalence'].map((l, i) => ({ l, dots: dots(sc[i]) })) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

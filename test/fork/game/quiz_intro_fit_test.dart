@@ -31,6 +31,7 @@ Future<void> _loadRealFonts() async {
   }
 
   await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
+  await load('Nunito', 'assets/fonts/Nunito-Variable.ttf');
   await load(
     'AtkinsonHyperlegibleNext',
     'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',

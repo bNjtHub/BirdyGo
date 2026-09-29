@@ -50,11 +50,15 @@ Les rampes de score et les palettes du spectrogramme d'upstream ne changent pas.
 
 ## Typographie
 
-- Fraunces, variable, axe SOFT haut, graisse 500 à 650 : titres et noms d'espèces. Elle rappelle les
-  planches naturalistes sans le contraste dur d'une serif de magazine.
-- Fraunces italique : noms latins, comme dans les guides naturalistes.
-- Atkinson Hyperlegible Next, variable : interface, chiffres, textes courants. Dessinée pour la
-  lisibilité en basse vision, elle tient bien dehors en plein soleil.
+- Nunito, variable, graisse 800 : titres (`display` 34, `title` 26, `heading` 20) et grands chiffres
+  (`numberXL`). Ronde et chaleureuse, sans fantaisie sur le j ni le g (audit typo J6i, option 1d).
+  Approche resserrée de 1 % de la taille dès 26, neutre en dessous.
+- Fraunces, variable, axe SOFT haut, graisse 600 : noms d'espèces (`species`, `speciesCompact`) et le
+  « ? » d'un oiseau mystère. Rien d'autre.
+- Atkinson Hyperlegible Next italique 400 : noms latins (`latin`, `latinCompact`). Fichier italique
+  dédié, pas d'inclinaison synthétique.
+- Atkinson Hyperlegible Next, variable : interface, chiffres (sauf `numberXL`), textes courants.
+  Dessinée pour la lisibilité en basse vision, elle tient bien dehors en plein soleil.
 - Polices embarquées dans `assets/fonts/` (licence OFL), aucun téléchargement à l'exécution.
 - Échelle : 34, 26, 20, 17, 15, 13. Texte courant entre 15 et 17. Chiffres tabulaires pour les compteurs.
 - Pas de libellés en capitales, pas de sur-titre au-dessus de chaque bloc, pas de mot isolé mis en
@@ -240,7 +244,8 @@ hors version publiée) montre chaque composant en clair et en sombre.
   Le remplissage vif #19A7B3 avec texte Encre passe par `BirdyButtonStyles` et `ListenButton` : le
   thème ne peut pas le donner à `FilledButton` sans repeindre aussi `FilledButton.tonal`.
 - Polices variables : la graisse passe par `fontWeight` (Flutter l'applique à l'axe `wght`), jamais
-  par une variation `wght`, qui écraserait les `bold` des écrans upstream. Fraunces reçoit toujours
+  par une variation `wght`, qui écraserait les `bold` des écrans upstream (Nunito 800 compris).
+  Fraunces reçoit toujours
   `SOFT` 100 et `opsz` égal à la taille du texte (Flutter ne règle pas la taille optique seul).
 - Couleur d'espèce (`SpeciesTint.fromAccent`) : `tintDark` = l'accent à 24 % sur Encre, `tintLight`
   = même teinte à luminosité 0,92 (au moins 12:1 avec Encre), `deep` = l'accent assombri vers Encre
