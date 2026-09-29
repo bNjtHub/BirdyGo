@@ -565,7 +565,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Palmarès, la Carte, la Sonothèque, la Revue rapide, l'Envoi à la LPO et le comptage au
             jardin. À vérifier sur le Xiaomi : l'Accueil un jour sans écoute, la Sonothèque avec
             « Favoris seulement » et aucun favori.
-- [ ] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections »).
+- [x] J6c-bis-a Live : corrections (`lib/fork/live/`, PR « J6c-bis-a Live : corrections », fusionnée #23).
       - [x] Traits sous le spectre : départ au début de la fenêtre analysée (`DetectionRecord.timestamp`),
             plus 3 s trop tôt ; la fin ne recule ni ne saute quand le contact se ferme (fin de chant,
             pause, réécoute).
@@ -581,7 +581,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             immediate threshold » à 0,90 puis 0,80 en `flutter run --profile` sur le Xiaomi.
       À faire sur le Xiaomi : relever les lignes `[InferenceTiming]` (toutes les 30 analyses) en
       `--profile`, et vérifier que symbole et trait s'éteignent en pause et pendant une réécoute.
-- [ ] J6c-bis-b Live : « Analyse… » et fin rapide (`lib/fork/live/`, PR « J6c-bis-b Live : … »).
+- [x] J6c-bis-b Live : « Analyse… » et fin rapide (`lib/fork/live/`, PR « J6c-bis-b Live : … », fusionnée #26).
       Lecture seule dans `lib/features/inference` (quelques lignes `// FORK`, `infer()` et le lissage
       inchangés).
       - [x] Upstream : `lastWindowScores` (scores de la dernière fenêtre × multiplicateurs) et
@@ -600,7 +600,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       À faire sur le Xiaomi : à l'aube, noter si « Analyse… » reste allumé presque tout le temps ;
       vérifier le coût du cycle dans `[InferenceTiming]` ; réécoute par le haut-parleur sans
       « Analyse… » ni symbole.
-- [ ] J6c-bis-c Live : spectre, noms et couleurs (`lib/fork/live/`, PR « J6c-bis-c Live : … »).
+- [x] J6c-bis-c Live : spectre, noms et couleurs (`lib/fork/live/`, PR « J6c-bis-c Live : … », fusionnée #34).
       - [x] Rotation portrait ↔ paysage sans effacer le spectre ni ses traits (clés globales : le
             spectre, les traits et le tableau changent de place dans l'arbre sans être recréés).
       - [x] Échelle en kHz retirée, en petit comme en grand : le modèle dit quand un oiseau chante,
@@ -645,12 +645,12 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
         d'OpenMoji ni de Mulberry (CC BY-SA) ni d'images NC.
       - Relecture sur planches. La photo reste sur la fiche.
       - Nouvelle dépendance prévue : `flutter_svg` (absente du projet).
-- [ ] J6e Jeu : statuts selon le nombre d'espèces découvertes, badges, série de jours, défis de la
+- [x] J6e Jeu : statuts selon le nombre d'espèces découvertes, badges, série de jours, défis de la
       semaine, carnet façon collection (silhouettes mystère pour les espèces attendues ici en cette
       saison, grâce au géomodèle), célébrations graduées (arrivée, première fois, oiseau rare, nouveau
       statut). Règles : seules les détections Sûr ou confirmées font progresser ; un oiseau rare se
       vérifie avant la fête ; ni notification culpabilisante ni série perdue pour un jour manqué.
-      Trois PR : J6e-a (navigation et Carnet), J6e-b (Profil), J6e-c (moments et défis).
+      Trois PR : J6e-a (navigation et Carnet), J6e-b (Profil), J6e-c (moments et défis). Toutes fusionnées (#36, #37, #38, plus quiz #42 à #45).
       - [x] J6e-a Navigation et Carnet (`lib/fork/shell/`, `lib/fork/notebook/`, `lib/fork/game/`) :
             barre Accueil, Carnet, Carte, Profil (un point FORK dans `HomeScreen`, qui renvoie
             `ForkShell`) ; chaque onglet est construit à sa première visite puis gardé, la carte ne
@@ -757,7 +757,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             Boost sur oiseaux lointains, Ville près d'une route (scores, spectre, coût en profile,
             écran éteint), changement de mode en pleine écoute, mode retrouvé après redémarrage.
       - [ ] Décider de garder Ville après le terrain (lever le drapeau ou retirer le mode).
-      - [ ] Enregistrer le mode dans la session (champ `SessionSettings`, hors fork aujourd'hui).
+      - [x] Enregistrer le mode dans la session (champ `SessionSettings.listeningMode`, un `// FORK` dans `live_session.dart`, `live_controller.dart` et `live_screen.dart`, J6 Fin).
       - [x] J6f-e Profil et Quiz (PR « J6f-e Profil et Quiz : … », maquettes Claude Design `AppProfil`
             et `AppQuiz`). Profil en 3 blocs : « Mon niveau » (anneau, échelle 2×4 qu'on touche, encart
             du prochain niveau avec barre à cases), « Série », « À gagner » (plumes, défi, badges sur 3
@@ -798,7 +798,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             acceptable et de confidentialité) remplace bien l'étape de la charte d'usage BirdNET.
       - [ ] Envoi à Faune-France depuis la fiche : une session à la fois (pas de logique serveur
             nouvelle) ; à revoir si le besoin se confirme.
-      - [ ] Faire passer « Aujourd'hui » par `openListeningSummary` (retour d'un seul écran).
+      - [x] Faire passer « Aujourd'hui » par `openListeningSummary` (retour d'un seul écran, J6 Fin).
 
 - [ ] J6h Passe d'homogénéité, ligne Profil / Quiz (handoff `fork/handoff/README.md`, règles dans
       DESIGN.md « Ligne J6h »). Un écran = une PR « J6h <Écran> : … », PR empilées dans l'ordre.
@@ -809,8 +809,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
       - [x] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
       - [x] Fiche : héros `sure`, bloc « Fais sa connaissance ».
-      - [ ] Fiche, rubrique Ennemis : code prêt (6e disque, `SheetSection.enemies`, script `tools/fork_species_sheets.py`).
-            Régénérer les fiches avec la rubrique Ennemis (PC, API) ; en attendant la rubrique reste masquée (n/5).
+      - [x] Fiche, rubrique Ennemis : code prêt (6e disque, `SheetSection.enemies`, script `tools/fork_species_sheets.py`).
+            Régénérer les fiches avec la rubrique Ennemis (PC, API) ; fait : fiches régénérées, 100 espèces (commits 71630632, 06f838e6).
       - [x] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
       - [x] Quiz : intro sans défilement, croix et confirmation de sortie.
       - [x] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.

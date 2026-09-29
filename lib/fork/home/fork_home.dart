@@ -20,7 +20,6 @@ import '../../features/explore/explore_providers.dart';
 import '../../features/explore/widgets/species_info_overlay.dart';
 import '../../features/history/widgets/clip_player_sheet.dart';
 import '../../features/live/live_screen.dart';
-import '../../features/live/live_providers.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
@@ -43,7 +42,7 @@ import '../profile/profile_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../settings/fork_prefs.dart';
 import '../shell/fork_shell.dart';
-import '../summary/listening_summary_screen.dart';
+import '../summary/open_listening_summary.dart';
 import 'day_sheet.dart';
 import 'day_strip.dart';
 import 'home_loader.dart';
@@ -154,19 +153,19 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   /// the source of truth; a session gone since the index was built shows a
   /// message instead.
   Future<void> _openTodayBilan(String sessionId) async {
-    final LiveSession? session;
+    // One level deep: Back returns here, not to the first route.
+    final bool opened;
     try {
-      session = await ref.read(sessionRepositoryProvider).load(sessionId);
+      opened = await openListeningSummary(
+        context,
+        ref,
+        sessionId: sessionId,
+      );
     } catch (_) {
       if (mounted) _showBilanFailure();
       return;
     }
-    if (!mounted) return;
-    if (session == null) {
-      _showBilanFailure();
-      return;
-    }
-    _open(ListeningSummaryScreen(session: session));
+    if (!opened && mounted) _showBilanFailure();
   }
 
   void _showBilanFailure() {

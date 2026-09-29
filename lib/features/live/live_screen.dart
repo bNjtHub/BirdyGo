@@ -477,6 +477,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         forkStartPositionUncertain:
             startLat == null ||
             ref.read(locationServiceProvider).lastFetchUsedCachedFallback,
+        // FORK: keep the listening mode in the session (J6f).
+        forkListeningMode: ref.read(listeningModeProvider).name,
       );
       if (_forkPractice) controller.session?.practice = true; // FORK: J5c
       if (mounted) {
