@@ -15,9 +15,12 @@ import '../../features/announcements/geo_commonness_provider.dart';
 import '../../features/explore/explore_providers.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
+import '../design/species_accents.dart';
 import '../reliability/geo_presence_service.dart';
 import '../settings/fork_prefs.dart';
 import '../reliability/reliability_config.dart';
+import 'notification_images.dart';
+import 'notification_images_config.dart';
 import 'notifications_gateway.dart';
 
 /// First id of the species notifications; the group summary takes the id
@@ -49,11 +52,41 @@ class SpeciesNotifier {
   SpeciesNotifier({
     required NotificationsGateway gateway,
     bool Function()? isBackground,
+    NotificationImageLoader? imageLoader,
+    this.imageTimeout = kNotificationImageTimeout,
   }) : _gateway = gateway,
-       _isBackground = isBackground ?? _appNotResumed;
+       _isBackground = isBackground ?? _appNotResumed,
+       _imageLoader = imageLoader ?? _defaultImageLoader;
 
   final NotificationsGateway _gateway;
   final bool Function() _isBackground;
+  final NotificationImageLoader _imageLoader;
+
+  /// Longest wait for the images of one notification.
+  final Duration imageTimeout;
+
+  /// Images already prepared (or being prepared) this session, per species.
+  final Map<String, Future<NotificationImages?>> _images = {};
+
+  static Future<NotificationImages?> _defaultImageLoader(
+    String scientificName,
+    String? photoAsset,
+  ) => loadNotificationImages(
+    scientificName,
+    photoAsset,
+    tint: SpeciesAccents.tintOf(scientificName),
+  );
+
+  /// Images of a species within [imageTimeout], else null: the notification
+  /// is then posted without image.
+  Future<NotificationImages?> _imagesFor(String name, String? photo) async {
+    final pending = _images.putIfAbsent(name, () => _imageLoader(name, photo));
+    try {
+      return await pending.timeout(imageTimeout);
+    } catch (_) {
+      return null;
+    }
+  }
 
   String? _sessionId;
   final Set<String> _seen = {};
@@ -76,12 +109,14 @@ class SpeciesNotifier {
     required GeoPresence? Function(String scientificName) presenceOf,
     required String Function(DetectionRecord detection) nameOf,
     required SpeciesNotifierStrings strings,
+    String? Function(String scientificName)? photoAssetOf,
   }) async {
     if (sessionId != _sessionId) {
       // New session: forget the old one and clear its notifications.
       final old = List<int>.of(_posted);
       _sessionId = sessionId;
       _seen.clear();
+      _images.clear();
       _posted.clear();
       if (old.isNotEmpty) await _gateway.cancel([...old, _summaryId]);
     }
@@ -101,6 +136,7 @@ class SpeciesNotifier {
       final id = kSpeciesNotificationBaseId + _posted.length;
       _posted.add(id);
       final groupKey = 'birdygo_species_$sessionId';
+      final images = await _imagesFor(name, photoAssetOf?.call(name));
       await _gateway.show(
         id: id,
         title: nameOf(record),
@@ -112,6 +148,7 @@ class SpeciesNotifier {
         groupKey: groupKey,
         channelName: strings.channelName,
         channelDescription: strings.channelDescription,
+        images: images,
       );
       if (_posted.length >= 2) {
         await _gateway.showSummary(
@@ -169,8 +206,11 @@ Future<void> notifyNewSpecies(
         presenceOf: (name) => livePresence(commonness, name),
         nameOf:
             (d) =>
-                taxonomy?.lookup(d.scientificName)?.commonNameForLocale(locale) ??
+                taxonomy
+                    ?.lookup(d.scientificName)
+                    ?.commonNameForLocale(locale) ??
                 d.commonName,
         strings: speciesNotifierStrings(l10n),
+        photoAssetOf: (name) => taxonomy?.assetImagePath(name),
       );
 }

@@ -1,4 +1,5 @@
 import 'package:birdnet_live/features/live/live_session.dart';
+import 'package:birdnet_live/fork/notifications/notification_images.dart';
 import 'package:birdnet_live/fork/notifications/notifications_gateway.dart';
 import 'package:birdnet_live/fork/notifications/species_notifier.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -20,6 +21,7 @@ class _FakeGateway implements NotificationsGateway {
     required String groupKey,
     required String channelName,
     required String channelDescription,
+    NotificationImages? images,
   }) async => shown.add((id: id, title: title, body: body));
 
   @override
@@ -106,12 +108,15 @@ void main() {
     expect(gateway.shown, isEmpty);
   });
 
-  test('a to-check detection does not notify, a later reliable one does', () async {
-    await feed([_det('Parus major', 0.3)]);
-    expect(gateway.shown, isEmpty);
-    await feed([_det('Parus major', 0.7)]);
-    expect(gateway.shown, hasLength(1));
-  });
+  test(
+    'a to-check detection does not notify, a later reliable one does',
+    () async {
+      await feed([_det('Parus major', 0.3)]);
+      expect(gateway.shown, isEmpty);
+      await feed([_det('Parus major', 0.7)]);
+      expect(gateway.shown, hasLength(1));
+    },
+  );
 
   test('an unexpected species is to check and does not notify', () async {
     await feed([

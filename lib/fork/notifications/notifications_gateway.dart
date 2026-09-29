@@ -10,6 +10,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'notification_images.dart';
+
 /// Android channel of the « new species » notifications.
 const String kNewSpeciesChannelId = 'birdygo_new_species';
 
@@ -18,7 +20,8 @@ abstract class NotificationsGateway {
   /// Asks for the notification permission; true when granted.
   Future<bool> requestPermission();
 
-  /// Posts one species notification, grouped under [groupKey].
+  /// Posts one species notification, grouped under [groupKey], with its
+  /// [images] when they could be prepared in time.
   Future<void> show({
     required int id,
     required String title,
@@ -26,6 +29,7 @@ abstract class NotificationsGateway {
     required String groupKey,
     required String channelName,
     required String channelDescription,
+    NotificationImages? images,
   });
 
   /// Posts (or updates) the group summary.
@@ -41,6 +45,42 @@ abstract class NotificationsGateway {
   /// Removes the notifications with these ids. Never `cancelAll`: that would
   /// also remove the foreground-service notification.
   Future<void> cancel(Iterable<int> ids);
+}
+
+/// Details of a species notification (or of the group summary). With
+/// [images]: photo as large icon, expanding shows the big picture.
+NotificationDetails speciesNotificationDetails({
+  required String groupKey,
+  required String channelName,
+  required String channelDescription,
+  required bool summary,
+  NotificationImages? images,
+}) {
+  final icon = images?.largeIcon;
+  final big = images?.bigPicture;
+  return NotificationDetails(
+    android: AndroidNotificationDetails(
+      kNewSpeciesChannelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      groupKey: groupKey,
+      setAsGroupSummary: summary,
+      // The summary stays quiet: only the species make a sound.
+      groupAlertBehavior:
+          summary ? GroupAlertBehavior.children : GroupAlertBehavior.all,
+      largeIcon: icon == null ? null : ByteArrayAndroidBitmap(icon),
+      styleInformation:
+          big == null
+              ? null
+              : BigPictureStyleInformation(
+                ByteArrayAndroidBitmap(big),
+                hideExpandedLargeIcon: true,
+              ),
+    ),
+    iOS: DarwinNotificationDetails(threadIdentifier: groupKey),
+  );
 }
 
 /// Real implementation on flutter_local_notifications.
@@ -97,27 +137,6 @@ class LocalNotificationsGateway implements NotificationsGateway {
     }
   }
 
-  NotificationDetails _details({
-    required String groupKey,
-    required String channelName,
-    required String channelDescription,
-    required bool summary,
-  }) => NotificationDetails(
-    android: AndroidNotificationDetails(
-      kNewSpeciesChannelId,
-      channelName,
-      channelDescription: channelDescription,
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-      groupKey: groupKey,
-      setAsGroupSummary: summary,
-      // The summary stays quiet: only the species make a sound.
-      groupAlertBehavior:
-          summary ? GroupAlertBehavior.children : GroupAlertBehavior.all,
-    ),
-    iOS: DarwinNotificationDetails(threadIdentifier: groupKey),
-  );
-
   Future<void> _post(
     int id,
     String title,
@@ -146,15 +165,17 @@ class LocalNotificationsGateway implements NotificationsGateway {
     required String groupKey,
     required String channelName,
     required String channelDescription,
+    NotificationImages? images,
   }) => _post(
     id,
     title,
     body,
-    _details(
+    speciesNotificationDetails(
       groupKey: groupKey,
       channelName: channelName,
       channelDescription: channelDescription,
       summary: false,
+      images: images,
     ),
   );
 
@@ -170,7 +191,7 @@ class LocalNotificationsGateway implements NotificationsGateway {
     id,
     title,
     body,
-    _details(
+    speciesNotificationDetails(
       groupKey: groupKey,
       channelName: channelName,
       channelDescription: channelDescription,
