@@ -3,6 +3,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/map/contact_map_data.dart';
 import 'package:birdnet_live/fork/map/contact_map_screen.dart';
@@ -46,6 +48,7 @@ void main() {
     required bool withData,
     bool dark = false,
     double textScale = 1,
+    bool showBack = true,
   }) async {
     SharedPreferences.setMockInitialValues({
       kObservationIndexFilledVersion: ObservationIndex.schemaVersion,
@@ -84,7 +87,7 @@ void main() {
                 ).copyWith(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               ),
-          home: const ContactMapScreen(),
+          home: ContactMapScreen(showBack: showBack),
         ),
       ),
     );
@@ -129,6 +132,40 @@ void main() {
       find.textContaining('Aucun contact avec ces filtres'),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+    'period and confirmed chips are ink when on; back button when pushed (J6h)',
+    (tester) async {
+      await pumpMap(tester, withData: false);
+      Color? fillOf(String label) =>
+          tester
+              .widget<Material>(
+                find
+                    .ancestor(
+                      of: find.text(label),
+                      matching: find.byType(Material),
+                    )
+                    .first,
+              )
+              .color;
+
+      final c = BirdyColors.of(tester.element(find.text('30 jours')));
+      final ink = BirdyChipColors.ink(c);
+      expect(find.byIcon(AppIcons.arrowBackRounded), findsOneWidget);
+      expect(fillOf('30 jours'), Color.alphaBlend(ink.background, c.surface1));
+      await tester.tap(find.text('Confirmées'));
+      await settle(tester);
+      expect(
+        fillOf('Confirmées'),
+        Color.alphaBlend(ink.background, c.surface1),
+      );
+    },
+  );
+
+  testWidgets('no back button as a tab (J6h)', (tester) async {
+    await pumpMap(tester, withData: false, showBack: false);
+    expect(find.byIcon(AppIcons.arrowBackRounded), findsNothing);
   });
 
   testWidgets('the confirmed chip shows a check when on (J6c)', (tester) async {

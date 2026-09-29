@@ -615,7 +615,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 }
 
 /// Filter chips over the map: species, period, confirmed only. White,
-/// floating, the chosen one turns tonal (J6f).
+/// floating; species stays tonal, period and confirmed go ink when on (J6h).
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
     required this.speciesLabel,
@@ -656,7 +656,7 @@ class _FilterBar extends StatelessWidget {
           BirdyFilterChip(
             label: periodLabel,
             selected: true,
-            selectedColors: BirdyChipColors.tonal(c),
+            selectedColors: BirdyChipColors.ink(c),
             floating: true,
             leading: const Icon(AppIcons.expandMore),
             onSelected: onPeriod,
@@ -665,7 +665,7 @@ class _FilterBar extends StatelessWidget {
           BirdyFilterChip(
             label: l10n.forkMapConfirmedOnly,
             selected: confirmedOnly,
-            selectedColors: BirdyChipColors.tonal(c),
+            selectedColors: BirdyChipColors.ink(c),
             floating: true,
             leading: confirmedOnly ? const Icon(AppIcons.check) : null,
             onSelected: () => onConfirmed(!confirmedOnly),

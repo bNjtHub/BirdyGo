@@ -127,6 +127,7 @@ class ClusterBubbleView extends StatelessWidget {
                 unit,
                 style: BirdyText.caption.copyWith(
                   color: BirdyMapStyle.onCluster,
+                  fontSize: BirdyMapStyle.clusterLabelSize,
                   height: 1.1,
                 ),
               ),
