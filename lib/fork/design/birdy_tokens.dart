@@ -505,6 +505,17 @@ abstract final class BirdySizes {
 
   /// Knowledge disc of the species page's « Faire connaissance » block.
   static const double knowledgeDisc = 52;
+
+  /// Ring around the chosen knowledge disc (white gap, then color), each
+  /// this wide.
+  static const double knowledgeRing = 2;
+
+  /// Read check in the corner of a knowledge disc.
+  static const double knowledgeCheck = 18;
+
+  /// Watermark icon of the knowledge card, and the thin segments under it.
+  static const double knowledgeWatermark = 88;
+  static const double knowledgeSegment = 6;
   static const double rowCompact = 60;
 
   /// Minimum height of a collection card (notebook grid of 3).
@@ -651,6 +662,9 @@ abstract final class BirdyAlpha {
   /// table (it is not there yet).
   static const double expectedRow = 0.55;
 
+
+  /// Big watermark icon of the species page's knowledge card.
+  static const double knowledgeWatermark = 0.12;
 
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;

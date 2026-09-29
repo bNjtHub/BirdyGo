@@ -336,6 +336,9 @@ void main() {
       expect(chart.labels.length, 12);
       expect(chart.highlightIndex, DateTime.now().month - 1);
 
+      // The page is taller since J6h: bring the chart on screen first.
+      await tester.ensureVisible(seasons);
+      await tester.pump();
       final rect = tester.getRect(seasons);
       final slot = rect.width / 12;
       await tester.tapAt(Offset(rect.left + slot * 2.5, rect.top + 5));

@@ -405,12 +405,14 @@ class SegmentedBar extends StatelessWidget {
     required this.filled,
     required this.color,
     required this.track,
+    this.height = BirdySizes.segmentHeight, // FORK: J6h thinner bar (6)
   });
 
   final int count;
   final int filled;
   final Color color;
   final Color track;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +430,7 @@ class SegmentedBar extends StatelessWidget {
           if (i > 0) const SizedBox(width: BirdySpace.xs / 2),
           Expanded(
             child: Container(
-              height: BirdySizes.segmentHeight,
+              height: height,
               decoration: BoxDecoration(
                 color: i < filled ? color : track,
                 borderRadius: BorderRadius.circular(BirdyRadii.pill),
