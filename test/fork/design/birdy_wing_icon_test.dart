@@ -37,11 +37,16 @@ void _wingAnimationTests() {
       expect(BirdyWingIcon.barScale(i, 1), 1.0);
     }
     final mid = [for (var i = 0; i < 4; i++) BirdyWingIcon.barScale(i, .5)];
-    expect(mid.every((k) => k >= 1 && k <= 1 + BirdyMotion.wingWaveAmplitude),
-        isTrue);
+    expect(
+      mid.every((k) => k >= 1 && k <= 1 + BirdyMotion.wingWaveAmplitude),
+      isTrue,
+    );
     expect(mid.any((k) => k > 1.05), isTrue);
     // Staggered: the first bar peaks before the last one.
-    expect(BirdyWingIcon.barScale(0, .3), greaterThan(BirdyWingIcon.barScale(3, .3)));
+    expect(
+      BirdyWingIcon.barScale(0, .3),
+      greaterThan(BirdyWingIcon.barScale(3, .3)),
+    );
   });
 
   testWidgets('waves after the interval, returns to rest, cleans up', (

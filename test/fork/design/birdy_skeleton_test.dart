@@ -70,13 +70,21 @@ void main() {
       ),
     );
     final stack =
-        find.ancestor(of: find.byType(Text), matching: find.byType(Stack)).first;
+        find
+            .ancestor(of: find.byType(Text), matching: find.byType(Stack))
+            .first;
     final painted = find.descendant(
       of: stack,
       matching: find.byType(CustomPaint),
     );
     // 3 wrapped lines at 100 px: three pills.
-    expect(painted, paints..rrect()..rrect()..rrect());
+    expect(
+      painted,
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect(),
+    );
     // Same size as the real text would take.
     expect(tester.getSize(stack), tester.getSize(find.byType(Text)));
   });

@@ -610,6 +610,13 @@ abstract final class BirdySizes {
   /// 844 pt phone without scrolling), the mystery bird's « ? » on the wing,
   /// and the [QuizLogo] disc of the « Arrêter la partie ? » sheet.
   static const double quizIntroHero = 210;
+  static const double quizIntroHeroFloor = 168;
+  static const double quizIntroHeroMin = 150;
+
+  /// Height of the intro besides the illustrated zone and its variable gaps,
+  /// at font scale 1 (measured), and a few points of safety.
+  static const double quizIntroRest = 358;
+  static const double quizIntroSlack = 4;
   static const double quizMark = 30;
   static const double quizSheetDisc = 72;
 

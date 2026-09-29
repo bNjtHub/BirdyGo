@@ -95,7 +95,9 @@ void main() {
     expect(find.byType(ShaderMask), findsNothing);
     final box = tester.widget<Container>(find.byType(Container).first);
     expect(
-      ((box.decoration! as BoxDecoration).gradient! as LinearGradient).colors.first,
+      ((box.decoration! as BoxDecoration).gradient! as LinearGradient)
+          .colors
+          .first,
       BirdyColors.light.skeleton,
     );
   });

@@ -51,12 +51,37 @@ class QuizIntro extends StatelessWidget {
     return QuizFade(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // 210 on a 844 pt phone (the whole intro fits without scrolling);
-          // a little less on a short one, where the scroll is the last resort.
-          final hero = (constraints.maxHeight * 0.4).clamp(
-            168.0,
-            BirdySizes.quizIntroHero,
-          );
+          // The illustrated zone gives room first: 210 when the phone is tall
+          // enough, down to a floor; then the gaps tighten from 12 to 8 and
+          // the zone goes down to its minimum. The scroll below is the last
+          // resort, for a very short screen or a huge font.
+          final k = math.max(1.0, MediaQuery.textScalerOf(context).scale(1));
+          // The go button under the scroll is 72 whatever the font scale.
+          final fixed = BirdySizes.quizIntroRest * k + BirdySizes.listen;
+          double room(double gap) =>
+              constraints.maxHeight -
+              (fixed + 4 * gap + BirdySpace.s + BirdySizes.quizIntroSlack);
+          var gap = BirdySpace.m;
+          double hero =
+              room(gap)
+                  .clamp(
+                    BirdySizes.quizIntroHeroFloor,
+                    BirdySizes.quizIntroHero,
+                  )
+                  .toDouble();
+          if (room(gap) < BirdySizes.quizIntroHeroFloor) {
+            gap = BirdySpace.s;
+            hero =
+                room(gap)
+                    .clamp(
+                      // A big font makes the speech bubble taller: keep the floor.
+                      k > 1.15
+                          ? BirdySizes.quizIntroHeroFloor
+                          : BirdySizes.quizIntroHeroMin,
+                      BirdySizes.quizIntroHeroFloor,
+                    )
+                    .toDouble();
+          }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -66,7 +91,7 @@ class QuizIntro extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: hero, child: _IntroWell(birds: birds)),
-                      const SizedBox(height: BirdySpace.m),
+                      SizedBox(height: gap),
                       Semantics(
                         header: true,
                         label: l10n.forkQuizTitle,
@@ -94,11 +119,11 @@ class QuizIntro extends StatelessWidget {
                         l10n.forkQuizIntro,
                         style: BirdyText.body.copyWith(color: c.text1),
                       ),
-                      const SizedBox(height: BirdySpace.m),
+                      SizedBox(height: gap),
                       _StepCards(questions: questions, choices: choices),
-                      const SizedBox(height: BirdySpace.m),
+                      SizedBox(height: gap),
                       _IntroBadgeCard(badge: badge),
-                      const SizedBox(height: BirdySpace.m),
+                      SizedBox(height: gap),
                     ],
                   ),
                 ),
@@ -185,31 +210,37 @@ class _IntroWell extends StatelessWidget {
                   ),
                 ),
               Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    QuizSpeechBubble(
-                      label: AppLocalizations.of(context)!.forkQuizIntroBubble,
-                    ),
-                    SizedBox(height: 10 * k),
-                    QuizBounce(
-                      child: QuizMysteryDisc(
-                        size: 128 * k,
-                        silhouette: 104 * k,
+                child: FittedBox(
+                  // A short well (or a big font) scales its center down.
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QuizSpeechBubble(
+                        label:
+                            AppLocalizations.of(context)!.forkQuizIntroBubble,
                       ),
-                    ),
-                    SizedBox(height: 14 * k),
-                    QuizBars(
-                      heights: const [14, 26, 20, 12, 6],
-                      colors: BirdyQuizColors.barsIntro,
-                      delays: [
-                        for (var i = 0; i < 5; i++) QuizMotion.barIntroStep * i,
-                      ],
-                      width: 6,
-                      gap: 5,
-                      period: QuizMotion.barIntro,
-                    ),
-                  ],
+                      SizedBox(height: 10 * k),
+                      QuizBounce(
+                        child: QuizMysteryDisc(
+                          size: 128 * k,
+                          silhouette: 104 * k,
+                        ),
+                      ),
+                      SizedBox(height: 14 * k),
+                      QuizBars(
+                        heights: const [14, 26, 20, 12, 6],
+                        colors: BirdyQuizColors.barsIntro,
+                        delays: [
+                          for (var i = 0; i < 5; i++)
+                            QuizMotion.barIntroStep * i,
+                        ],
+                        width: 6,
+                        gap: 5,
+                        period: QuizMotion.barIntro,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

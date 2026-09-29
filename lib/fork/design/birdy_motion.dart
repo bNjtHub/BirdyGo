@@ -112,7 +112,15 @@ abstract final class BirdyMotion {
   static const double shimmerTiltDegrees = 20;
 
   /// Soft falloff of the band: opacity share at each stop, edge to edge.
-  static const List<double> shimmerBandAlphas = [0, 0.12, 0.45, 1, 0.45, 0.12, 0];
+  static const List<double> shimmerBandAlphas = [
+    0,
+    0.12,
+    0.45,
+    1,
+    0.45,
+    0.12,
+    0,
+  ];
   static const List<double> shimmerBandStops = [
     0,
     0.15,
