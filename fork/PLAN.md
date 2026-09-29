@@ -816,7 +816,6 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Réglages : blocs titrés, bloc « Toi » (prénom), thème Auto, écran d'écoute.
       - [x] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
       - [x] Objectif : héros à anneau, liste en bloc, bouton épinglé avec l'aile.
-      - [ ] Carte : puces en encre, retour quand elle est poussée.
       - [x] Carte : puces en encre, bulle 13, retour quand elle est poussée.
       - [x] Revue : pile centrée verticalement.
       - [x] Premier lancement : étape prénom facultative.
