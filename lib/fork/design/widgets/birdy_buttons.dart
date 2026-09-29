@@ -59,14 +59,19 @@ abstract final class BirdyButtonStyles {
   }
 
   /// « Arrêter » in the live control bar: Brume fill, Encre text, 64 px.
-  static ButtonStyle stop(BuildContext context) => FilledButton.styleFrom(
-    backgroundColor: BirdyBrand.mist,
-    foregroundColor: BirdyBrand.ink,
-    minimumSize: const Size(64, BirdySizes.liveControl),
-    shape: const StadiumBorder(),
-    textStyle: BirdyText.label,
-    iconSize: 22,
-  );
+  /// On the light listening screen (J6h) the colors swap: a Brume button
+  /// would vanish on Brume.
+  static ButtonStyle stop(BuildContext context) {
+    final light = !BirdyColors.of(context).isDark;
+    return FilledButton.styleFrom(
+      backgroundColor: light ? BirdyBrand.ink : BirdyBrand.mist,
+      foregroundColor: light ? BirdyBrand.mist : BirdyBrand.ink,
+      minimumSize: const Size(64, BirdySizes.liveControl),
+      shape: const StadiumBorder(),
+      textStyle: BirdyText.label,
+      iconSize: 22,
+    );
+  }
 
   /// « Pause » / « Reprendre » in the live control bar: outlined, 64 px.
   static ButtonStyle pause(BuildContext context) {

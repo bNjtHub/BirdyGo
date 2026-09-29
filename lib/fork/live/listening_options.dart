@@ -16,6 +16,7 @@ import '../listening_mode/listening_mode.dart';
 import '../listening_mode/listening_mode_config.dart';
 import '../listening_mode/listening_mode_sheet.dart';
 import '../reliability/levels_sheet.dart';
+import '../settings/fork_prefs.dart';
 
 /// Icon of the options button: the mode's own icon, except Normal which
 /// shows the neutral options icon (nothing special is on).
@@ -129,6 +130,20 @@ class ListeningOptionsSheet extends ConsumerWidget {
           const SizedBox(height: BirdySpace.s),
           Divider(color: c.line, height: 1),
           const SizedBox(height: BirdySpace.s),
+          SwitchListTile(
+            key: const ValueKey('listening-options-light'),
+            contentPadding: EdgeInsets.zero,
+            secondary: Icon(AppIcons.wbSunny, color: c.text1),
+            title: Text(
+              l10n.forkLiveLightScreen,
+              style: BirdyText.label.copyWith(color: c.text1),
+            ),
+            value: ref.watch(liveThemeProvider) == LiveTheme.light,
+            onChanged:
+                (on) => ref
+                    .read(liveThemeProvider.notifier)
+                    .set(on ? LiveTheme.light : LiveTheme.dark),
+          ),
           _OptionRow(
             key: const ValueKey('listening-options-levels'),
             icon: AppIcons.infoOutline,

@@ -189,6 +189,45 @@ void main() {
     });
   });
 
+  group('light listening screen reaches AA (J6h)', () {
+    const c = BirdyColors.light;
+
+    test('text and mode colors on the page and the control bar', () {
+      for (final (name, bg) in [
+        ('background', c.background),
+        ('backgroundDeep', c.backgroundDeep),
+        ('surface1', c.surface1),
+      ]) {
+        expectAA(c.text1, bg, 'text1/$name');
+        expectAA(c.text2, bg, 'text2/$name');
+        expectAA(c.accentText, bg, 'accentText/$name');
+        for (final (mode, color) in [
+          ('normal', ListeningModeColors.normalLight),
+          ('wind', ListeningModeColors.windLight),
+          ('boost', ListeningModeColors.boostLight),
+          ('city', ListeningModeColors.cityLight),
+        ]) {
+          expectAA(color, bg, '$mode/$name');
+        }
+      }
+    });
+
+    test('« Arrêter »: Brume text on ink', () {
+      expectAA(BirdyBrand.mist, BirdyBrand.ink, 'mist/ink');
+    });
+
+    test('rarity pills on the rows and the page', () {
+      for (final bg in [c.surface1, c.background, c.backgroundDeep]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
+    });
+  });
+
   test('contrastRatio matches WCAG reference values', () {
     expect(
       contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)),

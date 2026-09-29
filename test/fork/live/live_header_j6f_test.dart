@@ -117,35 +117,36 @@ void main() {
   tearDown(() => ForkNoiseReductionHook.setEnabled(false));
 
   group('LiveHeader (J6f)', () {
-    testWidgets('one options button, neutral icon, Normal still in the status', (
-      tester,
-    ) async {
-      final semantics = tester.ensureSemantics();
-      var taps = 0;
-      await tester.pumpWidget(_app(_header(onOptions: () => taps++)));
-      await tester.pump(const Duration(milliseconds: 300));
-      // Back and options, nothing else: no « i », no pill, no menu.
-      expect(find.byType(BirdyIconButton), findsNWidgets(2));
-      expect(find.byType(ListeningOptionsButton), findsOneWidget);
-      expect(find.byIcon(AppIcons.infoOutline), findsNothing);
-      expect(find.byIcon(AppIcons.moreVert), findsNothing);
-      // Options button: neutral tune icon in Normal.
-      expect(find.byIcon(AppIcons.tuneRounded), findsOneWidget);
-      // Status: always with the mode, even Normal, its icon inline.
-      expect(statusText(tester).semanticsLabel, 'En écoute · Normal');
-      expect(find.byIcon(AppIcons.listeningNormal), findsOneWidget);
-      expect(
-        find.bySemanticsLabel("Options d'écoute, mode Normal"),
-        findsOneWidget,
-      );
-      expect(
-        tester.getSize(find.byType(ListeningOptionsButton)).height,
-        greaterThanOrEqualTo(BirdySizes.target),
-      );
-      await tester.tap(find.byType(ListeningOptionsButton));
-      expect(taps, 1);
-      semantics.dispose();
-    });
+    testWidgets(
+      'one options button, neutral icon, Normal still in the status',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        var taps = 0;
+        await tester.pumpWidget(_app(_header(onOptions: () => taps++)));
+        await tester.pump(const Duration(milliseconds: 300));
+        // Back and options, nothing else: no « i », no pill, no menu.
+        expect(find.byType(BirdyIconButton), findsNWidgets(2));
+        expect(find.byType(ListeningOptionsButton), findsOneWidget);
+        expect(find.byIcon(AppIcons.infoOutline), findsNothing);
+        expect(find.byIcon(AppIcons.moreVert), findsNothing);
+        // Options button: neutral tune icon in Normal.
+        expect(find.byIcon(AppIcons.tuneRounded), findsOneWidget);
+        // Status: always with the mode, even Normal, its icon inline.
+        expect(statusText(tester).semanticsLabel, 'En écoute · Normal');
+        expect(find.byIcon(AppIcons.listeningNormal), findsOneWidget);
+        expect(
+          find.bySemanticsLabel("Options d'écoute, mode Normal"),
+          findsOneWidget,
+        );
+        expect(
+          tester.getSize(find.byType(ListeningOptionsButton)).height,
+          greaterThanOrEqualTo(BirdySizes.target),
+        );
+        await tester.tap(find.byType(ListeningOptionsButton));
+        expect(taps, 1);
+        semantics.dispose();
+      },
+    );
 
     testWidgets('another mode follows the status and gives its icon', (
       tester,
@@ -207,9 +208,9 @@ void main() {
       Future<BirdyGoLogoPainter> painterOf() async {
         final paint = tester.widgetList<CustomPaint>(find.byType(CustomPaint));
         return paint
-                .map((p) => p.painter)
-                .whereType<BirdyGoLogoPainter>()
-                .first;
+            .map((p) => p.painter)
+            .whereType<BirdyGoLogoPainter>()
+            .first;
       }
 
       await tester.pumpWidget(_app(_header(phase: LiveControlPhase.active)));

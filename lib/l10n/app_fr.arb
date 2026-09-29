@@ -1762,5 +1762,6 @@
   "forkExceptionalHere": "Exceptionnel ici",
   "forkUncommonShort": "Peu commun",
   "forkRareShort": "Rare",
-  "forkExceptionalShort": "Exceptionnel"
+  "forkExceptionalShort": "Exceptionnel",
+  "forkLiveLightScreen": "Écran clair"
 }
