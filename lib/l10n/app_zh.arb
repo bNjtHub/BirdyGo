@@ -1114,5 +1114,8 @@
   "forkMomentPausedSuffix": "· paused",
   "forkQuizEffectsOn": "Effects on",
   "forkQuizEffectsOff": "Effects off",
-  "forkSettingsQuizEffects": "Quiz sound effects"
+  "forkSettingsQuizEffects": "Quiz sound effects",
+  "forkSheetHabits": "Habits",
+  "forkSheetEnemies": "Enemies",
+  "forkSheetEnemiesKicker": "Who hunts it"
 }

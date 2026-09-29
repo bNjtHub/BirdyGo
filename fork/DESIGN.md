@@ -815,6 +815,7 @@ Règles transverses :
     de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
+- **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
   boutons « Écouter » et « Commencer à écouter » (écart icône/texte : +`BirdySpace.wingLabelGap`). Sur ces

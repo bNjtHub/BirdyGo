@@ -809,6 +809,8 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
       - [x] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
       - [x] Fiche : héros `sure`, bloc « Fais sa connaissance ».
+      - [ ] Fiche, rubrique Ennemis : code prêt (6e disque, `SheetSection.enemies`, script `tools/fork_species_sheets.py`).
+            Régénérer les fiches avec la rubrique Ennemis (PC, API) ; en attendant la rubrique reste masquée (n/5).
       - [x] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
       - [x] Quiz : intro sans défilement, croix et confirmation de sortie.
       - [x] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.

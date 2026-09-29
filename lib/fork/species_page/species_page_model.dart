@@ -102,6 +102,7 @@ const List<SheetSection> sheetChipOrder = [
   SheetSection.behaviour,
   SheetSection.whyHere,
   SheetSection.migration,
+  SheetSection.enemies,
   SheetSection.anecdote,
   SheetSection.byEar,
   SheetSection.confusions,

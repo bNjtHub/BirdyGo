@@ -47,7 +47,9 @@ void main() {
     expect(find.text('Suivant'), findsOneWidget);
   });
 
-  testWidgets('Suivant walks the sections, then becomes Revoir', (tester) async {
+  testWidgets('Suivant walks the sections, then becomes Revoir', (
+    tester,
+  ) async {
     await _pump(tester, _all);
     for (final hook in [
       'Sa taille',
@@ -131,5 +133,107 @@ void main() {
     expect(find.text('Le merle à plastron.'), findsOneWidget);
     expect(find.text('Pourquoi il est là'), findsOneWidget);
     expect(find.text('Confusions possibles'), findsOneWidget);
+  });
+
+  group('six sections (Ennemis)', () {
+    const six = SpeciesSheet(
+      name: 'Merle noir',
+      sections: {
+        SheetSection.byEar: 'Phrases flûtées.',
+        SheetSection.size: 'Vingt-cinq centimètres.',
+        SheetSection.behaviour: 'Fouille le sol.',
+        SheetSection.migration: 'Reste toute l\'année.',
+        SheetSection.enemies: 'L\'épervier et le chat.',
+        SheetSection.anecdote: 'Il chante dès la fin de l\'hiver.',
+      },
+    );
+    const keys = [
+      'by_ear',
+      'size',
+      'behaviour',
+      'migration',
+      'enemies',
+      'anecdote',
+    ];
+
+    test('order of the six sections', () {
+      expect(meetAvailable(six), [
+        SheetSection.byEar,
+        SheetSection.size,
+        SheetSection.behaviour,
+        SheetSection.migration,
+        SheetSection.enemies,
+        SheetSection.anecdote,
+      ]);
+    });
+
+    testWidgets('six discs, Habitudes label, counter 1/6', (tester) async {
+      await _pump(tester, six);
+      for (final k in keys) {
+        expect(find.byKey(ValueKey('meet-disc-$k')), findsOneWidget);
+      }
+      expect(find.text('Habitudes'), findsOneWidget);
+      expect(find.text('Comportement'), findsNothing);
+      expect(find.text('Ennemis'), findsOneWidget);
+      expect(find.text('1/6 découverts'), findsOneWidget);
+    });
+
+    testWidgets('Ennemis shows its kicker and text', (tester) async {
+      await _pump(tester, six);
+      await tester.tap(find.byKey(const ValueKey('meet-disc-enemies')));
+      await tester.pumpAndSettle();
+      expect(find.text('Qui le chasse'), findsOneWidget);
+      expect(find.text('L\'épervier et le chat.'), findsOneWidget);
+      expect(find.text('2/6 découverts'), findsOneWidget);
+    });
+
+    testWidgets('Ennemis is hidden without text, counter is n/5', (
+      tester,
+    ) async {
+      await _pump(tester, _all);
+      expect(find.byKey(const ValueKey('meet-disc-enemies')), findsNothing);
+      expect(find.text('1/5 découverts'), findsOneWidget);
+    });
+
+    for (final scale in [1.0, 1.3]) {
+      testWidgets('labels never overflow at 320 dp, text x$scale', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(960, 3000);
+        tester.view.devicePixelRatio = 3;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder:
+                (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: MeetSpeciesBlock(sheet: six, onQuizTap: () {}),
+              ),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        for (final k in keys) {
+          final disc = tester.getRect(find.byKey(ValueKey('meet-disc-$k')));
+          final label = tester.getRect(
+            find.descendant(
+              of: find.byKey(ValueKey('meet-disc-$k')),
+              matching: find.byType(Text),
+            ),
+          );
+          expect(label.left, greaterThanOrEqualTo(disc.left - 0.5));
+          expect(label.right, lessThanOrEqualTo(disc.right + 0.5));
+        }
+      });
+    }
   });
 }

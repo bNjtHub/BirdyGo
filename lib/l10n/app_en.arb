@@ -4872,8 +4872,6 @@
   "@forkSheetSummary": {"description": "BirdyGo fork: AI species sheet (J4b)."},
   "forkSheetSize": "Size",
   "@forkSheetSize": {"description": "BirdyGo fork: AI species sheet (J4b)."},
-  "forkSheetBehaviour": "What it does",
-  "@forkSheetBehaviour": {"description": "BirdyGo fork: AI species sheet (J4b)."},
   "forkSheetWhyHere": "Why it is here",
   "@forkSheetWhyHere": {"description": "BirdyGo fork: AI species sheet (J4b)."},
   "forkSheetMigration": "Migration",
@@ -6142,8 +6140,6 @@
   "@forkMeetByEar": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
   "forkMeetSize": "Size",
   "@forkMeetSize": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
-  "forkMeetBehaviour": "Behaviour",
-  "@forkMeetBehaviour": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
   "forkMeetMigration": "Migration",
   "@forkMeetMigration": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
   "forkMeetAnecdote": "Anecdote",
@@ -6228,5 +6224,11 @@
   "forkVolumeCaption": "You may not hear the songs.",
   "@forkVolumeCaption": {"description": "BirdyGo fork: media volume warning on the listening screen (J6h)."},
   "forkVolumeRaise": "Turn it up",
-  "@forkVolumeRaise": {"description": "BirdyGo fork: button that raises the media volume (J6h)."}
+  "@forkVolumeRaise": {"description": "BirdyGo fork: button that raises the media volume (J6h)."},
+  "forkSheetHabits": "Habits",
+  "@forkSheetHabits": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."},
+  "forkSheetEnemies": "Enemies",
+  "@forkSheetEnemies": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."},
+  "forkSheetEnemiesKicker": "Who hunts it",
+  "@forkSheetEnemiesKicker": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."}
 }
