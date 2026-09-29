@@ -25,6 +25,7 @@ import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
 import 'package:birdnet_live/fork/home/home_model.dart';
 import 'package:birdnet_live/fork/home/home_widgets.dart';
+import 'package:birdnet_live/fork/home/singing_logo.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/fork/reliability/quick_review_screen.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -285,6 +286,18 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
+  }
+
+  // FORK: J6h, the menu button shares the logo's vertical center.
+  for (final scale in [1.0, 1.3]) {
+    testWidgets('menu button is centered on the logo at x$scale', (
+      tester,
+    ) async {
+      await pump(tester, textScale: scale);
+      final logo = tester.getCenter(find.byType(SingingLogo));
+      final menu = tester.getCenter(find.byType(BirdyIconButton));
+      expect((logo.dy - menu.dy).abs(), lessThanOrEqualTo(1));
+    });
   }
 
   testWidgets('the morning overview, block by block', (tester) async {
