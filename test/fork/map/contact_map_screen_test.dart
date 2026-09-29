@@ -217,7 +217,9 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text('2 espèces · 79 contacts'), findsOneWidget);
-    expect(find.text('44 contacts'), findsOneWidget);
+    // Count as a big number with its unit under it (J6g-f).
+    expect(find.text('44'), findsOneWidget);
+    expect(find.text('contacts'), findsNWidgets(2));
     expect(find.text('Merle noir'), findsOneWidget);
     // Only the robin has a clip to replay.
     expect(find.byType(ClipPlayButton), findsOneWidget);

@@ -1,5 +1,7 @@
 /// Bottom sheets of the contact map: species in an area, filters and base
-/// map choice (fork/PLAN.md J5, fork/maquette/Carte.dc.html).
+/// map choice (fork/PLAN.md J5, fork/maquette/Carte.dc.html). Profil style
+/// since J6g-f: species tint blocks, ringed photo avatars, Fraunces names,
+/// counts as big numbers, tactile 60 dp rows.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -16,8 +18,10 @@ import '../data/observation_index.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/species_tint.dart';
 import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/clip_play_button.dart';
+import '../design/widgets/pressable.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
 
@@ -82,11 +86,151 @@ Future<void> showAreaSheet(
   return showBirdySheet<void>(
     context: context,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-    ),
     builder: (_) => _AreaSheet(species: species, filterSummary: filterSummary),
   );
+}
+
+/// One species of a map sheet, Profil style: a block on the species tint, a
+/// photo avatar with an accent ring, the name in Fraunces, the latin name and
+/// the count as a big number. The whole left part is one target of at least
+/// 60 dp (opens the species page); [trailing] (replay) is its own target.
+class MapSpeciesRow extends StatelessWidget {
+  const MapSpeciesRow({
+    super.key,
+    required this.scientificName,
+    required this.name,
+    required this.count,
+    required this.onTap,
+    this.trailing,
+  });
+
+  final String scientificName;
+  final String name;
+  final int count;
+  final VoidCallback onTap;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final tint = SpeciesAccents.tintOf(scientificName);
+    return Material(
+      color: tint.cardBackground(Theme.of(context).brightness),
+      borderRadius: BorderRadius.circular(BirdyRadii.card),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              button: true,
+              excludeSemantics: true,
+              label: '$name, ${l10n.forkMapContacts(count)}',
+              child: Pressable(
+                child: InkWell(
+                  onTap: onTap,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: BirdySizes.rowCompact,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BirdySpace.m,
+                        vertical: BirdySpace.s,
+                      ),
+                      child: Row(
+                        children: [
+                          _RingedAvatar(
+                            scientificName: scientificName,
+                            tint: tint,
+                          ),
+                          const SizedBox(width: BirdySpace.m),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: BirdyText.species.copyWith(
+                                    color: c.text1,
+                                  ),
+                                ),
+                                Text(
+                                  scientificName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: BirdyText.latinCompact.copyWith(
+                                    color: c.text2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: BirdySpace.s),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '$count',
+                                style: BirdyText.numberM.copyWith(
+                                  color: c.text1,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                l10n.forkMapContactsUnit(count),
+                                style: BirdyText.caption.copyWith(
+                                  color: c.text2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (trailing != null)
+            Padding(
+              padding: const EdgeInsets.only(right: BirdySpace.s),
+              child: trailing,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Photo avatar inside a ring of the species accent.
+class _RingedAvatar extends StatelessWidget {
+  const _RingedAvatar({required this.scientificName, required this.tint});
+
+  final String scientificName;
+  final SpeciesTint tint;
+
+  static const double _photo = 40;
+
+  @override
+  Widget build(BuildContext context) {
+    const ring = BirdyMapStyle.avatarRing;
+    return Container(
+      key: const ValueKey('map-avatar-ring'),
+      padding: const EdgeInsets.all(ring),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: tint.accent, width: ring),
+      ),
+      child: SpeciesAvatar(scientificName: scientificName, size: _photo),
+    );
+  }
 }
 
 class _AreaSheet extends ConsumerWidget {
@@ -122,25 +266,35 @@ class _AreaSheet extends ConsumerWidget {
         maxHeight: MediaQuery.sizeOf(context).height * 0.6,
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        padding: const EdgeInsets.fromLTRB(
+          BirdySpace.page,
+          0,
+          BirdySpace.page,
+          BirdySpace.l,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.forkMapAreaTitle(species.length, contacts),
-              style: BirdyText.heading.copyWith(color: c.text1),
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.forkMapAreaTitle(species.length, contacts),
+                style: BirdyText.heading.copyWith(color: c.text1),
+              ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: BirdySpace.xs),
             Text(
               filterSummary,
               style: BirdyText.caption.copyWith(color: c.text2),
             ),
-            const SizedBox(height: BirdySpace.s),
+            const SizedBox(height: BirdySpace.m),
             Flexible(
-              child: ListView.builder(
+              child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: species.length,
+                separatorBuilder:
+                    (_, _) => const SizedBox(height: BirdySpace.s),
                 itemBuilder: (context, i) {
                   final s = species[i];
                   final name = localizedSpeciesName(
@@ -149,9 +303,10 @@ class _AreaSheet extends ConsumerWidget {
                     s.commonName,
                   );
                   final clip = s.bestClip;
-                  final tint = SpeciesAccents.tintOf(s.scientificName);
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(BirdyRadii.thumb),
+                  return MapSpeciesRow(
+                    scientificName: s.scientificName,
+                    name: name,
+                    count: s.contacts,
                     onTap:
                         () => SpeciesInfoOverlay.show(
                           context,
@@ -159,65 +314,19 @@ class _AreaSheet extends ConsumerWidget {
                           scientificName: s.scientificName,
                           commonName: name,
                         ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 56),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: tint.cardBackground(
-                                  Theme.of(context).brightness,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: SpeciesAvatar(
-                                scientificName: s.scientificName,
-                                size: 40,
-                              ),
+                    trailing:
+                        clip == null
+                            ? null
+                            : ClipPlayButton(
+                              state: ClipPlayState.idle,
+                              semanticLabel: '${l10n.forkReplay} : $name',
+                              onPressed: () => _play(context, clip, name),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    name,
-                                    style: BirdyText.species.copyWith(
-                                      color: c.text1,
-                                    ),
-                                  ),
-                                  Text(
-                                    l10n.forkMapContacts(s.contacts),
-                                    style: BirdyText.caption.copyWith(
-                                      color: c.text2,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (clip != null)
-                              ClipPlayButton(
-                                state: ClipPlayState.idle,
-                                semanticLabel: '${l10n.forkReplay} : $name',
-                                onPressed: () => _play(context, clip, name),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
                   );
                 },
               ),
             ),
-            const SizedBox(height: BirdySpace.s),
+            const SizedBox(height: BirdySpace.m),
             Row(
               children: [
                 Icon(AppIcons.lockOutline, size: 16, color: c.text2),
@@ -257,9 +366,6 @@ Future<SpeciesChoice?> showSpeciesPicker(
   return showBirdySheet<SpeciesChoice>(
     context: context,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-    ),
     builder: (_) => _SpeciesPicker(tallies: tallies),
   );
 }
@@ -279,6 +385,7 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     final query = _query.trim().toLowerCase();
     final entries = [
       for (final t in widget.tallies)
@@ -303,14 +410,21 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              padding: const EdgeInsets.fromLTRB(
+                BirdySpace.page,
+                0,
+                BirdySpace.page,
+                BirdySpace.s,
+              ),
               child: TextField(
                 autofocus: false,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(AppIcons.search),
                   hintText: l10n.forkMapSearchSpecies,
                   border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(BirdyRadii.pill),
+                    ),
                   ),
                 ),
                 onChanged: (v) => setState(() => _query = v),
@@ -318,34 +432,79 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
             ),
             Expanded(
               child: ListView(
+                padding: EdgeInsets.fromLTRB(
+                  BirdySpace.page,
+                  BirdySpace.xs,
+                  BirdySpace.page,
+                  BirdySpace.l + birdySheetBottomInset(context),
+                ),
                 children: [
                   if (query.isEmpty)
-                    ListTile(
-                      minTileHeight: 56,
-                      title: Text(l10n.forkMapAllSpecies),
-                      onTap:
-                          () =>
-                              Navigator.pop(context, const SpeciesChoice.all()),
-                    ),
-                  for (final e in shown)
-                    ListTile(
-                      minTileHeight: 56,
-                      leading: SpeciesAvatar(
-                        scientificName: e.tally.scientificName,
-                        size: 40,
-                      ),
-                      title: Text(e.name),
-                      trailing: Text(
-                        '${e.tally.contacts}',
-                        style: const TextStyle(
-                          fontFeatures: [FontFeature.tabularFigures()],
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: BirdySpace.s),
+                      child: Semantics(
+                        button: true,
+                        excludeSemantics: true,
+                        label: l10n.forkMapAllSpecies,
+                        child: Pressable(
+                          child: Material(
+                            color: c.tonal,
+                            borderRadius: BorderRadius.circular(
+                              BirdyRadii.card,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              onTap:
+                                  () => Navigator.pop(
+                                    context,
+                                    const SpeciesChoice.all(),
+                                  ),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: BirdySizes.rowCompact,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: BirdySpace.l,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        AppIcons.bird,
+                                        color: c.accentText,
+                                        fill: 1,
+                                      ),
+                                      const SizedBox(width: BirdySpace.m),
+                                      Expanded(
+                                        child: Text(
+                                          l10n.forkMapAllSpecies,
+                                          style: BirdyText.species.copyWith(
+                                            color: c.accentText,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      onTap:
-                          () => Navigator.pop(
-                            context,
-                            SpeciesChoice(e.tally.scientificName, e.name),
-                          ),
+                    ),
+                  for (final e in shown)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: BirdySpace.s),
+                      child: MapSpeciesRow(
+                        scientificName: e.tally.scientificName,
+                        name: e.name,
+                        count: e.tally.contacts,
+                        onTap:
+                            () => Navigator.pop(
+                              context,
+                              SpeciesChoice(e.tally.scientificName, e.name),
+                            ),
+                      ),
                     ),
                 ],
               ),
@@ -358,7 +517,8 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
 }
 
 /// Lets the user pick one of [options], labelled by [label]. Returns null
-/// when dismissed.
+/// when dismissed. Rows are 60 dp tactile blocks; the chosen one is tonal
+/// with a check.
 Future<T?> showChoiceSheet<T>(
   BuildContext context, {
   required String title,
@@ -368,35 +528,95 @@ Future<T?> showChoiceSheet<T>(
 }) {
   return showBirdySheet<T>(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-    ),
-    builder:
-        (context) => Column(
+    builder: (context) {
+      final c = BirdyColors.of(context);
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          BirdySpace.page,
+          0,
+          BirdySpace.page,
+          BirdySpace.l,
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            Semantics(
+              header: true,
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: BirdyText.heading.copyWith(color: c.text1),
               ),
             ),
-            RadioGroup<T>(
-              groupValue: selected,
-              onChanged: (v) => Navigator.pop(context, v),
-              child: Column(
-                children: [
-                  for (final o in options)
-                    RadioListTile<T>(value: o, title: Text(label(o))),
-                ],
+            const SizedBox(height: BirdySpace.m),
+            for (final o in options)
+              Padding(
+                padding: const EdgeInsets.only(bottom: BirdySpace.s),
+                child: _ChoiceRow(
+                  label: label(o),
+                  selected: o == selected,
+                  onTap: () => Navigator.pop(context, o),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
           ],
         ),
+      );
+    },
   );
+}
+
+class _ChoiceRow extends StatelessWidget {
+  const _ChoiceRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      excludeSemantics: true,
+      label: label,
+      child: Pressable(
+        child: Material(
+          color: selected ? c.tonal : c.surface2,
+          borderRadius: BorderRadius.circular(BirdyRadii.card),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: BirdySizes.rowCompact,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: BirdyText.species.copyWith(
+                          color: selected ? c.accentText : c.text1,
+                        ),
+                      ),
+                    ),
+                    if (selected) Icon(AppIcons.check, color: c.accentText),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Label of a base map.

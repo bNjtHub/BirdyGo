@@ -28,8 +28,6 @@ import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
-import '../design/widgets/pressable.dart';
-import '../design/widgets/species_avatar.dart' as birdy;
 import '../design/widgets/birdy_cross_fade.dart';
 import '../ranking/ranking_logic.dart';
 import 'base_layers.dart';
@@ -37,19 +35,17 @@ import 'contact_map_data.dart';
 import 'contact_map_sheets.dart';
 import 'hex_grid.dart';
 import 'map_config.dart';
+import 'map_loading.dart';
+import 'map_markers.dart';
 import 'place_bird_layer.dart';
-
-/// Martin-pêcheur (fork/DESIGN.md): places, markers and the user's
-/// position.
-const Color _kingfisher = BirdyBrand.kingfisher;
-
-/// Encre de nuit and Brume (fork/DESIGN.md): marker count badges.
-const Color _ink = BirdyBrand.ink;
-const Color _mist = BirdyBrand.mist;
 
 /// Where the map opens when there is nothing to show: France.
 const LatLng _defaultCenter = LatLng(46.6, 2.4);
 const double _defaultZoom = 5;
+
+/// Space under the locate button, and the room it takes above that.
+const double _locateBottom = 40;
+const double _locateSlot = BirdySizes.target + _locateBottom;
 
 /// Full-screen contact map.
 class ContactMapScreen extends ConsumerStatefulWidget {
@@ -492,7 +488,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                                   point: _userPosition!,
                                   width: 32,
                                   height: 32,
-                                  child: const _UserDot(),
+                                  child: const UserDotView(),
                                 ),
                               ],
                             ),
@@ -508,7 +504,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                       ),
                     )
                   else
-                    const Center(child: CircularProgressIndicator()),
+                    const Positioned.fill(child: MapLoadingSkeleton()),
                   // Filter chips, notices, empty state and the locate button float
                   // over the map itself, below the shared tab header.
                   Positioned.fill(
@@ -553,41 +549,56 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                                     onAction: () => _requestTileConsent(l10n),
                                   ),
                         ),
-                        const Spacer(),
-                        if (data != null && data.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  BirdyRadii.card,
-                                ),
-                                boxShadow: c.floatShadow,
-                              ),
-                              child:
-                                  _indexEmpty
-                                      ? BirdyEmptyState.inline(
-                                        icon: AppIcons.hearing,
-                                        title: l10n.forkMapEmptyTitle,
-                                        body: l10n.forkMapEmpty,
-                                      )
-                                      : BirdyEmptyState.inline(
-                                        kind: BirdyEmptyKind.filtered,
-                                        icon: AppIcons.searchOff,
-                                        title: l10n.forkMapEmptyFilteredTitle,
-                                        body: l10n.forkMapEmptyFiltered,
+                        // Never taller than what is left: the locate button and
+                        // the empty state float in this space, so a 320 dp
+                        // phone at 130 % cannot overflow the column.
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              if (data != null && data.isEmpty)
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      BirdySpace.l,
+                                      BirdySpace.l,
+                                      BirdySpace.l,
+                                      _locateSlot + BirdySpace.l,
+                                    ),
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                          BirdyRadii.card,
+                                        ),
+                                        boxShadow: c.floatShadow,
                                       ),
-                            ),
-                          ),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
-                            child: _MapButton(
-                              icon: AppIcons.myLocation,
-                              tooltip: l10n.forkMapLocateMe,
-                              onPressed: () => _locate(l10n),
-                            ),
+                                      child:
+                                          _indexEmpty
+                                              ? BirdyEmptyState.inline(
+                                                icon: AppIcons.hearing,
+                                                title: l10n.forkMapEmptyTitle,
+                                                body: l10n.forkMapEmpty,
+                                              )
+                                              : BirdyEmptyState.inline(
+                                                kind: BirdyEmptyKind.filtered,
+                                                icon: AppIcons.searchOff,
+                                                title:
+                                                    l10n.forkMapEmptyFilteredTitle,
+                                                body: l10n.forkMapEmptyFiltered,
+                                              ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                right: BirdySpace.l,
+                                bottom: _locateBottom,
+                                child: _MapButton(
+                                  icon: AppIcons.myLocation,
+                                  tooltip: l10n.forkMapLocateMe,
+                                  onPressed: () => _locate(l10n),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -665,7 +676,9 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-/// Round 48 dp icon button floating over the map.
+/// Round 48 dp icon button floating over the map: [BirdyIconButton] on a
+/// solid surface (its dark fill is translucent and would let the tiles
+/// through), lifted with the float shadow only.
 class _MapButton extends StatelessWidget {
   const _MapButton({
     required this.icon,
@@ -680,25 +693,16 @@ class _MapButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    return Pressable(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: c.floatShadow,
-        ),
-        child: Material(
-          color: c.surface1,
-          shape: CircleBorder(side: BorderSide(color: c.line)),
-          child: IconButton(
-            tooltip: tooltip,
-            icon: Icon(icon, color: c.text1),
-            constraints: const BoxConstraints.tightFor(
-              width: BirdySizes.target,
-              height: BirdySizes.target,
-            ),
-            onPressed: onPressed,
-          ),
-        ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface1,
+        shape: BoxShape.circle,
+        boxShadow: c.floatShadow,
+      ),
+      child: BirdyIconButton(
+        icon: icon,
+        semanticLabel: tooltip,
+        onPressed: onPressed,
       ),
     );
   }
@@ -722,27 +726,55 @@ class _Notice extends StatelessWidget {
         boxShadow: c.floatShadow,
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                text,
-                style: BirdyText.bodyCompact.copyWith(color: c.text1),
-              ),
-            ),
-            if (action != null)
-              TextButton(onPressed: onAction, child: Text(action!)),
-          ],
+        padding: const EdgeInsets.all(BirdySpace.m),
+        // The action sits beside the text, or under it when the column is
+        // narrow or the text large (a 320 dp phone at 130 %).
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final stacked =
+                box.maxWidth < 360 ||
+                MediaQuery.textScalerOf(context).scale(15) > 17;
+            final message = Text(
+              text,
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
+            );
+            final button =
+                action == null
+                    ? null
+                    : TextButton(
+                      style: BirdyButtonStyles.tonal(context),
+                      onPressed: onAction,
+                      child: Text(action!),
+                    );
+            if (stacked) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  message,
+                  if (button != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    button,
+                  ],
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: message),
+                if (button != null) ...[
+                  const SizedBox(width: BirdySpace.s),
+                  button,
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// A species at a spot (SPEC.md 9.14): white disc with a Martin-pêcheur
-/// ring (Loriot when its spot is selected), the photo inside, and the
-/// number of contacts in a badge.
+/// A species at a spot (SPEC.md 9.14): looks in [SpeciesMarkerView].
 class _ContactMarker extends ConsumerWidget {
   const _ContactMarker({
     required this.spot,
@@ -769,58 +801,10 @@ class _ContactMarker extends ConsumerWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: ExcludeSemantics(
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: selected ? BirdyBrand.oriole : _kingfisher,
-                      spreadRadius: 3,
-                    ),
-                    const BoxShadow(
-                      color: Color(0x2E13233A),
-                      offset: Offset(0, 4),
-                      blurRadius: 12,
-                    ),
-                  ],
-                ),
-                child: birdy.SpeciesAvatar(
-                  image: path == null ? null : AssetImage(path),
-                  size: 34,
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  constraints: const BoxConstraints(minWidth: 22),
-                  height: 22,
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: _ink,
-                    borderRadius: BorderRadius.circular(BirdyRadii.pill),
-                  ),
-                  child: Text(
-                    '${spot.count}',
-                    style: BirdyText.labelCompact.copyWith(
-                      color: _mist,
-                      fontSize: 13,
-                      height: 1,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: SpeciesMarkerView(
+            image: path == null ? null : AssetImage(path),
+            count: spot.count,
+            selected: selected,
           ),
         ),
       ),
@@ -828,8 +812,8 @@ class _ContactMarker extends ConsumerWidget {
   }
 }
 
-/// Several markers close together: a Martin-pêcheur disc with the number
-/// of species (SPEC.md 9.14, « Le jardin »).
+/// Several markers close together (SPEC.md 9.14, « Le jardin »): looks in
+/// [ClusterBubbleView].
 class _ClusterBubble extends StatelessWidget {
   const _ClusterBubble({required this.species});
 
@@ -843,75 +827,7 @@ class _ClusterBubble extends StatelessWidget {
       button: true,
       label: '$species $unit',
       excludeSemantics: true,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: _kingfisher,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x2E13233A),
-              offset: Offset(0, 4),
-              blurRadius: 12,
-            ),
-          ],
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$species',
-                  style: BirdyText.numberM.copyWith(color: _ink, height: 1),
-                ),
-                Text(
-                  unit,
-                  style: BirdyText.caption.copyWith(
-                    color: _ink,
-                    fontSize: 11,
-                    height: 1.1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The user's position: a Martin-pêcheur dot with a white border and a
-/// soft, still halo (no endless animation on the map).
-class _UserDot extends StatelessWidget {
-  const _UserDot();
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _kingfisher.withValues(alpha: 0.18),
-      ),
-      child: Center(
-        child: Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: _kingfisher,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
-            boxShadow: const [
-              BoxShadow(color: Color(0x2E13233A), blurRadius: 8),
-            ],
-          ),
-        ),
-      ),
+      child: ClusterBubbleView(species: species, unit: unit),
     );
   }
 }
