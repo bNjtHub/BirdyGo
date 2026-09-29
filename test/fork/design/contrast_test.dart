@@ -52,6 +52,17 @@ void main() {
       }
     });
 
+    test('J6h hero captions', () {
+      for (final bg in [c.background, c.surface1]) {
+        expectAA(
+          c.accentText,
+          on(c.tonal, bg),
+          'Bilan caption: accentText/tonal',
+        );
+        expectAA(c.text2, on(c.sure.background, bg), 'Fiche line: text2/sure');
+      }
+    });
+
     test('reliability badges', () {
       for (final (name, level) in [
         ('sure', c.sure),
@@ -107,6 +118,17 @@ void main() {
           on(c.orioleContainer, bg),
           'rare: orioleText/container',
         );
+      }
+    });
+
+    test('J6h hero captions', () {
+      for (final bg in [c.background, c.surface1]) {
+        expectAA(
+          c.accentText,
+          on(c.tonal, bg),
+          'Bilan caption (dark): accentText/tonal',
+        );
+        expectAA(c.text2, on(c.sure.background, bg), 'Fiche line: text2/sure');
       }
     });
 
