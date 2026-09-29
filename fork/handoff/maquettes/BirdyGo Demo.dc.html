@@ -39,6 +39,7 @@ button{font:inherit;color:inherit}
         </button>
       </sc-for>
     </div>
+    <button onClick="{{ simRare }}" style="all:unset;cursor:pointer;text-align:center;min-height:48px;padding:8px 14px;box-sizing:border-box;border-radius:20px;background:#FFFFFF;color:#13233A;font-weight:700;font-size:14px;line-height:1.3;display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:#7A5A00;font-variation-settings:'FILL' 1">diamond</span>Simuler : un oiseau rare chante (Huppe fasciée)</button>
     <button onClick="{{ simReturn }}" style="all:unset;cursor:pointer;text-align:center;min-height:48px;padding:8px 14px;box-sizing:border-box;border-radius:20px;background:#FFFFFF;color:#13233A;font-weight:700;font-size:14px;line-height:1.3;display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:#0B6E77">phone_iphone</span>Simuler : je reviens dans l'app et 3 nouvelles espèces ont chanté</button>
     <button onClick="{{ reset }}" style="all:unset;cursor:pointer;text-align:center;height:48px;border-radius:999px;background:#D6EEF0;color:#0B6E77;font-weight:700;font-size:15px;line-height:48px">Réinitialiser la démo</button>
   </div>
@@ -237,6 +238,23 @@ function LiveLogo({ size, running }) {
     h('circle', { cx: 176.2, cy: 172.6, r: 18.7, fill: '#13233A' }), h('circle', { cx: 171, cy: 166.6, r: 5.4, fill: '#FFFFFF' }));
 }
 
+function RareHalo({ color }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const el = ref.current; if (!el) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ring = el.querySelector('[data-ring]');
+    ring.animate([{ transform: 'rotate(-90deg) scale(.85)', opacity: 0 }, { transform: 'rotate(0deg) scale(1)', opacity: 1, offset: 0.35 }, { transform: 'rotate(120deg) scale(1)', opacity: 1 }], { duration: 2400, easing: 'cubic-bezier(.2,0,0,1)', fill: 'both' });
+    el.querySelectorAll('[data-glow]').forEach((g) => g.animate([{ transform: 'scale(1)', opacity: 0 }, { transform: 'scale(1.18)', opacity: 0.55, offset: 0.5 }, { transform: 'scale(1.32)', opacity: 0 }], { duration: 1400, delay: 350, iterations: 2, easing: 'ease-out', fill: 'both' }));
+    el.querySelectorAll('[data-d]').forEach((s, i) => s.animate([{ transform: 'translate(-50%,-50%) scale(0) rotate(-30deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.25) rotate(0deg)', opacity: 1, offset: 0.35 }, { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.7 }, { transform: 'translate(-50%,-50%) scale(0)', opacity: 0 }], { duration: 1600, delay: 450 + i * 220, easing: 'ease-out', fill: 'both' }));
+  }, []);
+  const pts = [[-8, -6, 18], [110, 18, 14], [100, 96, 16]];
+  return h('div', { ref, 'aria-hidden': true, style: { position: 'absolute', inset: -10, pointerEvents: 'none' } },
+    h('div', { 'data-glow': 1, style: { position: 'absolute', inset: 10, borderRadius: 999, background: color, opacity: 0 } }),
+    h('div', { 'data-ring': 1, style: { position: 'absolute', inset: 0, borderRadius: 999, border: `2.5px dashed ${color}`, opacity: 0 } }),
+    ...pts.map(([x, y, sz], i) => h('span', { key: i, 'data-d': 1, className: 'ms', style: { position: 'absolute', left: x + 10, top: y + 10, fontSize: sz, color, fontVariationSettings: "'FILL' 1", opacity: 0 } }, 'diamond')));
+}
+
 function Burst({ colors }) {
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -278,11 +296,11 @@ const TODAY = { species: [['merle', 5, 'sure'], ['rouge', 4, 'sure'], ['charb', 
 const fmt = (s) => { const m = Math.floor(s / 60), x = s % 60; return String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
 const plural = (n, one, many) => (n === 1 ? one : many);
 const SHEET_TEXT = {
-  merle: { sum: "Le chanteur du soir : un long chant flûté, posé, qui varie sans cesse. On le voit partout, du jardin à la forêt.", ear: "Des phrases flûtées, lentes, souvent terminées par un petit grincement. L'alarme est un « tchok tchok » sec.", size: "25 cm, un peu plus grand qu'un étourneau. Le mâle est noir au bec jaune, la femelle brune.", beh: "Il fouille la pelouse par petits bonds, tête penchée, à l'affût des vers.", mig: "Sédentaire en France ; des merles du nord viennent en plus l'hiver.", fun: "Il chante dès la fin de l'hiver, souvent perché sur une antenne ou un toit." },
-  rouge: { sum: "Petit oiseau rond à la gorge orange, familier des jardiniers. Il chante presque toute l'année, même en hiver.", ear: "Un chant clair et mélancolique, en cascades de notes aiguës. Le cri est un « tic » répété.", size: "14 cm, rond comme une balle, pattes fines.", beh: "Il suit le jardinier pour attraper les vers qu'il déterre.", mig: "Sédentaire, avec des migrateurs du nord l'hiver.", fun: "Mâle et femelle chantent pour défendre chacun leur territoire d'hiver." },
+  merle: { sum: "Le chanteur du soir : un long chant flûté, posé, qui varie sans cesse. On le voit partout, du jardin à la forêt.", ear: "Des phrases flûtées, lentes, souvent terminées par un petit grincement. L'alarme est un « tchok tchok » sec.", size: "25 cm, un peu plus grand qu'un étourneau. Le mâle est noir au bec jaune, la femelle brune.", beh: "Il fouille la pelouse par petits bonds, tête penchée, à l'affût des vers.", mig: "Sédentaire en France ; des merles du nord viennent en plus l'hiver.", fun: "Il chante dès la fin de l'hiver, souvent perché sur une antenne ou un toit.", pred: "Le chat, l'épervier et la chouette hulotte. Au nid, la pie et le geai volent parfois ses œufs. Son « tchok tchok » d'alarme prévient tout le jardin." },
+  rouge: { sum: "Petit oiseau rond à la gorge orange, familier des jardiniers. Il chante presque toute l'année, même en hiver.", ear: "Un chant clair et mélancolique, en cascades de notes aiguës. Le cri est un « tic » répété.", size: "14 cm, rond comme une balle, pattes fines.", beh: "Il suit le jardinier pour attraper les vers qu'il déterre.", mig: "Sédentaire, avec des migrateurs du nord l'hiver.", fun: "Mâle et femelle chantent pour défendre chacun leur territoire d'hiver.", pred: "Surtout le chat, et l'épervier qui chasse en rase-mottes. Au nid, la pie et l'écureuil. Il lance un « tic » sec pour donner l'alerte." },
 };
-const CHIP_NAMES = [['ear', "À l'oreille"], ['size', 'Taille'], ['beh', 'Comportement'], ['mig', 'Migration'], ['fun', 'Anecdote']];
-const CHIP_TONES = { ear: { icon: 'hearing', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Comment le reconnaître' }, size: { icon: 'straighten', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Sa taille' }, beh: { icon: 'visibility', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Ce qu\'il fait' }, mig: { icon: 'flight', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Où il passe l\'année' }, fun: { icon: 'lightbulb', bg: '#FBEFC8', ink: '#7A5A00', kicker: 'Le savais-tu ?' } };
+const CHIP_NAMES = [['ear', "À l'oreille"], ['size', 'Taille'], ['beh', 'Habitudes'], ['mig', 'Migration'], ['pred', 'Ennemis'], ['fun', 'Anecdote']];
+const CHIP_TONES = { pred: { icon: 'pets', bg: '#E3E9EF', ink: '#34495E', kicker: 'Qui le chasse' }, ear: { icon: 'hearing', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Comment le reconnaître' }, size: { icon: 'straighten', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Sa taille' }, beh: { icon: 'visibility', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Ce qu\'il fait' }, mig: { icon: 'flight', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Où il passe l\'année' }, fun: { icon: 'lightbulb', bg: '#FBEFC8', ink: '#7A5A00', kicker: 'Le savais-tu ?' } };
 const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
@@ -309,12 +327,30 @@ class Component extends DCLogic {
       entries = [e, ...entries.filter((x) => x.k !== k).map((x) => ({ ...x, isNew: false }))];
       marks = [...marks.slice(-14), { id: seq + '-' + elapsed, color: SP[k].accent, label: SP[k].name, len: 120 }];
     }
-    let { moment, firsts = [], queue = [], batch = 0, batchPos = 0 } = L;
+    let { moment, firsts = [], queue = [], batch = 0, batchPos = 0, rare = null, rareSeen = [] } = L;
+    if (rare && rare.until && elapsed >= rare.until) rare = null;
+    if (!rare) { const nr = entries.find((x) => x.unexpected && !s.discovered.includes(x.k) && !rareSeen.includes(x.k)); if (nr) { rareSeen = [...rareSeen, nr.k]; firsts = [...firsts, nr.k]; rare = { k: nr.k, answer: null, until: null, id: nr.k + elapsed }; if (moment) { queue = [{ k: moment.k, rank: moment.rank }, ...queue]; moment = null; if (batchPos) batchPos -= 1; } } }
     entries.filter((x) => x.level === 'sure' && !s.discovered.includes(x.k) && !firsts.includes(x.k)).forEach((x) => { firsts = [...firsts, x.k]; queue = [...queue, { k: x.k, rank: s.discovered.length + firsts.length }]; });
     if (moment && elapsed >= moment.until) moment = null;
-    if (!moment && queue.length) { if (!batchPos || batchPos >= batch) { batch = queue.length; batchPos = 0; } const q = queue[0]; queue = queue.slice(1); batchPos += 1; moment = { ...q, until: elapsed + 6, id: q.k + elapsed }; }
+    if (!rare && !moment && queue.length) { if (!batchPos || batchPos >= batch) { batch = queue.length; batchPos = 0; } const q = queue[0]; queue = queue.slice(1); batchPos += 1; moment = { ...q, until: elapsed + 6, id: q.k + elapsed }; }
     if (!moment && !queue.length) { batch = 0; batchPos = 0; }
-    this.setState({ live: { ...L, elapsed, entries, marks, seq, next, moment, firsts, queue, batch, batchPos } });
+    this.setState({ live: { ...L, elapsed, entries, marks, seq, next, moment, firsts, queue, batch, batchPos, rare, rareSeen } });
+  }
+  answerRare(a) {
+    const L = this.state.live; const r = L.rare; if (!r) return;
+    const ranks = this.state.discovered.length + (L.firsts || []).filter((k) => k !== r.k).length + 1;
+    let entries = L.entries; let review = this.state.review;
+    if (a === 'yes') entries = entries.map((e) => (e.k === r.k ? { ...e, level: 'sure', confirmed: true } : e));
+    if (a === 'later' && !review.some((x) => x.k === r.k)) review = [...review, { id: Date.now(), k: r.k, when: "aujourd'hui à 9:42", score: 0.72, level: 'toCheck' }];
+    if (a === 'no') entries = entries.filter((e) => e.k !== r.k);
+    this.setState({ review, live: { ...L, entries, rare: { ...r, answer: a, rank: ranks, until: L.elapsed + (a === 'yes' ? 6 : 3), id: r.id + a } } });
+  }
+  closeRare() { const L = this.state.live; this.setState({ live: { ...L, rare: null } }); }
+  simulateRare() {
+    const s = this.state; if (s.live.phase === 'idle') this.startLive();
+    setTimeout(() => { const L = this.state.live; if ((L.rareSeen || []).includes('huppe') || this.state.discovered.includes('huppe')) return this.toast('La huppe a déjà été traitée : réinitialise la démo', 'info');
+      const entries = [{ k: 'huppe', count: 1, level: 'toCheck', score: 0.72, unexpected: true, singing: true, singingUntil: L.elapsed + 3, isNew: true }, ...L.entries.filter((e) => e.k !== 'huppe')];
+      this.setState({ live: { ...L, phase: 'active', entries, next: 3 } }); }, 60);
   }
   nextMoment() { const L = this.state.live; const queue = L.queue || []; if (!queue.length) return this.setState({ live: { ...L, moment: null, batch: 0, batchPos: 0 } }); const q = queue[0]; this.setState({ live: { ...L, queue: queue.slice(1), batchPos: (L.batchPos || 0) + 1, moment: { ...q, until: L.elapsed + 6, id: q.k + L.elapsed + 'n' } } }); }
   simulateReturn() {
@@ -411,6 +447,11 @@ class Component extends DCLogic {
       expected: ['merle', 'rouge', 'charb'].map((k) => SP[k]),
       logo: h(LiveLogo, { size: 24, running: L.phase === 'active' }), logoSmall: h(LiveLogo, { size: 18, running: L.phase === 'active' }),
       toggleExpand: () => this.setState({ live: { ...L, expanded: !L.expanded } }),
+      rare: L.rare ? (() => { const r = L.rare; const p = SP[r.k]; const left = r.until ? Math.max(0, r.until - L.elapsed) : 0; const total = r.answer === 'yes' ? 6 : 3; const oText = lightLive ? '#7A5A00' : '#F4C542'; const oCont = lightLive ? '#FBEFC8' : 'rgba(244,197,66,.16)';
+        return { ...p, ask: !r.answer, yes: r.answer === 'yes', no: r.answer === 'no', later: r.answer === 'later', done: r.answer === 'no' || r.answer === 'later', presence: 2, presenceLine: 'Présence estimée ici cette semaine : 2 sur 100.', presenceBar: '2%', oText, oCont, veil: lightLive ? 'rgba(238,241,236,.86)' : 'rgba(19,35,58,.86)', card: lightLive ? '#FFFFFF' : '#213852', border: r.answer === 'yes' ? '#F4C542' : 'rgba(244,197,66,.65)', avatarBg: lightLive ? p.tint : p.tintDark, avatarBorder: r.answer === 'yes' ? '3px solid #F4C542' : `2.5px dashed ${oText}`, avatarGlow: r.answer === 'yes' ? '0 0 0 6px rgba(244,197,66,.22)' : 'none', track: lightLive ? '#DCE2DA' : 'rgba(238,241,236,.14)', fill: oText, verdictBg: lightLive ? '#FFFFFF' : '#1A2D47', verdictBorder: lightLive ? '#C5CCC2' : 'rgba(238,241,236,.32)', noInk: lightLive ? '#A04A1C' : '#F2A677', maybeBg: lightLive ? '#E3E9EF' : 'rgba(201,211,221,.12)', maybeInk: lightLive ? '#34495E' : '#C9D3DD', yesBg: lightLive ? '#E6EDD6' : 'rgba(157,180,106,.2)',
+          enters: `${p.name} entre dans ton carnet. C'est ta ${r.rank || ''}e espèce.`, doneText: r.answer === 'no' ? "C'est noté. Il ne comptera pas, merci." : 'Gardé pour plus tard, dans la revue rapide.', doneIcon: r.answer === 'no' ? 'close' : 'schedule',
+          bar: (left / total * 100) + '%', left: `Se referme seul dans ${left} s`, pausedNote: L.phase === 'paused', halo: !r.answer ? h(RareHalo, { key: r.id, color: oText }) : null, burst: r.answer === 'yes' ? h(Burst, { key: r.id, colors: ['#F4C542', '#E3A22B', '#FFE9A0', p.accent, '#19A7B3', '#F4C542'] }) : null, playing: s.playing === 'rare-' + r.k,
+          replay: () => { this.play('rare-' + r.k); this.toast("Réécoute : l'écoute se met en pause le temps de l'extrait", 'volume_down'); }, answerYes: () => this.answerRare('yes'), answerNo: () => this.answerRare('no'), answerLater: () => this.answerRare('later'), close: () => this.closeRare(), open: () => { this.closeRare(); this.openSpecies(r.k); } }; })() : null,
       moment: L.moment ? (() => { const m = L.moment; const p = SP[m.k]; let ci = -1; STATUSES.forEach((st, i) => { if (m.rank >= st.from) ci = i; }); const nx = STATUSES[ci + 1]; const left = Math.max(0, m.until - L.elapsed); const justLevel = ci >= 0 && STATUSES[ci].from === m.rank; return { ...p, rankLine: `Ajouté à ton carnet · ${m.rank}${m.rank === 1 ? 're' : 'e'} espèce`, status: STATUS_NAMES[ci] || '', statusEmblem: ci >= 0 ? emblem(STATUSES[ci], 28, { inner: true }) : null, statusKicker: justLevel ? 'Nouveau niveau !' : 'Ton niveau', nextLine: nx ? `Encore ${nx.from - m.rank} ${plural(nx.from - m.rank, 'espèce', 'espèces')} pour devenir ${STATUS_NAMES[ci + 1]}` : '', bar: (left / 6 * 100) + '%', left: `Se referme seul dans ${left} s`, pausedNote: L.phase === 'paused', burst: h(Burst, { key: m.id, colors: [p.accent, '#F4C542', '#19A7B3', '#9DB46A', '#EC7A3C', p.deep] }), veil: lightLive ? 'rgba(238,241,236,.84)' : 'rgba(19,35,58,.84)', glow: p.accent + '38', card: lightLive ? '#FFFFFF' : '#213852', border: p.accent + '80', track: lightLive ? '#DCE2DA' : 'rgba(238,241,236,.14)', fill: lightLive ? '#0B6E77' : '#4FC3CC', halo2: p.accent, avatarBg: lightLive ? p.tint : p.tintDark, playing: s.playing === 'moment-' + m.k, replay: () => this.play('moment-' + m.k), close: () => this.nextMoment(), queued: (L.queue || []).length, more: (L.queue || []).length > 0, pager: (L.batch || 0) > 1 ? `${L.batchPos} sur ${L.batch} nouvelles` : '', dots: (L.batch || 0) > 1 ? Array.from({ length: L.batch }, (_, i) => ({ w: i === L.batchPos - 1 ? '18px' : '6px', c: i < L.batchPos ? (lightLive ? '#0B6E77' : '#4FC3CC') : (lightLive ? '#C5CCC2' : 'rgba(238,241,236,.32)') })) : [], primaryLabel: (L.queue || []).length ? 'Espèce suivante' : "Continuer l'écoute", primaryIcon: (L.queue || []).length ? 'arrow_forward' : '', title: 'Première rencontre !', leftNext: (L.queue || []).length ? `Suivante dans ${left} s` : `Se referme seul dans ${left} s`, open: () => { this.setState({ live: { ...this.state.live, moment: null } }); this.openSpecies(m.k); } }; })() : null,
       pause: () => this.setState({ live: { ...L, phase: L.phase === 'paused' ? 'active' : 'paused' } }),
       stop: () => this.stopLive(), options: () => this.setState({ sheet: 'listen' }),
@@ -455,7 +496,7 @@ class Component extends DCLogic {
 
     // Fiche
     const fk = s.species; const f = SP[fk]; const heard = disc.includes(fk) || f.total > 0;
-    const txt = SHEET_TEXT[fk] || { sum: `${f.name} : fiche rédigée à l'avance, disponible hors ligne. Relecture en cours pour les 100 oiseaux les plus courants.`, ear: 'Réécoute tes enregistrements ci-dessus pour te faire l\'oreille : c\'est le meilleur moyen de le retenir.', size: 'Sa taille et sa silhouette arrivent avec la relecture de la fiche.', beh: 'Son comportement arrive avec la relecture de la fiche.', mig: f.pres === 'mig' ? "Migrateur : présent de la fin de l'hiver à l'automne." : 'Sédentaire en France : tu peux l\'entendre toute l\'année.', fun: 'L\'anecdote arrive avec la relecture de la fiche.' };
+    const txt = SHEET_TEXT[fk] || { sum: `${f.name} : fiche rédigée à l'avance, disponible hors ligne. Relecture en cours pour les 100 oiseaux les plus courants.`, ear: 'Réécoute tes enregistrements ci-dessus pour te faire l\'oreille : c\'est le meilleur moyen de le retenir.', size: 'Sa taille et sa silhouette arrivent avec la relecture de la fiche.', beh: 'Son comportement arrive avec la relecture de la fiche.', mig: f.pres === 'mig' ? "Migrateur : présent de la fin de l'hiver à l'automne." : 'Sédentaire en France : tu peux l\'entendre toute l\'année.', fun: 'L\'anecdote arrive avec la relecture de la fiche.', pred: 'Ses ennemis arrivent avec la relecture de la fiche : le chat et l\'épervier chassent la plupart des petits oiseaux du jardin.' };
     const monthVals = MONTHS.map((_, i) => (f.pres === 'mig' ? (i >= 2 && i <= 9 ? [30, 70, 100, 95, 85, 75, 60, 35][i - 2] : 4) : [70, 75, 85, 95, 100, 90, 80, 75, 80, 78, 72, 70][i]));
     const peakM = monthVals.indexOf(Math.max(...monthVals));
     const hours = Array.from({ length: 24 }, (_, i) => Math.max(0, Math.round(100 * Math.exp(-Math.pow((i - 7) / 2.2, 2)) + 35 * Math.exp(-Math.pow((i - 19) / 1.8, 2)))));
@@ -472,8 +513,8 @@ class Component extends DCLogic {
       moreClips: `Voir les ${clipsN} enregistrements`, hasClips: heard,
       summary: txt.sum, chips: CHIP_NAMES.map(([id, label]) => { const T = CHIP_TONES[id]; const sel = s.ficheChip === id; return { label, icon: T.icon, bg: sel ? T.bg : '#EEF1EC', ink: sel ? T.ink : '#6B5847', fill: sel ? 1 : 0, ring: sel ? `0 0 0 2px #FFFFFF, 0 0 0 4px ${T.ink}` : 'none', weight: sel ? 700 : 400, seen: (s.ficheSeen || []).includes(id) && !sel ? 1 : 0, pick: () => this.setState({ ficheChip: id, ficheSeen: [...new Set([...(s.ficheSeen || []), id])] }) }; }), chipText: txt[s.ficheChip],
       cardBg: CHIP_TONES[s.ficheChip].bg, cardInk: CHIP_TONES[s.ficheChip].ink, cardIcon: CHIP_TONES[s.ficheChip].icon, cardKicker: CHIP_TONES[s.ficheChip].kicker,
-      chipStep: `${(s.ficheSeen || []).length}/5 découverts`, chipDots: CHIP_NAMES.map(([id]) => (id === s.ficheChip ? CHIP_TONES[id].ink : (s.ficheSeen || []).includes(id) ? '#9DB46A' : 'rgba(19,35,58,.12)')),
-      nextLabel: CHIP_NAMES.findIndex(([id]) => id === s.ficheChip) === 4 ? 'Revoir' : 'Suivant', nextChip: () => { const i = CHIP_NAMES.findIndex(([id]) => id === s.ficheChip); const n = CHIP_NAMES[(i + 1) % 5][0]; this.setState({ ficheChip: n, ficheSeen: [...new Set([...(s.ficheSeen || []), n])] }); },
+      chipStep: `${(s.ficheSeen || []).length}/6 découverts`, chipDots: CHIP_NAMES.map(([id]) => (id === s.ficheChip ? CHIP_TONES[id].ink : (s.ficheSeen || []).includes(id) ? '#9DB46A' : 'rgba(19,35,58,.12)')),
+      nextLabel: CHIP_NAMES.findIndex(([id]) => id === s.ficheChip) === CHIP_NAMES.length - 1 ? 'Revoir' : 'Suivant', nextChip: () => { const i = CHIP_NAMES.findIndex(([id]) => id === s.ficheChip); const n = CHIP_NAMES[(i + 1) % CHIP_NAMES.length][0]; this.setState({ ficheChip: n, ficheSeen: [...new Set([...(s.ficheSeen || []), n])] }); },
       share: () => this.toast('Fiche partagée', 'share'), reference: () => this.toast('Chant de référence ouvert', 'open_in_new'), lpo: () => this.toast('Envoi à Faune-France préparé', 'send'), openLink: () => this.toast('Page externe ouverte', 'open_in_new'), seeMap: () => this.push('mapx'),
     };
 
@@ -523,7 +564,7 @@ class Component extends DCLogic {
     const quiz = {
       intro: Q.stage === 'intro', q: Q.stage === 'q', result: Q.stage === 'result',
       orbit: [['rouge', '22px', 'auto', '24px', 'auto', '-8deg'], ['bleue', 'auto', '8px', '36px', 'auto', '6deg'], ['merle', '30px', 'auto', 'auto', '30px', '5deg'], ['pinson', 'auto', '14px', 'auto', '40px', '-6deg']].map(([k, l, r, t, b, tilt]) => ({ ...SP[k], left: l, right: r, top: t, bottom: b, tilt })),
-      soundOn: Q.sound, soundLabel: Q.sound ? 'Avec son' : 'Sans son', soundIcon: Q.sound ? 'volume_up' : 'volume_off', soundTrack: Q.sound ? '#19A7B3' : '#C5CCC2', soundJustify: Q.sound ? 'flex-end' : 'flex-start', toggleSound: () => this.setState({ quiz: { ...Q, sound: !Q.sound } }),
+      soundOn: Q.sound, soundLabel: Q.sound ? 'Avec effets' : 'Sans effets', soundIcon: Q.sound ? 'volume_up' : 'volume_off', soundTrack: Q.sound ? '#19A7B3' : '#C5CCC2', soundJustify: Q.sound ? 'flex-end' : 'flex-start', toggleSound: () => this.setState({ quiz: { ...Q, sound: !Q.sound } }),
       fineEarSegs: Array.from({ length: 10 }, (_, i) => (i < s.fineEar % 10 || s.fineEar >= 10 && i < 10 ? '#19A7B3' : '#DCE2DA')), fineEarLine: s.fineEar >= 10 ? `Première plume gagnée · ${s.fineEar} bonnes réponses` : `Encore ${10 - s.fineEar} bonnes réponses · ${s.fineEar} sur 10`, fineEarTitle: s.fineEar >= 10 ? 'Ta deuxième plume' : 'Ta première plume', fineEarMedal: medal(s.fineEar >= 10 ? 1 : 0),
       start: () => this.startQuiz(), leaveIcon: Q.stage === 'intro' ? 'arrow_back' : 'close', leave: () => (Q.stage === 'q' ? this.setState({ sheet: 'quitQuiz' }) : this.back()),
       qn: `${Q.qi + 1} sur 10`, trail: Array.from({ length: 10 }, (_, i) => ({ bg: i < Q.qi ? '#19A7B3' : i === Q.qi ? '#F4C542' : '#DCE2DA', w: i === Q.qi ? '22px' : '10px' })), playing: Q.playing, score: Q.score,
@@ -624,7 +665,7 @@ class Component extends DCLogic {
     const INDEX = [['home', 'Accueil', 'home', go.home], ['live', 'Écoute', 'graphic_eq', go.live], ['bilan', "Bilan de l'écoute", 'summarize', go.bilanToday], ['review', 'Revue rapide', 'verified', go.review], ['species', 'Fiche espèce', 'raven', () => this.openSpecies('merle')], ['notebook', 'Mon carnet', 'menu_book', go.notebook], ['map', 'Ma carte', 'map', go.map], ['profile', 'Profil', 'person', go.profile], ['quiz', 'Qui chante ?', 'headphones', go.quiz], ['ranking', 'Palmarès', 'leaderboard', go.ranking], ['sounds', 'Sonothèque', 'library_music', go.sounds], ['settings', 'Réglages', 'tune', go.settings], ['goal', 'Objectif du jour', 'flag', go.goal], ['more', 'Menu Plus', 'menu', () => { this.tab('home'); setTimeout(() => this.setState({ sheet: 'more' }), 0); }]];
     const isTab = !top;
     return {
-      app, simReturn: () => this.simulateReturn(), reset: () => { this.setState(fresh()); this.toast('Démo réinitialisée', 'restart_alt'); },
+      app, simRare: () => this.simulateRare(), simReturn: () => this.simulateReturn(), reset: () => { this.setState(fresh()); this.toast('Démo réinitialisée', 'restart_alt'); },
       index: INDEX.map(([id, label, icon, fn]) => ({ label, icon, go: fn, bg: screen === id || (id === 'more' && s.sheet === 'more') ? '#EEF1EC' : 'transparent', weight: screen === id ? 700 : 400 })),
       show: { home: screen === 'home', notebook: screen === 'notebook', map: screen === 'map' || screen === 'mapx', profile: screen === 'profile', live: screen === 'live', bilan: screen === 'bilan', review: screen === 'review', species: screen === 'species', quiz: screen === 'quiz', ranking: screen === 'ranking', sounds: screen === 'sounds', settings: screen === 'settings', goal: screen === 'goal', nav: isTab, sheet: !!s.sheet, toast: !!s.toast },
       screenBottom: isTab ? '80px' : '0px', toastBottom: isTab ? '96px' : '24px', toast: s.toast, toastIcon: s.toastIcon,
@@ -636,3 +677,4 @@ class Component extends DCLogic {
 </script>
 </body>
 </html>
+
