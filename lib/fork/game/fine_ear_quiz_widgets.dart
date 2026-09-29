@@ -211,6 +211,7 @@ class QuizMysteryDisc extends StatelessWidget {
             BirdyGoSilhouetteIcon(
               size: silhouette,
               color: BirdyBrand.mist.withValues(alpha: 0.35),
+              muted: true,
             ),
             // Centered on the bird's wing, not on the disc: the mark reads
             // as sitting on the bird's body whatever the disc's margin.

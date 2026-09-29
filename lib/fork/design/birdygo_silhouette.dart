@@ -71,30 +71,98 @@ Path _unit(Path shape) {
   );
 }
 
+/// Where a point of the logo's 512 box lands in [birdyGoSilhouette]'s unit
+/// space, and the scale between the two: the wing bars ride the same
+/// transform as the outline, so they sit exactly as in the full logo.
+final Rect _eyeLessBounds = _outline(withEye: false).getBounds();
+Offset _toUnit(Offset p) =>
+    (p - _eyeLessBounds.center) / _eyeLessBounds.longestSide;
+final double _unitScale = 1 / _eyeLessBounds.longestSide;
+
+/// The silhouette with the eye at [closed] (0 → 1): the eye's hole squashed
+/// into a curved line. Only the last value is kept: an animation asks for a
+/// new one each frame, a still icon never gets here.
+final Path _filledOutline = _outline(withEye: true);
+double? _cachedClosed;
+Path? _cachedClosedPath;
+Path _silhouetteWithEye(double closed) {
+  if (closed <= 0) return birdyGoSilhouette;
+  if (_cachedClosed != closed) {
+    _cachedClosed = closed;
+    _cachedClosedPath = _unit(
+      Path.combine(
+        PathOperation.difference,
+        _filledOutline,
+        BirdyGoLogoPainter.eyePath(closed),
+      ),
+    );
+  }
+  return _cachedClosedPath!;
+}
+
 /// [birdyGoSilhouette] filled with one flat [color], drawn at [size] (its
 /// longest side): the mystery card's placeholder, in place of a generic
 /// species icon, so it reads as the BirdyGo bird rather than any bird.
+///
+/// The wing (the logo's four bars, same place, stroke and round caps) is
+/// drawn by default, in the logo's own colors. A [muted] bird (a species
+/// still to find, a translucent or grey mark) gets bars in a lighter tone
+/// of [color] instead, so it stays discreet. [wing] false draws the plain
+/// shape. [eyeClosed] (0 → 1) squashes the eye's hole into a curved line.
 class BirdyGoSilhouetteIcon extends StatelessWidget {
   const BirdyGoSilhouetteIcon({
     super.key,
     required this.size,
     required this.color,
+    this.muted = false,
+    this.wing = true,
+    this.eyeClosed = 0,
   });
 
   final double size;
   final Color color;
+  final bool muted;
+  final bool wing;
+  final double eyeClosed;
 
   @override
   Widget build(BuildContext context) => CustomPaint(
     size: Size.square(size),
-    painter: _BirdyGoSilhouettePainter(color),
+    painter: BirdyGoSilhouettePainter(
+      color,
+      muted: muted,
+      wing: wing,
+      eyeClosed: eyeClosed,
+    ),
   );
 }
 
-class _BirdyGoSilhouettePainter extends CustomPainter {
-  _BirdyGoSilhouettePainter(this.color);
+class BirdyGoSilhouettePainter extends CustomPainter {
+  BirdyGoSilhouettePainter(
+    this.color, {
+    this.muted = false,
+    this.wing = true,
+    this.eyeClosed = 0,
+  });
 
   final Color color;
+  final bool muted;
+  final bool wing;
+  final double eyeClosed;
+
+  /// A muted bird's bars: the body color this far towards white.
+  static const double mutedWingLighten = 0.55;
+
+  /// Stroke of a bar in the logo's 512 box (as in [BirdyGoLogoPainter]).
+  static const double _barStroke = 30;
+
+  /// The bar colors this painter draws, in order.
+  List<Color> get barColors => [
+    for (final (_, _, original) in BirdyGoLogoPainter.bars)
+      muted
+          ? Color.lerp(color, const Color(0xFFFFFFFF), mutedWingLighten)!
+          : original,
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -102,10 +170,27 @@ class _BirdyGoSilhouettePainter extends CustomPainter {
       ..save()
       ..translate(size.width / 2, size.height / 2)
       ..scale(size.shortestSide)
-      ..drawPath(birdyGoSilhouette, Paint()..color = color)
-      ..restore();
+      ..drawPath(_silhouetteWithEye(eyeClosed), Paint()..color = color);
+    if (wing) {
+      final colors = barColors;
+      for (final (i, (from, to, _)) in BirdyGoLogoPainter.bars.indexed) {
+        canvas.drawLine(
+          _toUnit(from),
+          _toUnit(to),
+          Paint()
+            ..color = colors[i]
+            ..strokeWidth = _barStroke * _unitScale
+            ..strokeCap = StrokeCap.round,
+        );
+      }
+    }
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_BirdyGoSilhouettePainter old) => old.color != color;
+  bool shouldRepaint(BirdyGoSilhouettePainter old) =>
+      old.color != color ||
+      old.muted != muted ||
+      old.wing != wing ||
+      old.eyeClosed != eyeClosed;
 }

@@ -177,12 +177,14 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   confetti. La séquence « Première rencontre » (environ 2,5 s avec l'anneau et les confettis) dépasse
   `celebrationMax` (500 ms) : exception acceptée, comme le quiz, car rien n'attend la fin (la carte et ses
   boutons sont là dès 250 ms, l'écoute continue) et ce moment n'arrive qu'une fois par espèce dans une vie.
-- Exception autorisée : un double appui sur le logo de l'accueil (J6f, `lib/fork/home/logo_flight.dart`)
-  fait s'envoler l'oiseau à travers l'écran (chemin courbe, une boucle, retour à sa place), 2 à 2,5 s,
-  au-delà des 500 ms. Explicite et voulu par la personne (deux appuis, jamais tout seul), donc pas
-  une célébration au sens de la règle. Le cri BirdyGo joue une fois au décollage ; pendant ce temps le
-  logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un double appui se
-  comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
+- Exception autorisée : un double appui sur le logo de l'accueil (J6h, `lib/fork/home/logo_flight.dart`)
+  fait décoller l'oiseau, qui vole jusqu'au centre de l'écran (3,5 fois sa taille), penche la tête et
+  fait un clin d'œil (l'œil devient un trait courbe), puis s'envole par la droite et revient se poser
+  dans l'en-tête : 3,6 s (`BirdyMotion.logoWink*`, un seul contrôleur), au-delà des 500 ms. Explicite
+  et voulu par la personne (deux appuis, jamais tout seul), donc pas une célébration au sens de la
+  règle. Le cri BirdyGo joue une fois à l'arrivée, un retour haptique léger au clin d'œil ; pendant ce
+  temps le logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un clin
+  d'œil rapide sur place (450 ms). Les appuis pendant la séquence sont ignorés.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 - Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule
@@ -312,8 +314,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
-  couleurs de la marque. Un double appui (J6f, `logo_flight.dart`) le fait s'envoler à travers
-  l'écran à la place : voir l'exception de la section Animations.
+  couleurs de la marque. Un double appui (J6h, `logo_flight.dart`) lui fait faire un clin d'œil au
+  centre de l'écran : voir l'exception de la section Animations.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
 - Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,

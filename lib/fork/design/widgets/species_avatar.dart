@@ -79,5 +79,5 @@ class SpeciesAvatar extends StatelessWidget {
   );
 
   Widget _silhouette(SpeciesTint t) =>
-      BirdyGoSilhouetteIcon(size: size * 0.6, color: t.deep);
+      BirdyGoSilhouetteIcon(size: size * 0.6, color: t.deep, muted: muted);
 }
