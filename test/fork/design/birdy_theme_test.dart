@@ -48,7 +48,7 @@ void main() {
     for (final theme in themes.values) {
       final t = theme.textTheme;
       for (final style in [t.headlineMedium, t.headlineSmall, t.titleLarge]) {
-        expect(style!.fontFamily, BirdyFonts.serif);
+        expect(style!.fontFamily, BirdyFonts.rounded);
       }
       for (final style in [
         t.bodyLarge,
@@ -68,31 +68,45 @@ void main() {
     }
   });
 
-  test('Fraunces styles set SOFT and opsz, never wght', () {
-    const serif = [
-      BirdyText.display,
-      BirdyText.title,
-      BirdyText.heading,
-      BirdyText.species,
-      BirdyText.speciesCompact,
-      BirdyText.latin,
-      BirdyText.latinCompact,
-    ];
-    for (final style in serif) {
-      final axes = {for (final v in style.fontVariations!) v.axis: v.value};
-      expect(axes['SOFT'], 100);
-      expect(axes['opsz'], style.fontSize);
-      expect(axes.containsKey('wght'), isFalse);
-      expect(style.fontWeight, isNotNull);
-    }
-    for (final style in [
-      BirdyText.numberXL,
-      BirdyText.numberL,
-      BirdyText.numberM,
-    ]) {
-      expect(style.fontFeatures, contains(const FontFeature.tabularFigures()));
-    }
-  });
+  test(
+    'Fraunces styles set SOFT and opsz, Nunito and Atkinson only weight',
+    () {
+      const serif = [BirdyText.species, BirdyText.speciesCompact];
+      for (final style in serif) {
+        expect(style.fontFamily, BirdyFonts.serif);
+        final axes = {for (final v in style.fontVariations!) v.axis: v.value};
+        expect(axes['SOFT'], 100);
+        expect(axes['opsz'], style.fontSize);
+        expect(axes.containsKey('wght'), isFalse);
+        expect(style.fontWeight, isNotNull);
+      }
+      for (final style in [
+        BirdyText.display,
+        BirdyText.title,
+        BirdyText.heading,
+        BirdyText.numberXL,
+      ]) {
+        expect(style.fontFamily, BirdyFonts.rounded);
+        expect(style.fontWeight, FontWeight.w800);
+        expect(style.fontVariations, isNull);
+      }
+      for (final style in [BirdyText.latin, BirdyText.latinCompact]) {
+        expect(style.fontFamily, BirdyFonts.sans);
+        expect(style.fontStyle, FontStyle.italic);
+        expect(style.fontWeight, FontWeight.w400);
+      }
+      for (final style in [
+        BirdyText.numberXL,
+        BirdyText.numberL,
+        BirdyText.numberM,
+      ]) {
+        expect(
+          style.fontFeatures,
+          contains(const FontFeature.tabularFigures()),
+        );
+      }
+    },
+  );
 
   test('buttons keep 48 dp touch targets', () {
     for (final theme in themes.values) {

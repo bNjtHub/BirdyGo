@@ -40,6 +40,7 @@ Future<void> _loadRealFonts() async {
   }
 
   await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
+  await load('Nunito', 'assets/fonts/Nunito-Variable.ttf');
   await load(
     'AtkinsonHyperlegibleNext',
     'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
@@ -163,11 +164,12 @@ void main() {
     WidgetTester tester, {
     bool dark = false,
     double textScale = 1,
+    double width = 390,
     bool reducedMotion = false,
   }) async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    tester.view.physicalSize = Size(width, 844) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     loader = _DelayedLoader(heardResult: _heard, expectedResult: _expected);
@@ -223,6 +225,14 @@ void main() {
     expect(find.text('1'), findsWidgets);
     expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
   }
+
+  testWidgets('320 dp, 130 %: Nunito titles do not overflow', (tester) async {
+    await pump(tester, textScale: 1.3, width: 320);
+    loader.resolveHeard();
+    loader.resolveExpected();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('light, 100 %: no layout shift as heard then expected land', (
     tester,
