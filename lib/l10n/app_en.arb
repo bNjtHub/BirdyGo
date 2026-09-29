@@ -2647,7 +2647,7 @@
   "@surveyLocationUnavailable": {
     "description": "Shown when GPS is not available"
   },
-  "surveyManualGpsWarning": "Location only updates when the app is open. Tap here to grant background location permission in Settings.",
+  "surveyManualGpsWarning": "Location is off. Tap here to allow location while the app is in use.",
   "@surveyManualGpsWarning": {
     "description": "Warning about manual GPS mode limitations"
   },
@@ -3110,7 +3110,7 @@
       "names": { "type": "String" }
     }
   },
-  "surveyManualGpsReadyWarning": "Background location not enabled — location will only update while the app is open.",
+  "surveyManualGpsReadyWarning": "Location permission not granted — no position will be recorded.",
   "@surveyManualGpsReadyWarning": {
     "description": "Warning on ready screen about manual GPS"
   },

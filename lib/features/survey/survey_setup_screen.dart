@@ -49,6 +49,14 @@ import 'survey_notification.dart';
 enum _LocationChoice { gps, manual, skip }
 
 /// Setup wizard for a survey transect.
+/// FORK: whether the survey may follow GPS with the screen off. "While in
+/// use" is enough (foreground service of type location); "Always" is never
+/// requested.
+@visibleForTesting
+bool hasSurveyGpsPermission(LocationPermission permission) =>
+    permission == LocationPermission.whileInUse ||
+    permission == LocationPermission.always;
+
 class SurveySetupScreen extends ConsumerStatefulWidget {
   const SurveySetupScreen({super.key});
 
@@ -215,6 +223,11 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
     }
   }
 
+  // FORK: ACCESS_BACKGROUND_LOCATION is no longer declared (first release).
+  // "While in use" is enough: the survey foreground service (type
+  // microphone|location, started while the app is in front) keeps GPS
+  // fixes coming with the screen off. _hasBackgroundGps therefore means
+  // "GPS permission granted", and nothing asks for "Allow all the time".
   Future<void> _checkBackgroundPermission() async {
     if (!ref.read(useGpsProvider)) {
       if (mounted) setState(() => _hasBackgroundGps = false);
@@ -223,7 +236,7 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
     final permission = await Geolocator.checkPermission();
     if (mounted) {
       setState(() {
-        _hasBackgroundGps = permission == LocationPermission.always;
+        _hasBackgroundGps = hasSurveyGpsPermission(permission);
       });
     }
   }
@@ -234,7 +247,6 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
 
     var permission = await Geolocator.checkPermission();
 
-    // First ensure we have at least whileInUse.
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
@@ -244,16 +256,8 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
       return;
     }
 
-    // Android 11+ requires the user to grant "Allow all the time" in app
-    // settings — requestPermission() can only escalate to whileInUse.
-    if (permission != LocationPermission.always) {
-      _awaitingSettingsReturn = true;
-      await Geolocator.openAppSettings();
-      return;
-    }
-
     if (mounted) {
-      setState(() => _hasBackgroundGps = true);
+      setState(() => _hasBackgroundGps = hasSurveyGpsPermission(permission));
     }
   }
 
