@@ -132,7 +132,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     times: times,
     caption: homeDateLine(
       Localizations.localeOf(context).toString(),
-      DateTime.now(),
+      ref.read(homeClockProvider)(),
       place: _place,
     ),
     highlighted: moment,
@@ -144,7 +144,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
   Future<void> _startChallenge() async {
-    await ref.read(challengeStoreProvider).start(DateTime.now());
+    await ref.read(challengeStoreProvider).start(ref.read(homeClockProvider)());
     ref.invalidate(gameProgressProvider);
   }
 
@@ -204,7 +204,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final localeName = Localizations.localeOf(context).toString();
-    final now = DateTime.now();
+    final now = ref.watch(homeClockProvider)();
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final snapshot = _snapshot;
