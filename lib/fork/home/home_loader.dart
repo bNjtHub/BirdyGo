@@ -137,6 +137,10 @@ class HomeLoader {
   }
 }
 
+/// The clock of the Accueil (date line, greeting, day times); tests override
+/// it with a fixed time so the screen is deterministic.
+final homeClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
 final homeLoaderProvider = Provider<HomeLoader>(
   (ref) => HomeLoader(
     index: () => ref.read(observationIndexServiceProvider).ensureReady(),

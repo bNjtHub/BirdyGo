@@ -508,7 +508,11 @@ class _FirstTimeCard extends StatelessWidget {
         SizedBox(height: gap),
         _Encounter(
           color: tint.accent,
-          confetti: [tint.accent, ...BirdyConfettiColors.burst, tint.deep],
+          confetti: [
+            tint.accent,
+            ...BirdyConfettiColors.burstOf(context),
+            tint.deep,
+          ],
           child: _Avatar(
             key: const ValueKey('first-time-bird'),
             moment: moment,
@@ -977,7 +981,7 @@ class _RareBird extends StatelessWidget {
       ),
       if (confirmed)
         BirdyConfetti.burst(
-          colors: BirdyConfettiColors.rare,
+          colors: BirdyConfettiColors.rareOf(context),
           settings: BirdyConfettiBurst.firstEncounterMain,
         ),
     ],
