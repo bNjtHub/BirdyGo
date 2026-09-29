@@ -6343,7 +6343,7 @@
   "@forkLicensesModelSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
   "forkLicensesSheets": "Species sheets",
   "@forkLicensesSheets": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
-  "forkLicensesSheetsSub": "Texts written for BirdyGo",
+  "forkLicensesSheetsSub": "Texts written by BirdyGo",
   "@forkLicensesSheetsSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
   "forkLicensesMaps": "Map tiles",
   "@forkLicensesMaps": {"description": "BirdyGo fork: J7 content licenses screen (About)."},

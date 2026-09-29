@@ -120,7 +120,7 @@ void main() {
         findsOneWidget);
   });
 
-  test('no "BirdNET Live" left in fr/en arb values except credits', () {
+  test('no "BirdNET Live" left in any arb values except credits', () {
     const credits = {
       'aboutCreditsDescription',
       'aboutFundingDescription',
