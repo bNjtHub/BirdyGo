@@ -15,7 +15,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_buttons.dart';
-import '../home/birdygo_logo.dart';
+import '../design/widgets/birdy_listening_logo.dart';
 import '../listening_mode/listening_mode.dart';
 import 'listening_options.dart';
 import 'live_control_bar.dart';
@@ -112,7 +112,11 @@ class LiveHeader extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          _LiveLogo(phase: phase),
+                          BirdyListeningLogo(
+                            size: BirdySizes.liveLogo,
+                            running: phase == LiveControlPhase.active,
+                            frozen: phase == LiveControlPhase.paused,
+                          ),
                           const SizedBox(width: BirdySpace.s),
                           Expanded(
                             child: _StatusText(
@@ -190,75 +194,6 @@ class LiveHeader extends StatelessWidget {
   }
 }
 
-/// BirdyGo mark next to the status (J6f), replacing the pulsing dot. Only
-/// its four wing bars move, like a small level meter, and only while
-/// [LiveControlPhase.active]; the bird itself never moves. Paused: bars
-/// frozen at a mid length. Idle or reduced motion: the full static logo.
-/// One [AnimationController], repainted through [BirdyGoLogoPainter]'s own
-/// `repaint` listenable — the header around it never rebuilds per frame.
-class _LiveLogo extends StatefulWidget {
-  const _LiveLogo({required this.phase});
-
-  final LiveControlPhase phase;
-
-  @override
-  State<_LiveLogo> createState() => _LiveLogoState();
-}
-
-class _LiveLogoState extends State<_LiveLogo>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: BirdyMotion.listeningLevelPeriod,
-  );
-
-  bool _shouldRun(BuildContext context) =>
-      widget.phase == LiveControlPhase.active && !BirdyMotion.reduced(context);
-
-  void _sync() {
-    if (_shouldRun(context)) {
-      if (!_controller.isAnimating) _controller.repeat();
-    } else if (_controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _sync();
-  }
-
-  @override
-  void didUpdateWidget(_LiveLogo old) {
-    super.didUpdateWidget(old);
-    _sync();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final reduced = BirdyMotion.reduced(context);
-    final active = widget.phase == LiveControlPhase.active && !reduced;
-    final paused = widget.phase == LiveControlPhase.paused && !reduced;
-    return RepaintBoundary(
-      child: CustomPaint(
-        size: const Size.square(BirdySizes.liveLogo),
-        painter: BirdyGoLogoPainter(
-          progress: kAlwaysCompleteAnimation,
-          level: active ? _controller : null,
-          frozenLevel: paused ? BirdyGoLogoPainter.pausedBarLevel : null,
-        ),
-      ),
-    );
-  }
-}
-
 /// Listening time, refreshed every second in this widget only, so the rest
 /// of the screen does not rebuild with the clock.
 /// Status on one line; a new text fades in over the old one, the height
@@ -305,7 +240,10 @@ class _StatusText extends StatelessWidget {
                 color: modeColor,
               ),
             ),
-            TextSpan(text: ' $modeWord', style: style.copyWith(color: modeColor)),
+            TextSpan(
+              text: ' $modeWord',
+              style: style.copyWith(color: modeColor),
+            ),
           ],
         ),
         key: ValueKey('$status·${mode?.name}'),

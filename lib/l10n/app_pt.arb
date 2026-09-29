@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Continuar",
   "openInAppleMaps": "Abrir no Apple Maps",
   "aruCombinedSessionWarningTitle": "Conflito com áudio completo",
-  "aruCombinedSessionWarningBody": "As Sessions combinadas não suportam áudio completo. O sistema voltará a salvar clipes com amostragem inteligente (Smart). Volte à tela anterior para revisar suas configurações de gravação se desejar alterar isso."
+  "aruCombinedSessionWarningBody": "As Sessions combinadas não suportam áudio completo. O sistema voltará a salvar clipes com amostragem inteligente (Smart). Volte à tela anterior para revisar suas configurações de gravação se desejar alterar isso.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

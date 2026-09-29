@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Doorgaan",
   "openInAppleMaps": "Openen in Apple Maps",
   "aruCombinedSessionWarningTitle": "Volledig audioconflict",
-  "aruCombinedSessionWarningBody": "Gecombineerde sessies ondersteunen geen volledige audio. Het systeem valt dan terug op het opslaan van fragmenten met Smart-sampling. Ga naar het vorige scherm om de opname-instellingen aan te passen als je dit wilt wijzigen."
+  "aruCombinedSessionWarningBody": "Gecombineerde sessies ondersteunen geen volledige audio. Het systeem valt dan terug op het opslaan van fragmenten met Smart-sampling. Ga naar het vorige scherm om de opname-instellingen aan te passen als je dit wilt wijzigen.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

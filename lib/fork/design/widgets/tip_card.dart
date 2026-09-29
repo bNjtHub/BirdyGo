@@ -17,6 +17,7 @@ import '../birdy_motion.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
 import 'birdy_animated_icon.dart';
+import 'birdy_step_dots.dart';
 import 'entrance.dart';
 import 'pressable.dart';
 
@@ -287,25 +288,14 @@ class _Dots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    return ExcludeSemantics(
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        spacing: 5,
-        runSpacing: 5,
-        children: [
-          for (var i = 0; i < count; i++)
-            AnimatedContainer(
-              duration: BirdyMotion.enter,
-              curve: BirdyMotion.standard,
-              width: i == current ? 14 : 5,
-              height: 5,
-              decoration: BoxDecoration(
-                color: i == current ? c.orioleText : c.borderStrong,
-                borderRadius: BorderRadius.circular(BirdyRadii.pill),
-              ),
-            ),
-        ],
-      ),
+    return BirdyStepDots(
+      count: count,
+      current: current,
+      activeColor: c.orioleText,
+      inactiveColor: c.borderStrong,
+      height: 5,
+      activeWidth: 14,
+      gap: 5,
     );
   }
 }

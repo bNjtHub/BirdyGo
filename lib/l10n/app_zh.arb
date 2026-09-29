@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "继续",
   "openInAppleMaps": "在 Apple 地图中打开",
   "aruCombinedSessionWarningTitle": "完整音频冲突",
-  "aruCombinedSessionWarningBody": "合并 Session 不支持完整音频。系统将退回为使用 Smart 采样保存片段。如需更改，请返回上一界面调整录音设置。"
+  "aruCombinedSessionWarningBody": "合并 Session 不支持完整音频。系统将退回为使用 Smart 采样保存片段。如需更改，请返回上一界面调整录音设置。",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

@@ -51,6 +51,27 @@ abstract final class BirdyMotion {
     milliseconds: 250,
   );
 
+  /// « Première rencontre » in a series (J6h, AppEcoute mockup): the card
+  /// closes by itself, or moves on to the next species, after
+  /// [firstEncounterShown]; the countdown bar empties linearly over it.
+  static const Duration firstEncounterShown = Duration(seconds: 6);
+
+  /// The second confetti salve leaves this much after the first.
+  static const Duration firstEncounterSecondSalveDelay = Duration(
+    milliseconds: 380,
+  );
+
+  /// Oriole sparkles around the bird (`BirdySparkles`): each pops for
+  /// [sparklePop], [sparkleStagger] after the previous one, from
+  /// [firstEncounterSparkleDelay] on. Once, never looping.
+  static const Duration sparklePop = Duration(milliseconds: 700);
+  static const Duration sparkleStagger = Duration(milliseconds: 160);
+  static const Duration firstEncounterSparkleDelay = Duration(
+    milliseconds: 500,
+  );
+  static const double sparklePeakAt = 0.4;
+  static const double sparklePeakScale = 1.2;
+
   /// bg-ring: peak opacity (at [ringPeakAt] of the ring) and final scale.
   static const double ringPeakOpacity = 0.6;
   static const double ringPeakAt = 0.35;
@@ -195,11 +216,16 @@ abstract final class BirdyMotion {
   static final SpringDescription sheetSpring =
       SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85);
 
-  /// Period of the live logo's wing-bar level meter while listening (J6f,
-  /// `BirdyGoLogoPainter`): the one loop allowed in the fork, replacing the
-  /// live dot's pulse. Calm, no bounce (curve [standard] on each half);
-  /// reduced motion stops it (fork/DESIGN.md, Animations).
-  static const Duration listeningLevelPeriod = Duration(milliseconds: 1300);
+  /// Period of the listening logo's wing-bar level meter (J6f, J6h,
+  /// `BirdyListeningLogo`, `BirdyGoLogoPainter`): the one loop allowed in the
+  /// fork, replacing the live dot's pulse. Calm, no bounce (curve
+  /// [standard] on each half); reduced motion stops it (fork/DESIGN.md,
+  /// Animations). Each bar swells between [listeningBarMin] and its full
+  /// length, [listeningBarStagger] (share of the period) after the previous
+  /// one (AppEcoute mockup: 0.45 → 1, 1 s, 0.18 s).
+  static const Duration listeningLevelPeriod = Duration(milliseconds: 1000);
+  static const double listeningBarMin = 0.45;
+  static const double listeningBarStagger = 0.18;
 
   /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval] (plus or
   /// minus up to [wingWaveJitter], so it never feels metronomic) the four
@@ -261,4 +287,50 @@ abstract final class BirdyConfettiMotion {
 /// Haptics of BirdyGo moments (new species, first encounter, new status).
 abstract final class BirdyHaptics {
   static Future<void> light() => HapticFeedback.lightImpact();
+}
+
+/// Physics of one confetti burst (`BirdyConfetti.burst(burst: ...)`): how
+/// many pieces, how hard they leave, how fast they fall, and the life of
+/// the layer (they fade out over the last [BirdyConfettiMotion.fade]).
+class BirdyConfettiBurst {
+  const BirdyConfettiBurst({
+    required this.particles,
+    required this.minForce,
+    required this.maxForce,
+    required this.gravity,
+    required this.life,
+  });
+
+  final int particles;
+  final double minForce;
+  final double maxForce;
+  final double gravity;
+  final Duration life;
+
+  /// The burst of the quiz, statuses and the first encounter until J6h.
+  static const BirdyConfettiBurst standard = BirdyConfettiBurst(
+    particles: BirdyConfettiMotion.burstParticles,
+    minForce: BirdyConfettiMotion.burstMinForce,
+    maxForce: BirdyConfettiMotion.burstMaxForce,
+    gravity: BirdyConfettiMotion.burstGravity,
+    life: BirdyConfettiMotion.burstLife,
+  );
+
+  /// « Première rencontre » fireworks (AppEcoute mockup, Burst): a first
+  /// salve of 22 pieces reaching far, then 14 shorter ones, each falling a
+  /// little before fading (1.5 to 1.9 s).
+  static const BirdyConfettiBurst firstEncounterMain = BirdyConfettiBurst(
+    particles: 22,
+    minForce: 22,
+    maxForce: 40,
+    gravity: 0.3,
+    life: Duration(milliseconds: 1900),
+  );
+  static const BirdyConfettiBurst firstEncounterSecond = BirdyConfettiBurst(
+    particles: 14,
+    minForce: 16,
+    maxForce: 30,
+    gravity: 0.3,
+    life: Duration(milliseconds: 1900),
+  );
 }

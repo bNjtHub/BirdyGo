@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Fortsett",
   "openInAppleMaps": "Åpne i Apple Maps",
   "aruCombinedSessionWarningTitle": "Konflikt med full lyd",
-  "aruCombinedSessionWarningBody": "Kombinerte økter støtter ikke full lyd. Systemet lagrer i stedet et Smart-utvalg av klipp. Gå til forrige skjerm hvis du vil endre opptaksinnstillingene."
+  "aruCombinedSessionWarningBody": "Kombinerte økter støtter ikke full lyd. Systemet lagrer i stedet et Smart-utvalg av klipp. Gå til forrige skjerm hvis du vil endre opptaksinnstillingene.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

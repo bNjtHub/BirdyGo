@@ -103,7 +103,8 @@ class BirdyGoLogoPainter extends CustomPainter {
   static const double lowerBeakOpenDegrees = -11;
   static const double upperBeakOpenDegrees = 13;
 
-  /// Shortest length a bar takes, oscillating or paused: never fully gone.
+  /// Length a bar holds while paused (the oscillation's own shortest length
+  /// is [BirdyMotion.listeningBarMin]): never fully gone.
   static const double pausedBarLevel = 0.55;
 
   /// Source view box of the SVG.
@@ -273,11 +274,14 @@ class BirdyGoLogoPainter extends CustomPainter {
       } else if (frozenLevel != null) {
         fraction = frozenLevel!;
       } else if (level != null) {
-        // Staggered level meter: each bar a phrase-length behind the last.
-        final phase = (level!.value + i / bars.length) % 1.0;
+        // Staggered level meter: each bar a little behind the last.
+        final phase =
+            (level!.value - i * BirdyMotion.listeningBarStagger) % 1.0;
         final triangle = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
         final eased = BirdyMotion.standard.transform(triangle);
-        fraction = pausedBarLevel + (1 - pausedBarLevel) * eased;
+        fraction =
+            BirdyMotion.listeningBarMin +
+            (1 - BirdyMotion.listeningBarMin) * eased;
       } else {
         fraction = 1;
       }

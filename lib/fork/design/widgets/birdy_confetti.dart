@@ -19,12 +19,14 @@ import '../birdy_tokens.dart';
 
 class BirdyConfetti extends StatefulWidget {
   /// A burst from this point, in [colors] (the bird's own colors plus
-  /// [BirdyConfettiColors.burst], usually).
+  /// [BirdyConfettiColors.burst], usually). [settings] set its count, force,
+  /// gravity and life; the default is the quiz's burst.
   const BirdyConfetti.burst({
     super.key,
     this.controller,
     this.colors = BirdyConfettiColors.burst,
     this.delay = Duration.zero,
+    this.settings = BirdyConfettiBurst.standard,
   }) : rain = false;
 
   /// Rain from this point, falling slowly. A full rain puts one at each of
@@ -34,7 +36,8 @@ class BirdyConfetti extends StatefulWidget {
     this.controller,
     this.colors = BirdyConfettiColors.rain,
     this.delay = Duration.zero,
-  }) : rain = true;
+  }) : settings = BirdyConfettiBurst.standard,
+       rain = true;
 
   /// Played by the caller when given, and the particles fade from the
   /// first build. When null, the widget plays its own once, [delay] after
@@ -42,6 +45,9 @@ class BirdyConfetti extends StatefulWidget {
   final ConfettiController? controller;
   final List<Color> colors;
   final Duration delay;
+
+  /// Physics of a burst (ignored by a rain).
+  final BirdyConfettiBurst settings;
   final bool rain;
 
   @override
@@ -55,10 +61,7 @@ class _BirdyConfettiState extends State<BirdyConfetti>
   ConfettiController? _own;
   late final AnimationController _life = AnimationController(
     vsync: this,
-    duration:
-        widget.rain
-            ? BirdyConfettiMotion.rainLife
-            : BirdyConfettiMotion.burstLife,
+    duration: widget.rain ? BirdyConfettiMotion.rainLife : widget.settings.life,
   );
   Timer? _timer;
   bool _reduced = false;
@@ -157,19 +160,12 @@ class _BirdyConfettiState extends State<BirdyConfetti>
           rain
               ? BirdyConfettiMotion.rainParticles ~/
                   BirdyConfettiMotion.rainSpots.length
-              : BirdyConfettiMotion.burstParticles,
+              : widget.settings.particles,
       minBlastForce:
-          rain
-              ? BirdyConfettiMotion.rainMinForce
-              : BirdyConfettiMotion.burstMinForce,
+          rain ? BirdyConfettiMotion.rainMinForce : widget.settings.minForce,
       maxBlastForce:
-          rain
-              ? BirdyConfettiMotion.rainMaxForce
-              : BirdyConfettiMotion.burstMaxForce,
-      gravity:
-          rain
-              ? BirdyConfettiMotion.rainGravity
-              : BirdyConfettiMotion.burstGravity,
+          rain ? BirdyConfettiMotion.rainMaxForce : widget.settings.maxForce,
+      gravity: rain ? BirdyConfettiMotion.rainGravity : widget.settings.gravity,
       particleDrag: BirdyConfettiMotion.drag,
       minimumSize: BirdyConfettiMotion.minSize,
       maximumSize: BirdyConfettiMotion.maxSize,

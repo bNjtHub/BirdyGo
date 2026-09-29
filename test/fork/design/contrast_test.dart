@@ -301,4 +301,24 @@ void main() {
       );
     }
   });
+  test('first-encounter countdown and series (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final card = c.surface2;
+      final track = c.isDark ? c.borderStrong : c.line;
+      // Text under the bar, and the series position, on the card.
+      expectAA(c.text2, card, 'countdown text/card');
+      expectAA(c.text1, card, 'series title/card');
+      // The bar's fill and the current dot stand out from their track. Both
+      // repeat what the text says (« Suivante dans 4 s », « 2 sur 3 »), so
+      // the spec's soft dark track (borderStrong) only has to stay visible.
+      expectAA(c.accentText, on(track, card), 'countdown fill/track', min: 2);
+      expectAA(
+        c.accentText,
+        on(c.borderStrong, card),
+        'series dot/idle dot',
+        min: 2,
+      );
+      expectAA(c.accentText, card, 'countdown fill/card', min: 3);
+    }
+  });
 }

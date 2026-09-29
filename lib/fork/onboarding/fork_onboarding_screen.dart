@@ -20,6 +20,7 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_step_dots.dart';
 import '../design/widgets/pressable.dart';
 import '../settings/fork_prefs.dart';
 import 'onboarding_pages.dart';
@@ -194,8 +195,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                         ),
                         textStyle: BirdyText.label,
                       ),
-                      onPressed:
-                          () => _goTo(ForkOnboardingScreen.namePage),
+                      onPressed: () => _goTo(ForkOnboardingScreen.namePage),
                       child: Text(l10n.skip),
                     ),
                   ),
@@ -214,10 +214,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                   const OnboardingWelcomePage(),
                   const OnboardingHowPage(),
                   const OnboardingLevelsPage(),
-                  OnboardingNamePage(
-                    controller: _name,
-                    onSubmitted: _saveName,
-                  ),
+                  OnboardingNamePage(controller: _name, onSubmitted: _saveName),
                   OnboardingPermissionsPage(
                     mic: _mic,
                     location: _location,
@@ -333,28 +330,12 @@ class _Dots extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final duration =
-        BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.enter;
-    return Semantics(
-      label: l10n.forkOnbPageOf(page + 1, count),
-      excludeSemantics: true,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var i = 0; i < count; i++)
-            AnimatedContainer(
-              duration: duration,
-              curve: BirdyMotion.standard,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: i == page ? 22 : 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: i == page ? c.accent : c.borderStrong,
-                borderRadius: BorderRadius.circular(BirdyRadii.pill),
-              ),
-            ),
-        ],
-      ),
+    return BirdyStepDots(
+      count: count,
+      current: page,
+      activeColor: c.accent,
+      inactiveColor: c.borderStrong,
+      semanticLabel: l10n.forkOnbPageOf(page + 1, count),
     );
   }
 }

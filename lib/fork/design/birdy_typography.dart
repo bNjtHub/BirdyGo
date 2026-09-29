@@ -120,6 +120,16 @@ abstract final class BirdyText {
     letterSpacing: 0,
   );
 
+  /// [caption] with tabular figures, for counters that tick (J6h).
+  static const TextStyle captionTabular = TextStyle(
+    fontFamily: BirdyFonts.sans,
+    fontSize: 13,
+    height: 1.35,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   /// Label of main buttons, Atkinson bold 17.
   static const TextStyle label = TextStyle(
     fontFamily: BirdyFonts.sans,

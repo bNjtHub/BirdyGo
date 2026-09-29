@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Pokračovat",
   "openInAppleMaps": "Otevřít v Apple Maps",
   "aruCombinedSessionWarningTitle": "Konflikt s plným zvukem",
-  "aruCombinedSessionWarningBody": "Kombinované Sessions nepodporují plný zvuk. Systém se vrátí k ukládání klipů s inteligentním vzorkováním (Smart). Chcete-li to změnit, přejděte na předchozí obrazovku a zkontrolujte nastavení nahrávání."
+  "aruCombinedSessionWarningBody": "Kombinované Sessions nepodporují plný zvuk. Systém se vrátí k ukládání klipů s inteligentním vzorkováním (Smart). Chcete-li to změnit, přejděte na předchozí obrazovku a zkontrolujte nastavení nahrávání.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

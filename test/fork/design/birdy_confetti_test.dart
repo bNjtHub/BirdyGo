@@ -102,4 +102,31 @@ void main() {
     );
     await tester.pump(BirdyConfettiMotion.burstLife);
   });
+  testWidgets(
+    'burst settings: count, force, gravity and life come from the caller',
+    (tester) async {
+      const salve = BirdyConfettiBurst.firstEncounterSecond;
+      await _pump(tester, const BirdyConfetti.burst(settings: salve));
+      final particles = _particles(tester);
+      expect(particles.numberOfParticles, salve.particles);
+      expect(particles.minBlastForce, salve.minForce);
+      expect(particles.maxBlastForce, salve.maxForce);
+      expect(particles.gravity, salve.gravity);
+      // Faded out after ITS life, which is shorter than the default one.
+      expect(salve.life, lessThan(BirdyConfettiMotion.burstLife));
+      await tester.pump();
+      await tester.pump(salve.life);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(ConfettiWidget), findsNothing);
+    },
+  );
+
+  test('the default burst is the one of the quiz and the statuses', () {
+    const standard = BirdyConfettiBurst.standard;
+    expect(standard.particles, BirdyConfettiMotion.burstParticles);
+    expect(standard.minForce, BirdyConfettiMotion.burstMinForce);
+    expect(standard.maxForce, BirdyConfettiMotion.burstMaxForce);
+    expect(standard.gravity, BirdyConfettiMotion.burstGravity);
+    expect(standard.life, BirdyConfettiMotion.burstLife);
+  });
 }
