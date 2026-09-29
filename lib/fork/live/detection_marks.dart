@@ -255,6 +255,7 @@ class DetectionMarks extends StatefulWidget {
     required this.displaySeconds,
     required this.running,
     this.showLabels = true,
+    this.clock,
   });
 
   /// Strip height: bars only.
@@ -271,14 +272,20 @@ class DetectionMarks extends StatefulWidget {
   /// spectrogram since J6c-bis-c).
   final bool showLabels;
 
+  /// Source of the current instant; the wall clock when null. Tests inject a
+  /// fake one so nothing depends on real elapsed time.
+  final DateTime Function()? clock;
+
   @override
   State<DetectionMarks> createState() => _DetectionMarksState();
 }
 
 class _DetectionMarksState extends State<DetectionMarks>
     with SingleTickerProviderStateMixin {
-  late final ValueNotifier<DateTime> _now = ValueNotifier(DateTime.now());
-  late final Ticker _ticker = createTicker((_) => _now.value = DateTime.now());
+  DateTime _time() => (widget.clock ?? DateTime.now)();
+
+  late final ValueNotifier<DateTime> _now = ValueNotifier(_time());
+  late final Ticker _ticker = createTicker((_) => _now.value = _time());
   final MarkPauses _pauses = MarkPauses();
   final MarkEndHold _endHold = MarkEndHold();
 
@@ -297,7 +304,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   @override
   void initState() {
     super.initState();
-    if (!widget.running) _pauses.pause(DateTime.now());
+    if (!widget.running) _pauses.pause(_time());
     _syncTicker();
   }
 
@@ -313,7 +320,7 @@ class _DetectionMarksState extends State<DetectionMarks>
       );
     }
     if (widget.running != old.running) {
-      final at = DateTime.now();
+      final at = _time();
       widget.running ? _pauses.resume(at) : _pauses.pause(at);
     }
     _syncTicker();
@@ -323,7 +330,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   void _syncTicker() {
     final shouldRun = widget.running && widget.spans.isNotEmpty;
     if (shouldRun && !_ticker.isActive) {
-      _now.value = DateTime.now();
+      _now.value = _time();
       _ticker.start();
     } else if (!shouldRun && _ticker.isActive) {
       _ticker.stop();
