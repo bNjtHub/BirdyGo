@@ -506,6 +506,9 @@ abstract final class BirdySizes {
   static const double alertDisc = 44;
   static const double alertDiscIcon = 22;
 
+  /// Blur sigma behind the floating volume toast.
+  static const double alertBlurSigma = 12;
+
   /// Minimum height of badges and pills (they grow with text scale).
   static const double pill = 26;
 
