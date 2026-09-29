@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/dashed_border.dart';
 import 'streak.dart';
@@ -196,16 +197,7 @@ class StreakDotsSkeleton extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Column(
                 children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: c.skeleton,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const SizedBox(
-                      width: BirdySizes.dayDot,
-                      height: BirdySizes.dayDot,
-                    ),
-                  ),
+                  BirdySkeleton.circle(size: BirdySizes.dayDot),
                   const SizedBox(height: BirdySpace.xs),
                   Text(
                     weekday.format(day.date).toUpperCase(),

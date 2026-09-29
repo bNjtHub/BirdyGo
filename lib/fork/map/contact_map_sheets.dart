@@ -16,6 +16,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../design/birdy_tokens.dart';
+import '../design/birdygo_silhouette.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/species_tint.dart';
@@ -469,10 +470,11 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(
-                                        AppIcons.bird,
-                                        color: c.accentText,
-                                        fill: 1,
+                                      ExcludeSemantics(
+                                        child: BirdyGoSilhouetteIcon(
+                                          size: 24,
+                                          color: c.accentText,
+                                        ),
                                       ),
                                       const SizedBox(width: BirdySpace.m),
                                       Expanded(

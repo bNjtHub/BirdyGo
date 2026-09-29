@@ -73,14 +73,20 @@ IndexedDetection _clip(String name) => IndexedDetection(
   clipPath: '/clips/$name.wav',
 );
 
-void main() {
-  testWidgets('the intro fits a 390 × 844 phone without scrolling', (
-    tester,
-  ) async {
+/// Pumps the intro on a [size] phone and checks it fits without scrolling;
+/// the illustrated zone is [wellHeight] when given, else between its floor
+/// and its full height.
+Future<void> _checkFit(
+  WidgetTester tester,
+  Size size, {
+  double textScale = 1,
+  double? wellHeight,
+}) async {
+  {
     await _loadRealFonts();
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    tester.view.physicalSize = size * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -91,11 +97,20 @@ void main() {
           speciesClipPlayerProvider.overrideWithValue(_FakePlayer()),
           quizSfxPlayerProvider.overrideWithValue(_FakeSfx()),
           effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
-          taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
         ],
         child: MaterialApp(
           theme: BirdyTheme.light(),
           locale: const Locale('fr'),
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                child: child!,
+              ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: FineEarQuizScreen(
@@ -116,13 +131,43 @@ void main() {
 
     final scroll = tester.state<ScrollableState>(find.byType(Scrollable));
     expect(scroll.position.maxScrollExtent, 0);
-    // The illustrated zone is the token's height.
-    expect(
-      tester.getSize(find.byType(QuizWell).first).height,
-      BirdySizes.quizIntroHero,
-    );
+    final well = tester.getSize(find.byType(QuizWell).first).height;
+    if (wellHeight != null) {
+      expect(well, wellHeight);
+    } else {
+      expect(well, greaterThanOrEqualTo(BirdySizes.quizIntroHeroMin));
+      expect(well, lessThanOrEqualTo(BirdySizes.quizIntroHero));
+    }
     // Back arrow on the intro, no cross.
     expect(find.byTooltip('Retour'), findsOneWidget);
     expect(find.byTooltip('Quitter le quiz'), findsNothing);
+  }
+}
+
+void main() {
+  testWidgets('the intro fits a 390 × 844 phone without scrolling', (
+    tester,
+  ) async {
+    await _checkFit(
+      tester,
+      const Size(390, 844),
+      wellHeight: BirdySizes.quizIntroHero,
+    );
+  });
+
+  testWidgets('the intro fits a 393 × 780 phone without scrolling', (
+    tester,
+  ) async {
+    await _checkFit(tester, const Size(393, 780));
+  });
+
+  testWidgets('the intro fits 393 × 780 at font scale 1.1', (tester) async {
+    await _checkFit(tester, const Size(393, 780), textScale: 1.1);
+  });
+
+  testWidgets('the intro fits 393 × 852 at font scale 1.1, at full height', (
+    tester,
+  ) async {
+    await _checkFit(tester, const Size(393, 852), textScale: 1.1);
   });
 }

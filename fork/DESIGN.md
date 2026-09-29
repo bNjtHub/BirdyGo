@@ -195,7 +195,10 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   et la bande se lit en coordonnées d'écran. Il démarre avec le premier squelette visible et s'arrête
   avec le dernier (retiré de l'arbre, ou masqué par un `TickerMode`). Couleurs : `skeleton` de base,
   `skeletonSheen` par-dessus (clair : blanc à 55 %, sombre : blanc à 12 %). Animations réduites : aucun
-  ticker, aplat `skeleton` fixe. Les formes et leurs dimensions ne changent pas.
+  ticker, aplat fixe. Les formes et leurs dimensions ne changent pas. Toutes sont arrondies (ligne de
+  texte = pilule, un bloc prend le rayon de la carte qu'il remplace : `card`, `hero`, `pill` pour barres et
+  disques ; `BirdySkeleton.circle` et `.bar`) et remplies d'un léger dégradé (`skeleton` vers `skeleton`
+  + 35 % de la lueur). La bande a une chute douce (`shimmerBandAlphas`), sans bord visible.
 - Seconde exception, plus discrète : le logo de l'écoute (J6f, `lib/fork/live/live_header.dart`
   `_LiveLogo`, `BirdyGoLogoPainter`). Il remplace le point vivant qui pulsait ; tant que l'écoute
   est active, ses quatre barres d'aile oscillent seules, comme un petit vumètre, décalées entre
@@ -799,4 +802,7 @@ Règles transverses :
   Le « ? » est réservé à « Je ne sais pas ».
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
-  boutons « Écouter » et « Commencer à écouter ».
+  boutons « Écouter » et « Commencer à écouter » (écart icône/texte : +`BirdySpace.wingLabelGap`). Sur ces
+  deux boutons (`animated`), toutes les 7 s environ (±1,5 s), les barres font une vague douce de 0,9 s,
+  décalées, puis reviennent au repos (`BirdyMotion.wingWave*`) ; rien ne tourne entre deux vagues, arrêt
+  avec animations réduites. La feuille « Arrêter la partie ? » reprend `QuizLogo`, l'emblème du quiz.

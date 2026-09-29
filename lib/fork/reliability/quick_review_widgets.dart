@@ -110,14 +110,10 @@ class ReviewProgress extends StatelessWidget {
 
   /// Same bar-then-caption shape, before the queue's length is known.
   static Widget skeleton(BuildContext context) {
-    final c = BirdyColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-          child: SizedBox(height: 6, child: ColoredBox(color: c.skeleton)),
-        ),
+        BirdySkeleton.bar(height: 6),
         const SizedBox(height: 6),
         BirdySkeleton.text(
           BirdyText.caption,

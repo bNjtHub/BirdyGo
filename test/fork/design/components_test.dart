@@ -8,6 +8,7 @@ import 'package:birdnet_live/fork/design/widgets/animated_count.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_buttons.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_pill.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_wing_icon.dart';
 import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
 import 'package:birdnet_live/fork/design/widgets/pressable.dart';
@@ -223,6 +224,22 @@ void main() {
       );
       await tester.tap(find.text('Écouter'));
       expect(taps, 1);
+    });
+
+    testWidgets('Écouter: the wing sits a token gap before the label', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(Center(child: ListenButton(onPressed: () {}))),
+      );
+      final wing = tester.getRect(find.byType(BirdyWingIcon));
+      final label = tester.getRect(find.text('Écouter'));
+      // The button's own gap (4 to 8, scaled with the font) plus the token.
+      expect(
+        label.left - wing.right,
+        greaterThanOrEqualTo(4 + BirdySpace.wingLabelGap),
+      );
+      expect(tester.getSize(find.byType(BirdyWingIcon)).width, 28);
     });
 
     testWidgets('icon button: 48 dp and a label', (tester) async {

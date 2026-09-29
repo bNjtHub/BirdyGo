@@ -114,7 +114,10 @@ class ListenButton extends StatelessWidget {
             textStyle: BirdyText.label.copyWith(fontSize: 20),
             iconSize: 28,
           ),
-          icon: const BirdyWingIcon(size: 28),
+          icon: const Padding(
+            padding: EdgeInsetsDirectional.only(end: BirdySpace.wingLabelGap),
+            child: BirdyWingIcon(size: 28, animated: true),
+          ),
           label: Text(l10n.forkListen),
         ),
       ),

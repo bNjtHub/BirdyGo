@@ -140,6 +140,26 @@ abstract final class BirdyMotion {
   static const double shimmerBandWidth = 0.5;
   static const double shimmerTiltDegrees = 20;
 
+  /// Soft falloff of the band: opacity share at each stop, edge to edge.
+  static const List<double> shimmerBandAlphas = [
+    0,
+    0.12,
+    0.45,
+    1,
+    0.45,
+    0.12,
+    0,
+  ];
+  static const List<double> shimmerBandStops = [
+    0,
+    0.15,
+    0.32,
+    0.5,
+    0.68,
+    0.85,
+    1,
+  ];
+
   static const double pressScale = 0.97;
 
   /// Starting scale of an element entering.
@@ -165,6 +185,19 @@ abstract final class BirdyMotion {
   /// live dot's pulse. Calm, no bounce (curve [standard] on each half);
   /// reduced motion stops it (fork/DESIGN.md, Animations).
   static const Duration listeningLevelPeriod = Duration(milliseconds: 1300);
+
+  /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval] (plus or
+  /// minus up to [wingWaveJitter], so it never feels metronomic) the four
+  /// bars swell one after the other in [wingWave], then return exactly to
+  /// rest. A gentle level-meter hint, not a loop: at rest nothing ticks.
+  /// Each bar starts [wingWaveStagger] (share of the wave) after the
+  /// previous one and grows by [wingWaveAmplitude] of its length at most.
+  static const Duration wingWave = Duration(milliseconds: 900);
+  static const Duration wingWaveInterval = Duration(seconds: 7);
+  static const Duration wingWaveJitter = Duration(milliseconds: 1500);
+  static const Curve wingWaveCurve = Curves.easeInOut;
+  static const double wingWaveStagger = 0.12;
+  static const double wingWaveAmplitude = 0.22;
 
   /// Whether the platform asks for reduced motion.
   static bool reduced(BuildContext context) =>
