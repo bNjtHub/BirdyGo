@@ -1762,5 +1762,9 @@
   "forkExceptionalHere": "Exceptionnel ici",
   "forkUncommonShort": "Peu commun",
   "forkRareShort": "Rare",
-  "forkExceptionalShort": "Exceptionnel"
+  "forkExceptionalShort": "Exceptionnel",
+  "forkRankingPodiumTitle": "Podium",
+  "forkRankingListTitle": "Classement",
+  "forkConfirmedShort": "Confirmées",
+  "forkRankingByShort": "par {order}"
 }

@@ -81,13 +81,14 @@ class RankingHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.end,
-          spacing: BirdySpace.s,
+        // Number and label share one baseline (J6h), never bottom-aligned.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
           children: [
             Text('$count', style: BirdyText.numberXL.copyWith(color: c.text1)),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5),
+            const SizedBox(width: BirdySpace.s),
+            Flexible(
               child: Text(
                 label,
                 style: BirdyText.body.copyWith(color: c.text1),
@@ -95,7 +96,7 @@ class RankingHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: BirdySpace.xs),
         // Capped so its loading skeleton (ranking_screen.dart) can reserve
         // a fixed number of lines instead of however many this sentence
         // (period + new-this-year count) happens to wrap to.
@@ -441,11 +442,15 @@ class RankingRow extends StatelessWidget {
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(BirdyRadii.thumb),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 60),
+          constraints: const BoxConstraints(minHeight: BirdySizes.row),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: BirdySpace.xs),
+            // The row lives in a BirdyListBlock (J6h), which draws the block
+            // edge and the 1 px dividers; the row pads itself.
+            padding: const EdgeInsets.symmetric(
+              horizontal: BirdySpace.l,
+              vertical: BirdySpace.s,
+            ),
             child: Row(
               children: [
                 SizedBox(
