@@ -474,19 +474,22 @@ class StreakBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: BirdySpace.s,
-            crossAxisAlignment: WrapCrossAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 '${streak.current}',
                 style: BirdyText.numberXL.copyWith(color: c.text1),
               ),
-              Text(
-                days,
-                style: BirdyText.caption.copyWith(
-                  color: c.orioleText,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(width: BirdySpace.s),
+              Flexible(
+                child: Text(
+                  days,
+                  style: BirdyText.caption.copyWith(
+                    color: c.orioleText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -582,7 +585,7 @@ class ToCheckBlock extends StatelessWidget {
                 ),
               ),
               Icon(
-                AppIcons.question,
+                AppIcons.search,
                 size: BirdySizes.blockIcon,
                 color: c.toCheck.foreground,
               ),
@@ -859,6 +862,27 @@ class StatusBlockSkeleton extends StatelessWidget {
 }
 
 /// « Aujourd'hui », its numbers, and today's species as tinted cards.
+/// Sits its child's text baseline on the « Aujourd'hui » title's, in a Wrap
+/// (which cannot align on baselines): every item is shifted down to the
+/// same baseline, the height of a title line.
+class _OnTitleBaseline extends StatelessWidget {
+  const _OnTitleBaseline({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = BirdyText.heading;
+    return Baseline(
+      baseline: MediaQuery.textScalerOf(
+        context,
+      ).scale(style.fontSize! * style.height!),
+      baselineType: TextBaseline.alphabetic,
+      child: child,
+    );
+  }
+}
+
 class TodayBlock extends StatelessWidget {
   const TodayBlock({
     super.key,
@@ -908,16 +932,18 @@ class TodayBlock extends StatelessWidget {
             child: Wrap(
               spacing: BirdySpace.m,
               runSpacing: BirdySpace.xs,
-              crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    l10n.forkHomeTodayTitle,
-                    style: BirdyText.heading.copyWith(color: c.text1),
+                _OnTitleBaseline(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.forkHomeTodayTitle,
+                      style: BirdyText.heading.copyWith(color: c.text1),
+                    ),
                   ),
                 ),
-                Text.rich(
+                _OnTitleBaseline(
+                  child: Text.rich(
                   TextSpan(
                     children: [
                       for (final (i, (count, label)) in numbers.indexed) ...[
@@ -927,9 +953,10 @@ class TodayBlock extends StatelessWidget {
                       ],
                     ],
                   ),
-                  style: BirdyText.caption.copyWith(
-                    color: c.text2,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    style: BirdyText.caption.copyWith(
+                      color: c.text2,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ],
@@ -1092,16 +1119,19 @@ class TodayBlockSkeleton extends StatelessWidget {
               child: Wrap(
                 spacing: BirdySpace.m,
                 runSpacing: BirdySpace.xs,
-                crossAxisAlignment: WrapCrossAlignment.end,
                 children: [
-                  Text(
-                    l10n.forkHomeTodayTitle,
-                    style: BirdyText.heading.copyWith(color: c.text1),
+                  _OnTitleBaseline(
+                    child: Text(
+                      l10n.forkHomeTodayTitle,
+                      style: BirdyText.heading.copyWith(color: c.text1),
+                    ),
                   ),
-                  BirdySkeleton.text(
-                    BirdyText.caption,
-                    placeholder: placeholderNumbers,
-                    maxLines: null,
+                  _OnTitleBaseline(
+                    child: BirdySkeleton.text(
+                      BirdyText.caption,
+                      placeholder: placeholderNumbers,
+                      maxLines: null,
+                    ),
                   ),
                 ],
               ),

@@ -40,11 +40,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Loader with a fixed snapshot, place and sunrise.
 class _FakeLoader implements HomeLoader {
-  _FakeLoader(this.snapshot, {this.place, this.sunriseAt});
+  _FakeLoader(this.snapshot, {this.place, this.sunriseAt, this.sunsetAt});
 
   final HomeSnapshot snapshot;
   final String? place;
   final DateTime? sunriseAt;
+  final DateTime? sunsetAt;
 
   @override
   Future<HomeSnapshot> load() async => snapshot;
@@ -54,6 +55,9 @@ class _FakeLoader implements HomeLoader {
 
   @override
   Future<DateTime?> sunrise() async => sunriseAt;
+
+  @override
+  Future<DateTime?> sunset() async => sunsetAt;
 }
 
 /// Index that never opens and never notifies.
@@ -178,6 +182,7 @@ void main() {
     HomeSnapshot? snapshot,
     String? place = 'Beaulieu-sur-Brenne',
     DateTime? sunrise,
+    DateTime? sunset,
     GameProgress? game,
     bool withGame = true,
     bool dark = false,
@@ -221,6 +226,7 @@ void main() {
               snapshot ?? _morning(),
               place: place,
               sunriseAt: sunrise,
+              sunsetAt: sunset,
             ),
           ),
           taxonomyServiceProvider.overrideWith(
@@ -282,15 +288,20 @@ void main() {
   }
 
   testWidgets('the morning overview, block by block', (tester) async {
-    await pump(tester, sunrise: DateTime(2026, 9, 26, 7, 36), withGoal: true);
+    await pump(
+      tester,
+      sunrise: DateTime(2026, 9, 26, 7, 36),
+      sunset: DateTime(2026, 9, 26, 19, 41),
+      withGoal: true,
+    );
     // Small logo row above the header, and the menu in the header's actions.
     expect(find.byType(BirdyGoWordmark), findsOneWidget);
     expect(find.bySemanticsLabel('BirdyGo'), findsOneWidget);
     expect(find.byTooltip('Menu'), findsOneWidget);
-    expect(
-      find.textContaining('· Beaulieu-sur-Brenne · lever du soleil 07:36'),
-      findsOneWidget,
-    );
+    // The sunrise moved into the « Ta journée » strip.
+    expect(find.textContaining('Beaulieu-sur-Brenne'), findsOneWidget);
+    expect(find.textContaining('lever du soleil'), findsNothing);
+    expect(find.text('07:36'), findsOneWidget);
     // Hero.
     expect(find.textContaining('Dernier oiseau entendu · '), findsOneWidget);
     expect(find.text('Erithacus rubecula'), findsOneWidget);
@@ -474,6 +485,7 @@ void main() {
         size: size,
         withGoal: true,
         sunrise: DateTime(2026, 9, 26, 7, 36),
+        sunset: DateTime(2026, 9, 26, 19, 41),
       );
       expect(tester.takeException(), isNull);
       await scrollTo(tester, find.byType(DailyGoalBlock));

@@ -69,6 +69,9 @@ class _DelayedLoader implements HomeLoader {
 
   @override
   Future<DateTime?> sunrise() async => null;
+
+  @override
+  Future<DateTime?> sunset() async => null;
 }
 
 Streak _streak({int current = 9}) {

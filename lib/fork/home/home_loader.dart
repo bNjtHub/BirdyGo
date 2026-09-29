@@ -99,7 +99,13 @@ class HomeLoader {
 
   /// Today's sunrise where the phone is (J6f date line), estimated like the
   /// ARU schedule. Null without a position; never asks for one.
-  Future<DateTime?> sunrise() async {
+  Future<DateTime?> sunrise() async => (await _sunTimes())?.sunrise;
+
+  /// Today's sunset where the phone is (J6h « Ta journée » strip); same
+  /// rules as [sunrise].
+  Future<DateTime?> sunset() async => (await _sunTimes())?.sunset;
+
+  Future<AruSunTimes?> _sunTimes() async {
     try {
       final position = await _position();
       if (position == null) return null;
@@ -108,7 +114,7 @@ class HomeLoader {
         date: DateTime(now.year, now.month, now.day),
         latitude: position.latitude,
         longitude: position.longitude,
-      ).sunrise;
+      );
     } catch (_) {
       return null;
     }
