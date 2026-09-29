@@ -31,6 +31,7 @@ import 'live_session.dart';
 import 'widgets/detection_list_widget.dart';
 import '../../fork/background/background_tip.dart'; // FORK: J2b
 import '../../fork/background/live_background.dart'; // FORK: J2b
+import '../../fork/notifications/species_notifier.dart'; // FORK: J6h
 import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
 import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
 import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
@@ -256,6 +257,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     ref.read(allSessionDetectionsProvider.notifier).state =
         controller.sessionDetections;
     ref.read(currentSessionProvider.notifier).state = controller.session;
+
+    // FORK: notify a new reliable species while in the background (J6h)
+    unawaited(
+      notifyNewSpecies(
+        ref,
+        AppLocalizations.of(context)!,
+        controller.session,
+        controller.sessionDetections,
+      ),
+    );
 
     // Auto-start: if the user opted in via the Live setting, kick off a
     // session as soon as the model finishes loading. Guarded by

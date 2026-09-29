@@ -822,6 +822,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Écoute : alerte « Volume coupé / Volume bas » (volume média sous `MediaVolumeConfig.lowBelow`,
             lu chaque seconde par `MediaVolume`) et bouton « Monter le son » (`comfortable`, avec le
             curseur système). Canal `fr.justcodeit.birdygo/media_volume`, `MediaVolumeChannel.kt`.
+      - [x] Écoute : notification d'une nouvelle espèce (Sûr ou Probable, première fois de la session) quand l'app est en arrière-plan ; canal « Nouvelles espèces », interrupteur dans les options d'écoute (`lib/fork/notifications/`). Côté iOS : autorisation de notification (UNUserNotificationCenter) et mode d'arrière-plan audio nécessaires.
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
@@ -888,6 +889,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Notification de nouvelle espèce (J6h) : `NotificationsGateway` demande déjà l'autorisation iOS (`requestPermissions`) ; sans `UIBackgroundModes: audio` (ci-dessous) l'écoute s'arrête en arrière-plan, donc pas de notification. À tester.
 - Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
   `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`

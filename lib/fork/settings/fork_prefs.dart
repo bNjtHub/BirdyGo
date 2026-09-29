@@ -72,3 +72,22 @@ class LiveThemeSetting extends Notifier<LiveTheme> {
 final liveThemeProvider = NotifierProvider<LiveThemeSetting, LiveTheme>(
   LiveThemeSetting.new,
 );
+
+const String kNewSpeciesNotifPref = 'fork_new_species_notif_v1';
+
+/// « Me prévenir des nouvelles espèces »: a notification per new species
+/// while listening in the background. On by default.
+class NewSpeciesNotifSetting extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref.read(sharedPreferencesProvider).getBool(kNewSpeciesNotifPref) ?? true;
+
+  Future<void> set(bool on) async {
+    state = on;
+    await ref.read(sharedPreferencesProvider).setBool(kNewSpeciesNotifPref, on);
+  }
+}
+
+final newSpeciesNotifProvider = NotifierProvider<NewSpeciesNotifSetting, bool>(
+  NewSpeciesNotifSetting.new,
+);
