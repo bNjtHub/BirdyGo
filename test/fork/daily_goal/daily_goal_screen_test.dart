@@ -96,7 +96,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // While progress is still pending its skeleton may shimmer forever
+    // (J6g-g), so pumpAndSettle would never return: pump past the entrance.
+    if (slowProgress != null) {
+      await tester.pump(const Duration(seconds: 1));
+    } else {
+      await tester.pumpAndSettle();
+    }
   }
 
   testWidgets('home card is passive until opened', (tester) async {
