@@ -561,9 +561,12 @@ class VerdictButtons extends StatelessWidget {
 
 /// Nothing left: empty queue or all sorted.
 class ReviewAllDone extends StatelessWidget {
-  const ReviewAllDone({super.key, required this.sorted});
+  const ReviewAllDone({super.key, required this.sorted, this.onBack});
 
   final int sorted;
+
+  /// Exit of the end state: shows a centered back button under the message.
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -580,6 +583,8 @@ class ReviewAllDone extends StatelessWidget {
               ? l10n.forkQuickReviewEmpty
               : '${l10n.forkQuickReviewSorted(sorted)} '
                   '${l10n.forkQuickReviewDone}',
+      action: l10n.tooltipBack,
+      onAction: onBack,
     );
   }
 }
