@@ -1,4 +1,4 @@
-/// « Fais sa connaissance » (J6h): the species sheet as five round discs,
+/// « Fais sa connaissance » (J6h): the species sheet as six round discs,
 /// one content card under them, and the link to the quiz. Replaces the old
 /// chip row. State is ephemeral: it resets each time the page opens.
 library;
@@ -17,12 +17,13 @@ import '../species_sheet/species_sheet.dart';
 import '../species_sheet/species_sheet_section.dart' show sheetSectionTitle;
 import 'section_title.dart';
 
-/// The five sections, in display order (a subset of [SheetSection]).
+/// The six sections, in display order (a subset of [SheetSection]).
 const List<SheetSection> kMeetSections = [
   SheetSection.byEar,
   SheetSection.size,
   SheetSection.behaviour,
   SheetSection.migration,
+  SheetSection.enemies,
   SheetSection.anecdote,
 ];
 
@@ -32,15 +33,19 @@ List<SheetSection> meetAvailable(SpeciesSheet sheet) => [
     if (sheet.sections.containsKey(s)) s,
 ];
 
+/// Discs per row of the grid.
+const int _kMeetColumns = 3;
+
 /// Meaning of the tint of a section (DESIGN.md: tonal learn, sure acquired,
 /// oriole reward).
-enum _Tone { tonal, sure, oriole }
+enum _Tone { tonal, sure, probable, oriole }
 
 const Map<SheetSection, _Tone> _tones = {
   SheetSection.byEar: _Tone.tonal,
   SheetSection.size: _Tone.sure,
   SheetSection.behaviour: _Tone.tonal,
   SheetSection.migration: _Tone.sure,
+  SheetSection.enemies: _Tone.probable,
   SheetSection.anecdote: _Tone.oriole,
 };
 
@@ -49,14 +54,16 @@ IconData _iconOf(SheetSection s) => switch (s) {
   SheetSection.size => AppIcons.straighten,
   SheetSection.behaviour => AppIcons.visibility,
   SheetSection.migration => AppIcons.flight,
+  SheetSection.enemies => AppIcons.pets,
   _ => AppIcons.lightbulbOutline,
 };
 
 String _labelOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   SheetSection.byEar => l10n.forkMeetByEar,
   SheetSection.size => l10n.forkMeetSize,
-  SheetSection.behaviour => l10n.forkMeetBehaviour,
+  SheetSection.behaviour => l10n.forkSheetHabits,
   SheetSection.migration => l10n.forkMeetMigration,
+  SheetSection.enemies => l10n.forkSheetEnemies,
   _ => l10n.forkMeetAnecdote,
 };
 
@@ -65,6 +72,7 @@ String _hookOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   SheetSection.size => l10n.forkMeetHookSize,
   SheetSection.behaviour => l10n.forkMeetHookBehaviour,
   SheetSection.migration => l10n.forkMeetHookMigration,
+  SheetSection.enemies => l10n.forkSheetEnemiesKicker,
   _ => l10n.forkMeetHookAnecdote,
 };
 
@@ -124,6 +132,7 @@ List<Widget> _extraBlocks(SpeciesSheet sheet) => [
 ({Color fill, Color fore}) _colors(BirdyColors c, _Tone t) => switch (t) {
   _Tone.tonal => (fill: c.tonal, fore: c.accentText),
   _Tone.sure => (fill: c.sure.background, fore: c.sure.foreground),
+  _Tone.probable => (fill: c.probable.background, fore: c.probable.foreground),
   _Tone.oriole => (fill: c.orioleContainer, fore: c.orioleText),
 };
 
@@ -208,25 +217,30 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                 ),
               ],
               const SizedBox(height: BirdySpace.l),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < sections.length; i++)
-                    Expanded(
-                      child: _MeetDisc(
-                        key: ValueKey('meet-disc-${sections[i].key}'),
-                        section: sections[i],
-                        selected: i == index,
-                        read: read.contains(sections[i]),
-                        onTap:
-                            () => setState(() {
-                              _read.add(current);
-                              _index = i;
-                            }),
+              // 3 columns: six sections make a 3 x 2 grid.
+              for (var r = 0; r < sections.length; r += _kMeetColumns)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var i = r; i < r + _kMeetColumns; i++)
+                      Expanded(
+                        child:
+                            i < sections.length
+                                ? _MeetDisc(
+                                  key: ValueKey('meet-disc-${sections[i].key}'),
+                                  section: sections[i],
+                                  selected: i == index,
+                                  read: read.contains(sections[i]),
+                                  onTap:
+                                      () => setState(() {
+                                        _read.add(current);
+                                        _index = i;
+                                      }),
+                                )
+                                : const SizedBox.shrink(),
                       ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
               const SizedBox(height: BirdySpace.l),
               DecoratedBox(
                 decoration: BoxDecoration(
@@ -425,7 +439,7 @@ class _MeetDisc extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: BirdySpace.xs),
-              // « Comportement » does not fit a fifth of the row at 13.
+              // A long label shrinks to fit its column at 13 and large text scales.
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(

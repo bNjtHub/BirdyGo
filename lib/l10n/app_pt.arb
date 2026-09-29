@@ -1111,5 +1111,8 @@
   "forkMomentSeriesPos": "{pos} of {total} new",
   "forkMomentClosesIn": "Closes by itself in {n} s",
   "forkMomentNextIn": "Next in {n} s",
-  "forkMomentPausedSuffix": "· paused"
+  "forkMomentPausedSuffix": "· paused",
+  "forkSheetHabits": "Habits",
+  "forkSheetEnemies": "Enemies",
+  "forkSheetEnemiesKicker": "Who hunts it"
 }

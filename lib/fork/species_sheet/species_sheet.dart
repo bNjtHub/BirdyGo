@@ -21,6 +21,7 @@ enum SheetSection {
   behaviour('behaviour'),
   whyHere('why_here'),
   migration('migration'),
+  enemies('enemies'),
   byEar('by_ear'),
   confusions('confusions'),
   anecdote('anecdote');
