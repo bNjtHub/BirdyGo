@@ -77,9 +77,38 @@ abstract final class BirdyMotion {
   /// Upper bound of any celebration.
   static const Duration celebrationMax = Duration(milliseconds: 500);
 
-  /// The home logo's double-tap flight (J6f): explicit, user-triggered
-  /// exception to [celebrationMax], see DESIGN.md's Logo section.
-  static const Duration logoFlight = Duration(milliseconds: 2300);
+  /// The home logo's double-tap easter egg (J6h, logo_flight.dart): the bird
+  /// flies to the middle of the screen, winks, and flies off and back.
+  /// Explicit, user-triggered exception to [celebrationMax], see DESIGN.md's
+  /// Logo section. One controller, the legs are shares of [logoWink]:
+  /// take-off until [logoWinkTakeoffEnd], hover until [logoWinkHoverEnd]
+  /// (head tilt, the wink between [logoWinkEyeStart] and [logoWinkEyeEnd],
+  /// the tweet), off-screen until [logoWinkExitEnd], then back to its place.
+  static const Duration logoWink = Duration(milliseconds: 3600);
+  static const double logoWinkTakeoffEnd = 0.22;
+  static const double logoWinkHoverEnd = 0.62;
+  static const double logoWinkExitEnd = 0.78;
+  static const double logoWinkEyeStart = 0.34;
+  static const double logoWinkEyeEnd = 0.5;
+
+  /// Size of the bird at the middle of the screen, as a multiple of the
+  /// header mark, and the size it has while off-screen (it shrinks back to
+  /// 1 on its way home).
+  static const double logoWinkScale = 3.5;
+  static const double logoWinkFarScale = 2;
+
+  /// Head tilt while hovering, in degrees, and the hover's gentle bob, in
+  /// logical pixels (under [maxOffset]) over [logoWinkBobCycles] cycles.
+  static const double logoWinkTiltDegrees = 7;
+  static const double logoWinkBob = 6;
+  static const double logoWinkBobCycles = 2;
+
+  /// Wing beats while flying, and the share of a bar the beat never takes.
+  static const int logoWinkFlapCycles = 6;
+  static const double logoWinkFlapFloor = 0.35;
+
+  /// Reduced motion: a quick wink in place, nothing else.
+  static const Duration logoWinkReduced = Duration(milliseconds: 450);
 
   /// Delay between list items entering, over [staggerMaxItems] items.
   static const Duration staggerStep = Duration(milliseconds: 40);

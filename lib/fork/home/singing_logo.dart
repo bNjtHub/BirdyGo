@@ -8,10 +8,10 @@
 /// above it, the app in the background). Reduced motion: the settled mark,
 /// never animated. A tap on the mark or the name makes it sing once.
 ///
-/// A double tap (J6f) sends the bird flying across the screen instead (see
-/// [logo_flight.dart]): an explicit, user-triggered exception to the
-/// 500 ms rule, documented in DESIGN.md's Logo section. Reduced motion: a
-/// double tap just behaves like a tap.
+/// A double tap (J6h) sends the bird to the middle of the screen to wink at
+/// the child, then off and back (see [logo_flight.dart]): an explicit,
+/// user-triggered exception to the 500 ms rule, documented in DESIGN.md's
+/// Logo section. Reduced motion: a quick wink in place.
 library;
 
 import 'dart:async';
@@ -56,6 +56,9 @@ class SingingLogo extends StatefulWidget {
   static const Rect _mark = Rect.fromLTWH(30, 72, 460, 372);
   static const Offset _boardOrigin = Offset(-80, 10);
 
+  /// Side of the logo painter's box (the brand SVG's view box).
+  static const double _logoBox = 512;
+
   @override
   State<SingingLogo> createState() => _SingingLogoState();
 }
@@ -87,11 +90,14 @@ class _SingingLogoState extends State<SingingLogo>
 
   /// The mark's own box, to find its screen position when a flight starts.
   final GlobalKey _markKey = GlobalKey();
-  late final AnimationController _flightController = AnimationController(
-    vsync: this,
-    duration: BirdyMotion.logoFlight,
-  );
+  late final AnimationController _flightController =
+      AnimationController(vsync: this)..addListener(_flightTick);
   OverlayEntry? _flightEntry;
+
+  /// The tweet and the haptic each fire once per run, at the wink.
+  bool _tweeted = false;
+  bool _winked = false;
+  bool _flightReduced = false;
 
   /// While flying, the static mark is hidden (one bird on screen).
   bool _flying = false;
@@ -171,18 +177,16 @@ class _SingingLogoState extends State<SingingLogo>
   }
 
   void _onTap() {
+    // The egg is running: its own tweet is the only one.
+    if (_flying) return;
     widget.onTap?.call();
     if (_canSing && !_controller.isAnimating) _sing();
   }
 
-  /// A second double tap while flying is ignored; reduced motion falls
-  /// back to a plain tap (sing + chirp, no flight).
+  /// A second double tap while the bird is away is ignored. Reduced motion:
+  /// a quick wink in place, no flight.
   void _onDoubleTap() {
     if (_flying) return;
-    if (_reduced) {
-      _onTap();
-      return;
-    }
     _startFlight();
   }
 
@@ -201,24 +205,51 @@ class _SingingLogoState extends State<SingingLogo>
     final originGlobal = markBox.localToGlobal(
       markBox.size.center(Offset.zero),
     );
-    final path = LogoFlightPath(
+    // The painter's 512 box, at the header mark's scale: its center-of-mark
+    // point sits where the timeline says, so the bird starts and ends
+    // exactly on the header's own.
+    final k = widget.width / SingingLogo._mark.width;
+    final boxSize = SingingLogo._logoBox * k;
+    _flightReduced = _reduced;
+    final timeline = LogoWinkTimeline(
       origin: overlayBox.globalToLocal(originGlobal),
       screen: overlayBox.size,
+      farMargin: boxSize * BirdyMotion.logoWinkFarScale / 2,
+      reduced: _reduced,
     );
-    // The tweet plays once, at take-off (muted during a listening, like a
-    // plain tap: widget.onTap already checks that).
-    widget.onTap?.call();
+    _tweeted = false;
+    _winked = false;
     setState(() => _flying = true);
     _flightEntry = OverlayEntry(
       builder:
-          (_) => LogoFlightBird(
+          (_) => LogoWinkBird(
             animation: _flightController,
-            path: path,
-            size: BirdySizes.logoFlightBird,
+            timeline: timeline,
+            size: boxSize,
+            pivot: SingingLogo._mark.center * k,
           ),
     );
     overlay.insert(_flightEntry!);
+    _flightController.duration =
+        _reduced ? BirdyMotion.logoWinkReduced : BirdyMotion.logoWink;
     _flightController.forward(from: 0).whenComplete(_endFlight);
+    _flightTick();
+  }
+
+  /// The tweet (muted during a listening, like a plain tap: widget.onTap
+  /// already checks that) plays when the bird arrives, the haptic when the
+  /// eye closes.
+  void _flightTick() {
+    if (!_flying) return;
+    final t = _flightController.value;
+    if (!_tweeted && (_flightReduced || t >= BirdyMotion.logoWinkTakeoffEnd)) {
+      _tweeted = true;
+      widget.onTap?.call();
+    }
+    if (!_winked && (_flightReduced || t >= BirdyMotion.logoWinkEyeStart)) {
+      _winked = true;
+      BirdyHaptics.light();
+    }
   }
 
   void _endFlight() {

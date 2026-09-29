@@ -90,6 +90,7 @@ abstract final class NotebookVisuals {
         icon: BirdyGoSilhouetteIcon(
           size: size * 0.6,
           color: SpeciesTint.neutral.deep,
+          muted: true,
         ),
       );
 }

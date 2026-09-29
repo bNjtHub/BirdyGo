@@ -72,15 +72,26 @@ class _BirdyGoLogoState extends State<BirdyGoLogo>
 /// live header). [frozenLevel] holds the bars at a fixed length instead
 /// (paused). Neither is read while [progress] is still drawing the bars in.
 class BirdyGoLogoPainter extends CustomPainter {
-  BirdyGoLogoPainter({required this.progress, this.level, this.frozenLevel})
-    : super(repaint: level == null ? progress : Listenable.merge([
-        progress,
-        level,
-      ]));
+  BirdyGoLogoPainter({
+    required this.progress,
+    this.level,
+    this.frozenLevel,
+    this.eyeClosed,
+  }) : super(
+         repaint: Listenable.merge([
+           progress,
+           if (level != null) level,
+           if (eyeClosed != null) eyeClosed,
+         ]),
+       );
 
   final Animation<double> progress;
   final Animation<double>? level;
   final double? frozenLevel;
+
+  /// 0 (open) → 1 (winking: the eye is a curved line): the home easter
+  /// egg's wink (logo_flight.dart).
+  final Animation<double>? eyeClosed;
 
   /// Shortest length a bar takes, oscillating or paused: never fully gone.
   static const double pausedBarLevel = 0.55;
@@ -153,6 +164,33 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// The eye (ink disc), also cut out of the map's place silhouette.
   static const Offset eyeCenter = Offset(176.2, 172.6);
   static const double eyeRadius = 18.7;
+
+  /// How far the closed eye's line sags below the eye's center, and its
+  /// thickness at the middle, as shares of [eyeRadius].
+  static const double _closedSag = 0.3;
+  static const double _closedThickness = 0.5;
+
+  /// The eye at [closed] (0 → 1) in the 512 box: the round eye, squashing
+  /// into a thin curved line (a smiling closed eye) with the same width.
+  /// Shared by the silhouette, which cuts it out.
+  static Path eyePath(double closed) {
+    final c = closed.clamp(0.0, 1.0);
+    const r = eyeRadius;
+    final top = _lerp(-r, r * _closedSag, c);
+    final bottom = _lerp(r, r * (_closedSag + _closedThickness), c);
+    // A cubic with both controls at 4/3 of the peak peaks at that height.
+    const k = 4 / 3;
+    final left = eyeCenter.dx - r;
+    final right = eyeCenter.dx + r;
+    final y = eyeCenter.dy;
+    return Path()
+      ..moveTo(left, y)
+      ..cubicTo(left, y + k * top, right, y + k * top, right, y)
+      ..cubicTo(right, y + k * bottom, left, y + k * bottom, left, y)
+      ..close();
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
 
   static final Path upperBeak =
       Path()
@@ -231,19 +269,28 @@ class BirdyGoLogoPainter extends CustomPainter {
       );
     }
 
-    canvas
-      ..drawCircle(eyeCenter, eyeRadius, Paint()..color = BirdyBrand.ink)
-      ..drawCircle(
+    final closed = eyeClosed?.value ?? 0;
+    if (closed <= 0) {
+      canvas.drawCircle(eyeCenter, eyeRadius, Paint()..color = BirdyBrand.ink);
+    } else {
+      canvas.drawPath(eyePath(closed), Paint()..color = BirdyBrand.ink);
+    }
+    // The glint fades out before the lid gets to it.
+    final glint = (1 - closed * 2).clamp(0.0, 1.0);
+    if (glint > 0) {
+      canvas.drawCircle(
         const Offset(171, 166.6),
         5.4,
-        Paint()..color = const Color(0xFFFFFFFF),
-      )
-      ..restore();
+        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: glint),
+      );
+    }
+    canvas.restore();
   }
 
   @override
   bool shouldRepaint(BirdyGoLogoPainter oldDelegate) =>
       oldDelegate.progress != progress ||
       oldDelegate.level != level ||
-      oldDelegate.frozenLevel != frozenLevel;
+      oldDelegate.frozenLevel != frozenLevel ||
+      oldDelegate.eyeClosed != eyeClosed;
 }

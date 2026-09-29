@@ -396,6 +396,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                     child: BirdyGoSilhouetteIcon(
                       size: BirdySizes.notebookHeroSilhouette,
                       color: c.text2,
+                      muted: true,
                     ),
                   ),
                   const SizedBox(width: BirdySpace.s),
