@@ -34,6 +34,7 @@ import '../ranking/species_activity_section.dart';
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
+import 'meet_species_block.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
 import 'species_page_drag_close.dart';
@@ -398,7 +399,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           ),
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
-        SheetChipsBlock(sheet: sheet)
+        MeetSpeciesBlock(sheet: sheet)
       else if (_description != null)
         DescriptionBlock(
           text: _description!,
@@ -458,9 +459,9 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
-                BirdySpace.gutter,
+                BirdySpace.page,
                 BirdySpace.l,
-                BirdySpace.gutter,
+                BirdySpace.page,
                 // FORK: viewPaddingOf, not paddingOf — inside a sheet
                 // (showBirdySheet, useSafeArea: true) the ambient padding
                 // does not carry the bottom nav bar inset, only viewPadding
@@ -472,7 +473,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                 children: [
                   for (final block in blocks) ...[
                     if (block != blocks.first)
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.block),
                     block,
                   ],
                 ],

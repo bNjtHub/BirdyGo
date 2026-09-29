@@ -22,6 +22,7 @@ class ActivityBars extends StatelessWidget {
     this.onSelect,
     this.highlightIndex,
     this.highlightColor,
+    this.labelStyle,
   });
 
   final List<int> values;
@@ -57,6 +58,10 @@ class ActivityBars extends StatelessWidget {
   /// default.
   final Color? highlightColor;
 
+  /// Axis label style (J6h: [BirdyText.axisLabel], 12); the theme's
+  /// labelSmall by default.
+  final TextStyle? labelStyle;
+
   void _select(Offset local, double width) {
     final onSelect = this.onSelect;
     if (onSelect == null || values.isEmpty || width <= 0) return;
@@ -68,7 +73,7 @@ class ActivityBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.labelSmall?.copyWith(
+    final style = (labelStyle ?? theme.textTheme.labelSmall)?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
     return Semantics(

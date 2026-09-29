@@ -147,6 +147,16 @@ abstract final class BirdyText {
     letterSpacing: 0,
   );
 
+  /// Axis labels of the charts (months, hours), Atkinson 12: the smallest
+  /// size of the scale.
+  static const TextStyle axisLabel = TextStyle(
+    fontFamily: BirdyFonts.sans,
+    fontSize: 12,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+  );
+
   /// Hero number 64, tabular figures: one per screen at most (the quiz
   /// score).
   static const TextStyle numberHero = TextStyle(
