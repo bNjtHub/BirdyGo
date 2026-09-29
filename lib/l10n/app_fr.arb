@@ -1854,5 +1854,9 @@
   "forkRankingPodiumTitle": "Podium",
   "forkRankingListTitle": "Classement",
   "forkConfirmedShort": "Confirmées",
-  "forkRankingByShort": "par {order}"
+  "forkRankingByShort": "par {order}",
+  "forkSoundLibraryAll": "Toutes",
+  "forkSoundLibraryHeroLabel": "{count, plural, =1{enregistrement} other{enregistrements}}",
+  "forkSoundLibrarySpeciesCount": "{count, plural, =1{1 espèce} other{{count} espèces}}",
+  "forkSoundLibraryFavoritesCount": "{count, plural, =0{0 ★ favori} =1{1 ★ favori} other{{count} ★ favoris}}"
 }
