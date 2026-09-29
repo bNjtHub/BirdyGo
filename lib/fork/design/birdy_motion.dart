@@ -80,16 +80,31 @@ abstract final class BirdyMotion {
   /// The home logo's double-tap easter egg (J6h, logo_flight.dart): the bird
   /// flies to the middle of the screen, winks, and flies off and back.
   /// Explicit, user-triggered exception to [celebrationMax], see DESIGN.md's
-  /// Logo section. One controller, the legs are shares of [logoWink]:
-  /// take-off until [logoWinkTakeoffEnd], hover until [logoWinkHoverEnd]
-  /// (head tilt, the wink between [logoWinkEyeStart] and [logoWinkEyeEnd],
-  /// the tweet), off-screen until [logoWinkExitEnd], then back to its place.
-  static const Duration logoWink = Duration(milliseconds: 3600);
-  static const double logoWinkTakeoffEnd = 0.22;
-  static const double logoWinkHoverEnd = 0.62;
-  static const double logoWinkExitEnd = 0.78;
-  static const double logoWinkEyeStart = 0.34;
-  static const double logoWinkEyeEnd = 0.5;
+  /// Logo section. One controller, the legs are shares of [logoWink]
+  /// (written in milliseconds of its 4.4 s): take-off until
+  /// [logoWinkTakeoffEnd], hover until [logoWinkHoverEnd] (the tweet and the
+  /// song from the arrival, the wink between [logoWinkEyeStart] and
+  /// [logoWinkEyeEnd], head tilt), off-screen until [logoWinkExitEnd], then
+  /// back to its place.
+  static const Duration logoWink = Duration(milliseconds: 4400);
+  static const double logoWinkTakeoffEnd = 800 / 4400;
+  static const double logoWinkHoverEnd = 3100 / 4400;
+  static const double logoWinkExitEnd = 3700 / 4400;
+  static const double logoWinkEyeStart = 2400 / 4400;
+  static const double logoWinkEyeEnd = 2950 / 4400;
+
+  /// The song at the middle of the screen, from [logoWinkTakeoffEnd] with
+  /// the tweet: [logoWinkSyllables] syllables [logoWinkSyllable] apart, the
+  /// beak open for [logoWinkSyllableLength] of each, one note per syllable
+  /// leaving the beak [logoWinkNoteDelay] later and flying (rising, fading)
+  /// for [logoWinkNoteLife], [logoWinkNoteReach] times the header's flight.
+  /// All shares of [logoWink]; the last note is gone before [logoWinkHoverEnd].
+  static const int logoWinkSyllables = 4;
+  static const double logoWinkSyllable = 400 / 4400;
+  static const double logoWinkSyllableLength = 360 / 4400;
+  static const double logoWinkNoteDelay = 80 / 4400;
+  static const double logoWinkNoteLife = 1000 / 4400;
+  static const double logoWinkNoteReach = 1.6;
 
   /// Size of the bird at the middle of the screen, as a multiple of the
   /// header mark, and the size it has while off-screen (it shrinks back to

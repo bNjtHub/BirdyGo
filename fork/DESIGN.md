@@ -180,7 +180,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 - Exception autorisée : un double appui sur le logo de l'accueil (J6h, `lib/fork/home/logo_flight.dart`)
   fait décoller l'oiseau, qui vole jusqu'au centre de l'écran (3,5 fois sa taille), penche la tête et
   fait un clin d'œil (l'œil devient un trait courbe), puis s'envole par la droite et revient se poser
-  dans l'en-tête : 3,6 s (`BirdyMotion.logoWink*`, un seul contrôleur), au-delà des 500 ms. Explicite
+  dans l'en-tête : 4,4 s (l'oiseau chante avec ses notes à l'arrivée) (`BirdyMotion.logoWink*`, un seul contrôleur), au-delà des 500 ms. Explicite
   et voulu par la personne (deux appuis, jamais tout seul), donc pas une célébration au sens de la
   règle. Le cri BirdyGo joue une fois à l'arrivée, un retour haptique léger au clin d'œil ; pendant ce
   temps le logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un clin

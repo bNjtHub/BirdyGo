@@ -203,6 +203,45 @@ class BirdyGoSingingPainter extends CustomPainter {
         ..scale(1, scaleY)
         ..translate(-origin.dx, -origin.dy);
 
+  /// One note of age [u] (0 → 1) in the logo's 512 box, leaving the beak and
+  /// rising to the left; [i] picks its color and lane. [reach] stretches the
+  /// flight and the size (the home easter egg's big bird, logo_flight.dart).
+  static void paintNote(Canvas canvas, int i, double u, {double reach = 1}) {
+    final rise = 1 - math.pow(1 - u, 2).toDouble();
+    final paint =
+        Paint()
+          ..color = _noteColors[i % _noteColors.length].withValues(
+            alpha:
+                _Timeline.easeOut(u / .15) *
+                (1 - _Timeline.smooth((u - .5) / .5)),
+          );
+    canvas
+      ..save()
+      ..translate(
+        40 - (34 + i * 18) * rise * reach + math.sin(u * math.pi * 2 + i) * 5,
+        190 - (110 + i * 16) * rise * reach,
+      )
+      ..rotate((-12 + math.sin(u * math.pi) * 14) * math.pi / 180)
+      ..scale((.6 + .4 * _Timeline.easeOut(u / .3)) * 1.7 * (1 - i * .08))
+      ..save();
+    _rotateAbout(canvas, const Offset(-.5, 15), -20);
+    canvas
+      ..drawOval(
+        Rect.fromCenter(center: const Offset(-.5, 15), width: 15, height: 10),
+        paint,
+      )
+      ..restore()
+      ..drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(3, -14, 4, 30),
+          const Radius.circular(2),
+        ),
+        paint,
+      )
+      ..drawPath(_noteFlag, paint)
+      ..restore();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final t = still ? _settled : clock.value;
@@ -348,40 +387,7 @@ class BirdyGoSingingPainter extends CustomPainter {
         }
       }
       if (age == null) continue;
-      final u = age / _noteLife;
-      final rise = 1 - math.pow(1 - u, 2).toDouble();
-      final paint =
-          Paint()
-            ..color = _noteColors[i].withValues(
-              alpha:
-                  _Timeline.easeOut(u / .15) *
-                  (1 - _Timeline.smooth((u - .5) / .5)),
-            );
-      canvas
-        ..save()
-        ..translate(
-          40 - (34 + i * 18) * rise + math.sin(u * math.pi * 2 + i) * 5,
-          190 - (110 + i * 16) * rise,
-        )
-        ..rotate((-12 + math.sin(u * math.pi) * 14) * math.pi / 180)
-        ..scale((.6 + .4 * _Timeline.easeOut(u / .3)) * 1.7 * (1 - i * .08))
-        ..save();
-      _rotateAbout(canvas, const Offset(-.5, 15), -20);
-      canvas
-        ..drawOval(
-          Rect.fromCenter(center: const Offset(-.5, 15), width: 15, height: 10),
-          paint,
-        )
-        ..restore()
-        ..drawRRect(
-          RRect.fromRectAndRadius(
-            const Rect.fromLTWH(3, -14, 4, 30),
-            const Radius.circular(2),
-          ),
-          paint,
-        )
-        ..drawPath(_noteFlag, paint)
-        ..restore();
+      paintNote(canvas, i, age / _noteLife);
     }
     canvas.restore();
   }

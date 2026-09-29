@@ -172,6 +172,107 @@ void main() {
     expect(BirdyMotion.logoWinkEyeEnd, lessThan(BirdyMotion.logoWinkHoverEnd));
   });
 
+  test('the bird sings at the arrival: beak and one note per syllable', () {
+    const timeline = LogoWinkTimeline(
+      origin: Offset(30, 40),
+      screen: Size(400, 800),
+    );
+    const total = 4400.0;
+    const syll = BirdyMotion.logoWinkSyllable;
+    const start = BirdyMotion.logoWinkTakeoffEnd;
+    // Before the arrival: closed beak, no note.
+    expect(timeline.mouthAt(start - 0.01), 0);
+    for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+      expect(timeline.noteAt(start - 0.01, i), isNull);
+    }
+    // Mid syllable: beak wide open, and each note flies in turn.
+    const mid = start + BirdyMotion.logoWinkSyllableLength / 2;
+    expect(timeline.mouthAt(mid), closeTo(1, 0.01));
+    expect(timeline.mouthAt(mid + syll), closeTo(1, 0.01));
+    for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+      final t =
+          start +
+          i * syll +
+          BirdyMotion.logoWinkNoteDelay +
+          BirdyMotion.logoWinkNoteLife / 2;
+      expect(timeline.noteAt(t, i), closeTo(0.5, 0.01));
+    }
+    // Gone before the bird leaves; total run stays short.
+    for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+      expect(timeline.noteAt(BirdyMotion.logoWinkHoverEnd, i), isNull);
+    }
+    expect(timeline.mouthAt(BirdyMotion.logoWinkEyeStart), 0);
+    expect(BirdyMotion.logoWink.inMilliseconds, lessThanOrEqualTo(4500));
+    expect(total, BirdyMotion.logoWink.inMilliseconds);
+  });
+
+  test('reduced motion: no beak, no notes', () {
+    const timeline = LogoWinkTimeline(
+      origin: Offset(30, 40),
+      screen: Size(400, 800),
+      reduced: true,
+    );
+    for (var k = 0; k <= 20; k++) {
+      final t = k / 20;
+      expect(timeline.mouthAt(t), 0);
+      for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++) {
+        expect(timeline.noteAt(t, i), isNull);
+      }
+    }
+  });
+
+  testWidgets('notes are painted during the song only, one tweet', (
+    tester,
+  ) async {
+    var plays = 0;
+    await tester.pumpWidget(app(onTap: () => plays++));
+    await doubleTap(tester);
+    final painter =
+        tester
+            .widgetList<CustomPaint>(find.byType(CustomPaint))
+            .map((w) => w.painter)
+            .whereType<LogoNotesPainter>()
+            .single;
+    final timeline = painter.timeline;
+    int flying() {
+      final t = painter.animation.value;
+      return [
+        for (var i = 0; i < BirdyMotion.logoWinkSyllables; i++)
+          timeline.noteAt(t, i),
+      ].whereType<double>().length;
+    }
+
+    expect(flying(), 0);
+    await tester.pump(
+      BirdyMotion.logoWink * BirdyMotion.logoWinkTakeoffEnd +
+          BirdyMotion.logoWink * BirdyMotion.logoWinkSyllable * 1.5,
+    );
+    expect(flying(), greaterThan(0));
+    expect(plays, 1);
+    await tester.pump(
+      BirdyMotion.logoWink * (BirdyMotion.logoWinkHoverEnd - 0.4),
+    );
+    await tester.pump(BirdyMotion.logoWink * 0.1);
+    expect(painter.animation.value, greaterThan(BirdyMotion.logoWinkHoverEnd));
+    expect(flying(), 0);
+
+    await pumpThroughRun(tester, BirdyMotion.logoWink);
+    expect(plays, 1);
+  });
+
+  testWidgets('reduced motion paints no notes layer', (tester) async {
+    await tester.pumpWidget(app(reduced: true, onTap: () {}));
+    await doubleTap(tester);
+    expect(
+      tester
+          .widgetList<CustomPaint>(find.byType(CustomPaint))
+          .map((w) => w.painter)
+          .whereType<LogoNotesPainter>(),
+      isEmpty,
+    );
+    await pumpThroughRun(tester, BirdyMotion.logoWinkReduced);
+  });
+
   testWidgets('a plain single tap still sings and chirps, unchanged', (
     tester,
   ) async {

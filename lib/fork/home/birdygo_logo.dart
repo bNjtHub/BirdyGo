@@ -11,6 +11,7 @@
 /// to "no loops" (fork/DESIGN.md, Animations).
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -77,11 +78,13 @@ class BirdyGoLogoPainter extends CustomPainter {
     this.level,
     this.frozenLevel,
     this.eyeClosed,
+    this.mouth,
   }) : super(
          repaint: Listenable.merge([
            progress,
            if (level != null) level,
            if (eyeClosed != null) eyeClosed,
+           if (mouth != null) mouth,
          ]),
        );
 
@@ -92,6 +95,13 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// 0 (open) → 1 (winking: the eye is a curved line): the home easter
   /// egg's wink (logo_flight.dart).
   final Animation<double>? eyeClosed;
+
+  /// 0 (closed) → 1 (open): the beak's opening while the easter egg's bird
+  /// sings, with the header singing mark's own angles.
+  final Animation<double>? mouth;
+
+  static const double lowerBeakOpenDegrees = -11;
+  static const double upperBeakOpenDegrees = 13;
 
   /// Shortest length a bar takes, oscillating or paused: never fully gone.
   static const double pausedBarLevel = 0.55;
@@ -192,6 +202,9 @@ class BirdyGoLogoPainter extends CustomPainter {
 
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
 
+  /// The beak's hinge, where both halves turn to open.
+  static const Offset beakHinge = Offset(118.1, 202.6);
+
   static final Path upperBeak =
       Path()
         ..moveTo(145.9, 149)
@@ -221,10 +234,18 @@ class BirdyGoLogoPainter extends CustomPainter {
           );
     canvas.drawPath(tail, plumage);
 
-    for (final (path, color) in [
-      (lowerBeak, lowerBeakColor),
-      (upperBeak, BirdyBrand.oriole),
+    final open = mouth?.value ?? 0;
+    for (final (path, color, degrees) in [
+      (lowerBeak, lowerBeakColor, lowerBeakOpenDegrees * open),
+      (upperBeak, BirdyBrand.oriole, upperBeakOpenDegrees * open),
     ]) {
+      canvas.save();
+      if (degrees != 0) {
+        canvas
+          ..translate(beakHinge.dx, beakHinge.dy)
+          ..rotate(degrees * math.pi / 180)
+          ..translate(-beakHinge.dx, -beakHinge.dy);
+      }
       canvas
         ..drawPath(path, Paint()..color = color)
         ..drawPath(
@@ -234,7 +255,8 @@ class BirdyGoLogoPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 12
             ..strokeJoin = StrokeJoin.round,
-        );
+        )
+        ..restore();
     }
 
     canvas.drawPath(body, plumage);
@@ -292,5 +314,6 @@ class BirdyGoLogoPainter extends CustomPainter {
       oldDelegate.progress != progress ||
       oldDelegate.level != level ||
       oldDelegate.frozenLevel != frozenLevel ||
-      oldDelegate.eyeClosed != eyeClosed;
+      oldDelegate.eyeClosed != eyeClosed ||
+      oldDelegate.mouth != mouth;
 }
