@@ -14,6 +14,7 @@ class BirdyListBlock extends StatelessWidget {
     super.key,
     this.title,
     this.trailing,
+    this.color,
     required this.children,
   });
 
@@ -21,6 +22,9 @@ class BirdyListBlock extends StatelessWidget {
 
   /// Right end of the title line (a count, a « Tout voir » link).
   final Widget? trailing;
+
+  /// Fill of the block (Brume for the Plus sheet); white when null.
+  final Color? color;
 
   final List<Widget> children;
 

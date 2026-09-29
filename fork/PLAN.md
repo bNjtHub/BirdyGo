@@ -793,7 +793,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] J6g-g Squelettes (PR « J6g-g Squelettes : … ») : `BirdyShimmer`, balayage de lumière
             partagé, figé en animations réduites ; boucle autorisée dans DESIGN.md.
       - [x] (Benjamin) Téléphone : série J6g validée.
-      - [ ] Retirer `HomeMenuEntry` et `HomeMenuSheet`, devenus inutilisés (J6g-c).
+      - [x] Retirer `HomeMenuEntry` et `HomeMenuSheet`, devenus inutilisés (J6g-c).
       - [ ] Confirmer que la phrase de consentement de l'onboarding (liens Politique d'utilisation
             acceptable et de confidentialité) remplace bien l'étape de la charte d'usage BirdNET.
       - [ ] Envoi à Faune-France depuis la fiche : une session à la fois (pas de logique serveur
@@ -814,7 +814,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.
       - [x] Sonothèque : héros, filtre favoris sur la liste, bloc unique.
       - [x] Réglages : blocs titrés, bloc « Toi » (prénom), thème Auto, écran d'écoute.
-      - [ ] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
+      - [x] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
       - [ ] Objectif : héros à anneau, liste en bloc, bouton épinglé avec l'aile.
       - [ ] Carte : puces en encre, retour quand elle est poussée.
       - [ ] Revue : pile centrée verticalement.
