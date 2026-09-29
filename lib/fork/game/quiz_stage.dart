@@ -15,7 +15,6 @@ import '../design/widgets/pressable.dart';
 import '../species_photo/photo_credit.dart';
 import '../species_photo/photo_credit_sheet.dart';
 import 'fine_ear_quiz_widgets.dart';
-import 'french_article.dart';
 import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
@@ -114,9 +113,7 @@ class _ListeningCard extends StatelessWidget {
       highlightCenter: const Alignment(0, -0.16),
       child: Stack(
         children: [
-          const Positioned.fill(
-            child: QuizTwinkleField(count: 4, seed: 11),
-          ),
+          const Positioned.fill(child: QuizTwinkleField(count: 4, seed: 11)),
           Positioned(
             top: 12,
             left: 12,
@@ -360,21 +357,11 @@ class _RevealCard extends StatelessWidget {
     final c = BirdyColors.of(context);
     final tint = bird.tint;
     final heading = right ? l10n.forkQuizCheer('$cheer') : l10n.forkQuizAlmost;
-    // « C'est bien le merle noir »: the article when the name's gender is
-    // known, « C'est bien : Nom » otherwise (french_article.dart).
-    final withArticle =
-        Localizations.localeOf(context).languageCode == 'fr'
-            ? frenchWithArticle(bird.name)
-            : null;
-    final named = withArticle ?? bird.name;
+    // « Bravo, c'est bien lui : Nom » / « C'était : Nom »: no article built
+    // by hand, so no wrong gender.
+    final named = bird.name;
     final sentence =
-        withArticle != null
-            ? (right
-                ? l10n.forkQuizRightArticle(withArticle)
-                : l10n.forkQuizWrongArticle(withArticle))
-            : (right
-                ? l10n.forkQuizRightName(bird.name)
-                : l10n.forkQuizWrong(bird.name));
+        right ? l10n.forkQuizRevealRight(named) : l10n.forkQuizWrong(named);
     final at = sentence.indexOf(named);
     final span = TextSpan(
       style: BirdyText.body.copyWith(height: 1.3, color: c.text1),

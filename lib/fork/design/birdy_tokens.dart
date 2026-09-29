@@ -595,6 +595,14 @@ abstract final class BirdySizes {
   /// The quiz entry's logo (J6f, [QuizLogo]), the Profil quiz row.
   static const double quizLogo = 56;
 
+  /// « Qui chante ? » (J6h): the intro's illustrated zone (the intro fits a
+  /// 844 pt phone without scrolling), the mystery bird's « ? » on the wing,
+  /// and the disc and icon of the « Arrêter la partie ? » sheet.
+  static const double quizIntroHero = 210;
+  static const double quizMark = 30;
+  static const double quizSheetDisc = 72;
+  static const double quizSheetIcon = 36;
+
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
   /// check badge on the current one.
   static const double levelEmblem = 48;

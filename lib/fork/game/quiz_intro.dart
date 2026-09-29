@@ -51,7 +51,12 @@ class QuizIntro extends StatelessWidget {
     return QuizFade(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final hero = (constraints.maxHeight * 0.4).clamp(168.0, heroMax);
+          // 210 on a 844 pt phone (the whole intro fits without scrolling);
+          // a little less on a short one, where the scroll is the last resort.
+          final hero = (constraints.maxHeight * 0.4).clamp(
+            168.0,
+            BirdySizes.quizIntroHero,
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -61,7 +66,7 @@ class QuizIntro extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: hero, child: _IntroWell(birds: birds)),
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.m),
                       Semantics(
                         header: true,
                         label: l10n.forkQuizTitle,
@@ -89,11 +94,11 @@ class QuizIntro extends StatelessWidget {
                         l10n.forkQuizIntro,
                         style: BirdyText.body.copyWith(color: c.text1),
                       ),
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.m),
                       _StepCards(questions: questions, choices: choices),
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.m),
                       _IntroBadgeCard(badge: badge),
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.m),
                     ],
                   ),
                 ),
@@ -188,7 +193,10 @@ class _IntroWell extends StatelessWidget {
                     ),
                     SizedBox(height: 10 * k),
                     QuizBounce(
-                      child: QuizMysteryDisc(size: 128 * k, silhouette: 104 * k),
+                      child: QuizMysteryDisc(
+                        size: 128 * k,
+                        silhouette: 104 * k,
+                      ),
                     ),
                     SizedBox(height: 14 * k),
                     QuizBars(
@@ -259,11 +267,13 @@ class _StepCards extends StatelessWidget {
           for (var i = 0; i < steps.length; i++) ...[
             if (i > 0) const SizedBox(width: BirdySpace.s),
             Expanded(
-              child: QuizPop(
-                duration: const Duration(milliseconds: 380),
-                delay: Duration(milliseconds: 120 + i * 100),
-                child: Transform.rotate(
-                  angle: steps[i].tilt,
+              // The tilt sits outside the pop: the entrance scales and fades
+              // the card without ever replacing its rotation.
+              child: Transform.rotate(
+                angle: steps[i].tilt,
+                child: QuizPop(
+                  duration: const Duration(milliseconds: 380),
+                  delay: Duration(milliseconds: 120 + i * 100),
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(
                       BirdySpace.xs,
@@ -302,7 +312,11 @@ class _StepCards extends StatelessWidget {
                             color: c.surface1,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(steps[i].icon, size: 26, color: steps[i].ink),
+                          child: Icon(
+                            steps[i].icon,
+                            size: 26,
+                            color: steps[i].ink,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -313,7 +327,9 @@ class _StepCards extends StatelessWidget {
                         Text(
                           steps[i].body,
                           textAlign: TextAlign.center,
-                          style: BirdyText.caption.copyWith(color: steps[i].ink),
+                          style: BirdyText.caption.copyWith(
+                            color: steps[i].ink,
+                          ),
                         ),
                       ],
                     ),

@@ -4,6 +4,8 @@
 /// the result live in their own files, exported here.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../shared/models/taxonomy_species.dart';
@@ -142,10 +144,7 @@ class QuizWell extends StatelessWidget {
                 gradient: RadialGradient(
                   center: highlightCenter,
                   radius: 1,
-                  colors: const [
-                    BirdyBrand.wellHighlight,
-                    Color(0x00173A55),
-                  ],
+                  colors: const [BirdyBrand.wellHighlight, Color(0x00173A55)],
                   transform: QuizFixedRadius(radius, center: highlightCenter),
                 ),
               ),
@@ -186,8 +185,11 @@ class QuizMysteryDisc extends StatelessWidget {
   final double size;
   final double silhouette;
 
-  /// Height of the question mark, as a share of [silhouette].
-  static const double _markShare = 0.42;
+  /// The « ? » is [BirdySizes.quizMark] tall on a [_markRef] silhouette (the
+  /// intro's disc at full size) and scales with it; tilted like the mockup
+  /// (degrees).
+  static const double _markRef = 104;
+  static const double _markTilt = -8;
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
@@ -214,9 +216,17 @@ class QuizMysteryDisc extends StatelessWidget {
             // as sitting on the bird's body whatever the disc's margin.
             Transform.translate(
               offset: birdyGoWingCenter * silhouette,
-              child: CustomPaint(
-                size: Size.square(silhouette * _markShare),
-                painter: const QuizQuestionMark(color: BirdyBrand.oriole),
+              child: Transform.rotate(
+                angle: _markTilt * math.pi / 180,
+                child: Text(
+                  '?',
+                  style: BirdyText.display.copyWith(
+                    fontSize: BirdySizes.quizMark * silhouette / _markRef,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                    color: BirdyBrand.oriole,
+                  ),
+                ),
               ),
             ),
           ],
@@ -224,57 +234,6 @@ class QuizMysteryDisc extends StatelessWidget {
       ),
     ),
   );
-}
-
-/// The Quiz mockup's question mark (a round hook and a dot, stroked with
-/// round caps), scaled so its whole height fills the box and centered in it.
-class QuizQuestionMark extends CustomPainter {
-  const QuizQuestionMark({required this.color});
-
-  final Color color;
-
-  // The mockup's 64 box: hook path, dot and stroke width.
-  static final Path _hook =
-      Path()
-        ..moveTo(29.5, 31.5)
-        ..relativeArcToPoint(
-          const Offset(6.2, 4.2),
-          radius: const Radius.circular(4.5),
-          largeArc: true,
-        )
-        ..relativeCubicTo(-1.4, 0.6, -2.2, 1.6, -2.2, 3.2)
-        ..relativeLineTo(0, 0.8);
-  static const Offset _dot = Offset(33.5, 45.2);
-  static const double _dotRadius = 2.2;
-  static const double _stroke = 3.6;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final hook = _hook.getBounds().inflate(_stroke / 2);
-    final bounds = hook.expandToInclude(
-      Rect.fromCircle(center: _dot, radius: _dotRadius),
-    );
-    final scale = size.height / bounds.height;
-    canvas
-      ..save()
-      ..translate(size.width / 2, size.height / 2)
-      ..scale(scale)
-      ..translate(-bounds.center.dx, -bounds.center.dy)
-      ..drawPath(
-        _hook,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _stroke
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      )
-      ..drawCircle(_dot, _dotRadius, Paint()..color = color)
-      ..restore();
-  }
-
-  @override
-  bool shouldRepaint(QuizQuestionMark old) => old.color != color;
 }
 
 /// A 1.5 px dashed circle, inside the box.
