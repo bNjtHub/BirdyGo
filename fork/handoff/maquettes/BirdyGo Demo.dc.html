@@ -20,6 +20,7 @@ a:hover{color:#13233A;text-decoration:underline}
 @keyframes birdyIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes birdyFade{from{opacity:0}to{opacity:1}}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes wingBar{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
 @keyframes sing{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
 button{font:inherit;color:inherit}
@@ -38,6 +39,7 @@ button{font:inherit;color:inherit}
         </button>
       </sc-for>
     </div>
+    <button onClick="{{ simReturn }}" style="all:unset;cursor:pointer;text-align:center;min-height:48px;padding:8px 14px;box-sizing:border-box;border-radius:20px;background:#FFFFFF;color:#13233A;font-weight:700;font-size:14px;line-height:1.3;display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:#0B6E77">phone_iphone</span>Simuler : je reviens dans l'app et 3 nouvelles espèces ont chanté</button>
     <button onClick="{{ reset }}" style="all:unset;cursor:pointer;text-align:center;height:48px;border-radius:999px;background:#D6EEF0;color:#0B6E77;font-weight:700;font-size:15px;line-height:48px">Réinitialiser la démo</button>
   </div>
 
@@ -223,13 +225,49 @@ function Spectro(p) {
   return h('canvas', { ref, width: 390, height: p.h, style: { display: 'block', width: '100%', height: p.h + 'px' } });
 }
 
+function LiveLogo({ size, running }) {
+  const bars = [['M217.4 333.7L217.4 240.1', '#EEF1EC', 0], ['M260.6 365.5L268 223.3', '#F4C542', 0.18], ['M306.2 349.4L316 256.2', '#EEF1EC', 0.36], ['M352.9 331.7L359.3 290.9', '#8CD3D9', 0.54]];
+  const anim = (dl) => (running ? { transformBox: 'fill-box', transformOrigin: 'center', animation: `wingBar 1s ${dl}s ease-in-out infinite` } : {});
+  return h('svg', { viewBox: '40 70 430 380', width: size, height: size, 'aria-hidden': true, style: { display: 'block', flexShrink: 0 } },
+    h('path', { d: 'M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z', fill: '#19A7B3' }),
+    h('path', { d: 'M118.1 206.6L64.5 222.5L140 240.3Z', fill: '#E3A22B', stroke: '#E3A22B', strokeWidth: 12, strokeLinejoin: 'round' }),
+    h('path', { d: 'M145.9 149L50.6 160.9L118.1 196.6Z', fill: '#F4C542', stroke: '#F4C542', strokeWidth: 12, strokeLinejoin: 'round' }),
+    h('path', { d: 'M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z', fill: '#19A7B3' }),
+    ...bars.map(([p, c, dl], i) => h('path', { key: i, d: p, stroke: c, strokeWidth: 30, strokeLinecap: 'round', fill: 'none', style: anim(dl) })),
+    h('circle', { cx: 176.2, cy: 172.6, r: 18.7, fill: '#13233A' }), h('circle', { cx: 171, cy: 166.6, r: 5.4, fill: '#FFFFFF' }));
+}
+
+function Burst({ colors }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ring = el.querySelector('[data-ring]');
+    if (ring && !reduce) ring.animate([{ transform: 'scale(1.1)', opacity: 0 }, { transform: 'scale(1.35)', opacity: 0.9, offset: 0.3 }, { transform: 'scale(1.9)', opacity: 0 }], { duration: 900, delay: 180, easing: 'cubic-bezier(.2,0,0,1)', fill: 'both' });
+    if (reduce) return;
+    el.querySelectorAll('[data-c]').forEach((c, i) => {
+      const wave = i < 22 ? 0 : 1; const n = wave ? 14 : 22; const j = wave ? i - 22 : i;
+      const a = (j / n) * Math.PI * 2 + wave * 0.35; const r = (wave ? 95 : 130) + (j % 3) * 22;
+      const dx = Math.cos(a) * r, dy = Math.sin(a) * r;
+      c.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 1 }, { transform: `translate(calc(-50% + ${dx * 0.8}px), calc(-50% + ${dy * 0.8}px)) rotate(${i * 40}deg) scale(1.1)`, opacity: 1, offset: 0.55 }, { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy + 60}px)) rotate(${i * 80}deg) scale(.8)`, opacity: 0 }], { duration: 1500 + (j % 3) * 200, delay: 300 + wave * 380, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'both' });
+    });
+    el.querySelectorAll('[data-s]').forEach((c, i) => {
+      c.animate([{ transform: 'translate(-50%,-50%) scale(0)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1.2)', opacity: 1, offset: 0.4 }, { transform: 'translate(-50%,-50%) scale(0)', opacity: 0 }], { duration: 700, delay: 500 + i * 160, easing: 'ease-out', fill: 'both' });
+    });
+  }, []);
+  return h('div', { ref, style: { position: 'absolute', inset: 0, pointerEvents: 'none' } },
+    h('div', { 'data-ring': 1, style: { position: 'absolute', inset: 0, borderRadius: 999, border: `2px solid ${colors[0]}`, background: colors[0] + '26', opacity: 0 } }),
+    ...Array.from({ length: 36 }, (_, i) => h('span', { key: i, 'data-c': 1, style: { position: 'absolute', left: '50%', top: '50%', width: i % 3 ? 8 : 7, height: i % 3 ? 13 : 7, borderRadius: i % 3 ? 2 : 999, background: colors[i % colors.length], opacity: 0 } })),
+    ...[[-62, -40], [66, -30], [-48, 58], [58, 54]].map(([x, y], i) => h('span', { key: 's' + i, 'data-s': 1, className: 'ms', style: { position: 'absolute', left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)`, fontSize: 20, color: '#F4C542', fontVariationSettings: "'FILL' 1", opacity: 0 } }, 'auto_awesome')));
+}
+
 function fresh() {
   return {
     tab: 'home', stack: [], sheet: null, sheetData: null, toast: null, toastIcon: 'check_circle',
     species: 'merle', discovered: START_DISCOVERED.slice(), newSeen: [],
     review: [{ id: 1, k: 'pic', when: "aujourd'hui à 7:38", score: 0.38, level: 'toCheck' }, { id: 2, k: 'fauvette', when: "aujourd'hui à 7:44", score: 0.41, level: 'toCheck' }, { id: 3, k: 'grive', when: 'hier à 18:12', score: 0.6, level: 'probable' }],
     sorted: 0, drag: null, playing: null,
-    live: { phase: 'idle', elapsed: 0, entries: [], marks: [], seq: 0, next: 2, mode: 'normal', expanded: false },
+    live: { phase: 'idle', elapsed: 0, entries: [], marks: [], seq: 0, next: 2, mode: 'normal', expanded: false, moment: null, firsts: [] },
     session: null, nbFilter: 'all', rankPeriod: '30', rankConfirmed: false, rankOrder: 'contacts', soundFav: false,
     settings: { lang: 'Français', spLang: "Comme l'app", theme: 'system', liveTheme: 'dark', quizSound: true, photos: false, blur: true },
     pickedLevel: null, challenge: { started: true, value: 4 }, quiz: { stage: 'intro', qi: 0, score: 0, picked: null, questions: [], playing: false, sound: true },
@@ -271,7 +309,21 @@ class Component extends DCLogic {
       entries = [e, ...entries.filter((x) => x.k !== k).map((x) => ({ ...x, isNew: false }))];
       marks = [...marks.slice(-14), { id: seq + '-' + elapsed, color: SP[k].accent, label: SP[k].name, len: 120 }];
     }
-    this.setState({ live: { ...L, elapsed, entries, marks, seq, next } });
+    let { moment, firsts = [], queue = [], batch = 0, batchPos = 0 } = L;
+    entries.filter((x) => x.level === 'sure' && !s.discovered.includes(x.k) && !firsts.includes(x.k)).forEach((x) => { firsts = [...firsts, x.k]; queue = [...queue, { k: x.k, rank: s.discovered.length + firsts.length }]; });
+    if (moment && elapsed >= moment.until) moment = null;
+    if (!moment && queue.length) { if (!batchPos || batchPos >= batch) { batch = queue.length; batchPos = 0; } const q = queue[0]; queue = queue.slice(1); batchPos += 1; moment = { ...q, until: elapsed + 6, id: q.k + elapsed }; }
+    if (!moment && !queue.length) { batch = 0; batchPos = 0; }
+    this.setState({ live: { ...L, elapsed, entries, marks, seq, next, moment, firsts, queue, batch, batchPos } });
+  }
+  nextMoment() { const L = this.state.live; const queue = L.queue || []; if (!queue.length) return this.setState({ live: { ...L, moment: null, batch: 0, batchPos: 0 } }); const q = queue[0]; this.setState({ live: { ...L, queue: queue.slice(1), batchPos: (L.batchPos || 0) + 1, moment: { ...q, until: L.elapsed + 6, id: q.k + L.elapsed + 'n' } } }); }
+  simulateReturn() {
+    const s = this.state; if (s.live.phase === 'idle') this.startLive();
+    setTimeout(() => { const st = this.state; const L = st.live; const pick = ['grive', 'sittelle', 'fauvette', 'martin'].filter((k) => !st.discovered.includes(k) && !(L.firsts || []).includes(k)).slice(0, 3); if (!pick.length) return this.toast('Plus de nouvelle espèce à simuler : réinitialise la démo', 'info');
+      let firsts = [...(L.firsts || [])]; const add = pick.map((k) => { firsts.push(k); return { k, rank: st.discovered.length + firsts.length }; });
+      const entries = [...pick.map((k) => ({ k, count: 1, level: 'sure', score: 0.9, singing: false, isNew: true })), ...L.entries.filter((e) => !pick.includes(e.k))];
+      const all = [...(L.queue || []), ...add]; const q = all[0];
+      this.setState({ live: { ...L, phase: 'active', entries, firsts, queue: all.slice(1), batch: all.length, batchPos: 1, moment: { ...q, until: L.elapsed + 6, id: q.k + 'r' + L.elapsed } } }); this.toast("Retour dans l'app : 3 oiseaux sont apparus pendant ton absence", 'phone_iphone'); }, 60);
   }
   startLive() { this.push('live', { live: { ...fresh().live, mode: this.state.live.mode, phase: 'active' } }); }
   stopLive() {
@@ -357,7 +409,9 @@ class Component extends DCLogic {
       spectro: h(Spectro, { h: L.expanded ? 420 : 160, running: L.phase === 'active', singing: L.entries.filter((e) => e.singing).map((e) => ({ band: BANDS[e.k] || 0.4 })), marks: L.marks }),
       rows: L.entries.map((e) => ({ ...SP[e.k], count: '×' + e.count, total: `${SP[e.k].total + e.count} au total`, singing: e.singing ? 1 : 0, badge: badge(e.level, !lightLive), rareHere: e.unexpected && e.level === 'toCheck', showBadge: !(e.unexpected && e.level === 'toCheck'), rarityLabel: e.unexpected && e.level === 'toCheck' ? '' : SP[e.k].rarity === 'rare' ? 'Rare ici' : SP[e.k].rarity === 'uncommon' ? 'Peu commun ici' : '', rarityIcon: SP[e.k].rarity === 'rare' ? 'diamond' : 'visibility', rarityBg: SP[e.k].rarity === 'rare' ? T.orioleCont : T.line, rarityFg: SP[e.k].rarity === 'rare' ? T.orioleText : T.text2, anim: e.isNew ? 'birdyIn .32s cubic-bezier(.2,0,0,1)' : 'none', open: () => this.openSpecies(e.k), replay: () => { this.play('live-' + e.k); this.toast("Réécoute : l'écoute se met en pause le temps de l'extrait", 'volume_down'); }, playing: s.playing === 'live-' + e.k })),
       expected: ['merle', 'rouge', 'charb'].map((k) => SP[k]),
+      logo: h(LiveLogo, { size: 24, running: L.phase === 'active' }), logoSmall: h(LiveLogo, { size: 18, running: L.phase === 'active' }),
       toggleExpand: () => this.setState({ live: { ...L, expanded: !L.expanded } }),
+      moment: L.moment ? (() => { const m = L.moment; const p = SP[m.k]; let ci = -1; STATUSES.forEach((st, i) => { if (m.rank >= st.from) ci = i; }); const nx = STATUSES[ci + 1]; const left = Math.max(0, m.until - L.elapsed); const justLevel = ci >= 0 && STATUSES[ci].from === m.rank; return { ...p, rankLine: `Ajouté à ton carnet · ${m.rank}${m.rank === 1 ? 're' : 'e'} espèce`, status: STATUS_NAMES[ci] || '', statusEmblem: ci >= 0 ? emblem(STATUSES[ci], 28, { inner: true }) : null, statusKicker: justLevel ? 'Nouveau niveau !' : 'Ton niveau', nextLine: nx ? `Encore ${nx.from - m.rank} ${plural(nx.from - m.rank, 'espèce', 'espèces')} pour devenir ${STATUS_NAMES[ci + 1]}` : '', bar: (left / 6 * 100) + '%', left: `Se referme seul dans ${left} s`, pausedNote: L.phase === 'paused', burst: h(Burst, { key: m.id, colors: [p.accent, '#F4C542', '#19A7B3', '#9DB46A', '#EC7A3C', p.deep] }), veil: lightLive ? 'rgba(238,241,236,.84)' : 'rgba(19,35,58,.84)', glow: p.accent + '38', card: lightLive ? '#FFFFFF' : '#213852', border: p.accent + '80', track: lightLive ? '#DCE2DA' : 'rgba(238,241,236,.14)', fill: lightLive ? '#0B6E77' : '#4FC3CC', halo2: p.accent, avatarBg: lightLive ? p.tint : p.tintDark, playing: s.playing === 'moment-' + m.k, replay: () => this.play('moment-' + m.k), close: () => this.nextMoment(), queued: (L.queue || []).length, more: (L.queue || []).length > 0, pager: (L.batch || 0) > 1 ? `${L.batchPos} sur ${L.batch} nouvelles` : '', dots: (L.batch || 0) > 1 ? Array.from({ length: L.batch }, (_, i) => ({ w: i === L.batchPos - 1 ? '18px' : '6px', c: i < L.batchPos ? (lightLive ? '#0B6E77' : '#4FC3CC') : (lightLive ? '#C5CCC2' : 'rgba(238,241,236,.32)') })) : [], primaryLabel: (L.queue || []).length ? 'Espèce suivante' : "Continuer l'écoute", primaryIcon: (L.queue || []).length ? 'arrow_forward' : '', title: 'Première rencontre !', leftNext: (L.queue || []).length ? `Suivante dans ${left} s` : `Se referme seul dans ${left} s`, open: () => { this.setState({ live: { ...this.state.live, moment: null } }); this.openSpecies(m.k); } }; })() : null,
       pause: () => this.setState({ live: { ...L, phase: L.phase === 'paused' ? 'active' : 'paused' } }),
       stop: () => this.stopLive(), options: () => this.setState({ sheet: 'listen' }),
     };
@@ -570,7 +624,7 @@ class Component extends DCLogic {
     const INDEX = [['home', 'Accueil', 'home', go.home], ['live', 'Écoute', 'graphic_eq', go.live], ['bilan', "Bilan de l'écoute", 'summarize', go.bilanToday], ['review', 'Revue rapide', 'verified', go.review], ['species', 'Fiche espèce', 'raven', () => this.openSpecies('merle')], ['notebook', 'Mon carnet', 'menu_book', go.notebook], ['map', 'Ma carte', 'map', go.map], ['profile', 'Profil', 'person', go.profile], ['quiz', 'Qui chante ?', 'headphones', go.quiz], ['ranking', 'Palmarès', 'leaderboard', go.ranking], ['sounds', 'Sonothèque', 'library_music', go.sounds], ['settings', 'Réglages', 'tune', go.settings], ['goal', 'Objectif du jour', 'flag', go.goal], ['more', 'Menu Plus', 'menu', () => { this.tab('home'); setTimeout(() => this.setState({ sheet: 'more' }), 0); }]];
     const isTab = !top;
     return {
-      app, reset: () => { this.setState(fresh()); this.toast('Démo réinitialisée', 'restart_alt'); },
+      app, simReturn: () => this.simulateReturn(), reset: () => { this.setState(fresh()); this.toast('Démo réinitialisée', 'restart_alt'); },
       index: INDEX.map(([id, label, icon, fn]) => ({ label, icon, go: fn, bg: screen === id || (id === 'more' && s.sheet === 'more') ? '#EEF1EC' : 'transparent', weight: screen === id ? 700 : 400 })),
       show: { home: screen === 'home', notebook: screen === 'notebook', map: screen === 'map' || screen === 'mapx', profile: screen === 'profile', live: screen === 'live', bilan: screen === 'bilan', review: screen === 'review', species: screen === 'species', quiz: screen === 'quiz', ranking: screen === 'ranking', sounds: screen === 'sounds', settings: screen === 'settings', goal: screen === 'goal', nav: isTab, sheet: !!s.sheet, toast: !!s.toast },
       screenBottom: isTab ? '80px' : '0px', toastBottom: isTab ? '96px' : '24px', toast: s.toast, toastIcon: s.toastIcon,

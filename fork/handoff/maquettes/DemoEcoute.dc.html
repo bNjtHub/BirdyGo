@@ -12,7 +12,7 @@
     <div style="display:flex;align-items:center;gap:12px">
       <button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:{{ app.live.t.btnBg }};border:1px solid {{ app.live.t.btnBorder }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">arrow_back</span></button>
       <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:22px;height:22px"><span style="font-size:17px;font-weight:700">{{ app.live.status }} · </span><span class="ms" style="font-size:14px;color:{{ app.live.modeColor }}">{{ app.live.modeIcon }}</span><span style="font-size:17px;font-weight:700;color:{{ app.live.modeColor }}">{{ app.live.modeWord }}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden">{{ app.live.logo }}<span style="font-size:17px;font-weight:700">{{ app.live.status }} · </span><span class="ms" style="font-size:14px;color:{{ app.live.modeColor }}">{{ app.live.modeIcon }}</span><span style="font-size:17px;font-weight:700;color:{{ app.live.modeColor }}">{{ app.live.modeWord }}</span></div>
         <div style="font-size:13px;color:{{ app.live.t.text2 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ app.live.place }}</div>
         <sc-if value="{{ app.live.expanded }}"><div style="font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.summary }}</div></sc-if>
       </div>
@@ -26,6 +26,7 @@
       </div>
     </sc-if>
   </div>
+  <div style="flex:1;min-height:0;position:relative;display:flex;flex-direction:column">
   <div onClick="{{ app.live.toggleExpand }}" style="cursor:pointer;position:relative;flex-shrink:0;background:linear-gradient(#0B1728,#0F1E33)">
     {{ app.live.spectro }}
     <div style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;background:rgba(19,35,58,.55);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#EEF1EC">expand_more</span></div>
@@ -64,6 +65,50 @@
         <button onClick="{{ r.replay }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;border:2px solid {{ app.live.t.accentText }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px;color:{{ app.live.t.accentText }};font-variation-settings:'FILL' 1">play_arrow</span></button>
       </div>
     </sc-for>
+  </div>
+  <sc-if value="{{ app.live.moment }}">
+    <div style="position:absolute;inset:0;z-index:5;background:{{ app.live.moment.veil }};display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;animation:birdyFade .25s both">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,{{ app.live.moment.glow }},transparent 62%);pointer-events:none"></div>
+      <div key="{{ app.live.moment.id }}" style="position:relative;width:100%;max-width:358px;background:{{ app.live.moment.card }};border:1.5px solid {{ app.live.moment.border }};border-radius:28px;box-sizing:border-box;padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 8px 28px rgba(19,35,58,.24);animation:pop .45s cubic-bezier(.2,0,0,1) both">
+        <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.logoSmall }}L'écoute continue</div>
+        <div style="height:10px"></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:#F4C542;color:#13233A;font-size:13px;font-weight:700"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">auto_awesome</span>Première fois</span><sc-if value="{{ app.live.moment.pager }}"><span style="font-size:13px;font-weight:700;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ app.live.moment.pager }}</span></sc-if></div>
+        <div style="height:14px"></div>
+        <div onClick="{{ app.live.moment.open }}" style="cursor:pointer;position:relative;width:112px;height:112px;flex-shrink:0">
+          {{ app.live.moment.burst }}
+          <div style="position:relative;width:112px;height:112px;border-radius:999px;background:{{ app.live.moment.avatarBg }};box-shadow:0 0 0 4px {{ app.live.moment.card }},0 0 0 6px {{ app.live.moment.halo2 }};display:flex;align-items:center;justify-content:center;animation:pop .5s .12s cubic-bezier(.2,0,0,1) both"><img src="{{ app.live.moment.sil }}" alt="" style="width:62%;height:62%;object-fit:contain;filter:{{ app.live.t.silFilter }}"></div>
+        </div>
+        <div style="height:12px"></div>
+        <div style="animation:birdyIn .3s .35s both">
+          <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">{{ app.live.moment.name }}</div>
+          <div style="font-family:Fraunces;font-style:italic;font-size:15px;font-weight:500;color:{{ app.live.t.text2 }}">{{ app.live.moment.latin }}</div>
+        </div>
+        <div style="height:10px"></div>
+        <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20;animation:birdyIn .3s .45s both">{{ app.live.moment.title }}</div>
+        <div style="font-size:15px;font-weight:700;margin-top:2px;animation:birdyIn .3s .52s both">{{ app.live.moment.rankLine }}</div>
+        <sc-if value="{{ app.live.moment.status }}">
+          <div style="margin-top:12px;width:100%;border-radius:16px;background:{{ app.live.t.line }};padding:10px 12px;box-sizing:border-box;display:flex;align-items:center;gap:10px;text-align:left;animation:birdyIn .4s .6s both">
+            <div style="flex-shrink:0">{{ app.live.moment.statusEmblem }}</div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap"><span style="font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.moment.statusKicker }}</span><span style="font-size:15px;font-weight:700">{{ app.live.moment.status }}</span></div>
+              <div style="font-size:13px;line-height:1.35;color:{{ app.live.t.text2 }}">{{ app.live.moment.nextLine }}</div>
+            </div>
+          </div>
+        </sc-if>
+        <div style="height:16px"></div>
+        <div style="width:100%;display:flex;gap:8px;align-items:center">
+          <button onClick="{{ app.live.moment.replay }}" style="all:unset;cursor:pointer;width:56px;height:56px;border-radius:999px;border:2px solid {{ app.live.t.accentText }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0" style-active="transform:scale(.95)"><span class="ms" style="font-size:26px;color:{{ app.live.t.accentText }};font-variation-settings:'FILL' 1">play_arrow</span></button>
+          <button onClick="{{ app.live.moment.close }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:999px;background:#19A7B3;color:#13233A;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)">{{ app.live.moment.primaryLabel }}<span class="ms" style="font-size:22px">{{ app.live.moment.primaryIcon }}</span></button>
+        </div>
+        <div style="height:14px"></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:6px" aria-live="polite">
+          <sc-if value="{{ app.live.moment.pager }}"><div style="display:flex;justify-content:center;gap:4px;margin-bottom:4px"><sc-for list="{{ app.live.moment.dots }}" as="dt" hint-placeholder-count="3"><div style="height:6px;width:{{ dt.w }};border-radius:999px;background:{{ dt.c }};transition:all .25s"></div></sc-for></div></sc-if>
+          <div style="height:6px;border-radius:999px;background:{{ app.live.moment.track }};overflow:hidden"><div style="height:100%;width:{{ app.live.moment.bar }};border-radius:999px;background:{{ app.live.moment.fill }};transition:width 1s linear"></div></div>
+          <div style="display:flex;justify-content:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ app.live.moment.leftNext }}<sc-if value="{{ app.live.moment.pausedNote }}"><span>· en pause</span></sc-if></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
   </div>
   <div style="background:{{ app.live.t.deep }};border-top:1px solid {{ app.live.t.line }};padding:12px 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
     <button onClick="{{ app.live.stop }}" style="all:unset;cursor:pointer;height:64px;border-radius:999px;background:{{ app.live.t.stopBg }};color:{{ app.live.t.stopFg }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">stop</span>Arrêter</button>
