@@ -146,9 +146,9 @@ class _VolumePromptState extends State<_VolumePrompt>
       curve: BirdyMotion.standard,
     );
     return Positioned(
-      top: MediaQuery.paddingOf(context).top + BirdySpace.s,
-      left: BirdySpace.gutter,
-      right: BirdySpace.gutter,
+      top: MediaQuery.paddingOf(context).top + BirdySpace.page,
+      left: BirdySpace.page,
+      right: BirdySpace.page,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
