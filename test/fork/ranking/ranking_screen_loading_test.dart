@@ -1,6 +1,6 @@
 /// Loading skeleton of the palmarès (J6f skeletons): the header count and
 /// the list both wait on `_load()` (the index plus the "new this year" set),
-/// which resolves after the first frame; the header, chips and options row
+/// which resolves after the first frame; the header and chips
 /// above the list must not move once it lands.
 library;
 
@@ -17,24 +17,10 @@ import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsNode;
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 SpeciesTally _tally(String name, int contacts, int days) => SpeciesTally(
   scientificName: name,
@@ -85,7 +71,7 @@ class _DelayedIndexService extends ObservationIndexService {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   late SharedPreferences prefs;
   late _DelayedIndexService service;
@@ -110,7 +96,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
-          taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
           observationIndexServiceProvider.overrideWith((ref) => service),
         ],
         child: MaterialApp(
@@ -135,9 +123,6 @@ void main() {
     await tester.pump();
     final header = tester.getRect(find.byKey(const ValueKey('ranking-header')));
     final chips = tester.getRect(find.byKey(const ValueKey('ranking-chips')));
-    final options = tester.getRect(
-      find.byKey(const ValueKey('ranking-options')),
-    );
 
     service.resolve();
     await tester.pumpAndSettle();
@@ -154,9 +139,6 @@ void main() {
     final loadedChips = tester.getRect(
       find.byKey(const ValueKey('ranking-chips')),
     );
-    final loadedOptions = tester.getRect(
-      find.byKey(const ValueKey('ranking-options')),
-    );
     expect(loadedChips.left, chips.left, reason: 'chips left');
     expect(loadedChips.right, chips.right, reason: 'chips right');
     expect(
@@ -168,11 +150,6 @@ void main() {
       chips.top - loadedChips.top,
       lessThan(24),
       reason: 'chips should not settle by more than one caption line',
-    );
-    expect(
-      loadedOptions.top - loadedChips.top,
-      options.top - chips.top,
-      reason: 'options row keeps its own distance from the chips',
     );
     expect(find.textContaining('espèces en 30 jours'), findsOneWidget);
   }

@@ -56,7 +56,7 @@ import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
 import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
 import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
-import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
+import '../../fork/live/live_rarity_tag.dart'; // FORK: J6h rarity tag (was reliability_badge)
 import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
 
 /// Timed point-count survey screen with countdown and auto-stop.
@@ -487,13 +487,14 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         clipPending:
             forkRecordsClips &&
             forkActiveSpecies.contains(detection.scientificName),
-        badge: ReliabilityBadge(
+        badge: LiveReliabilityBadge(
+          // FORK: J6h rarity tag next to the badge
           level: reliabilityFor(
             score: detection.confidence,
             review: detection.reviewStatus,
             presence: presence,
           ),
-          unexpected: presence?.unexpected ?? false,
+          cause: liveRarityCause(forkCommonness, detection.scientificName),
           score: detection.confidence, // FORK: « Rare ici · à confirmer » (J3b)
           compact: true,
         ),

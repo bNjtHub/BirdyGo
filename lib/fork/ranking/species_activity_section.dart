@@ -3,6 +3,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -68,7 +69,7 @@ class SpeciesActivitySection extends ConsumerWidget {
         if (value == null || tally == null) return const SizedBox.shrink();
         final months = DateFormat.MMMMd(language).dateSymbols.NARROWMONTHS;
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: BirdySpace.s),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -83,17 +84,17 @@ class SpeciesActivitySection extends ConsumerWidget {
                 ),
                 style: theme.textTheme.bodyLarge,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: BirdySpace.l),
               Text(l10n.forkActivityByHour, style: theme.textTheme.titleSmall),
-              const SizedBox(height: 8),
+              const SizedBox(height: BirdySpace.s),
               ActivityBars(
                 values: value.$2,
                 labels: const {0: '0 h', 6: '6 h', 12: '12 h', 18: '18 h'},
                 semanticLabel: l10n.forkActivityByHour,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: BirdySpace.l),
               Text(l10n.forkActivityByMonth, style: theme.textTheme.titleSmall),
-              const SizedBox(height: 8),
+              const SizedBox(height: BirdySpace.s),
               ActivityBars(
                 values: value.$3,
                 labels: {for (var i = 0; i < 12; i++) i: months[i]},

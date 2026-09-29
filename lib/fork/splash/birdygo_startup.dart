@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../design/birdy_theme.dart';
+import '../design/birdy_theme_choice.dart';
 import 'birdygo_launch_handoff.dart';
 import 'birdygo_splash.dart';
 import 'birdygo_warm_up.dart';
@@ -12,7 +13,18 @@ import 'birdygo_warm_up.dart';
 /// [BirdyGoSplash.minimumDisplay]; a slower start keeps the splash singing.
 /// Explicit launch actions bypass the remaining wait once their route is ready.
 class BirdyGoStartup extends StatefulWidget {
-  const BirdyGoStartup({super.key, required this.bootstrap, this.warmUp});
+  const BirdyGoStartup({
+    super.key,
+    required this.bootstrap,
+    this.warmUp,
+    this.bird = BirdyBird.loriot,
+    this.themeMode = ThemeMode.system,
+  });
+
+  /// The chosen bird theme and theme mode, read from the preferences before
+  /// `runApp` so the splash is in the right colors from the first frame.
+  final BirdyBird bird;
+  final ThemeMode themeMode;
 
   final Future<Widget> Function() bootstrap;
 
@@ -150,11 +162,11 @@ class _BirdyGoStartupState extends State<BirdyGoStartup> {
 
   Widget _buildSplash() => MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: BirdyTheme.light(),
+    theme: BirdyTheme.light(bird: widget.bird),
     // Same background as the native launch (values-night): the startup
-    // follows the device theme, like App does by default.
-    darkTheme: BirdyTheme.dark(),
-    themeMode: ThemeMode.system,
+    // follows the device theme unless the child chose one, like App.
+    darkTheme: BirdyTheme.dark(bird: widget.bird),
+    themeMode: widget.themeMode,
     // A notification launch route belongs to App, after initialization.
     initialRoute: '/',
     localizationsDelegates: AppLocalizations.localizationsDelegates,

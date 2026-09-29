@@ -43,6 +43,8 @@ class BirdyFilterChip extends StatelessWidget {
     this.selectedColors,
     this.leading,
     this.floating = false,
+    this.unselectedColor,
+    this.centered = false,
   });
 
   final String label;
@@ -56,6 +58,11 @@ class BirdyFilterChip extends StatelessWidget {
   /// Over a map: white chips carry the float shadow.
   final bool floating;
 
+  /// Fill when not selected; white by default (Brume on a white block).
+  final Color? unselectedColor;
+  /// Centers the label (a chip stretched by a grid cell).
+  final bool centered;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
@@ -67,7 +74,7 @@ class BirdyFilterChip extends StatelessWidget {
             ? (floating
                 ? Color.alphaBlend(on.background, c.surface1)
                 : on.background)
-            : c.surface1;
+            : (unselectedColor ?? c.surface1);
     final foreground = selected ? on.foreground : c.text1;
     return Semantics(
       button: true,
@@ -90,10 +97,14 @@ class BirdyFilterChip extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment:
+                        centered
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.start,
                     children: [
                       if (leading != null) ...[
                         IconTheme.merge(
-                          data: IconThemeData(color: foreground, size: 18),
+                          data: IconThemeData(color: foreground, size: BirdyGlyph.l),
                           child: leading!,
                         ),
                         const SizedBox(width: BirdySpace.s),

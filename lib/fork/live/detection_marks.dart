@@ -14,6 +14,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import 'live_heard.dart';
+import 'spectrogram_label_layout.dart';
 
 /// Time span of one detected passage.
 @immutable
@@ -169,6 +170,7 @@ class DetectionMark {
     required this.left,
     required this.right,
     required this.lane,
+    this.startsBeforeWindow = false,
   });
 
   final MarkSpan span;
@@ -177,6 +179,10 @@ class DetectionMark {
 
   /// Row of the mark when passages overlap (0 = top).
   final int lane;
+
+  /// The passage began before the visible window (J6h): [left] is clamped
+  /// to 0, and its name is not written.
+  final bool startsBeforeWindow;
 }
 
 /// Places the [spans] (sorted by start) visible in the last
@@ -210,6 +216,7 @@ List<DetectionMark> layoutDetectionMarks({
       continue;
     }
     final left = fraction(span.start);
+    final startsBefore = age(span.start) > displayMicros;
     final right = fraction(end);
     var lane = laneEnds.indexWhere((e) => e + minGap <= left);
     if (lane < 0) {
@@ -226,7 +233,15 @@ List<DetectionMark> layoutDetectionMarks({
     if (lane < laneEnds.length) {
       laneEnds[lane] = right > laneEnds[lane] ? right : laneEnds[lane];
     }
-    marks.add(DetectionMark(span: span, left: left, right: right, lane: lane));
+    marks.add(
+      DetectionMark(
+        span: span,
+        left: left,
+        right: right,
+        lane: lane,
+        startsBeforeWindow: startsBefore,
+      ),
+    );
   }
   return marks;
 }
@@ -240,6 +255,7 @@ class DetectionMarks extends StatefulWidget {
     required this.displaySeconds,
     required this.running,
     this.showLabels = true,
+    this.clock,
   });
 
   /// Strip height: bars only.
@@ -256,14 +272,20 @@ class DetectionMarks extends StatefulWidget {
   /// spectrogram since J6c-bis-c).
   final bool showLabels;
 
+  /// Source of the current instant; the wall clock when null. Tests inject a
+  /// fake one so nothing depends on real elapsed time.
+  final DateTime Function()? clock;
+
   @override
   State<DetectionMarks> createState() => _DetectionMarksState();
 }
 
 class _DetectionMarksState extends State<DetectionMarks>
     with SingleTickerProviderStateMixin {
-  late final ValueNotifier<DateTime> _now = ValueNotifier(DateTime.now());
-  late final Ticker _ticker = createTicker((_) => _now.value = DateTime.now());
+  DateTime _time() => (widget.clock ?? DateTime.now)();
+
+  late final ValueNotifier<DateTime> _now = ValueNotifier(_time());
+  late final Ticker _ticker = createTicker((_) => _now.value = _time());
   final MarkPauses _pauses = MarkPauses();
   final MarkEndHold _endHold = MarkEndHold();
 
@@ -282,7 +304,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   @override
   void initState() {
     super.initState();
-    if (!widget.running) _pauses.pause(DateTime.now());
+    if (!widget.running) _pauses.pause(_time());
     _syncTicker();
   }
 
@@ -298,7 +320,7 @@ class _DetectionMarksState extends State<DetectionMarks>
       );
     }
     if (widget.running != old.running) {
-      final at = DateTime.now();
+      final at = _time();
       widget.running ? _pauses.resume(at) : _pauses.pause(at);
     }
     _syncTicker();
@@ -308,7 +330,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   void _syncTicker() {
     final shouldRun = widget.running && widget.spans.isNotEmpty;
     if (shouldRun && !_ticker.isActive) {
-      _now.value = DateTime.now();
+      _now.value = _time();
       _ticker.start();
     } else if (!shouldRun && _ticker.isActive) {
       _ticker.stop();
@@ -334,7 +356,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final labelStyle = BirdyText.labelCompact.copyWith(
-      fontSize: 13,
+      fontSize: BirdyText.captionSize,
       color: c.text1,
     );
     final textScaler = MediaQuery.textScalerOf(context);
@@ -422,29 +444,37 @@ class DetectionMarksPainter extends CustomPainter {
     }
     if (!showLabels) return;
     final labelTop = top + lanes * step + 2;
-    var freeFrom = double.negativeInfinity;
-    for (final m in marks) {
-      final left = m.left * size.width;
-      if (left < freeFrom) continue;
-      final text = _labels.putIfAbsent(
-        '${m.span.scientificName}|${m.span.label}',
-        () => TextPainter(
-          text: TextSpan(
-            text: m.span.label,
-            style: labelStyle.copyWith(
-              color: SpeciesAccents.accentOf(m.span.scientificName),
+    final texts = [
+      for (final m in marks)
+        _labels.putIfAbsent(
+          '${m.span.scientificName}|${m.span.label}',
+          () => TextPainter(
+            text: TextSpan(
+              text: m.span.label,
+              style: labelStyle.copyWith(
+                color: SpeciesAccents.accentOf(m.span.scientificName),
+              ),
             ),
-          ),
-          textDirection: textDirection,
-          textScaler: textScaler,
-          maxLines: 1,
-        )..layout(),
-      );
-      if (labelTop + text.height > size.height) break;
-      final x = left.clamp(0.0, size.width - text.width).toDouble();
-      if (x < freeFrom) continue;
-      text.paint(canvas, Offset(x, labelTop));
-      freeFrom = x + text.width + 8;
+            textDirection: textDirection,
+            textScaler: textScaler,
+            maxLines: 1,
+          )..layout(),
+        ),
+    ];
+    // J6h: names never touch (8 px), none is cut by the left edge.
+    final xs = placeMarkLabels([
+      for (var i = 0; i < marks.length; i++)
+        MarkLabelSlot(
+          left: marks[i].left * size.width,
+          width: texts[i].width,
+          startsBeforeWindow: marks[i].startsBeforeWindow,
+        ),
+    ], maxWidth: size.width);
+    for (var i = 0; i < marks.length; i++) {
+      final x = xs[i];
+      if (x == null) continue;
+      if (labelTop + texts[i].height > size.height) break;
+      texts[i].paint(canvas, Offset(x, labelTop));
     }
   }
 

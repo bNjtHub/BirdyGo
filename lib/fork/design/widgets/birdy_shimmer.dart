@@ -149,8 +149,12 @@ class _BirdyShimmerState extends State<BirdyShimmer> {
     return ui.Gradient.linear(
       from,
       from + Offset(dx, dy),
-      [sheen.withValues(alpha: 0), sheen, sheen.withValues(alpha: 0)],
-      const [0, 0.5, 1],
+      // Eased falloff (not a triangle) so the band has no visible edge.
+      [
+        for (final a in BirdyMotion.shimmerBandAlphas)
+          sheen.withValues(alpha: sheen.a * a),
+      ],
+      BirdyMotion.shimmerBandStops,
     );
   }
 
@@ -171,8 +175,8 @@ class _BirdyShimmerState extends State<BirdyShimmer> {
                 (bounds) =>
                     _shader(bounds, progress, sheen, screenW) ??
                     ui.Gradient.linear(Offset.zero, const Offset(1, 0), const [
-                      Color(0x00000000),
-                      Color(0x00000000),
+                      BirdyBrand.clear,
+                      BirdyBrand.clear,
                     ]),
             child: child,
           );

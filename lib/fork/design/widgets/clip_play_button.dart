@@ -26,6 +26,7 @@ class ClipPlayButton extends StatelessWidget {
     required this.semanticLabel,
     this.onPressed,
     this.progress,
+    this.size = BirdySizes.target,
   });
 
   final ClipPlayState state;
@@ -39,10 +40,13 @@ class ClipPlayButton extends StatelessWidget {
   /// [ClipPlayState.playing]. Null draws no ring.
   final double? progress;
 
+  /// Diameter: the touch target, or [BirdySizes.mainAction] on a card
+  /// where the replay leads (the icon is half of it).
+  final double size;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    const size = BirdySizes.target;
 
     if (state == ClipPlayState.pending) {
       return Tooltip(
@@ -55,7 +59,7 @@ class ClipPlayButton extends StatelessWidget {
               child: SizedBox.square(
                 dimension: 18,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: BirdyStroke.regular,
                   color: c.accentText,
                 ),
               ),
@@ -68,7 +72,7 @@ class ClipPlayButton extends StatelessWidget {
     final playing = state == ClipPlayState.playing;
     final shape = CircleBorder(
       side:
-          playing ? BorderSide.none : BorderSide(color: c.accentText, width: 2),
+          playing ? BorderSide.none : BorderSide(color: c.accentText, width: BirdyStroke.regular),
     );
     Widget button = Material(
       color: playing ? c.accent : Colors.transparent,
@@ -81,7 +85,7 @@ class ClipPlayButton extends StatelessWidget {
           dimension: size,
           child: Icon(
             playing ? AppIcons.stop : AppIcons.playArrow,
-            size: 24,
+            size: size / 2,
             fill: 1,
             color: playing ? c.onAccent : c.accentText,
           ),
@@ -99,7 +103,7 @@ class ClipPlayButton extends StatelessWidget {
               dimension: size - 4,
               child: CircularProgressIndicator(
                 value: ring.clamp(0, 1).toDouble(),
-                strokeWidth: 2.5,
+                strokeWidth: BirdyStroke.medium,
                 color: c.onAccent,
                 backgroundColor: Colors.transparent,
               ),

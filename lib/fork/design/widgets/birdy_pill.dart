@@ -52,7 +52,7 @@ class BirdyPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[leading!, const SizedBox(width: 5)],
+            if (leading != null) ...[leading!, const SizedBox(width: BirdySpace.tight)],
             Flexible(
               child: Text(
                 label,
@@ -66,7 +66,7 @@ class BirdyPill extends StatelessWidget {
     final shape = StadiumBorder(
       side:
           outlined && !dashed
-              ? BorderSide(color: foreground, width: 1.5)
+              ? BorderSide(color: foreground, width: BirdyStroke.thin)
               : BorderSide.none,
     );
     final pill = DecoratedBox(
@@ -158,19 +158,32 @@ enum NoveltyKind {
 
   /// Collection card not opened yet (Loriot fill).
   isNew,
+
+  /// Uncommon here this week (J6h): quiet, `line` fill.
+  uncommonHere,
+
+  /// Rare here this week (J6h): Loriot container.
+  rareHere,
+
+  /// Exceptional here this week (J6h): Loriot container, star.
+  exceptionalHere,
 }
 
 class NoveltyPill extends StatelessWidget {
-  const NoveltyPill({super.key, required this.kind});
+  const NoveltyPill({super.key, required this.kind, this.short = false});
 
   final NoveltyKind kind;
+
+  /// Rarity kinds only: « Rare » instead of « Rare ici » (notebook cards,
+  /// where the place is obvious).
+  final bool short;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     Widget icon(IconData data, Color color) =>
-        Icon(data, size: 14, color: color, fill: 1);
+        Icon(data, size: BirdyGlyph.s, color: color, fill: 1);
     return switch (kind) {
       NoveltyKind.firstTime => BirdyPill(
         label: l10n.forkFirstTime,
@@ -202,6 +215,24 @@ class NoveltyPill extends StatelessWidget {
         background: c.orioleContainer,
         dashed: true,
         leading: icon(AppIcons.diamond, c.orioleText),
+      ),
+      NoveltyKind.uncommonHere => BirdyPill(
+        label: short ? l10n.forkUncommonShort : l10n.forkUncommonHere,
+        foreground: c.text2,
+        background: c.line,
+        leading: icon(AppIcons.visibility, c.text2),
+      ),
+      NoveltyKind.rareHere => BirdyPill(
+        label: short ? l10n.forkRareShort : l10n.forkRareHere,
+        foreground: c.orioleText,
+        background: c.orioleContainer,
+        leading: icon(AppIcons.diamond, c.orioleText),
+      ),
+      NoveltyKind.exceptionalHere => BirdyPill(
+        label: short ? l10n.forkExceptionalShort : l10n.forkExceptionalHere,
+        foreground: c.orioleText,
+        background: c.orioleContainer,
+        leading: icon(AppIcons.star, c.orioleText),
       ),
     };
   }

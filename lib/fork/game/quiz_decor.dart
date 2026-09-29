@@ -84,7 +84,7 @@ class QuizTwinkleField extends _QuizField {
   final int count;
   final int seed;
 
-  static const Duration period = Duration(milliseconds: 2200);
+  static const Duration period = BirdyMotion.decorSparks;
 
   @override
   State<QuizTwinkleField> createState() => _QuizTwinkleFieldState();
@@ -208,7 +208,7 @@ class QuizSparkField extends _QuizField {
   final int seed;
   final double maxRadius;
 
-  static const Duration period = Duration(milliseconds: 2600);
+  static const Duration period = BirdyMotion.decorTwinkles;
 
   @override
   State<QuizSparkField> createState() => _QuizSparkFieldState();
@@ -312,7 +312,7 @@ class QuizStarBurstField extends _QuizField {
   final int count;
   final int seed;
 
-  static const Duration duration = Duration(milliseconds: 1200);
+  static const Duration duration = BirdyMotion.decorBurst;
 
   @override
   State<QuizStarBurstField> createState() => _QuizStarBurstFieldState();

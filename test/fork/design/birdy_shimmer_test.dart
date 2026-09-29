@@ -95,7 +95,9 @@ void main() {
     expect(find.byType(ShaderMask), findsNothing);
     final box = tester.widget<Container>(find.byType(Container).first);
     expect(
-      (box.decoration! as BoxDecoration).color,
+      ((box.decoration! as BoxDecoration).gradient! as LinearGradient)
+          .colors
+          .first,
       BirdyColors.light.skeleton,
     );
   });
@@ -139,7 +141,9 @@ void main() {
       expect(tester.getSize(find.byType(Container).first), const Size(200, 40));
       final box = tester.widget<Container>(find.byType(Container).first);
       expect(
-        (box.decoration! as BoxDecoration).color,
+        ((box.decoration! as BoxDecoration).gradient! as LinearGradient)
+            .colors
+            .first,
         (dark ? BirdyColors.dark : BirdyColors.light).skeleton,
       );
       await tester.pumpWidget(_app(const SizedBox()));

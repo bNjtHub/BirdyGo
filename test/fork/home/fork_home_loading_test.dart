@@ -25,28 +25,10 @@ import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// The default test font is a rough substitute with different metrics: the
-/// rect assertions below compare wrapped-or-not text, so they need the real
-/// bundled fonts loaded, or a short name could wrap under the test font and
-/// not on a real phone (or the reverse).
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 /// `load()` resolves only when told to, so a test can control exactly when
 /// the snapshot lands, independently from the game progress below.
@@ -69,6 +51,9 @@ class _DelayedLoader implements HomeLoader {
 
   @override
   Future<DateTime?> sunrise() async => null;
+
+  @override
+  Future<DateTime?> sunset() async => null;
 }
 
 Streak _streak({int current = 9}) {
@@ -175,7 +160,7 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   late SharedPreferences prefs;
   late _DelayedLoader loader;
@@ -186,6 +171,7 @@ void main() {
     HomeSnapshot? snapshot,
     bool dark = false,
     double textScale = 1,
+    double width = 390,
     bool reducedMotion = false,
   }) async {
     SharedPreferences.setMockInitialValues({});
@@ -194,7 +180,7 @@ void main() {
     // scrolling, even in dark at 130 %: `ListView`'s `SliverList` only
     // builds children within the viewport (plus cache extent), and an
     // off-screen block would not be found by its key otherwise.
-    tester.view.physicalSize = const Size(390, 2400) * 2;
+    tester.view.physicalSize = Size(width, 2400) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     loader = _DelayedLoader(snapshot ?? _morning());
@@ -255,6 +241,14 @@ void main() {
     expect(find.text('9'), findsWidgets); // série
     expect(find.text('12'), findsWidgets); // à vérifier
   }
+
+  testWidgets('320 dp, 130 %: Nunito titles do not overflow', (tester) async {
+    await pump(tester, textScale: 1.3, width: 320);
+    loader.resolve();
+    gameGate.complete(_game());
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('light, 100 %: no layout shift as snapshot then game land', (
     tester,

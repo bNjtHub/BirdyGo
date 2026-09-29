@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="padding:16px 16px 0;display:flex;align-items:flex-start;gap:8px;flex-shrink:0">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0"><div style="font-family:Fraunces;font-size:34px;line-height:1.1;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 34">Ma carte</div><div style="font-size:13px;color:#6B5847;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ app.map.caption }}</div></div>
+    <sc-if value="{{ app.map.showBack }}"><button onClick="{{ app.map.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">arrow_back</span></button></sc-if>
+    <button onClick="{{ app.map.layers }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">layers</span></button>
+  </div>
+  <div style="height:10px;flex-shrink:0"></div>
+  <div style="flex:1;position:relative;overflow:hidden;background:repeating-linear-gradient(135deg,#E3E8DE 0 12px,#DDE3D8 12px 24px)">
+    <div style="position:absolute;left:12px;bottom:10px;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#6B5847;background:rgba(255,255,255,.7);padding:3px 6px;border-radius:6px">fond de carte · {{ app.map.layer }}</div>
+    <sc-for list="{{ app.map.markers }}" as="m" hint-placeholder-count="6">
+      <button onClick="{{ m.open }}" style="all:unset;cursor:pointer;position:absolute;left:{{ m.left }};top:{{ m.top }};transform:translate(-50%,-50%);width:44px;height:44px;border-radius:999px;background:#FFFFFF;border:3px solid {{ m.ring }};box-sizing:border-box;box-shadow:0 4px 12px rgba(19,35,58,.18);display:flex;align-items:center;justify-content:center;animation:pop .4s both" style-active="transform:translate(-50%,-50%) scale(.94)">
+        <div style="width:34px;height:34px;border-radius:999px;background:{{ m.tint }};display:flex;align-items:center;justify-content:center"><img src="{{ m.sil }}" alt="" style="width:22px;height:22px;object-fit:contain"></div>
+        <span style="position:absolute;top:-10px;right:-14px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:999px;background:#13233A;color:#EEF1EC;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums">{{ m.n }}</span>
+      </button>
+    </sc-for>
+    <button onClick="{{ app.map.cluster }}" style="all:unset;cursor:pointer;position:absolute;left:78%;top:24%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:999px;background:#19A7B3;border:3px solid #FFFFFF;box-sizing:border-box;box-shadow:0 4px 12px rgba(19,35,58,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"><span style="font-size:17px;font-weight:800">4</span><span style="font-size:11px;font-weight:700">espèces</span></button>
+    <div style="position:absolute;left:44%;top:46%;width:14px;height:14px;border-radius:999px;background:#19A7B3;border:3px solid #FFFFFF;box-shadow:0 0 0 8px rgba(25,167,179,.2)"></div>
+
+    <div style="position:absolute;left:16px;right:0;top:10px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-right:16px;padding-bottom:12px">
+      <button onClick="{{ app.map.species }}" style="all:unset;cursor:pointer;flex-shrink:0;height:48px;padding:0 16px;border-radius:999px;background:#FFFFFF;box-shadow:0 8px 28px rgba(19,35,58,.14);display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;white-space:nowrap"><span class="ms" style="font-size:18px">expand_more</span>Toutes les espèces</button>
+      <button onClick="{{ app.map.period }}" style="all:unset;cursor:pointer;flex-shrink:0;height:48px;padding:0 16px;border-radius:999px;background:#13233A;color:#EEF1EC;box-shadow:0 8px 28px rgba(19,35,58,.14);display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;white-space:nowrap"><span class="ms" style="font-size:18px">expand_more</span>{{ app.map.periodLabel }}</button>
+      <button onClick="{{ app.map.confirmed }}" style="all:unset;cursor:pointer;flex-shrink:0;height:48px;padding:0 16px;border-radius:999px;background:{{ app.map.confirmedBg }};color:{{ app.map.confirmedFg }};box-shadow:0 8px 28px rgba(19,35,58,.14);display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;white-space:nowrap"><span class="ms" style="font-size:18px;opacity:{{ app.map.confirmedIcon }}">check</span>Confirmées</button>
+    </div>
+    <button onClick="{{ app.map.locate }}" style="all:unset;cursor:pointer;position:absolute;right:16px;bottom:40px;width:48px;height:48px;border-radius:999px;background:#FFFFFF;box-shadow:0 8px 28px rgba(19,35,58,.14);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px">my_location</span></button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

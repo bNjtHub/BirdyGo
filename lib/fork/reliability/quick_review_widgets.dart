@@ -85,7 +85,7 @@ class ReviewProgress extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(BirdyRadii.pill),
           child: SizedBox(
-            height: 6,
+            height: BirdySpace.snug,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -99,7 +99,7 @@ class ReviewProgress extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: BirdySpace.snug),
         Text(
           l10n.forkQuickReviewSorted(sorted),
           style: BirdyText.caption.copyWith(color: c.text2),
@@ -110,15 +110,11 @@ class ReviewProgress extends StatelessWidget {
 
   /// Same bar-then-caption shape, before the queue's length is known.
   static Widget skeleton(BuildContext context) {
-    final c = BirdyColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-          child: SizedBox(height: 6, child: ColoredBox(color: c.skeleton)),
-        ),
-        const SizedBox(height: 6),
+        BirdySkeleton.bar(height: BirdySpace.snug),
+        const SizedBox(height: BirdySpace.snug),
         BirdySkeleton.text(
           BirdyText.caption,
           placeholder: '00000000000000000000',
@@ -161,7 +157,7 @@ class ReviewCardStack extends StatelessWidget {
       ),
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: BirdySpace.l),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -229,7 +225,7 @@ class ReviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.surface1,
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
-        border: Border.all(color: outline, width: 3),
+        border: Border.all(color: outline, width: BirdyStroke.thick),
         boxShadow: c.floatShadow,
       ),
       child: Column(
@@ -240,7 +236,7 @@ class ReviewCard extends StatelessWidget {
           const SizedBox(height: BirdySpace.m),
           Row(
             children: [
-              SpeciesAvatar(image: image, size: 96),
+              SpeciesAvatar(image: image, size: BirdyGlyph.disc96),
               const SizedBox(width: BirdySpace.l),
               Expanded(
                 child: Column(
@@ -272,11 +268,11 @@ class ReviewCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(BirdyRadii.inset),
               child: Stack(
                 children: [
-                  ClipSpectrogram(path: clip, height: 80),
+                  ClipSpectrogram(path: clip, height: BirdySizes.clipSpectrogram),
                   if (playing)
                     PositionedDirectional(
                       start: 10,
-                      top: 8,
+                      top: BirdySpace.s,
                       child: Text(
                         l10n.forkQuickReviewPlaying,
                         style: BirdyText.caption.copyWith(
@@ -344,18 +340,18 @@ class ReviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.surface1,
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
-        border: Border.all(color: Colors.transparent, width: 3),
+        border: Border.all(color: Colors.transparent, width: BirdyStroke.thick),
         boxShadow: c.floatShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BirdySkeleton.box(width: 110, height: 26, radius: BirdyRadii.pill),
+          BirdySkeleton.box(width: BirdySizes.skeletonTagL, height: BirdySizes.pill, radius: BirdyRadii.pill),
           const SizedBox(height: BirdySpace.m),
           Row(
             children: [
-              BirdySkeleton.box(width: 96, height: 96, radius: 48),
+              BirdySkeleton.box(width: BirdyGlyph.disc96, height: BirdyGlyph.disc96, radius: BirdyRadii.pill),
               const SizedBox(width: BirdySpace.l),
               Expanded(
                 child: Column(
@@ -382,7 +378,7 @@ class ReviewCard extends StatelessWidget {
           const SizedBox(height: BirdySpace.m),
           BirdySkeleton.box(
             width: double.infinity,
-            height: 80,
+            height: BirdySizes.clipSpectrogram,
             radius: BirdyRadii.inset,
           ),
           const SizedBox(height: BirdySpace.m),
@@ -414,9 +410,9 @@ class SwipeHints extends StatelessWidget {
     Widget hint(IconData icon, String label, {bool trailing = false}) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!trailing) Icon(icon, size: 16, color: c.text2),
+        if (!trailing) Icon(icon, size: BirdyGlyph.m, color: c.text2),
         Flexible(child: Text(label, style: style)),
-        if (trailing) Icon(icon, size: 16, color: c.text2),
+        if (trailing) Icon(icon, size: BirdyGlyph.m, color: c.text2),
       ],
     );
     return ExcludeSemantics(
@@ -455,10 +451,19 @@ class VerdictButtons extends StatelessWidget {
     super.key,
     required this.enabled,
     required this.onAnswer,
+    this.notLabel,
+    this.dontKnowLabel,
+    this.yesLabel,
   });
 
   final bool enabled;
   final void Function(ReviewAnswer answer) onAnswer;
+
+  /// Shorter labels for a card with little room (the rare bird card of the
+  /// Live screen); the review's own labels when null.
+  final String? notLabel;
+  final String? dontKnowLabel;
+  final String? yesLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +485,7 @@ class VerdictButtons extends StatelessWidget {
           color: background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(BirdyRadii.card),
-            side: BorderSide(color: border, width: 1.5),
+            side: BorderSide(color: border, width: BirdyStroke.thin),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -489,26 +494,26 @@ class VerdictButtons extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: 104),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
+                  horizontal: BirdySpace.snug,
                   vertical: BirdySpace.s,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: BirdyGlyph.disc48,
+                      height: BirdyGlyph.disc48,
                       decoration: BoxDecoration(
                         color: circle,
                         shape: BoxShape.circle,
                         border:
                             ring == null
                                 ? null
-                                : Border.all(color: ring, width: 2),
+                                : Border.all(color: ring, width: BirdyStroke.regular),
                       ),
-                      child: Icon(icon, size: 26, color: iconColor),
+                      child: Icon(icon, size: BirdyGlyph.x4l, color: iconColor),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: BirdySpace.snug),
                     Text(
                       label,
                       textAlign: TextAlign.center,
@@ -529,7 +534,7 @@ class VerdictButtons extends StatelessWidget {
         children: [
           button(
             answer: ReviewAnswer.itIsNot,
-            label: l10n.forkReviewItIsNot,
+            label: notLabel ?? l10n.forkReviewItIsNot,
             icon: AppIcons.close,
             iconColor: c.toCheck.foreground,
             circle: c.surface1,
@@ -537,20 +542,20 @@ class VerdictButtons extends StatelessWidget {
             background: c.surface1,
             border: c.borderStrong,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: BirdySpace.cozy),
           button(
             answer: ReviewAnswer.dontKnow,
-            label: l10n.forkReviewDontKnow,
+            label: dontKnowLabel ?? l10n.forkReviewDontKnow,
             icon: AppIcons.question,
             iconColor: c.probable.foreground,
             circle: c.probable.background,
             background: c.surface1,
             border: c.borderStrong,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: BirdySpace.cozy),
           button(
             answer: ReviewAnswer.itIs,
-            label: l10n.forkReviewItIs,
+            label: yesLabel ?? l10n.forkReviewItIs,
             icon: AppIcons.check,
             iconColor: BirdyBrand.ink,
             circle: BirdyBrand.lichen,
@@ -565,9 +570,12 @@ class VerdictButtons extends StatelessWidget {
 
 /// Nothing left: empty queue or all sorted.
 class ReviewAllDone extends StatelessWidget {
-  const ReviewAllDone({super.key, required this.sorted});
+  const ReviewAllDone({super.key, required this.sorted, this.onBack});
 
   final int sorted;
+
+  /// Exit of the end state: shows a centered back button under the message.
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -584,6 +592,8 @@ class ReviewAllDone extends StatelessWidget {
               ? l10n.forkQuickReviewEmpty
               : '${l10n.forkQuickReviewSorted(sorted)} '
                   '${l10n.forkQuickReviewDone}',
+      action: l10n.tooltipBack,
+      onAction: onBack,
     );
   }
 }

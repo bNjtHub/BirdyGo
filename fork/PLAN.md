@@ -793,12 +793,68 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] J6g-g Squelettes (PR « J6g-g Squelettes : … ») : `BirdyShimmer`, balayage de lumière
             partagé, figé en animations réduites ; boucle autorisée dans DESIGN.md.
       - [x] (Benjamin) Téléphone : série J6g validée.
-      - [ ] Retirer `HomeMenuEntry` et `HomeMenuSheet`, devenus inutilisés (J6g-c).
+      - [x] Retirer `HomeMenuEntry` et `HomeMenuSheet`, devenus inutilisés (J6g-c).
       - [ ] Confirmer que la phrase de consentement de l'onboarding (liens Politique d'utilisation
             acceptable et de confidentialité) remplace bien l'étape de la charte d'usage BirdNET.
       - [ ] Envoi à Faune-France depuis la fiche : une session à la fois (pas de logique serveur
             nouvelle) ; à revoir si le besoin se confirme.
       - [ ] Faire passer « Aujourd'hui » par `openListeningSummary` (retour d'un seul écran).
+
+- [ ] J6h Passe d'homogénéité, ligne Profil / Quiz (handoff `fork/handoff/README.md`, règles dans
+      DESIGN.md « Ligne J6h »). Un écran = une PR « J6h <Écran> : … », PR empilées dans l'ordre.
+      - [x] Socle : silhouette dans `SpeciesAvatar`, pastilles, `AppIcons`, jeton #8CD3D9 et aile,
+            ligne de liste unique, préférences `firstName` et `liveTheme`, config des heures du jour.
+      - [x] Accueil : bande « Ta journée » et son tiroir, salutation avec prénom, aile sur « Écouter ».
+      - [x] Écoute : thème clair (`liveTheme`), étiquettes de rareté, noms du spectrogramme sans chevauchement.
+      - [x] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
+      - [x] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
+      - [x] Fiche : héros `sure`, bloc « Fais sa connaissance ».
+      - [ ] Fiche, rubrique Ennemis : code prêt (6e disque, `SheetSection.enemies`, script `tools/fork_species_sheets.py`).
+            Régénérer les fiches avec la rubrique Ennemis (PC, API) ; en attendant la rubrique reste masquée (n/5).
+      - [x] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
+      - [x] Quiz : intro sans défilement, croix et confirmation de sortie.
+      - [x] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.
+      - [x] Sonothèque : héros, filtre favoris sur la liste, bloc unique.
+      - [x] Réglages : blocs titrés, bloc « Toi » (prénom), thème Auto, écran d'écoute.
+      - [x] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
+      - [x] Objectif : héros à anneau, liste en bloc, bouton épinglé avec l'aile.
+      - [x] Carte : puces en encre, bulle 13, retour quand elle est poussée.
+      - [x] Revue : pile centrée verticalement.
+      - [x] Premier lancement : étape prénom facultative.
+      - [x] J6i Icônes (Android) : 4 icônes adaptatives (fond dégradé tonal → blanc, logo du thème),
+            rendues par `test/fork/tool/render_launcher_icons_test.dart`
+            (`RENDER_LAUNCHER_ICONS=1 flutter test …`). 4 `activity-alias` (`.AliasLoriot` par défaut,
+            `.AliasMartin`, `.AliasFlamant`, `.AliasEtourneau`), canal `fr.justcodeit.birdygo/app_icon`,
+            `AppIconChannel.kt` applique le choix quand l'appli passe en arrière-plan.
+      - [ ] (Benjamin) Téléphone : l'icône change après avoir quitté l'appli, widgets et partage vers
+            l'appli fonctionnent toujours.
+      - [x] Écoute : alerte « Volume coupé / Volume bas » (volume média sous `MediaVolumeConfig.lowBelow`,
+            lu chaque seconde par `MediaVolume`) et bouton « Monter le son » (`comfortable`, avec le
+            curseur système). Canal `fr.justcodeit.birdygo/media_volume`, `MediaVolumeChannel.kt`.
+      - [x] Écoute : notification d'une nouvelle espèce (Sûr ou Probable, première fois de la session) quand l'app est en arrière-plan ; canal « Nouvelles espèces », interrupteur dans les options d'écoute (`lib/fork/notifications/`). Côté iOS : autorisation de notification (UNUserNotificationCenter) et mode d'arrière-plan audio nécessaires.
+      - [x] Écoute : premières rencontres en série (file, « 1 sur 3 nouvelles », points, « Espèce suivante »),
+            barre de décompte qui se fige en pause, retour d'arrière-plan, logo animé partagé
+            (`BirdyListeningLogo`), feu d'artifice en deux salves et étincelles (`BirdySparkles`).
+      - [x] Accueil et Quiz : point du wordmark posé sur la ligne de base, « Avec effets / Sans effets »,
+            Réglages « Effets sonores du quiz ».
+      - [x] Écoute : carte de l'oiseau rare (arrivée avec anneau pointillé, halo et losanges ; « 1 chance sur n » ;
+            les 3 verdicts de la Revue rapide ; décomptes 6 s / 3 s ; « Je ne sais pas » laisse à vérifier) et
+            carte de première rencontre compacte (oiseau 96, sans nom latin, `BalancedText`, sans « n au total »).
+      - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
+            pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
+      - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
+
+- [ ] J6i Thèmes, typo, wordmark, icônes, premier lancement (suite de J6h, PR #103 à #108).
+      - [x] Thèmes (#104, #105) : 4 palettes d'oiseau (loriot, martin, flamant, étourneau), choix clair / sombre.
+      - [x] Typo (#103) : échelle Nunito / Atkinson / Fraunces, jetons dans `birdy_typography.dart`.
+      - [x] Wordmark (#106) : point posé sur la ligne de base, logo animé du thème.
+      - [x] Icônes (#107) : icône d'appli par oiseau (4 alias Android), l'icône de l'application pointe
+            vers celle du loriot. Côté iOS : voir la section « Phase iOS », icône d'appli par oiseau.
+      - [x] Onboarding (#108) : choix de l'oiseau, prénom, bienvenue.
+      - [x] Ménage : images d'échec des goldens ignorées (`**/goldens/failures/`), jetons pour les tailles
+            de l'onboarding (`labelLarge`, `inputLarge`, `headingSmall`, `ctaIcon`, `inlineIcon`).
+      - [ ] (Benjamin) Téléphone : premier lancement, 4 oiseaux, icône, clair/sombre.
+      - [x] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
@@ -862,6 +918,8 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Notification de nouvelle espèce (J6h) : `NotificationsGateway` demande déjà l'autorisation iOS (`requestPermissions`) ; sans `UIBackgroundModes: audio` (ci-dessous) l'écoute s'arrête en arrière-plan, donc pas de notification. À tester.
+- Photo dans la notification (J6h) : Android utilise `largeIcon` + `BigPictureStyleInformation` (octets PNG, `lib/fork/notifications/notification_images.dart`). Côté iOS : écrire le PNG dans le dossier temporaire et le joindre via `DarwinNotificationDetails(attachments: [DarwinNotificationAttachment(path)])`.
 - Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
   `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
@@ -901,6 +959,17 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Quiz « Qui chante ? » (J6e) : aucun code natif. Bruitages en WAV lus par just_audio avec un
   lecteur à part : sur iPhone, vérifier qu'ils ne coupent pas une musique en cours (session audio
   « ambient » ou mixage) et que le mode silencieux est respecté.
+- Volume média (J6h) : `AVAudioSession.outputVolume` en lecture seule ; iOS ne permet pas de régler
+  le volume (`MPVolumeView` seulement) → bouton qui ouvre le curseur système. En attendant,
+  `NoopMediaVolume` ne montre aucune alerte.
+- Icône d'appli par oiseau (J6i) : `AppIcon` (`lib/fork/app_icon/`) est un no-op hors Android
+  (`NoopAppIcon`). Côté iOS : `UIApplication.setAlternateIconName` depuis un canal Swift (même canal
+  `fr.justcodeit.birdygo/app_icon`, méthode `setIcon(bird)`), déclarer `CFBundleIcons` >
+  `CFBundleAlternateIcons` dans `Info.plist` (une entrée par oiseau : `martin`, `flamant`,
+  `etourneau`, Loriot = icône principale) et ajouter les images par thème (60x60 @2x/@3x, hors
+  catalogue d'assets, ou ensemble « Alternate App Icons » de Xcode). iOS affiche une alerte système
+  au changement : pas de report à l'arrière-plan. Le rendu des PNG existe déjà
+  (`test/fork/tool/render_launcher_icons_test.dart`, à étendre aux tailles iOS).
 - Modes d'écoute (J6f) : Dart pur, aucun code natif. Gain, filtre passe-haut et réducteur du mode
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même

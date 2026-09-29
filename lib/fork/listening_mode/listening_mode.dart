@@ -163,8 +163,7 @@ IconData listeningModeIcon(ListeningMode? mode) => switch (mode) {
 /// Color of [mode]'s icon and word in [c]'s theme (J6f); always visible,
 /// including Normal. Null (custom) gives the neutral [BirdyColors.text2].
 Color listeningModeColor(BirdyColors c, ListeningMode? mode) => switch (mode) {
-  ListeningMode.normal =>
-    c.isDark ? ListeningModeColors.normalDark : ListeningModeColors.normalLight,
+  ListeningMode.normal => c.accentText, // follows the bird theme (J6i)
   ListeningMode.wind =>
     c.isDark ? ListeningModeColors.windDark : ListeningModeColors.windLight,
   ListeningMode.boost =>

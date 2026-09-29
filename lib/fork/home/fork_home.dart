@@ -25,6 +25,7 @@ import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
+import '../day/day_times.dart';
 import '../daily_goal/daily_goal_block.dart';
 import '../daily_goal/daily_goal_screen.dart';
 import '../design/birdy_motion.dart';
@@ -40,8 +41,11 @@ import '../game/status_celebration.dart';
 import '../game/streak.dart';
 import '../profile/profile_screen.dart';
 import '../reliability/quick_review_screen.dart';
+import '../settings/fork_prefs.dart';
 import '../shell/fork_shell.dart';
 import '../summary/listening_summary_screen.dart';
+import 'day_sheet.dart';
+import 'day_strip.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
 import 'home_text.dart';
@@ -61,7 +65,7 @@ class ForkHome extends ConsumerStatefulWidget {
 class _ForkHomeState extends ConsumerState<ForkHome> {
   HomeSnapshot? _snapshot;
   String? _place;
-  DateTime? _sunrise;
+  DayTimes? _dayTimes;
   int _generation = 0;
 
   @override
@@ -86,7 +90,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   Future<void> _loadPlace() async {
     final loader = ref.read(homeLoaderProvider);
     final sunrise = await loader.sunrise();
-    if (mounted && sunrise != null) setState(() => _sunrise = sunrise);
+    final sunset = await loader.sunset();
+    final times = DayTimes.tryCreate(sunrise: sunrise, sunset: sunset);
+    if (mounted && times != null) setState(() => _dayTimes = times);
     final place = await loader.placeName();
     if (mounted && place != null) setState(() => _place = place);
   }
@@ -118,12 +124,27 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         commonName: name,
       );
 
+  /// Straight into listening, like the « Écouter » button.
+  void _listen() => _open(const LiveScreen(forceAutoStart: true));
+
+  void _openDaySheet(DayTimes times, DayMoment moment) => showDaySheet(
+    context,
+    times: times,
+    caption: homeDateLine(
+      Localizations.localeOf(context).toString(),
+      ref.read(homeClockProvider)(),
+      place: _place,
+    ),
+    highlighted: moment,
+    onListen: _listen,
+  );
+
   void _open(Widget screen) => Navigator.of(
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
   Future<void> _startChallenge() async {
-    await ref.read(challengeStoreProvider).start(DateTime.now());
+    await ref.read(challengeStoreProvider).start(ref.read(homeClockProvider)());
     ref.invalidate(gameProgressProvider);
   }
 
@@ -183,7 +204,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final localeName = Localizations.localeOf(context).toString();
-    final now = DateTime.now();
+    final now = ref.watch(homeClockProvider)();
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final snapshot = _snapshot;
@@ -208,9 +229,22 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     // resolve independently; the header's live region only announces once
     // both have (SPEC.md's common case never announces a second "loading").
     final dataReady = !loadingSnapshot && !loadingGame;
-    // The singing logo, small, alone above the tab header (Accueil only).
-    const topBar = HomeLogoRow();
-    final sunrise = _sunrise;
+    // The singing logo, small, above the tab header (Accueil only), with the
+    // menu button on the same row so both share one vertical center.
+    final topBar = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Expanded(child: HomeLogoRow()),
+        const SizedBox(width: BirdySpace.s),
+        BirdyIconButton(
+          icon: AppIcons.menu,
+          semanticLabel: l10n.forkHomeMenu,
+          onPressed: _showMenu,
+        ),
+      ],
+    );
+    final dayTimes = _dayTimes;
+    final firstName = ref.watch(firstNameProvider);
 
     // 'last' (hero): the common case for a returning user is a last bird
     // already on record, so it skeletons while loading; a fresh install
@@ -296,7 +330,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           _crossFade(
             TodayEmptyBlock(
               key: const ValueKey('home-today-empty'),
-              onListen: () => _open(const LiveScreen(forceAutoStart: true)),
+              onListen: _listen,
             ),
           ),
         );
@@ -326,23 +360,23 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           liveRegion: true,
           label: dataReady ? null : l10n.forkHomeLoading,
           child: BirdyTabHeader(
-            title: homeGreeting(l10n, now),
-            caption: homeDateLine(
-              localeName,
-              now,
-              place: _place,
-              sunrise: sunrise == null ? null : homeSunrise(l10n, sunrise),
-            ),
-            actions: [
-              BirdyIconButton(
-                icon: AppIcons.menu,
-                semanticLabel: l10n.forkHomeMenu,
-                onPressed: _showMenu,
-              ),
-            ],
+            title: homeGreeting(l10n, now, firstName: firstName),
+            caption: homeDateLine(localeName, now, place: _place),
           ),
         ),
       ),
+      // No strip without a position (no sunrise or sunset).
+      if (dayTimes != null)
+        (
+          'day',
+          _crossFade(
+            DayStrip(
+              key: const ValueKey('home-day-strip'),
+              times: dayTimes,
+              onMoment: (moment) => _openDaySheet(dayTimes, moment),
+            ),
+          ),
+        ),
       if (heroEntry() case final entry?) entry,
       (
         'grid',
@@ -371,7 +405,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       padding: const EdgeInsets.all(BirdySpace.xl),
       // Straight into listening: the live screen starts on arrival.
       child: ListenButton(
-        onPressed: () => _open(const LiveScreen(forceAutoStart: true)),
+        onPressed: _listen,
       ),
     );
 

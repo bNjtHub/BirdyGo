@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
-import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/entrance.dart';
@@ -223,14 +222,6 @@ class LiveTableRow extends StatelessWidget {
         children: [
           SingingIndicator(singing: entry.singingVisual, color: tint.accent),
           if (badge != null) badge!,
-          if (!compact)
-            Text(
-              l10n.forkLiveTotal(entry.total),
-              style: BirdyText.caption.copyWith(
-                color: c.text2,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
         ],
       ),
       count: AnimatedCount(
@@ -274,7 +265,7 @@ class SpeciesColorDot extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: ring, width: 3),
+            border: Border.all(color: ring, width: BirdyStroke.thick),
           ),
         ),
       ),
@@ -337,7 +328,7 @@ class SingingBars extends StatefulWidget {
 
 class _SingingBarsState extends State<SingingBars>
     with SingleTickerProviderStateMixin {
-  static const Duration _period = Duration(milliseconds: 900);
+  static const Duration _period = BirdyMotion.singingBars;
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: _period,

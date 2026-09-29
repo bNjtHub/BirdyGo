@@ -79,7 +79,7 @@ class StatusEmblem extends StatelessWidget {
                 ? status.color
                 : (c.isDark
                     ? BirdyBrand.mist.withValues(alpha: 0.10)
-                    : const Color(0xFFE1E5DE)),
+                    : BirdyBrand.mistTrack),
         ink:
             reached
                 ? BirdyBrand.ink
@@ -129,7 +129,7 @@ class _EmblemPainter extends CustomPainter {
         center,
         radius * 0.86,
         Paint()
-          ..color = const Color(0xFFFFFFFF).withValues(
+          ..color = BirdyBrand.white.withValues(
             alpha: BirdyAlpha.emblemInnerRing,
           )
           ..style = PaintingStyle.stroke
@@ -187,10 +187,7 @@ class StatusRing extends StatelessWidget {
               size: Size.square(size),
               painter: _RingPainter(
                 progress: progress,
-                track:
-                    c.isDark
-                        ? BirdyBrand.mist.withValues(alpha: 0.14)
-                        : const Color(0xFFDCE2DA),
+                track: c.progressTrack,
                 color: shown.color,
               ),
             ),
@@ -327,7 +324,7 @@ class BadgeMedal extends StatelessWidget {
           ),
           border: Border.all(
             color: metal.shadow.withValues(alpha: .55),
-            width: 1,
+            width: BirdyStroke.hairline,
           ),
         ),
         alignment: Alignment.center,
@@ -381,9 +378,9 @@ class TierDots extends StatelessWidget {
       children: [
         for (var i = 0; i < 3; i++)
           Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
+            width: BirdySpace.snug,
+            height: BirdySpace.snug,
+            margin: const EdgeInsets.symmetric(horizontal: BirdySpace.xxs),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: i < filled ? c.text1 : c.borderStrong,
@@ -405,12 +402,14 @@ class SegmentedBar extends StatelessWidget {
     required this.filled,
     required this.color,
     required this.track,
+    this.height = BirdySizes.segmentHeight, // FORK: J6h thinner bar (6)
   });
 
   final int count;
   final int filled;
   final Color color;
   final Color track;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -425,10 +424,10 @@ class SegmentedBar extends StatelessWidget {
     return Row(
       children: [
         for (var i = 0; i < count; i++) ...[
-          if (i > 0) const SizedBox(width: BirdySpace.xs / 2),
+          if (i > 0) const SizedBox(width: BirdySpace.xxs),
           Expanded(
             child: Container(
-              height: BirdySizes.segmentHeight,
+              height: height,
               decoration: BoxDecoration(
                 color: i < filled ? color : track,
                 borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -469,7 +468,7 @@ class StreakChip extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(AppIcons.calendarToday, size: 20, color: c.accentText),
+                    Icon(AppIcons.calendarToday, size: BirdyGlyph.xl, color: c.accentText),
                     const SizedBox(width: BirdySpace.s),
                     Text(
                       l10n.forkStreakChip(days),

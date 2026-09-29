@@ -11,6 +11,14 @@ import 'summary_fixture.dart';
 /// The page's vertical list (the species strip scrolls too).
 final Finder _page = find.byType(Scrollable).first;
 
+/// Opens « Autres actions » and taps the row titled [title].
+Future<void> _tapInSheet(WidgetTester tester, String title) async {
+  await _tapInPage(tester, find.text('Autres actions'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(title));
+  await tester.pumpAndSettle();
+}
+
 /// Brings [finder] into the page's view, then taps it.
 Future<void> _tapInPage(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(finder, 200, scrollable: _page);
@@ -94,7 +102,8 @@ void main() {
     );
     expect(find.text('13'), findsOneWidget);
     expect(find.text('52'), findsOneWidget);
-    expect(find.text('42 min'), findsOneWidget);
+    expect(find.textContaining('42', findRichText: true), findsWidgets);
+    expect(find.textContaining('min', findRichText: true), findsWidgets);
     expect(find.text('Une nouvelle, peut-être deux'), findsOneWidget);
     expect(find.text('Première fois'), findsOneWidget);
     expect(find.text('Pic épeiche'), findsOneWidget);
@@ -137,7 +146,7 @@ void main() {
       expect(find.text(l10n.detectionEvidenceSeen), findsOneWidget);
       expect(find.text(l10n.forkSummaryRankWithoutTime(1)), findsOneWidget);
       expect(find.textContaining('07:12.'), findsNothing);
-      await _tapInPage(tester, find.text(l10n.forkSummaryAddObservation));
+      await _tapInSheet(tester, l10n.forkSummaryAddObservation);
       expect(added, isTrue);
     },
   );
@@ -151,7 +160,7 @@ void main() {
     await _tapInPage(tester, find.text('Vérifier 3 détections'));
     expect(checked, summary.keysToCheck);
 
-    await _tapInPage(tester, find.text("Voir le détail de l'écoute"));
+    await _tapInSheet(tester, "Détail de l'écoute");
     expect(details, 1);
   });
 
@@ -187,7 +196,7 @@ void main() {
   ) async {
     await pump(tester, _morning());
     expect(find.textContaining('ne compte ni au palmarès'), findsNothing);
-    await _tapInPage(tester, find.text("C'était un enregistrement ?"));
+    await _tapInSheet(tester, "C'était un enregistrement");
     expect(markedRecording, isTrue);
   });
 
@@ -209,7 +218,7 @@ void main() {
       200,
       scrollable: _page,
     );
-    await _tapInPage(tester, find.text("Non, c'étaient de vrais oiseaux"));
+    await _tapInSheet(tester, "Non, c'étaient de vrais oiseaux");
     expect(markedRecording, isFalse);
   });
 

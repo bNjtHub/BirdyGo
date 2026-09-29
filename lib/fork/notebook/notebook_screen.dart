@@ -25,6 +25,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/empty_state.dart';
+import '../design/birdygo_silhouette.dart';
 import '../design/widgets/species_card.dart';
 import '../game/game_widgets.dart' show SegmentedBar;
 import '../design/widgets/birdy_cross_fade.dart';
@@ -38,8 +39,11 @@ import 'notebook_visuals.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
-const int _columns = 3;
+const int _columns = 2;
 const double _gap = 10;
+
+/// Lines reserved for the hero sentence.
+const int _heroLines = 4;
 
 class NotebookScreen extends ConsumerStatefulWidget {
   const NotebookScreen({super.key});
@@ -183,8 +187,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       if (showScaffold) ...[
         SliverToBoxAdapter(child: _progressBlock(l10n, c, notebook, dataReady)),
         SliverToBoxAdapter(child: _countBlocks(l10n, c, notebook, dataReady)),
-        SliverToBoxAdapter(child: _filterChips(l10n, c)),
-        ..._grid(l10n, c, notebook, dataReady),
+        _collectionBlock(l10n, c, notebook, dataReady),
       ] else
         SliverFillRemaining(
           hasScrollBody: false,
@@ -249,7 +252,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               placeholder: '00000000000000000000',
             )
             : Text(
-              l10n.forkNotebookDiscovered(notebook!.discovered),
+              l10n.forkNotebookCaption(notebook!.discovered),
               key: const ValueKey('notebook-caption-real'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -279,10 +282,12 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       color: c.text1,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
-    final captionStyle = BirdyText.body.copyWith(
-      color: c.text1,
-      fontWeight: FontWeight.w700,
-    );
+    final captionStyle = BirdyText.bodyCompact.copyWith(color: c.text1);
+    // Four lines of the sentence, always reserved: the real text (2 to 4
+    // lines) and its skeleton then take the same height.
+    final sentenceHeight = MediaQuery.textScalerOf(
+      context,
+    ).scale(captionStyle.fontSize! * captionStyle.height! * _heroLines);
     const ringSize = BirdySizes.notebookRing;
     final track = birdyTrackOnTint(c);
     return BirdyBlock(
@@ -293,6 +298,11 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            l10n.forkNotebookHeroTitle,
+            style: BirdyText.heading.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.m),
           Row(
             children: [
               // Ring like the Profil « Mon niveau » one: the expected
@@ -312,7 +322,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                       color: c.accent,
                       track: track,
                       child: Padding(
-                        padding: const EdgeInsets.all(BirdySpace.m + 4),
+                        padding: const EdgeInsets.all(BirdySpace.m + BirdySpace.xs),
                         child: FittedBox(
                           child: Text(
                             '${notebook.expectedFound}',
@@ -329,22 +339,28 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                   ),
               const SizedBox(width: BirdySpace.l),
               Expanded(
-                // Up to 3 lines, real text and skeleton alike, so the block
-                // never resizes whatever the geo-model's digit count.
-                child:
-                    ready
-                        ? Text(
-                          l10n.forkNotebookProgressCaption(notebook.expected!),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: captionStyle,
-                        )
-                        : BirdySkeleton.text(
-                          captionStyle,
-                          placeholder:
-                              '00000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                          maxLines: 3,
-                        ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: sentenceHeight),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child:
+                        ready
+                            ? Text(
+                              '${l10n.forkNotebookHeroExpected(notebook.expected!)} '
+                              '${l10n.forkNotebookHeroFound(notebook.expectedFound, notebook.expected! - notebook.expectedFound)}',
+                              maxLines: _heroLines,
+                              overflow: TextOverflow.ellipsis,
+                              style: captionStyle,
+                            )
+                            : BirdySkeleton.text(
+                              captionStyle,
+                              placeholder:
+                                  '${l10n.forkNotebookHeroExpected(88)} '
+                                  '${l10n.forkNotebookHeroFound(88, 88)}',
+                              maxLines: _heroLines,
+                            ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -371,14 +387,41 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           ),
           const SizedBox(height: BirdySpace.s),
           ready
-              ? Text(
-                l10n.forkNotebookSilhouettes,
-                style: BirdyText.caption.copyWith(color: c.accentText),
+              ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // The grey bird the caption talks about.
+                  Padding(
+                    padding: const EdgeInsets.only(top: BirdySpace.xxs),
+                    child: BirdyGoSilhouetteIcon.mystery(
+                      size: BirdySizes.notebookHeroSilhouette,
+                      color: c.text2,
+                    ),
+                  ),
+                  const SizedBox(width: BirdySpace.s),
+                  Expanded(
+                    child: Text(
+                      l10n.forkNotebookSilhouettes,
+                      style: BirdyText.caption.copyWith(color: c.accentText),
+                    ),
+                  ),
+                ],
               )
-              : BirdySkeleton.text(
-                BirdyText.caption,
-                placeholder: l10n.forkNotebookSilhouettes,
-                maxLines: null,
+              : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Same indent as the silhouette line, so it wraps alike.
+                  const SizedBox(
+                    width: BirdySizes.notebookHeroSilhouette + BirdySpace.s,
+                  ),
+                  Expanded(
+                    child: BirdySkeleton.text(
+                      BirdyText.caption,
+                      placeholder: l10n.forkNotebookSilhouettes,
+                      maxLines: null,
+                    ),
+                  ),
+                ],
               ),
         ],
       ),
@@ -481,41 +524,130 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     );
   }
 
-  Widget _filterChips(AppLocalizations l10n, BirdyColors c) => Padding(
-    key: const ValueKey('notebook-filter-chips'),
-    padding: const EdgeInsets.only(bottom: BirdySpace.block),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final filter in NotebookFilter.values)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
-              child: BirdyFilterChip(
-                label: switch (filter) {
-                  NotebookFilter.all => l10n.forkNotebookFilterAll,
-                  NotebookFilter.discovered =>
-                    l10n.forkNotebookFilterDiscovered,
-                  NotebookFilter.toDiscover =>
-                    l10n.forkNotebookFilterToDiscover,
-                  NotebookFilter.rare => l10n.forkNotebookFilterRare,
-                },
-                selected: _filter == filter,
-                selectedColors: switch (filter) {
-                  NotebookFilter.all => BirdyChipColors.ink(c),
-                  NotebookFilter.discovered => BirdyChipColors.sure(c),
-                  NotebookFilter.toDiscover => BirdyChipColors.tonal(c),
-                  NotebookFilter.rare => BirdyChipColors.oriole(c),
-                },
-                onSelected: () => setState(() => _filter = filter),
-              ),
-            ),
+  /// The white « Ma collection » block: title and card count, filter chips,
+  /// then the (lazy) grid. A [DecoratedSliver] paints the white block behind
+  /// the slivers, so the grid stays lazy.
+  Widget _collectionBlock(
+    AppLocalizations l10n,
+    BirdyColors c,
+    Notebook? notebook,
+    bool dataReady,
+  ) => DecoratedSliver(
+    decoration: BoxDecoration(
+      color: c.surface1,
+      borderRadius: BorderRadius.circular(BirdyRadii.card),
+    ),
+    sliver: SliverPadding(
+      padding: const EdgeInsets.all(BirdySpace.l),
+      sliver: SliverMainAxisGroup(
+        slivers: [
+          SliverToBoxAdapter(
+            child: _collectionHeader(l10n, c, notebook, dataReady),
+          ),
+          SliverToBoxAdapter(child: _filterChips(l10n, c)),
+          ..._grid(l10n, c, notebook, dataReady),
         ],
       ),
     ),
   );
 
-  /// Generic grid rows of 3 columns: [cellBuilder] gets each cell's column
+  /// « Ma collection » (20) and « N cartes » on the same baseline.
+  Widget _collectionHeader(
+    AppLocalizations l10n,
+    BirdyColors c,
+    Notebook? notebook,
+    bool dataReady,
+  ) => Padding(
+    key: const ValueKey('notebook-collection-header'),
+    padding: const EdgeInsets.only(bottom: BirdySpace.m),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Expanded(
+          child: Text(
+            l10n.forkNotebookCollection,
+            style: BirdyText.heading.copyWith(color: c.text1),
+          ),
+        ),
+        _crossFade(
+          dataReady
+              ? Text(
+                l10n.forkNotebookCardCount(notebook!.filtered(_filter).length),
+                key: const ValueKey('notebook-card-count-real'),
+                style: BirdyText.caption.copyWith(color: c.text2),
+              )
+              : BirdySkeleton.text(
+                BirdyText.caption,
+                key: const ValueKey('notebook-card-count-skeleton'),
+                placeholder: '000000000',
+              ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _filterChips(AppLocalizations l10n, BirdyColors c) => Padding(
+    key: const ValueKey('notebook-filter-chips'),
+    padding: const EdgeInsets.only(bottom: BirdySpace.block),
+    child: Stack(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final filter in NotebookFilter.values)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
+                  child: BirdyFilterChip(
+                    label: switch (filter) {
+                      NotebookFilter.all => l10n.forkNotebookFilterAll,
+                      NotebookFilter.discovered =>
+                        l10n.forkNotebookFilterDiscovered,
+                      NotebookFilter.toDiscover =>
+                        l10n.forkNotebookFilterToDiscover,
+                      NotebookFilter.rare => l10n.forkNotebookFilterRare,
+                    },
+                    selected: _filter == filter,
+                    // Brume on the white block; the chosen one keeps its
+                    // meaning tint (DESIGN.md, J6h exception).
+                    unselectedColor: c.background,
+                    selectedColors: switch (filter) {
+                      NotebookFilter.all => BirdyChipColors.ink(c),
+                      NotebookFilter.discovered => BirdyChipColors.sure(c),
+                      NotebookFilter.toDiscover => BirdyChipColors.tonal(c),
+                      NotebookFilter.rare => BirdyChipColors.oriole(c),
+                    },
+                    onSelected: () => setState(() => _filter = filter),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // White fade on the right edge: the row scrolls.
+        PositionedDirectional(
+          top: 0,
+          bottom: 0,
+          end: 0,
+          width: BirdySizes.chipFade,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              key: const ValueKey('notebook-chips-fade'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
+                  colors: [c.surface1.withValues(alpha: 0), c.surface1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  /// Generic grid rows of 2 columns: [cellBuilder] gets each cell's column
   /// width and index, so the skeleton grid and the real one share the exact
   /// same geometry (widths, gaps) and never shift into one another.
   List<Widget> _columnRows(
@@ -531,7 +663,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           child: LayoutBuilder(
             builder: (context, box) {
               final width = (box.maxWidth - _gap * (_columns - 1)) / _columns;
-              final visualSize = (width - 20).clamp(40.0, 72.0);
+              final visualSize = (width - 20).clamp(
+                40.0,
+                BirdySizes.notebookVisual,
+              );
               return IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -572,7 +707,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
     child: ConstrainedBox(
       constraints: const BoxConstraints(minHeight: BirdySizes.collectionCard),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(BirdySpace.cozy),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
@@ -582,13 +717,13 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               height: visualSize,
               radius: BirdyRadii.thumb,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: BirdySpace.snug),
             SizedBox(
-              height: twoLineTextHeight(context, BirdyText.speciesCompact),
+              height: twoLineTextHeight(context, BirdyText.species),
               child: Align(
                 alignment: AlignmentDirectional.topStart,
                 child: BirdySkeleton.text(
-                  BirdyText.speciesCompact,
+                  BirdyText.species,
                   placeholder: '0000000000000000',
                 ),
               ),
@@ -662,7 +797,8 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           label: l10n.forkNotebookMystery,
           excludeSemantics: card.hint == null,
           child: SpeciesCard.mystery(
-            name: l10n.forkNotebookFilterToDiscover,
+            name: l10n.forkNotebookMystery,
+            largeName: true,
             visual: NotebookVisuals.mystery(
               card.scientificName,
               size: visualSize,
@@ -690,13 +826,20 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               muted: true,
               badge: NotebookBadge.toConfirm,
             ),
-            corner: _rarity(l10n, card.rarity),
-            caption: Text(
-              l10n.forkNotebookToConfirm,
-              style: TextStyle(
-                color: c.toCheck.foreground,
-                fontWeight: FontWeight.w700,
-              ),
+            largeName: true,
+            caption: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.forkNotebookToConfirm,
+                  style: TextStyle(
+                    color: c.toCheck.foreground,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                ..._pills(card),
+              ],
             ),
             onTap: () => _openCard(card),
           ),
@@ -722,16 +865,13 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               badge: NotebookBadge.discovered,
             ),
             tint: SpeciesAccents.tintOf(card.scientificName),
-            corner: _rarity(l10n, card.rarity),
+            largeName: true,
             caption: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(l10n.forkNotebookTimes(card.contacts)),
-                if (card.isNew) ...[
-                  const SizedBox(height: 6),
-                  const NoveltyPill(kind: NoveltyKind.isNew),
-                ],
+                ..._pills(card),
               ],
             ),
             onTap: () => _openCard(card),
@@ -741,32 +881,34 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   }
 
   /// « . Rare ici » (with its leading full stop) for a card's spoken label.
-  String _rarityLabel(AppLocalizations l10n, RarityMark mark) =>
-      switch (mark) {
-        RarityMark.none => '',
-        RarityMark.uncommon => '. ${l10n.forkRarityUncommon}',
-        RarityMark.rare => '. ${l10n.forkRarityRare}',
-        RarityMark.exceptional => '. ${l10n.forkRarityExceptional}',
-      };
+  String _rarityLabel(AppLocalizations l10n, RarityMark mark) => switch (mark) {
+    RarityMark.none => '',
+    RarityMark.uncommon => '. ${l10n.forkRarityUncommon}',
+    RarityMark.rare => '. ${l10n.forkRarityRare}',
+    RarityMark.exceptional => '. ${l10n.forkRarityExceptional}',
+  };
 
-  Widget? _rarity(AppLocalizations l10n, RarityMark mark) {
-    final c = BirdyColors.of(context);
-    final (icon, color, label) = switch (mark) {
-      RarityMark.none => (null, null, null),
-      RarityMark.uncommon => (
-        AppIcons.contrast,
-        c.text2,
-        l10n.forkRarityUncommon,
-      ),
-      RarityMark.rare => (AppIcons.diamond, c.orioleText, l10n.forkRarityRare),
-      RarityMark.exceptional => (
-        AppIcons.star,
-        c.orioleText,
-        l10n.forkRarityExceptional,
-      ),
+  /// Rarity in words next to « Nouveau », at the bottom of the card (no
+  /// corner mark hiding the bird). Empty when neither applies.
+  List<Widget> _pills(NotebookCard card) {
+    final rarity = switch (card.rarity) {
+      RarityMark.none => null,
+      RarityMark.uncommon => NoveltyKind.uncommonHere,
+      RarityMark.rare => NoveltyKind.rareHere,
+      RarityMark.exceptional => NoveltyKind.exceptionalHere,
     };
-    if (icon == null) return null;
-    return Icon(icon, size: 16, color: color, fill: 1, semanticLabel: label);
+    if (rarity == null && !card.isNew) return const [];
+    return [
+      const SizedBox(height: BirdySpace.snug),
+      Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          if (rarity != null) NoveltyPill(kind: rarity, short: true),
+          if (card.isNew) const NoveltyPill(kind: NoveltyKind.isNew),
+        ],
+      ),
+    ];
   }
 }
 

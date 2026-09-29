@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/birdygo_silhouette.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
 import 'challenges.dart';
@@ -27,11 +28,25 @@ String challengeBody(AppLocalizations l10n, ChallengeKind kind) =>
       ChallengeKind.weekSpecies => l10n.forkChallengeWeekSpeciesBody,
     };
 
-IconData challengeIcon(ChallengeKind kind) => switch (kind) {
-  ChallengeKind.dawnMornings => AppIcons.wbTwilightRounded,
-  ChallengeKind.listeningDays => AppIcons.calendarToday,
-  ChallengeKind.weekSpecies => AppIcons.bird,
-};
+/// Glyph of the challenge disc: an icon, or the BirdyGo silhouette for the
+/// species challenge (J6h, in place of the raven).
+Widget challengeGlyph(ChallengeKind kind, Color color, double size) =>
+    switch (kind) {
+      ChallengeKind.dawnMornings => Icon(
+        AppIcons.wbTwilightRounded,
+        size: size,
+        color: color,
+      ),
+      ChallengeKind.listeningDays => Icon(
+        AppIcons.calendarToday,
+        size: size,
+        color: color,
+      ),
+      ChallengeKind.weekSpecies => BirdyGoSilhouetteIcon.glyph(
+        size: size,
+        color: color,
+      ),
+    };
 
 /// Dots up to this target, a count beyond.
 const int _maxDots = 5;
@@ -75,7 +90,7 @@ class ChallengeCard extends StatelessWidget {
       color: background,
       padding: const EdgeInsets.symmetric(
         horizontal: BirdySpace.l,
-        vertical: 14,
+        vertical: BirdySpace.comfy,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -89,10 +104,11 @@ class ChallengeCard extends StatelessWidget {
                   color: done ? c.oriole : c.tonal,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  done ? AppIcons.check : challengeIcon(challenge.kind),
-                  size: 22,
-                  color: done ? c.onOriole : c.accentText,
+                child: Center(
+                  child:
+                      done
+                          ? Icon(AppIcons.check, size: BirdyGlyph.xxl, color: c.onOriole)
+                          : challengeGlyph(challenge.kind, c.accentText, 22),
                 ),
               ),
               const SizedBox(width: BirdySpace.m),
@@ -180,16 +196,16 @@ class _Progress extends StatelessWidget {
         children: [
           for (var i = 0; i < challenge.target; i++)
             Container(
-              width: 14,
-              height: 14,
-              margin: const EdgeInsets.only(left: 4),
+              width: BirdySpace.comfy,
+              height: BirdySpace.comfy,
+              margin: const EdgeInsets.only(left: BirdySpace.xs),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: i < value ? BirdyBrand.kingfisher : null,
+                color: i < value ? c.accent : null,
                 border:
                     i < value
                         ? null
-                        : Border.all(color: c.borderStrong, width: 2),
+                        : Border.all(color: c.borderStrong, width: BirdyStroke.regular),
               ),
             ),
         ],

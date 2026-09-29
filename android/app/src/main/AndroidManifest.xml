@@ -11,7 +11,8 @@
     <application
         android:label="BirdyGo"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_loriot"
+        android:roundIcon="@mipmap/ic_launcher_loriot_round"
         android:enableOnBackInvokedCallback="true">
         <!-- screenOrientation is "fullUser", not the default "unspecified":
              phones leave the 180° reverse-portrait position out of sensor
@@ -45,10 +46,7 @@
               android:name="flutter_deeplinking_enabled"
               android:value="false"
               />
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            <!-- FORK: MAIN/LAUNCHER moved to the activity-aliases below (J6i) -->
             <!-- "Share with BirdNET Live" for audio files: the share sheet of a
                  recorder, file manager, or messaging app hands us a content://
                  URI, MainActivity copies it into the cache, and Dart opens File
@@ -69,6 +67,57 @@
                 <data android:mimeType="audio/*"/>
             </intent-filter>
         </activity>
+        <!-- FORK: one launcher icon per bird theme (J6i). Exactly one alias is
+             enabled; AppIconChannel.kt switches them when the app goes to the
+             background. Loriot is the default. -->
+        <activity-alias
+            android:name=".AliasLoriot"
+            android:targetActivity=".MainActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_loriot"
+            android:roundIcon="@mipmap/ic_launcher_loriot_round">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasMartin"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_martin"
+            android:roundIcon="@mipmap/ic_launcher_martin_round">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasFlamant"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_flamant"
+            android:roundIcon="@mipmap/ic_launcher_flamant_round">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasEtourneau"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_etourneau"
+            android:roundIcon="@mipmap/ic_launcher_etourneau_round">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

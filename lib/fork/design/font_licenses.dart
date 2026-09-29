@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 /// Font families and their license files in assets/fonts/.
 const Map<String, String> kForkFontLicenses = {
+  'Nunito': 'assets/fonts/OFL-Nunito.txt',
   'Fraunces': 'assets/fonts/OFL-Fraunces.txt',
   'Atkinson Hyperlegible Next': 'assets/fonts/OFL-AtkinsonHyperlegibleNext.txt',
 };

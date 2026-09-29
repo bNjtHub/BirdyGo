@@ -9,6 +9,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
@@ -123,7 +124,7 @@ class QuizChoiceCard extends StatelessWidget {
                 maxIcon,
               );
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
+                duration: QuizMotion.fade,
                 curve: QuizMotion.out,
                 constraints: BoxConstraints(minHeight: height),
                 padding: const EdgeInsets.symmetric(
@@ -171,8 +172,8 @@ class QuizChoiceCard extends StatelessWidget {
         card,
         if (state == QuizChoiceState.right)
           Positioned(
-            top: 8,
-            right: 8,
+            top: BirdySpace.s,
+            right: BirdySpace.s,
             child: QuizPop(
               duration: QuizMotion.pill,
               child: _Mark(
@@ -184,8 +185,8 @@ class QuizChoiceCard extends StatelessWidget {
           ),
         if (state == QuizChoiceState.wrong)
           Positioned(
-            top: 8,
-            right: 8,
+            top: BirdySpace.s,
+            right: BirdySpace.s,
             child: _Mark(
               icon: AppIcons.quizClose,
               color: c.text2,
@@ -194,7 +195,7 @@ class QuizChoiceCard extends StatelessWidget {
           ),
         if (found)
           Positioned(
-            top: 4,
+            top: BirdySpace.xs,
             left: -BirdySpace.l,
             right: -BirdySpace.l,
             child: IgnorePointer(
@@ -231,7 +232,7 @@ class QuizChoiceCard extends StatelessWidget {
       excludeSemantics: true,
       child: AnimatedOpacity(
         opacity: state == QuizChoiceState.other ? 0.4 : 1,
-        duration: const Duration(milliseconds: 150),
+        duration: BirdyMotion.exit,
         curve: QuizMotion.out,
         child: body,
       ),
@@ -255,8 +256,8 @@ class _Mark extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return Container(
-      width: 28,
-      height: 28,
+      width: BirdyGlyph.x5l,
+      height: BirdyGlyph.x5l,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Icon(icon, size: iconSize, weight: 600, color: c.surface1),
     );
@@ -276,7 +277,7 @@ class _PlusOne extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 28),
       padding: const EdgeInsets.symmetric(
         horizontal: BirdySpace.m,
-        vertical: 5,
+        vertical: BirdySpace.tight,
       ),
       decoration: BoxDecoration(
         color: c.oriole,

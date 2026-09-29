@@ -6,10 +6,16 @@ import 'package:birdnet_live/fork/daily_goal/daily_goal_card.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_providers.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_block.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_list_block.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_list_row.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_wing_icon.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -126,7 +132,7 @@ void main() {
     await pump(tester);
     expect(locationRequests, 0);
     expect(find.text('1/8 espèces entendues'), findsOneWidget);
-    expect(find.text('Entendu'), findsOneWidget);
+    expect(find.text('Entendu · Sûr'), findsOneWidget);
     await tester.tap(find.byTooltip('Remplacer Bird 0'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Bird 8'));
@@ -209,6 +215,57 @@ void main() {
     await saveGoal();
     await pump(tester, size: const Size(320, 640), textScale: 1.3, dark: true);
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('hero shows the ring with the count and the label', (
+    tester,
+  ) async {
+    await saveGoal();
+    await pump(tester);
+    final ring = tester.widget<BirdyProgressRing>(
+      find.byType(BirdyProgressRing),
+    );
+    expect(ring.size, BirdySizes.dailyGoalRing);
+    expect(ring.value, closeTo(1 / 8, 1e-9));
+    expect(find.text('1/8 espèces entendues'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('list is one block: found row vs to-find rows', (tester) async {
+    await saveGoal();
+    await pump(tester);
+    expect(find.byType(BirdyListBlock), findsOneWidget);
+    expect(find.byType(BirdyListRow), findsNWidgets(8));
+    expect(
+      find.byKey(const ValueKey('dailyGoal-found-Species 0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('dailyGoal-todo-Species 1')),
+      findsOneWidget,
+    );
+    expect(find.text('Entendu · Sûr'), findsOneWidget);
+    // One check for the found bird, hearing icon for the seven to find.
+    expect(find.byIcon(AppIcons.checkCircle), findsOneWidget);
+    expect(find.byIcon(AppIcons.hearing), findsNWidgets(7));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('pinned listen button carries the wing icon', (tester) async {
+    await saveGoal();
+    await pump(tester);
+    final button = find.byKey(const ValueKey('dailyGoalListen'));
+    expect(button, findsOneWidget);
+    expect(
+      find.descendant(of: button, matching: find.byType(BirdyWingIcon)),
+      findsOneWidget,
+    );
+    expect(tester.getSize(button).height, BirdySizes.listen);
+    // Pinned: still there when the list is scrolled.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(button, findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

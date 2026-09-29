@@ -4,6 +4,7 @@ import 'package:birdnet_live/fork/listening_mode/listening_mode.dart';
 import 'package:birdnet_live/fork/live/listening_options.dart';
 import 'package:birdnet_live/fork/live/live_control_bar.dart';
 import 'package:birdnet_live/fork/live/live_listening_layout.dart';
+import 'package:birdnet_live/fork/settings/fork_prefs.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/providers/settings_providers.dart';
@@ -79,6 +80,21 @@ void main() {
     expect(find.text("À quel point l'app est sûre"), findsOneWidget);
     expect(find.text('Aide du mode En direct'), findsOneWidget);
     expect(find.text('Paramètres'), findsOneWidget);
+  });
+
+  testWidgets('the new-species switch is on by default and can be turned off', (
+    tester,
+  ) async {
+    final container = await pump(
+      tester,
+      ListeningOptionsSheet(onHelp: () {}, onSettings: () {}),
+    );
+    expect(container.read(newSpeciesNotifProvider), isTrue);
+    expect(find.text('Me prévenir des nouvelles espèces'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('listening-options-notify')));
+    await pumpSettled(tester);
+    expect(container.read(newSpeciesNotifProvider), isFalse);
+    expect(prefs.getBool(kNewSpeciesNotifPref), isFalse);
   });
 
   testWidgets('choosing Vent applies it, confirms, and shows in the status', (

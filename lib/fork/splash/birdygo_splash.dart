@@ -8,8 +8,10 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdygo_wordmark.dart';
 import 'birdygo_splash_painter.dart';
 import 'birdygo_warm_up.dart';
 
@@ -31,7 +33,7 @@ class BirdyGoSplash extends StatefulWidget {
   /// Shortest time the splash stays up on a normal launch, however fast the
   /// app initializes: the whole intro, until the footer has faded in
   /// ([BirdyGoSplashTimeline.settled]).
-  static const minimumDisplay = Duration(milliseconds: 4500);
+  static const minimumDisplay = BirdyMotion.splashMinimum;
 
   final VoidCallback? onRetry;
 
@@ -58,6 +60,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   Color _text = BirdyBrand.ink;
   Color _soft = BirdyBrand.bark;
   Color _track = BirdyGoLoadingPainter.lightTrack;
+  BirdyBrandColors _brand = const BirdyBrandColors(BirdyBird.loriot);
 
   /// The time the intro is drawn at: settled at once with reduced motion.
   double _at(double clock) => _reduced ? BirdyGoSplashTimeline.settled : clock;
@@ -193,62 +196,11 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
 
   /// « Birdy », an Oriole dot, « Go » (variant « Point Loriot » of the board).
   /// The brand name is never translated.
-  Widget _wordmark(BuildContext context, AppLocalizations l10n) {
-    final scaler = MediaQuery.textScalerOf(context);
-    return Semantics(
-      label: l10n.appTitle,
-      child: ExcludeSemantics(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Birdy',
-                  style: BirdyText.display.copyWith(
-                    fontSize: 44,
-                    letterSpacing: -.8,
-                    fontVariations: const [
-                      FontVariation('SOFT', 100),
-                      FontVariation('opsz', 44),
-                    ],
-                  ),
-                ),
-                // The dot floats at mid-height of the lowercase letters.
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.baseline,
-                  baseline: TextBaseline.alphabetic,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(5, 0, 5, scaler.scale(5)),
-                    child: SizedBox.square(
-                      dimension: scaler.scale(9),
-                      child: const DecoratedBox(
-                        decoration: ShapeDecoration(
-                          color: BirdyBrand.oriole,
-                          shape: CircleBorder(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(
-                  text: 'Go',
-                  style: BirdyText.label.copyWith(
-                    fontSize: 42,
-                    height: 1.1,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ],
-            ),
-            style: TextStyle(color: _text),
-            softWrap: false,
-          ),
-        ),
-      ),
-    );
-  }
+  // FORK: reuse BirdyGoWordmark (wordmark 2c) instead of a second copy.
+  Widget _wordmark(BuildContext context, AppLocalizations l10n) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: BirdyGoWordmark(color: _text),
+  );
 
   /// The tagline enters in two beats; a screen reader hears one sentence.
   Widget _tagline(AppLocalizations l10n) {
@@ -284,7 +236,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
           textAlign: TextAlign.center,
         ),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: BirdySpace.m),
       FilledButton(onPressed: widget.onRetry, child: Text(l10n.retry)),
     ],
   );
@@ -319,10 +271,14 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
               RepaintBoundary(
                 child: CustomPaint(
                   size: const Size(120, 3),
-                  painter: BirdyGoLoadingPainter(fraction: _bar, track: _track),
+                  painter: BirdyGoLoadingPainter(
+                    fraction: _bar,
+                    track: _track,
+                    fill: _brand.accent,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: BirdySpace.xxl),
               Text(
                 l10n.forkPoweredByBirdnet,
                 style: BirdyText.caption.copyWith(color: _soft),
@@ -359,6 +315,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    _brand = BirdyBrandColors.of(context);
     _background = dark ? BirdyBrand.ink : BirdyBrand.mist;
     _text = dark ? BirdyBrand.mist : BirdyBrand.ink;
     _soft = dark ? BirdyColors.dark.text2 : BirdyBrand.bark;
@@ -391,7 +348,12 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                     minHeight: constraints.maxHeight,
                   ),
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(28, 16, 28, padding),
+                    padding: EdgeInsets.fromLTRB(
+        BirdySpace.splashSide,
+        BirdySpace.l,
+        BirdySpace.splashSide,
+        padding,
+      ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -418,6 +380,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                                         // A startup error is no time to sing on.
                                         loop: widget.onRetry == null,
                                         still: _reduced,
+                                        brand: _brand,
                                       ),
                                     ),
                                   ),
@@ -434,7 +397,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: compact ? 16 : 32),
+                          padding: EdgeInsets.only(top: compact ? BirdySpace.l : BirdySpace.xxxl),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 480),
                             child:

@@ -3,6 +3,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'species_sheet.dart';
@@ -12,9 +13,10 @@ String sheetSectionTitle(AppLocalizations l10n, SheetSection section) =>
     switch (section) {
       SheetSection.summary => l10n.forkSheetSummary,
       SheetSection.size => l10n.forkSheetSize,
-      SheetSection.behaviour => l10n.forkSheetBehaviour,
+      SheetSection.behaviour => l10n.forkSheetHabits,
       SheetSection.whyHere => l10n.forkSheetWhyHere,
       SheetSection.migration => l10n.forkSheetMigration,
+      SheetSection.enemies => l10n.forkSheetEnemies,
       SheetSection.byEar => l10n.forkSheetByEar,
       SheetSection.confusions => l10n.forkSheetConfusions,
       SheetSection.anecdote => l10n.forkSheetAnecdote,
@@ -47,7 +49,7 @@ class SpeciesSheetView extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final summary = sheet.sections[SheetSection.summary];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.l, BirdySpace.l, BirdySpace.l, BirdySpace.s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -58,20 +60,20 @@ class SpeciesSheetView extends StatelessWidget {
             ),
           for (final entry in sheet.sections.entries)
             if (entry.key != SheetSection.summary) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: BirdySpace.l),
               Text(
                 sheetSectionTitle(l10n, entry.key),
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: BirdySpace.xs),
               Text(
                 entry.value,
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
               ),
             ],
-          const SizedBox(height: 12),
+          const SizedBox(height: BirdySpace.m),
           Text(
             l10n.forkSheetFooter,
             style: theme.textTheme.bodySmall?.copyWith(

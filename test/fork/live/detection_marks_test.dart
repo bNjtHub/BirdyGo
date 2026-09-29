@@ -241,6 +241,9 @@ void main() {
   });
 
   group('DetectionMarks', () {
+    // Fake clock: the strip never reads the wall clock in these tests.
+    var clockNow = DateTime(2026, 1, 1, 12);
+
     Widget strip(List<MarkSpan> spans, {bool running = true}) => MaterialApp(
       theme: BirdyTheme.dark(),
       home: Scaffold(
@@ -248,6 +251,7 @@ void main() {
           spans: spans,
           displaySeconds: 10,
           running: running,
+          clock: () => clockNow,
         ),
       ),
     );
@@ -266,10 +270,13 @@ void main() {
     for (final pause in [false, true]) {
       testWidgets('the end never goes back when the contact closes'
           '${pause ? ' on pause' : ''}', (tester) async {
-        final start = DateTime.now().subtract(const Duration(seconds: 3));
+        clockNow = DateTime(2026, 1, 1, 12);
+        final start = clockNow.subtract(const Duration(seconds: 3));
         final running = MarkSpan(scientificName: 'A', label: 'A', start: start);
         await tester.pumpWidget(strip([running]));
+        clockNow = clockNow.add(const Duration(milliseconds: 16));
         await tester.pump(const Duration(milliseconds: 16));
+        clockNow = clockNow.add(const Duration(milliseconds: 16));
         await tester.pump(const Duration(milliseconds: 16));
         final shownNow = painter(tester).now.value;
 
@@ -281,6 +288,7 @@ void main() {
           end: shownNow.subtract(const Duration(milliseconds: 1500)),
         );
         await tester.pumpWidget(strip([closed], running: !pause));
+        clockNow = clockNow.add(const Duration(milliseconds: 16));
         await tester.pump(const Duration(milliseconds: 16));
         final end = painter(tester).spans.single.end!;
         expect(end.isBefore(shownNow), isFalse);

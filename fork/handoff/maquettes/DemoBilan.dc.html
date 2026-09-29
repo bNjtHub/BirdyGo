@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px;min-height:48px">
+      <button onClick="{{ app.go.home }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">close</span></button>
+      <div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Bilan de l'écoute</div>
+      <button onClick="{{ app.go.mapPush }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">map</span></button>
+      <button onClick="{{ app.bilan.share }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">share</span></button>
+    </div>
+
+    <div style="background:#D6EEF0;border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:14px;animation:birdyIn .3s both">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-family:Fraunces;font-size:34px;line-height:1.1;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 34">{{ app.bilan.headline }}</div>
+        <div style="font-size:13px;color:#0B6E77;font-weight:700">{{ app.bilan.caption }}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.bilan.species }}</div><div style="font-size:13px;color:#6B5847;margin-top:4px">{{ app.bilan.speciesLabel }}</div></div>
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.bilan.contacts }}</div><div style="font-size:13px;color:#6B5847;margin-top:4px">contacts</div></div>
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap">{{ app.bilan.durationNum }}<span style="font-size:15px;font-weight:700"> min</span></div><div style="font-size:13px;color:#6B5847;margin-top:4px">durée</div></div>
+      </div>
+    </div>
+
+    <sc-if value="{{ app.bilan.hasNovelties }}">
+      <div style="background:#FFFFFF;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:10px;animation:birdyIn .3s .05s both">
+        <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">{{ app.bilan.noveltiesTitle }}</div>
+        <sc-for list="{{ app.bilan.firsts }}" as="f" hint-placeholder-count="0">
+          <div onClick="{{ f.open }}" style="cursor:pointer;min-height:104px;border-radius:20px;background:{{ f.tint }};padding:12px 16px;display:flex;align-items:center;gap:14px;animation:pop .5s cubic-bezier(.2,0,0,1) both" style-active="transform:scale(.98)">
+            <div style="width:80px;height:80px;border-radius:999px;background:{{ f.halo }};display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="{{ f.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+              <span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:#F4C542;font-size:13px;font-weight:700"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">auto_awesome</span>Première fois</span>
+              <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">{{ f.name }}</div>
+              <div style="font-size:17px;line-height:1.45">{{ f.rank }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-for list="{{ app.bilan.maybe }}" as="m" hint-placeholder-count="0">
+          <div onClick="{{ m.open }}" style="cursor:pointer;min-height:56px;border-radius:20px;background:#EEF1EC;padding:8px 12px;display:flex;align-items:center;gap:10px">
+            <div style="width:40px;height:40px;border-radius:999px;background:#DCE2DA;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.7"><img src="{{ m.silLight }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+              <div style="font-family:Fraunces;font-size:17px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">{{ m.name }}</div>
+              <span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ m.badge.bg }};border:{{ m.badge.border }};color:{{ m.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ m.badge.fg }};opacity:{{ m.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ m.badge.fg }};opacity:{{ m.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ m.badge.fg }};opacity:{{ m.badge.o3 }}"></span></span>{{ m.badge.label }}</span>
+            </div>
+            <span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;animation:birdyIn .3s .1s both">
+      <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">{{ app.bilan.stripTitle }}</div>
+      <div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none">
+        <sc-for list="{{ app.bilan.strip }}" as="x" hint-placeholder-count="6">
+          <div onClick="{{ x.open }}" style="cursor:pointer;width:48px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="position:relative;width:48px;height:48px;border-radius:999px;background:{{ x.tint }};display:flex;align-items:center;justify-content:center">
+              <div style="width:40px;height:40px;border-radius:999px;background:{{ x.halo }};display:flex;align-items:center;justify-content:center"><img src="{{ x.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+              <div style="position:absolute;top:0;right:0;width:8px;height:8px;border-radius:999px;background:#A04A1C;opacity:{{ x.pending }}"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{ x.n }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px">
+      <sc-if value="{{ app.bilan.hasToCheck }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ app.go.review }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#19A7B3;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)"><span class="ms" style="font-size:22px">check</span>{{ app.bilan.toCheckLabel }}</button>
+      </sc-if>
+      <button onClick="{{ app.bilan.toggleMore }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#FFFFFF;border:1.5px solid #C5CCC2;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)"><span class="ms" style="font-size:22px">more_horiz</span>Autres actions</button>
+      <sc-if value="{{ app.bilan.inlineMore }}"><div style="background:#FFFFFF;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;animation:birdyIn .2s both;box-shadow:0 8px 28px rgba(19,35,58,.14)">
+        <div onClick="{{ app.bilan.lpo }}" style="cursor:pointer;min-height:64px;display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:999px;background:#E6EDD6;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#4B6023">send</span></div><span style="flex:1;font-size:17px;font-weight:700">Envoyer à Faune-France</span><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+        <div onClick="{{ app.bilan.add }}" style="cursor:pointer;min-height:64px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#D6EEF0;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#0B6E77">add</span></div><span style="flex:1;font-size:17px;font-weight:700">Ajouter un oiseau observé</span><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+        <div onClick="{{ app.bilan.details }}" style="cursor:pointer;min-height:64px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#EEF1EC;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">list</span></div><span style="flex:1;font-size:17px;font-weight:700">Détail de l'écoute</span><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+      </div></sc-if>
+      <button onClick="{{ app.bilan.recording }}" style="all:unset;cursor:pointer;height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#6B5847">C'était un enregistrement ?</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

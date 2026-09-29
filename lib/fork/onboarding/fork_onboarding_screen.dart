@@ -20,17 +20,31 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_step_dots.dart';
 import '../design/widgets/pressable.dart';
+import '../settings/fork_prefs.dart';
 import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
 import 'onboarding_permissions_page.dart';
+import 'onboarding_steps.dart';
+
+/// Steps counted in « Étape n sur N » (first name, bird), and the dots of the
+/// other pages (three story pages and the permissions page).
+const int _stepCount = 2;
+const int _dotCount = 4;
 
 class ForkOnboardingScreen extends ConsumerStatefulWidget {
   const ForkOnboardingScreen({super.key});
 
-  /// Story pages, then the permissions page.
-  static const int pageCount = 4;
-  static const int permissionsPage = 3;
+  /// Story pages, step 1 (first name), step 2 (bird), then the permissions
+  /// page. FORK J6i: the bird step was added.
+  static const int pageCount = 6;
+  static const int namePage = 3;
+  static const int birdPage = 4;
+  static const int permissionsPage = 5;
+
+  /// Pages with their own header and button (the two steps).
+  static bool isStep(int page) => page == namePage || page == birdPage;
 
   @override
   ConsumerState<ForkOnboardingScreen> createState() =>
@@ -40,6 +54,7 @@ class ForkOnboardingScreen extends ConsumerStatefulWidget {
 class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
     with WidgetsBindingObserver {
   final PageController _controller = PageController();
+  final TextEditingController _name = TextEditingController();
   int _page = 0;
 
   OnboardingPermState _mic = OnboardingPermState.unknown;
@@ -64,6 +79,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -126,6 +142,21 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
 
   void _next() => _goTo((_page + 1).clamp(0, ForkOnboardingScreen.pageCount));
 
+  bool get _onStep => ForkOnboardingScreen.isStep(_page);
+
+  /// « Continuer » on step 1: same preference as the Settings block.
+  void _saveName() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    ref.read(firstNameProvider.notifier).set(_name.text);
+    _next();
+  }
+
+  /// « Plus tard » on step 1: nothing saved.
+  void _skipName() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    _next();
+  }
+
   /// The button of the last page. With the microphone not asked yet it asks
   /// first, and stays here if the answer is no (the card says why the
   /// microphone is needed); the next tap finishes anyway, so nobody is stuck.
@@ -158,7 +189,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
                   child: Visibility(
-                    visible: !_last,
+                    visible: !_last && !_onStep,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -175,8 +206,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                         ),
                         textStyle: BirdyText.label,
                       ),
-                      onPressed:
-                          () => _goTo(ForkOnboardingScreen.permissionsPage),
+                      onPressed: () => _goTo(ForkOnboardingScreen.namePage),
                       child: Text(l10n.skip),
                     ),
                   ),
@@ -187,6 +217,9 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
               child: PageView(
                 key: const ValueKey('onb-pages'),
                 controller: _controller,
+                // The steps are left by their own buttons only.
+                physics:
+                    _onStep ? const NeverScrollableScrollPhysics() : null,
                 onPageChanged: (i) {
                   setState(() => _page = i);
                   if (i == ForkOnboardingScreen.permissionsPage) _refresh();
@@ -195,6 +228,17 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                   const OnboardingWelcomePage(),
                   const OnboardingHowPage(),
                   const OnboardingLevelsPage(),
+                  OnboardingNameStep(
+                    controller: _name,
+                    onContinue: _saveName,
+                    onLater: _skipName,
+                    total: _stepCount,
+                  ),
+                  BirdyBirdStep(
+                    stepLabel: l10n.forkOnbStep(2, _stepCount),
+                    confirmation: true,
+                    onDone: _next,
+                  ),
                   OnboardingPermissionsPage(
                     mic: _mic,
                     location: _location,
@@ -207,13 +251,14 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                 ],
               ),
             ),
-            _BottomBar(
-              page: _page,
-              last: _last,
-              finishing: _finishing,
-              onNext: _next,
-              onFinish: _finish,
-            ),
+            if (!_onStep)
+              _BottomBar(
+                page: _page,
+                last: _last,
+                finishing: _finishing,
+                onNext: _next,
+                onFinish: _finish,
+              ),
           ],
         ),
       ),
@@ -254,7 +299,12 @@ class _BottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _Dots(page: page, count: ForkOnboardingScreen.pageCount),
+              // Dots for the story pages and the permissions page; the two
+              // steps have their own counter.
+              _Dots(
+                page: last ? _dotCount - 1 : page,
+                count: _dotCount,
+              ),
               const SizedBox(height: BirdySpace.l),
               if (last)
                 _FinishButton(
@@ -289,28 +339,12 @@ class _Dots extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final duration =
-        BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.enter;
-    return Semantics(
-      label: l10n.forkOnbPageOf(page + 1, count),
-      excludeSemantics: true,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var i = 0; i < count; i++)
-            AnimatedContainer(
-              duration: duration,
-              curve: BirdyMotion.standard,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: i == page ? 22 : 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: i == page ? c.accent : c.borderStrong,
-                borderRadius: BorderRadius.circular(BirdyRadii.pill),
-              ),
-            ),
-        ],
-      ),
+    return BirdyStepDots(
+      count: count,
+      current: page,
+      activeColor: c.accentText,
+      inactiveColor: c.progressTrack,
+      semanticLabel: l10n.forkOnbPageOf(page + 1, count),
     );
   }
 }
@@ -340,7 +374,7 @@ class _FinishButton extends StatelessWidget {
             foregroundColor: c.onAccent,
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
-            textStyle: BirdyText.label.copyWith(fontSize: 20),
+            textStyle: BirdyText.labelLarge,
             iconSize: 32,
           ),
           onPressed: onPressed,

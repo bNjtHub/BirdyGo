@@ -11,11 +11,13 @@
 /// to "no loops" (fork/DESIGN.md, Animations).
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 
 class BirdyGoLogo extends StatefulWidget {
@@ -27,7 +29,7 @@ class BirdyGoLogo extends StatefulWidget {
   final bool animate;
 
   /// Length of the whole wing animation.
-  static const Duration duration = Duration(milliseconds: 480);
+  static const Duration duration = BirdyMotion.logoWing;
 
   @override
   State<BirdyGoLogo> createState() => _BirdyGoLogoState();
@@ -61,7 +63,10 @@ class _BirdyGoLogoState extends State<BirdyGoLogo>
   Widget build(BuildContext context) => RepaintBoundary(
     child: CustomPaint(
       size: Size.square(widget.size),
-      painter: BirdyGoLogoPainter(progress: _controller),
+      painter: BirdyGoLogoPainter(
+        progress: _controller,
+        brand: BirdyBrandColors.of(context),
+      ),
     ),
   );
 }
@@ -72,33 +77,70 @@ class _BirdyGoLogoState extends State<BirdyGoLogo>
 /// live header). [frozenLevel] holds the bars at a fixed length instead
 /// (paused). Neither is read while [progress] is still drawing the bars in.
 class BirdyGoLogoPainter extends CustomPainter {
-  BirdyGoLogoPainter({required this.progress, this.level, this.frozenLevel})
-    : super(repaint: level == null ? progress : Listenable.merge([
-        progress,
-        level,
-      ]));
+  BirdyGoLogoPainter({
+    required this.progress,
+    this.level,
+    this.frozenLevel,
+    this.eyeClosed,
+    this.mouth,
+    this.brand = const BirdyBrandColors(BirdyBird.loriot),
+  }) : super(
+         repaint: Listenable.merge([
+           progress,
+           if (level != null) level,
+           if (eyeClosed != null) eyeClosed,
+           if (mouth != null) mouth,
+         ]),
+       );
 
   final Animation<double> progress;
   final Animation<double>? level;
   final double? frozenLevel;
 
-  /// Shortest length a bar takes, oscillating or paused: never fully gone.
+  /// 0 (open) → 1 (winking: the eye is a curved line): the home easter
+  /// egg's wink (logo_flight.dart).
+  final Animation<double>? eyeClosed;
+
+  /// 0 (closed) → 1 (open): the beak's opening while the easter egg's bird
+  /// sings, with the header singing mark's own angles.
+  final Animation<double>? mouth;
+
+  /// The bird theme's colors: plumage, beaks, wing bars 2 and 4 (J6i).
+  /// Loriot (the original look) by default.
+  final BirdyBrandColors brand;
+
+  static const double lowerBeakOpenDegrees = -11;
+  static const double upperBeakOpenDegrees = 13;
+
+  /// Length a bar holds while paused (the oscillation's own shortest length
+  /// is [BirdyMotion.listeningBarMin]): never fully gone.
   static const double pausedBarLevel = 0.55;
 
   /// Source view box of the SVG.
   static const double _box = 512;
 
-  static const Color plumageTop = Color(0xFF1CAEBA);
-  static const Color plumageBottom = Color(0xFF0E7C86);
-  static const Color lowerBeakColor = Color(0xFFE3A22B);
-  static const Color paleKingfisher = Color(0xFF8CD3D9);
-
-  /// Wing bars, bottom point first (the SVG draws them upward).
+  /// Wing bars in the Loriot colors, bottom point first (the SVG draws them
+  /// upward). Bars 1 and 3 are Brume for every bird; use [barsFor] for the
+  /// bird theme's bars 2 and 4.
   static const List<(Offset, Offset, Color)> bars = [
     (Offset(217.4, 333.7), Offset(217.4, 240.1), BirdyBrand.mist),
     (Offset(260.6, 365.5), Offset(268, 223.3), BirdyBrand.oriole),
     (Offset(306.2, 349.4), Offset(316, 256.2), BirdyBrand.mist),
-    (Offset(352.9, 331.7), Offset(359.3, 290.9), paleKingfisher),
+    (Offset(352.9, 331.7), Offset(359.3, 290.9), BirdyBrand.wingSky),
+  ];
+
+  /// [bars] in [brand]'s colors: bar 2 = highlight, bar 4 = accentLight.
+  static List<(Offset, Offset, Color)> barsFor(BirdyBrandColors brand) => [
+    for (final (i, (from, to, color)) in bars.indexed)
+      (
+        from,
+        to,
+        switch (i) {
+          1 => brand.highlight,
+          3 => brand.accentLight,
+          _ => color,
+        },
+      ),
   ];
 
   /// Each bar draws over this share of [progress], starting in turn.
@@ -154,6 +196,36 @@ class BirdyGoLogoPainter extends CustomPainter {
   static const Offset eyeCenter = Offset(176.2, 172.6);
   static const double eyeRadius = 18.7;
 
+  /// How far the closed eye's line sags below the eye's center, and its
+  /// thickness at the middle, as shares of [eyeRadius].
+  static const double _closedSag = 0.3;
+  static const double _closedThickness = 0.5;
+
+  /// The eye at [closed] (0 → 1) in the 512 box: the round eye, squashing
+  /// into a thin curved line (a smiling closed eye) with the same width.
+  /// Shared by the silhouette, which cuts it out.
+  static Path eyePath(double closed) {
+    final c = closed.clamp(0.0, 1.0);
+    const r = eyeRadius;
+    final top = _lerp(-r, r * _closedSag, c);
+    final bottom = _lerp(r, r * (_closedSag + _closedThickness), c);
+    // A cubic with both controls at 4/3 of the peak peaks at that height.
+    const k = 4 / 3;
+    final left = eyeCenter.dx - r;
+    final right = eyeCenter.dx + r;
+    final y = eyeCenter.dy;
+    return Path()
+      ..moveTo(left, y)
+      ..cubicTo(left, y + k * top, right, y + k * top, right, y)
+      ..cubicTo(right, y + k * bottom, left, y + k * bottom, left, y)
+      ..close();
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
+
+  /// The beak's hinge, where both halves turn to open.
+  static const Offset beakHinge = Offset(118.1, 202.6);
+
   static final Path upperBeak =
       Path()
         ..moveTo(145.9, 149)
@@ -179,14 +251,22 @@ class BirdyGoLogoPainter extends CustomPainter {
           ..shader = ui.Gradient.linear(
             const Offset(165, 97.7),
             const Offset(361.7, 434.9),
-            const [plumageTop, plumageBottom],
+            [brand.accentHi, brand.accentDeep],
           );
     canvas.drawPath(tail, plumage);
 
-    for (final (path, color) in [
-      (lowerBeak, lowerBeakColor),
-      (upperBeak, BirdyBrand.oriole),
+    final open = mouth?.value ?? 0;
+    for (final (path, color, degrees) in [
+      (lowerBeak, brand.highlightDeep, lowerBeakOpenDegrees * open),
+      (upperBeak, brand.highlight, upperBeakOpenDegrees * open),
     ]) {
+      canvas.save();
+      if (degrees != 0) {
+        canvas
+          ..translate(beakHinge.dx, beakHinge.dy)
+          ..rotate(degrees * math.pi / 180)
+          ..translate(-beakHinge.dx, -beakHinge.dy);
+      }
       canvas
         ..drawPath(path, Paint()..color = color)
         ..drawPath(
@@ -196,14 +276,15 @@ class BirdyGoLogoPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 12
             ..strokeJoin = StrokeJoin.round,
-        );
+        )
+        ..restore();
     }
 
     canvas.drawPath(body, plumage);
 
     final t = progress.value;
     final step = (1 - _barShare) / (bars.length - 1);
-    for (final (i, (from, to, color)) in bars.indexed) {
+    for (final (i, (from, to, color)) in barsFor(brand).indexed) {
       final local = ((t - i * step) / _barShare).clamp(0.0, 1.0);
       if (local == 0) continue;
       final double fraction;
@@ -213,11 +294,14 @@ class BirdyGoLogoPainter extends CustomPainter {
       } else if (frozenLevel != null) {
         fraction = frozenLevel!;
       } else if (level != null) {
-        // Staggered level meter: each bar a phrase-length behind the last.
-        final phase = (level!.value + i / bars.length) % 1.0;
+        // Staggered level meter: each bar a little behind the last.
+        final phase =
+            (level!.value - i * BirdyMotion.listeningBarStagger) % 1.0;
         final triangle = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
         final eased = BirdyMotion.standard.transform(triangle);
-        fraction = pausedBarLevel + (1 - pausedBarLevel) * eased;
+        fraction =
+            BirdyMotion.listeningBarMin +
+            (1 - BirdyMotion.listeningBarMin) * eased;
       } else {
         fraction = 1;
       }
@@ -231,19 +315,30 @@ class BirdyGoLogoPainter extends CustomPainter {
       );
     }
 
-    canvas
-      ..drawCircle(eyeCenter, eyeRadius, Paint()..color = BirdyBrand.ink)
-      ..drawCircle(
+    final closed = eyeClosed?.value ?? 0;
+    if (closed <= 0) {
+      canvas.drawCircle(eyeCenter, eyeRadius, Paint()..color = BirdyBrand.ink);
+    } else {
+      canvas.drawPath(eyePath(closed), Paint()..color = BirdyBrand.ink);
+    }
+    // The glint fades out before the lid gets to it.
+    final glint = (1 - closed * 2).clamp(0.0, 1.0);
+    if (glint > 0) {
+      canvas.drawCircle(
         const Offset(171, 166.6),
         5.4,
-        Paint()..color = const Color(0xFFFFFFFF),
-      )
-      ..restore();
+        Paint()..color = BirdyBrand.white.withValues(alpha: glint),
+      );
+    }
+    canvas.restore();
   }
 
   @override
   bool shouldRepaint(BirdyGoLogoPainter oldDelegate) =>
       oldDelegate.progress != progress ||
       oldDelegate.level != level ||
-      oldDelegate.frozenLevel != frozenLevel;
+      oldDelegate.frozenLevel != frozenLevel ||
+      oldDelegate.eyeClosed != eyeClosed ||
+      oldDelegate.mouth != mouth ||
+      oldDelegate.brand != brand;
 }

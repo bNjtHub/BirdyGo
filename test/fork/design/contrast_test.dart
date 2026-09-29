@@ -35,8 +35,32 @@ void main() {
       expectAA(c.onAccent, c.accent, 'onAccent/accent');
       expectAA(c.onOriole, c.oriole, 'onOriole/oriole');
       expectAA(c.accentText, c.tonal, 'accentText/tonal');
+      expectAA(c.text2, c.tonal, 'text2/tonal');
+      expectAA(c.orioleText, c.tonal, 'orioleText/tonal');
       expectAA(c.accentText, c.navIndicator, 'accentText/navIndicator');
       expectAA(c.orioleText, c.orioleContainer, 'orioleText/container');
+    });
+
+    test('rarity pills (J6h)', () {
+      for (final bg in [c.surface1, c.background]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
+    });
+
+    test('J6h hero captions', () {
+      for (final bg in [c.background, c.surface1]) {
+        expectAA(
+          c.accentText,
+          on(c.tonal, bg),
+          'Bilan caption: accentText/tonal',
+        );
+        expectAA(c.text2, on(c.sure.background, bg), 'Fiche line: text2/sure');
+      }
     });
 
     test('reliability badges', () {
@@ -76,12 +100,36 @@ void main() {
       expectAA(c.onAccent, c.accent, 'onAccent/accent');
       expectAA(c.onOriole, c.oriole, 'onOriole/oriole');
       expectAA(c.accentText, on(c.tonal, c.surface1), 'accentText/tonal');
+      expectAA(c.text2, on(c.tonal, c.background), 'text2/tonal');
+      expectAA(c.orioleText, on(c.tonal, c.background), 'orioleText/tonal');
       expectAA(
         c.orioleText,
         on(c.orioleContainer, c.surface1),
         'orioleText/container',
       );
       expectAA(BirdyBrand.ink, BirdyBrand.mist, 'stop button');
+    });
+
+    test('rarity pills (J6h)', () {
+      for (final bg in [c.surface1, c.background]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
+    });
+
+    test('J6h hero captions', () {
+      for (final bg in [c.background, c.surface1]) {
+        expectAA(
+          c.accentText,
+          on(c.tonal, bg),
+          'Bilan caption (dark): accentText/tonal',
+        );
+        expectAA(c.text2, on(c.sure.background, bg), 'Fiche line: text2/sure');
+      }
     });
 
     test('reliability badges', () {
@@ -94,6 +142,20 @@ void main() {
         expectAA(level.foreground, on(level.background, c.background), name);
       }
     });
+  });
+
+  test('volume alert block reaches AA in both themes (J6h)', () {
+    for (final (mode, c) in [
+      ('light', BirdyColors.light),
+      ('dark', BirdyColors.dark),
+    ]) {
+      for (final bg in [c.background, c.surface1]) {
+        final tint = on(c.orioleContainer, bg);
+        expectAA(c.text1, tint, '$mode title/tint');
+        expectAA(c.text2, tint, '$mode caption/tint');
+      }
+      expectAA(c.onOriole, c.oriole, '$mode disc icon and button/oriole');
+    }
   });
 
   test('Material roles of both themes reach AA', () {
@@ -167,6 +229,45 @@ void main() {
     });
   });
 
+  group('light listening screen reaches AA (J6h)', () {
+    const c = BirdyColors.light;
+
+    test('text and mode colors on the page and the control bar', () {
+      for (final (name, bg) in [
+        ('background', c.background),
+        ('backgroundDeep', c.backgroundDeep),
+        ('surface1', c.surface1),
+      ]) {
+        expectAA(c.text1, bg, 'text1/$name');
+        expectAA(c.text2, bg, 'text2/$name');
+        expectAA(c.accentText, bg, 'accentText/$name');
+        for (final (mode, color) in [
+          ('normal', ListeningModeColors.normalLight),
+          ('wind', ListeningModeColors.windLight),
+          ('boost', ListeningModeColors.boostLight),
+          ('city', ListeningModeColors.cityLight),
+        ]) {
+          expectAA(color, bg, '$mode/$name');
+        }
+      }
+    });
+
+    test('« Arrêter »: Brume text on ink', () {
+      expectAA(BirdyBrand.mist, BirdyBrand.ink, 'mist/ink');
+    });
+
+    test('rarity pills on the rows and the page', () {
+      for (final bg in [c.surface1, c.background, c.backgroundDeep]) {
+        expectAA(c.text2, on(c.line, bg), 'uncommon: text2/line');
+        expectAA(
+          c.orioleText,
+          on(c.orioleContainer, bg),
+          'rare: orioleText/container',
+        );
+      }
+    });
+  });
+
   test('contrastRatio matches WCAG reference values', () {
     expect(
       contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)),
@@ -177,5 +278,58 @@ void main() {
       contrastRatio(BirdyColors.light.accentText, BirdyBrand.mist),
       closeTo(5.25, 0.05),
     );
+  });
+
+  test('day sheet and strip (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final tonal = on(c.tonal, c.surface1);
+      final oriole = on(c.orioleContainer, c.surface1);
+      expectAA(c.text1, tonal, 'sheet title/tonal');
+      expectAA(c.text2, tonal, 'sheet text/tonal');
+      expectAA(c.accentText, tonal, 'sheet header/tonal');
+      expectAA(c.text1, oriole, 'sheet title/oriole');
+      expectAA(c.text2, oriole, 'sheet text/oriole');
+      expectAA(c.orioleText, oriole, 'sheet header/oriole');
+      // Strip pills and the sheet's white discs.
+      expectAA(c.text1, c.surface1, 'pill text/surface1');
+      expectAA(c.orioleText, c.surface1, 'sunrise icon/surface1');
+      expectAA(
+        c.probable.foreground,
+        c.surface1,
+        'sunset icon/surface1',
+        min: 3,
+      );
+    }
+  });
+  test('first-encounter countdown and series (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final card = c.surface2;
+      final track = c.progressTrack;
+      // Text under the bar, and the series position, on the card.
+      expectAA(c.text2, card, 'countdown text/card');
+      expectAA(c.text1, card, 'series title/card');
+      // Non-text UI: 3:1 (WCAG 1.4.11) for the fill and the current dot.
+      expectAA(c.accentText, on(track, card), 'countdown fill/track', min: 3);
+      expectAA(c.accentText, on(track, card), 'series dot/idle dot', min: 3);
+      expectAA(c.accentText, card, 'countdown fill/card', min: 3);
+      // Tip card step dots.
+      expectAA(c.orioleText, on(track, c.surface1), 'tip dot/idle dot', min: 3);
+      // Onboarding page dots, on the screen background.
+      expectAA(c.accentText, on(track, c.background), 'onboarding dot/idle dot', min: 3);
+    }
+  });
+  test('rare bird card (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final card = c.surface2;
+      // The chance line, and the pill, on the card.
+      expectAA(c.orioleText, card, 'chance line/card');
+      expectAA(c.orioleText, on(c.orioleContainer, card), 'rare pill/card');
+      // Captions, the answer note (on surface1 inside the card).
+      expectAA(c.text2, card, 'caption/card');
+      expectAA(c.text1, c.surface1, 'answer note/box');
+      expectAA(c.text2, c.surface1, 'answer note icon/box', min: 3);
+      // The dotted ring and the golden confetti are decoration.
+      expectAA(c.onOriole, c.oriole, '+1 espèce rare/pill');
+    }
   });
 }

@@ -9,13 +9,13 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
 import '../species_photo/photo_credit.dart';
 import '../species_photo/photo_credit_sheet.dart';
 import 'fine_ear_quiz_widgets.dart';
-import 'french_article.dart';
 import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
@@ -114,19 +114,17 @@ class _ListeningCard extends StatelessWidget {
       highlightCenter: const Alignment(0, -0.16),
       child: Stack(
         children: [
-          const Positioned.fill(
-            child: QuizTwinkleField(count: 4, seed: 11),
-          ),
+          const Positioned.fill(child: QuizTwinkleField(count: 4, seed: 11)),
           Positioned(
-            top: 12,
-            left: 12,
-            right: 16,
+            top: BirdySpace.m,
+            left: BirdySpace.m,
+            right: BirdySpace.l,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 20,
-                  height: 20,
+                  width: BirdySpace.xl,
+                  height: BirdySpace.xl,
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     color: BirdyBrand.oriole,
@@ -160,7 +158,7 @@ class _ListeningCard extends StatelessWidget {
             left: 0,
             right: 0,
             top: 0,
-            bottom: 44,
+            bottom: BirdyGlyph.disc44,
             child: Center(
               child: SizedBox(
                 // The disc sits in the middle; the same margin on every side
@@ -226,10 +224,10 @@ class _ListeningCard extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: 20,
-            right: 20,
-            bottom: 14,
-            height: 26,
+            left: BirdySpace.xl,
+            right: BirdySpace.xl,
+            bottom: BirdySpace.comfy,
+            height: BirdyGlyph.x4l,
             child: _StageSpectrum(playing: playing),
           ),
         ],
@@ -263,15 +261,15 @@ class _StageSpectrum extends StatelessWidget {
       child: Row(
         children: [
           for (var i = 0; i < _count; i++) ...[
-            if (i > 0) const SizedBox(width: 3),
+            if (i > 0) const SizedBox(width: BirdySpace.thin),
             Expanded(
               child: Center(
                 child: QuizBar(
-                  width: 5,
+                  width: BirdySpace.tight,
                   height: _heights[i % _heights.length].toDouble(),
                   color: _colors[i % _colors.length],
-                  period: Duration(milliseconds: 700 + (i % 5) * 90),
-                  delay: Duration(milliseconds: (i * 70) % 600),
+                  period: BirdyMotion.quizBarPeriod(i),
+                  delay: BirdyMotion.quizBarDelay(i),
                   running: playing,
                 ),
               ),
@@ -312,11 +310,11 @@ class _BigPlayButton extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: BirdyBrand.wellBottom, width: 3),
+              border: Border.all(color: BirdyBrand.wellBottom, width: BirdyStroke.thick),
               boxShadow: c.ctaGlow,
             ),
             child: Material(
-              color: BirdyBrand.kingfisher,
+              color: c.accent,
               shape: const CircleBorder(),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -360,21 +358,11 @@ class _RevealCard extends StatelessWidget {
     final c = BirdyColors.of(context);
     final tint = bird.tint;
     final heading = right ? l10n.forkQuizCheer('$cheer') : l10n.forkQuizAlmost;
-    // « C'est bien le merle noir »: the article when the name's gender is
-    // known, « C'est bien : Nom » otherwise (french_article.dart).
-    final withArticle =
-        Localizations.localeOf(context).languageCode == 'fr'
-            ? frenchWithArticle(bird.name)
-            : null;
-    final named = withArticle ?? bird.name;
+    // « Bravo, c'est bien lui : Nom » / « C'était : Nom »: no article built
+    // by hand, so no wrong gender.
+    final named = bird.name;
     final sentence =
-        withArticle != null
-            ? (right
-                ? l10n.forkQuizRightArticle(withArticle)
-                : l10n.forkQuizWrongArticle(withArticle))
-            : (right
-                ? l10n.forkQuizRightName(bird.name)
-                : l10n.forkQuizWrong(bird.name));
+        right ? l10n.forkQuizRevealRight(named) : l10n.forkQuizWrong(named);
     final at = sentence.indexOf(named);
     final span = TextSpan(
       style: BirdyText.body.copyWith(height: 1.3, color: c.text1),
@@ -430,7 +418,7 @@ class _RevealCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: right ? tint.cardBackground(c.brightness) : c.surface1,
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
-        border: right ? null : Border.all(color: c.lineOpaque, width: 1.5),
+        border: right ? null : Border.all(color: c.lineOpaque, width: BirdyStroke.thin),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -533,7 +521,7 @@ class _EncouragePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.s, BirdySpace.xs, BirdySpace.m, BirdySpace.xs),
       decoration: BoxDecoration(
         color: c.tonal,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -541,7 +529,7 @@ class _EncouragePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(AppIcons.graphicEqRounded, size: 14, color: c.accentText),
+          Icon(AppIcons.graphicEqRounded, size: BirdyGlyph.s, color: c.accentText),
           const SizedBox(width: BirdySpace.xs),
           Flexible(
             child: Text(
@@ -593,7 +581,7 @@ class _ReplayButton extends StatelessWidget {
           child: Material(
             color: background,
             shape: CircleBorder(
-              side: BorderSide(color: c.accentText, width: 2),
+              side: BorderSide(color: c.accentText, width: BirdyStroke.regular),
             ),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -602,7 +590,7 @@ class _ReplayButton extends StatelessWidget {
                 dimension: BirdySizes.target,
                 child: Icon(
                   playing ? AppIcons.quizStop : AppIcons.playArrowRounded,
-                  size: 28,
+                  size: BirdyGlyph.x5l,
                   fill: 1,
                   color: c.accentText,
                 ),

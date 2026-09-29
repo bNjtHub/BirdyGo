@@ -11,9 +11,11 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_wing_icon.dart';
 import '../game/fine_ear_quiz_widgets.dart' show QuizWell;
 import '../game/quiz_decor.dart';
 import '../game/quiz_fx.dart';
@@ -160,7 +162,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepListenTitle,
         body: l10n.forkOnbStepListenBody,
-        icon: AppIcons.graphicEqRounded,
+        icon: const BirdyWingIcon(size: BirdyGlyph.x4l), // the Listen emblem
         bg: c.tonal,
         ink: c.accentText,
         tilt: -0.02,
@@ -168,7 +170,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepDiscoverTitle,
         body: l10n.forkOnbStepDiscoverBody,
-        icon: AppIcons.menuBook,
+        icon: Icon(AppIcons.menuBook, size: BirdyGlyph.x4l, color: c.orioleText),
         bg: c.orioleContainer,
         ink: c.orioleText,
         tilt: 0.017,
@@ -176,7 +178,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepCollectTitle,
         body: l10n.forkOnbStepCollectBody,
-        icon: AppIcons.quizSpark,
+        icon: Icon(AppIcons.quizSpark, size: BirdyGlyph.x4l, color: c.sure.foreground),
         bg: c.sure.background,
         ink: c.sure.foreground,
         tilt: -0.012,
@@ -198,10 +200,10 @@ class OnboardingHowPage extends StatelessWidget {
                       '${steps[i].body}',
                   excludeSemantics: true,
                   child: QuizPop(
-                    duration: const Duration(milliseconds: 380),
-                    delay: Duration(milliseconds: 120 + i * 100),
+                    duration: BirdyMotion.podiumPopIn,
+                    delay: BirdyMotion.introCardDelay(i),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.xs),
                       child: Transform.rotate(
                         angle: steps[i].tilt,
                         child: _StepCard(
@@ -236,7 +238,7 @@ class _StepCard extends StatelessWidget {
   final int number;
   final String title;
   final String body;
-  final IconData icon;
+  final Widget icon;
   final Color background;
   final Color ink;
 
@@ -255,8 +257,8 @@ class _StepCard extends StatelessWidget {
           Column(
             children: [
               Container(
-                width: 26,
-                height: 26,
+                width: BirdyGlyph.x4l,
+                height: BirdyGlyph.x4l,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
@@ -272,21 +274,21 @@ class _StepCard extends StatelessWidget {
               ),
               const SizedBox(height: BirdySpace.s),
               Container(
-                width: 44,
-                height: 44,
+                width: BirdyGlyph.disc44,
+                height: BirdyGlyph.disc44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: c.surface1,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 26, color: ink),
+                child: icon,
               ),
             ],
           ),
           const SizedBox(width: BirdySpace.m),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.only(top: BirdySpace.xxs),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -353,7 +355,7 @@ class OnboardingLevelsPage extends StatelessWidget {
                 if (i > 0) const SizedBox(height: BirdySpace.block),
                 QuizRise(
                   duration: QuizMotion.rise,
-                  delay: Duration(milliseconds: 80 + i * 100),
+                  delay: BirdyMotion.introRowDelay(i),
                   distance: 8,
                   child: BirdyBlock(
                     tone: rows[i].tone,

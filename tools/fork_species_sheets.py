@@ -68,7 +68,7 @@ MAX_ARTICLE_CHARS = 24_000
 
 # Sections of a sheet, in display order. `hint` feeds the game notebook (J6e).
 FIELDS = [
-    "summary", "size", "behaviour", "why_here", "migration",
+    "summary", "size", "behaviour", "why_here", "migration", "enemies",
     "by_ear", "confusions", "anecdote", "hint",
 ]
 
@@ -112,6 +112,8 @@ envergure 20 à 22 cm, 16 à 22 g »).
 - behaviour : ce qu'il fait (alimentation, comportement).
 - why_here : pourquoi on le trouve là (milieux, nourriture, nid).
 - migration : sédentaire ou migrateur, quand il arrive et repart en France.
+- enemies : qui le chasse : prédateurs principaux, en une ou deux phrases \
+adaptées aux enfants.
 - by_ear : comment le reconnaître à l'oreille (chant, cris).
 - confusions : avec quelles espèces on peut le confondre et comment les \
 distinguer.
@@ -886,8 +888,9 @@ progress();
 """
 
 REVIEW_LABELS = {
-    "summary": "En bref", "size": "Taille", "behaviour": "Ce qu'il fait",
+    "summary": "En bref", "size": "Taille", "behaviour": "Habitudes",
     "why_here": "Pourquoi il est là", "migration": "Migration",
+    "enemies": "Ennemis (qui le chasse)",
     "by_ear": "À l'oreille", "confusions": "Confusions possibles",
     "anecdote": "Le saviez-vous ?", "hint": "Indice du carnet (jeu)",
 }

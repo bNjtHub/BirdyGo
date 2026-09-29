@@ -31,21 +31,24 @@ import 'live_session.dart';
 import 'widgets/detection_list_widget.dart';
 import '../../fork/background/background_tip.dart'; // FORK: J2b
 import '../../fork/background/live_background.dart'; // FORK: J2b
+import '../../fork/notifications/species_notifier.dart'; // FORK: J6h
 import '../../fork/data/species_totals_provider.dart'; // FORK: totals (J2)
 import '../../fork/replay/replay_button.dart'; // FORK: replay (J2)
 import '../announcements/geo_commonness_provider.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/geo_presence_service.dart'; // FORK: reliability (J3)
-import '../../fork/reliability/reliability_badge.dart'; // FORK: reliability (J3)
 import '../../fork/reliability/reliability_config.dart'; // FORK: reliability (J3)
 import '../../fork/design/birdy_theme.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
+import '../../fork/live/media_volume_banner.dart'; // FORK: media volume warning (J6h)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import '../../fork/live/live_expected.dart'; // FORK: listening screen (J6f)
 import '../../fork/live/live_place.dart'; // FORK: listening screen (J6f)
+import '../../fork/live/live_rarity_tag.dart'; // FORK: J6h rarity tag
+import '../../fork/settings/fork_prefs.dart'; // FORK: J6h light listening screen
 import '../../fork/listening_mode/listening_mode.dart'; // FORK: listening screen (J6f)
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
@@ -254,6 +257,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     ref.read(allSessionDetectionsProvider.notifier).state =
         controller.sessionDetections;
     ref.read(currentSessionProvider.notifier).state = controller.session;
+
+    // FORK: notify a new reliable species while in the background (J6h)
+    unawaited(
+      notifyNewSpecies(
+        ref,
+        AppLocalizations.of(context)!,
+        controller.session,
+        controller.sessionDetections,
+      ),
+    );
 
     // Auto-start: if the user opted in via the Live setting, kick off a
     // session as soon as the model finishes loading. Guarded by
@@ -794,13 +807,14 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         clipPending:
             forkRecordsClips &&
             forkActiveSpecies.contains(detection.scientificName),
-        badge: ReliabilityBadge(
+        badge: LiveReliabilityBadge(
+          // FORK: J6h rarity tag next to the badge
           level: reliabilityFor(
             score: detection.confidence,
             review: detection.reviewStatus,
             presence: presence,
           ),
-          unexpected: presence?.unexpected ?? false,
+          cause: liveRarityCause(forkCommonness, detection.scientificName),
           score: detection.confidence, // FORK: « Rare ici · à confirmer » (J3b)
           compact: true,
         ),
@@ -1038,6 +1052,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     // Dialogs and sheets take the theme of the context that opens them:
     // [themed] sits under [ListeningTheme], so they open dark too.
     return ListeningTheme(
+      // FORK: J6h « Écran clair »
+      light: ref.watch(liveThemeProvider) == LiveTheme.light,
       child: Builder(
         builder:
             (themed) => PopScope(
@@ -1087,13 +1103,14 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                       commonness,
                       entry.scientificName,
                     );
-                    return ReliabilityBadge(
+                    return LiveReliabilityBadge(
+                      // FORK: J6h rarity tag next to the badge
                       level: reliabilityFor(
                         score: entry.record.confidence,
                         review: entry.record.reviewStatus,
                         presence: presence,
                       ),
-                      unexpected: presence?.unexpected ?? false,
+                      cause: liveRarityCause(commonness, entry.scientificName),
                       // FORK: « Rare ici · à confirmer » (J3b)
                       score: entry.record.confidence,
                       compact: compact,
@@ -1154,16 +1171,24 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                             presenceScoreOf:
                                 (name) => commonness?[name]?.currentScore,
                             clips: clips,
+                            // FORK: the countdown of a moment stops in pause (J6h)
+                            paused: isPaused,
                             imageFor: (name) {
                               final path = imagePath(name);
                               return path == null ? null : AssetImage(path);
                             },
                           )
                           : null,
-                  banner:
-                      liveState == LiveState.error
-                          ? _StatusBanner(liveState: liveState, ref: ref)
-                          : null,
+                  // FORK: media volume warning (J6h), above the error banner
+                  banner: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (inSession && !_forkPractice)
+                        const MediaVolumeBanner(),
+                      if (liveState == LiveState.error)
+                        _StatusBanner(liveState: liveState, ref: ref),
+                    ],
+                  ),
                 ),
               ),
             ),

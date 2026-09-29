@@ -13,28 +13,13 @@ import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsNode;
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-/// See notebook_screen_loading_test.dart: the rect assertions below compare
-/// wrapped-or-not text, so they need the real bundled fonts, not the test
-/// font's different metrics.
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import 'package:shared_preferences/shared_preferences.dart';
+import '../helpers/fonts.dart';
 
 GameProgress _player() {
   final now = DateTime.now();
@@ -116,13 +101,14 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   Future<void> pump(
     WidgetTester tester, {
     required Completer<GameProgress> completer,
     bool dark = false,
     double textScale = 1,
+    double width = 390,
     bool reducedMotion = false,
   }) async {
     // Tall enough that the header, the level card, the streak card and the
@@ -130,12 +116,17 @@ void main() {
     // `ListView` only builds children near the viewport, so comparing rects
     // across two snapshots needs them all built and at a fixed scroll
     // position (0) throughout, not scrolled into view one at a time.
-    tester.view.physicalSize = const Size(390, 2200) * 2;
+    tester.view.physicalSize = Size(width, 2200) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [gameProgressProvider.overrideWith((ref) => completer.future)],
+        overrides: [
+          gameProgressProvider.overrideWith((ref) => completer.future),
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
         child: MaterialApp(
           theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
           locale: const Locale('fr'),
@@ -168,6 +159,14 @@ void main() {
 
     expect(find.text('24 espèces découvertes'), findsOneWidget);
   }
+
+  testWidgets('320 dp, 130 %: Nunito titles do not overflow', (tester) async {
+    final completer = Completer<GameProgress>();
+    await pump(tester, completer: completer, textScale: 1.3, width: 320);
+    completer.complete(_player());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('light, 100 %: no layout shift as the game progress lands', (
     tester,

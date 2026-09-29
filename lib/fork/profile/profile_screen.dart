@@ -29,8 +29,9 @@ import '../game/game_progress.dart';
 import '../game/game_text.dart';
 import '../game/fine_ear_quiz_screen.dart';
 import '../game/game_widgets.dart';
-import '../game/quiz_logo.dart';
+import '../game/quiz_entry_row.dart';
 import '../game/streak.dart';
+import '../settings/fork_prefs.dart';
 import '../ranking/ranking_screen.dart';
 
 /// Widest column on tablets.
@@ -44,6 +45,7 @@ class ProfileScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final progress = ref.watch(gameProgressProvider).value;
+    final firstName = ref.watch(firstNameProvider);
     final loading = progress == null;
 
     return Scaffold(
@@ -97,6 +99,7 @@ class ProfileScreen extends ConsumerWidget {
                         : _LevelCard(
                           key: const ValueKey('level-real'),
                           progress: progress,
+                          firstName: firstName,
                         ),
                   ),
                 ),
@@ -172,7 +175,7 @@ class _LevelCardSkeleton extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            BirdySkeleton.box(width: 96, height: 96, radius: 48),
+            BirdySkeleton.box(width: BirdyGlyph.disc96, height: BirdyGlyph.disc96, radius: BirdyRadii.pill),
             const SizedBox(width: BirdySpace.l),
             Expanded(
               child: Column(
@@ -289,9 +292,10 @@ class _LevelCardSkeleton extends StatelessWidget {
 /// nothing picked, the info box shows the next level (or, at the top, a
 /// short message).
 class _LevelCard extends StatefulWidget {
-  const _LevelCard({super.key, required this.progress});
+  const _LevelCard({super.key, required this.progress, this.firstName});
 
   final GameProgress progress;
+  final String? firstName;
 
   @override
   State<_LevelCard> createState() => _LevelCardState();
@@ -308,6 +312,7 @@ class _LevelCardState extends State<_LevelCard> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final progress = widget.progress;
+    final firstName = widget.firstName?.trim();
     final status = progress.status;
     final statuses = GameConfig.statuses;
     final currentIndex = status == null ? -1 : statuses.indexOf(status);
@@ -322,7 +327,7 @@ class _LevelCardState extends State<_LevelCard> {
             StatusRing(
               status: status,
               progress: progress.progress,
-              size: 96,
+              size: BirdyGlyph.disc96,
               semanticLabel: l10n.forkStatusRingLabel(percent),
             ),
             const SizedBox(width: BirdySpace.l),
@@ -340,7 +345,9 @@ class _LevelCardState extends State<_LevelCard> {
                     ),
                     const SizedBox(height: BirdySpace.xs),
                     Text(
-                      l10n.forkLevelCongrats,
+                      (firstName == null || firstName.isEmpty)
+                          ? l10n.forkLevelCongrats
+                          : l10n.forkLevelCongratsNamed(firstName),
                       style: BirdyText.body.copyWith(
                         color: c.text1,
                         fontWeight: FontWeight.w700,
@@ -427,7 +434,8 @@ class _Ladder extends StatelessWidget {
           startIndex: start,
           count: count,
           lineColor: rowReached ? c.sure.foreground : c.border,
-          lineWidth: rowReached ? 4 : 2,
+          lineWidth:
+              rowReached ? BirdySizes.levelLineThick : BirdySizes.levelLineThin,
           currentIndex: currentIndex,
           picked: picked,
           onPick: onPick,
@@ -466,13 +474,25 @@ class _LadderRow extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
+            // J6h: one stroke between each pair of emblems, cell width minus
+            // the emblems' half widths, centered on the emblem (cell padding
+            // included) so it never crosses the current emblem's ring.
             for (var j = 0; j < count - 1; j++)
               Positioned(
-                left: cell * j + cell / 2 + emblem / 2,
-                right: box.maxWidth - (cell * (j + 1) + cell / 2 - emblem / 2),
-                top: emblem / 2 - lineWidth / 2,
+                key: ValueKey('ladder-stroke-$j'),
+                left: cell * j + cell / 2 + BirdySizes.levelLineInset / 2,
+                width: cell - BirdySizes.levelLineInset,
+                top:
+                    BirdySizes.levelCellPadTop +
+                    emblem / 2 -
+                    lineWidth / 2,
                 height: lineWidth,
-                child: ColoredBox(color: lineColor),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: lineColor,
+                    borderRadius: BorderRadius.circular(lineWidth / 2),
+                  ),
+                ),
               ),
             Row(
               children: [
@@ -544,7 +564,9 @@ class _LadderCell extends StatelessWidget {
                 minHeight: BirdySizes.levelCellMinHeight,
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: BirdySpace.s),
+                padding: const EdgeInsets.symmetric(
+                  vertical: BirdySizes.levelCellPadTop,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -571,13 +593,13 @@ class _LadderCell extends StatelessWidget {
                                 color: BirdyBrand.checkGreen,
                                 border: Border.all(
                                   color: c.sure.background,
-                                  width: 2,
+                                  width: BirdyStroke.regular,
                                 ),
                               ),
                               child: const Icon(
                                 AppIcons.check,
-                                size: 12,
-                                color: Colors.white,
+                                size: BirdyGlyph.xxs,
+                                color: BirdyBrand.white,
                               ),
                             ),
                           ),
@@ -660,7 +682,7 @@ class _LevelInfoBox extends StatelessWidget {
           count: total,
           filled: filled,
           color: c.accentText,
-          track: c.line,
+          track: c.progressTrack,
         ),
       );
       detail = l10n.forkLevelRemainingCount(status.from - progress.verified);
@@ -872,7 +894,7 @@ class _EarnCardSkeleton extends StatelessWidget {
                 style: BirdyText.title.copyWith(color: c.text1),
               ),
             ),
-            BirdySkeleton.box(width: 64, height: 36, radius: BirdyRadii.pill),
+            BirdySkeleton.box(width: BirdySizes.skeletonTagS, height: BirdyGlyph.disc36, radius: BirdyRadii.pill),
           ],
         ),
         const SizedBox(height: BirdySpace.m),
@@ -886,7 +908,7 @@ class _EarnCardSkeleton extends StatelessWidget {
         const SizedBox(height: BirdySpace.m),
         _BadgesSkeleton(),
         const SizedBox(height: BirdySpace.m),
-        const _QuizEntry(),
+        const QuizEntryRow(bordered: true),
       ],
     );
   }
@@ -937,12 +959,12 @@ class _BadgesSkeleton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: BirdySpace.m,
-            vertical: 6,
+            vertical: BirdySpace.snug,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              BirdySkeleton.box(width: 56, height: 56, radius: 28),
+              BirdySkeleton.box(width: BirdyGlyph.disc56, height: BirdyGlyph.disc56, radius: BirdyRadii.pill),
               const SizedBox(height: BirdySpace.xs),
               BirdySkeleton.text(BirdyText.labelCompact, placeholder: '0000000'),
             ],
@@ -1004,7 +1026,7 @@ class _EarnCard extends StatelessWidget {
         const SizedBox(height: BirdySpace.m),
         _Badges(badges: sortedBadges),
         const SizedBox(height: BirdySpace.m),
-        const _QuizEntry(),
+        const QuizEntryRow(bordered: true),
       ],
     );
   }
@@ -1025,8 +1047,8 @@ class _PlumesPill extends StatelessWidget {
       label: l10n.forkPlumesEarned(total),
       excludeSemantics: true,
       child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: BirdyGlyph.disc36,
+        padding: const EdgeInsets.symmetric(horizontal: BirdySpace.comfy),
         decoration: BoxDecoration(
           color: c.orioleContainer,
           borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -1038,9 +1060,9 @@ class _PlumesPill extends StatelessWidget {
             GlyphIcon(
               glyph: GameConfig.statuses[1].glyph,
               color: c.orioleText,
-              size: 20,
+              size: BirdyGlyph.xl,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: BirdySpace.snug),
             Text(
               '$total',
               style: BirdyText.labelCompact.copyWith(
@@ -1123,7 +1145,7 @@ class _Badges extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: BirdySpace.m,
-              vertical: 6,
+              vertical: BirdySpace.snug,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1134,7 +1156,7 @@ class _Badges extends StatelessWidget {
                     tier: badge.tier,
                     icon: badgeIcon(badge.kind),
                     glyph: badgeGlyph(badge.kind),
-                    size: 56,
+                    size: BirdyGlyph.disc56,
                   ),
                 ),
                 const SizedBox(height: BirdySpace.xs),
@@ -1155,7 +1177,7 @@ class _Badges extends StatelessWidget {
                     child: BirdyProgressBar(
                       value: badge.value / badge.nextTarget!,
                       color: c.accentText,
-                      track: c.line,
+                      track: c.progressTrack,
                     ),
                   ),
                   const SizedBox(height: BirdySpace.xs),
@@ -1212,7 +1234,7 @@ class _Badges extends StatelessWidget {
                 tier: badge.tier,
                 icon: badgeIcon(badge.kind),
                 glyph: badgeGlyph(badge.kind),
-                size: 72,
+                size: BirdyGlyph.disc72,
               ),
               const SizedBox(height: BirdySpace.m),
               Text(
@@ -1270,58 +1292,3 @@ class _Badges extends StatelessWidget {
 void _openQuiz(BuildContext context) => Navigator.of(
   context,
 ).push(MaterialPageRoute<void>(builder: (_) => const FineEarQuizScreen()));
-
-/// « Qui chante ? »: the quiz behind the Oreille fine badge.
-class _QuizEntry extends StatelessWidget {
-  const _QuizEntry();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    return Semantics(
-      label: '${l10n.forkQuizTitle}. ${l10n.forkQuizEntrySubtitle}',
-      button: true,
-      excludeSemantics: true,
-      child: Pressable(
-        child: Material(
-          color: c.surface1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(BirdyRadii.card),
-            side: BorderSide(color: c.line),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(BirdyRadii.card),
-            onTap: () => _openQuiz(context),
-            child: Padding(
-              padding: const EdgeInsets.all(BirdySpace.l),
-              child: Row(
-                children: [
-                  const ExcludeSemantics(child: QuizLogo()),
-                  const SizedBox(width: BirdySpace.l),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.forkQuizTitle,
-                          style: BirdyText.heading.copyWith(color: c.text1),
-                        ),
-                        const SizedBox(height: BirdySpace.xs),
-                        Text(
-                          l10n.forkQuizEntrySubtitle,
-                          style: BirdyText.bodyCompact.copyWith(color: c.text2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(AppIcons.chevronRight, color: c.text2),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

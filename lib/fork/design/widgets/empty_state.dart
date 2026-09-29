@@ -24,27 +24,35 @@ class BirdyEmptyState extends StatelessWidget {
   /// Full-page empty state, centered, for a screen with nothing else to show.
   const BirdyEmptyState({
     super.key,
-    required this.icon,
+    this.icon,
+    this.leading,
     required this.title,
     this.body,
     this.kind = BirdyEmptyKind.firstUse,
     this.action,
     this.onAction,
-  }) : inline = false;
+  }) : assert(icon != null || leading != null),
+       inline = false;
 
   /// Compact card in a flow (home, LPO, over the map): disc on the left,
   /// texts on the right, optional action under the texts.
   const BirdyEmptyState.inline({
     super.key,
-    required this.icon,
+    this.icon,
+    this.leading,
     required this.title,
     this.body,
     this.kind = BirdyEmptyKind.firstUse,
     this.action,
     this.onAction,
-  }) : inline = true;
+  }) : assert(icon != null || leading != null),
+       inline = true;
 
-  final IconData icon;
+  final IconData? icon;
+
+  /// Feature emblem (quiz logo, wing...) drawn instead of the icon disc, at
+  /// the disc size ([fullDisc] / [inlineDisc]). Null keeps the icon disc.
+  final Widget? leading;
 
   /// What is missing, one line, no final period.
   final String title;
@@ -82,12 +90,18 @@ class BirdyEmptyState extends StatelessWidget {
     final (discColor, iconColor) = colors(c, kind);
     final hasAction = action != null && onAction != null;
 
-    final disc = Container(
-      width: inline ? inlineDisc : fullDisc,
-      height: inline ? inlineDisc : fullDisc,
-      decoration: BoxDecoration(color: discColor, shape: BoxShape.circle),
-      child: Icon(icon, size: inline ? inlineIcon : fullIcon, color: iconColor),
-    );
+    final disc =
+        leading ??
+        Container(
+          width: inline ? inlineDisc : fullDisc,
+          height: inline ? inlineDisc : fullDisc,
+          decoration: BoxDecoration(color: discColor, shape: BoxShape.circle),
+          child: Icon(
+            icon,
+            size: inline ? inlineIcon : fullIcon,
+            color: iconColor,
+          ),
+        );
 
     if (inline) {
       return BirdyEntrance(

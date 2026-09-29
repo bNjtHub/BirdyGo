@@ -247,19 +247,33 @@ void main() {
       await pump(tester, home: const SimpleSettingsScreen());
       expect(find.text(fr.forkSettingsTitle), findsOneWidget);
 
+      // The switch is labelled « Effets sonores du quiz ».
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('settings-quiz-sound')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Effets sonores du quiz'), findsOneWidget);
+      expect(find.text('Bruitages du quiz'), findsNothing);
       // Quiz sounds: on by default.
       expect(container.read(quizSoundOnProvider), isTrue);
+      await tester.ensureVisible(find.byKey(const ValueKey('settings-quiz-sound')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('settings-quiz-sound')));
       await tester.pump();
       expect(prefs.getBool(kQuizSoundPref), isFalse);
       expect(container.read(quizSoundOnProvider), isFalse);
 
       // Online photos: off by default.
+      await tester.ensureVisible(find.byKey(const ValueKey('settings-online-photos')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('settings-online-photos')));
       await tester.pump();
       expect(prefs.getBool(kOnlinePhotosPref), isTrue);
 
       // Blur sensitive species: on by default.
+      await tester.ensureVisible(find.byKey(const ValueKey('settings-blur-sensitive')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('settings-blur-sensitive')));
       await tester.pump();
       expect(prefs.getBool(kBlurSensitiveExportPref), isFalse);

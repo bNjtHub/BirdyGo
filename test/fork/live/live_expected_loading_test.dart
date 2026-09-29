@@ -12,25 +12,8 @@ import 'package:birdnet_live/fork/live/live_expected.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_test/flutter_test.dart';
-
-/// The default test font is a rough substitute with different metrics: the
-/// rect assertions below compare wrapped-or-not text, so they need the real
-/// bundled fonts loaded.
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 /// 7 a.m. in September: « ce matin », « septembre ».
 final _morning = DateTime(2026, 9, 28, 7);
@@ -111,7 +94,7 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   Future<void> pumpLoading(
     WidgetTester tester, {
@@ -124,11 +107,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       _app(
-        LiveExpectedView(
-          now: _morning,
-          species: [],
-          loading: true,
-        ),
+        LiveExpectedView(now: _morning, species: [], loading: true),
         dark: dark,
         textScale: textScale,
         reduceMotion: reduceMotion,
@@ -162,19 +141,14 @@ void main() {
       final loading = _Snapshot(tester);
 
       await tester.pumpWidget(
-        _app(
-          LiveExpectedView(now: _morning, species: _five),
-          textScale: 1.3,
-        ),
+        _app(LiveExpectedView(now: _morning, species: _five), textScale: 1.3),
       );
       await tester.pump(const Duration(seconds: 1));
       loading.expectUnchanged(_Snapshot(tester));
     },
   );
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     await pumpLoading(tester, reduceMotion: true);
     final before = tester.getRect(find.byType(LiveExpectedTip));
     for (var i = 0; i < 5; i++) {

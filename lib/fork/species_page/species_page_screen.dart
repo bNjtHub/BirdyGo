@@ -15,6 +15,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../features/explore/widgets/pick_wikipedia_url.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_providers.dart';
+import '../audio_output/volume_guard.dart';
 import '../../shared/models/taxonomy_species.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
@@ -34,6 +35,8 @@ import '../ranking/species_activity_section.dart';
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
+import 'meet_species_block.dart';
+import 'section_title.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
 import 'species_page_drag_close.dart';
@@ -256,6 +259,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     if (_player.playing.value == path) {
       await _player.stop();
     } else {
+      ensureAudible(context, ref);
       await _player.play(path);
     }
   }
@@ -398,7 +402,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           ),
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
-        SheetChipsBlock(sheet: sheet)
+        MeetSpeciesBlock(sheet: sheet)
       else if (_description != null)
         DescriptionBlock(
           text: _description!,
@@ -440,7 +444,10 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       const SpeciesPageFooter(),
     ];
 
-    final content = Center(
+    // FORK: species tint for the block titles (J6h fix)
+    final content = SpeciesTintScope(
+      tint: tint,
+      child: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: kSpeciesPageMaxWidth),
         child: Column(
@@ -458,9 +465,9 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
-                BirdySpace.gutter,
+                BirdySpace.page,
                 BirdySpace.l,
-                BirdySpace.gutter,
+                BirdySpace.page,
                 // FORK: viewPaddingOf, not paddingOf — inside a sheet
                 // (showBirdySheet, useSafeArea: true) the ambient padding
                 // does not carry the bottom nav bar inset, only viewPadding
@@ -472,7 +479,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                 children: [
                   for (final block in blocks) ...[
                     if (block != blocks.first)
-                      const SizedBox(height: BirdySpace.l),
+                      const SizedBox(height: BirdySpace.block),
                     block,
                   ],
                 ],
@@ -480,6 +487,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
             ),
           ],
         ),
+      ),
       ),
     );
 

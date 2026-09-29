@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px;min-height:48px">
+      <button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px">arrow_back</span></button>
+      <div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Sonothèque</div>
+    </div>
+    <div style="background:#D6EEF0;border-radius:28px;padding:20px;display:flex;align-items:center;gap:16px;animation:birdyIn .3s both">
+      <div style="width:76px;height:76px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:38px;color:#0B6E77">graphic_eq</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:34px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.sounds.total }}</span><span style="font-size:17px;line-height:1.45">enregistrements</span></div>
+        <div style="font-size:13px;color:#6B5847">18 espèces · <span style="color:#7A5A00;font-weight:800">{{ app.sounds.favs }} ★</span> favoris</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onClick="{{ app.sounds.all }}" style="all:unset;cursor:pointer;height:48px;padding:0 16px;border-radius:999px;background:{{ app.sounds.allBg }};color:{{ app.sounds.allFg }};display:flex;align-items:center;font-size:15px;font-weight:700">Toutes</button>
+      <button onClick="{{ app.sounds.fav }}" style="all:unset;cursor:pointer;height:48px;padding:0 16px;border-radius:999px;background:{{ app.sounds.favBg }};color:{{ app.sounds.favFg }};display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span class="ms" style="font-size:18px;color:{{ app.sounds.starColor }};font-variation-settings:'FILL' 1">star</span>Favoris seulement</button>
+    </div>
+    <sc-if value="{{ app.sounds.empty }}">
+      <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;gap:12px"><div style="width:48px;height:48px;border-radius:999px;background:#DCE2DA;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px;color:#6B5847">star</span></div><div><div style="font-size:17px;font-weight:700">Pas encore de favori</div><div style="font-size:15px;color:#6B5847">Touche l'étoile à côté de tes meilleurs enregistrements.</div></div></div>
+    </sc-if>
+    <div style="background:#FFFFFF;border-radius:20px;padding:4px 16px;display:flex;flex-direction:column;animation:birdyIn .3s .04s both">
+      <sc-for list="{{ app.sounds.rows }}" as="x" hint-placeholder-count="8">
+        <div onClick="{{ x.open }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:{{ x.sep }}">
+          <div style="width:48px;height:48px;border-radius:999px;background:{{ x.tint }};display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="{{ x.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+          <div style="flex:1;min-width:0"><div style="font-family:Fraunces;font-size:17px;line-height:1.2;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">{{ x.name }}</div><div style="font-size:13px;color:#6B5847;margin-top:2px">{{ x.count }}</div></div>
+          <span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

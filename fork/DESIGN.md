@@ -48,13 +48,49 @@ L'écoute s'ouvre en thème sombre par défaut : on l'utilise souvent à l'aube,
 Les rampes de score et les palettes du spectrogramme d'upstream ne changent pas.
 Élévation par teinte de surface (Material 3), pas la même ombre grise sous chaque carte.
 
+### Thèmes d'oiseau (J6i)
+
+L'enfant choisit son oiseau : la couleur de marque, le logo et le splash suivent. Le thème par défaut
+et tant que rien n'est choisi est le **Loriot**, qui garde exactement les jetons d'avant J6i (le
+« Martin-pêcheur » #19A7B3 ci-dessus est l'accent du thème Loriot ; le jaune du bec est le loriot).
+Valeurs exactes dans `fork/handoff/maquettes/themes.js`, reprises dans
+`lib/fork/design/birdy_theme_choice.dart` (seul endroit avec ces couleurs en dur).
+
+| Thème (`BirdyBird`) | acc | accText clair | accText sombre | bec / barre 2 |
+|---|---|---|---|---|
+| `loriot` (défaut) | #19A7B3 | #0B6E77 | #4FC3CC | #F4C542 |
+| `martin` | #3A9BE0 | #1565A8 | #7DBBF0 | #F28C38 |
+| `flamant` | #E86A9A | #A8305F | #F59BC0 | #3A2F4F |
+| `etourneau` | #9D82E0 | #5B3FB0 | #BBA6F0 | #E9C46A |
+
+Ce qui change : `accent` (action, anneaux, halo `glow`), `accentText`, `tonal`, `navIndicator`, le
+logo, le point du wordmark. `BirdyColors.forBird(bird, brightness)` donne les jetons du thème,
+`BirdyBrandColors.of(context)` les rôles de marque (`accentHi`, `accentDeep`, `accentLight`,
+`highlight`, `highlightDeep`, `wordmarkDot`, `accentTextDark`). Le choix est dans
+`birdyBirdProvider` (SharedPreferences `fork_birdy_bird_v1`), lu avant `runApp` : le splash est
+dans le bon thème dès la première image.
+
+Ce qui ne change jamais : niveaux Sûr / Probable / À vérifier, loriot doré (récompense, série, rare),
+médailles et emblèmes de niveau, confettis, teintes d'espèces, modes Vent / Boost / Ville, encre du
+texte sur `accent`. Le mode Normal suit `accentText`. Le logo du quiz (disque sombre aux barres
+turquoise) reste tel quel : c'est son emblème.
+
+Contraste vérifié pour chaque thème (`test/fork/design/birdy_theme_choice_test.dart`) : encre sur
+`accent`, `accentText` sur blanc, Brume, `tonal` et `navIndicator`, `accentTextDark` sur Encre et sur
+les surfaces sombres, tous ≥ 4,5:1. Goldens de l'Accueil, 4 thèmes × clair / sombre :
+`test/fork/goldens/` (tolérance de 2 % : l'Accueil affiche la date et une salutation).
+
 ## Typographie
 
-- Fraunces, variable, axe SOFT haut, graisse 500 à 650 : titres et noms d'espèces. Elle rappelle les
-  planches naturalistes sans le contraste dur d'une serif de magazine.
-- Fraunces italique : noms latins, comme dans les guides naturalistes.
-- Atkinson Hyperlegible Next, variable : interface, chiffres, textes courants. Dessinée pour la
-  lisibilité en basse vision, elle tient bien dehors en plein soleil.
+- Nunito, variable, graisse 800 : titres (`display` 34, `title` 26, `heading` 20) et grands chiffres
+  (`numberXL`). Ronde et chaleureuse, sans fantaisie sur le j ni le g (audit typo J6i, option 1d).
+  Approche resserrée de 1 % de la taille dès 26, neutre en dessous.
+- Fraunces, variable, axe SOFT haut, graisse 600 : noms d'espèces (`species`, `speciesCompact`) et le
+  « ? » d'un oiseau mystère. Rien d'autre.
+- Atkinson Hyperlegible Next italique 400 : noms latins (`latin`, `latinCompact`). Fichier italique
+  dédié, pas d'inclinaison synthétique.
+- Atkinson Hyperlegible Next, variable : interface, chiffres (sauf `numberXL`), textes courants.
+  Dessinée pour la lisibilité en basse vision, elle tient bien dehors en plein soleil.
 - Polices embarquées dans `assets/fonts/` (licence OFL), aucun téléchargement à l'exécution.
 - Échelle : 34, 26, 20, 17, 15, 13. Texte courant entre 15 et 17. Chiffres tabulaires pour les compteurs.
 - Pas de libellés en capitales, pas de sur-titre au-dessus de chaque bloc, pas de mot isolé mis en
@@ -151,7 +187,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
 | Nouvelle espèce en Live | 220 ms | glisse de 8 px, échelle 0,97 vers 1, fondu, vibration légère |
 | Toute première espèce | 250 ms pour la carte, séquence d'environ 2,5 s, une seule fois | carte « Première rencontre » (fondu, 0,97 vers 1), légère teinte de la couleur de l'oiseau derrière (opacité 15 % au plus), puis l'oiseau, son anneau, les textes et une gerbe de confettis (détail en J6f), vibration légère |
-| Oiseau rare | attente, puis 450 ms | carte dorée immobile (fin liseré Loriot) en attendant « C'est bien lui » ; puis un seul anneau doux et la pastille « +1 espèce rare » en fondu |
+| Oiseau rare | arrivée d'environ 2,4 s, une fois ; attente sans décompte ; puis réponse | carte dorée (fin liseré Loriot). À l'arrivée : anneau pointillé Loriot qui se dessine en tournant de −90° à 120°, halo Loriot qui pulse 2 fois, 3 losanges qui scintillent l'un après l'autre (décalage 220 ms), pastille en pop ; l'anneau reste ensuite pointillé. « C'est lui » : anneau plein et halo, confettis dorés, « +1 espèce rare », décompte 6 s ; « Je ne sais pas » et « Pas lui » : encadré de réponse, décompte 3 s |
 | Nouveau statut | 300 ms, une seule fois | l'emblème apparaît en fondu (échelle 0,97 vers 1), le texte suit 60 ms après, une gerbe de confettis part de l'emblème une fois celui-ci arrivé, vibration légère |
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
@@ -177,12 +213,33 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   confetti. La séquence « Première rencontre » (environ 2,5 s avec l'anneau et les confettis) dépasse
   `celebrationMax` (500 ms) : exception acceptée, comme le quiz, car rien n'attend la fin (la carte et ses
   boutons sont là dès 250 ms, l'écoute continue) et ce moment n'arrive qu'une fois par espèce dans une vie.
-- Exception autorisée : un double appui sur le logo de l'accueil (J6f, `lib/fork/home/logo_flight.dart`)
-  fait s'envoler l'oiseau à travers l'écran (chemin courbe, une boucle, retour à sa place), 2 à 2,5 s,
-  au-delà des 500 ms. Explicite et voulu par la personne (deux appuis, jamais tout seul), donc pas
-  une célébration au sens de la règle. Le cri BirdyGo joue une fois au décollage ; pendant ce temps le
-  logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un double appui se
-  comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
+- Exception autorisée : un double appui sur le logo de l'accueil (J6h, `lib/fork/home/logo_flight.dart`)
+  fait décoller l'oiseau, qui vole jusqu'au centre de l'écran (3,5 fois sa taille), penche la tête et
+  fait un clin d'œil (l'œil devient un trait courbe), puis s'envole par la droite et revient se poser
+  dans l'en-tête : 4,4 s (l'oiseau chante avec ses notes à l'arrivée) (`BirdyMotion.logoWink*`, un seul contrôleur), au-delà des 500 ms. Explicite
+  et voulu par la personne (deux appuis, jamais tout seul), donc pas une célébration au sens de la
+  règle. Le cri BirdyGo joue une fois à l'arrivée, un retour haptique léger au clin d'œil ; pendant ce
+  temps le logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un clin
+  d'œil rapide sur place (450 ms). Les appuis pendant la séquence sont ignorés.
+- Première rencontre en série (J6h) : les Sûres entendues pendant qu'une carte est ouverte, ou app en arrière-plan,
+  forment une file (rang figé, « 1 sur 3 nouvelles », points `BirdyStepDots`) ; un rare passe devant. Barre de
+  décompte 6 px (`BirdyProgressBar`, 6 s linéaires, `firstEncounterShown`) et texte « Se referme seul dans n s » /
+  « Suivante dans n s », figés en pause (« · en pause »), la carte passe à la suivante ou se ferme à zéro.
+  Logo « L'écoute continue » = `BirdyListeningLogo` (barres 0,45 à 1, 1 s, décalage 0,18 ; même logo à 24 px dans
+  l'en-tête), figé en pause. Feu d'artifice : deux salves de confettis (22 puis 14, `BirdyConfettiBurst`) et
+  4 étincelles (`BirdySparkles`), une fois. Animations réduites : barre en paliers d'une seconde, texte mis à
+  jour, ni confetti ni étincelles, logo immobile.
+- Carte de l'oiseau rare (J6h, `lib/fork/live/live_moments.dart`, `rare_halo.dart`) : logo « L'écoute continue »,
+  pastille « Rare ici · à confirmer », oiseau 96 (`BirdySizes.momentAvatar`) dans son anneau pointillé, nom sans nom
+  latin (`BalancedText`, lignes équilibrées), ligne Loriot « ◆ 1 chance sur n de l'entendre ici » (n = 1 / score
+  de présence arrondi, « moins de 1 sur 100 » sous 1 %), rejouer 56 rond + « C'est bien lui ? », les trois verdicts
+  de la Revue rapide (`VerdictButtons`, libellés courts), légende. Écarts de 20 entre groupes, resserrés sous
+  `momentCompactBelow` ; défilement en dernier recours seulement. La carte de première rencontre suit la même
+  règle (oiseau 96, sans nom latin). Arrivée : jetons `BirdyMotion.rare*` (anneau 2,4 s, halo 2 × 1,4 s, losanges
+  `BirdySparkles` avec l'icône `diamond`). Décomptes : 6 s après « C'est lui », 3 s après les deux autres
+  (`rareConfirmedShown`, `rareAnsweredShown`), mêmes barre et pause que la première rencontre. « Je ne sais pas »
+  n'écrit rien : les détections restent « à vérifier » et la Revue rapide les reprend. Animations réduites : anneau
+  pointillé immobile, ni halo, ni losanges, ni confettis.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 - Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule
@@ -193,7 +250,10 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   et la bande se lit en coordonnées d'écran. Il démarre avec le premier squelette visible et s'arrête
   avec le dernier (retiré de l'arbre, ou masqué par un `TickerMode`). Couleurs : `skeleton` de base,
   `skeletonSheen` par-dessus (clair : blanc à 55 %, sombre : blanc à 12 %). Animations réduites : aucun
-  ticker, aplat `skeleton` fixe. Les formes et leurs dimensions ne changent pas.
+  ticker, aplat fixe. Les formes et leurs dimensions ne changent pas. Toutes sont arrondies (ligne de
+  texte = pilule, un bloc prend le rayon de la carte qu'il remplace : `card`, `hero`, `pill` pour barres et
+  disques ; `BirdySkeleton.circle` et `.bar`) et remplies d'un léger dégradé (`skeleton` vers `skeleton`
+  + 35 % de la lueur). La bande a une chute douce (`shimmerBandAlphas`), sans bord visible.
 - Seconde exception, plus discrète : le logo de l'écoute (J6f, `lib/fork/live/live_header.dart`
   `_LiveLogo`, `BirdyGoLogoPainter`). Il remplace le point vivant qui pulsait ; tant que l'écoute
   est active, ses quatre barres d'aile oscillent seules, comme un petit vumètre, décalées entre
@@ -216,7 +276,8 @@ hors version publiée) montre chaque composant en clair et en sombre.
   Le remplissage vif #19A7B3 avec texte Encre passe par `BirdyButtonStyles` et `ListenButton` : le
   thème ne peut pas le donner à `FilledButton` sans repeindre aussi `FilledButton.tonal`.
 - Polices variables : la graisse passe par `fontWeight` (Flutter l'applique à l'axe `wght`), jamais
-  par une variation `wght`, qui écraserait les `bold` des écrans upstream. Fraunces reçoit toujours
+  par une variation `wght`, qui écraserait les `bold` des écrans upstream (Nunito 800 compris).
+  Fraunces reçoit toujours
   `SOFT` 100 et `opsz` égal à la taille du texte (Flutter ne règle pas la taille optique seul).
 - Couleur d'espèce (`SpeciesTint.fromAccent`) : `tintDark` = l'accent à 24 % sur Encre, `tintLight`
   = même teinte à luminosité 0,92 (au moins 12:1 avec Encre), `deep` = l'accent assombri vers Encre
@@ -312,8 +373,8 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
-  couleurs de la marque. Un double appui (J6f, `logo_flight.dart`) le fait s'envoler à travers
-  l'écran à la place : voir l'exception de la section Animations.
+  couleurs de la marque. Un double appui (J6h, `logo_flight.dart`) lui fait faire un clin d'œil au
+  centre de l'écran : voir l'exception de la section Animations.
 - Salutation selon l'heure (mêmes bornes que le Bilan, `dayPartOf`), date et lieu du téléphone
   (cache de géocodage, ou réseau si autorisé ; jamais de demande de localisation depuis l'accueil).
 - Ordre (maquette `Main.dc.html`) : salutation, objectif du jour, carte de statut, tuiles du jour,
@@ -518,6 +579,19 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 Dans `fork/brand/` : `birdygo-logo.svg` (animé en CSS, pour le README), `birdygo-logo-static.svg`
 (même dessin sans animation, base de l'icône d'app et du logo de l'accueil, dont l'animation se refait
 en Flutter), `birdygo-logo-small.svg` (simplifié, de 16 à 32 px).
+
+Recoloration par thème (J6i) : les painters (`BirdyGoLogoPainter`, `BirdyGoSingingPainter`,
+`BirdyWingIcon`, splash) reçoivent un `BirdyBrandColors` (Loriot par défaut). Corps et queue :
+dégradé `accentHi` → `accentDeep` ; bec supérieur et barre 2 : `highlight` ; bec inférieur :
+`highlightDeep` ; barres 1 et 3 : Brume ; barre 4 : `accentLight` ; notes du chant : `accent`,
+`highlightDeep`, `accentDeep`. L'œil et le reflet ne changent pas.
+
+Wordmark 2c (`BirdyGoWordmark`, accueil, écran de démarrage, onboarding) : « Birdy » en Nunito 800
+couleur encre, puis un point de diamètre 0,2 × la taille (`dotRatio`), avec la même marge de chaque
+côté (0,125 × la taille, soit 3 px à 24 ; `dotMarginRatio`), centré à mi-hauteur des minuscules
+(x-height de Nunito 0,484 em, `nunitoXHeight`), couleur `wordmarkDot` du thème ; puis « Go » en
+Nunito 900, même taille, en `accentText` (`accentTextDark` en sombre). Le point suit l'échelle du
+texte. Libellé d'accessibilité « BirdyGo », jamais traduit ; les trois parties sont exclues.
 
 ## Textes
 
@@ -755,3 +829,90 @@ Modes d'écoute (`lib/fork/listening_mode/`)
 - Le mode écrit les réglages gain et passe-haut existants, donc le spectre, l'inférence et les
   clips voient le même signal. Un curseur des Réglages bougé à la main affiche « Personnalisé ».
   Le modèle et les seuils ne changent pas.
+
+## Ligne J6h (homogénéité, référence Profil / Quiz)
+
+Source : `fork/handoff/README.md` (captures et maquettes dans `fork/handoff/`). Ces règles priment
+sur les sections précédentes en cas de conflit.
+
+1. **Deux en-têtes seulement.** Onglet : `BirdyTabHeader`, titre 34, légende 13, boutons ronds blancs
+   de 48. Écran poussé : `BirdyOverlayHeader`, retour 48, titre 20. Les actions (tri, filtre,
+   calques) montent dans les boutons ronds de l'en-tête ; plus de ligne d'options flottante.
+2. **Un bloc héros par écran.** Rayon `BirdyRadii.hero` (28), marge `BirdySpace.xl` (20), fond teinté.
+   Il porte le seul grand chiffre de l'écran (anneau ou nombre 34), sa phrase et sa barre.
+3. **Le bloc porte son titre.** Marge de page `BirdySpace.page` (16), `BirdySpace.block` (10) entre
+   blocs. Une liste vit dans un seul bloc blanc (rayon 20) titré `BirdyText.heading` (20), lignes
+   séparées par un filet `c.line` de 1 px. Plus de piles de cartes séparées.
+4. **Une teinte veut dire une seule chose.** `tonal` : écouter, apprendre, progresser. `sure` : acquis,
+   confirmé, niveau. `oriole` : récompense, série, rare. `toCheck` (pointillé) : à vérifier. Jamais
+   d'alternance décorative.
+5. **Une seule ligne de liste.** Disque teinté de 44 avec icône, ou avatar de 48 ; libellé 17 gras,
+   légende 13, chevron ; hauteur minimale `BirdySizes.row` (72). Réglages, Plus, Sonothèque,
+   Objectif, Bilan et les tiroirs la partagent.
+6. **Une seule action forte, en bas.** Pilule de 72, Martin-pêcheur, `listenGlow` ou `ctaGlow`,
+   épinglée en bas. Tout le reste : bouton tonal 48, secondaire 56, ou puce.
+7. **Puces blanches, choix en encre.** La puce choisie passe en `BirdyChipColors.ink` partout.
+   Exception : sur fond Brume, les filtres du Carnet gardent leur teinte de sens.
+8. **Même comportement partout.** Entrée décalée (`BirdyEntrance.staggered`, 40 ms,
+   `staggerMaxItems`), squelettes à la forme finale puis `BirdyCrossFade`, pression à 0,97
+   (`Pressable`), cibles d'au moins 48, jamais de bordure grise sur un bloc.
+
+Règles transverses :
+- **Croix ou flèche.** Flèche ← pour revenir sans rien perdre ; croix ✕ pour sortir d'un parcours
+  (Bilan, Revue rapide, Quiz en partie ou au score). Quitter une partie en cours demande confirmation.
+- **Échelle de texte.** 34 / 26 / 20 / 17 / 15 / 13. Rien sous 12, graphiques et spectrogramme compris.
+- **Pastilles.** Hauteur minimale 26, `BirdyText.badge` (13 gras), marge 4/10/4/7. Même format pour
+  Nouveau, Nouveau cette année, rareté et fiabilité.
+- **Alignement.** Grand chiffre + libellé, ou titre + légende côte à côte : baseline alphabétique,
+  jamais `end`.
+- **Oiseau générique : une variante par sens** (`BirdyGoSilhouetteIcon`, `SilhouetteRole`), jamais
+  `AppIcons.bird`. Un sens = un visuel, partout :
+  - `.mystery` (oiseau à découvrir : carte mystère du Carnet, oiseau du quiz, « à trouver » de l'Objectif
+    du jour, mini-silhouette du Carnet) : corps gris, pas d'aile, « ? » Loriot sur le centre de l'aile
+    (`BirdyMysteryMark`, partagé avec le quiz), masqué sous `BirdySizes.silhouetteMarkMin` (20).
+  - `.species` (espèce connue sans photo : repli de `SpeciesAvatar`) : teinte `deep` de l'espèce sur son
+    halo, avec l'aile aux couleurs du logo dès `BirdySizes.silhouetteWingMin` (32), sans en dessous.
+  - `.glyph` (icône : pastilles du bandeau du jour, feuille du jour, carte défi, « Toutes les espèces »
+    de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
+- **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
+  Le « ? » est réservé à « Je ne sais pas ».
+- **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
+- **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
+  #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
+  boutons « Écouter » et « Commencer à écouter » (écart icône/texte : +`BirdySpace.wingLabelGap`). Sur ces
+  deux boutons (`animated`), toutes les 7 s environ (±1,5 s), les barres font une vague douce de 0,9 s,
+  décalées, puis reviennent au repos (`BirdyMotion.wingWave*`) ; rien ne tourne entre deux vagues, arrêt
+  avec animations réduites. La feuille « Arrêter la partie ? » reprend `QuizLogo`, l'emblème du quiz.
+
+## Onboarding (J6i : prénom et oiseau)
+
+Parcours : Bienvenue, Comment, Niveaux (histoire, inchangées) → Étape 1 Prénom → Étape 2 Choisis ton
+oiseau → Autorisations → Accueil. Premier lancement en Loriot tant que l'enfant n'a pas choisi.
+Références : `fork/handoff/maquettes/DemoPrenom.dc.html`, `DemoTheme.dc.html`, `themes.js`.
+
+- **Les deux étapes** ont leur propre en-tête (« Étape n sur 2 » à droite, flèche ← dans Réglages) et
+  leur propre bouton de 72 (`BirdySizes.listen`, halo du thème). L'en-tête et le bouton restent fixes,
+  le reste défile (320 dp, 130 %). L'écran cache ses points et « Passer » sur ces deux pages, et ne les
+  laisse pas glisser : on en sort par leurs boutons. Les points ne comptent que les 3 pages d'histoire
+  et les autorisations.
+- **Étape 1.** Disque tonal de 132 (`SingingThemeLogo`, halo blanc 8 à 70 %) qui chante une phrase à
+  l'arrivée et au toucher ; wordmark 44 (`BirdyGoWordmark`) ; titre « Bienvenue ! » qui devient
+  « Enchanté, {prénom} ! » pendant la saisie ; « Comment tu t'appelles ? » ; champ dans un bloc blanc
+  (`autofillHints: givenName`, 24 caractères, filet accent), légende cadenas « Il reste sur ton
+  téléphone » ; « Continuer » grisé tant que le champ est vide ; « Plus tard » (texte, 48) ne
+  sauvegarde rien.
+- **Étape 2 et Réglages, « Mon oiseau ».** Même page (`BirdyBirdStep`). Disque 132 recoloré tout de
+  suite et qui chante à chaque carte touchée ; grille 2 × 2 (`BirdyBirdPicker`) de cartes blanches :
+  disque tonal 72 avec le logo, nom (Nunito 17), 3 pastilles de 14 (accent, bec, tonal) ; la carte
+  choisie a un anneau accent de 3 et une coche. Toucher une carte met `birdyBirdProvider` à jour
+  aussitôt : toute l'appli prévisualise l'oiseau, sans attendre « C'est mon oiseau ! ». Encadré
+  « Ton icône sur le téléphone » : aperçu 60 (logo sur dégradé tonal → blanc, celui de la future icône
+  de lanceur, toujours en clair) et le fait sur l'oiseau. Onboarding : le bouton affiche
+  « Bienvenue {prénom} chez les {oiseaux} ! » 1,5 s, puis les autorisations. Réglages : le bouton et la
+  flèche reviennent.
+- **Réglages.** Ligne « Mon oiseau » en tête du bloc Thème : disque tonal 44 avec le logo (immobile),
+  nom de l'oiseau, chevron.
+- **Composants partagés.** `SingingThemeLogo` (disque + chant), `BirdyBirdPicker` / `BirdyBirdCard` /
+  `BirdyIconPreview`, `BirdyBirdLabels` (nom, pluriel, fait). Aucun disque ni carte écrits à la main
+  ailleurs : même emblème partout.
+- **Animations réduites.** Ni chant, ni pop, ni fondu ; l'accueil de l'oiseau ne dure pas.

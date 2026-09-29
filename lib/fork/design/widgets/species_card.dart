@@ -21,6 +21,7 @@ class SpeciesCard extends StatelessWidget {
     this.caption,
     this.corner,
     this.hero = false,
+    this.largeName = false,
     this.onTap,
   }) : _variant = _CardVariant.tinted;
 
@@ -31,6 +32,7 @@ class SpeciesCard extends StatelessWidget {
     required this.name,
     required this.visual,
     this.caption,
+    this.largeName = false,
   }) : tint = null,
        corner = null,
        hero = false,
@@ -45,6 +47,7 @@ class SpeciesCard extends StatelessWidget {
     required this.visual,
     this.caption,
     this.corner,
+    this.largeName = false,
     this.onTap,
   }) : tint = null,
        hero = false,
@@ -67,6 +70,10 @@ class SpeciesCard extends StatelessWidget {
   /// Hero card: radius 28, heading-size name.
   final bool hero;
 
+  /// Name in [BirdyText.species] (17) instead of the compact 15 (notebook
+  /// grid, two columns); the mystery card's name follows.
+  final bool largeName;
+
   final VoidCallback? onTap;
 
   final _CardVariant _variant;
@@ -86,10 +93,12 @@ class SpeciesCard extends StatelessWidget {
     } else {
       background = (tint ?? SpeciesTint.neutral).cardBackground(c.brightness);
     }
-    final nameStyle = (hero ? BirdyText.heading : BirdyText.speciesCompact)
+    final nameStyle = (hero
+            ? BirdyText.heading
+            : (largeName ? BirdyText.species : BirdyText.speciesCompact))
         .copyWith(color: isMystery ? c.text2 : c.text1);
     final effectiveNameStyle =
-        isMystery
+        isMystery && !largeName
             ? BirdyText.badge.copyWith(color: c.text2, height: 1.2)
             : nameStyle;
     // Two lines, always: a 1-line name and a 2-line name must leave the
@@ -98,7 +107,7 @@ class SpeciesCard extends StatelessWidget {
     final nameHeight = twoLineTextHeight(context, effectiveNameStyle);
 
     Widget content = Padding(
-      padding: EdgeInsets.all(hero ? BirdySpace.l : 10),
+      padding: EdgeInsets.all(hero ? BirdySpace.l : BirdySpace.cozy),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         // Hero cards size to their own content (no bounded height to fill);
@@ -107,7 +116,7 @@ class SpeciesCard extends StatelessWidget {
         mainAxisSize: hero ? MainAxisSize.min : MainAxisSize.max,
         children: [
           visual,
-          const SizedBox(height: 6),
+          const SizedBox(height: BirdySpace.snug),
           SizedBox(
             height: nameHeight,
             child: Align(
@@ -121,7 +130,7 @@ class SpeciesCard extends StatelessWidget {
             ),
           ),
           if (caption != null) ...[
-            if (hero) const SizedBox(height: 6) else const Spacer(),
+            if (hero) const SizedBox(height: BirdySpace.snug) else const Spacer(),
             DefaultTextStyle.merge(
               style: BirdyText.caption.copyWith(
                 color: isMystery || !c.isDark ? c.text2 : c.text1,
@@ -136,7 +145,7 @@ class SpeciesCard extends StatelessWidget {
       content = Stack(
         children: [
           content,
-          PositionedDirectional(top: 10, end: 10, child: corner!),
+          PositionedDirectional(top: BirdySpace.cozy, end: BirdySpace.cozy, child: corner!),
         ],
       );
     }

@@ -3,6 +3,8 @@ import 'package:birdnet_live/features/history/session_repository.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_switch.dart';
 import 'package:birdnet_live/fork/ranking/ranking_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -142,7 +144,7 @@ void main() {
     expect(find.text('Troglodytes troglodytes'), findsOneWidget);
     expect(find.text('Upupa epops'), findsOneWidget);
     expect(find.text('Nouveau cette année'), findsOneWidget);
-    expect(find.text('Classées par contacts'), findsOneWidget);
+    expect(find.text('par contacts'), findsOneWidget);
   });
 
   testWidgets('confirmed only and the period go to the index', (tester) async {
@@ -158,19 +160,66 @@ void main() {
     expect(find.textContaining('depuis le 4 octobre 2025'), findsOneWidget);
   });
 
-  testWidgets('sort by days from the menu', (tester) async {
+  testWidgets('sort by days from the sort button sheet', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('Classées par contacts'));
+    await tester.tap(find.byTooltip('Trier et filtrer'));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(CheckedPopupMenuItem<Object>, 'Jours'),
-    );
+    await tester.tap(find.text('Jours'));
     await tester.pumpAndSettle();
     expect(index.calls.last.order, RankingOrder.days);
-    expect(find.text('Classées par jours'), findsOneWidget);
+    expect(find.text('par jours'), findsOneWidget);
     // Merle first with 25 days.
     expect(find.text('25'), findsOneWidget);
     expect(find.text('jours'), findsNWidgets(3));
+  });
+
+  testWidgets('the « par contacts » control opens the same sheet', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.text('par contacts'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dernière écoute'), findsOneWidget);
+    expect(find.text('Oiseaux seulement'), findsOneWidget);
+  });
+
+  testWidgets('period chip selection: the chosen one is in ink', (
+    tester,
+  ) async {
+    await pump(tester);
+    final c = BirdyColors.of(tester.element(find.byType(RankingScreen)));
+    Color fillOf(String label) =>
+        tester
+            .widget<Material>(
+              find
+                  .descendant(
+                    of: find.ancestor(
+                      of: find.text(label),
+                      matching: find.byType(BirdyFilterChip),
+                    ),
+                    matching: find.byType(Material),
+                  )
+                  .first,
+            )
+            .color!;
+    expect(fillOf('30 jours'), c.text1);
+    expect(fillOf('Tout'), c.surface1);
+    await tester.tap(find.text('Tout'));
+    await tester.pumpAndSettle();
+    expect(fillOf('Tout'), c.text1);
+    expect(fillOf('30 jours'), c.surface1);
+  });
+
+  testWidgets('no floating options row, Podium and Classement blocks', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('ranking-options')), findsNothing);
+    expect(find.byType(PopupMenuButton<Object>), findsNothing);
+    expect(find.text('Podium'), findsOneWidget);
+    expect(find.text('Classement'), findsOneWidget);
+    expect(find.text('Confirmées'), findsOneWidget);
+    expect(find.byType(BirdySwitch), findsOneWidget);
   });
 
   testWidgets('one or two species: a smaller podium', (tester) async {
@@ -190,7 +239,7 @@ void main() {
   testWidgets('English strings', (tester) async {
     await pump(tester, locale: 'en');
     expect(find.text('species in 30 days'), findsOneWidget);
-    expect(find.text('Ranked by contacts'), findsOneWidget);
+    expect(find.text('by contacts'), findsOneWidget);
   });
 
   for (final (label, dark, scale, size) in [

@@ -2,11 +2,13 @@
 ///
 /// Built on upstream's [AppTheme.fromColorScheme] so every structural choice
 /// of upstream (touch targets, list tile padding, sheet width) stays, then
-/// the BirdyGo palette, fonts and component shapes are laid over it.
+/// the BirdyGo palette, fonts and component shapes are laid over it. The
+/// brand roles follow the chosen bird ([BirdyBird], J6i).
 ///
-/// Material roles: `primary` is the Martin-pêcheur that stays AA as text on
-/// the theme's surfaces (#0B6E77 on light, #4FC3CC on dark); the bright
-/// #19A7B3 fill with Encre text is used through [BirdyButtonStyles].
+/// Material roles: `primary` is the bird's `accentText`, which stays AA as
+/// text on the theme's surfaces (Loriot: #0B6E77 on light, #4FC3CC on dark);
+/// the bright `accent` fill with Encre text is used through
+/// [BirdyButtonStyles].
 library;
 
 import 'package:flutter/material.dart';
@@ -14,25 +16,37 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_semantic_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/score_colors.dart';
+import 'birdy_theme_choice.dart';
 import 'birdy_tokens.dart';
 import 'birdy_typography.dart';
 
 abstract final class BirdyTheme {
-  static ThemeData? _light;
-  static ThemeData? _dark;
+  static final Map<(BirdyBird, Brightness), ThemeData> _cache = {};
 
-  /// Light theme: Brume background, white cards.
-  static ThemeData light() => _light ??= _build(BirdyColors.light);
+  /// Light theme: Brume background, white cards. [bird] sets the brand
+  /// colors (J6i); Loriot is the original look.
+  static ThemeData light({BirdyBird bird = BirdyBird.loriot}) =>
+      _cache[(bird, Brightness.light)] ??= _build(
+        BirdyColors.forBird(bird, Brightness.light),
+        BirdyBrandColors(bird, Brightness.light),
+      );
 
   /// Dark theme: Encre de nuit background, used by listening by default.
-  static ThemeData dark() => _dark ??= _build(BirdyColors.dark);
+  static ThemeData dark({BirdyBird bird = BirdyBird.loriot}) =>
+      _cache[(bird, Brightness.dark)] ??= _build(
+        BirdyColors.forBird(bird, Brightness.dark),
+        BirdyBrandColors(bird, Brightness.dark),
+      );
 
   /// Material color scheme mapped on the BirdyGo tokens.
-  static ColorScheme colorScheme(BirdyColors c) {
+  static ColorScheme colorScheme(
+    BirdyColors c, {
+    BirdyBird bird = BirdyBird.loriot,
+  }) {
     final isDark = c.isDark;
     Color solid(Color color) => Color.alphaBlend(color, c.background);
     final seed = ColorScheme.fromSeed(
-      seedColor: BirdyBrand.kingfisher,
+      seedColor: c.accent,
       brightness: c.brightness,
     );
     return seed.copyWith(
@@ -63,12 +77,14 @@ abstract final class BirdyTheme {
       inverseSurface: isDark ? BirdyBrand.mist : BirdyBrand.ink,
       onInverseSurface: isDark ? BirdyBrand.ink : BirdyBrand.mist,
       inversePrimary:
-          isDark ? BirdyColors.light.accentText : BirdyColors.dark.accentText,
+          isDark
+              ? BirdyBrandColors(bird, Brightness.light).accentText
+              : BirdyBrandColors(bird, Brightness.dark).accentText,
     );
   }
 
-  static ThemeData _build(BirdyColors c) {
-    final scheme = colorScheme(c);
+  static ThemeData _build(BirdyColors c, BirdyBrandColors brand) {
+    final scheme = colorScheme(c, bird: brand.bird);
     final base = AppTheme.fromColorScheme(scheme);
     const stadium = StadiumBorder();
     final textTheme = base.textTheme.merge(BirdyText.textTheme);
@@ -82,6 +98,7 @@ abstract final class BirdyTheme {
         c.isDark ? ScoreColors.dark : ScoreColors.light,
         c.isDark ? AppSemanticColors.dark(scheme) : AppSemanticColors.light,
         c,
+        brand,
       ],
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: c.background,
@@ -179,7 +196,7 @@ abstract final class BirdyTheme {
         contentTextStyle: BirdyText.bodyCompact.copyWith(
           color: BirdyBrand.mist,
         ),
-        actionTextColor: BirdyColors.dark.accentText,
+        actionTextColor: BirdyBrandColors(brand.bird, Brightness.dark).accentText,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(BirdyRadii.card)),
         ),
@@ -215,22 +232,33 @@ abstract final class BirdyTheme {
   }
 }
 
-/// Forces the dark theme below it: listening opens dark by default
-/// (fork/DESIGN.md). Keeps an already dark theme, and the upstream
-/// high-contrast palette when the user chose it.
+/// Forces the theme below it: listening opens dark by default
+/// (fork/DESIGN.md), or light when [light] is set (J6h « Écran clair »).
+/// Keeps an already matching theme, and the upstream high-contrast palette
+/// when the user chose it.
 class ListeningTheme extends StatelessWidget {
-  const ListeningTheme({super.key, required this.child});
+  const ListeningTheme({super.key, required this.child, this.light = false});
 
   final Widget child;
+
+  /// The user chose the light listening screen (`liveThemeProvider`).
+  final bool light;
 
   @override
   Widget build(BuildContext context) {
     final current = Theme.of(context);
-    if (current.brightness == Brightness.dark) return child;
+    final wanted = light ? Brightness.light : Brightness.dark;
+    if (current.brightness == wanted) return child;
+    final highContrast = AppTheme.isHighContrastTheme(current);
+    final bird = BirdyBrandColors.fromTheme(current).bird;
     final data =
-        AppTheme.isHighContrastTheme(current)
-            ? AppTheme.highContrastDark()
-            : BirdyTheme.dark();
+        light
+            ? (highContrast
+                ? AppTheme.highContrastLight()
+                : BirdyTheme.light(bird: bird))
+            : (highContrast
+                ? AppTheme.highContrastDark()
+                : BirdyTheme.dark(bird: bird));
     return Theme(data: data, child: child);
   }
 }

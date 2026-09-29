@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
+import '../audio_output/volume_guard.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
@@ -36,7 +37,9 @@ import 'fine_ear_quiz_widgets.dart';
 import 'game_config.dart';
 import 'game_loader.dart';
 import 'quiz_fx.dart';
+import 'quiz_logo.dart';
 import 'quiz_sfx.dart';
+import 'quiz_stop_sheet.dart';
 
 class FineEarQuizScreen extends ConsumerStatefulWidget {
   const FineEarQuizScreen({
@@ -102,7 +105,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   /// Where the last burst starts (center of the tapped card) and its colors.
   Offset? _burstOrigin;
-  List<Color> _burstColors = BirdyConfettiColors.burst;
+  List<Color>? _burstColors;
 
   @override
   void initState() {
@@ -154,15 +157,16 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     _playCurrent();
   }
 
-  void _toIntro() {
-    unawaited(_player.stop());
-    _burst.stop(clearAllParticles: true);
-    _rain.stop(clearAllParticles: true);
-    setState(() {
-      _phase = _Phase.intro;
-      _picked = null;
-      _burstOrigin = null;
-    });
+  /// The cross or the system back mid-game: asks before leaving. The right
+  /// answers so far are already counted for the badge.
+  Future<void> _confirmStop() async {
+    if (_phase != _Phase.question) return;
+    final stop = await showQuizStopSheet(
+      context,
+      right: _results.where((r) => r).length,
+    );
+    // pop, not maybePop: PopScope blocks a back in a question.
+    if (stop && mounted) Navigator.of(context).pop();
   }
 
   QuizQuestion? get _question =>
@@ -172,12 +176,15 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   void _playCurrent() {
     final path = _question?.answer.clipPath;
-    if (path != null) unawaited(_player.play(path));
+    if (path == null) return;
+    ensureAudible(context, ref);
+    unawaited(_player.play(path));
   }
 
   void _togglePlay() {
     final path = _question?.answer.clipPath;
     if (path == null) return;
+    if (_player.playing.value != path) ensureAudible(context, ref);
     unawaited(
       _player.playing.value == path ? _player.stop() : _player.play(path),
     );
@@ -206,7 +213,11 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       _results.add(right);
       if (right) {
         _burstOrigin = _centerOf(index);
-        _burstColors = [tint.accent, ...BirdyConfettiColors.burst, tint.deep];
+        _burstColors = [
+          tint.accent,
+          ...BirdyConfettiColors.burstOf(context),
+          tint.deep,
+        ];
       }
     });
     // The clip stops: the reveal takes the stage.
@@ -293,7 +304,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     final c = BirdyColors.of(context);
     final loading = _clips == null;
     final empty = !loading && _questions.isEmpty;
-    final inRound = !loading && !empty && _phase != _Phase.intro;
+    final inQuestion = !loading && !empty && _phase == _Phase.question;
     final reduced = BirdyMotion.reduced(context);
 
     final Widget body;
@@ -305,7 +316,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
               ? const Center(child: CircularProgressIndicator())
               : BirdyEntrance(
                 child: BirdyEmptyState(
-                  icon: AppIcons.headphones,
+                  leading: const QuizLogo(size: BirdyEmptyState.fullDisc),
                   title: l10n.forkQuizEmptyTitle,
                   body: l10n.forkQuizEmpty,
                 ),
@@ -319,20 +330,26 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           header = _questionBar(context);
           body = _questionView(context);
         case _Phase.result:
-          header = _titleBar(context, onBack: _toIntro);
+          // A cross on the score: leaving the whole quiz.
+          header = _titleBar(
+            context,
+            icon: AppIcons.quizClose,
+            label: l10n.forkQuizQuit,
+            onBack: () => Navigator.of(context).pop(),
+          );
           body = _result();
       }
     }
 
     final origin = _burstOrigin;
     return PopScope(
-      // In a round, back returns to the intro, like the on-screen button.
-      canPop: !inRound,
+      // Mid-game, back asks first, like the cross.
+      canPop: !inQuestion,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
           _leave();
         } else {
-          _toIntro();
+          _confirmStop();
         }
       },
       child: Scaffold(
@@ -390,7 +407,12 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     );
   }
 
-  Widget _titleBar(BuildContext context, {required VoidCallback onBack}) {
+  Widget _titleBar(
+    BuildContext context, {
+    required VoidCallback onBack,
+    IconData icon = AppIcons.arrowBackRounded,
+    String? label,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     return Padding(
@@ -400,8 +422,8 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
         child: Row(
           children: [
             BirdyIconButton(
-              icon: AppIcons.arrowBackRounded,
-              semanticLabel: l10n.tooltipBack,
+              icon: icon,
+              semanticLabel: label ?? l10n.tooltipBack,
               onPressed: onBack,
             ),
             const SizedBox(width: BirdySpace.m),
@@ -469,7 +491,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     );
   }
 
-  /// Close (back to the intro) and the trail of stones.
+  /// Close (asks first) and the trail of stones.
   Widget _questionBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
@@ -479,7 +501,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           BirdyIconButton(
             icon: AppIcons.quizClose,
             semanticLabel: l10n.forkQuizQuit,
-            onPressed: _toIntro,
+            onPressed: _confirmStop,
           ),
           const SizedBox(width: BirdySpace.m),
           Expanded(
@@ -652,7 +674,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                     foregroundColor: c.onAccent,
                     minimumSize: const Size(64, BirdySizes.listen),
                     shape: const StadiumBorder(),
-                    textStyle: BirdyText.label.copyWith(fontSize: 20),
+                    textStyle: BirdyText.labelLarge,
                     iconSize: 22,
                   ),
                   onPressed: _next,
@@ -723,7 +745,7 @@ class _StreakPill extends StatelessWidget {
     final c = BirdyColors.of(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 30),
-      padding: const EdgeInsets.fromLTRB(4, 2, 12, 2),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.xs, BirdySpace.xxs, BirdySpace.m, BirdySpace.xxs),
       decoration: BoxDecoration(
         color: c.oriole,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -733,12 +755,15 @@ class _StreakPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 20,
-            height: 20,
+            width: BirdySpace.xl,
+            height: BirdySpace.xl,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: c.surface1, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: c.surface1,
+              shape: BoxShape.circle,
+            ),
             child: QuizLoop(
-              period: const Duration(milliseconds: 1600),
+              period: QuizMotion.pulse,
               builder:
                   (context, t, child) => Opacity(
                     opacity: quizKeyframes(
@@ -749,7 +774,12 @@ class _StreakPill extends StatelessWidget {
                     ),
                     child: child,
                   ),
-              child: Icon(AppIcons.quizSpark, size: 13, fill: 1, color: c.oriole),
+              child: Icon(
+                AppIcons.quizSpark,
+                size: BirdyGlyph.xs,
+                fill: 1,
+                color: c.oriole,
+              ),
             ),
           ),
           const SizedBox(width: BirdySpace.xs),
@@ -787,7 +817,7 @@ class _ScoreChip extends StatelessWidget {
       excludeSemantics: true,
       child: Container(
         constraints: const BoxConstraints(minHeight: 30),
-        padding: const EdgeInsets.fromLTRB(10, 0, 12, 0),
+        padding: const EdgeInsets.fromLTRB(BirdySpace.cozy, 0, BirdySpace.m, 0),
         decoration: BoxDecoration(
           color: c.sure.background,
           borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -795,7 +825,7 @@ class _ScoreChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(AppIcons.quizCheck, size: 16, color: c.sure.foreground),
+            Icon(AppIcons.quizCheck, size: BirdyGlyph.m, color: c.sure.foreground),
             const SizedBox(width: BirdySpace.xs),
             Text(
               '$right',

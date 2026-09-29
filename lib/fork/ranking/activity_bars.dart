@@ -7,6 +7,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 
 /// Bars for [values], with a few axis [labels] under them.
 class ActivityBars extends StatelessWidget {
@@ -22,6 +23,7 @@ class ActivityBars extends StatelessWidget {
     this.onSelect,
     this.highlightIndex,
     this.highlightColor,
+    this.labelStyle,
   });
 
   final List<int> values;
@@ -57,6 +59,10 @@ class ActivityBars extends StatelessWidget {
   /// default.
   final Color? highlightColor;
 
+  /// Axis label style (J6h: [BirdyText.axisLabel], 12); the theme's
+  /// labelSmall by default.
+  final TextStyle? labelStyle;
+
   void _select(Offset local, double width) {
     final onSelect = this.onSelect;
     if (onSelect == null || values.isEmpty || width <= 0) return;
@@ -68,7 +74,7 @@ class ActivityBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.labelSmall?.copyWith(
+    final style = (labelStyle ?? theme.textTheme.labelSmall)?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
     return Semantics(
@@ -104,13 +110,13 @@ class ActivityBars extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: BirdySpace.xs),
           LayoutBuilder(
             builder: (context, constraints) {
               final slot = constraints.maxWidth / values.length;
               final keys = labels.keys.toList()..sort();
               return SizedBox(
-                height: 16,
+                height: BirdySpace.l,
                 child: Stack(
                   children: [
                     for (var i = 0; i < keys.length; i++)

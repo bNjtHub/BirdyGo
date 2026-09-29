@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="background:#FFFFFF;border-radius:28px 28px 0 0;padding:10px 16px 24px;display:flex;flex-direction:column;gap:10px;max-height:760px;overflow-y:auto;scrollbar-width:none;box-sizing:border-box;font-family:Atkinson,sans-serif;color:#13233A;animation:sheetUp .28s cubic-bezier(.2,0,0,1)">
+  <div onClick="{{ app.go.closeSheet }}" style="cursor:pointer;width:36px;height:4px;border-radius:999px;background:#C5CCC2;align-self:center;margin-bottom:6px"></div>
+
+  <sc-if value="{{ app.sheets.more }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;padding-bottom:6px">Plus</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <sc-for list="{{ app.sheets.moreTiles }}" as="t" hint-placeholder-count="8">
+        <button onClick="{{ t.go }}" style="all:unset;cursor:pointer;min-height:104px;border-radius:20px;background:#EEF1EC;padding:12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:8px" style-active="transform:scale(.97)">
+          <div style="width:40px;height:40px;border-radius:999px;background:{{ t.disc }};border:{{ t.border }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:{{ t.ink }}">{{ t.icon }}</span></div>
+          <div style="font-size:15px;line-height:1.3;font-weight:700">{{ t.label }}</div>
+        </button>
+      </sc-for>
+    </div>
+    <div style="border-radius:20px;background:#EEF1EC;display:flex;flex-direction:column">
+      <div onClick="{{ app.sheets.toggleAdvanced }}" style="cursor:pointer;min-height:72px;padding:0 16px;display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">handyman</span></div><div style="flex:1;font-size:17px;font-weight:700">Outils avancés</div><span class="ms" style="font-size:24px;color:#6B5847">{{ app.sheets.advancedIcon }}</span></div>
+      <sc-if value="{{ app.sheets.advancedOpen }}">
+        <div style="padding:0 16px 8px;display:flex;flex-direction:column;animation:birdyFade .2s">
+          <sc-for list="{{ app.sheets.tools }}" as="tl" hint-placeholder-count="5"><div onClick="{{ tl.go }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><span class="ms" style="font-size:22px;color:#6B5847">{{ tl.icon }}</span><span style="flex:1;font-size:15px">{{ tl.label }}</span><span class="ms" style="font-size:22px;color:#6B5847">chevron_right</span></div></sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div style="border-radius:20px;background:#EEF1EC;padding:0 16px;display:flex;flex-direction:column">
+      <div onClick="{{ app.sheets.settings }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">tune</span></div><div style="flex:1;font-size:17px;font-weight:700">Réglages</div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+      <div onClick="{{ app.sheets.about }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">info</span></div><div style="flex:1;font-size:17px;font-weight:700">À propos</div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.day }}">
+    <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:4px"><div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">Ta journée d'écoute</div><div style="font-size:13px;color:#6B5847">Mardi 29 septembre · Beaulieu-sur-Brenne</div></div>
+    <sc-for list="{{ app.sheets.dayGroups }}" as="g" hint-placeholder-count="2">
+      <div style="border-radius:20px;background:{{ g.bg }};padding:12px 8px 8px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:6px;padding:0 6px 4px;font-size:13px;font-weight:700;color:{{ g.ink }}"><span class="ms" style="font-size:16px;font-variation-settings:'FILL' 1">{{ g.icon }}</span>{{ g.title }}</div>
+        <sc-for list="{{ g.rows }}" as="d" hint-placeholder-count="2">
+          <div onClick="{{ d.pick }}" style="cursor:pointer;border-radius:16px;background:{{ d.bg }};border:2px solid {{ d.ring }};box-sizing:border-box;padding:8px 10px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s">
+            <div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><sc-if value="{{ d.bird }}"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:24px;height:24px"></sc-if><span class="ms" style="font-size:22px;color:{{ d.ink }};font-variation-settings:'FILL' {{ d.fill }}">{{ d.icon }}</span></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:17px;font-weight:700">{{ d.name }}</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap">{{ d.time }}</span></div>
+              <div style="font-size:13px;line-height:1.35;color:{{ d.bodyColor }}">{{ d.body }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      <button onClick="{{ app.sheets.dayRemind }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#D6EEF0;color:#0B6E77;display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:700"><span class="ms" style="font-size:20px">notifications</span>Me le rappeler</button>
+      <button onClick="{{ app.go.live }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#19A7B3;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Écouter</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.quitQuiz }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:4px 4px 0">
+      <div style="width:72px;height:72px;border-radius:999px;background:#FBEFC8;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:36px;color:#7A5A00">headphones</span></div>
+      <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">Arrêter la partie ?</div>
+      <div style="font-size:17px;line-height:1.45;color:#6B5847">{{ app.sheets.quitLine }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px">
+        <button onClick="{{ app.sheets.quitYes }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#FFFFFF;border:1.5px solid #C5CCC2;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Arrêter</button>
+        <button onClick="{{ app.go.closeSheet }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#19A7B3;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Continuer</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.bilanMore }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;padding-bottom:4px">Autres actions</div>
+    <div style="border-radius:20px;background:#EEF1EC;padding:0 16px;display:flex;flex-direction:column">
+      <div onClick="{{ app.bilan.lpo }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:999px;background:#E6EDD6;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#4B6023">send</span></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Envoyer à Faune-France</div><div style="font-size:13px;color:#6B5847">Fiche prête pour chaque observation confirmée</div></div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+      <div onClick="{{ app.bilan.add }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#D6EEF0;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#0B6E77">add</span></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Ajouter un oiseau observé</div><div style="font-size:13px;color:#6B5847">Vu mais pas entendu</div></div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+      <div onClick="{{ app.bilan.details }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">list</span></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Détail de l'écoute</div><div style="font-size:13px;color:#6B5847">Chaque détection, minute par minute</div></div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+      <div onClick="{{ app.bilan.recording }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA"><div style="width:44px;height:44px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">music_note</span></div><div style="flex:1"><div style="font-size:17px;font-weight:700">C'était un enregistrement</div><div style="font-size:13px;color:#6B5847">Ne compte pas dans tes statistiques</div></div><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.listen }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">Options d'écoute</div>
+    <div style="font-size:13px;font-weight:700;color:#6B5847">Mode d'écoute</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ app.sheets.modes }}" as="m" hint-placeholder-count="4">
+        <div onClick="{{ m.pick }}" style="cursor:pointer;min-height:64px;border-radius:20px;background:{{ m.bg }};padding:8px 12px;display:flex;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:999px;background:#13233A;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:{{ m.c }}">{{ m.ic }}</span></div>
+          <div style="flex:1"><div style="font-size:17px;font-weight:700">{{ m.l }}</div><div style="font-size:13px;color:#6B5847">{{ m.desc }}</div></div>
+          <span class="ms" style="font-size:24px;color:#0B6E77;font-variation-settings:'FILL' 1;opacity:{{ m.sel }}">check_circle</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="height:1px;background:#DCE2DA;margin:4px 0"></div>
+    <div onClick="{{ app.sheets.toggleLiveTheme }}" style="cursor:pointer;min-height:56px;display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:24px">light_mode</span><span style="flex:1;font-size:17px;font-weight:700">Écran clair</span><div style="width:44px;height:28px;border-radius:999px;background:{{ app.sheets.liveThemeTrack }};padding:3px;box-sizing:border-box;display:flex;justify-content:{{ app.sheets.liveThemeJustify }};transition:background .2s"><div style="width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 3px rgba(19,35,58,.25)"></div></div></div>
+    <div onClick="{{ app.sheets.openLevels }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:24px">info</span><span style="flex:1;font-size:17px;font-weight:700">Que veulent dire les niveaux ?</span><span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span></div>
+    <div onClick="{{ app.sheets.help }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:24px">help</span><span style="flex:1;font-size:17px;font-weight:700">Aide de l'écoute</span></div>
+    <div onClick="{{ app.sheets.settings }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:24px">tune</span><span style="flex:1;font-size:17px;font-weight:700">Réglages</span></div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.levels }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">À quel point l'app est sûre ?</div>
+    <sc-for list="{{ app.sheets.levelRows }}" as="lv" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px solid #DCE2DA">
+        <span style="align-self:flex-start;display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ lv.badge.bg }};border:{{ lv.badge.border }};color:{{ lv.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ lv.badge.fg }};opacity:{{ lv.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ lv.badge.fg }};opacity:{{ lv.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ lv.badge.fg }};opacity:{{ lv.badge.o3 }}"></span></span>{{ lv.badge.label }}</span>
+        <div style="font-size:15px;line-height:1.45">{{ lv.text }}</div>
+      </div>
+    </sc-for>
+    <div style="font-size:13px;color:#6B5847">Seuls les oiseaux Sûrs ou confirmés comptent. « C'est bien lui » dans la revue rapide confirme un oiseau.</div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.badge }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:4px 4px 0">
+      <div style="width:72px;height:72px;border-radius:999px;background:{{ app.sheets.badgeSel.medal.bg }};border:{{ app.sheets.badgeSel.medal.border }};box-sizing:border-box;padding:7px;animation:pop .4s both"><div style="width:100%;height:100%;border-radius:999px;background:{{ app.sheets.badgeSel.medal.inner }};border:{{ app.sheets.badgeSel.medal.innerBorder }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:32px;color:{{ app.sheets.badgeSel.medal.ink }}">{{ app.sheets.badgeSel.icon }}</span></div></div>
+      <div style="font-family:Fraunces;font-size:20px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">{{ app.sheets.badgeSel.name }}</div>
+      <div style="font-size:17px;font-weight:700;color:#6B5847">{{ app.sheets.badgeSel.tierLabel }}</div>
+      <div style="font-size:17px;line-height:1.45">{{ app.sheets.badgeSel.rule }}</div>
+      <div style="font-size:17px;font-weight:700">{{ app.sheets.badgeSel.progress }}</div>
+      <div style="font-size:13px;color:#6B5847">{{ app.sheets.badgeSel.tiersLine }}</div>
+      <sc-if value="{{ app.sheets.badgeSel.isFineEar }}"><button onClick="{{ app.sheets.playQuiz }}" style="all:unset;cursor:pointer;margin-top:12px;width:100%;height:56px;border-radius:999px;background:#19A7B3;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Jouer à « Qui chante ? »</button></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.choice }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;padding-bottom:4px">{{ app.sheets.choiceData.title }}</div>
+    <sc-for list="{{ app.sheets.choiceData.options }}" as="o" hint-placeholder-count="4">
+      <div onClick="{{ o.pick }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;border-radius:16px;padding:0 8px"><span style="flex:1;font-size:17px;font-weight:{{ o.weight }}">{{ o.o }}</span><span class="ms" style="font-size:24px;color:#0B6E77;opacity:{{ o.sel }}">check</span></div>
+    </sc-for>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.rankSort }}">
+    <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;padding-bottom:4px">Trier et filtrer</div>
+    <sc-for list="{{ app.sheets.sortRows }}" as="o" hint-placeholder-count="2">
+      <div onClick="{{ o.pick }}" style="cursor:pointer;min-height:48px;display:flex;align-items:center;padding:0 8px"><span style="flex:1;font-size:17px;font-weight:{{ o.weight }}">{{ o.l }}</span><span class="ms" style="font-size:24px;color:#0B6E77;opacity:{{ o.sel }}">check</span></div>
+    </sc-for>
+  </sc-if>
+
+  <sc-if value="{{ app.sheets.area }}">
+    <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:Fraunces;font-size:26px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">{{ app.sheets.areaTitle }}</div><div style="font-size:13px;color:#6B5847">{{ app.sheets.areaCaption }}</div></div>
+    <div style="border-radius:20px;background:#EEF1EC;padding:0 16px">
+      <sc-for list="{{ app.sheets.areaRows }}" as="a" hint-placeholder-count="3">
+        <div onClick="{{ a.open }}" style="cursor:pointer;min-height:72px;display:flex;align-items:center;gap:12px;border-top:{{ a.sep }}">
+          <div style="width:48px;height:48px;border-radius:999px;background:#FFFFFF;border:2px solid {{ a.accent }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img src="{{ a.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+          <div style="flex:1"><div style="font-family:Fraunces;font-size:17px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">{{ a.name }}</div><div style="font-size:13px;color:#6B5847">{{ a.n }}</div></div>
+          <span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

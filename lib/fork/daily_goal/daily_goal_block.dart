@@ -178,7 +178,7 @@ class _Slot extends StatelessWidget {
               image: image,
               tint: SpeciesAccents.tintOf(bird.scientificName),
               size: BirdySizes.goalSlotVisual,
-              muted: true,
+              mystery: true,
             ),
           ),
         ),

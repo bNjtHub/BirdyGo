@@ -4,6 +4,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 
 import '../../features/live/live_session.dart';
 import '../../shared/utils/app_icons.dart';
@@ -27,7 +28,7 @@ class LpoSendButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.xl, BirdySpace.l, BirdySpace.xl, BirdySpace.s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -50,7 +51,7 @@ class LpoSendButton extends StatelessWidget {
                   ),
                 ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: BirdySpace.s),
           Text(
             l10n.forkLpoOnlyConfirmed,
             textAlign: TextAlign.center,

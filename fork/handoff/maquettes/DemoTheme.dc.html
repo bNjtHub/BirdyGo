@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:16px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:12px;min-height:48px">
+      <sc-if value="{{ app.theme.canBack }}"><button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">arrow_back</span></button></sc-if>
+      <span style="flex:1"></span>
+      <span style="font-size:13px;font-weight:700;color:#6B5847">{{ app.theme.stepLabel }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+      <div style="position:relative;overflow:visible;width:132px;height:132px;border-radius:999px;background:var(--ton,#D6EEF0);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(255,255,255,.7);animation:pop .45s cubic-bezier(.2,0,0,1) both;transition:background .25s">{{ app.theme.singing }}</div>
+      <div style="font-family:Nunito,Atkinson,sans-serif;font-size:34px;line-height:1.1;font-weight:800;">Choisis ton oiseau</div>
+      <div style="font-size:17px;line-height:1.45;max-width:320px;text-wrap:pretty">Il donne ses couleurs à ton appli. Tu pourras en changer quand tu veux, dans Réglages.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <sc-for list="{{ app.theme.cards }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.pick }}" aria-pressed="{{ c.pressed }}" style="all:unset;cursor:pointer;position:relative;min-height:148px;border-radius:20px;background:#FFFFFF;box-shadow:{{ c.ring }};box-sizing:border-box;padding:14px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;transition:box-shadow .18s" style-active="transform:scale(.97)">
+          <div style="width:72px;height:72px;border-radius:999px;background:{{ c.bg }};display:flex;align-items:center;justify-content:center"><sc-if value="{{ c.logo }}"><img src="{{ c.logo }}" alt="" style="width:50px;height:50px"></sc-if></div>
+          <div style="font-family:Nunito,Atkinson,sans-serif;font-size:17px;line-height:1.2;font-weight:800;">{{ c.name }}</div>
+          <div style="display:flex;gap:4px"><span style="width:14px;height:14px;border-radius:999px;background:{{ c.acc }}"></span><span style="width:14px;height:14px;border-radius:999px;background:{{ c.hi }}"></span><span style="width:14px;height:14px;border-radius:999px;background:{{ c.ton }};border:1px solid #DCE2DA;box-sizing:border-box"></span></div>
+          <div style="position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:999px;background:{{ c.acc }};display:flex;align-items:center;justify-content:center;opacity:{{ c.sel }};transition:opacity .15s"><span class="ms" style="font-size:16px;color:#13233A;font-variation-settings:'wght' 700">check</span></div>
+        </button>
+      </sc-for>
+    </div>
+    <div style="background:#FFFFFF;border-radius:20px;padding:14px 16px;display:flex;gap:14px;align-items:center">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+        <div key="{{ app.theme.pickKey }}" style="width:60px;height:60px;border-radius:15px;background:{{ app.theme.iconBg }};box-shadow:0 2px 8px rgba(19,35,58,.18),inset 0 0 0 1px rgba(19,35,58,.06);display:flex;align-items:center;justify-content:center;animation:pop .4s both"><sc-if value="{{ app.theme.logoBig }}"><img src="{{ app.theme.logoBig }}" alt="" style="width:44px;height:44px"></sc-if></div>
+        <span style="font-size:11px;font-weight:700">{{ app.theme.iconLabel }}</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:13px;font-weight:700;color:#6B5847">Ton icône sur le téléphone</div><div style="font-size:15px;line-height:1.4"><b>{{ app.theme.pickName }}</b> · {{ app.theme.pickFact }}</div></div>
+    </div>
+    <div style="display:none">
+      <span class="ms" style="font-size:24px;color:var(--accT,#0B6E77);font-variation-settings:'FILL' 1">lightbulb</span>
+      <div style="flex:1;font-size:15px;line-height:1.4"><b>{{ app.theme.pickName }}</b> · {{ app.theme.pickFact }}</div>
+    </div>
+  </div>
+  <div style="padding:8px 16px 24px;flex-shrink:0">
+    <button onClick="{{ app.theme.confirm }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:72px;border-radius:999px;background:var(--acc,#19A7B3);box-shadow:0 10px 28px var(--glow,rgba(25,167,179,.35));display:flex;align-items:center;justify-content:center;gap:8px;font-size:20px;font-weight:700;color:#13233A;transition:background .25s" style-active="transform:scale(.97)">C'est mon oiseau !</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

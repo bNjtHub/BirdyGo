@@ -9,9 +9,9 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
+import 'birdy_wing_icon.dart';
 import 'pressable.dart';
 
 abstract final class BirdyButtonStyles {
@@ -36,9 +36,9 @@ abstract final class BirdyButtonStyles {
       backgroundColor: c.isDark ? Colors.transparent : c.surface1,
       foregroundColor: c.text1,
       minimumSize: const Size(64, BirdySizes.mainAction),
-      padding: const EdgeInsets.symmetric(horizontal: 22),
+      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.wide),
       shape: const StadiumBorder(),
-      side: BorderSide(color: c.borderStrong, width: 1.5),
+      side: BorderSide(color: c.borderStrong, width: BirdyStroke.thin),
       textStyle: BirdyText.label,
       iconSize: 22,
     );
@@ -51,7 +51,7 @@ abstract final class BirdyButtonStyles {
       backgroundColor: c.tonal,
       foregroundColor: c.accentText,
       minimumSize: const Size(64, BirdySizes.target),
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.roomy),
       shape: const StadiumBorder(),
       textStyle: BirdyText.labelCompact,
       iconSize: 20,
@@ -59,14 +59,19 @@ abstract final class BirdyButtonStyles {
   }
 
   /// « Arrêter » in the live control bar: Brume fill, Encre text, 64 px.
-  static ButtonStyle stop(BuildContext context) => FilledButton.styleFrom(
-    backgroundColor: BirdyBrand.mist,
-    foregroundColor: BirdyBrand.ink,
-    minimumSize: const Size(64, BirdySizes.liveControl),
-    shape: const StadiumBorder(),
-    textStyle: BirdyText.label,
-    iconSize: 22,
-  );
+  /// On the light listening screen (J6h) the colors swap: a Brume button
+  /// would vanish on Brume.
+  static ButtonStyle stop(BuildContext context) {
+    final light = !BirdyColors.of(context).isDark;
+    return FilledButton.styleFrom(
+      backgroundColor: light ? BirdyBrand.ink : BirdyBrand.mist,
+      foregroundColor: light ? BirdyBrand.mist : BirdyBrand.ink,
+      minimumSize: const Size(64, BirdySizes.liveControl),
+      shape: const StadiumBorder(),
+      textStyle: BirdyText.label,
+      iconSize: 22,
+    );
+  }
 
   /// « Pause » / « Reprendre » in the live control bar: outlined, 64 px.
   static ButtonStyle pause(BuildContext context) {
@@ -75,7 +80,7 @@ abstract final class BirdyButtonStyles {
       foregroundColor: c.text1,
       minimumSize: const Size(64, BirdySizes.liveControl),
       shape: const StadiumBorder(),
-      side: BorderSide(color: c.borderStrong, width: 1.5),
+      side: BorderSide(color: c.borderStrong, width: BirdyStroke.thin),
       textStyle: BirdyText.label,
       iconSize: 22,
     );
@@ -106,10 +111,13 @@ class ListenButton extends StatelessWidget {
             foregroundColor: c.onAccent,
             minimumSize: const Size.fromHeight(BirdySizes.listen),
             shape: const StadiumBorder(),
-            textStyle: BirdyText.label.copyWith(fontSize: 20),
+            textStyle: BirdyText.labelLarge,
             iconSize: 28,
           ),
-          icon: const Icon(AppIcons.graphicEq),
+          icon: const Padding(
+            padding: EdgeInsetsDirectional.only(end: BirdySpace.wingLabelGap),
+            child: BirdyWingIcon(size: BirdyGlyph.x5l, animated: true),
+          ),
           label: Text(l10n.forkListen),
         ),
       ),

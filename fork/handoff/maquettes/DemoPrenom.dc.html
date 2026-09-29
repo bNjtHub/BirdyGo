@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:16px;display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;min-height:48px"><span style="flex:1"></span><span style="font-size:13px;font-weight:700;color:#6B5847">Étape 1 sur 2</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding-top:8px">
+      <div onClick="{{ app.prenom.sing }}" style="cursor:pointer;position:relative;overflow:visible;width:132px;height:132px;border-radius:999px;background:var(--ton,#D6EEF0);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(255,255,255,.7);animation:pop .5s cubic-bezier(.2,0,0,1) both">{{ app.prenom.singing }}</div>
+      <span aria-label="BirdyGo" style="display:inline-flex;align-items:baseline;white-space:nowrap;line-height:1;animation:birdyIn .3s .15s both"><span style="font-family:Nunito,Atkinson,sans-serif;font-size:44px;font-weight:800;letter-spacing:-0.44px">Birdy</span><span aria-hidden="true" style="display:inline-block;width:9px;height:9px;border-radius:999px;background:var(--dot,#F4C542);margin:0 5px;transform:translateY(-6.5px)"></span><span style="font-family:Nunito,Atkinson,sans-serif;font-size:44px;font-weight:900;letter-spacing:-0.44px;color:var(--accT,#0B6E77);transition:color .25s">Go</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;text-align:center;animation:birdyIn .3s .25s both">
+      <div style="font-family:Nunito,Atkinson,sans-serif;font-size:34px;line-height:1.1;font-weight:800;">{{ app.prenom.hello }}</div>
+      <div style="font-size:17px;line-height:1.45">Comment tu t'appelles ?</div>
+    </div>
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;animation:birdyIn .3s .35s both">
+      <label for="demo-prenom" style="font-size:13px;font-weight:700;color:#6B5847">Ton prénom</label>
+      <input id="demo-prenom" value="{{ app.prenom.name }}" onChange="{{ app.prenom.setName }}" placeholder="Écris-le ici" autocomplete="given-name" style="all:unset;font-family:Atkinson;font-size:26px;font-weight:700;min-height:48px;border-bottom:2px solid var(--acc,#19A7B3);padding:4px 0">
+      <div style="display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:1.35;color:#6B5847"><span class="ms" style="font-size:16px;margin-top:1px">lock</span>Pour te dire bonjour. Il reste sur ton téléphone, personne d'autre ne le voit.</div>
+    </div>
+  </div>
+  <div style="padding:8px 16px 24px;display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+    <button onClick="{{ app.prenom.next }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:72px;border-radius:999px;background:{{ app.prenom.ctaBg }};color:{{ app.prenom.ctaFg }};box-shadow:{{ app.prenom.ctaShadow }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:20px;font-weight:700;transition:background .2s" style-active="transform:scale(.97)">Continuer<span class="ms" style="font-size:24px">arrow_forward</span></button>
+    <button onClick="{{ app.prenom.skip }}" style="all:unset;cursor:pointer;height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#6B5847">Plus tard</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

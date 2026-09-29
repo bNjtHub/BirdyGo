@@ -63,6 +63,8 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MediaVolumeChannel.register(flutterEngine, this) // FORK: media volume warning (J6h)
+        AppIconChannel.register(flutterEngine, this) // FORK: launcher icon per bird (J6i)
 
         // Wakelock channel.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WAKELOCK_CHANNEL).setMethodCallHandler { call, result ->

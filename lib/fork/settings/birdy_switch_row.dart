@@ -13,12 +13,16 @@ class BirdySwitchRow extends StatelessWidget {
     super.key,
     required this.title,
     this.hint,
+    this.icon,
     required this.value,
     required this.onChanged,
   });
 
   final String title;
   final String? hint;
+
+  /// Icon of a leading tinted disc (J6h); none keeps the plain row.
+  final IconData? icon;
   final bool value;
   final ValueChanged<bool> onChanged;
 
@@ -43,6 +47,18 @@ class BirdySwitchRow extends StatelessWidget {
             ),
             child: Row(
               children: [
+                if (icon != null) ...[
+                  Container(
+                    width: BirdySizes.rowDisc,
+                    height: BirdySizes.rowDisc,
+                    decoration: BoxDecoration(
+                      color: c.tonal,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: BirdyGlyph.xxl, color: c.accentText, fill: 1),
+                  ),
+                  const SizedBox(width: BirdySpace.m),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

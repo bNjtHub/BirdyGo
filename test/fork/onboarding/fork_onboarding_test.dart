@@ -1,6 +1,9 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
 import 'package:birdnet_live/fork/onboarding/fork_onboarding_screen.dart';
 import 'package:birdnet_live/fork/onboarding/onboarding_permissions.dart';
+import 'package:birdnet_live/fork/onboarding/onboarding_steps.dart';
+import 'package:birdnet_live/fork/settings/fork_prefs.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
@@ -112,14 +115,26 @@ void main() {
     await settle(tester, reduced);
   }
 
+  /// Steps 1 and 2 without typing: « Plus tard », then « C'est mon oiseau ! ».
+  Future<void> skipSteps(WidgetTester tester, bool reduced) async {
+    await tester.tap(find.byKey(const ValueKey('onb-name-later')));
+    await settle(tester, reduced);
+    await tester.tap(find.byKey(const ValueKey('onb-bird-confirm')));
+    await settle(tester, reduced);
+    // The welcome stays 1.5 s before the permissions page.
+    await tester.pump(BirdyBirdStep.welcomeTime);
+    await settle(tester, reduced);
+  }
+
   Future<void> toPermissions(WidgetTester tester, bool reduced) async {
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.byKey(const ValueKey('onb-next')));
       await settle(tester, reduced);
     }
+    await skipSteps(tester, reduced);
   }
 
-  testWidgets('three story pages, swipe and next', (tester) async {
+  testWidgets('story pages, name page, swipe and next', (tester) async {
     await pump(tester, FakePermissions());
     expect(find.textContaining('reconnaît les oiseaux'), findsOneWidget);
     expect(find.text('Passer'), findsOneWidget);
@@ -134,6 +149,16 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('onb-next')));
     await settle(tester, false);
+    expect(find.text('Étape 1 sur 2'), findsOneWidget);
+    expect(find.text("Comment tu t'appelles ?"), findsOneWidget);
+    expect(find.byKey(const ValueKey('onb-name-later')), findsOneWidget);
+    // The top « Passer » is hidden here (kept for layout).
+    expect(tester.widget<Visibility>(find.ancestor(
+      of: find.byKey(const ValueKey('onb-skip')),
+      matching: find.byType(Visibility),
+    )).visible, isFalse);
+
+    await skipSteps(tester, false);
     expect(find.text('Deux autorisations, et c\'est parti'), findsOneWidget);
     expect(find.text('Passer'), findsOneWidget);
     expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
@@ -144,10 +169,13 @@ void main() {
     )).visible, isFalse);
   });
 
-  testWidgets('skip jumps to the permissions page', (tester) async {
+  testWidgets('skip jumps to the name page, then permissions', (tester) async {
     await pump(tester, FakePermissions());
     await tester.tap(find.byKey(const ValueKey('onb-skip')));
     await settle(tester, false);
+    expect(find.byKey(const ValueKey('onb-name-field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('onb-mic')), findsNothing);
+    await skipSteps(tester, false);
     expect(find.byKey(const ValueKey('onb-mic')), findsOneWidget);
     expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
   });
@@ -171,6 +199,7 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await skipSteps(tester, true);
 
       await tester.tap(find.byKey(const ValueKey('onb-mic-allow')));
       await settle(tester, true);
@@ -193,6 +222,7 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await skipSteps(tester, true);
 
       await tester.tap(find.byKey(const ValueKey('onb-location-allow')));
       await settle(tester, true);
@@ -220,6 +250,7 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await skipSteps(tester, true);
       expect(find.textContaining('éteinte'), findsOneWidget);
       expect(find.byKey(const ValueKey('onb-location-allow')), findsNothing);
     });
@@ -231,6 +262,7 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await skipSteps(tester, true);
 
       // The final button asks for the microphone first and stays here.
       await tester.ensureVisible(find.byKey(const ValueKey('onb-finish')));
@@ -274,6 +306,210 @@ void main() {
     );
   });
 
+  group('first name step', () {
+    Future<void> toName(WidgetTester tester) async {
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byKey(const ValueKey('onb-next')));
+        await settle(tester, true);
+      }
+    }
+
+    testWidgets('Continuer saves the trimmed name and shows the bird step', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toName(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('onb-name-field')),
+        '  Benjamin ',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('onb-name-continue')));
+      await settle(tester, true);
+      expect(prefs.getString(kFirstNamePref), 'Benjamin');
+      expect(find.text('Étape 2 sur 2'), findsOneWidget);
+      expect(find.text('Choisis ton oiseau'), findsOneWidget);
+    });
+
+    testWidgets('the title follows the typing; Continuer needs a name', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toName(tester);
+      expect(find.text('Bienvenue !'), findsOneWidget);
+      FilledButton button() => tester.widget<FilledButton>(
+        find.descendant(
+          of: find.byKey(const ValueKey('onb-name-continue')),
+          matching: find.byWidgetPredicate((w) => w is FilledButton),
+        ),
+      );
+      final field = find.byKey(const ValueKey('onb-name-field'));
+      await tester.enterText(field, 'Léa');
+      await tester.pump();
+      expect(find.text('Enchanté, Léa !'), findsOneWidget);
+      expect(find.text('Bienvenue !'), findsNothing);
+      await tester.enterText(field, '');
+      await tester.pump();
+      expect(find.text('Bienvenue !'), findsOneWidget);
+      expect(button().onPressed, isNull);
+    });
+
+    testWidgets('name is limited to 24 characters', (tester) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toName(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('onb-name-field')),
+        'A' * 40,
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('onb-name-continue')));
+      await settle(tester, true);
+      expect(prefs.getString(kFirstNamePref), 'A' * 24);
+    });
+
+    testWidgets('Plus tard leaves the name empty and shows the bird step', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toName(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('onb-name-field')),
+        'Benjamin',
+      );
+      await tester.tap(find.byKey(const ValueKey('onb-name-later')));
+      await settle(tester, true);
+      expect(prefs.getString(kFirstNamePref), isNull);
+      expect(find.text('Étape 2 sur 2'), findsOneWidget);
+    });
+
+    testWidgets('no overflow with the keyboard on 360x640', (tester) async {
+      await pump(
+        tester,
+        FakePermissions(),
+        size: const Size(360, 640),
+        reduced: true,
+      );
+      await toName(tester);
+      await tester.tap(find.byKey(const ValueKey('onb-name-field')));
+      await tester.pumpAndSettle();
+      tester.view.viewInsets = const FakeViewPadding(bottom: 600); // 300 dp
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('onb-name-field')), findsOneWidget);
+      expect(find.byKey(const ValueKey('onb-name-continue')), findsOneWidget);
+    });
+  });
+
+  group('bird step', () {
+    Future<void> toBird(WidgetTester tester, {bool reduced = true}) async {
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byKey(const ValueKey('onb-next')));
+        await settle(tester, reduced);
+      }
+      await tester.tap(find.byKey(const ValueKey('onb-name-later')));
+      await settle(tester, reduced);
+    }
+
+    Future<void> tapBird(WidgetTester tester, String name) async {
+      await tester.ensureVisible(find.text(name));
+      await tester.pump();
+      await tester.tap(find.text(name));
+    }
+
+    testWidgets('starts on the Loriot; a tap previews and saves the bird', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toBird(tester);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(BirdyBirdStep)),
+      );
+      expect(container.read(birdyBirdProvider), BirdyBird.loriot);
+      await tapBird(tester, 'Flamant rose');
+      await tester.pump();
+      // Immediate: no need to confirm.
+      expect(container.read(birdyBirdProvider), BirdyBird.flamant);
+      expect(prefs.getString(kBirdyBirdPref), 'flamant');
+      expect(find.textContaining('Il dort debout'), findsOneWidget);
+      expect(find.text('Ton icône sur le téléphone'), findsOneWidget);
+    });
+
+    testWidgets('confirming welcomes the child by name, then permissions', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byKey(const ValueKey('onb-next')));
+        await settle(tester, true);
+      }
+      await tester.enterText(
+        find.byKey(const ValueKey('onb-name-field')),
+        'Léa',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('onb-name-continue')));
+      await settle(tester, true);
+      await tapBird(tester, 'Étourneau');
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('onb-bird-confirm')));
+      await tester.pump();
+      expect(find.text('Bienvenue Léa chez les étourneaux !'), findsOneWidget);
+      await settle(tester, true);
+      expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
+      expect(prefs.getString(kBirdyBirdPref), 'etourneau');
+      expect(prefs.getString(kFirstNamePref), 'Léa');
+    });
+
+    testWidgets('without a name the welcome has no name', (tester) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toBird(tester);
+      await tester.tap(find.byKey(const ValueKey('onb-bird-confirm')));
+      await tester.pump();
+      expect(find.text('Bienvenue chez les loriots !'), findsOneWidget);
+      await settle(tester, true);
+    });
+
+    testWidgets('the bird step is not swipeable away', (tester) async {
+      await pump(tester, FakePermissions(), reduced: true);
+      await toBird(tester);
+      await tester.drag(
+        find.byKey(const ValueKey('onb-pages')),
+        const Offset(-300, 0),
+      );
+      await settle(tester, true);
+      expect(find.byKey(const ValueKey('onb-bird-confirm')), findsOneWidget);
+      expect(find.byKey(const ValueKey('onb-finish')), findsNothing);
+    });
+
+    for (final dark in [false, true]) {
+      testWidgets('320 dp, 130 % text, ${dark ? 'dark' : 'light'}: no '
+          'overflow', (tester) async {
+        await pump(
+          tester,
+          FakePermissions(),
+          dark: dark,
+          textScale: 1.3,
+          size: const Size(320, 568),
+          reduced: true,
+        );
+        await toBird(tester);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('normal motion: the disc sings on a tap, no exception', (
+      tester,
+    ) async {
+      await pump(tester, FakePermissions());
+      await toBird(tester, reduced: false);
+      await tapBird(tester, 'Martin-pêcheur');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(seconds: 3));
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('layout', () {
     for (final dark in [false, true]) {
       testWidgets('320 dp, 130 % text, ${dark ? 'dark' : 'light'}', (
@@ -296,6 +532,15 @@ void main() {
           await tester.tap(find.byKey(const ValueKey('onb-next')));
           await settle(tester, true);
         }
+        expect(tester.takeException(), isNull, reason: 'step 1');
+        await tester.tap(find.byKey(const ValueKey('onb-name-later')));
+        await settle(tester, true);
+        expect(tester.takeException(), isNull, reason: 'step 2');
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('onb-bird-confirm')),
+        );
+        await tester.tap(find.byKey(const ValueKey('onb-bird-confirm')));
+        await settle(tester, true);
         expect(tester.takeException(), isNull, reason: 'permissions page');
         // 48 dp targets.
         final finish = tester.getSize(find.byKey(const ValueKey('onb-finish')));

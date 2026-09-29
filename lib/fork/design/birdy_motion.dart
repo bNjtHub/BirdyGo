@@ -10,6 +10,36 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 abstract final class BirdyMotion {
+  /// Welcome bird step of the onboarding (J6i).
+  static const Duration welcomeBird = Duration(milliseconds: 1500);
+
+  /// Staggered entrance of the intro / onboarding cards and rows: card `i`
+  /// enters 120 ms + 100 ms per index in, rows 80 ms + 100 ms per index in.
+  static Duration introCardDelay(int i) => Duration(milliseconds: 120 + i * 100);
+  static Duration introRowDelay(int i) => Duration(milliseconds: 80 + i * 100);
+
+  /// Wing flap of the BirdyGo logo, and the live table's singing bars.
+  static const Duration logoWing = Duration(milliseconds: 480);
+  static const Duration singingBars = Duration(milliseconds: 900);
+
+  /// An answered card leaving the quick review.
+  static const Duration cardFly = Duration(milliseconds: 260);
+
+  /// Shortest time the splash stays up (whole intro, footer faded in).
+  static const Duration splashMinimum = Duration(milliseconds: 4500);
+
+  /// Wait for one frame before yielding to the background.
+  static const Duration framePauseTimeout = Duration(milliseconds: 100);
+
+  /// Idle bars of the quiz stage: period and start delay of bar `i`.
+  static Duration quizBarPeriod(int i) => Duration(milliseconds: 700 + (i % 5) * 90);
+  static Duration quizBarDelay(int i) => Duration(milliseconds: (i * 70) % 600);
+
+  /// Loops of the quiz decor (sparks, twinkles, star burst).
+  static const Duration decorSparks = Duration(milliseconds: 2200);
+  static const Duration decorTwinkles = Duration(milliseconds: 2600);
+  static const Duration decorBurst = Duration(milliseconds: 1200);
+
   /// Enter, exit and press curve. Never use `Curves.easeIn` for UI.
   static const Curve standard = Cubic(0.23, 1, 0.32, 1);
 
@@ -51,6 +81,27 @@ abstract final class BirdyMotion {
     milliseconds: 250,
   );
 
+  /// « Première rencontre » in a series (J6h, AppEcoute mockup): the card
+  /// closes by itself, or moves on to the next species, after
+  /// [firstEncounterShown]; the countdown bar empties linearly over it.
+  static const Duration firstEncounterShown = Duration(seconds: 6);
+
+  /// The second confetti salve leaves this much after the first.
+  static const Duration firstEncounterSecondSalveDelay = Duration(
+    milliseconds: 380,
+  );
+
+  /// Oriole sparkles around the bird (`BirdySparkles`): each pops for
+  /// [sparklePop], [sparkleStagger] after the previous one, from
+  /// [firstEncounterSparkleDelay] on. Once, never looping.
+  static const Duration sparklePop = Duration(milliseconds: 700);
+  static const Duration sparkleStagger = Duration(milliseconds: 160);
+  static const Duration firstEncounterSparkleDelay = Duration(
+    milliseconds: 500,
+  );
+  static const double sparklePeakAt = 0.4;
+  static const double sparklePeakScale = 1.2;
+
   /// bg-ring: peak opacity (at [ringPeakAt] of the ring) and final scale.
   static const double ringPeakOpacity = 0.6;
   static const double ringPeakAt = 0.35;
@@ -62,6 +113,33 @@ abstract final class BirdyMotion {
 
   /// Rare bird, after « C'est bien lui »: one soft ring and the pill.
   static const Duration rareBird = Duration(milliseconds: 450);
+
+  /// Arrival of the rare card (J6h, AppEcoute mockup, RareHalo), once: the
+  /// dotted ring draws itself in [rareRing] turning from [rareRingFromTurns]
+  /// to [rareRingToTurns], appearing over the first [rareRingAppearAt] of
+  /// it, from [rareRingFromScale]; the halo pulses [rareGlowPulses] times
+  /// for [rareGlowPulse] from [rareGlowDelay]; the diamonds pop one after
+  /// the other ([rareDiamondPop] each, [rareDiamondStagger] apart, from
+  /// [rareDiamondDelay]). Nothing at all with reduced motion.
+  static const Duration rareRing = Duration(milliseconds: 2400);
+  static const double rareRingFromTurns = -0.25;
+  static const double rareRingToTurns = 1 / 3;
+  static const double rareRingAppearAt = 0.35;
+  static const double rareRingFromScale = 0.85;
+  static const Duration rareGlowDelay = Duration(milliseconds: 350);
+  static const Duration rareGlowPulse = Duration(milliseconds: 1400);
+  static const int rareGlowPulses = 2;
+  static const double rareGlowPeakOpacity = 0.55;
+  static const double rareGlowPeakScale = 1.18;
+  static const double rareGlowEndScale = 1.32;
+  static const Duration rareDiamondDelay = Duration(milliseconds: 450);
+  static const Duration rareDiamondStagger = Duration(milliseconds: 220);
+  static const Duration rareDiamondPop = Duration(milliseconds: 1600);
+
+  /// How long the rare card stays after each answer (J6h): the countdown
+  /// bar of « C'est bien lui » and of the two quieter answers.
+  static const Duration rareConfirmedShown = Duration(seconds: 6);
+  static const Duration rareAnsweredShown = Duration(seconds: 3);
 
   /// New status: emblem fades in, text follows [newStatusTextDelay] later.
   static const Duration newStatus = Duration(milliseconds: 300);
@@ -77,9 +155,53 @@ abstract final class BirdyMotion {
   /// Upper bound of any celebration.
   static const Duration celebrationMax = Duration(milliseconds: 500);
 
-  /// The home logo's double-tap flight (J6f): explicit, user-triggered
-  /// exception to [celebrationMax], see DESIGN.md's Logo section.
-  static const Duration logoFlight = Duration(milliseconds: 2300);
+  /// The home logo's double-tap easter egg (J6h, logo_flight.dart): the bird
+  /// flies to the middle of the screen, winks, and flies off and back.
+  /// Explicit, user-triggered exception to [celebrationMax], see DESIGN.md's
+  /// Logo section. One controller, the legs are shares of [logoWink]
+  /// (written in milliseconds of its 4.4 s): take-off until
+  /// [logoWinkTakeoffEnd], hover until [logoWinkHoverEnd] (the tweet and the
+  /// song from the arrival, the wink between [logoWinkEyeStart] and
+  /// [logoWinkEyeEnd], head tilt), off-screen until [logoWinkExitEnd], then
+  /// back to its place.
+  static const Duration logoWink = Duration(milliseconds: 4400);
+  static const double logoWinkTakeoffEnd = 800 / 4400;
+  static const double logoWinkHoverEnd = 3100 / 4400;
+  static const double logoWinkExitEnd = 3700 / 4400;
+  static const double logoWinkEyeStart = 2400 / 4400;
+  static const double logoWinkEyeEnd = 2950 / 4400;
+
+  /// The song at the middle of the screen, from [logoWinkTakeoffEnd] with
+  /// the tweet: [logoWinkSyllables] syllables [logoWinkSyllable] apart, the
+  /// beak open for [logoWinkSyllableLength] of each, one note per syllable
+  /// leaving the beak [logoWinkNoteDelay] later and flying (rising, fading)
+  /// for [logoWinkNoteLife], [logoWinkNoteReach] times the header's flight.
+  /// All shares of [logoWink]; the last note is gone before [logoWinkHoverEnd].
+  static const int logoWinkSyllables = 4;
+  static const double logoWinkSyllable = 400 / 4400;
+  static const double logoWinkSyllableLength = 360 / 4400;
+  static const double logoWinkNoteDelay = 80 / 4400;
+  static const double logoWinkNoteLife = 1000 / 4400;
+  static const double logoWinkNoteReach = 1.6;
+
+  /// Size of the bird at the middle of the screen, as a multiple of the
+  /// header mark, and the size it has while off-screen (it shrinks back to
+  /// 1 on its way home).
+  static const double logoWinkScale = 3.5;
+  static const double logoWinkFarScale = 2;
+
+  /// Head tilt while hovering, in degrees, and the hover's gentle bob, in
+  /// logical pixels (under [maxOffset]) over [logoWinkBobCycles] cycles.
+  static const double logoWinkTiltDegrees = 7;
+  static const double logoWinkBob = 6;
+  static const double logoWinkBobCycles = 2;
+
+  /// Wing beats while flying, and the share of a bar the beat never takes.
+  static const int logoWinkFlapCycles = 6;
+  static const double logoWinkFlapFloor = 0.35;
+
+  /// Reduced motion: a quick wink in place, nothing else.
+  static const Duration logoWinkReduced = Duration(milliseconds: 450);
 
   /// Delay between list items entering, over [staggerMaxItems] items.
   static const Duration staggerStep = Duration(milliseconds: 40);
@@ -111,6 +233,26 @@ abstract final class BirdyMotion {
   static const double shimmerBandWidth = 0.5;
   static const double shimmerTiltDegrees = 20;
 
+  /// Soft falloff of the band: opacity share at each stop, edge to edge.
+  static const List<double> shimmerBandAlphas = [
+    0,
+    0.12,
+    0.45,
+    1,
+    0.45,
+    0.12,
+    0,
+  ];
+  static const List<double> shimmerBandStops = [
+    0,
+    0.15,
+    0.32,
+    0.5,
+    0.68,
+    0.85,
+    1,
+  ];
+
   static const double pressScale = 0.97;
 
   /// Starting scale of an element entering.
@@ -131,11 +273,29 @@ abstract final class BirdyMotion {
   static final SpringDescription sheetSpring =
       SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85);
 
-  /// Period of the live logo's wing-bar level meter while listening (J6f,
-  /// `BirdyGoLogoPainter`): the one loop allowed in the fork, replacing the
-  /// live dot's pulse. Calm, no bounce (curve [standard] on each half);
-  /// reduced motion stops it (fork/DESIGN.md, Animations).
-  static const Duration listeningLevelPeriod = Duration(milliseconds: 1300);
+  /// Period of the listening logo's wing-bar level meter (J6f, J6h,
+  /// `BirdyListeningLogo`, `BirdyGoLogoPainter`): the one loop allowed in the
+  /// fork, replacing the live dot's pulse. Calm, no bounce (curve
+  /// [standard] on each half); reduced motion stops it (fork/DESIGN.md,
+  /// Animations). Each bar swells between [listeningBarMin] and its full
+  /// length, [listeningBarStagger] (share of the period) after the previous
+  /// one (AppEcoute mockup: 0.45 → 1, 1 s, 0.18 s).
+  static const Duration listeningLevelPeriod = Duration(milliseconds: 1000);
+  static const double listeningBarMin = 0.45;
+  static const double listeningBarStagger = 0.18;
+
+  /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval] (plus or
+  /// minus up to [wingWaveJitter], so it never feels metronomic) the four
+  /// bars swell one after the other in [wingWave], then return exactly to
+  /// rest. A gentle level-meter hint, not a loop: at rest nothing ticks.
+  /// Each bar starts [wingWaveStagger] (share of the wave) after the
+  /// previous one and grows by [wingWaveAmplitude] of its length at most.
+  static const Duration wingWave = Duration(milliseconds: 900);
+  static const Duration wingWaveInterval = Duration(seconds: 7);
+  static const Duration wingWaveJitter = Duration(milliseconds: 1500);
+  static const Curve wingWaveCurve = Curves.easeInOut;
+  static const double wingWaveStagger = 0.12;
+  static const double wingWaveAmplitude = 0.22;
 
   /// Whether the platform asks for reduced motion.
   static bool reduced(BuildContext context) =>
@@ -184,4 +344,50 @@ abstract final class BirdyConfettiMotion {
 /// Haptics of BirdyGo moments (new species, first encounter, new status).
 abstract final class BirdyHaptics {
   static Future<void> light() => HapticFeedback.lightImpact();
+}
+
+/// Physics of one confetti burst (`BirdyConfetti.burst(burst: ...)`): how
+/// many pieces, how hard they leave, how fast they fall, and the life of
+/// the layer (they fade out over the last [BirdyConfettiMotion.fade]).
+class BirdyConfettiBurst {
+  const BirdyConfettiBurst({
+    required this.particles,
+    required this.minForce,
+    required this.maxForce,
+    required this.gravity,
+    required this.life,
+  });
+
+  final int particles;
+  final double minForce;
+  final double maxForce;
+  final double gravity;
+  final Duration life;
+
+  /// The burst of the quiz, statuses and the first encounter until J6h.
+  static const BirdyConfettiBurst standard = BirdyConfettiBurst(
+    particles: BirdyConfettiMotion.burstParticles,
+    minForce: BirdyConfettiMotion.burstMinForce,
+    maxForce: BirdyConfettiMotion.burstMaxForce,
+    gravity: BirdyConfettiMotion.burstGravity,
+    life: BirdyConfettiMotion.burstLife,
+  );
+
+  /// « Première rencontre » fireworks (AppEcoute mockup, Burst): a first
+  /// salve of 22 pieces reaching far, then 14 shorter ones, each falling a
+  /// little before fading (1.5 to 1.9 s).
+  static const BirdyConfettiBurst firstEncounterMain = BirdyConfettiBurst(
+    particles: 22,
+    minForce: 22,
+    maxForce: 40,
+    gravity: 0.3,
+    life: Duration(milliseconds: 1900),
+  );
+  static const BirdyConfettiBurst firstEncounterSecond = BirdyConfettiBurst(
+    particles: 14,
+    minForce: 16,
+    maxForce: 30,
+    gravity: 0.3,
+    life: Duration(milliseconds: 1900),
+  );
 }

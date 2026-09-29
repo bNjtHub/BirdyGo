@@ -23,28 +23,10 @@ import 'package:birdnet_live/shared/providers/settings_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// The default test font is a rough substitute with different metrics: the
-/// rect assertions below compare wrapped-or-not text, so they need the real
-/// bundled fonts loaded, or a short name could wrap under the test font and
-/// not on a real phone (or the reverse).
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 /// `heard()` and `expected()` resolve only when their completer is told to,
 /// so a test can control exactly when each of the two async sources lands.
@@ -146,7 +128,7 @@ class _Snapshot {
   void expectUnchanged(_Snapshot other) {
     expect(other.header, header, reason: 'header');
     expect(other.progressBlock, progressBlock, reason: 'progress block');
-    expect(other.toDiscoverBlock, toDiscoverBlock, reason: 'à découvrir block');
+    expect(other.toDiscoverBlock, toDiscoverBlock, reason: 'à trouver block');
     expect(other.rareBlock, rareBlock, reason: 'rares block');
     expect(other.filterChips, filterChips, reason: 'filter chips');
     expect(other.firstGridCell, firstGridCell, reason: 'first grid cell');
@@ -154,7 +136,7 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   late SharedPreferences prefs;
   late _DelayedLoader loader;
@@ -163,11 +145,12 @@ void main() {
     WidgetTester tester, {
     bool dark = false,
     double textScale = 1,
+    double width = 390,
     bool reducedMotion = false,
   }) async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    tester.view.physicalSize = const Size(390, 844) * 2;
+    tester.view.physicalSize = Size(width, 844) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     loader = _DelayedLoader(heardResult: _heard, expectedResult: _expected);
@@ -221,8 +204,16 @@ void main() {
 
     // The real numbers did take over.
     expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+    expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
   }
+
+  testWidgets('320 dp, 130 %: Nunito titles do not overflow', (tester) async {
+    await pump(tester, textScale: 1.3, width: 320);
+    loader.resolveHeard();
+    loader.resolveExpected();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('light, 100 %: no layout shift as heard then expected land', (
     tester,
@@ -248,7 +239,7 @@ void main() {
         find.byKey(const ValueKey('notebook-progress-block')),
       );
 
-      // Heard-based numbers (the header's "N espèces découvertes") land
+      // Heard-based numbers (the header's "N oiseaux dans ton carnet") land
       // first; the progress block ("N sur M") must still be a skeleton, at
       // its final height, since M (the geo-model's total) is not in yet.
       loader.resolveHeard();
@@ -258,8 +249,11 @@ void main() {
         tester.getRect(find.byKey(const ValueKey('notebook-progress-block'))),
         loading,
       );
-      expect(find.text('1 espèce découverte'), findsOneWidget);
-      expect(find.textContaining('sur'), findsNothing);
+      expect(find.text('1 oiseau dans ton carnet'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('notebook-progress-skeleton')),
+        findsOneWidget,
+      );
 
       // The total lands: same block, same rect, real numbers fade in.
       loader.resolveExpected();
@@ -268,7 +262,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey('notebook-progress-block'))),
         loading,
       );
-      expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+      expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
     },
   );
 
@@ -336,7 +330,7 @@ void main() {
     loader.resolveHeard();
     loader.resolveExpected();
     await tester.pumpAndSettle();
-    expect(find.textContaining('sur 2 espèces'), findsOneWidget);
+    expect(find.textContaining('2 oiseaux vivent'), findsOneWidget);
   });
 
   testWidgets('the loading state is announced once, skeletons excluded', (

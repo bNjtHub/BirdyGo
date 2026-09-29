@@ -58,7 +58,7 @@ class SpeciesMiniMap extends StatelessWidget {
                               ? null
                               : CameraFit.coordinates(
                                 coordinates: points,
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(BirdySpace.l),
                                 maxZoom: SpeciesPageConfig.miniMapSingleZoom,
                               ),
                       interactionOptions: const InteractionOptions(
@@ -72,10 +72,10 @@ class SpeciesMiniMap extends StatelessWidget {
                           for (final p in points)
                             CircleMarker(
                               point: p,
-                              radius: 5,
-                              color: BirdyBrand.kingfisher,
-                              borderColor: Colors.white,
-                              borderStrokeWidth: 1.5,
+                              radius: BirdyMapStyle.pointRadius,
+                              color: BirdyColors.of(context).accent,
+                              borderColor: BirdyBrand.white,
+                              borderStrokeWidth: BirdyStroke.thin,
                             ),
                         ],
                       ),

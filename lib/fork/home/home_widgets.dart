@@ -13,7 +13,6 @@ import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_block.dart';
-import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdygo_wordmark.dart';
 import '../design/widgets/pressable.dart';
@@ -212,13 +211,13 @@ class HomeHero extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: c.isDark ? c.surface1 : Colors.white,
-                      width: 4,
+                      color: c.isDark ? c.surface1 : BirdyBrand.white,
+                      width: BirdyStroke.chunky,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: tint.accent.withValues(alpha: 0.35),
-                        blurRadius: 18,
+                        blurRadius: BirdyBlur.xl,
                         offset: const Offset(0, 6),
                       ),
                     ],
@@ -365,8 +364,8 @@ class _ReliabilityBadgeSkeleton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BirdySkeleton.box(width: 12, height: 12, radius: BirdyRadii.thumb),
-          const SizedBox(width: 5),
+          BirdySkeleton.box(width: BirdySpace.m, height: BirdySpace.m, radius: BirdyRadii.thumb),
+          const SizedBox(width: BirdySpace.tight),
           // « Sûr », the shortest level label: a longer one only grows
           // this pill a little once real, never shrinks it.
           BirdySkeleton.text(BirdyText.badge, placeholder: 'Sûr'),
@@ -474,19 +473,22 @@ class StreakBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: BirdySpace.s,
-            crossAxisAlignment: WrapCrossAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 '${streak.current}',
                 style: BirdyText.numberXL.copyWith(color: c.text1),
               ),
-              Text(
-                days,
-                style: BirdyText.caption.copyWith(
-                  color: c.orioleText,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(width: BirdySpace.s),
+              Flexible(
+                child: Text(
+                  days,
+                  style: BirdyText.caption.copyWith(
+                    color: c.orioleText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -582,7 +584,7 @@ class ToCheckBlock extends StatelessWidget {
                 ),
               ),
               Icon(
-                AppIcons.question,
+                AppIcons.search,
                 size: BirdySizes.blockIcon,
                 color: c.toCheck.foreground,
               ),
@@ -743,7 +745,7 @@ class StatusBlock extends StatelessWidget {
                         style: BirdyText.caption.copyWith(color: c.text2),
                       ),
                     ),
-                    Icon(AppIcons.chevronRight, size: 20, color: c.text2),
+                    Icon(AppIcons.chevronRight, size: BirdyGlyph.xl, color: c.text2),
                   ],
                 ),
               ],
@@ -845,7 +847,7 @@ class StatusBlockSkeleton extends StatelessWidget {
                           maxLines: null,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      const SizedBox(width: BirdySpace.xl),
                     ],
                   ),
                 ],
@@ -859,6 +861,27 @@ class StatusBlockSkeleton extends StatelessWidget {
 }
 
 /// « Aujourd'hui », its numbers, and today's species as tinted cards.
+/// Sits its child's text baseline on the « Aujourd'hui » title's, in a Wrap
+/// (which cannot align on baselines): every item is shifted down to the
+/// same baseline, the height of a title line.
+class _OnTitleBaseline extends StatelessWidget {
+  const _OnTitleBaseline({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = BirdyText.heading;
+    return Baseline(
+      baseline: MediaQuery.textScalerOf(
+        context,
+      ).scale(style.fontSize! * style.height!),
+      baselineType: TextBaseline.alphabetic,
+      child: child,
+    );
+  }
+}
+
 class TodayBlock extends StatelessWidget {
   const TodayBlock({
     super.key,
@@ -908,16 +931,18 @@ class TodayBlock extends StatelessWidget {
             child: Wrap(
               spacing: BirdySpace.m,
               runSpacing: BirdySpace.xs,
-              crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    l10n.forkHomeTodayTitle,
-                    style: BirdyText.heading.copyWith(color: c.text1),
+                _OnTitleBaseline(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.forkHomeTodayTitle,
+                      style: BirdyText.heading.copyWith(color: c.text1),
+                    ),
                   ),
                 ),
-                Text.rich(
+                _OnTitleBaseline(
+                  child: Text.rich(
                   TextSpan(
                     children: [
                       for (final (i, (count, label)) in numbers.indexed) ...[
@@ -927,9 +952,10 @@ class TodayBlock extends StatelessWidget {
                       ],
                     ],
                   ),
-                  style: BirdyText.caption.copyWith(
-                    color: c.text2,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    style: BirdyText.caption.copyWith(
+                      color: c.text2,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ],
@@ -979,7 +1005,7 @@ class TodayBlock extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(AppIcons.chevronRight, size: 20, color: c.accentText),
+                  Icon(AppIcons.chevronRight, size: BirdyGlyph.xl, color: c.accentText),
                 ],
               ),
             ),
@@ -1020,7 +1046,7 @@ class TodayEmptyBlock extends StatelessWidget {
               color: birdyTrackOnTint(c),
               shape: BoxShape.circle,
             ),
-            child: Icon(AppIcons.hearing, size: 36, color: c.accentText),
+            child: Icon(AppIcons.hearing, size: BirdyGlyph.disc36, color: c.accentText),
           ),
           const SizedBox(width: BirdySpace.l),
           Expanded(
@@ -1092,16 +1118,19 @@ class TodayBlockSkeleton extends StatelessWidget {
               child: Wrap(
                 spacing: BirdySpace.m,
                 runSpacing: BirdySpace.xs,
-                crossAxisAlignment: WrapCrossAlignment.end,
                 children: [
-                  Text(
-                    l10n.forkHomeTodayTitle,
-                    style: BirdyText.heading.copyWith(color: c.text1),
+                  _OnTitleBaseline(
+                    child: Text(
+                      l10n.forkHomeTodayTitle,
+                      style: BirdyText.heading.copyWith(color: c.text1),
+                    ),
                   ),
-                  BirdySkeleton.text(
-                    BirdyText.caption,
-                    placeholder: placeholderNumbers,
-                    maxLines: null,
+                  _OnTitleBaseline(
+                    child: BirdySkeleton.text(
+                      BirdyText.caption,
+                      placeholder: placeholderNumbers,
+                      maxLines: null,
+                    ),
                   ),
                 ],
               ),
@@ -1132,7 +1161,7 @@ class TodayBlockSkeleton extends StatelessWidget {
                       placeholder: l10n.forkHomeTodayOpen,
                     ),
                   ),
-                  const SizedBox(width: 20, height: 20),
+                  const SizedBox(width: BirdySpace.xl, height: BirdySpace.xl),
                 ],
               ),
             ),
@@ -1234,57 +1263,6 @@ class _SpeciesChipCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// One entry of the home menu.
-@immutable
-class HomeMenuEntry {
-  const HomeMenuEntry(this.icon, this.label, this.onTap);
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-}
-
-/// Everything the upstream home offered, in groups separated by a line.
-class HomeMenuSheet extends StatelessWidget {
-  const HomeMenuSheet({super.key, required this.groups});
-
-  final List<List<HomeMenuEntry>> groups;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return ListView(
-      shrinkWrap: true,
-      // The bottom nav bar inset goes here, as trailing scroll padding,
-      // rather than around this ListView from showBirdySheet
-      // (addBottomInset: false in fork_home.dart) — this list can grow to
-      // fill the sheet, and outer padding would shrink that scrolling
-      // viewport instead of just clearing the nav bar (J6f-c bugfix).
-      padding: EdgeInsets.only(
-        bottom: BirdySpace.l + birdySheetBottomInset(context),
-      ),
-      children: [
-        for (final (i, group) in groups.indexed) ...[
-          if (i > 0) Divider(color: c.line, height: BirdySpace.l),
-          for (final entry in group)
-            ListTile(
-              minTileHeight: BirdySizes.target,
-              leading: Icon(entry.icon, color: c.text1),
-              title: Text(
-                entry.label,
-                style: BirdyText.body.copyWith(color: c.text1),
-              ),
-              onTap: () {
-                Navigator.of(context).pop();
-                entry.onTap();
-              },
-            ),
-        ],
-      ],
     );
   }
 }

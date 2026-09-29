@@ -9,23 +9,32 @@ import 'live_table_model.dart';
 
 enum LiveMomentKind { firstTime, rare }
 
+/// The geo-model's presence score (0–1) under which the rare card says
+/// « moins de 1 sur 100 » instead of counting its chances.
+const double rareLowPresenceBelow = 0.01;
+
+/// « 1 chance sur n de l'entendre ici »: n = round(1 / score). Null
+/// without a usable score (unknown or not above zero).
+int? rareChanceN(double? presenceScore) =>
+    presenceScore == null || presenceScore <= 0
+        ? null
+        : (1 / presenceScore).round();
+
 class LiveMoment {
-  const LiveMoment({
-    required this.kind,
-    required this.entry,
-    required this.rank,
-  });
+  LiveMoment({required this.kind, required this.entry, this.rank = 0});
 
   final LiveMomentKind kind;
   final LiveTableEntry entry;
 
   /// Rank of the species in the notebook once verified (« 24e espèce »).
-  final int rank;
+  /// 0 until the tracker gives it: when the card is shown (first
+  /// encounter) or when the bird is confirmed (rare). Then fixed.
+  int rank;
 }
 
 /// Tracks the moments of one listening. Each species gets one moment at
-/// most; a moment that comes while another is shown is dropped (the Bilan
-/// lists it), as SPEC.md 6.1 asks.
+/// most. Moments that come while another is shown are queued by the screen
+/// (J6h: a series of first encounters) rather than dropped.
 class LiveMomentTracker {
   LiveMomentTracker({required Set<String> verifiedBefore})
     : _verifiedBefore = verifiedBefore;
@@ -45,44 +54,82 @@ class LiveMomentTracker {
     required bool Function(String scientificName) isBird,
   }) {
     for (final entry in entries) {
-      final name = entry.scientificName;
-      if (_handled.contains(name) ||
-          _verifiedBefore.contains(name) ||
-          !isBird(name)) {
-        continue;
-      }
-      final record = entry.record;
-      final presence = presenceOf(name);
-      final level = reliabilityFor(
-        score: record.confidence,
-        review: record.reviewStatus,
-        presence: presence,
-      );
-      if (level == ReliabilityLevel.sure) {
-        _handled.add(name);
-        _added++;
-        return LiveMoment(
-          kind: LiveMomentKind.firstTime,
-          entry: entry,
-          rank: verifiedCount,
-        );
-      }
-      if (placeOnlyToCheck(
-        score: record.confidence,
-        review: record.reviewStatus,
-        presence: presence,
-      )) {
-        _handled.add(name);
-        return LiveMoment(
-          kind: LiveMomentKind.rare,
-          entry: entry,
-          rank: verifiedCount + 1,
-        );
-      }
+      final moment = _momentOf(entry, presenceOf, isBird);
+      if (moment != null) return moment;
     }
     return null;
   }
 
-  /// « C'est bien lui » on a rare bird: it joins the notebook.
-  void confirmed() => _added++;
+  /// Every new moment among [entries], in the order of [entries] (J6h): a
+  /// series when several birds were heard while the screen was elsewhere,
+  /// or while a card was open. Ranks are not given here: see [shown] and
+  /// [confirmed], so they follow the order the user really adds species.
+  List<LiveMoment> nextAll(
+    List<LiveTableEntry> entries, {
+    required GeoPresence? Function(String scientificName) presenceOf,
+    required bool Function(String scientificName) isBird,
+  }) {
+    final moments = <LiveMoment>[];
+    for (final entry in entries) {
+      final moment = _momentOf(entry, presenceOf, isBird);
+      if (moment != null) moments.add(moment);
+    }
+    return moments;
+  }
+
+  LiveMoment? _momentOf(
+    LiveTableEntry entry,
+    GeoPresence? Function(String scientificName) presenceOf,
+    bool Function(String scientificName) isBird,
+  ) {
+    final name = entry.scientificName;
+    if (_handled.contains(name) ||
+        _verifiedBefore.contains(name) ||
+        !isBird(name)) {
+      return null;
+    }
+    final record = entry.record;
+    final presence = presenceOf(name);
+    final level = reliabilityFor(
+      score: record.confidence,
+      review: record.reviewStatus,
+      presence: presence,
+    );
+    if (level == ReliabilityLevel.sure) {
+      _handled.add(name);
+      return LiveMoment(kind: LiveMomentKind.firstTime, entry: entry);
+    }
+    if (placeOnlyToCheck(
+      score: record.confidence,
+      review: record.reviewStatus,
+      presence: presence,
+    )) {
+      _handled.add(name);
+      return LiveMoment(kind: LiveMomentKind.rare, entry: entry);
+    }
+    return null;
+  }
+
+  /// A first-encounter card is shown: the species joins the notebook and
+  /// takes the next rank. No-op for a card that already has one.
+  void shown(LiveMoment moment) {
+    if (moment.kind != LiveMomentKind.firstTime || moment.rank > 0) return;
+    _added++;
+    moment.rank = verifiedCount;
+  }
+
+  /// A shown first-encounter card gives way (a rare bird takes its place):
+  /// it gives its rank back and takes a new one when shown again.
+  void released(LiveMoment moment) {
+    if (moment.kind != LiveMomentKind.firstTime || moment.rank == 0) return;
+    _added--;
+    moment.rank = 0;
+  }
+
+  /// « C'est bien lui » on a rare bird: it joins the notebook now.
+  void confirmed(LiveMoment moment) {
+    if (moment.rank > 0) return;
+    _added++;
+    moment.rank = verifiedCount;
+  }
 }

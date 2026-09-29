@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../reliability/reliability_config.dart';
+import 'birdy_theme_choice.dart';
 
 /// Brand colors named in fork/DESIGN.md.
 abstract final class BirdyBrand {
@@ -39,6 +40,34 @@ abstract final class BirdyBrand {
 
   /// Faint radial highlight over the well (Quiz v2 mockup's hero and stage).
   static const Color wellHighlight = Color(0xFF173A55);
+
+  /// The light blue bar of the logo's wing (fork/brand/birdygo-logo.svg).
+  static const Color wingSky = Color(0xFF8CD3D9);
+
+  /// Soft shadow of the wing icon (J6h): dark teal at 45 %.
+  static const Color wingShadow = Color(0x730B3C46);
+
+  /// Pure white and black, for marks on photos and painted highlights.
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+
+  /// Black at 38 % (thin outline of the fiche grab handle on any photo).
+  static const Color black38 = Color(0x61000000);
+
+  /// Fully transparent black (gradient and shimmer end stops).
+  static const Color clear = Color(0x00000000);
+
+  /// Soft black shadow, 25 %.
+  static const Color shadowSoft = Color(0x40000000);
+
+  /// [wellHighlight] faded to transparent (quiz stage glow end stop).
+  static const Color wellHighlightClear = Color(0x00173A55);
+
+  /// Light-theme track of the splash progress arcs (Encre at 8 %).
+  static const Color splashTrackLight = Color(0x1413233A);
+
+  /// Unselected rim of a quiz answer dot in the light theme.
+  static const Color mistTrack = Color(0xFFE1E5DE);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -60,6 +89,32 @@ abstract final class BirdyConfettiColors {
     BirdyBrand.kingfisher,
     BirdyBrand.lichen,
   ];
+
+  /// Golden burst of a confirmed rare bird (J6h).
+  static const List<Color> rare = [
+    BirdyBrand.oriole,
+    Color(0xFFE3A22B),
+    Color(0xFFFFE9A0),
+    BirdyBrand.kingfisher,
+  ];
+
+  // The kingfisher entry of each list is the accent slot: the lists below
+  // swap it for the active bird's accent (oriole and lichen stay fixed).
+  static List<Color> _follow(List<Color> colors, Color accent) => [
+    for (final c in colors) c == BirdyBrand.kingfisher ? accent : c,
+  ];
+
+  /// [rain] with the active bird's accent.
+  static List<Color> rainOf(BuildContext context) =>
+      _follow(rain, BirdyBrandColors.of(context).accent);
+
+  /// [burst] with the active bird's accent.
+  static List<Color> burstOf(BuildContext context) =>
+      _follow(burst, BirdyBrandColors.of(context).accent);
+
+  /// [rare] with the active bird's accent.
+  static List<Color> rareOf(BuildContext context) =>
+      _follow(rare, BirdyBrandColors.of(context).accent);
 }
 
 /// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not
@@ -153,6 +208,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.line,
     required this.border,
     required this.borderStrong,
+    required this.progressTrack,
     required this.dashed,
     required this.text1,
     required this.text2,
@@ -161,6 +217,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.accentText,
     required this.tonal,
     required this.navIndicator,
+    required this.glow,
     required this.oriole,
     required this.onOriole,
     required this.orioleText,
@@ -200,6 +257,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Secondary buttons.
   final Color borderStrong;
 
+  /// Empty part of a progress bar and idle step dots. Darker than
+  /// [borderStrong] in the dark theme, so the fill keeps 3:1 (WCAG 1.4.11).
+  final Color progressTrack;
+
   /// Mystery cards (1.5 px dashed).
   final Color dashed;
 
@@ -209,13 +270,13 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Secondary text and quiet icons.
   final Color text2;
 
-  /// Martin-pêcheur fill of actions.
+  /// Fill of actions (the bird theme's brand color, J6i).
   final Color accent;
 
   /// Text and icons on [accent].
   final Color onAccent;
 
-  /// Martin-pêcheur for text and icons on this theme's surfaces (AA).
+  /// Brand color for text and icons on this theme's surfaces (AA).
   final Color accentText;
 
   /// Tonal buttons.
@@ -223,6 +284,9 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
 
   /// Active item of the bottom navigation.
   final Color navIndicator;
+
+  /// Halo under the big « Écouter » buttons: [accent] at 35 %.
+  final Color glow;
 
   /// Loriot fill (Première fois, Nouveau).
   final Color oriole;
@@ -274,21 +338,22 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   ];
 
   /// Glow of the big « Écouter » button only.
-  List<BoxShadow> get ctaGlow => const [
-    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 10), blurRadius: 28),
+  List<BoxShadow> get ctaGlow => [
+    BoxShadow(color: glow, offset: const Offset(0, 10), blurRadius: 28),
   ];
 
   /// Glow of the home « Écouter » button: centered around it and at most
   /// [listenGlowExtent] past its edge, so it fits the equal margins above
   /// the bottom bar without being cut.
-  List<BoxShadow> get listenGlow => const [
-    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 4), blurRadius: 16),
+  List<BoxShadow> get listenGlow => [
+    BoxShadow(color: glow, offset: const Offset(0, 4), blurRadius: 16),
   ];
 
   /// How far [listenGlow] reaches below the button (offset + blur).
   static const double listenGlowExtent = 20;
 
-  /// Light theme (notebook), SPEC.md 2.3.
+  /// Light theme (notebook), SPEC.md 2.3. Accent roles are the Loriot bird's
+  /// (the default); [forBird] gives the other birds.
   static const BirdyColors light = BirdyColors(
     brightness: Brightness.light,
     background: BirdyBrand.mist,
@@ -299,6 +364,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     line: Color(0xFFDCE2DA),
     border: Color(0xFFC5CCC2),
     borderStrong: Color(0xFFC5CCC2),
+    progressTrack: Color(0xFFDCE2DA),
     dashed: Color(0xFFB9C0B5),
     text1: BirdyBrand.ink,
     text2: BirdyBrand.bark,
@@ -308,6 +374,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     accentText: Color(0xFF0B6E77),
     tonal: Color(0xFFD6EEF0),
     navIndicator: Color(0xFFD1ECEF),
+    glow: Color(0x5919A7B3),
     oriole: BirdyBrand.oriole,
     onOriole: BirdyBrand.ink,
     orioleText: Color(0xFF7A5A00),
@@ -342,6 +409,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     line: Color(0x14EEF1EC),
     border: Color(0x24EEF1EC),
     borderStrong: Color(0x52EEF1EC),
+    progressTrack: Color(0x24EEF1EC),
     dashed: Color(0x52EEF1EC),
     text1: BirdyBrand.mist,
     text2: Color(0xFFB4C0CC),
@@ -350,6 +418,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     accentText: Color(0xFF4FC3CC),
     tonal: Color(0x2919A7B3),
     navIndicator: Color(0xFF213852),
+    glow: Color(0x5919A7B3),
     oriole: BirdyBrand.oriole,
     onOriole: BirdyBrand.ink,
     orioleText: BirdyBrand.oriole,
@@ -382,6 +451,49 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       theme.extension<BirdyColors>() ??
       (theme.brightness == Brightness.dark ? dark : light);
 
+  /// Tokens of [bird] in [brightness]: [light] or [dark] with the brand
+  /// roles (accent, accentText, tonal, navIndicator, glow) of the bird
+  /// ([BirdyBrandColors]). Everything else is the same for every bird.
+  static BirdyColors forBird(BirdyBird bird, Brightness brightness) {
+    final base = brightness == Brightness.dark ? dark : light;
+    // Loriot is the original set (a test checks it equals its brand roles).
+    if (bird == BirdyBird.loriot) return base;
+    return base._withBrand(BirdyBrandColors(bird, brightness));
+  }
+
+  BirdyColors _withBrand(BirdyBrandColors b) => BirdyColors(
+    brightness: brightness,
+    background: background,
+    backgroundDeep: backgroundDeep,
+    surface1: surface1,
+    surface2: surface2,
+    surface3: surface3,
+    line: line,
+    border: border,
+    borderStrong: borderStrong,
+    progressTrack: progressTrack,
+    dashed: dashed,
+    text1: text1,
+    text2: text2,
+    accent: b.accent,
+    onAccent: onAccent,
+    accentText: b.accentText,
+    tonal: b.tonal,
+    navIndicator: b.navIndicator,
+    glow: b.glow,
+    oriole: oriole,
+    onOriole: onOriole,
+    orioleText: orioleText,
+    orioleContainer: orioleContainer,
+    rarityMuted: rarityMuted,
+    veil: veil,
+    sure: sure,
+    probable: probable,
+    toCheck: toCheck,
+    skeleton: skeleton,
+    skeletonSheen: skeletonSheen,
+  );
+
   /// Tokens are fixed per theme: use [light] or [dark].
   @override
   BirdyColors copyWith() => this;
@@ -400,6 +512,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       line: c(line, other.line),
       border: c(border, other.border),
       borderStrong: c(borderStrong, other.borderStrong),
+      progressTrack: c(progressTrack, other.progressTrack),
       dashed: c(dashed, other.dashed),
       text1: c(text1, other.text1),
       text2: c(text2, other.text2),
@@ -408,6 +521,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       accentText: c(accentText, other.accentText),
       tonal: c(tonal, other.tonal),
       navIndicator: c(navIndicator, other.navIndicator),
+      glow: c(glow, other.glow),
       oriole: c(oriole, other.oriole),
       onOriole: c(onOriole, other.onOriole),
       orioleText: c(orioleText, other.orioleText),
@@ -437,12 +551,78 @@ abstract final class BirdyRadii {
   /// Small thumbnails.
   static const double thumb = 12;
 
+  /// Small skeleton blocks and inline chips.
+  static const double chip = 8;
+
+  /// Tick marks and tiny bars.
+  static const double xs = 2;
+
+  /// Small pill ends and thin bars.
+  static const double s = 3;
+
   /// Buttons, chips, badges, pills, rings.
   static const double pill = 999;
 }
 
+/// Blur radii of drop shadows.
+abstract final class BirdyBlur {
+  static const double s = 3;
+  static const double m = 8;
+  static const double l = 16;
+  static const double xl = 18;
+}
+
+/// Line and border widths.
+abstract final class BirdyStroke {
+  static const double hairline = 1;
+  static const double thin = 1.5;
+  static const double regular = 2;
+  static const double medium = 2.5;
+  static const double thick = 3;
+  static const double chunky = 4;
+}
+
+/// Icon glyph and avatar sizes.
+abstract final class BirdyGlyph {
+  static const double xxs = 12;
+  static const double xs = 13;
+  static const double s = 14;
+  static const double m = 16;
+  static const double l = 18;
+  static const double xl = 20;
+  static const double xxl = 22;
+  static const double x3l = 24;
+  static const double x4l = 26;
+  static const double x5l = 28;
+
+  /// Round icons and avatars, by diameter.
+  static const double disc36 = 36;
+  static const double disc40 = 40;
+  static const double disc44 = 44;
+  static const double disc48 = 48;
+  static const double disc56 = 56;
+  static const double disc72 = 72;
+  static const double disc96 = 96;
+  static const double disc136 = 136;
+}
+
 /// Spacing scale (SPEC.md 2.8).
 abstract final class BirdySpace {
+  /// Side gutter of the splash footer.
+  static const double splashSide = 28;
+
+  /// Half-steps of the scale, from a hairline to the wide gap.
+  static const double hairline = 1;
+  static const double xxs = 2;
+  static const double thin = 3;
+  static const double tight = 5;
+  static const double snug = 6;
+  static const double slim = 7;
+  static const double cozy = 10;
+  static const double comfy = 14;
+  static const double roomy = 18;
+  static const double wide = 22;
+
   static const double xs = 4;
   static const double s = 8;
   static const double m = 12;
@@ -450,6 +630,10 @@ abstract final class BirdySpace {
   static const double xl = 20;
   static const double xxl = 24;
   static const double xxxl = 32;
+
+  /// Extra gap between the wing icon and the label of « Écouter » buttons,
+  /// on top of the 4 to 8 the button already puts (the bars read tight).
+  static const double wingLabelGap = s;
 
   /// Page gutter on light screens.
   static const double gutter = 20;
@@ -481,18 +665,102 @@ abstract final class BirdySizes {
   /// « Arrêter » and « Pause » in the live control bar.
   static const double liveControl = 64;
 
-  /// The home logo's double-tap flight (J6f): bigger than the resting mark
-  /// so the bird stays readable while it crosses the screen.
-  static const double logoFlightBird = 56;
-
   static const double navBar = 80;
   static const double topBar = 56;
+
+  /// Disc and icon of an alert block (volume alert, J6h).
+  static const double alertDisc = 44;
+  static const double alertDiscIcon = 22;
+
+  /// Blur sigma behind the floating volume toast.
+  static const double alertBlurSigma = 12;
 
   /// Minimum height of badges and pills (they grow with text scale).
   static const double pill = 26;
 
+  /// Skeleton tag widths (pill-shaped placeholders in headers).
+  static const double skeletonTagS = 64;
+  static const double skeletonTagM = 88;
+  static const double skeletonTagL = 110;
+
+  /// Sample tile width in the design gallery.
+  static const double gallerySample = 140;
+
+  /// Activity bars of the species page: 24 monthly bars and the hourly ones.
+  static const double activityBarsWidth = 150;
+  static const double activityBarsHeight = 45;
+  static const double hourBarsHeight = 52;
+
+  /// Clip spectrogram height in the quick review.
+  static const double clipSpectrogram = 80;
+
+  /// Contact map: fit padding (sides, top under the header, bottom) and
+  /// cluster bubble size and padding.
+  static const double mapFitSide = 48;
+  static const double mapFitTop = 120;
+  static const double mapFitBottom = 48;
+  static const double mapClusterSize = 60;
+  static const double mapClusterPadding = 50;
+
+  /// Hero bird of the quiz intro (before the screen-height scale).
+  static const double quizIntroBird = 128;
+
+  /// Toggle switch: track size and knob diameter.
+  static const double switchWidth = 44;
+  static const double switchHeight = 28;
+  static const double switchKnob = 22;
+
   /// Minimum height of a live row, and of a compact row.
   static const double row = 72;
+
+  /// Tinted disc leading a list row (J6h [BirdyListRow]).
+  static const double rowDisc = 44;
+
+  /// Bird-choice disc of the onboarding (J6i): the themed logo in a tonal
+  /// disc, its white halo, the logo's width inside it, and the smaller disc
+  /// of a picker card.
+  static const double themeLogoDisc = 132;
+  static const double themeLogoHalo = 8;
+  static const double themeLogoMark = 88;
+  static const double themeCardDisc = 72;
+  static const double themeCardMark = 48;
+
+  /// Icon of the onboarding call-to-action, small inline icons (lock, check)
+  /// and the logo of the « Mon oiseau » row disc.
+  static const double ctaIcon = 24;
+  static const double inlineIcon = 16;
+  static const double myBirdRowMark = 28;
+
+  /// Launcher-icon preview of the picker, and the logo inside it.
+  static const double iconPreview = 60;
+  static const double iconPreviewMark = 42;
+  static const double iconPreviewRadius = 15;
+
+  /// Ring around the chosen picker card, its check badge and its colour dots.
+  static const double themeRing = 3;
+  static const double themeCheck = 24;
+  static const double themeDot = 14;
+
+  /// White disc of the sound library hero (J6h).
+  static const double soundHeroDisc = 76;
+
+  /// Species-tint disc leading a species page block title, and its icon.
+  static const double sectionDisc = 36;
+  static const double sectionIcon = 20;
+
+  /// Knowledge disc of the species page's « Faire connaissance » block.
+  static const double knowledgeDisc = 52;
+
+  /// Ring around the chosen knowledge disc (white gap, then color), each
+  /// this wide.
+  static const double knowledgeRing = 2;
+
+  /// Read check in the corner of a knowledge disc.
+  static const double knowledgeCheck = 18;
+
+  /// Watermark icon of the knowledge card, and the thin segments under it.
+  static const double knowledgeWatermark = 88;
+  static const double knowledgeSegment = 6;
   static const double rowCompact = 60;
 
   /// Minimum height of a collection card (notebook grid of 3).
@@ -505,10 +773,22 @@ abstract final class BirdySizes {
 
   /// Progress ring of a block (daily goal), and its stroke.
   static const double ring = 76;
+
+  /// Ring of the daily goal hero (J6h), and the avatar of a list row.
+  static const double dailyGoalRing = 120;
+  static const double rowAvatar = 48;
   static const double ringStroke = 8;
 
   /// Progress bar of a block (status, notebook).
   static const double progressBar = 8;
+
+  /// Countdown bar of a first-encounter card (J6h).
+  static const double countdownBar = 6;
+
+  /// Current dot of a series (its length), and the icon after a main
+  /// button's label (« Espèce suivante »).
+  static const double countdownDotActive = 18;
+  static const double buttonIcon = 22;
 
   /// Day dot of the série (7 per week).
   static const double dayDot = 14;
@@ -548,12 +828,20 @@ abstract final class BirdySizes {
   /// Ring of the notebook progress block (J6g-b).
   static const double notebookRing = 88;
 
+  /// Species visual of a notebook card (two-column grid, J6h).
+  static const double notebookVisual = 88;
+
+  /// White fade on the right edge of a scrolling chip row (J6h).
+  static const double chipFade = 40;
+
+  /// Grey mini-silhouette in the notebook hero caption (J6h).
+  static const double notebookHeroSilhouette = 16;
+
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
 
   /// Icon of a one-line tip (empty live table).
   static const double tipIcon = 18;
-
 
   /// Illustration disc of the « Qui chante ? » block on the Profil, and the
   /// Loriot question mark pinned on its corner.
@@ -563,10 +851,37 @@ abstract final class BirdySizes {
   /// The quiz entry's logo (J6f, [QuizLogo]), the Profil quiz row.
   static const double quizLogo = 56;
 
+  /// « Qui chante ? » (J6h): the intro's illustrated zone (the intro fits a
+  /// 844 pt phone without scrolling), the mystery bird's « ? » on the wing,
+  /// and the [QuizLogo] disc of the « Arrêter la partie ? » sheet.
+  static const double quizIntroHero = 210;
+  static const double quizIntroHeroFloor = 168;
+  static const double quizIntroHeroMin = 150;
+
+  /// Height of the intro besides the illustrated zone and its variable gaps,
+  /// at font scale 1 (measured), and a few points of safety.
+  static const double quizIntroRest = 358;
+  static const double quizIntroSlack = 4;
+  static const double quizMark = 30;
+
+  /// Silhouette sizes: the logo's wing shows from this size on a species,
+  /// the mystery « ? » from this size on a mystery bird (below, plain).
+  static const double silhouetteWingMin = 32;
+  static const double silhouetteMarkMin = 20;
+  static const double quizSheetDisc = 72;
+
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
   /// check badge on the current one.
   static const double levelEmblem = 48;
   static const double levelCellMinHeight = 84;
+
+  /// Ladder connector strokes sit between emblems: each is the cell width
+  /// minus this inset, and the cell's vertical padding plus half the emblem
+  /// centers them on it.
+  static const double levelLineInset = 48;
+  static const double levelCellPadTop = 8;
+  static const double levelLineThick = 4;
+  static const double levelLineThin = 2;
   static const double levelCheckBadge = 20;
 
   /// Icon disc leading the level info box and a weekly challenge inset.
@@ -584,8 +899,26 @@ abstract final class BirdySizes {
   /// Minimum height of a badge tile (Profil « À gagner »).
   static const double badgeTile = 136;
 
-  /// Live header logo (J6f): about the status line's height, a bit more.
-  static const double liveLogo = 22;
+  /// Listening logo (J6f, J6h): in the live header, and small in front of
+  /// « L'écoute continue » on the first-encounter card.
+  static const double liveLogo = 24;
+  static const double liveLogoSmall = 18;
+
+  /// Sparkle popping around the bird of a first encounter (J6h).
+  static const double sparkle = 20;
+
+  /// Bird picture of the moment cards (first encounter, rare bird).
+  static const double momentAvatar = 96;
+
+  /// Room the dotted ring of the rare card leaves around the picture, its
+  /// stroke and its dash and gap.
+  static const double rareRingGap = 10;
+  static const double rareRingStroke = 2.5;
+  static const double rareRingDash = 5;
+  static const double rareRingDashGap = 4;
+
+  /// Height of the moment area under which a card tightens its gaps.
+  static const double momentCompactBelow = 620;
 
   /// Mode icon inline before the mode word in the live status line (J6f).
   static const double statusModeIcon = 14;
@@ -598,8 +931,11 @@ abstract final class BirdySizes {
 /// surfaces (`surface1`-`surface3`) and their light theme counterparts
 /// (`test/fork/design/contrast_test.dart`).
 abstract final class ListeningModeColors {
-  /// Same value as [BirdyColors.accentText]: Normal is the plain, always-on
-  /// setting, so it borrows the app's action color rather than a new one.
+  /// Same value as [BirdyColors.accentText] (Loriot bird): Normal is the
+  /// plain, always-on setting, so it borrows the app's action color rather
+  /// than a new one. The mode's color follows the chosen bird
+  /// (`listeningModeColor` reads [BirdyColors.accentText]); these are the
+  /// Loriot values, kept for the contrast test.
   static const Color normalLight = Color(0xFF0B6E77);
   static const Color normalDark = Color(0xFF4FC3CC);
 
@@ -623,6 +959,9 @@ abstract final class BirdyAlpha {
   /// Decorative disc of the species accent behind the hero bird.
   static const double heroDisc = 0.18;
 
+  /// White halo around the onboarding's bird disc.
+  static const double themeHalo = 0.7;
+
   /// White fill of a dashed slot on a tonal block.
   static const double slotFill = 0.55;
 
@@ -639,15 +978,23 @@ abstract final class BirdyAlpha {
   /// table (it is not there yet).
   static const double expectedRow = 0.55;
 
+  /// Big watermark icon of the species page's knowledge card.
+  static const double knowledgeWatermark = 0.12;
 
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;
+
+  /// Scrim behind the photo credit button on a species photo.
+  static const double photoButtonScrim = 0.45;
 }
 
 /// Contact map markers (J6g-f). The map tiles stay light in both themes, so
 /// the marker disc and its ring do not follow the theme: they must read on
 /// any tile, and on the dark placeholder shown before tiles are allowed.
 abstract final class BirdyMapStyle {
+  /// Radius of a contact point dot on the species mini map.
+  static const double pointRadius = 5;
+
   /// Disc under a species photo and border of the cluster bubble.
   static const Color disc = Color(0xFFFFFFFF);
 
@@ -670,6 +1017,9 @@ abstract final class BirdyMapStyle {
   /// Cluster bubble diameter and border.
   static const double cluster = 56;
   static const double clusterBorder = 3;
+
+  /// Unit label (« espèces ») under the count in the cluster bubble.
+  static const double clusterLabelSize = 13;
 
   /// User position dot and its border.
   static const double userDot = 14;

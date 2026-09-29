@@ -25,6 +25,7 @@ import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
 import 'package:birdnet_live/fork/home/home_model.dart';
 import 'package:birdnet_live/fork/home/home_widgets.dart';
+import 'package:birdnet_live/fork/home/singing_logo.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/fork/reliability/quick_review_screen.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
@@ -40,11 +41,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Loader with a fixed snapshot, place and sunrise.
 class _FakeLoader implements HomeLoader {
-  _FakeLoader(this.snapshot, {this.place, this.sunriseAt});
+  _FakeLoader(this.snapshot, {this.place, this.sunriseAt, this.sunsetAt});
 
   final HomeSnapshot snapshot;
   final String? place;
   final DateTime? sunriseAt;
+  final DateTime? sunsetAt;
 
   @override
   Future<HomeSnapshot> load() async => snapshot;
@@ -54,6 +56,9 @@ class _FakeLoader implements HomeLoader {
 
   @override
   Future<DateTime?> sunrise() async => sunriseAt;
+
+  @override
+  Future<DateTime?> sunset() async => sunsetAt;
 }
 
 /// Index that never opens and never notifies.
@@ -178,6 +183,7 @@ void main() {
     HomeSnapshot? snapshot,
     String? place = 'Beaulieu-sur-Brenne',
     DateTime? sunrise,
+    DateTime? sunset,
     GameProgress? game,
     bool withGame = true,
     bool dark = false,
@@ -221,6 +227,7 @@ void main() {
               snapshot ?? _morning(),
               place: place,
               sunriseAt: sunrise,
+              sunsetAt: sunset,
             ),
           ),
           taxonomyServiceProvider.overrideWith(
@@ -281,16 +288,33 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  // FORK: J6h, the menu button shares the logo's vertical center.
+  for (final scale in [1.0, 1.3]) {
+    testWidgets('menu button is centered on the logo at x$scale', (
+      tester,
+    ) async {
+      await pump(tester, textScale: scale);
+      final logo = tester.getCenter(find.byType(SingingLogo));
+      final menu = tester.getCenter(find.byType(BirdyIconButton));
+      expect((logo.dy - menu.dy).abs(), lessThanOrEqualTo(1));
+    });
+  }
+
   testWidgets('the morning overview, block by block', (tester) async {
-    await pump(tester, sunrise: DateTime(2026, 9, 26, 7, 36), withGoal: true);
+    await pump(
+      tester,
+      sunrise: DateTime(2026, 9, 26, 7, 36),
+      sunset: DateTime(2026, 9, 26, 19, 41),
+      withGoal: true,
+    );
     // Small logo row above the header, and the menu in the header's actions.
     expect(find.byType(BirdyGoWordmark), findsOneWidget);
     expect(find.bySemanticsLabel('BirdyGo'), findsOneWidget);
     expect(find.byTooltip('Menu'), findsOneWidget);
-    expect(
-      find.textContaining('· Beaulieu-sur-Brenne · lever du soleil 07:36'),
-      findsOneWidget,
-    );
+    // The sunrise moved into the « Ta journée » strip.
+    expect(find.textContaining('Beaulieu-sur-Brenne'), findsOneWidget);
+    expect(find.textContaining('lever du soleil'), findsNothing);
+    expect(find.text('07:36'), findsOneWidget);
     // Hero.
     expect(find.textContaining('Dernier oiseau entendu · '), findsOneWidget);
     expect(find.text('Erithacus rubecula'), findsOneWidget);
@@ -412,6 +436,12 @@ void main() {
     tester,
   ) async {
     await pump(tester, snapshot: const HomeSnapshot(), withGame: false);
+    // The game skeletons shimmer forever here: no pumpAndSettle.
+    await tester.scrollUntilVisible(
+      find.textContaining('Aucun oiseau'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.textContaining('Aucun oiseau'), findsOneWidget);
     expect(find.textContaining('Dernier oiseau entendu'), findsNothing);
     expect(find.text('Écouter'), findsOneWidget);
@@ -474,6 +504,7 @@ void main() {
         size: size,
         withGoal: true,
         sunrise: DateTime(2026, 9, 26, 7, 36),
+        sunset: DateTime(2026, 9, 26, 19, 41),
       );
       expect(tester.takeException(), isNull);
       await scrollTo(tester, find.byType(DailyGoalBlock));

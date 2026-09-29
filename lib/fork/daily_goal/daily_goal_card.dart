@@ -356,7 +356,7 @@ class _BirdCircle extends StatelessWidget {
               image: bird.image,
               tint: tint,
               size: DailyGoalCardSizes.toFindVisual * scale,
-              muted: true,
+              mystery: true,
             ),
           ),
         ),

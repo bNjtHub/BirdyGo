@@ -16,9 +16,13 @@ import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_list_block.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdy_switch.dart';
 import '../design/widgets/empty_state.dart';
@@ -203,7 +207,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: BirdySpace.gutter,
+                        horizontal: BirdySpace.page,
                       ),
                       sliver: SliverList.list(
                         children: [
@@ -211,54 +215,76 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                             key: const ValueKey('ranking-header'),
                             liveRegion: true,
                             label: loading ? l10n.forkRankingLoading : null,
-                            child: BirdyOverlayHeader(title: l10n.forkRanking),
-                          ),
-                          // The shell (row, spacing) is always built the same
-                          // way; only its counts cross-fade, so the chips and
-                          // options below never move once the ranking lands.
-                          KeyedSubtree(
-                            key: const ValueKey('ranking-count'),
-                            child: _crossFade(
-                              loading
-                                  ? const _RankingHeaderSkeleton(
-                                    key: ValueKey('ranking-header-skeleton'),
-                                  )
-                                  : RankingHeader(
-                                    key: const ValueKey('ranking-header-real'),
-                                    count: ranked.length,
-                                    label: l10n.forkRankingSpeciesWord(
-                                      ranked.length,
-                                      periodPhrase(l10n, _period, now),
-                                    ),
-                                    newCountLine: newLine,
-                                    dates:
-                                        dates == null ||
-                                                _period == RankingPeriod.year
-                                            ? null
-                                            : dates,
-                                  ),
+                            child: BirdyOverlayHeader(
+                              title: l10n.forkRanking,
+                              actions: [
+                                BirdyIconButton(
+                                  icon: AppIcons.sort,
+                                  semanticLabel: l10n.forkRankingSortMenu,
+                                  onPressed: _openSortSheet,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: BirdySpace.m),
-                          Container(
-                            key: const ValueKey('ranking-chips'),
-                            child: _periodChips(l10n),
+                          const SizedBox(height: BirdySpace.block),
+                          // Tonal hero: the count and the period chips. The
+                          // shell (row, spacing) is always built the same
+                          // way; only its counts cross-fade, so the chips
+                          // never move once the ranking lands.
+                          BirdyBlock(
+                            tone: BirdyBlockTone.tonal,
+                            radius: BirdyRadii.hero,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                KeyedSubtree(
+                                  key: const ValueKey('ranking-count'),
+                                  child: _crossFade(
+                                    loading
+                                        ? const _RankingHeaderSkeleton(
+                                          key: ValueKey(
+                                            'ranking-header-skeleton',
+                                          ),
+                                        )
+                                        : RankingHeader(
+                                          key: const ValueKey(
+                                            'ranking-header-real',
+                                          ),
+                                          count: ranked.length,
+                                          label: l10n.forkRankingSpeciesWord(
+                                            ranked.length,
+                                            periodPhrase(l10n, _period, now),
+                                          ),
+                                          newCountLine: newLine,
+                                          dates:
+                                              dates == null ||
+                                                      _period ==
+                                                          RankingPeriod.year
+                                                  ? null
+                                                  : dates,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(height: BirdySpace.m),
+                                Container(
+                                  key: const ValueKey('ranking-chips'),
+                                  child: _periodChips(l10n, c),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: BirdySpace.xs),
-                          Container(
-                            key: const ValueKey('ranking-options'),
-                            child: _optionsRow(l10n, c),
-                          ),
-                          const SizedBox(height: BirdySpace.m),
+                          const SizedBox(height: BirdySpace.block),
                         ],
                       ),
                     ),
                     if (loading)
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: BirdySpace.gutter,
+                      const SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: BirdySpace.page,
                         ),
-                        sliver: const _RankingListSkeleton(),
+                        sliver: SliverToBoxAdapter(
+                          child: _RankingListSkeleton(),
+                        ),
                       )
                     else if (ranked.isEmpty)
                       SliverFillRemaining(
@@ -284,40 +310,52 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                                       ),
                                 ),
                       )
-                    else ...[
+                    else
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: BirdySpace.gutter,
+                          horizontal: BirdySpace.page,
                         ),
-                        sliver: SliverToBoxAdapter(
-                          child: RankingPodium(
-                            top: ranked.take(3).toList(),
-                            onOpen: _open,
-                          ),
+                        sliver: SliverList.list(
+                          children: [
+                            BirdyBlock(
+                              key: const ValueKey('ranking-podium-block'),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _blockTitle(
+                                    l10n.forkRankingPodiumTitle,
+                                    c,
+                                    trailing: _confirmedSwitch(l10n, c),
+                                  ),
+                                  const SizedBox(height: BirdySpace.m),
+                                  RankingPodium(
+                                    top: ranked.take(3).toList(),
+                                    onOpen: _open,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (ranked.length > 3) ...[
+                              const SizedBox(height: BirdySpace.block),
+                              BirdyListBlock(
+                                key: const ValueKey('ranking-list-block'),
+                                title: l10n.forkRankingListTitle,
+                                trailing: _sortControl(l10n, c),
+                                children: [
+                                  for (var i = 3; i < ranked.length; i++)
+                                    RankingRow(
+                                      rank: i + 1,
+                                      species: ranked[i],
+                                      fraction: ranked[i].value / leader,
+                                      index: i - 3,
+                                      onTap: () => _open(ranked[i]),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: BirdySpace.m),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: BirdySpace.gutter,
-                        ),
-                        sliver: SliverList.builder(
-                          itemCount: ranked.length > 3 ? ranked.length - 3 : 0,
-                          itemBuilder: (context, i) {
-                            final species = ranked[i + 3];
-                            return RankingRow(
-                              rank: i + 4,
-                              species: species,
-                              fraction: species.value / leader,
-                              index: i,
-                              onTap: () => _open(species),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
                     const SliverToBoxAdapter(
                       child: SizedBox(height: BirdySpace.xxl),
                     ),
@@ -357,7 +395,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     );
   }
 
-  Widget _periodChips(AppLocalizations l10n) => Wrap(
+  /// White chips on the hero, the chosen one in ink.
+  Widget _periodChips(AppLocalizations l10n, BirdyColors c) => Wrap(
     spacing: BirdySpace.s,
     runSpacing: BirdySpace.s,
     children: [
@@ -365,86 +404,137 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
         BirdyFilterChip(
           label: _periodLabel(l10n, p),
           selected: _period == p,
+          selectedColors: BirdyChipColors.ink(c),
           onSelected: () => setState(() => _period = p),
         ),
     ],
   );
 
-  /// « Confirmées seulement » switch, then the sort and filter menu.
-  Widget _optionsRow(AppLocalizations l10n, BirdyColors c) => Row(
-    children: [
-      Expanded(
-        child: Semantics(
-          toggled: _confirmedOnly,
-          label: l10n.forkConfirmedOnly,
-          excludeSemantics: true,
-          child: InkWell(
-            onTap: () => setState(() => _confirmedOnly = !_confirmedOnly),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: BirdySizes.target),
-              child: Row(
-                children: [
-                  BirdySwitch(
-                    value: _confirmedOnly,
-                    onChanged: (v) => setState(() => _confirmedOnly = v),
-                  ),
-                  const SizedBox(width: BirdySpace.s),
-                  Flexible(
-                    child: Text(
-                      l10n.forkConfirmedOnly,
-                      style: BirdyText.bodyCompact.copyWith(color: c.text1),
-                    ),
-                  ),
-                ],
-              ),
+  /// Title 20 of a white block, with [trailing] on its baseline.
+  Widget _blockTitle(String title, BirdyColors c, {required Widget trailing}) =>
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: BirdyText.heading.copyWith(color: c.text1),
             ),
           ),
-        ),
-      ),
-      const SizedBox(width: BirdySpace.s),
-      Flexible(
-        child: PopupMenuButton<Object>(
-          tooltip: l10n.forkRankingSortMenu,
-          onSelected:
-              (choice) => setState(() {
-                if (choice is RankingOrder) _order = choice;
-                if (choice == #birds) _birdsOnly = !_birdsOnly;
-              }),
-          itemBuilder:
-              (context) => [
-                for (final o in RankingOrder.values)
-                  CheckedPopupMenuItem<Object>(
-                    value: o,
-                    checked: _order == o,
-                    child: Text(_orderLabel(l10n, o)),
-                  ),
-                const PopupMenuDivider(),
-                CheckedPopupMenuItem<Object>(
-                  value: #birds,
-                  checked: _birdsOnly,
-                  child: Text(l10n.forkBirdsOnly),
-                ),
-              ],
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: BirdySizes.target),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    l10n.forkRankingSortedBy(_orderWord(l10n, _order)),
-                    textAlign: TextAlign.end,
-                    style: BirdyText.caption.copyWith(color: c.text2),
-                  ),
-                ),
-                Icon(AppIcons.expandMore, color: c.text2),
-              ],
+          trailing,
+        ],
+      );
+
+  /// « Confirmées » switch of the podium block header.
+  Widget _confirmedSwitch(AppLocalizations l10n, BirdyColors c) => Semantics(
+    toggled: _confirmedOnly,
+    label: l10n.forkConfirmedOnly,
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () => setState(() => _confirmedOnly = !_confirmedOnly),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: BirdySizes.target),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.forkConfirmedShort,
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
             ),
-          ),
+            const SizedBox(width: BirdySpace.s),
+            BirdySwitch(
+              value: _confirmedOnly,
+              onChanged: (v) => setState(() => _confirmedOnly = v),
+            ),
+          ],
         ),
       ),
-    ],
+    ),
   );
+
+  /// « par contacts ▾ » of the list block header: opens the sort sheet.
+  Widget _sortControl(AppLocalizations l10n, BirdyColors c) => InkWell(
+    onTap: _openSortSheet,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: BirdySizes.target),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.forkRankingByShort(_orderWord(l10n, _order)),
+            style: BirdyText.caption.copyWith(color: c.text2),
+          ),
+          Icon(AppIcons.expandMore, color: c.text2),
+        ],
+      ),
+    ),
+  );
+
+  /// Sort order and « Oiseaux seulement » filter, in a sheet.
+  Future<void> _openSortSheet() {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    Widget option(String label, bool checked, VoidCallback onTap) => InkWell(
+      onTap: () {
+        Navigator.of(context).pop();
+        setState(onTap);
+      },
+      child: Semantics(
+        checked: checked,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BirdySizes.target),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: BirdySpace.xl),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: BirdyText.label.copyWith(color: c.text1),
+                  ),
+                ),
+                if (checked)
+                  Icon(AppIcons.checkRounded, color: c.accentText)
+                else
+                  const SizedBox(width: BirdySpace.xxl),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return showBirdySheet<void>(
+      context: context,
+      builder:
+          (_) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  BirdySpace.xl,
+                  0,
+                  BirdySpace.xl,
+                  BirdySpace.s,
+                ),
+                child: Text(
+                  l10n.forkRankingSortMenu,
+                  style: BirdyText.heading.copyWith(color: c.text1),
+                ),
+              ),
+              for (final o in RankingOrder.values)
+                option(_orderLabel(l10n, o), _order == o, () => _order = o),
+              Divider(height: BirdyStroke.hairline, thickness: BirdyStroke.hairline, color: c.line),
+              option(
+                l10n.forkBirdsOnly,
+                _birdsOnly,
+                () => _birdsOnly = !_birdsOnly,
+              ),
+              const SizedBox(height: BirdySpace.s),
+            ],
+          ),
+    );
+  }
 
   /// Fades [child] in in place: a loaded value replacing its skeleton.
   /// [child]'s own key tells the switcher when to cross-fade.
@@ -462,16 +552,16 @@ class _RankingHeaderSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.end,
-          spacing: BirdySpace.s,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
           children: [
             BirdySkeleton.text(
               BirdyText.numberXL.copyWith(color: c.text1),
               placeholder: '00',
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5),
+            const SizedBox(width: BirdySpace.s),
+            Flexible(
               child: BirdySkeleton.text(
                 BirdyText.body.copyWith(color: c.text1),
                 placeholder: '000000000000000000',
@@ -479,7 +569,7 @@ class _RankingHeaderSkeleton extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: BirdySpace.xs),
         // Two lines, like the real caption's cap (ranking_widgets.dart).
         BirdySkeleton.text(
           BirdyText.caption.copyWith(color: c.text2),
@@ -492,59 +582,57 @@ class _RankingHeaderSkeleton extends StatelessWidget {
   }
 }
 
-/// A sensible number of skeleton rows, at [RankingRow]'s own minimum
-/// height, filling a typical viewport under the header and chips.
+/// A sensible number of skeleton rows in one white block, at [RankingRow]'s
+/// own minimum height, filling a typical viewport under the hero.
 class _RankingListSkeleton extends StatelessWidget {
   const _RankingListSkeleton();
 
-  static const int _rows = 6;
+  static const int _rows = 5;
 
   @override
   Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return SliverList.builder(
-      itemCount: _rows,
-      itemBuilder: (context, index) {
-        final key = index == 0 ? const ValueKey('ranking-list-first') : null;
-        return Padding(
-          key: key,
-          padding: const EdgeInsets.symmetric(vertical: BirdySpace.xs),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 60),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 28,
-                  child: BirdySkeleton.text(BirdyText.label, placeholder: '00'),
-                ),
-                BirdySkeleton.box(width: 36, height: 36, radius: 18),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BirdySkeleton.text(
-                        BirdyText.species,
-                        placeholder: '000000000000000',
-                      ),
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(BirdyRadii.pill),
-                        child: SizedBox(
-                          height: 8,
-                          child: ColoredBox(color: c.skeleton),
-                        ),
-                      ),
-                    ],
+    return BirdyListBlock(
+      children: [
+        for (var index = 0; index < _rows; index++)
+          ConstrainedBox(
+            key: index == 0 ? const ValueKey('ranking-list-first') : null,
+            constraints: const BoxConstraints(minHeight: BirdySizes.row),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BirdySpace.l,
+                vertical: BirdySpace.s,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: BirdyGlyph.x5l,
+                    child: BirdySkeleton.text(
+                      BirdyText.label,
+                      placeholder: '00',
+                    ),
                   ),
-                ),
-                const SizedBox(width: BirdySpace.m),
-                BirdySkeleton.text(BirdyText.numberM, placeholder: '00'),
-              ],
+                  BirdySkeleton.box(width: BirdyGlyph.disc36, height: BirdyGlyph.disc36, radius: BirdyRadii.pill),
+                  const SizedBox(width: BirdySpace.cozy),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BirdySkeleton.text(
+                          BirdyText.species,
+                          placeholder: '000000000000000',
+                        ),
+                        const SizedBox(height: BirdySpace.snug),
+                        BirdySkeleton.bar(height: BirdySpace.s),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: BirdySpace.m),
+                  BirdySkeleton.text(BirdyText.numberM, placeholder: '00'),
+                ],
+              ),
             ),
           ),
-        );
-      },
+      ],
     );
   }
 }

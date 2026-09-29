@@ -126,7 +126,17 @@ abstract final class AppIcons {
   static const IconData micNoneOutlined = Symbols.mic_none;
   static const IconData micOff = Symbols.mic_off;
   static const IconData micRounded = Symbols.mic_rounded;
+  static const IconData moreHoriz = Symbols.more_horiz; // FORK: J6h
   static const IconData moreVert = Symbols.more_vert;
+  static const IconData wbTwilight = Symbols.wb_twilight; // FORK: J6h
+  static const IconData smartphone = Symbols.smartphone; // FORK: J6h
+  static const IconData lightMode = Symbols.light_mode; // FORK: J6h
+  static const IconData translate = Symbols.translate; // FORK: J6h
+  static const IconData image = Symbols.image; // FORK: J6h
+  static const IconData visibilityOff = Symbols.visibility_off; // FORK: J6h
+  static const IconData flight = Symbols.flight; // FORK: J6h
+  static const IconData notifications = Symbols.notifications; // FORK: J6h
+  static const IconData autoAwesome = Symbols.auto_awesome; // FORK: J6h
   static const IconData musicNote = Symbols.music_note;
   static const IconData myLocation = Symbols.my_location;
   static const IconData noteAdd = Symbols.note_add;
@@ -137,6 +147,7 @@ abstract final class AppIcons {
       Symbols.notifications_active_rounded;
   static const IconData openInNew = Symbols.open_in_new;
   static const IconData parkRounded = Symbols.park_rounded;
+  static const IconData pets = Symbols.pets; // FORK: J6h, Ennemis section
   static const IconData pause = Symbols.pause;
   static const IconData pauseRounded = Symbols.pause_rounded;
   static const IconData partlyCloudyDay = Symbols.partly_cloudy_day;

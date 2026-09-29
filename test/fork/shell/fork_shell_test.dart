@@ -35,6 +35,9 @@ class _FakeHome implements HomeLoader {
 
   @override
   Future<DateTime?> sunrise() async => null;
+
+  @override
+  Future<DateTime?> sunset() async => null;
 }
 
 class _FakeNotebook implements NotebookLoader {

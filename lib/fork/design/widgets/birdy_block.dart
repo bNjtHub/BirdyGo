@@ -113,6 +113,7 @@ class BirdyProgressBar extends StatelessWidget {
     required this.value,
     required this.color,
     required this.track,
+    this.height = BirdySizes.progressBar,
   });
 
   /// 0 to 1.
@@ -120,17 +121,20 @@ class BirdyProgressBar extends StatelessWidget {
   final Color color;
   final Color track;
 
+  /// [BirdySizes.countdownBar] for a countdown (J6h).
+  final double height;
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(BirdyRadii.pill),
       child: SizedBox(
-        height: BirdySizes.progressBar,
+        height: height,
         child: LinearProgressIndicator(
           value: value.clamp(0.0, 1.0),
           color: color,
           backgroundColor: track,
-          minHeight: BirdySizes.progressBar,
+          minHeight: height,
         ),
       ),
     );
