@@ -14,13 +14,21 @@ import 'fine_ear_quiz_screen.dart';
 import 'quiz_logo.dart';
 
 class QuizEntryRow extends StatelessWidget {
-  const QuizEntryRow({super.key, this.subtitle, this.onTap});
+  const QuizEntryRow({
+    super.key,
+    this.subtitle,
+    this.onTap,
+    this.bordered = false,
+  });
 
   /// Defaults to the Profil's line.
   final String? subtitle;
 
   /// Defaults to opening the quiz.
   final VoidCallback? onTap;
+
+  /// A hairline outline (the Profil's look, on its background).
+  final bool bordered;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +42,10 @@ class QuizEntryRow extends StatelessWidget {
       child: Pressable(
         child: Material(
           color: c.surface1,
-          borderRadius: BorderRadius.circular(BirdyRadii.card),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BirdyRadii.card),
+            side: bordered ? BorderSide(color: c.line) : BorderSide.none,
+          ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap:

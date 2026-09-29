@@ -29,7 +29,7 @@ import '../game/game_progress.dart';
 import '../game/game_text.dart';
 import '../game/fine_ear_quiz_screen.dart';
 import '../game/game_widgets.dart';
-import '../game/quiz_logo.dart';
+import '../game/quiz_entry_row.dart';
 import '../game/streak.dart';
 import '../settings/fork_prefs.dart';
 import '../ranking/ranking_screen.dart';
@@ -908,7 +908,7 @@ class _EarnCardSkeleton extends StatelessWidget {
         const SizedBox(height: BirdySpace.m),
         _BadgesSkeleton(),
         const SizedBox(height: BirdySpace.m),
-        const _QuizEntry(),
+        const QuizEntryRow(bordered: true),
       ],
     );
   }
@@ -1026,7 +1026,7 @@ class _EarnCard extends StatelessWidget {
         const SizedBox(height: BirdySpace.m),
         _Badges(badges: sortedBadges),
         const SizedBox(height: BirdySpace.m),
-        const _QuizEntry(),
+        const QuizEntryRow(bordered: true),
       ],
     );
   }
@@ -1292,58 +1292,3 @@ class _Badges extends StatelessWidget {
 void _openQuiz(BuildContext context) => Navigator.of(
   context,
 ).push(MaterialPageRoute<void>(builder: (_) => const FineEarQuizScreen()));
-
-/// « Qui chante ? »: the quiz behind the Oreille fine badge.
-class _QuizEntry extends StatelessWidget {
-  const _QuizEntry();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    return Semantics(
-      label: '${l10n.forkQuizTitle}. ${l10n.forkQuizEntrySubtitle}',
-      button: true,
-      excludeSemantics: true,
-      child: Pressable(
-        child: Material(
-          color: c.surface1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(BirdyRadii.card),
-            side: BorderSide(color: c.line),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(BirdyRadii.card),
-            onTap: () => _openQuiz(context),
-            child: Padding(
-              padding: const EdgeInsets.all(BirdySpace.l),
-              child: Row(
-                children: [
-                  const ExcludeSemantics(child: QuizLogo()),
-                  const SizedBox(width: BirdySpace.l),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.forkQuizTitle,
-                          style: BirdyText.heading.copyWith(color: c.text1),
-                        ),
-                        const SizedBox(height: BirdySpace.xs),
-                        Text(
-                          l10n.forkQuizEntrySubtitle,
-                          style: BirdyText.bodyCompact.copyWith(color: c.text2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(AppIcons.chevronRight, color: c.text2),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
