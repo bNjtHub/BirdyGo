@@ -132,7 +132,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
-          taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
           observationIndexServiceProvider.overrideWith((ref) => service),
           reviewWriterProvider.overrideWithValue(_Writer()),
           geoPresenceServiceProvider.overrideWithValue(_Geo()),
@@ -190,9 +192,7 @@ void main() {
     expect(find.text('1 sur 2'), findsOneWidget);
   });
 
-  testWidgets('reduced motion: nothing animates while loading', (
-    tester,
-  ) async {
+  testWidgets('reduced motion: nothing animates while loading', (tester) async {
     await pump(tester, reducedMotion: true);
     await tester.pump();
     final before = tester.getRect(

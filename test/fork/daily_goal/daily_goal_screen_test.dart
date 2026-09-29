@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_card.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_providers.dart';
 import 'package:birdnet_live/fork/daily_goal/daily_goal_screen.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
@@ -47,6 +50,8 @@ void main() {
     bool progressError = false,
     Size size = const Size(390, 844),
     double textScale = 1,
+    bool dark = false,
+    Completer<Set<String>>? slowProgress,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -61,6 +66,7 @@ void main() {
             return null;
           }),
           dailyGoalProgressProvider.overrideWith((ref) async {
+            if (slowProgress != null) return slowProgress.future;
             // Follow replacements just as the real progress provider does.
             final goal = ref.watch(dailyGoalProvider).goal;
             if (progressError) throw StateError('Index unavailable');
@@ -75,7 +81,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: BirdyTheme.light(),
+          theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -90,7 +96,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // While progress is still pending its skeleton may shimmer forever
+    // (J6g-g), so pumpAndSettle would never return: pump past the entrance.
+    if (slowProgress != null) {
+      await tester.pump(const Duration(seconds: 1));
+    } else {
+      await tester.pumpAndSettle();
+    }
   }
 
   testWidgets('home card is passive until opened', (tester) async {
@@ -159,6 +171,43 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.drag(find.byType(ListView).first, const Offset(0, -1100));
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('uses the overlay header, not a Material app bar', (
+    tester,
+  ) async {
+    await saveGoal();
+    await pump(tester);
+    expect(find.byType(BirdyOverlayHeader), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('progress load shows skeletons, not a spinner', (tester) async {
+    await saveGoal();
+    final slow = Completer<Set<String>>();
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, slowProgress: slow);
+    // pumpAndSettle in pump() ends with progress still pending.
+    expect(
+      find.byKey(const ValueKey('dailyGoalProgressSkeleton')),
+      findsOneWidget,
+    );
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    slow.complete({'Species 0'});
+    await tester.pumpAndSettle();
+    expect(find.text('1/8 espèces entendues'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('small phone, 130 %, dark: no overflow', (tester) async {
+    await saveGoal();
+    await pump(tester, size: const Size(320, 640), textScale: 1.3, dark: true);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });

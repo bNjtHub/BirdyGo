@@ -12,6 +12,9 @@ import '../../shared/widgets/content_width_constraint.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/species_avatar.dart';
 import '../design/widgets/species_tile.dart';
 import 'daily_goal.dart';
@@ -45,52 +48,35 @@ class DailyGoalReplacementScreen extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
+                  BirdySpace.page,
                   BirdySpace.s,
+                  BirdySpace.page,
                   BirdySpace.s,
-                  BirdySpace.gutter,
-                  BirdySpace.m,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      icon: const Icon(AppIcons.arrowBackRounded),
-                      tooltip:
-                          MaterialLocalizations.of(context).backButtonTooltip,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(width: BirdySpace.s),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: BirdySpace.s),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.forkDailyGoalChooseReplacement,
-                              style: BirdyText.title.copyWith(
-                                color: colors.text1,
-                              ),
-                            ),
-                            const SizedBox(height: BirdySpace.xs),
-                            Text(
-                              l10n.forkDailyGoalReplace(nameOf(replacing)),
-                              style: BirdyText.caption.copyWith(
-                                color: colors.text2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                child: BirdyOverlayHeader(
+                  title: l10n.forkDailyGoalChooseReplacement,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  BirdySpace.page,
+                  0,
+                  BirdySpace.page,
+                  BirdySpace.block,
+                ),
+                child: BirdyBlock(
+                  tone: BirdyBlockTone.tonal,
+                  child: Text(
+                    l10n.forkDailyGoalReplace(nameOf(replacing)),
+                    style: BirdyText.bodyCompact.copyWith(color: colors.text1),
+                  ),
                 ),
               ),
               Expanded(
                 child:
                     alternatives.isEmpty
                         ? ListView(
-                          padding: const EdgeInsets.all(BirdySpace.gutter),
+                          padding: const EdgeInsets.all(BirdySpace.page),
                           children: [
                             Text(
                               l10n.forkDailyGoalNoReplacement,
@@ -102,9 +88,9 @@ class DailyGoalReplacementScreen extends ConsumerWidget {
                         )
                         : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(
-                            BirdySpace.gutter,
+                            BirdySpace.page,
                             0,
-                            BirdySpace.gutter,
+                            BirdySpace.page,
                             BirdySpace.xxl,
                           ),
                           itemCount: alternatives.length,
@@ -122,7 +108,7 @@ class DailyGoalReplacementScreen extends ConsumerWidget {
                                       ?.displayScientificName ??
                                   bird.scientificName,
                               avatar: SpeciesAvatar(
-                                size: 64,
+                                size: BirdySizes.mainAction + BirdySpace.s,
                                 tint: SpeciesAccents.tintOf(
                                   bird.scientificName,
                                 ),
@@ -133,9 +119,9 @@ class DailyGoalReplacementScreen extends ConsumerWidget {
                                   null => null,
                                 },
                               ),
-                              action: IconButton.filledTonal(
-                                icon: const Icon(AppIcons.addRounded),
-                                tooltip: name,
+                              action: BirdyIconButton(
+                                icon: AppIcons.addRounded,
+                                semanticLabel: name,
                                 onPressed: select,
                               ),
                               onTap: select,
