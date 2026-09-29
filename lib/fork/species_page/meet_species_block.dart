@@ -14,6 +14,8 @@ import '../design/widgets/birdy_block.dart';
 import '../game/game_widgets.dart' show SegmentedBar;
 import '../game/quiz_entry_row.dart';
 import '../species_sheet/species_sheet.dart';
+import '../species_sheet/species_sheet_section.dart' show sheetSectionTitle;
+import 'section_title.dart';
 
 /// The five sections, in display order (a subset of [SheetSection]).
 const List<SheetSection> kMeetSections = [
@@ -66,6 +68,58 @@ String _hookOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   _ => l10n.forkMeetHookAnecdote,
 };
 
+/// Sections outside the five discs, shown as their own tinted blocks so
+/// nothing of the sheet is lost (J6h fix).
+const List<SheetSection> kMeetExtras = [
+  SheetSection.whyHere,
+  SheetSection.confusions,
+];
+
+IconData _extraIcon(SheetSection s) =>
+    s == SheetSection.whyHere ? AppIcons.locationOn : AppIcons.swapHoriz;
+
+/// A section of the sheet as a tonal block: species-tint icon disc, 20
+/// title, then the text.
+class _MeetExtraBlock extends StatelessWidget {
+  const _MeetExtraBlock({super.key, required this.section, required this.text});
+
+  final SheetSection section;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return BirdyBlock(
+      tone: BirdyBlockTone.tonal,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionTitle(
+            icon: _extraIcon(section),
+            text: sheetSectionTitle(l10n, section),
+          ),
+          const SizedBox(height: BirdySpace.m),
+          Text(text, style: BirdyText.body.copyWith(color: c.text1)),
+        ],
+      ),
+    );
+  }
+}
+
+/// The extra sections of [sheet] that have content, each with a gap above.
+List<Widget> _extraBlocks(SpeciesSheet sheet) => [
+  for (final s in kMeetExtras)
+    if (sheet.sections[s] != null) ...[
+      const SizedBox(height: BirdySpace.block),
+      _MeetExtraBlock(
+        key: ValueKey('meet-extra-${s.key}'),
+        section: s,
+        text: sheet.sections[s]!,
+      ),
+    ],
+];
+
 /// Fill and foreground of a tone on the current theme.
 ({Color fill, Color fore}) _colors(BirdyColors c, _Tone t) => switch (t) {
   _Tone.tonal => (fill: c.tonal, fore: c.accentText),
@@ -106,6 +160,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                 style: BirdyText.bodyCompact.copyWith(color: c.text2),
               ),
             ),
+          ..._extraBlocks(widget.sheet),
           const SizedBox(height: BirdySpace.block),
           QuizEntryRow(
             subtitle: l10n.forkMeetQuizSubtitle,
@@ -267,6 +322,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
             ],
           ),
         ),
+        ..._extraBlocks(widget.sheet),
         const SizedBox(height: BirdySpace.block),
         QuizEntryRow(
           subtitle: l10n.forkMeetQuizSubtitle,
