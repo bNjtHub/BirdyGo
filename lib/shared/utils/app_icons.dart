@@ -130,6 +130,10 @@ abstract final class AppIcons {
   static const IconData moreVert = Symbols.more_vert;
   static const IconData wbTwilight = Symbols.wb_twilight; // FORK: J6h
   static const IconData smartphone = Symbols.smartphone; // FORK: J6h
+  static const IconData lightMode = Symbols.light_mode; // FORK: J6h
+  static const IconData translate = Symbols.translate; // FORK: J6h
+  static const IconData image = Symbols.image; // FORK: J6h
+  static const IconData visibilityOff = Symbols.visibility_off; // FORK: J6h
   static const IconData flight = Symbols.flight; // FORK: J6h
   static const IconData notifications = Symbols.notifications; // FORK: J6h
   static const IconData autoAwesome = Symbols.auto_awesome; // FORK: J6h
