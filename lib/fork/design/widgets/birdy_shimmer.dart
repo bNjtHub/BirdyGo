@@ -26,7 +26,7 @@ class BirdyShimmerClock {
   static final BirdyShimmerClock instance = BirdyShimmerClock._();
 
   /// Sweep progress in [0, 1] while the band crosses, or null while resting.
-  final ValueNotifier<double?> progress = ValueNotifier<double?>(null);
+  final _ProgressNotifier progress = _ProgressNotifier();
 
   Ticker? _ticker;
   int _users = 0;
@@ -62,7 +62,27 @@ class BirdyShimmerClock {
     _users = 0;
     _ticker?.dispose();
     _ticker = null;
-    progress.value = null;
+    progress.reset();
+  }
+}
+
+/// Sweep progress that can be cleared without notifying: the last skeleton
+/// releases the clock while the tree is being torn down or built, where a
+/// listener's setState would throw.
+class _ProgressNotifier extends ValueNotifier<double?> {
+  _ProgressNotifier() : super(null);
+
+  bool _quiet = false;
+
+  void reset() {
+    _quiet = true;
+    value = null;
+    _quiet = false;
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_quiet) super.notifyListeners();
   }
 }
 
