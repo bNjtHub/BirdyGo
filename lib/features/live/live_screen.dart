@@ -41,6 +41,7 @@ import '../../fork/live/detection_marks.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_control_bar.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
+import '../../fork/live/media_volume_banner.dart'; // FORK: media volume warning (J6h)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import '../../fork/live/live_expected.dart'; // FORK: listening screen (J6f)
@@ -1165,10 +1166,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                             },
                           )
                           : null,
-                  banner:
-                      liveState == LiveState.error
-                          ? _StatusBanner(liveState: liveState, ref: ref)
-                          : null,
+                  // FORK: media volume warning (J6h), above the error banner
+                  banner: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (inSession && !_forkPractice)
+                        const MediaVolumeBanner(),
+                      if (liveState == LiveState.error)
+                        _StatusBanner(liveState: liveState, ref: ref),
+                    ],
+                  ),
                 ),
               ),
             ),

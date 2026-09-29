@@ -819,6 +819,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Carte : puces en encre, bulle 13, retour quand elle est poussée.
       - [x] Revue : pile centrée verticalement.
       - [x] Premier lancement : étape prénom facultative.
+      - [x] Écoute : alerte « Volume coupé / Volume bas » (volume média sous `MediaVolumeConfig.lowBelow`,
+            lu chaque seconde par `MediaVolume`) et bouton « Monter le son » (`comfortable`, avec le
+            curseur système). Canal `fr.justcodeit.birdygo/media_volume`, `MediaVolumeChannel.kt`.
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
@@ -924,6 +927,9 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Quiz « Qui chante ? » (J6e) : aucun code natif. Bruitages en WAV lus par just_audio avec un
   lecteur à part : sur iPhone, vérifier qu'ils ne coupent pas une musique en cours (session audio
   « ambient » ou mixage) et que le mode silencieux est respecté.
+- Volume média (J6h) : `AVAudioSession.outputVolume` en lecture seule ; iOS ne permet pas de régler
+  le volume (`MPVolumeView` seulement) → bouton qui ouvre le curseur système. En attendant,
+  `NoopMediaVolume` ne montre aucune alerte.
 - Modes d'écoute (J6f) : Dart pur, aucun code natif. Gain, filtre passe-haut et réducteur du mode
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même

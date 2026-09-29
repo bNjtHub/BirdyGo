@@ -6200,5 +6200,13 @@
   "forkOnbNameContinue": "Continue",
   "@forkOnbNameContinue": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
   "forkOnbNameFieldLabel": "First name",
-  "@forkOnbNameFieldLabel": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."}
+  "@forkOnbNameFieldLabel": {"description": "BirdyGo fork: optional first-name step of the first launch (J6h)."},
+  "forkVolumeMuted": "Volume off",
+  "@forkVolumeMuted": {"description": "BirdyGo fork: media volume warning on the listening screen (J6h)."},
+  "forkVolumeLow": "Volume low",
+  "@forkVolumeLow": {"description": "BirdyGo fork: media volume warning on the listening screen (J6h)."},
+  "forkVolumeCaption": "You won't hear replayed songs.",
+  "@forkVolumeCaption": {"description": "BirdyGo fork: media volume warning on the listening screen (J6h)."},
+  "forkVolumeRaise": "Turn it up",
+  "@forkVolumeRaise": {"description": "BirdyGo fork: button that raises the media volume (J6h)."}
 }
