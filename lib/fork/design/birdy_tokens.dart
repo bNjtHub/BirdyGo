@@ -159,6 +159,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.line,
     required this.border,
     required this.borderStrong,
+    required this.progressTrack,
     required this.dashed,
     required this.text1,
     required this.text2,
@@ -205,6 +206,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
 
   /// Secondary buttons.
   final Color borderStrong;
+
+  /// Empty part of a progress bar and idle step dots. Darker than
+  /// [borderStrong] in the dark theme, so the fill keeps 3:1 (WCAG 1.4.11).
+  final Color progressTrack;
 
   /// Mystery cards (1.5 px dashed).
   final Color dashed;
@@ -305,6 +310,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     line: Color(0xFFDCE2DA),
     border: Color(0xFFC5CCC2),
     borderStrong: Color(0xFFC5CCC2),
+    progressTrack: Color(0xFFDCE2DA),
     dashed: Color(0xFFB9C0B5),
     text1: BirdyBrand.ink,
     text2: BirdyBrand.bark,
@@ -348,6 +354,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     line: Color(0x14EEF1EC),
     border: Color(0x24EEF1EC),
     borderStrong: Color(0x52EEF1EC),
+    progressTrack: Color(0x24EEF1EC),
     dashed: Color(0x52EEF1EC),
     text1: BirdyBrand.mist,
     text2: Color(0xFFB4C0CC),
@@ -406,6 +413,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       line: c(line, other.line),
       border: c(border, other.border),
       borderStrong: c(borderStrong, other.borderStrong),
+      progressTrack: c(progressTrack, other.progressTrack),
       dashed: c(dashed, other.dashed),
       text1: c(text1, other.text1),
       text2: c(text2, other.text2),

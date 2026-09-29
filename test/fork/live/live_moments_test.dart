@@ -68,6 +68,7 @@ void main() {
       ]);
       expect(moment!.kind, LiveMomentKind.firstTime);
       expect(moment.entry.scientificName, 'Dendrocopos major');
+      tracker.shown(moment);
       expect(moment.rank, 2);
       expect(next(tracker, [_entry('Dendrocopos major', 0.97)]), isNull);
     });
@@ -85,9 +86,10 @@ void main() {
       final tracker = LiveMomentTracker(verifiedBefore: {'Turdus merula'});
       final moment = next(tracker, [_entry('Upupa epops', 0.93)]);
       expect(moment!.kind, LiveMomentKind.rare);
-      expect(moment.rank, 2);
+      expect(moment.rank, 0);
       expect(tracker.verifiedCount, 1);
-      tracker.confirmed();
+      tracker.confirmed(moment);
+      expect(moment.rank, 2);
       expect(tracker.verifiedCount, 2);
       // A rare bird too faint for « Probable » stays a plain row.
       expect(
@@ -121,8 +123,9 @@ void main() {
         LiveMomentKind.firstTime,
         LiveMomentKind.rare,
       ]);
-      expect(all.take(2).map((m) => m.rank), [2, 3]);
-      expect(tracker.verifiedCount, 3);
+      // Ranks are given when a card is shown, not when it is created.
+      expect(all.map((m) => m.rank), [0, 0, 0]);
+      expect(tracker.verifiedCount, 1);
       // Each species comes once.
       expect(
         tracker.nextAll(
@@ -132,6 +135,72 @@ void main() {
         ),
         isEmpty,
       );
+    });
+
+    group('ranks follow the order species are added', () {
+      List<LiveMoment> all(LiveMomentTracker t, List<LiveTableEntry> e) =>
+          t.nextAll(e, presenceOf: _presence, isBird: (_) => true);
+      final base = {'A1', 'A2', 'A3'};
+
+      test('a series of 3 shown in turn: 4th, 5th, 6th', () {
+        final t = LiveMomentTracker(verifiedBefore: base);
+        final m = all(t, [
+          _entry('B1', 0.95),
+          _entry('B2', 0.95),
+          _entry('B3', 0.95),
+        ]);
+        for (final x in m) {
+          t.shown(x);
+        }
+        expect(m.map((x) => x.rank), [4, 5, 6]);
+      });
+
+      test('series of 3 then a confirmed rare: next rank', () {
+        final t = LiveMomentTracker(verifiedBefore: base);
+        final m = all(t, [
+          _entry('B1', 0.95),
+          _entry('B2', 0.95),
+          _entry('B3', 0.95),
+        ]);
+        m.forEach(t.shown);
+        final rare = all(t, [_entry('Upupa epops', 0.93)]).single;
+        t.confirmed(rare);
+        expect(rare.rank, 7);
+        expect(t.verifiedCount, 7);
+      });
+
+      test('rare confirmed while firsts are queued: no duplicate rank', () {
+        final t = LiveMomentTracker(verifiedBefore: base);
+        final m = all(t, [
+          _entry('B1', 0.95),
+          _entry('B2', 0.95),
+          _entry('Upupa epops', 0.93),
+        ]);
+        final firsts = m.where((x) => x.kind == LiveMomentKind.firstTime);
+        final rare = m.singleWhere((x) => x.kind == LiveMomentKind.rare);
+        // The first card is shown, the rare bird interrupts it.
+        t.shown(firsts.first);
+        t.released(firsts.first);
+        t.confirmed(rare);
+        for (final x in firsts) {
+          t.shown(x);
+        }
+        final ranks = [rare.rank, ...firsts.map((x) => x.rank)];
+        expect(ranks, [4, 5, 6]);
+        expect(ranks.toSet().length, 3);
+      });
+
+      test('a declined rare bird consumes no rank', () {
+        final t = LiveMomentTracker(verifiedBefore: base);
+        final m = all(t, [_entry('Upupa epops', 0.93), _entry('B1', 0.95)]);
+        final rare = m.singleWhere((x) => x.kind == LiveMomentKind.rare);
+        final first = m.singleWhere((x) => x.kind == LiveMomentKind.firstTime);
+        t.shown(rare);
+        t.shown(first);
+        expect(rare.rank, 0);
+        expect(first.rank, 4);
+        expect(t.verifiedCount, 4);
+      });
     });
 
     test('non-birds and already verified species never trigger', () {
