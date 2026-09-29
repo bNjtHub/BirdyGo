@@ -457,6 +457,10 @@ abstract final class BirdySpace {
   static const double xxl = 24;
   static const double xxxl = 32;
 
+  /// Extra gap between the wing icon and the label of « Écouter » buttons,
+  /// on top of the 8 the button already puts (the bars read tight at 8).
+  static const double wingLabelGap = xs;
+
   /// Page gutter on light screens.
   static const double gutter = 20;
 
@@ -604,11 +608,10 @@ abstract final class BirdySizes {
 
   /// « Qui chante ? » (J6h): the intro's illustrated zone (the intro fits a
   /// 844 pt phone without scrolling), the mystery bird's « ? » on the wing,
-  /// and the disc and icon of the « Arrêter la partie ? » sheet.
+  /// and the [QuizLogo] disc of the « Arrêter la partie ? » sheet.
   static const double quizIntroHero = 210;
   static const double quizMark = 30;
   static const double quizSheetDisc = 72;
-  static const double quizSheetIcon = 36;
 
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
   /// check badge on the current one.

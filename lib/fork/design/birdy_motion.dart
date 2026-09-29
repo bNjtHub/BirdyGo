@@ -137,6 +137,19 @@ abstract final class BirdyMotion {
   /// reduced motion stops it (fork/DESIGN.md, Animations).
   static const Duration listeningLevelPeriod = Duration(milliseconds: 1300);
 
+  /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval] (plus or
+  /// minus up to [wingWaveJitter], so it never feels metronomic) the four
+  /// bars swell one after the other in [wingWave], then return exactly to
+  /// rest. A gentle level-meter hint, not a loop: at rest nothing ticks.
+  /// Each bar starts [wingWaveStagger] (share of the wave) after the
+  /// previous one and grows by [wingWaveAmplitude] of its length at most.
+  static const Duration wingWave = Duration(milliseconds: 900);
+  static const Duration wingWaveInterval = Duration(seconds: 7);
+  static const Duration wingWaveJitter = Duration(milliseconds: 1500);
+  static const Curve wingWaveCurve = Curves.easeInOut;
+  static const double wingWaveStagger = 0.12;
+  static const double wingWaveAmplitude = 0.22;
+
   /// Whether the platform asks for reduced motion.
   static bool reduced(BuildContext context) =>
       MediaQuery.maybeDisableAnimationsOf(context) ?? false;

@@ -1,7 +1,8 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/game/quiz_logo.dart';
 import 'package:birdnet_live/fork/game/quiz_stop_sheet.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
-import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('says what is kept, with the headphones disc', (tester) async {
+  testWidgets('says what is kept, with the quiz logo', (tester) async {
     await open(tester);
     expect(find.text('Arrêter la partie ?'), findsOneWidget);
     expect(
@@ -40,7 +41,11 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byIcon(AppIcons.headphones), findsOneWidget);
+    expect(find.byType(QuizLogo), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(QuizLogo)),
+      const Size.square(BirdySizes.quizSheetDisc),
+    );
   });
 
   testWidgets('« Arrêter » resolves to true', (tester) async {

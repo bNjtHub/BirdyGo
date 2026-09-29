@@ -15,6 +15,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_wing_icon.dart';
 import '../game/fine_ear_quiz_widgets.dart' show QuizWell;
 import '../game/quiz_decor.dart';
 import '../game/quiz_fx.dart';
@@ -162,7 +163,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepListenTitle,
         body: l10n.forkOnbStepListenBody,
-        icon: AppIcons.graphicEqRounded,
+        icon: const BirdyWingIcon(size: 26), // the Listen emblem
         bg: c.tonal,
         ink: c.accentText,
         tilt: -0.02,
@@ -170,7 +171,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepDiscoverTitle,
         body: l10n.forkOnbStepDiscoverBody,
-        icon: AppIcons.menuBook,
+        icon: Icon(AppIcons.menuBook, size: 26, color: c.orioleText),
         bg: c.orioleContainer,
         ink: c.orioleText,
         tilt: 0.017,
@@ -178,7 +179,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepCollectTitle,
         body: l10n.forkOnbStepCollectBody,
-        icon: AppIcons.quizSpark,
+        icon: Icon(AppIcons.quizSpark, size: 26, color: c.sure.foreground),
         bg: c.sure.background,
         ink: c.sure.foreground,
         tilt: -0.012,
@@ -238,7 +239,7 @@ class _StepCard extends StatelessWidget {
   final int number;
   final String title;
   final String body;
-  final IconData icon;
+  final Widget icon;
   final Color background;
   final Color ink;
 
@@ -281,7 +282,7 @@ class _StepCard extends StatelessWidget {
                   color: c.surface1,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 26, color: ink),
+                child: icon,
               ),
             ],
           ),

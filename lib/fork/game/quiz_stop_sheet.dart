@@ -10,7 +10,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_sheet.dart';
-import '../../shared/utils/app_icons.dart';
+import 'quiz_logo.dart';
 
 /// Asks whether to stop the round. Resolves to true when the player chose
 /// « Arrêter »; false for « Continuer » or a dismissed sheet.
@@ -45,21 +45,9 @@ class QuizStopSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: BirdySizes.quizSheetDisc,
-            height: BirdySizes.quizSheetDisc,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: c.orioleContainer,
-              shape: BoxShape.circle,
-            ),
-            child: ExcludeSemantics(
-              child: Icon(
-                AppIcons.headphones,
-                size: BirdySizes.quizSheetIcon,
-                color: c.orioleText,
-              ),
-            ),
+          // The quiz's own emblem, as on its Profil entry row.
+          const ExcludeSemantics(
+            child: QuizLogo(size: BirdySizes.quizSheetDisc),
           ),
           const SizedBox(height: BirdySpace.m),
           Semantics(

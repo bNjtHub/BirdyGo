@@ -228,7 +228,10 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
               shape: const StadiumBorder(),
               textStyle: BirdyText.label.copyWith(fontSize: 20),
             ),
-            icon: const BirdyWingIcon(),
+            icon: const Padding(
+              padding: EdgeInsetsDirectional.only(end: BirdySpace.wingLabelGap),
+              child: BirdyWingIcon(animated: true),
+            ),
             label: Text(l10n.forkDailyGoalListen),
             onPressed:
                 () => Navigator.of(context).push<void>(
