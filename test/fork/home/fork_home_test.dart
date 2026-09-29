@@ -423,6 +423,12 @@ void main() {
     tester,
   ) async {
     await pump(tester, snapshot: const HomeSnapshot(), withGame: false);
+    // The game skeletons shimmer forever here: no pumpAndSettle.
+    await tester.scrollUntilVisible(
+      find.textContaining('Aucun oiseau'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.textContaining('Aucun oiseau'), findsOneWidget);
     expect(find.textContaining('Dernier oiseau entendu'), findsNothing);
     expect(find.text('Écouter'), findsOneWidget);
