@@ -171,15 +171,17 @@ void main() {
     expect(find.textContaining('est une bonne réponse'), findsOneWidget);
   });
 
-  testWidgets('the card stack is centered between progress and verdicts', (
+  testWidgets('the card stack and hints are centered between progress and verdicts', (
     tester,
   ) async {
     await pump(tester);
     final progress = tester.getRect(find.byType(ReviewProgress));
     final stack = tester.getRect(find.byType(ReviewCardStack));
     final hints = tester.getRect(find.byType(SwipeHints));
+    final buttons = tester.getRect(find.byType(VerdictButtons));
     final above = stack.top - progress.bottom;
-    final below = hints.top - BirdySpace.s - stack.bottom;
+    final below = buttons.top - BirdySpace.m - hints.bottom;
+    expect(hints.top, greaterThan(stack.bottom));
     expect(above, greaterThan(0));
     expect((above - below).abs(), lessThan(2));
   });

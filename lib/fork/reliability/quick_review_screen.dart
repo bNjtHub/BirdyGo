@@ -311,9 +311,9 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
     IndexedDetection current,
   ) {
     final c = BirdyColors.of(context);
-    // FORK: J6h, the card stack is centered between the progress bar and the
-    // verdict buttons; when it does not fit (short screen, large text) the
-    // middle area scrolls instead of overflowing.
+    // The card stack and its swipe hints are centered together between the
+    // progress bar and the verdict buttons; when they do not fit (short
+    // screen, large text) the middle area scrolls instead of overflowing.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -326,38 +326,45 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
                     constraints: BoxConstraints(minHeight: box.maxHeight),
                     child: Center(
                       key: const ValueKey('quick-review-stack-area'),
-                      child: ReviewCardStack(
-                        behind: queue.length - _position - 1,
-                        top: GestureDetector(
-                          onPanUpdate: _onDragUpdate,
-                          onPanEnd: _onDragEnd,
-                          child: ValueListenableBuilder<Offset>(
-                            valueListenable: _offset,
-                            builder:
-                                (context, offset, child) => Transform.translate(
-                                  offset: offset,
-                                  child: child,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ReviewCardStack(
+                            behind: queue.length - _position - 1,
+                            top: GestureDetector(
+                              onPanUpdate: _onDragUpdate,
+                              onPanEnd: _onDragEnd,
+                              child: ValueListenableBuilder<Offset>(
+                                valueListenable: _offset,
+                                builder:
+                                    (context, offset, child) =>
+                                        Transform.translate(
+                                          offset: offset,
+                                          child: child,
+                                        ),
+                                child: ValueListenableBuilder<double>(
+                                  valueListenable: _fade,
+                                  builder:
+                                      (context, fade, child) =>
+                                          Opacity(opacity: fade, child: child),
+                                  child: _EnteringCard(
+                                    key: ValueKey(current.key),
+                                    child: _card(current),
+                                  ),
                                 ),
-                            child: ValueListenableBuilder<double>(
-                              valueListenable: _fade,
-                              builder:
-                                  (context, fade, child) =>
-                                      Opacity(opacity: fade, child: child),
-                              child: _EnteringCard(
-                                key: ValueKey(current.key),
-                                child: _card(current),
                               ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: BirdySpace.s),
+                          const SwipeHints(),
+                        ],
                       ),
                     ),
                   ),
                 ),
           ),
         ),
-        const SizedBox(height: BirdySpace.s),
-        const SwipeHints(),
         const SizedBox(height: BirdySpace.m),
         VerdictButtons(enabled: !_busy, onAnswer: _flyOff),
         const SizedBox(height: BirdySpace.m),
