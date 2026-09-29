@@ -57,6 +57,10 @@ class SingingLogo extends StatefulWidget {
   static const Rect _mark = Rect.fromLTWH(30, 72, 460, 372);
   static const Offset _boardOrigin = Offset(-80, 10);
 
+  // FORK: J6i, the onboarding's bird disc draws the same board.
+  static const Rect markRect = _mark;
+  static const Offset boardOrigin = _boardOrigin;
+
   /// Side of the logo painter's box (the brand SVG's view box).
   static const double _logoBox = 512;
 
