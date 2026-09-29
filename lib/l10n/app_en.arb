@@ -6045,5 +6045,13 @@
   "forkRareShort": "Rare",
   "@forkRareShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
   "forkExceptionalShort": "Exceptional",
-  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."}
+  "@forkExceptionalShort": {"description": "BirdyGo fork: rarity pill, short form for the notebook cards (J6h)."},
+  "forkLevelCongratsNamed": "Nice {name}, here you are",
+  "@forkLevelCongratsNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

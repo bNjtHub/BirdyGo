@@ -1762,5 +1762,13 @@
   "forkExceptionalHere": "Exceptionnel ici",
   "forkUncommonShort": "Peu commun",
   "forkRareShort": "Rare",
-  "forkExceptionalShort": "Exceptionnel"
+  "forkExceptionalShort": "Exceptionnel",
+  "forkLevelCongratsNamed": "Bravo {name}, te voilà",
+  "@forkLevelCongratsNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

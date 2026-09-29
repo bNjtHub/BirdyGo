@@ -579,6 +579,14 @@ abstract final class BirdySizes {
   /// check badge on the current one.
   static const double levelEmblem = 48;
   static const double levelCellMinHeight = 84;
+
+  /// Ladder connector strokes sit between emblems: each is the cell width
+  /// minus this inset, and the cell's vertical padding plus half the emblem
+  /// centers them on it.
+  static const double levelLineInset = 48;
+  static const double levelCellPadTop = 8;
+  static const double levelLineThick = 4;
+  static const double levelLineThin = 2;
   static const double levelCheckBadge = 20;
 
   /// Icon disc leading the level info box and a weekly challenge inset.
