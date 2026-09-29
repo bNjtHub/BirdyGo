@@ -458,8 +458,8 @@ abstract final class BirdySpace {
   static const double xxxl = 32;
 
   /// Extra gap between the wing icon and the label of « Écouter » buttons,
-  /// on top of the 8 the button already puts (the bars read tight at 8).
-  static const double wingLabelGap = xs;
+  /// on top of the 4 to 8 the button already puts (the bars read tight).
+  static const double wingLabelGap = s;
 
   /// Page gutter on light screens.
   static const double gutter = 20;

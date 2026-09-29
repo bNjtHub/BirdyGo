@@ -591,7 +591,6 @@ class _RankingListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
     return BirdyListBlock(
       children: [
         for (var index = 0; index < _rows; index++)
@@ -623,13 +622,7 @@ class _RankingListSkeleton extends StatelessWidget {
                           placeholder: '000000000000000',
                         ),
                         const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-                          child: SizedBox(
-                            height: 8,
-                            child: ColoredBox(color: c.skeleton),
-                          ),
-                        ),
+                        BirdySkeleton.bar(height: 8),
                       ],
                     ),
                   ),
