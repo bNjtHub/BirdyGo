@@ -2,6 +2,9 @@
 /// sections.
 library;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:birdnet_live/fork/species_page/meet_species_block.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -235,5 +238,39 @@ void main() {
         }
       });
     }
+  });
+  group('bundled Ennemis section', () {
+    late SpeciesSheets sheets;
+
+    setUpAll(() {
+      sheets = SpeciesSheets.fromGzip(
+        File(speciesSheetsAsset).readAsBytesSync(),
+      );
+    });
+
+    test('at least 80 bundled sheets have a non-empty Ennemis text', () {
+      final json =
+          jsonDecode(
+                utf8.decode(
+                  gzip.decode(File(speciesSheetsAsset).readAsBytesSync()),
+                ),
+              )
+              as Map<String, dynamic>;
+      var count = 0;
+      for (final key in (json['species'] as Map<String, dynamic>).keys) {
+        final text = sheets[key]!.sections[SheetSection.enemies];
+        if (text != null && text.trim().isNotEmpty) count++;
+      }
+      expect(count, greaterThanOrEqualTo(80));
+    });
+
+    testWidgets('shows six sections for a species with enemies', (
+      tester,
+    ) async {
+      final sheet = sheets['Accipiter nisus']!;
+      expect(meetAvailable(sheet), kMeetSections);
+      await _pump(tester, sheet);
+      expect(find.text('1/6 découverts'), findsOneWidget);
+    });
   });
 }
