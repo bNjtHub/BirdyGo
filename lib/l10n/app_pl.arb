@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Kontynuuj",
   "openInAppleMaps": "Otwórz w Mapach Apple",
   "aruCombinedSessionWarningTitle": "Pełny konflikt audio",
-  "aruCombinedSessionWarningBody": "Sesje łączone nie obsługują pełnego dźwięku. System przełączy się wtedy na zapisywanie fragmentów z próbkowaniem Smart. Przejdź do poprzedniego ekranu, aby zmienić ustawienia nagrywania, jeśli chcesz to zmodyfikować."
+  "aruCombinedSessionWarningBody": "Sesje łączone nie obsługują pełnego dźwięku. System przełączy się wtedy na zapisywanie fragmentów z próbkowaniem Smart. Przejdź do poprzedniego ekranu, aby zmienić ustawienia nagrywania, jeśli chcesz to zmodyfikować.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

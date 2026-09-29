@@ -1106,5 +1106,10 @@
   "permissionRequestIOS": "Продолжить",
   "openInAppleMaps": "Открыть в Apple Maps",
   "aruCombinedSessionWarningTitle": "Полный аудиоконфликт",
-  "aruCombinedSessionWarningBody": "Объединённые сессии не поддерживают полный звук. Система переключится на сохранение фрагментов с выборкой Smart. Перейдите на предыдущий экран, чтобы изменить настройки записи, если хотите это поменять."
+  "aruCombinedSessionWarningBody": "Объединённые сессии не поддерживают полный звук. Система переключится на сохранение фрагментов с выборкой Smart. Перейдите на предыдущий экран, чтобы изменить настройки записи, если хотите это поменять.",
+  "forkMomentNextSpecies": "Next species",
+  "forkMomentSeriesPos": "{pos} of {total} new",
+  "forkMomentClosesIn": "Closes by itself in {n} s",
+  "forkMomentNextIn": "Next in {n} s",
+  "forkMomentPausedSuffix": "· paused"
 }

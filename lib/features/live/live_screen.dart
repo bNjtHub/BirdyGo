@@ -1171,6 +1171,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                             presenceScoreOf:
                                 (name) => commonness?[name]?.currentScore,
                             clips: clips,
+                            // FORK: the countdown of a moment stops in pause (J6h)
+                            paused: isPaused,
                             imageFor: (name) {
                               final path = imagePath(name);
                               return path == null ? null : AssetImage(path);

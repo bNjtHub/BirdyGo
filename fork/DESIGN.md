@@ -185,6 +185,14 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   règle. Le cri BirdyGo joue une fois à l'arrivée, un retour haptique léger au clin d'œil ; pendant ce
   temps le logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un clin
   d'œil rapide sur place (450 ms). Les appuis pendant la séquence sont ignorés.
+- Première rencontre en série (J6h) : les Sûres entendues pendant qu'une carte est ouverte, ou app en arrière-plan,
+  forment une file (rang figé, « 1 sur 3 nouvelles », points `BirdyStepDots`) ; un rare passe devant. Barre de
+  décompte 6 px (`BirdyProgressBar`, 6 s linéaires, `firstEncounterShown`) et texte « Se referme seul dans n s » /
+  « Suivante dans n s », figés en pause (« · en pause »), la carte passe à la suivante ou se ferme à zéro.
+  Logo « L'écoute continue » = `BirdyListeningLogo` (barres 0,45 à 1, 1 s, décalage 0,18 ; même logo à 24 px dans
+  l'en-tête), figé en pause. Feu d'artifice : deux salves de confettis (22 puis 14, `BirdyConfettiBurst`) et
+  4 étincelles (`BirdySparkles`), une fois. Animations réduites : barre en paliers d'une seconde, texte mis à
+  jour, ni confetti ni étincelles, logo immobile.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
 - Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule

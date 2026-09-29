@@ -823,6 +823,9 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             lu chaque seconde par `MediaVolume`) et bouton « Monter le son » (`comfortable`, avec le
             curseur système). Canal `fr.justcodeit.birdygo/media_volume`, `MediaVolumeChannel.kt`.
       - [x] Écoute : notification d'une nouvelle espèce (Sûr ou Probable, première fois de la session) quand l'app est en arrière-plan ; canal « Nouvelles espèces », interrupteur dans les options d'écoute (`lib/fork/notifications/`). Côté iOS : autorisation de notification (UNUserNotificationCenter) et mode d'arrière-plan audio nécessaires.
+      - [x] Écoute : premières rencontres en série (file, « 1 sur 3 nouvelles », points, « Espèce suivante »),
+            barre de décompte qui se fige en pause, retour d'arrière-plan, logo animé partagé
+            (`BirdyListeningLogo`), feu d'artifice en deux salves et étincelles (`BirdySparkles`).
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
       - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.

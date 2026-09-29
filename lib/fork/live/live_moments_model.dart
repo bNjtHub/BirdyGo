@@ -24,8 +24,8 @@ class LiveMoment {
 }
 
 /// Tracks the moments of one listening. Each species gets one moment at
-/// most; a moment that comes while another is shown is dropped (the Bilan
-/// lists it), as SPEC.md 6.1 asks.
+/// most. Moments that come while another is shown are queued by the screen
+/// (J6h: a series of first encounters) rather than dropped.
 class LiveMomentTracker {
   LiveMomentTracker({required Set<String> verifiedBefore})
     : _verifiedBefore = verifiedBefore;
@@ -45,40 +45,68 @@ class LiveMomentTracker {
     required bool Function(String scientificName) isBird,
   }) {
     for (final entry in entries) {
-      final name = entry.scientificName;
-      if (_handled.contains(name) ||
-          _verifiedBefore.contains(name) ||
-          !isBird(name)) {
-        continue;
-      }
-      final record = entry.record;
-      final presence = presenceOf(name);
-      final level = reliabilityFor(
-        score: record.confidence,
-        review: record.reviewStatus,
-        presence: presence,
+      final moment = _momentOf(entry, presenceOf, isBird);
+      if (moment != null) return moment;
+    }
+    return null;
+  }
+
+  /// Every new moment among [entries], in the order of [entries] (J6h): a
+  /// series when several birds were heard while the screen was elsewhere,
+  /// or while a card was open. Ranks are fixed here (25th, 26th, 27th). A
+  /// rare bird's rank counts the birds of the series before it, though it
+  /// is asked first.
+  List<LiveMoment> nextAll(
+    List<LiveTableEntry> entries, {
+    required GeoPresence? Function(String scientificName) presenceOf,
+    required bool Function(String scientificName) isBird,
+  }) {
+    final moments = <LiveMoment>[];
+    for (final entry in entries) {
+      final moment = _momentOf(entry, presenceOf, isBird);
+      if (moment != null) moments.add(moment);
+    }
+    return moments;
+  }
+
+  LiveMoment? _momentOf(
+    LiveTableEntry entry,
+    GeoPresence? Function(String scientificName) presenceOf,
+    bool Function(String scientificName) isBird,
+  ) {
+    final name = entry.scientificName;
+    if (_handled.contains(name) ||
+        _verifiedBefore.contains(name) ||
+        !isBird(name)) {
+      return null;
+    }
+    final record = entry.record;
+    final presence = presenceOf(name);
+    final level = reliabilityFor(
+      score: record.confidence,
+      review: record.reviewStatus,
+      presence: presence,
+    );
+    if (level == ReliabilityLevel.sure) {
+      _handled.add(name);
+      _added++;
+      return LiveMoment(
+        kind: LiveMomentKind.firstTime,
+        entry: entry,
+        rank: verifiedCount,
       );
-      if (level == ReliabilityLevel.sure) {
-        _handled.add(name);
-        _added++;
-        return LiveMoment(
-          kind: LiveMomentKind.firstTime,
-          entry: entry,
-          rank: verifiedCount,
-        );
-      }
-      if (placeOnlyToCheck(
-        score: record.confidence,
-        review: record.reviewStatus,
-        presence: presence,
-      )) {
-        _handled.add(name);
-        return LiveMoment(
-          kind: LiveMomentKind.rare,
-          entry: entry,
-          rank: verifiedCount + 1,
-        );
-      }
+    }
+    if (placeOnlyToCheck(
+      score: record.confidence,
+      review: record.reviewStatus,
+      presence: presence,
+    )) {
+      _handled.add(name);
+      return LiveMoment(
+        kind: LiveMomentKind.rare,
+        entry: entry,
+        rank: verifiedCount + 1,
+      );
     }
     return null;
   }
