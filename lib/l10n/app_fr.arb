@@ -1716,5 +1716,9 @@
   "forkProfileLoading": "Chargement du profil",
   "forkProfileCaption": "{species} espèces · série de {streak} jours · record {record}",
   "forkMapTitle": "Ma carte",
-  "forkMapCaption": "Tes contacts sur {period} · {places, plural, =1{1 lieu} other{{places} lieux}}"
+  "forkMapCaption": "Tes contacts sur {period} · {places, plural, =1{1 lieu} other{{places} lieux}}",
+  "forkSummaryUnsavedTitle": "Écoute non enregistrée",
+  "forkSummaryUnsavedBody": "Cette écoute n'est pas encore dans ta bibliothèque. Enregistre-la pour la garder, ou supprime-la.",
+  "forkLpoSendSpecies": "Envoyer à Faune-France",
+  "forkLpoSpeciesCaption": "Depuis ta dernière écoute avec une observation confirmée de cet oiseau. Seuls les oiseaux que tu confirmes partent à la LPO."
 }

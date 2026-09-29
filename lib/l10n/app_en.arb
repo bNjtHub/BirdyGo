@@ -5952,5 +5952,13 @@
   "forkMapTitle": "My map",
   "@forkMapTitle": {"description": "BirdyGo fork: tabs (J6f)."},
   "forkMapCaption": "Your contacts over {period} · {places, plural, =1{1 place} other{{places} places}}",
-  "@forkMapCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"period": {"type": "String"}, "places": {"type": "int"}}}
+  "@forkMapCaption": {"description": "BirdyGo fork: tabs (J6f).", "placeholders": {"period": {"type": "String"}, "places": {"type": "int"}}},
+  "forkSummaryUnsavedTitle": "Not saved yet",
+  "@forkSummaryUnsavedTitle": {"description": "BirdyGo fork: listening summary of a session that is not saved (J6g-e). Title of the note and of the leave dialog."},
+  "forkSummaryUnsavedBody": "This listening is not in your library yet. Save it to keep it, or discard it.",
+  "@forkSummaryUnsavedBody": {"description": "BirdyGo fork: listening summary of a session that is not saved (J6g-e). Explains the save button below it."},
+  "forkLpoSendSpecies": "Send to Faune-France",
+  "@forkLpoSendSpecies": {"description": "BirdyGo fork: species page (J6g-e). Button that opens the Faune-France sending screen for this species."},
+  "forkLpoSpeciesCaption": "From your latest session with a confirmed sighting of this bird. Only birds you confirm go to the LPO.",
+  "@forkLpoSpeciesCaption": {"description": "BirdyGo fork: species page (J6g-e). Caption under the Faune-France button."}
 }

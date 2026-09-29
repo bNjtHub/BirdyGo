@@ -106,6 +106,9 @@ class _DelayedLoader implements SpeciesPageLoader {
       false;
 
   @override
+  Future<String?> lastConfirmedSession(String scientificName) async => null;
+
+  @override
   Future<void> setFavorite(String key, {required bool favorite}) async {}
 }
 

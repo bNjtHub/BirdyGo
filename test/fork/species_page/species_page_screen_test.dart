@@ -7,6 +7,7 @@ import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
+import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/map/contact_map_screen.dart';
@@ -27,6 +28,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../summary/summary_fixture.dart';
+
 const _robin = 'Erithacus rubecula';
 
 class _FakeLoader implements SpeciesPageLoader {
@@ -35,6 +38,7 @@ class _FakeLoader implements SpeciesPageLoader {
   final SpeciesRecord recordValue;
   final YearPresence? year;
   bool unexpected = false;
+  String? lpoSession;
   final favoriteCalls = <(String, bool)>[];
 
   @override
@@ -50,8 +54,23 @@ class _FakeLoader implements SpeciesPageLoader {
   }) async => unexpected;
 
   @override
+  Future<String?> lastConfirmedSession(String scientificName) async =>
+      lpoSession;
+
+  @override
   Future<void> setFavorite(String key, {required bool favorite}) async =>
       favoriteCalls.add((key, favorite));
+}
+
+/// Serves one session by id.
+class _OneSessionRepository extends SessionRepository {
+  _OneSessionRepository(this.session);
+
+  final LiveSession session;
+
+  @override
+  Future<LiveSession?> load(String id) async =>
+      id == session.id ? session : null;
 }
 
 class _FakePlayer implements SpeciesClipPlayer {
@@ -152,6 +171,8 @@ void main() {
     Size size = const Size(390, 844),
     SpeciesSheets? sheets,
     LiveState liveState = LiveState.ready,
+    SessionRepository? lpoRepository,
+    bool reduceMotion = false,
   }) async {
     tester.view.physicalSize = size * 2;
     tester.view.devicePixelRatio = 2;
@@ -175,6 +196,8 @@ void main() {
             _FakeDescriptions(),
           ),
           speciesPageLoaderProvider.overrideWithValue(loader),
+          if (lpoRepository != null)
+            sessionRepositoryProvider.overrideWithValue(lpoRepository),
           speciesClipPlayerProvider.overrideWithValue(player),
           speciesMiniMapTilesProvider.overrideWithValue(null),
           observationIndexServiceProvider.overrideWith(
@@ -191,7 +214,10 @@ void main() {
               (context, child) => MediaQuery(
                 data: MediaQuery.of(
                   context,
-                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                ).copyWith(
+                  textScaler: TextScaler.linear(textScale),
+                  disableAnimations: reduceMotion,
+                ),
                 child: child!,
               ),
           home:
@@ -451,6 +477,140 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.byType(SpeciesPage), findsOneWidget);
+    // Same close gesture as the full page, in the back arrow's place
+    // (J6g-e): a close X and a visible grab handle, no back arrow.
     expect(find.byTooltip('Retour'), findsNothing);
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsOneWidget);
+    final full = tester.getTopLeft(find.byTooltip('Fermer'));
+
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(full.dx, lessThan(40));
+  });
+
+  testWidgets('the sheet close button is a 48 dp target', (tester) async {
+    await pump(
+      tester,
+      liveState: LiveState.active,
+      home: opener(
+        (context, ref) => showSpeciesPage(
+          context,
+          ref,
+          scientificName: _robin,
+          commonName: 'Rougegorge familier',
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final size = tester.getSize(find.byTooltip('Fermer'));
+    expect(size.width, greaterThanOrEqualTo(48));
+    expect(size.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('the full page keeps its back arrow, no grab handle', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byTooltip('Retour'), findsOneWidget);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsNothing);
+  });
+
+  testWidgets('no Faune-France entry without a confirmed sighting', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('fiche-lpo-send')), findsNothing);
+  });
+
+  testWidgets('the Faune-France entry opens the send screen', (tester) async {
+    final session =
+        morningSession()
+          ..detections.clear()
+          ..detections.addAll([
+            for (final name in [_robin, 'Turdus merula'])
+              DetectionRecord(
+                scientificName: name,
+                commonName: name,
+                confidence: 0.9,
+                timestamp: DateTime(2026, 5, 1, 7, 10),
+                latitude: 46.7,
+                longitude: 1.2,
+                reviewStatus: ReviewStatus.confirmed,
+              ),
+          ]);
+    loader.lpoSession = session.id;
+    await pump(tester, lpoRepository: _OneSessionRepository(session));
+    final button = find.byKey(const ValueKey('fiche-lpo-send'));
+    await tester.scrollUntilVisible(
+      button,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    final screen = tester.widget<LpoSendScreen>(find.byType(LpoSendScreen));
+    // Only this species goes to the send screen.
+    expect(screen.detections, hasLength(1));
+    expect(screen.detections!.single.scientificName, _robin);
+  });
+
+  for (final dark in [false, true]) {
+    testWidgets(
+      'LPO entry at 320 dp, 130 % text: no overflow, 48 dp target '
+      '(${dark ? 'dark' : 'light'})',
+      (tester) async {
+        loader.lpoSession = 'sess-1';
+        await pump(
+          tester,
+          dark: dark,
+          textScale: 1.3,
+          size: const Size(320, 640),
+        );
+        final button = find.byKey(const ValueKey('fiche-lpo-send'));
+        await tester.scrollUntilVisible(
+          button,
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(tester.takeException(), isNull);
+        final size = tester.getSize(button);
+        expect(size.height, greaterThanOrEqualTo(48));
+        expect(size.width, greaterThanOrEqualTo(48));
+      },
+    );
+  }
+
+  testWidgets('reduced motion: the sheet closes with the X, no animation', (
+    tester,
+  ) async {
+    Widget home() => opener(
+      (context, ref) => showSpeciesPage(
+        context,
+        ref,
+        scientificName: _robin,
+        commonName: 'Rougegorge familier',
+      ),
+    );
+    await pump(
+      tester,
+      liveState: LiveState.active,
+      home: home(),
+      reduceMotion: true,
+      size: const Size(320, 640),
+      textScale: 1.3,
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsOneWidget);
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }
