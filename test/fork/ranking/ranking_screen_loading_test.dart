@@ -1,6 +1,6 @@
 /// Loading skeleton of the palmarès (J6f skeletons): the header count and
 /// the list both wait on `_load()` (the index plus the "new this year" set),
-/// which resolves after the first frame; the header, chips and options row
+/// which resolves after the first frame; the header and chips
 /// above the list must not move once it lands.
 library;
 
@@ -110,7 +110,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
-          taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
           observationIndexServiceProvider.overrideWith((ref) => service),
         ],
         child: MaterialApp(
@@ -135,9 +137,6 @@ void main() {
     await tester.pump();
     final header = tester.getRect(find.byKey(const ValueKey('ranking-header')));
     final chips = tester.getRect(find.byKey(const ValueKey('ranking-chips')));
-    final options = tester.getRect(
-      find.byKey(const ValueKey('ranking-options')),
-    );
 
     service.resolve();
     await tester.pumpAndSettle();
@@ -154,9 +153,6 @@ void main() {
     final loadedChips = tester.getRect(
       find.byKey(const ValueKey('ranking-chips')),
     );
-    final loadedOptions = tester.getRect(
-      find.byKey(const ValueKey('ranking-options')),
-    );
     expect(loadedChips.left, chips.left, reason: 'chips left');
     expect(loadedChips.right, chips.right, reason: 'chips right');
     expect(
@@ -168,11 +164,6 @@ void main() {
       chips.top - loadedChips.top,
       lessThan(24),
       reason: 'chips should not settle by more than one caption line',
-    );
-    expect(
-      loadedOptions.top - loadedChips.top,
-      options.top - chips.top,
-      reason: 'options row keeps its own distance from the chips',
     );
     expect(find.textContaining('espèces en 30 jours'), findsOneWidget);
   }

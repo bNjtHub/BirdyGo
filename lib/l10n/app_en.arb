@@ -6169,5 +6169,13 @@
   "forkQuizStopYes": "Stop",
   "@forkQuizStopYes": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, leave."},
   "forkQuizStopKeep": "Keep playing",
-  "@forkQuizStopKeep": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, stay."}
+  "@forkQuizStopKeep": {"description": "BirdyGo fork: « Qui chante ? » quiz (J6h). Exit confirmation sheet, stay."},
+  "forkRankingPodiumTitle": "Podium",
+  "@forkRankingPodiumTitle": {"description": "BirdyGo fork: palmarès podium block title (J6h)."},
+  "forkRankingListTitle": "Ranking",
+  "@forkRankingListTitle": {"description": "BirdyGo fork: palmarès list block title (J6h)."},
+  "forkConfirmedShort": "Confirmed",
+  "@forkConfirmedShort": {"description": "BirdyGo fork: palmarès podium switch label (J6h)."},
+  "forkRankingByShort": "by {order}",
+  "@forkRankingByShort": {"description": "BirdyGo fork: palmarès sort control in the list block (J6h).", "placeholders": {"order": {"type": "String"}}}
 }

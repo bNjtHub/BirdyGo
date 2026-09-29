@@ -35,6 +35,8 @@ void main() {
       expectAA(c.onAccent, c.accent, 'onAccent/accent');
       expectAA(c.onOriole, c.oriole, 'onOriole/oriole');
       expectAA(c.accentText, c.tonal, 'accentText/tonal');
+      expectAA(c.text2, c.tonal, 'text2/tonal');
+      expectAA(c.orioleText, c.tonal, 'orioleText/tonal');
       expectAA(c.accentText, c.navIndicator, 'accentText/navIndicator');
       expectAA(c.orioleText, c.orioleContainer, 'orioleText/container');
     });
@@ -87,6 +89,8 @@ void main() {
       expectAA(c.onAccent, c.accent, 'onAccent/accent');
       expectAA(c.onOriole, c.oriole, 'onOriole/oriole');
       expectAA(c.accentText, on(c.tonal, c.surface1), 'accentText/tonal');
+      expectAA(c.text2, on(c.tonal, c.background), 'text2/tonal');
+      expectAA(c.orioleText, on(c.tonal, c.background), 'orioleText/tonal');
       expectAA(
         c.orioleText,
         on(c.orioleContainer, c.surface1),

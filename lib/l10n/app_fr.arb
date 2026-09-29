@@ -1850,5 +1850,9 @@
   "forkQuizStopTitle": "Arrêter la partie ?",
   "forkQuizStopBody": "{count, plural, =0{Rien n'est perdu : tu pourras rejouer quand tu veux.} =1{Ta bonne réponse est gardée pour le badge Oreille fine.} other{Tes {count} bonnes réponses sont gardées pour le badge Oreille fine.}}",
   "forkQuizStopYes": "Arrêter",
-  "forkQuizStopKeep": "Continuer"
+  "forkQuizStopKeep": "Continuer",
+  "forkRankingPodiumTitle": "Podium",
+  "forkRankingListTitle": "Classement",
+  "forkConfirmedShort": "Confirmées",
+  "forkRankingByShort": "par {order}"
 }
