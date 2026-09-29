@@ -84,7 +84,8 @@ Notes sur la build :
   Console demande une déclaration, parfois une vidéo. Justification : l'écoute continue de chants
   d'oiseaux écran éteint est la fonction principale, l'utilisateur la lance, une notification permanente
   est affichée.
-- **Localisation en arrière-plan** : voir plus bas, à décider avant l'envoi.
+- **Localisation en arrière-plan** : non utilisée (décision : `ACCESS_BACKGROUND_LOCATION` retirée du
+  manifeste pour la première version), rien à déclarer. Voir la section dédiée plus bas.
 
 ### Sécurité des données (Data safety)
 
@@ -93,9 +94,12 @@ Réponses déduites du code (à revérifier si des fonctions réseau sont ajout�
 - Aucun serveur du développeur, aucun compte, aucune publicité, aucun outil d'analyse ni de plantage
   (pas de Firebase, Sentry, Crashlytics, etc. dans `pubspec.yaml`).
 - **Audio du microphone** : traité sur l'appareil, jamais envoyé. Pas de déclaration.
-- **Position** : lue et traitée sur l'appareil (géomodèle, marquage des détections). Elle part chez un tiers
-  seulement si l'utilisateur active une option facultative (voir ci-dessous) ou exporte/envoie lui-même
-  une observation.
+- **Position** : lue et traitée sur l'appareil (géomodèle, marquage des détections, carte). Elle n'est
+  partagée que si l'utilisateur exporte ou envoie lui-même une observation, ou active une option
+  facultative (voir ci-dessous). Les fonds de carte (OpenStreetMap et IGN, sur la carte des contacts et
+  la mini-carte de la fiche espèce) ne sont chargés qu'avec le même interrupteur « cartes en ligne »
+  (Paramètres > Confidentialité, désactivé par défaut) ; ils n'envoient que des coordonnées de tuile
+  et l'adresse IP, pas la position de l'utilisateur au sens strict.
 - **Requêtes réseau facultatives**, toutes désactivées par défaut (interrupteurs dans Paramètres >
   Confidentialité) : tuiles OpenStreetMap et Géoplateforme IGN (coordonnées de tuile et adresse IP),
   nom de lieu (Nominatim : latitude et longitude de la session), météo (Open-Meteo : latitude, longitude,
@@ -103,37 +107,43 @@ Réponses déduites du code (à revérifier si des fonctions réseau sont ajout�
 - **Envoi à Faune-France / NaturaList et exports** : décision de l'utilisateur, via la feuille de
   partage du système ; l'app n'envoie rien à un serveur elle-même.
 
-Réponse prudente au formulaire : « Position approximative » et « Position précise » déclarées comme
-**partagées avec des tiers** (les services ci-dessus), finalité « Fonctionnalités de l'appli »,
-**facultatives** (l'utilisateur peut les refuser). La déclaration reste ainsi vraie si un utilisateur
-active les options. Rien d'autre à déclarer. Chiffrement en transit : oui (HTTPS). Demande de suppression :
+Réponse au formulaire : « Position approximative » et « Position précise » **collectées** (traitées sur
+l'appareil), finalité « Fonctionnalités de l'appli », **facultatives** (la localisation se refuse ou se
+révoque). **Partagées** : seulement lorsque l'utilisateur exporte ou envoie lui-même une observation
+(partage à son initiative) ; les requêtes facultatives (Nominatim, Open-Meteo) envoient une latitude et
+une longitude uniquement après activation explicite : les déclarer comme partagées avec ces services,
+facultatives. La déclaration reste ainsi vraie si un utilisateur active les options. Rien d'autre à déclarer. Chiffrement en transit : oui (HTTPS). Demande de suppression :
 pas de compte ; les données restent sur l'appareil (Paramètres > Zone dangereuse > Effacer toutes les
 données, ou désinstaller).
 
 Autorisations déclarées dans le manifeste : internet, microphone (via service), localisation précise,
-approximative et en arrière-plan, notifications, vibration, services de premier plan.
+approximative (pas de localisation en arrière-plan), notifications, vibration, services de premier plan.
 
-### Localisation en arrière-plan : point à décider
+### Localisation en arrière-plan : retirée pour la première version
 
-`AndroidManifest.xml` déclare `ACCESS_BACKGROUND_LOCATION` (hérité d'upstream : position mise à jour
-pendant une écoute écran éteint, mode Relevé). Google exige alors un formulaire de justification, une
-vidéo de démonstration et une revue, ce qui peut retarder la validation. Deux options :
-1. la garder et remplir le formulaire (fonction : marquer chaque détection avec la position pendant
-   l'écoute écran éteint) ;
-2. la retirer du manifeste pour la première version (l'écoute continue, seule la position peut se figer
-   écran éteint). Modification à faire dans une PR à part.
+Décision de Benjamin : `ACCESS_BACKGROUND_LOCATION` n'est plus déclarée (elle imposait un formulaire de
+justification, une vidéo et une revue). Ce qui change :
+- **Écoute (Live)** : rien ne change. La position est suivie pendant l'écoute, écran éteint compris, par
+  le service de premier plan de type `microphone|location` (`FOREGROUND_SERVICE_LOCATION` déclarée),
+  démarré depuis l'app au premier plan avec la permission « Pendant l'utilisation de l'app ». Android
+  autorise ce cas sans « Toujours autoriser ».
+- **Mode Relevé (Survey)** : plus aucune demande de « Toujours autoriser ». L'écran de préparation
+  demande seulement « Pendant l'utilisation de l'app » ; le suivi GPS continu tourne grâce au service de
+  premier plan, comme en Live. Le bandeau d'avertissement n'apparaît que si la permission de
+  localisation manque.
+- Risque à vérifier par Benjamin : sur HyperOS, un service de premier plan peut être bridé ; test de
+  10 minutes de marche écran éteint (voir `fork/PLAN.md`, J7).
+- iOS (plus tard) : voir `fork/PLAN.md`, section « Phase iOS » (`UIBackgroundModes: location`).
 
-### Public cible et « Designed for Families »
+### Public cible : 13 ans et plus
 
-BirdyGo a une identité pensée pour les enfants (oiseaux-thèmes, quiz, palmarès). Deux choix :
-- **Public cible 13 ans et plus (ou adultes)** : pas d'exigence supplémentaire. Recommandé pour la
-  première publication.
-- **Cocher des tranches d'âge de moins de 13 ans** : l'app entre dans le programme « Designed for
-  Families ». Conséquences : politique de confidentialité conforme obligatoire, autorisations sensibles
-  examinées de près (localisation en arrière-plan et services de premier plan : risque de refus), SDK
-  tiers certifiés pour les familles, liens externes (eBird, Wikipédia, iNaturalist, Faune-France)
-  à cadrer pour les enfants, et les requêtes facultatives qui envoient l'adresse IP à des tiers
-  (cartes, photos) à justifier. À ne choisir que si Benjamin vise vraiment les enfants et accepte cette revue.
+Choix retenu : **public cible 13 ans et plus** dans la Play Console (« Public cible et contenu » : ne
+cocher aucune tranche d'âge en dessous de 13 ans). Pas de programme « Designed for Families », donc pas de
+revue famille ni de SDK certifiés. L'identité graphique (oiseaux-thèmes, quiz) reste possible : l'app
+n'est simplement pas destinée aux moins de 13 ans. La politique de confidentialité le dit (section
+« Enfants »). Si un jour les moins de 13 ans sont visés, il faudra rouvrir ce point : programme Familles,
+autorisations sensibles examinées de près, liens externes (eBird, Wikipédia, iNaturalist, Faune-France)
+et requêtes facultatives envoyant l'adresse IP à des tiers à justifier.
 
 ## 5. Autres tâches de J7 (hors Console)
 

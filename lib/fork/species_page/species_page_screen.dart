@@ -99,14 +99,17 @@ Future<void> showSpeciesPage(
   );
 }
 
-/// Base layer of the mini map; null in tests.
-final speciesMiniMapTilesProvider = Provider<Widget?>(
-  (ref) => buildBaseTileLayer(
+/// Base layer of the mini map; null in tests and while the online-map
+/// consent (`privacyAllowMapProvider`, off by default) is not given: the same
+/// gate as OSM everywhere else, and it covers the IGN base maps too.
+final speciesMiniMapTilesProvider = Provider<Widget?>((ref) {
+  if (!ref.watch(privacyAllowMapProvider)) return null;
+  return buildBaseTileLayer(
     MapBaseLayer.fromName(
       ref.read(sharedPreferencesProvider).getString(kMapBaseLayerPref),
     ),
-  ),
-);
+  );
+});
 
 class SpeciesPage extends ConsumerStatefulWidget {
   const SpeciesPage({

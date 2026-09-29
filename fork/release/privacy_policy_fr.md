@@ -79,17 +79,19 @@ Aucune autre requête réseau n'est faite par l'application.
 
 - **Microphone** : identifier les chants. Pendant une écoute, un service de premier plan avec
   notification permanente garde l'écoute active écran éteint.
-- **Localisation** (précise et approximative, y compris en arrière-plan pendant une écoute) : marquer les
-  détections et filtrer les espèces plausibles. Refusable ou révocable à tout moment dans les réglages
-  du système.
+- **Localisation** (précise et approximative, « pendant l'utilisation de l'app » ; pendant une écoute, la
+  notification permanente maintient le suivi écran éteint) : marquer les détections et filtrer les
+  espèces plausibles. L'application ne demande pas « Toujours autoriser ». Refusable ou révocable à tout
+  moment dans les réglages du système.
 - **Notifications** : indiquer l'écoute en cours et signaler une nouvelle espèce.
 - **Internet** : uniquement pour les fonctions facultatives ci-dessus.
 
 ## Enfants
 
-[À adapter selon le public cible choisi dans la Play Console.] L'application ne demande aucune donnée
-personnelle, ni compte, ni contact. Les fonctions réseau facultatives peuvent envoyer une adresse IP aux
-services listés ci-dessus ; nous conseillons aux parents de les laisser désactivées pour un enfant.
+L'application s'adresse aux personnes de **13 ans et plus** et n'est pas destinée aux enfants de moins de
+13 ans. Elle ne demande aucune donnée personnelle, ni compte, ni contact, et ne collecte rien à notre
+niveau. Les fonctions réseau facultatives (désactivées par défaut) peuvent envoyer une adresse IP aux
+services listés ci-dessus.
 
 ## Conservation et suppression
 

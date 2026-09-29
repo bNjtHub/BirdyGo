@@ -878,6 +878,18 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [ ] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
       exportés (`BirdNET_Live_…`), champ creator des exports GPX et JSON, rapport HTML. Adapter les
       tests upstream concernés.
+- [x] Première version sans localisation en arrière-plan : `ACCESS_BACKGROUND_LOCATION` retirée du
+      manifeste, plus aucune demande de « Toujours autoriser » (Relevé : `survey_setup_screen.dart`,
+      `// FORK`). Live et Relevé gardent la position écran éteint via le service de premier plan
+      `microphone|location` + « pendant l'utilisation ». Test : `test/fork/release/location_permission_test.dart`.
+      Impact Relevé : plus de mode « arrière-plan » séparé, le suivi continu dépend du service de premier plan.
+      - [ ] (Benjamin) sur le Xiaomi : marche de 10 minutes écran éteint en écoute, la trace GPS de la
+            session doit couvrir toute la marche (sinon HyperOS bride le service : revoir).
+- [x] Public cible 13 ans et plus, sans programme Familles (`fork/release/README.md`, politique de
+      confidentialité).
+- [x] Tuiles IGN : la carte des contacts était déjà soumise à l'interrupteur « cartes en ligne »
+      (`privacyAllowMapProvider`, désactivé par défaut) ; la mini-carte de la fiche espèce chargeait ses
+      tuiles sans ce contrôle, corrigé (`speciesMiniMapTilesProvider`) avec test.
 - [ ] Quelques semaines d'usage réel avant de passer à iOS.
 
 Fini quand : la build de test interne s'installe depuis le Play Store et tient une matinée d'écoute
@@ -920,6 +932,10 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Reprendre la liste des points iOS notés pendant les jalons Android.
 - Notification de nouvelle espèce (J6h) : `NotificationsGateway` demande déjà l'autorisation iOS (`requestPermissions`) ; sans `UIBackgroundModes: audio` (ci-dessous) l'écoute s'arrête en arrière-plan, donc pas de notification. À tester.
 - Photo dans la notification (J6h) : Android utilise `largeIcon` + `BigPictureStyleInformation` (octets PNG, `lib/fork/notifications/notification_images.dart`). Côté iOS : écrire le PNG dans le dossier temporaire et le joindre via `DarwinNotificationDetails(attachments: [DarwinNotificationAttachment(path)])`.
+- Localisation écran éteint (J7) : Android n'utilise plus `ACCESS_BACKGROUND_LOCATION`. Côté iOS il
+  faudra `UIBackgroundModes: location` (avec `allowBackgroundLocationUpdates`, déjà prévu par
+  `buildLocationSettings(background: true)`) et la permission « Toujours » si le suivi doit continuer
+  hors de l'app ; les textes `NSLocation*UsageDescription` sont à revoir.
 - Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
   `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
