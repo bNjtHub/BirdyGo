@@ -400,10 +400,21 @@ void main() {
     expect(find.text('Écouter'), findsOneWidget);
   });
 
-  testWidgets('the menu keeps every upstream entry', (tester) async {
+  // FORK: J6g-c, the menu is the « Plus » sheet (tiles, advanced tools).
+  testWidgets('the menu is the Plus sheet with every entry', (tester) async {
     await pump(tester);
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
+    expect(find.text(fr.forkMoreTitle), findsOneWidget);
+    Future<void> see(String label) async {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+
     for (final label in [
       fr.sessionLibraryTitle,
       fr.forkRanking,
@@ -412,20 +423,21 @@ void main() {
       fr.forkSoundLibrary,
       fr.forkGardenTitle,
       fr.exploreMode,
+      fr.helpTitle,
+      fr.forkSettingsTitle,
+      fr.about,
+    ]) {
+      await see(label);
+    }
+    await tester.tap(find.byKey(const ValueKey('more-advanced-toggle')));
+    await tester.pumpAndSettle();
+    for (final label in [
       fr.pointCountMode,
       fr.surveyMode,
       fr.aruMode,
       fr.fileAnalysisMode,
-      fr.settings,
-      fr.helpTitle,
-      fr.about,
     ]) {
-      await tester.scrollUntilVisible(
-        find.text(label),
-        100,
-        scrollable: find.byType(Scrollable).last,
-      );
-      expect(find.text(label), findsOneWidget, reason: label);
+      await see(label);
     }
   });
 
