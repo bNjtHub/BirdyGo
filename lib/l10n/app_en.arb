@@ -6151,5 +6151,13 @@
   "forkMeetRead": "Read",
   "@forkMeetRead": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
   "forkMeetQuizSubtitle": "Test your ear on its songs and those from your outings. Earn the Fine ear badge.",
-  "@forkMeetQuizSubtitle": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."}
+  "@forkMeetQuizSubtitle": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
+  "forkLevelCongratsNamed": "Nice {name}, here you are",
+  "@forkLevelCongratsNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

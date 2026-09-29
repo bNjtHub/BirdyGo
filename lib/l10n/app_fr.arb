@@ -1837,5 +1837,13 @@
   "forkMeetRead": "Lu",
   "@forkMeetRead": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
   "forkMeetQuizSubtitle": "Teste ton oreille sur ses chants et ceux de tes sorties. Gagne le badge Oreille fine.",
-  "@forkMeetQuizSubtitle": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."}
+  "@forkMeetQuizSubtitle": {"description": "BirdyGo fork: species page, Fais sa connaissance (J6h)."},
+  "forkLevelCongratsNamed": "Bravo {name}, te voilà",
+  "@forkLevelCongratsNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

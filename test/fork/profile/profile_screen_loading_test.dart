@@ -13,11 +13,13 @@ import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsNode;
 import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// See notebook_screen_loading_test.dart: the rect assertions below compare
 /// wrapped-or-not text, so they need the real bundled fonts, not the test
@@ -133,9 +135,14 @@ void main() {
     tester.view.physicalSize = const Size(390, 2200) * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [gameProgressProvider.overrideWith((ref) => completer.future)],
+        overrides: [
+          gameProgressProvider.overrideWith((ref) => completer.future),
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
         child: MaterialApp(
           theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
           locale: const Locale('fr'),

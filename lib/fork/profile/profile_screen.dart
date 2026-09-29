@@ -31,6 +31,7 @@ import '../game/fine_ear_quiz_screen.dart';
 import '../game/game_widgets.dart';
 import '../game/quiz_logo.dart';
 import '../game/streak.dart';
+import '../settings/fork_prefs.dart';
 import '../ranking/ranking_screen.dart';
 
 /// Widest column on tablets.
@@ -44,6 +45,7 @@ class ProfileScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final progress = ref.watch(gameProgressProvider).value;
+    final firstName = ref.watch(firstNameProvider);
     final loading = progress == null;
 
     return Scaffold(
@@ -97,6 +99,7 @@ class ProfileScreen extends ConsumerWidget {
                         : _LevelCard(
                           key: const ValueKey('level-real'),
                           progress: progress,
+                          firstName: firstName,
                         ),
                   ),
                 ),
@@ -289,9 +292,10 @@ class _LevelCardSkeleton extends StatelessWidget {
 /// nothing picked, the info box shows the next level (or, at the top, a
 /// short message).
 class _LevelCard extends StatefulWidget {
-  const _LevelCard({super.key, required this.progress});
+  const _LevelCard({super.key, required this.progress, this.firstName});
 
   final GameProgress progress;
+  final String? firstName;
 
   @override
   State<_LevelCard> createState() => _LevelCardState();
@@ -308,6 +312,7 @@ class _LevelCardState extends State<_LevelCard> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final progress = widget.progress;
+    final firstName = widget.firstName?.trim();
     final status = progress.status;
     final statuses = GameConfig.statuses;
     final currentIndex = status == null ? -1 : statuses.indexOf(status);
@@ -340,7 +345,9 @@ class _LevelCardState extends State<_LevelCard> {
                     ),
                     const SizedBox(height: BirdySpace.xs),
                     Text(
-                      l10n.forkLevelCongrats,
+                      (firstName == null || firstName.isEmpty)
+                          ? l10n.forkLevelCongrats
+                          : l10n.forkLevelCongratsNamed(firstName),
                       style: BirdyText.body.copyWith(
                         color: c.text1,
                         fontWeight: FontWeight.w700,
@@ -427,7 +434,8 @@ class _Ladder extends StatelessWidget {
           startIndex: start,
           count: count,
           lineColor: rowReached ? c.sure.foreground : c.border,
-          lineWidth: rowReached ? 4 : 2,
+          lineWidth:
+              rowReached ? BirdySizes.levelLineThick : BirdySizes.levelLineThin,
           currentIndex: currentIndex,
           picked: picked,
           onPick: onPick,
@@ -466,13 +474,25 @@ class _LadderRow extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
+            // J6h: one stroke between each pair of emblems, cell width minus
+            // the emblems' half widths, centered on the emblem (cell padding
+            // included) so it never crosses the current emblem's ring.
             for (var j = 0; j < count - 1; j++)
               Positioned(
-                left: cell * j + cell / 2 + emblem / 2,
-                right: box.maxWidth - (cell * (j + 1) + cell / 2 - emblem / 2),
-                top: emblem / 2 - lineWidth / 2,
+                key: ValueKey('ladder-stroke-$j'),
+                left: cell * j + cell / 2 + BirdySizes.levelLineInset / 2,
+                width: cell - BirdySizes.levelLineInset,
+                top:
+                    BirdySizes.levelCellPadTop +
+                    emblem / 2 -
+                    lineWidth / 2,
                 height: lineWidth,
-                child: ColoredBox(color: lineColor),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: lineColor,
+                    borderRadius: BorderRadius.circular(lineWidth / 2),
+                  ),
+                ),
               ),
             Row(
               children: [
@@ -544,7 +564,9 @@ class _LadderCell extends StatelessWidget {
                 minHeight: BirdySizes.levelCellMinHeight,
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: BirdySpace.s),
+                padding: const EdgeInsets.symmetric(
+                  vertical: BirdySizes.levelCellPadTop,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
