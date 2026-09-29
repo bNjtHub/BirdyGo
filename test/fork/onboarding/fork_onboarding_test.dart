@@ -155,9 +155,13 @@ void main() {
     )).visible, isFalse);
   });
 
-  testWidgets('skip jumps to the permissions page', (tester) async {
+  testWidgets('skip jumps to the name page, then permissions', (tester) async {
     await pump(tester, FakePermissions());
     await tester.tap(find.byKey(const ValueKey('onb-skip')));
+    await settle(tester, false);
+    expect(find.byKey(const ValueKey('onb-name-field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('onb-mic')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('onb-name-skip')));
     await settle(tester, false);
     expect(find.byKey(const ValueKey('onb-mic')), findsOneWidget);
     expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
@@ -182,6 +186,8 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await tester.tap(find.byKey(const ValueKey('onb-name-skip')));
+      await settle(tester, true);
 
       await tester.tap(find.byKey(const ValueKey('onb-mic-allow')));
       await settle(tester, true);
@@ -203,6 +209,8 @@ void main() {
       );
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
+      await settle(tester, true);
+      await tester.tap(find.byKey(const ValueKey('onb-name-skip')));
       await settle(tester, true);
 
       await tester.tap(find.byKey(const ValueKey('onb-location-allow')));
@@ -231,6 +239,8 @@ void main() {
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
       await settle(tester, true);
+      await tester.tap(find.byKey(const ValueKey('onb-name-skip')));
+      await settle(tester, true);
       expect(find.textContaining('éteinte'), findsOneWidget);
       expect(find.byKey(const ValueKey('onb-location-allow')), findsNothing);
     });
@@ -241,6 +251,8 @@ void main() {
       final perms = FakePermissions(micAnswer: OnboardingPermState.refused);
       await pump(tester, perms, reduced: true);
       await tester.tap(find.byKey(const ValueKey('onb-skip')));
+      await settle(tester, true);
+      await tester.tap(find.byKey(const ValueKey('onb-name-skip')));
       await settle(tester, true);
 
       // The final button asks for the microphone first and stays here.

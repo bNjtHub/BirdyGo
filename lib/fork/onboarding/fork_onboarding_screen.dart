@@ -195,7 +195,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                         textStyle: BirdyText.label,
                       ),
                       onPressed:
-                          () => _goTo(ForkOnboardingScreen.permissionsPage),
+                          () => _goTo(ForkOnboardingScreen.namePage),
                       child: Text(l10n.skip),
                     ),
                   ),
