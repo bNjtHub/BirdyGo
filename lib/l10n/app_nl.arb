@@ -1117,5 +1117,11 @@
   "forkSettingsQuizEffects": "Quiz sound effects",
   "forkSheetHabits": "Habits",
   "forkSheetEnemies": "Enemies",
-  "forkSheetEnemiesKicker": "Who hunts it"
+  "forkSheetEnemiesKicker": "Who hunts it",
+  "forkMomentRareChance": "1 chance in {n} of hearing it here",
+  "forkMomentRareAskShort": "Is it really this bird?",
+  "forkMomentRareListenFirst": "Listen again before celebrating.",
+  "forkMomentRareNoteShort": "It joins your notebook after your answer.",
+  "forkVerdictNotShort": "Not this one",
+  "forkVerdictYesShort": "It's this one"
 }

@@ -21,6 +21,9 @@ class BirdySparkles extends StatefulWidget {
     this.color = BirdyBrand.oriole,
     this.size = BirdySizes.sparkle,
     this.delay = Duration.zero,
+    this.icon = AppIcons.sparkle,
+    this.stagger = BirdyMotion.sparkleStagger,
+    this.pop = BirdyMotion.sparklePop,
   });
 
   /// Center of each sparkle, from the widget's own center.
@@ -29,12 +32,25 @@ class BirdySparkles extends StatefulWidget {
   final double size;
   final Duration delay;
 
+  /// The mark, the time between two sparkles and how long each one lasts
+  /// (the rare card pops diamonds, slower).
+  final IconData icon;
+  final Duration stagger;
+  final Duration pop;
+
   /// Around the bird of a first encounter.
   static const List<Offset> aroundBird = [
     Offset(-62, -40),
     Offset(66, -30),
     Offset(-48, 58),
     Offset(58, 54),
+  ];
+
+  /// Three diamonds around the bird of a rare card (AppEcoute mockup).
+  static const List<Offset> aroundRareBird = [
+    Offset(-56, -54),
+    Offset(62, -30),
+    Offset(52, 48),
   ];
 
   @override
@@ -45,8 +61,8 @@ class _BirdySparklesState extends State<BirdySparkles>
     with SingleTickerProviderStateMixin {
   late final Duration _total =
       widget.delay +
-      BirdyMotion.sparkleStagger * (widget.offsets.length - 1) +
-      BirdyMotion.sparklePop;
+      widget.stagger * (widget.offsets.length - 1) +
+      widget.pop;
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: _total,
@@ -69,10 +85,10 @@ class _BirdySparklesState extends State<BirdySparkles>
 
   /// 0 → 1 → 0 over one sparkle's own window.
   double _pop(int index) {
-    final start = widget.delay + BirdyMotion.sparkleStagger * index;
+    final start = widget.delay + widget.stagger * index;
     final t =
         (_controller.value * _total.inMicroseconds - start.inMicroseconds) /
-        BirdyMotion.sparklePop.inMicroseconds;
+        widget.pop.inMicroseconds;
     if (t <= 0 || t >= 1) return 0;
     const peak = BirdyMotion.sparklePeakAt;
     return t <= peak ? t / peak : (1 - t) / (1 - peak);
@@ -100,7 +116,7 @@ class _BirdySparklesState extends State<BirdySparkles>
                         child: Transform.scale(
                           scale: _pop(i) * BirdyMotion.sparklePeakScale,
                           child: Icon(
-                            AppIcons.sparkle,
+                            widget.icon,
                             size: widget.size,
                             color: widget.color,
                             fill: 1,

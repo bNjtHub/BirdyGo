@@ -57,7 +57,6 @@
               <span style="display:flex;align-items:flex-end;gap:2px;height:12px;opacity:{{ r.singing }};transition:opacity .2s"><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s infinite"></span><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s .15s infinite"></span><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s .3s infinite"></span></span>
               <sc-if value="{{ r.rareHere }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ app.live.t.orioleCont }};border:1.5px dashed {{ app.live.t.orioleText }};color:{{ app.live.t.orioleText }};font-size:13px;font-weight:700;line-height:1"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>Rare ici · à confirmer</span></sc-if>
               <sc-if value="{{ r.rarityLabel }}"><span style="display:inline-flex;align-items:center;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;gap:5px;border-radius:999px;background:{{ r.rarityBg }};color:{{ r.rarityFg }};font-size:13px;font-weight:700;line-height:1"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">{{ r.rarityIcon }}</span>{{ r.rarityLabel }}</span></sc-if><sc-if value="{{ r.showBadge }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ r.badge.bg }};border:{{ r.badge.border }};color:{{ r.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o3 }}"></span></span>{{ r.badge.label }}</span></sc-if>
-              <span style="font-size:13px;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ r.total }}</span>
             </div>
           </div>
         </div>
@@ -66,28 +65,86 @@
       </div>
     </sc-for>
   </div>
+<sc-if value="{{ app.live.rare }}">
+    <div style="position:absolute;inset:0;z-index:6;background:{{ app.live.rare.veil }};display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;animation:birdyFade .25s both">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(244,197,66,.26),transparent 62%);pointer-events:none"></div>
+      <div key="{{ app.live.rare.id }}" style="position:relative;width:100%;max-width:358px;max-height:100%;overflow-y:auto;scrollbar-width:none;background:{{ app.live.rare.card }};border:1.5px solid {{ app.live.rare.border }};border-radius:28px;box-sizing:border-box;padding:20px 20px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 8px 28px rgba(19,35,58,.24);animation:pop .45s cubic-bezier(.2,0,0,1) both">
+        <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.logoSmall }}L'écoute continue</div>
+        <div style="height:10px"></div>
+        <sc-if value="{{ app.live.rare.ask }}" hint-placeholder-val="{{ true }}"><span style="animation:pop .45s .15s cubic-bezier(.2,0,0,1) both;display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:{{ app.live.rare.oCont }};border:1.5px dashed {{ app.live.rare.oText }};color:{{ app.live.rare.oText }};font-size:13px;font-weight:700"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>Rare ici · à confirmer</span></sc-if>
+        <sc-if value="{{ app.live.rare.yes }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:#F4C542;color:#13233A;font-size:13px;font-weight:700;animation:pop .4s both"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>Inattendu ici</span></sc-if>
+        <sc-if value="{{ app.live.rare.done }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:{{ app.live.rare.oCont }};border:1.5px dashed {{ app.live.rare.oText }};color:{{ app.live.rare.oText }};font-size:13px;font-weight:700"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>Rare ici · à confirmer</span></sc-if>
+        <div style="height:14px"></div>
+        <div onClick="{{ app.live.rare.open }}" style="cursor:pointer;position:relative;width:96px;height:96px;flex-shrink:0">
+          {{ app.live.rare.halo }}
+          {{ app.live.rare.burst }}
+          <div style="position:relative;width:96px;height:96px;border-radius:999px;background:{{ app.live.rare.avatarBg }};border:{{ app.live.rare.avatarBorder }};box-shadow:{{ app.live.rare.avatarGlow }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:box-shadow .3s"><img src="{{ app.live.rare.sil }}" alt="" style="width:60%;height:60%;object-fit:contain;filter:{{ app.live.t.silFilter }}"></div>
+        </div>
+        <div style="height:10px"></div>
+        <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;text-wrap:balance">{{ app.live.rare.name }}</div>
+
+
+        <sc-if value="{{ app.live.rare.ask }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:{{ app.live.rare.oText }};animation:birdyIn .3s .5s both"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>1 chance sur 50 de l'entendre ici</div>
+          <div style="height:20px"></div>
+          <div style="width:100%;display:flex;align-items:center;gap:12px;text-align:left">
+            <button onClick="{{ app.live.rare.replay }}" aria-label="Réécouter l'extrait" style="all:unset;cursor:pointer;width:56px;height:56px;border-radius:999px;border:2px solid {{ app.live.t.accentText }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0" style-active="transform:scale(.95)"><span class="ms" style="font-size:28px;color:{{ app.live.t.accentText }};font-variation-settings:'FILL' 1">play_arrow</span></button>
+            <div style="flex:1;min-width:0"><div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">C'est bien lui ?</div><div style="font-size:13px;line-height:1.35;color:{{ app.live.t.text2 }}">Réécoute-le avant de fêter.</div></div>
+          </div>
+          <div style="height:20px"></div>
+          <div style="width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <button onClick="{{ app.live.rare.answerNo }}" style="all:unset;cursor:pointer;min-height:88px;border-radius:20px;background:{{ app.live.rare.verdictBg }};border:1.5px solid {{ app.live.rare.verdictBorder }};box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px 4px" style-active="transform:scale(.97)"><div style="width:40px;height:40px;border-radius:999px;border:2px solid {{ app.live.rare.noInk }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:{{ app.live.rare.noInk }}">close</span></div><span style="font-size:13px;line-height:1.2;font-weight:700">Pas lui</span></button>
+            <button onClick="{{ app.live.rare.answerLater }}" style="all:unset;cursor:pointer;min-height:88px;border-radius:20px;background:{{ app.live.rare.verdictBg }};border:1.5px solid {{ app.live.rare.verdictBorder }};box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px 4px" style-active="transform:scale(.97)"><div style="width:40px;height:40px;border-radius:999px;background:{{ app.live.rare.maybeBg }};display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:{{ app.live.rare.maybeInk }}">question_mark</span></div><span style="font-size:13px;line-height:1.2;font-weight:700">Je ne sais pas</span></button>
+            <button onClick="{{ app.live.rare.answerYes }}" style="all:unset;cursor:pointer;min-height:88px;border-radius:20px;background:{{ app.live.rare.yesBg }};border:1.5px solid transparent;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px 4px" style-active="transform:scale(.97)"><div style="width:40px;height:40px;border-radius:999px;background:#9DB46A;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#13233A">check</span></div><span style="font-size:13px;line-height:1.2;font-weight:700">C'est lui</span></button>
+          </div>
+          <div style="font-size:13px;line-height:1.35;color:{{ app.live.t.text2 }};margin-top:12px">Il entre dans ton carnet après ta réponse.</div>
+        </sc-if>
+
+        <sc-if value="{{ app.live.rare.yes }}">
+          <div style="height:12px"></div>
+          <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20;animation:birdyIn .3s .3s both">Oiseau rare confirmé !</div>
+          <div style="margin-top:8px;animation:pop .4s .45s both"><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 14px;border-radius:999px;background:#F4C542;color:#13233A;font-size:15px;font-weight:800">+1 espèce rare</span></div>
+          <div style="font-size:15px;line-height:1.45;margin-top:10px;animation:birdyIn .3s .55s both">{{ app.live.rare.enters }}</div>
+          <div style="height:20px"></div>
+          <button onClick="{{ app.live.rare.close }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:56px;border-radius:999px;background:#19A7B3;color:#13233A;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700" style-active="transform:scale(.97)">Continuer l'écoute</button>
+          <div style="height:12px"></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:6px" aria-live="polite"><div style="height:6px;border-radius:999px;background:{{ app.live.rare.track }};overflow:hidden"><div style="height:100%;width:{{ app.live.rare.bar }};border-radius:999px;background:{{ app.live.rare.fill }};transition:width 1s linear"></div></div><div style="display:flex;justify-content:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ app.live.rare.left }}<sc-if value="{{ app.live.rare.pausedNote }}"><span>· en pause</span></sc-if></div></div>
+        </sc-if>
+
+        <sc-if value="{{ app.live.rare.done }}">
+          <div style="height:14px"></div>
+          <div style="width:100%;border-radius:16px;background:{{ app.live.t.line }};padding:12px;box-sizing:border-box;display:flex;align-items:center;gap:10px;text-align:left;animation:birdyIn .25s both"><span class="ms" style="font-size:22px;color:{{ app.live.t.text2 }}">{{ app.live.rare.doneIcon }}</span><span style="font-size:15px;line-height:1.4">{{ app.live.rare.doneText }}</span></div>
+          <div style="height:14px"></div>
+          <button onClick="{{ app.live.rare.close }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:56px;border-radius:999px;background:#19A7B3;color:#13233A;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Continuer l'écoute</button>
+          <div style="height:12px"></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:6px" aria-live="polite"><div style="height:6px;border-radius:999px;background:{{ app.live.rare.track }};overflow:hidden"><div style="height:100%;width:{{ app.live.rare.bar }};border-radius:999px;background:{{ app.live.rare.fill }};transition:width 1s linear"></div></div><div style="display:flex;justify-content:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ app.live.rare.left }}<sc-if value="{{ app.live.rare.pausedNote }}"><span>· en pause</span></sc-if></div></div>
+        </sc-if>
+
+              </div>
+    </div>
+  </sc-if>
   <sc-if value="{{ app.live.moment }}">
-    <div style="position:absolute;inset:0;z-index:5;background:{{ app.live.moment.veil }};display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;animation:birdyFade .25s both">
+    <div style="position:absolute;inset:0;z-index:5;background:{{ app.live.moment.veil }};display:flex;align-items:center;justify-content:center;padding:10px 16px;overflow:hidden;animation:birdyFade .25s both">
       <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,{{ app.live.moment.glow }},transparent 62%);pointer-events:none"></div>
       <div key="{{ app.live.moment.id }}" style="position:relative;width:100%;max-width:358px;background:{{ app.live.moment.card }};border:1.5px solid {{ app.live.moment.border }};border-radius:28px;box-sizing:border-box;padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 8px 28px rgba(19,35,58,.24);animation:pop .45s cubic-bezier(.2,0,0,1) both">
         <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.logoSmall }}L'écoute continue</div>
         <div style="height:10px"></div>
         <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:4px 10px 4px 7px;box-sizing:border-box;border-radius:999px;background:#F4C542;color:#13233A;font-size:13px;font-weight:700"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">auto_awesome</span>Première fois</span><sc-if value="{{ app.live.moment.pager }}"><span style="font-size:13px;font-weight:700;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ app.live.moment.pager }}</span></sc-if></div>
         <div style="height:14px"></div>
-        <div onClick="{{ app.live.moment.open }}" style="cursor:pointer;position:relative;width:112px;height:112px;flex-shrink:0">
+        <div onClick="{{ app.live.moment.open }}" style="cursor:pointer;position:relative;width:96px;height:96px;flex-shrink:0">
           {{ app.live.moment.burst }}
-          <div style="position:relative;width:112px;height:112px;border-radius:999px;background:{{ app.live.moment.avatarBg }};box-shadow:0 0 0 4px {{ app.live.moment.card }},0 0 0 6px {{ app.live.moment.halo2 }};display:flex;align-items:center;justify-content:center;animation:pop .5s .12s cubic-bezier(.2,0,0,1) both"><img src="{{ app.live.moment.sil }}" alt="" style="width:62%;height:62%;object-fit:contain;filter:{{ app.live.t.silFilter }}"></div>
+          <div style="position:relative;width:96px;height:96px;border-radius:999px;background:{{ app.live.moment.avatarBg }};box-shadow:0 0 0 4px {{ app.live.moment.card }},0 0 0 6px {{ app.live.moment.halo2 }};display:flex;align-items:center;justify-content:center;animation:pop .5s .12s cubic-bezier(.2,0,0,1) both"><img src="{{ app.live.moment.sil }}" alt="" style="width:62%;height:62%;object-fit:contain;filter:{{ app.live.t.silFilter }}"></div>
         </div>
         <div style="height:12px"></div>
         <div style="animation:birdyIn .3s .35s both">
-          <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">{{ app.live.moment.name }}</div>
-          <div style="font-family:Fraunces;font-style:italic;font-size:15px;font-weight:500;color:{{ app.live.t.text2 }}">{{ app.live.moment.latin }}</div>
+          <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;text-wrap:balance">{{ app.live.moment.name }}</div>
+
         </div>
         <div style="height:10px"></div>
         <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20;animation:birdyIn .3s .45s both">{{ app.live.moment.title }}</div>
         <div style="font-size:15px;font-weight:700;margin-top:2px;animation:birdyIn .3s .52s both">{{ app.live.moment.rankLine }}</div>
         <sc-if value="{{ app.live.moment.status }}">
-          <div style="margin-top:12px;width:100%;border-radius:16px;background:{{ app.live.t.line }};padding:10px 12px;box-sizing:border-box;display:flex;align-items:center;gap:10px;text-align:left;animation:birdyIn .4s .6s both">
+          <div style="margin-top:10px;width:100%;border-radius:16px;background:{{ app.live.t.line }};padding:8px 12px;box-sizing:border-box;display:flex;align-items:center;gap:10px;text-align:left;animation:birdyIn .4s .6s both">
             <div style="flex-shrink:0">{{ app.live.moment.statusEmblem }}</div>
             <div style="flex:1;min-width:0;display:flex;flex-direction:column">
               <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap"><span style="font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.moment.statusKicker }}</span><span style="font-size:15px;font-weight:700">{{ app.live.moment.status }}</span></div>

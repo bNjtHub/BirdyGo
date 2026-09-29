@@ -84,6 +84,33 @@ abstract final class BirdyMotion {
   /// Rare bird, after « C'est bien lui »: one soft ring and the pill.
   static const Duration rareBird = Duration(milliseconds: 450);
 
+  /// Arrival of the rare card (J6h, AppEcoute mockup, RareHalo), once: the
+  /// dotted ring draws itself in [rareRing] turning from [rareRingFromTurns]
+  /// to [rareRingToTurns], appearing over the first [rareRingAppearAt] of
+  /// it, from [rareRingFromScale]; the halo pulses [rareGlowPulses] times
+  /// for [rareGlowPulse] from [rareGlowDelay]; the diamonds pop one after
+  /// the other ([rareDiamondPop] each, [rareDiamondStagger] apart, from
+  /// [rareDiamondDelay]). Nothing at all with reduced motion.
+  static const Duration rareRing = Duration(milliseconds: 2400);
+  static const double rareRingFromTurns = -0.25;
+  static const double rareRingToTurns = 1 / 3;
+  static const double rareRingAppearAt = 0.35;
+  static const double rareRingFromScale = 0.85;
+  static const Duration rareGlowDelay = Duration(milliseconds: 350);
+  static const Duration rareGlowPulse = Duration(milliseconds: 1400);
+  static const int rareGlowPulses = 2;
+  static const double rareGlowPeakOpacity = 0.55;
+  static const double rareGlowPeakScale = 1.18;
+  static const double rareGlowEndScale = 1.32;
+  static const Duration rareDiamondDelay = Duration(milliseconds: 450);
+  static const Duration rareDiamondStagger = Duration(milliseconds: 220);
+  static const Duration rareDiamondPop = Duration(milliseconds: 1600);
+
+  /// How long the rare card stays after each answer (J6h): the countdown
+  /// bar of « C'est bien lui » and of the two quieter answers.
+  static const Duration rareConfirmedShown = Duration(seconds: 6);
+  static const Duration rareAnsweredShown = Duration(seconds: 3);
+
   /// New status: emblem fades in, text follows [newStatusTextDelay] later.
   static const Duration newStatus = Duration(milliseconds: 300);
   static const Duration newStatusTextDelay = Duration(milliseconds: 60);

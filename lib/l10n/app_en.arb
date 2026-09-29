@@ -5718,8 +5718,6 @@
   "@forkMomentRareConfirmed": {"description": "BirdyGo fork: Live moments (J6e)."},
   "forkMomentRareEnters": "{name} joins your notebook. It is your species #{rank}.",
   "@forkMomentRareEnters": {"description": "BirdyGo fork: Live moments (J6e).", "placeholders": {"name": {"type": "String"}, "rank": {"type": "int"}}},
-  "forkMomentRareKeep": "Keep the clip: if you send it to the LPO, their volunteers can listen to it.",
-  "@forkMomentRareKeep": {"description": "BirdyGo fork: Live moments (J6e)."},
   "forkMomentRarePlusOne": "+1 rare species",
   "@forkMomentRarePlusOne": {"description": "BirdyGo fork: Live moments (J6e)."},
   "forkMomentRareLater": "Kept for later, in the quick review.",
@@ -6230,5 +6228,17 @@
   "forkSheetEnemies": "Enemies",
   "@forkSheetEnemies": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."},
   "forkSheetEnemiesKicker": "Who hunts it",
-  "@forkSheetEnemiesKicker": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."}
+  "@forkSheetEnemiesKicker": {"description": "BirdyGo fork: species sheet, Habitudes and Ennemis (J6h)."},
+  "forkMomentRareChance": "1 chance in {n} of hearing it here",
+  "@forkMomentRareChance": {"description": "BirdyGo fork: Live moments (J6h).", "placeholders": {"n": {"type": "int"}}},
+  "forkMomentRareAskShort": "Is it really this bird?",
+  "@forkMomentRareAskShort": {"description": "BirdyGo fork: Live moments (J6h)."},
+  "forkMomentRareListenFirst": "Listen again before celebrating.",
+  "@forkMomentRareListenFirst": {"description": "BirdyGo fork: Live moments (J6h)."},
+  "forkMomentRareNoteShort": "It joins your notebook after your answer.",
+  "@forkMomentRareNoteShort": {"description": "BirdyGo fork: Live moments (J6h)."},
+  "forkVerdictNotShort": "Not this one",
+  "@forkVerdictNotShort": {"description": "BirdyGo fork: Live moments (J6h)."},
+  "forkVerdictYesShort": "It's this one",
+  "@forkVerdictYesShort": {"description": "BirdyGo fork: Live moments (J6h)."}
 }

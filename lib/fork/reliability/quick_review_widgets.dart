@@ -451,10 +451,19 @@ class VerdictButtons extends StatelessWidget {
     super.key,
     required this.enabled,
     required this.onAnswer,
+    this.notLabel,
+    this.dontKnowLabel,
+    this.yesLabel,
   });
 
   final bool enabled;
   final void Function(ReviewAnswer answer) onAnswer;
+
+  /// Shorter labels for a card with little room (the rare bird card of the
+  /// Live screen); the review's own labels when null.
+  final String? notLabel;
+  final String? dontKnowLabel;
+  final String? yesLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -525,7 +534,7 @@ class VerdictButtons extends StatelessWidget {
         children: [
           button(
             answer: ReviewAnswer.itIsNot,
-            label: l10n.forkReviewItIsNot,
+            label: notLabel ?? l10n.forkReviewItIsNot,
             icon: AppIcons.close,
             iconColor: c.toCheck.foreground,
             circle: c.surface1,
@@ -536,7 +545,7 @@ class VerdictButtons extends StatelessWidget {
           const SizedBox(width: 10),
           button(
             answer: ReviewAnswer.dontKnow,
-            label: l10n.forkReviewDontKnow,
+            label: dontKnowLabel ?? l10n.forkReviewDontKnow,
             icon: AppIcons.question,
             iconColor: c.probable.foreground,
             circle: c.probable.background,
@@ -546,7 +555,7 @@ class VerdictButtons extends StatelessWidget {
           const SizedBox(width: 10),
           button(
             answer: ReviewAnswer.itIs,
-            label: l10n.forkReviewItIs,
+            label: yesLabel ?? l10n.forkReviewItIs,
             icon: AppIcons.check,
             iconColor: BirdyBrand.ink,
             circle: BirdyBrand.lichen,

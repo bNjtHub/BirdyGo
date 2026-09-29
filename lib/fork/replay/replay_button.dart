@@ -9,6 +9,7 @@ import '../../features/live/live_controller.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/app_providers.dart';
 import '../audio_output/volume_guard.dart';
+import '../design/birdy_tokens.dart';
 import '../design/widgets/clip_play_button.dart';
 
 /// SharedPreferences key: the replay notice was shown once.
@@ -58,10 +59,14 @@ class ReplayButton extends ConsumerWidget {
     super.key,
     required this.controller,
     required this.clipPath,
+    this.size = BirdySizes.target,
   });
 
   final LiveController controller;
   final String clipPath;
+
+  /// Diameter of the round button (see [ClipPlayButton.size]).
+  final double size;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,6 +76,7 @@ class ReplayButton extends ConsumerWidget {
       builder: (context, playing, _) {
         final isPlaying = playing == clipPath;
         return ClipPlayButton(
+          size: size,
           state: isPlaying ? ClipPlayState.playing : ClipPlayState.idle,
           semanticLabel: isPlaying ? l10n.forkReplayStop : l10n.forkReplay,
           onPressed: () {
