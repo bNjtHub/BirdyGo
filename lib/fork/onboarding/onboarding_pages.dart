@@ -9,7 +9,6 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show MaxLengthEnforcement;
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
@@ -22,7 +21,6 @@ import '../game/quiz_fx.dart';
 import '../home/birdygo_logo.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
-import '../settings/fork_prefs.dart' show kFirstNameMaxLength;
 
 /// Widest column of an onboarding page (tablets, landscape).
 const double kOnboardingMaxWidth = 520;
@@ -375,89 +373,6 @@ class OnboardingLevelsPage extends StatelessWidget {
                   ),
                 ),
               ],
-            ],
-          ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Optional step: first name (J6h)
-// ---------------------------------------------------------------------------
-
-/// « Comment tu t'appelles ? »: one optional field. The screen owns the
-/// [controller] and saves it through `firstNameProvider` on « Continuer ».
-class OnboardingNamePage extends StatelessWidget {
-  const OnboardingNamePage({
-    super.key,
-    required this.controller,
-    required this.onSubmitted,
-  });
-
-  final TextEditingController controller;
-  final VoidCallback onSubmitted;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    return OnboardingPageFrame(
-      builder:
-          (context, height) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              QuizPop(
-                duration: const Duration(milliseconds: 380),
-                delay: const Duration(milliseconds: 80),
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Container(
-                    width: BirdySizes.mainAction,
-                    height: BirdySizes.mainAction,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: c.tonal,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      AppIcons.personOutline,
-                      size: 32,
-                      color: c.accentText,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: BirdySpace.l),
-              OnboardingTitle(l10n.forkOnbNameTitle),
-              const SizedBox(height: BirdySpace.xl),
-              QuizRise(
-                duration: QuizMotion.rise,
-                delay: const Duration(milliseconds: 180),
-                distance: 8,
-                child: TextField(
-                  key: const ValueKey('onb-name-field'),
-                  controller: controller,
-                  maxLength: kFirstNameMaxLength,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  buildCounter:
-                      (_, {required currentLength, required isFocused, maxLength}) =>
-                          null,
-                  textCapitalization: TextCapitalization.words,
-                  textInputAction: TextInputAction.done,
-                  autocorrect: false,
-                  style: BirdyText.body.copyWith(color: c.text1),
-                  decoration: InputDecoration(
-                    labelText: l10n.forkOnbNameFieldLabel,
-                    hintText: l10n.forkOnbNameHint,
-                  ),
-                  onSubmitted: (_) => onSubmitted(),
-                ),
-              ),
-              const SizedBox(height: BirdySpace.s),
-              Text(
-                l10n.forkOnbNameNote,
-                style: BirdyText.caption.copyWith(color: c.text2),
-              ),
             ],
           ),
     );
