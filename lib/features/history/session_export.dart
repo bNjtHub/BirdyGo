@@ -140,7 +140,7 @@ String _exportPrefix(LiveSession session) {
       session.customName != null && session.customName!.isNotEmpty
           ? '_${_sanitizeFilename(session.customName!)}'
           : '';
-  return 'BirdNET_Live_$dt$suffix$name';
+  return 'BirdyGo_$dt$suffix$name'; // FORK: app renamed
 }
 
 /// Replaces characters that are illegal in filenames with underscores and
@@ -529,7 +529,7 @@ Map<String, dynamic> buildExportMetadata({
   return {
     'exportedAt': DateTime.now().toUtc().toIso8601String(),
     'app': {
-      'name': 'BirdNET Live',
+      'name': 'BirdyGo', // FORK: app renamed
       if (appVersion != null) 'version': appVersion,
       if (appBuildNumber != null) 'buildNumber': appBuildNumber,
       if (appPackageName != null) 'packageName': appPackageName,
@@ -1476,7 +1476,7 @@ String buildGpxExport(
   final buf = StringBuffer();
 
   buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-  buf.writeln('<gpx version="1.1" creator="BirdNET Live"');
+  buf.writeln('<gpx version="1.1" creator="BirdyGo"');
   buf.writeln('  xmlns="http://www.topografix.com/GPX/1/1"');
   buf.writeln('  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"');
   buf.writeln(
@@ -1587,7 +1587,7 @@ Future<String?> buildMultiSessionExport(
 
   final archive = Archive();
   final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
-  final bulkPrefix = 'BirdNET_Live_Bulk_Export_$timestamp';
+  final bulkPrefix = 'BirdyGo_Bulk_Export_$timestamp';
 
   for (final session in sessions) {
     Map<String, dynamic>? metadata;

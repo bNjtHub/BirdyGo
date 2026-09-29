@@ -109,6 +109,10 @@ class TaxonomyService {
   /// Number of species in the CSV index.
   int get speciesCount => _csvIndex.length;
 
+  // FORK: J7 content licenses screen lists every species credit.
+  /// All CSV-sourced species.
+  Iterable<TaxonomySpecies> get allSpecies => _csvIndex.values;
+
   /// Count of species per taxon group (e.g. {"Aves": 4597, "Mammalia": 232}).
   Map<String, int> get taxonGroupCounts {
     final counts = <String, int>{};

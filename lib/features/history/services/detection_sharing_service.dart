@@ -304,7 +304,7 @@ String _exportClipName(DetectionRecord d, String ext) {
   final species = _sanitizeFilename(
     d.commonName.trim().isNotEmpty ? d.commonName : d.scientificName,
   );
-  return 'BirdNET_Live_${dt}_$species$ext';
+  return 'BirdyGo_${dt}_$species$ext'; // FORK: app renamed
 }
 
 /// Replaces filesystem-illegal characters with underscores and collapses
@@ -714,14 +714,14 @@ String _buildSubject(DetectionRecord d) {
   // stays human-friendly; fall back to the scientific name if the common
   // name is empty (e.g. unknown species).
   final name = d.commonName.trim().isNotEmpty ? d.commonName : d.scientificName;
-  return 'BirdNET Live: $name';
+  return 'BirdyGo: $name'; // FORK: app renamed
 }
 
 String _buildBody(DetectionRecord d) {
   final pct = (d.confidence * 100).round();
   final ts = d.timestamp.toUtc().toIso8601String();
   final lines = <String>[
-    'BirdNET Live \u2014 ${d.commonName} (${d.scientificName})',
+    'BirdyGo \u2014 ${d.commonName} (${d.scientificName})',
     '$pct% \u00b7 $ts',
   ];
   if (d.latitude != null && d.longitude != null) {
