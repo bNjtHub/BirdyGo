@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A;overflow:hidden">
+  <div style="padding:16px 16px 0;display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:12px;min-height:48px">
+      <button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">close</span></button>
+      <div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Revue rapide</div>
+      <sc-if value="{{ app.review.card }}"><span style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">{{ app.review.position }}</span></sc-if>
+      <button onClick="{{ app.review.reliability }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">verified</span></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="height:6px;border-radius:999px;background:#DCE2DA;overflow:hidden"><div style="height:100%;width:{{ app.review.progress }};background:#19A7B3;border-radius:999px;transition:width .3s"></div></div>
+      <div style="font-size:13px;color:#6B5847">{{ app.review.sortedLine }}</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ app.review.done }}">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;animation:birdyIn .3s both">
+      <div style="max-width:320px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+        <div style="width:72px;height:72px;border-radius:999px;background:#E6EDD6;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:36px;color:#4B6023">check</span></div>
+        <div style="font-family:Fraunces;font-size:20px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">{{ app.review.doneTitle }}</div>
+        <div style="font-size:17px;line-height:1.45;color:#6B5847">{{ app.review.doneBody }}</div>
+        <button onClick="{{ app.go.notebook }}" style="all:unset;cursor:pointer;height:56px;padding:0 24px;border-radius:999px;background:#19A7B3;display:flex;align-items:center;gap:8px;font-size:17px;font-weight:700;margin-top:8px"><span class="ms" style="font-size:22px">menu_book</span>Voir mon carnet</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ app.review.card }}">
+    <div style="flex:1;display:flex;flex-direction:column;padding:16px;gap:12px;min-height:0">
+      <div style="position:relative;padding-bottom:16px;margin-top:auto">
+        <sc-if value="{{ app.review.behind2 }}"><div style="position:absolute;inset:0 0 0 0;transform:translateY(16px) scale(.92);transform-origin:bottom center;opacity:.6;background:#FFFFFF;border-radius:28px;box-shadow:0 8px 28px rgba(19,35,58,.14)"></div></sc-if>
+        <sc-if value="{{ app.review.behind1 }}"><div style="position:absolute;inset:0 0 0 0;transform:translateY(8px) scale(.96);transform-origin:bottom center;opacity:.85;background:#FFFFFF;border-radius:28px;box-shadow:0 8px 28px rgba(19,35,58,.14)"></div></sc-if>
+        <div onPointerDown="{{ app.review.down }}" onPointerMove="{{ app.review.move }}" onPointerUp="{{ app.review.up }}" onPointerCancel="{{ app.review.up }}" style="position:relative;touch-action:none;cursor:grab;user-select:none;background:#FFFFFF;border-radius:28px;padding:20px;border:3px solid {{ app.review.outline }};box-shadow:0 8px 28px rgba(19,35,58,.14);transform:{{ app.review.transform }};transition:{{ app.review.transition }},border-color .12s;display:flex;flex-direction:column;gap:12px">
+          <span style="align-self:flex-start;display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ app.review.card.badge.bg }};border:{{ app.review.card.badge.border }};color:{{ app.review.card.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ app.review.card.badge.fg }};opacity:{{ app.review.card.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ app.review.card.badge.fg }};opacity:{{ app.review.card.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ app.review.card.badge.fg }};opacity:{{ app.review.card.badge.o3 }}"></span></span>{{ app.review.card.badge.label }}</span>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="width:96px;height:96px;border-radius:999px;background:{{ app.review.card.halo }};display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="{{ app.review.card.sil }}" alt="" draggable="false" style="width:62%;height:62%;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">{{ app.review.card.name }}</div>
+              <div style="font-family:Fraunces;font-style:italic;font-size:17px;font-weight:500;color:#6B5847">{{ app.review.card.latin }}</div>
+              <div style="font-size:15px;margin-top:4px">{{ app.review.card.when }}</div>
+              <div style="font-size:13px;color:#6B5847">{{ app.review.card.score }}</div>
+            </div>
+          </div>
+          <div style="height:80px;border-radius:16px;background:linear-gradient(#0B1728,#0F1E33);position:relative;overflow:hidden">
+            <div style="position:absolute;left:18%;right:22%;top:30%;height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(25,167,179,0),#19A7B3 30%,#F4C542 55%,#19A7B3 80%,rgba(25,167,179,0));filter:blur(3px);opacity:.9"></div>
+            <div style="position:absolute;left:24%;right:30%;top:58%;height:6px;border-radius:3px;background:#19A7B3;filter:blur(2px);opacity:.6"></div>
+            <sc-if value="{{ app.review.card.playing }}"><div style="position:absolute;left:10px;top:8px;font-size:13px;color:#EEF1EC">Lecture de l'extrait</div></sc-if>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button onClick="{{ app.review.play }}" onPointerDown="{{ app.review.stop }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;border:2px solid #0B6E77;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px;color:#0B6E77;font-variation-settings:'FILL' 1">play_arrow</span></button>
+            <button onClick="{{ app.review.reference }}" onPointerDown="{{ app.review.stop }}" style="all:unset;cursor:pointer;height:48px;padding:0 18px;border-radius:999px;background:#D6EEF0;color:#0B6E77;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700"><span class="ms" style="font-size:20px">open_in_new</span>Chant de référence</button>
+          </div>
+          <div style="font-size:13px;color:#6B5847;margin-top:-6px">Au casque ou à faible volume.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:13px;color:#6B5847">
+        <span style="display:flex;align-items:center"><span class="ms" style="font-size:16px">chevron_left</span>Ce n'est pas lui</span>
+        <span style="display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:16px">expand_less</span>Je ne sais pas</span>
+        <span style="display:flex;align-items:center;justify-content:flex-end">C'est bien lui<span class="ms" style="font-size:16px">chevron_right</span></span>
+      </div>
+      <div style="margin-top:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+        <button onClick="{{ app.review.no }}" style="all:unset;cursor:pointer;min-height:104px;border-radius:20px;background:#FFFFFF;border:1.5px solid #C5CCC2;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 6px" style-active="transform:scale(.97)"><div style="width:48px;height:48px;border-radius:999px;border:2px solid #A04A1C;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:26px;color:#A04A1C">close</span></div><span style="font-size:15px;font-weight:700;text-align:center">Ce n'est pas lui</span></button>
+        <button onClick="{{ app.review.maybe }}" style="all:unset;cursor:pointer;min-height:104px;border-radius:20px;background:#FFFFFF;border:1.5px solid #C5CCC2;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 6px" style-active="transform:scale(.97)"><div style="width:48px;height:48px;border-radius:999px;background:#E3E9EF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:26px;color:#34495E">question_mark</span></div><span style="font-size:15px;font-weight:700;text-align:center">Je ne sais pas</span></button>
+        <button onClick="{{ app.review.yes }}" style="all:unset;cursor:pointer;min-height:104px;border-radius:20px;background:#E6EDD6;border:1.5px solid #E6EDD6;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 6px" style-active="transform:scale(.97)"><div style="width:48px;height:48px;border-radius:999px;background:#9DB46A;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:26px;color:#13233A">check</span></div><span style="font-size:15px;font-weight:700;text-align:center">C'est bien lui</span></button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

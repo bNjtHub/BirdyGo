@@ -800,6 +800,29 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             nouvelle) ; à revoir si le besoin se confirme.
       - [ ] Faire passer « Aujourd'hui » par `openListeningSummary` (retour d'un seul écran).
 
+- [ ] J6h Passe d'homogénéité, ligne Profil / Quiz (handoff `fork/handoff/README.md`, règles dans
+      DESIGN.md « Ligne J6h »). Un écran = une PR « J6h <Écran> : … », PR empilées dans l'ordre.
+      - [ ] Socle : silhouette dans `SpeciesAvatar`, pastilles, `AppIcons`, jeton #8CD3D9 et aile,
+            ligne de liste unique, préférences `firstName` et `liveTheme`, config des heures du jour.
+      - [ ] Accueil : bande « Ta journée » et son tiroir, salutation avec prénom, aile sur « Écouter ».
+      - [ ] Écoute : thème clair (`liveTheme`), étiquettes de rareté, noms du spectrogramme sans chevauchement.
+      - [ ] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
+      - [ ] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
+      - [ ] Fiche : héros `sure`, bloc « Fais sa connaissance ».
+      - [ ] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
+      - [ ] Quiz : intro sans défilement, croix et confirmation de sortie.
+      - [ ] Palmarès : héros avec puces de période, blocs Podium et Classement, bouton `sort`.
+      - [ ] Sonothèque : héros, filtre favoris sur la liste, bloc unique.
+      - [ ] Réglages : blocs titrés, bloc « Toi » (prénom), thème Auto, écran d'écoute.
+      - [ ] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
+      - [ ] Objectif : héros à anneau, liste en bloc, bouton épinglé avec l'aile.
+      - [ ] Carte : puces en encre, retour quand elle est poussée.
+      - [ ] Revue : pile centrée verticalement.
+      - [ ] Premier lancement : étape prénom facultative.
+      - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
+            pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
+      - [ ] (Benjamin) Téléphone : série J6h, clair et sombre, écoute claire écran éteint.
+
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
 - l'écoute démarre moins d'une seconde après l'appui sur « Écouter » (le nouvel accueil garde le

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+@font-face{font-family:'Fraunces';src:url('assets/fonts/Fraunces-Variable.ttf') format('truetype');font-weight:100 900;font-style:normal}
+@font-face{font-family:'Fraunces';src:url('assets/fonts/Fraunces-Italic-Variable.ttf') format('truetype');font-weight:100 900;font-style:italic}
+@font-face{font-family:'Atkinson';src:url('assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf') format('truetype');font-weight:200 800}
+html,body{margin:0;background:#DDE2DA}
+a{color:#0B6E77;text-decoration:none}
+a:hover{color:#13233A;text-decoration:underline}
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;user-select:none}
+@keyframes birdyIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes birdyFade{from{opacity:0}to{opacity:1}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes sing{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;justify-content:center;align-items:flex-start;gap:40px;padding:32px 24px;box-sizing:border-box;font-family:Atkinson,sans-serif;color:#13233A;flex-wrap:wrap">
+
+  <div style="width:260px;display:flex;flex-direction:column;gap:12px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:40px;height:40px"><div style="font-family:Fraunces;font-size:26px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26">BirdyGo · démo</div></div>
+    <div style="font-size:15px;line-height:1.45;color:#6B5847;text-wrap:pretty">Tout est cliquable dans le téléphone. Lance une écoute, arrête-la, vérifie les détections : le carnet, le profil et l'accueil suivent.</div>
+    <div style="background:#FFFFFF;border-radius:20px;padding:8px;display:flex;flex-direction:column">
+      <sc-for list="{{ index }}" as="it" hint-placeholder-count="14">
+        <button onClick="{{ it.go }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:{{ it.bg }};font-size:15px;font-weight:{{ it.weight }}" style-hover="background:#EEF1EC">
+          <span class="ms" style="font-size:20px;color:#0B6E77">{{ it.icon }}</span>{{ it.label }}
+        </button>
+      </sc-for>
+    </div>
+    <button onClick="{{ reset }}" style="all:unset;cursor:pointer;text-align:center;height:48px;border-radius:999px;background:#D6EEF0;color:#0B6E77;font-weight:700;font-size:15px;line-height:48px">Réinitialiser la démo</button>
+  </div>
+
+  <div style="width:390px;height:844px;border-radius:48px;border:8px solid #0B1728;background:{{ phoneBg }};position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(19,35,58,.18);flex-shrink:0">
+    <div style="position:absolute;top:0;left:0;right:0;height:40px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:15px;font-weight:700;color:{{ statusInk }};background:{{ statusBg }};pointer-events:none">
+      <span>9:41</span><span style="display:flex;gap:4px"><span class="ms" style="font-size:18px">signal_cellular_alt</span><span class="ms" style="font-size:18px">battery_full</span></span>
+    </div>
+    <div style="position:absolute;top:40px;left:0;right:0;bottom:{{ screenBottom }};overflow:hidden">
+      <sc-if value="{{ show.home }}" hint-placeholder-val="{{ true }}"><dc-import name="DemoAccueil" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.notebook }}"><dc-import name="DemoCarnet" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.map }}"><dc-import name="DemoCarte" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.profile }}"><dc-import name="DemoProfil" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.live }}"><dc-import name="DemoEcoute" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.bilan }}"><dc-import name="DemoBilan" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.review }}"><dc-import name="DemoRevue" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.species }}"><dc-import name="DemoFiche" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.quiz }}"><dc-import name="DemoQuiz" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.ranking }}"><dc-import name="DemoPalmares" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.sounds }}"><dc-import name="DemoSonotheque" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.settings }}"><dc-import name="DemoReglages" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+      <sc-if value="{{ show.goal }}"><dc-import name="DemoObjectif" app="{{ app }}" hint-size="100%,100%" style="position:absolute;inset:0"></dc-import></sc-if>
+    </div>
+
+    <sc-if value="{{ show.nav }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:80px;background:#FFFFFF;display:grid;grid-template-columns:repeat(4,1fr);z-index:10">
+        <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+            <div style="width:64px;height:32px;border-radius:999px;background:{{ n.ind }};display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px;color:{{ n.iconColor }};font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span></div>
+            <span style="font-size:13px;line-height:1.2;color:{{ n.labelColor }};font-weight:{{ n.weight }}">{{ n.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ show.sheet }}">
+      <div style="position:absolute;inset:0;z-index:40">
+        <div onClick="{{ app.go.closeSheet }}" style="position:absolute;inset:0;background:rgba(12,24,41,.78);animation:birdyFade .2s"></div>
+        <dc-import name="DemoSheets" app="{{ app }}" hint-size="100%,60%" style="position:absolute;left:0;right:0;bottom:0"></dc-import>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ show.toast }}">
+      <div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }};z-index:50;background:#13233A;color:#EEF1EC;border-radius:12px;padding:14px 16px;font-size:15px;line-height:1.35;box-shadow:0 8px 28px rgba(19,35,58,.24);animation:birdyIn .2s;display:flex;gap:10px;align-items:center"><span class="ms" style="font-size:20px;color:#4FC3CC">{{ toastIcon }}</span><span>{{ toast }}</span></div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const h = React.createElement;
+const INK = [19, 35, 58];
+const hx = (s) => { s = s.replace('#', ''); return [0, 2, 4].map((i) => parseInt(s.substr(i, 2), 16)); };
+const toHex = (a) => '#' + a.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+const lum = (a) => { const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }; return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]); };
+const ctr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+function toHsl([r, g, b]) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let hh = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); hh = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh /= 6; } return [hh, s, l]; }
+function fromHsl(hh, s, l) { if (!s) return [l * 255, l * 255, l * 255]; const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q; const f = (t) => { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1 / 6) return p + (q - p) * 6 * t; if (t < 1 / 2) return q; if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; return p; }; return [f(hh + 1 / 3) * 255, f(hh) * 255, f(hh - 1 / 3) * 255]; }
+function tintOf(acc) { const rgb = hx(acc); const [hh, s] = toHsl(rgb); let l = 0.92, t = fromHsl(hh, s, l); while (ctr(INK, t) < 12 && l < 1) { l = Math.min(1, l + 0.01); t = fromHsl(hh, s, l); } let d = rgb, k = 0.01; while (ctr(d, [255, 255, 255]) < 3.2 && k <= 1) { d = rgb.map((v, i) => v + (INK[i] - v) * k); k += 0.01; } const dk = rgb.map((v, i) => INK[i] + (v - INK[i]) * 0.24); return { tint: toHex(t), deep: toHex(d), halo: acc + '33', tintDark: toHex(dk) }; }
+
+const SIL = { body: 'M133.1 251.5A95.6 95.6 0 1 1 280.7 131.8A54.3 54.3 0 0 0 312.3 154.7A136.8 136.8 0 1 1 141.2 274.1A28.1 28.1 0 0 0 133.1 251.5Z', tail: 'M364.4 181.4A24.4 24.4 0 0 0 397.4 179.5L424 152A21.5 21.5 0 0 1 458.5 177.1L425 240.5A93.7 93.7 0 0 0 414.2 285.3Z', up: 'M145.9 149L50.6 160.9L118.1 196.6Z', lo: 'M118.1 206.6L64.5 222.5L140 240.3Z', eye: 'M194.9 172.6a18.7 18.7 0 1 0-37.4 0a18.7 18.7 0 1 0 37.4 0Z' };
+function silUri(c) { const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 70 430 380"><g fill="${c}" stroke="${c}" stroke-linejoin="round"><path d="${SIL.tail}" stroke="none"/><path d="${SIL.up}" stroke-width="12"/><path d="${SIL.lo}" stroke-width="12"/><path fill-rule="evenodd" stroke="none" d="${SIL.body} ${SIL.eye}"/></g></svg>`; return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
+
+const SPECIES = [
+  ['merle', 'Merle noir', 'Turdus merula', '#F6B12A', 142, 38, 'res'], ['rouge', 'Rougegorge familier', 'Erithacus rubecula', '#EC7A3C', 121, 35, 'res'],
+  ['charb', 'Mésange charbonnière', 'Parus major', '#E9C13C', 98, 31, 'res'], ['bleue', 'Mésange bleue', 'Cyanistes caeruleus', '#3B8FDB', 76, 27, 'res'],
+  ['pinson', 'Pinson des arbres', 'Fringilla coelebs', '#DD8C6E', 69, 24, 'res'], ['trog', 'Troglodyte mignon', 'Troglodytes troglodytes', '#C69A6A', 54, 22, 'res'],
+  ['pie', 'Pie bavarde', 'Pica pica', '#2A9486', 47, 20, 'res'], ['pouillot', 'Pouillot véloce', 'Phylloscopus collybita', '#A6AA73', 41, 17, 'mig'],
+  ['moineau', 'Moineau domestique', 'Passer domesticus', '#C28A55', 38, 15, 'res'], ['rq', 'Rougequeue noir', 'Phoenicurus ochruros', '#E07A7A', 33, 14, 'mig'],
+  ['verdier', "Verdier d'Europe", 'Chloris chloris', '#A7B85C', 29, 12, 'res'], ['chardo', 'Chardonneret élégant', 'Carduelis carduelis', '#D9B84A', 26, 11, 'res'],
+  ['ramier', 'Pigeon ramier', 'Columba palumbus', '#9C8FD6', 24, 11, 'res'], ['tourterelle', 'Tourterelle turque', 'Streptopelia decaocto', '#C7849E', 21, 10, 'res'],
+  ['corneille', 'Corneille noire', 'Corvus corone', '#4DB6AC', 19, 9, 'res'], ['geai', 'Geai des chênes', 'Garrulus glandarius', '#5AA9E6', 16, 8, 'res'],
+  ['etourneau', 'Étourneau sansonnet', 'Sturnus vulgaris', '#6FBF8E', 14, 7, 'res'], ['mlq', 'Mésange à longue queue', 'Aegithalos caudatus', '#E38B5B', 12, 6, 'res'],
+  ['accenteur', 'Accenteur mouchet', 'Prunella modularis', '#D98C4A', 10, 6, 'res'], ['grimpereau', 'Grimpereau des jardins', 'Certhia brachydactyla', '#A7B85C', 9, 5, 'res'],
+  ['picvert', 'Pic vert', 'Picus viridis', '#6FBF8E', 7, 4, 'res'], ['hirondelle', 'Hirondelle rustique', 'Hirundo rustica', '#5AA9E6', 6, 4, 'mig'],
+  ['buse', 'Buse variable', 'Buteo buteo', '#D98C4A', 4, 3, 'res'], ['hulotte', 'Chouette hulotte', 'Strix aluco', '#C49A6C', 3, 2, 'res'],
+  ['pic', 'Pic épeiche', 'Dendrocopos major', '#D8343A', 0, 0, 'res'], ['fauvette', 'Fauvette à tête noire', 'Sylvia atricapilla', '#9C8FD6', 0, 0, 'mig'],
+  ['grive', 'Grive musicienne', 'Turdus philomelos', '#D98C4A', 0, 0, 'res'], ['sittelle', 'Sittelle torchepot', 'Sitta europaea', '#5AA9E6', 0, 0, 'res'],
+  ['martin', "Martin-pêcheur d'Europe", 'Alcedo atthis', '#29A9D6', 0, 0, 'res'], ['huppe', 'Huppe fasciée', 'Upupa epops', '#E3A07A', 0, 0, 'mig'],
+];
+const RARITY = { hulotte: 'uncommon', buse: 'uncommon', huppe: 'rare', martin: 'rare', picvert: 'uncommon' };
+const SP = {};
+SPECIES.forEach(([k, name, latin, accent, total, days, pres]) => { const t = tintOf(accent); SP[k] = { k, name, latin, accent, total, days, pres, ...t, sil: silUri(t.deep), silGrey: silUri('#B9C0B5'), silLight: silUri('#9AA39A'), rarity: RARITY[k] || 'none' }; });
+const START_DISCOVERED = SPECIES.slice(0, 24).map((s) => s[0]);
+const EXPECTED = ['merle', 'rouge', 'charb', 'bleue', 'pinson', 'trog', 'pie', 'pouillot', 'moineau', 'rq', 'verdier', 'chardo', 'ramier', 'accenteur', 'pic', 'fauvette', 'grive', 'sittelle', 'martin', 'huppe'];
+const GOAL = ['merle', 'rouge', 'sittelle', 'grive', 'pic'];
+const NEW_YEAR = ['pouillot', 'rq', 'hirondelle', 'chardo', 'mlq', 'accenteur', 'grimpereau', 'buse', 'hulotte'];
+
+const STATUS_NAMES = ['Oisillon', 'Jeune plume', 'Premier envol', 'Sentinelle des haies', 'Oreille de chouette', 'Grand migrateur', "Plume d'or", 'Martin-pêcheur'];
+const STATUS_LINES = ['Ta toute première espèce. Tout commence ici.', 'Tu reconnais les voix les plus faciles du jardin.', 'Tu sais repérer les chanteurs du matin.', 'Tu reconnais maintenant les voix des haies et des jardins.', 'Tu entends aussi les oiseaux discrets et ceux de la nuit.', 'Tu suis les oiseaux qui vont et viennent avec les saisons.', 'Ton carnet devient une vraie référence.', "Cent espèces à l'oreille. Chapeau."];
+const STATUSES = [
+  { from: 1, color: '#F2B98B', paths: ['M12 3.5c3.3 0 6 4.9 6 9.3a6 6 0 0 1-12 0c0-4.4 2.7-9.3 6-9.3z', 'M7 12.6l2.4 1.5 2.6-2.1 2.6 2.1 2.4-1.5'] },
+  { from: 5, color: '#E9836B', paths: ['M5.5 20.5 16 10', 'M19.5 3.5C12 3.5 7 7.5 7 15l2 2c7.5 0 11.5-5.5 10.5-13.5z'] },
+  { from: 10, color: '#9DB46A', paths: ['M2.5 9.5c2.8-2.3 6-2.3 9.5 1.2 3.5-3.5 6.7-3.5 9.5-1.2', 'M7.5 15.5c1.5-1.1 3-1.1 4.5.5 1.5-1.6 3-1.6 4.5-.5'] },
+  { from: 20, color: '#5DA46A', paths: ['M3 13.5S6.5 8 12 8s9 5.5 9 5.5-3.5 5.5-9 5.5-9-5.5-9-5.5z', 'M12 2.5v2.5M6.5 4.5l1.3 2M17.5 4.5l-1.3 2'], circles: [[12, 13.5, 2.5]] },
+  { from: 35, color: '#C28A55', paths: ['M5 4l3.2 3.4M19 4l-3.2 3.4', 'M5 4c-.7 2.2-1 4.6-1 7a8 8 0 0 0 16 0c0-2.4-.3-4.8-1-7', 'M11 15.8l1 1.4 1-1.4'], circles: [[9, 11.5, 2.4], [15, 11.5, 2.4]] },
+  { from: 50, color: '#5A9BE0', paths: ['M2.5 6.5 4.3 8l1.8-1.5M6.8 10.5l1.8 1.5 1.8-1.5M11.1 14.5l1.8 1.5 1.8-1.5M13.6 10.5l1.8 1.5 1.8-1.5M17.9 6.5 19.7 8l1.8-1.5'] },
+  { from: 75, color: '#F4C542', paths: ['M4.5 21 14 11.5', 'M17.5 5.5C11 5.5 7 9 7 15.5l1.8 1.8c6.5 0 10-4.3 8.7-11.8z'], filled: ['M19.5 1.8c.3 1.6.9 2.2 2.5 2.5-1.6.3-2.2.9-2.5 2.5-.3-1.6-.9-2.2-2.5-2.5 1.6-.3 2.2-.9 2.5-2.5z'] },
+  { from: 100, color: '#19A7B3', paths: ['M5 10v4M8.5 7v10M12 4.5v15M15.5 8v8M19 10.5v3'] },
+];
+function glyph(s, ink, t, sc) {
+  return h('g', { key: 'g', transform: `translate(${t} ${t}) scale(${sc})`, fill: 'none', stroke: ink, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+    ...s.paths.map((d, i) => h('path', { key: 'p' + i, d })),
+    ...(s.circles || []).map((c, i) => h('circle', { key: 'c' + i, cx: c[0], cy: c[1], r: c[2] })),
+    ...(s.filled || []).map((d, i) => h('path', { key: 'f' + i, d, fill: ink, stroke: 'none' })));
+}
+function emblem(s, size, { reached = true, current = false, inner = false } = {}) {
+  const fill = reached ? s.color : '#E1E5DE';
+  const ink = reached ? '#13233A' : 'rgba(19,35,58,.4)';
+  const kids = []; let r = 12;
+  if (current) { kids.push(h('circle', { key: 'o', cx: 12, cy: 12, r: 11.25, fill: 'none', stroke: '#13233A', strokeWidth: 1.5 })); r = 8.5; }
+  kids.push(h('circle', { key: 'd', cx: 12, cy: 12, r, fill }));
+  if (inner && reached) kids.push(h('circle', { key: 'i', cx: 12, cy: 12, r: r * 0.86, fill: 'none', stroke: 'rgba(255,255,255,.5)', strokeWidth: r * 0.05 }));
+  const g = r * 2 * 14 / 24; kids.push(glyph(s, ink, 12 - g / 2, g / 24));
+  return h('svg', { viewBox: '0 0 24 24', width: size, height: size, style: { display: 'block' } }, kids);
+}
+function ring(size, stroke, radius, value, color, track, center) {
+  const c = 2 * Math.PI * radius;
+  return h('div', { style: { position: 'relative', width: size, height: size, flexShrink: 0 } },
+    h('svg', { width: size, height: size, style: { position: 'absolute', inset: 0, transform: 'rotate(-90deg)' } },
+      h('circle', { cx: size / 2, cy: size / 2, r: radius, fill: 'none', stroke: track, strokeWidth: stroke }),
+      h('circle', { cx: size / 2, cy: size / 2, r: radius, fill: 'none', stroke: color, strokeWidth: stroke, strokeLinecap: 'round', strokeDasharray: `${c * Math.max(0.001, Math.min(1, value))} ${c}`, style: { transition: 'stroke-dasharray .6s cubic-bezier(.2,0,0,1)' } })),
+    h('div', { style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' } }, center));
+}
+function statusRing(idx, progress, size) {
+  const s = STATUSES[Math.max(0, idx)];
+  return ring(size, size * 6 / 84, size * 37 / 84, progress, s.color, '#DCE2DA', emblem(s, size * 58 / 84, { reached: idx >= 0, inner: true }));
+}
+
+const LEVELS = {
+  sure: { label: 'Sûr', fg: '#4B6023', bg: '#E6EDD6', dfg: '#B7CF83', dbg: 'rgba(157,180,106,.2)', n: 3, dashed: false },
+  probable: { label: 'Probable', fg: '#34495E', bg: '#E3E9EF', dfg: '#C9D3DD', dbg: 'rgba(201,211,221,.12)', n: 2, dashed: false },
+  toCheck: { label: 'À vérifier', fg: '#A04A1C', bg: '#FFFFFF', dfg: '#F2A677', dbg: 'transparent', n: 1, dashed: true },
+};
+function badge(level, dark) {
+  const L = LEVELS[level]; const fg = dark ? L.dfg : L.fg;
+  return { label: L.label, fg, bg: dark ? L.dbg : L.bg, border: L.dashed ? `1.5px dashed ${fg}` : '1.5px solid transparent', o1: 1, o2: L.n >= 2 ? 1 : 0.3, o3: L.n >= 3 ? 1 : 0.3 };
+}
+
+const MEDALS = [
+  { hi: '#E9B98E', base: '#C27F4A', sh: '#8C542C', rim: '#6E3F1F', ink: '#3F220C', tone: '#F6EBE1' },
+  { hi: '#F7F9FB', base: '#C9D0D7', sh: '#8F99A4', rim: '#6F7984', ink: '#2F3943', tone: '#EBEFF3' },
+  { hi: '#FFE9A0', base: '#F4C542', sh: '#C49224', rim: '#9A7010', ink: '#5A4000', tone: '#FBEFC8' },
+];
+function medal(tier) { if (!tier) return { bg: '#DCE2DA', border: '2px solid #C5CCC2', inner: 'transparent', innerBorder: 'none', ink: '#6B5847', op: 0.6 }; const m = MEDALS[tier - 1]; return { bg: `linear-gradient(135deg,${m.hi},${m.base} 55%,${m.sh})`, border: `2px solid ${m.rim}`, inner: `linear-gradient(135deg,${m.base},${m.hi}E6)`, innerBorder: `1px solid ${m.sh}8C`, ink: m.ink, op: 1 }; }
+
+const SEQ = [['rouge', 'sure', 0.91], ['merle', 'sure', 0.88], ['charb', 'probable', 0.62], ['rouge', 'sure', 0.93], ['pinson', 'sure', 0.86], ['sittelle', 'sure', 0.9], ['merle', 'sure', 0.9], ['fauvette', 'toCheck', 0.41], ['bleue', 'sure', 0.84], ['trog', 'probable', 0.58], ['rouge', 'sure', 0.95], ['pic', 'toCheck', 0.38], ['merle', 'sure', 0.92], ['charb', 'sure', 0.8], ['grive', 'probable', 0.6], ['buse', 'sure', 0.83], ['huppe', 'toCheck', 0.72, true]];
+const BANDS = { rouge: 0.35, merle: 0.55, charb: 0.3, pinson: 0.4, sittelle: 0.28, fauvette: 0.38, bleue: 0.25, trog: 0.22, pic: 0.5, grive: 0.45 };
+
+function Spectro(p) {
+  const ref = React.useRef(null); const pr = React.useRef(p); pr.current = p;
+  React.useEffect(() => {
+    const cv = ref.current; if (!cv) return; const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height, SH = H - 40; let raf, last = performance.now(), acc = 0, scroll = 0; const seen = {};
+    ctx.fillStyle = '#0B1728'; ctx.fillRect(0, 0, W, H);
+    const pal = (v) => { const a = [11, 23, 40], b = [25, 167, 179], c = [244, 197, 66]; let r; if (v < 0.6) { const t = v / 0.6; r = a.map((x, i) => x + (b[i] - x) * t); } else { const t = (v - 0.6) / 0.4; r = b.map((x, i) => x + (c[i] - x) * t); } return `rgb(${r[0] | 0},${r[1] | 0},${r[2] | 0})`; };
+    const frame = (now) => {
+      const q = pr.current; const dt = Math.min(64, now - last); last = now;
+      if (q.running) {
+        acc += dt * 0.045; const n = Math.floor(acc); acc -= n; scroll += n;
+        if (n > 0) {
+          const img = ctx.getImageData(n, 0, W - n, SH); ctx.putImageData(img, 0, 0);
+          for (let x = W - n; x < W; x++) for (let y = 0; y < SH; y += 2) {
+            const f = y / SH; let v = Math.random() * 0.16 + (f > 0.85 ? 0.1 : 0);
+            (q.singing || []).forEach((s) => { const c = s.band * SH + Math.sin(now / 110 + s.band * 30) * SH * 0.07; const d = Math.abs(y - c); if (d < 5) v += 0.8 * (1 - d / 5) * (0.6 + 0.4 * Math.random()); const c2 = c * 0.5; const d2 = Math.abs(y - c2); if (d2 < 3) v += 0.35 * (1 - d2 / 3); });
+            ctx.fillStyle = pal(Math.min(1, v)); ctx.fillRect(x, y, 1, 2);
+          }
+        }
+      }
+      ctx.fillStyle = '#0B1728'; ctx.fillRect(0, SH, W, 40); ctx.fillStyle = 'rgba(238,241,236,.14)'; ctx.fillRect(0, SH, W, 1);
+      let labelEnd = -1e9; ctx.font = '700 13px Atkinson, sans-serif';
+      (q.marks || []).forEach((m) => {
+        if (seen[m.id] == null) seen[m.id] = scroll;
+        const start = W - (scroll - seen[m.id]); const len = Math.min(scroll - seen[m.id], m.len);
+        if (start + len < 0) return;
+        ctx.fillStyle = m.color; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(start, SH + 26, Math.max(4, len), 6, 3); else ctx.rect(start, SH + 26, Math.max(4, len), 6); ctx.fill();
+        const lx = start; const lw = ctx.measureText(m.label).width;
+        if (lx >= 4 && lx >= labelEnd + 8) { ctx.fillStyle = m.color; ctx.fillText(m.label, lx, SH + 19); labelEnd = lx + lw; }
+      });
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [p.h]);
+  return h('canvas', { ref, width: 390, height: p.h, style: { display: 'block', width: '100%', height: p.h + 'px' } });
+}
+
+function fresh() {
+  return {
+    tab: 'home', stack: [], sheet: null, sheetData: null, toast: null, toastIcon: 'check_circle',
+    species: 'merle', discovered: START_DISCOVERED.slice(), newSeen: [],
+    review: [{ id: 1, k: 'pic', when: "aujourd'hui à 7:38", score: 0.38, level: 'toCheck' }, { id: 2, k: 'fauvette', when: "aujourd'hui à 7:44", score: 0.41, level: 'toCheck' }, { id: 3, k: 'grive', when: 'hier à 18:12', score: 0.6, level: 'probable' }],
+    sorted: 0, drag: null, playing: null,
+    live: { phase: 'idle', elapsed: 0, entries: [], marks: [], seq: 0, next: 2, mode: 'normal', expanded: false },
+    session: null, nbFilter: 'all', rankPeriod: '30', rankConfirmed: false, rankOrder: 'contacts', soundFav: false,
+    settings: { lang: 'Français', spLang: "Comme l'app", theme: 'system', liveTheme: 'dark', quizSound: true, photos: false, blur: true },
+    pickedLevel: null, challenge: { started: true, value: 4 }, quiz: { stage: 'intro', qi: 0, score: 0, picked: null, questions: [], playing: false, sound: true },
+    firstName: 'Benjamin', ficheSeen: ['ear'], fineEar: 4, favs: { merle0: true, rouge1: true }, mapPeriod: '30', mapConfirmed: false, mapLayer: 'OSM', ficheChip: 'ear', moreAdvanced: false, markerSel: null,
+  };
+}
+const TODAY = { species: [['merle', 5, 'sure'], ['rouge', 4, 'sure'], ['charb', 3, 'sure'], ['pinson', 2, 'sure'], ['bleue', 2, 'sure'], ['trog', 1, 'probable'], ['pic', 1, 'toCheck'], ['fauvette', 1, 'toCheck']], duration: 36 * 60, start: '07:12', end: '07:48', firsts: [] };
+const fmt = (s) => { const m = Math.floor(s / 60), x = s % 60; return String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+const plural = (n, one, many) => (n === 1 ? one : many);
+const SHEET_TEXT = {
+  merle: { sum: "Le chanteur du soir : un long chant flûté, posé, qui varie sans cesse. On le voit partout, du jardin à la forêt.", ear: "Des phrases flûtées, lentes, souvent terminées par un petit grincement. L'alarme est un « tchok tchok » sec.", size: "25 cm, un peu plus grand qu'un étourneau. Le mâle est noir au bec jaune, la femelle brune.", beh: "Il fouille la pelouse par petits bonds, tête penchée, à l'affût des vers.", mig: "Sédentaire en France ; des merles du nord viennent en plus l'hiver.", fun: "Il chante dès la fin de l'hiver, souvent perché sur une antenne ou un toit." },
+  rouge: { sum: "Petit oiseau rond à la gorge orange, familier des jardiniers. Il chante presque toute l'année, même en hiver.", ear: "Un chant clair et mélancolique, en cascades de notes aiguës. Le cri est un « tic » répété.", size: "14 cm, rond comme une balle, pattes fines.", beh: "Il suit le jardinier pour attraper les vers qu'il déterre.", mig: "Sédentaire, avec des migrateurs du nord l'hiver.", fun: "Mâle et femelle chantent pour défendre chacun leur territoire d'hiver." },
+};
+const CHIP_NAMES = [['ear', "À l'oreille"], ['size', 'Taille'], ['beh', 'Comportement'], ['mig', 'Migration'], ['fun', 'Anecdote']];
+const CHIP_TONES = { ear: { icon: 'hearing', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Comment le reconnaître' }, size: { icon: 'straighten', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Sa taille' }, beh: { icon: 'visibility', bg: '#D6EEF0', ink: '#0B6E77', kicker: 'Ce qu\'il fait' }, mig: { icon: 'flight', bg: '#E6EDD6', ink: '#4B6023', kicker: 'Où il passe l\'année' }, fun: { icon: 'lightbulb', bg: '#FBEFC8', ink: '#7A5A00', kicker: 'Le savais-tu ?' } };
+const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+class Component extends DCLogic {
+  state = fresh();
+  componentDidMount() { this.timer = setInterval(() => this.tick(), 1000); }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.tt); clearTimeout(this.pt); }
+
+  toast(msg, icon = 'check_circle') { clearTimeout(this.tt); this.setState({ toast: msg, toastIcon: icon }); this.tt = setTimeout(() => this.setState({ toast: null }), 2600); }
+  push(screen, extra = {}) { this.setState((s) => ({ stack: [...s.stack.filter((x) => x !== screen), screen], sheet: null, bilanMore: false, ...extra })); }
+  back() { const s = this.state; const top = s.stack[s.stack.length - 1]; if (top === 'live' && s.live.phase !== 'idle') return this.stopLive(); this.setState({ stack: s.stack.slice(0, -1), sheet: null, drag: null }); }
+  tab(t) { this.setState({ tab: t, stack: [], sheet: null }); }
+  openSpecies(k) { this.push('species', { species: k, ficheChip: 'ear', ficheSeen: ['ear'] }); }
+  play(id) { clearTimeout(this.pt); this.setState({ playing: id }); this.pt = setTimeout(() => this.setState({ playing: null }), 2200); }
+
+  tick() {
+    const s = this.state; const L = s.live; if (L.phase !== 'active') return;
+    const elapsed = L.elapsed + 1; let { entries, marks, seq, next } = L; next -= 1;
+    entries = entries.map((e) => (e.singingUntil && e.singingUntil <= elapsed ? { ...e, singing: false } : e));
+    if (next <= 0) {
+      const [k, level, score, unexpected] = SEQ[seq % SEQ.length]; seq += 1; next = 2 + (seq % 3);
+      const prev = entries.find((e) => e.k === k);
+      const e = prev ? { ...prev, count: prev.count + 1, singing: true, singingUntil: elapsed + 3, score: Math.max(prev.score, score), level: prev.level === 'sure' || level === 'sure' ? 'sure' : level } : { k, count: 1, level, score, unexpected: !!unexpected, singing: true, singingUntil: elapsed + 3, isNew: true };
+      entries = [e, ...entries.filter((x) => x.k !== k).map((x) => ({ ...x, isNew: false }))];
+      marks = [...marks.slice(-14), { id: seq + '-' + elapsed, color: SP[k].accent, label: SP[k].name, len: 120 }];
+    }
+    this.setState({ live: { ...L, elapsed, entries, marks, seq, next } });
+  }
+  startLive() { this.push('live', { live: { ...fresh().live, mode: this.state.live.mode, phase: 'active' } }); }
+  stopLive() {
+    const s = this.state; const L = s.live;
+    const firsts = L.entries.filter((e) => e.level === 'sure' && !s.discovered.includes(e.k)).map((e) => e.k);
+    const pend = L.entries.filter((e) => e.level !== 'sure' && !s.discovered.includes(e.k) && !s.review.some((r) => r.k === e.k));
+    let id = Date.now();
+    const review = [...s.review, ...pend.map((e) => ({ id: id++, k: e.k, when: "aujourd'hui à 9:41", score: e.score, level: e.level }))];
+    const session = { species: L.entries.map((e) => [e.k, e.count, e.level]), duration: Math.max(L.elapsed, 1), start: '09:41', end: '09:' + String(41 + Math.floor(L.elapsed / 60)).padStart(2, '0'), firsts, rankBase: s.discovered.length };
+    this.setState({ live: { ...L, phase: 'idle' }, session, discovered: [...s.discovered, ...firsts], newSeen: [...s.newSeen, ...firsts], review, stack: [...s.stack.filter((x) => x !== 'live' && x !== 'bilan'), 'bilan'], sheet: null });
+  }
+  answer(a) {
+    const s = this.state; const cur = s.review[0]; if (!cur) return;
+    const review = s.review.slice(1);
+    const up = { review, sorted: s.sorted + 1, drag: null };
+    if (a === 'itIs' && !s.discovered.includes(cur.k)) { up.discovered = [...s.discovered, cur.k]; up.newSeen = [...s.newSeen, cur.k]; }
+    this.setState(up);
+    if (a === 'itIs') this.toast(`${SP[cur.k].name} rejoint ton carnet`, 'menu_book');
+  }
+  startQuiz() {
+    const pool = this.state.discovered.slice(0, 18); const qs = [];
+    for (let i = 0; i < 10; i++) { const k = pool[(i * 7 + 3) % pool.length]; const others = pool.filter((x) => x !== k); const ch = [k, others[(i * 3) % others.length], others[(i * 5 + 2) % others.length], others[(i * 11 + 5) % others.length]]; const uniq = [...new Set(ch)]; while (uniq.length < 4) uniq.push(others[(uniq.length * 13) % others.length]); const rot = i % 4; qs.push({ k, choices: [...uniq.slice(rot), ...uniq.slice(0, rot)] }); }
+    this.setState({ quiz: { ...this.state.quiz, stage: 'q', qi: 0, score: 0, picked: null, questions: qs, playing: true } });
+    setTimeout(() => this.setState((st) => ({ quiz: { ...st.quiz, playing: false } })), 1800);
+  }
+
+  renderVals() {
+    const s = this.state; const disc = s.discovered;
+    const top = s.stack[s.stack.length - 1] || null;
+    const screen = top || s.tab;
+    const go = {
+      home: () => this.tab('home'), notebook: () => this.tab('notebook'), map: () => this.tab('map'), profile: () => this.tab('profile'),
+      back: () => this.back(), live: () => this.startLive(), review: () => this.push('review'), ranking: () => this.push('ranking'), sounds: () => this.push('sounds'),
+      settings: () => this.push('settings'), quiz: () => this.push('quiz', { quiz: { ...s.quiz, stage: 'intro' } }), goal: () => this.push('goal'),
+      bilanToday: () => this.push('bilan', { session: null }), more: () => this.setState({ sheet: 'more' }), closeSheet: () => this.setState({ sheet: null }),
+      mapFromSheet: () => this.tab('map'), mapPush: () => this.push('mapx'), notImpl: () => this.toast('Écran hérité de BirdNET Live, hors de cette démo', 'info'),
+    };
+
+    // Game
+    const verified = disc.length;
+    let cur = -1; STATUSES.forEach((st, i) => { if (verified >= st.from) cur = i; });
+    const next = STATUSES[cur + 1]; const from = cur >= 0 ? STATUSES[cur].from : 0;
+    const progress = next ? (verified - from) / (next.from - from) : 1;
+    const remaining = next ? next.from - verified : 0;
+    const statusName = cur >= 0 ? STATUS_NAMES[cur] : 'Pas encore de niveau';
+    const segs = next ? Array.from({ length: next.from - from }, (_, i) => i < verified - from) : [];
+
+    // Home
+    const lastK = s.session && s.session.species.length ? s.session.species[0][0] : 'merle';
+    const lastSp = SP[lastK];
+    const todaySession = s.session || TODAY;
+    const todaySpecies = todaySession.species.map(([k, n]) => ({ ...SP[k], n, open: () => this.openSpecies(k) }));
+    const goalBirds = GOAL.map((k) => ({ ...SP[k], found: disc.includes(k) }));
+    const goalFound = goalBirds.filter((b) => b.found).length;
+    const toCheck = s.review.length;
+    const streakDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((l, i) => ({ letter: ['M', 'M', 'J', 'V', 'S', 'D', 'L'][i], state: i === 6 ? 'today' : i === 2 ? 'rest' : 'listened' })).map((d) => ({
+      ...d, weight: d.state === 'today' ? 700 : 400, bg: d.state === 'rest' ? 'transparent' : '#19A7B3', border: d.state === 'rest' ? '2px dotted #19A7B3' : 'none',
+      size: d.state === 'today' ? '11px' : '14px', shadow: d.state === 'today' ? '0 0 0 2px #FBEFC8, 0 0 0 4px #13233A' : 'none', check: d.state === 'listened' ? 1 : 0,
+    }));
+    const home = {
+      greeting: s.firstName ? `Bonjour ${s.firstName}` : 'Bonjour', dateLine: 'Mardi 29 septembre · Beaulieu-sur-Brenne', golden: { label: 'Heure dorée 18:55', bg: '#FBEFC8', fg: '#7A5A00' }, day: Object.fromEntries(['dawn', 'sunrise', 'golden', 'dusk', 'sunset'].map((id) => [id, () => this.setState({ sheet: 'day', sheetData: id })])),
+      hero: { ...lastSp, when: s.session ? 'Dernier oiseau entendu · 09:' + String(41 + Math.floor(s.session.duration / 60)).padStart(2, '0') : 'Dernier oiseau entendu · 07:52', total: `${lastSp.total + (s.session ? s.session.species[0][1] : 0)} au total`, badge: badge(s.session && s.session.species.length ? s.session.species[0][2] : 'sure'), playing: s.playing === 'hero', open: () => this.openSpecies(lastK), replay: () => this.play('hero') },
+      goal: { count: goalFound, total: GOAL.length, left: goalFound >= GOAL.length ? 'Objectif atteint' : `Encore ${GOAL.length - goalFound} ${plural(GOAL.length - goalFound, 'espèce', 'espèces')}`, ring: ring(76, 8, 34, goalFound / GOAL.length, '#19A7B3', 'rgba(255,255,255,.8)', h('span', { style: { fontSize: 20, fontWeight: 800, fontVariantNumeric: 'tabular-nums' } }, `${goalFound}/${GOAL.length}`)), slots: goalBirds.filter((b) => !b.found).slice(0, 3) },
+      streak: { n: 6, days: streakDays },
+      hasToCheck: toCheck > 0, toCheck, reviewTime: `${Math.max(1, Math.ceil(toCheck * 0.5))} min de revue`,
+      status: { name: statusName, frac: next ? `${verified}/${next.from}` : '', ring: statusRing(cur, progress, 72), segs: segs.map((f) => (f ? '#4B6023' : 'rgba(255,255,255,.8)')), caption: next ? `Encore ${remaining} ${plural(remaining, 'espèce', 'espèces')} pour devenir ${STATUS_NAMES[cur + 1]}` : 'Tu as atteint le dernier niveau.' },
+      today: { stats: [[todaySession.species.length, plural(todaySession.species.length, 'espèce', 'espèces')], [todaySession.species.reduce((a, x) => a + x[1], 0), 'contacts']].concat(todaySession.firsts.length ? [[todaySession.firsts.length, plural(todaySession.firsts.length, 'nouvelle', 'nouvelles')]] : []).map(([n, l], i) => ({ n, l, sep: i ? ' · ' : '' })), chips: todaySpecies },
+      challenge: { started: s.challenge.started, value: s.challenge.value, dots: Array.from({ length: 10 }, (_, i) => i < s.challenge.value), start: () => { this.setState({ challenge: { started: true, value: 0 } }); this.toast('Défi commencé : il compte à partir de maintenant', 'flag'); } },
+    };
+
+    // Live
+    const L = s.live; const liveSpecies = L.entries.length; const liveContacts = L.entries.reduce((a, e) => a + e.count, 0);
+    const MODES = { normal: ['Normal', '#4FC3CC', 'tune', 'graphic_eq'], wind: ['Vent', '#B7CF83', 'air', 'air'], boost: ['Boost', '#F4C542', 'volume_up', 'volume_up'], city: ['Ville', '#F0A5AE', 'location_city', 'location_city'] };
+    const lightLive = s.settings.liveTheme === 'light';
+    const MODE_LIGHT = { normal: '#0B6E77', wind: '#4B6023', boost: '#7A5A00', city: '#8A2F45' };
+    const mode = MODES[L.mode]; const modeColor = lightLive ? MODE_LIGHT[L.mode] : mode[1];
+    const T = lightLive ? { bg: '#EEF1EC', deep: '#FFFFFF', s1: '#FFFFFF', text1: '#13233A', text2: '#6B5847', btnBg: '#FFFFFF', btnBorder: 'transparent', borderStrong: '#C5CCC2', line: '#DCE2DA', accentText: '#0B6E77', stopBg: '#13233A', stopFg: '#EEF1EC', expectedRow: 'rgba(255,255,255,.55)', silFilter: 'none', orioleCont: '#FBEFC8', orioleText: '#7A5A00', rare: '#7A5A00', uncommon: '#6B5847' } : { bg: '#13233A', deep: '#0F1D31', s1: '#1A2D47', text1: '#EEF1EC', text2: '#B4C0CC', btnBg: 'rgba(238,241,236,.08)', btnBorder: 'rgba(238,241,236,.14)', borderStrong: 'rgba(238,241,236,.32)', line: 'rgba(238,241,236,.08)', accentText: '#4FC3CC', stopBg: '#EEF1EC', stopFg: '#13233A', expectedRow: 'rgba(26,45,71,.55)', silFilter: 'brightness(1.6)', orioleCont: 'rgba(244,197,66,.16)', orioleText: '#F4C542', rare: '#F4C542', uncommon: '#C9B8A4' };
+    const live = {
+      t: T, status: L.phase === 'paused' ? 'En pause' : 'En écoute', modeWord: mode[0], modeColor, modeIcon: mode[3], optionsIcon: mode[2], place: 'Le jardin · Beaulieu-sur-Brenne',
+      elapsed: fmt(L.elapsed), species: liveSpecies, speciesLabel: plural(liveSpecies, 'espèce', 'espèces'), contacts: liveContacts, contactsLabel: plural(liveContacts, 'contact', 'contacts'),
+      summary: `${liveSpecies} ${plural(liveSpecies, 'espèce', 'espèces')} · ${liveContacts} ${plural(liveContacts, 'contact', 'contacts')}`,
+      paused: L.phase === 'paused', pauseDisplay: L.phase === 'paused' ? 'none' : 'flex', expanded: L.expanded, compactTiles: !L.expanded, empty: L.entries.length === 0,
+      spectro: h(Spectro, { h: L.expanded ? 420 : 160, running: L.phase === 'active', singing: L.entries.filter((e) => e.singing).map((e) => ({ band: BANDS[e.k] || 0.4 })), marks: L.marks }),
+      rows: L.entries.map((e) => ({ ...SP[e.k], count: '×' + e.count, total: `${SP[e.k].total + e.count} au total`, singing: e.singing ? 1 : 0, badge: badge(e.level, !lightLive), rareHere: e.unexpected && e.level === 'toCheck', showBadge: !(e.unexpected && e.level === 'toCheck'), rarityLabel: e.unexpected && e.level === 'toCheck' ? '' : SP[e.k].rarity === 'rare' ? 'Rare ici' : SP[e.k].rarity === 'uncommon' ? 'Peu commun ici' : '', rarityIcon: SP[e.k].rarity === 'rare' ? 'diamond' : 'visibility', rarityBg: SP[e.k].rarity === 'rare' ? T.orioleCont : T.line, rarityFg: SP[e.k].rarity === 'rare' ? T.orioleText : T.text2, anim: e.isNew ? 'birdyIn .32s cubic-bezier(.2,0,0,1)' : 'none', open: () => this.openSpecies(e.k), replay: () => { this.play('live-' + e.k); this.toast("Réécoute : l'écoute se met en pause le temps de l'extrait", 'volume_down'); }, playing: s.playing === 'live-' + e.k })),
+      expected: ['merle', 'rouge', 'charb'].map((k) => SP[k]),
+      toggleExpand: () => this.setState({ live: { ...L, expanded: !L.expanded } }),
+      pause: () => this.setState({ live: { ...L, phase: L.phase === 'paused' ? 'active' : 'paused' } }),
+      stop: () => this.stopLive(), options: () => this.setState({ sheet: 'listen' }),
+    };
+
+    // Bilan
+    const ses = s.session || TODAY;
+    const bFirsts = ses.firsts.map((k, i) => ({ ...SP[k], rank: `Ta ${(ses.rankBase || verified) + i + 1}e espèce, à 09:${String(42 + i * 2).padStart(2, '0')}.`, open: () => this.openSpecies(k) }));
+    const bMaybe = ses.species.filter(([k, , lv]) => lv !== 'sure' && !disc.includes(k)).map(([k, , lv]) => ({ ...SP[k], badge: badge(lv), open: () => this.push('review') }));
+    const pendingInQueue = s.review.length;
+    const dMin = Math.max(1, Math.round(ses.duration / 60));
+    const bilan = {
+      headline: 'Belle matinée !', caption: `Mardi 29 septembre · ${ses.start} → ${ses.end} · Le jardin`,
+      inlineMore: false, toggleMore: () => this.setState({ sheet: 'bilanMore' }), durationNum: dMin, species: ses.species.length, speciesLabel: plural(ses.species.length, 'espèce', 'espèces'), contacts: ses.species.reduce((a, x) => a + x[1], 0), duration: `${dMin} min`,
+      hasNovelties: bFirsts.length + bMaybe.length > 0,
+      noveltiesTitle: bFirsts.length && bMaybe.length ? `${bFirsts.length === 1 ? 'Une nouvelle' : bFirsts.length + ' nouvelles'}, peut-être ${bFirsts.length + bMaybe.length === 2 ? 'deux' : bFirsts.length + bMaybe.length}` : bFirsts.length ? (bFirsts.length === 1 ? 'Une nouvelle espèce' : `${bFirsts.length} nouvelles espèces`) : (bMaybe.length === 1 ? 'Peut-être une nouvelle espèce' : `Peut-être ${bMaybe.length} nouvelles espèces`),
+      firsts: bFirsts, maybe: bMaybe, stripTitle: `Les ${ses.species.length} espèces entendues`,
+      strip: ses.species.map(([k, n, lv]) => ({ ...SP[k], n: '×' + n, pending: lv !== 'sure' && !disc.includes(k) ? 1 : 0, open: () => this.openSpecies(k) })),
+      hasToCheck: pendingInQueue > 0, toCheckLabel: `Vérifier ${pendingInQueue} ${plural(pendingInQueue, 'détection', 'détections')}`,
+      share: () => this.toast('Bilan copié, prêt à partager', 'share'), lpo: () => this.toast('Fiche Faune-France prête : 6 observations confirmées', 'send'),
+      details: go.notImpl, add: () => this.toast('Ajouter un oiseau vu : choisis l\'espèce dans la liste', 'add'), recording: () => this.toast("Écoute marquée comme enregistrement : elle ne compte plus dans tes statistiques", 'music_note'),
+    };
+
+    // Review
+    const rc = s.review[0]; const dr = s.drag || { x: 0, y: 0 };
+    const hint = dr.x > 60 ? 'itIs' : dr.x < -60 ? 'itIsNot' : dr.y < -60 ? 'dontKnow' : null;
+    const review = {
+      done: !rc, count: s.review.length, position: `1 sur ${s.review.length + s.sorted > 0 ? s.review.length : 0}`, progress: (s.sorted / Math.max(1, s.sorted + s.review.length) * 100) + '%',
+      sortedLine: s.sorted === 0 ? "Rien de trié pour l'instant." : `Tu as trié ${s.sorted} ${plural(s.sorted, 'détection', 'détections')}.`,
+      doneTitle: s.sorted === 0 ? 'Rien à vérifier' : 'Tout est trié, bravo', doneBody: s.sorted === 0 ? 'Toutes les détections sont triées.' : `Tu as trié ${s.sorted} ${plural(s.sorted, 'détection', 'détections')}. Tes réponses rendent l'app plus fiable.`,
+      card: rc ? { ...SP[rc.k], when: rc.when, score: 'Score ' + rc.score.toFixed(2).replace('.', ','), badge: badge(rc.level), playing: s.playing === 'rev' + rc.id } : null,
+      behind1: s.review.length > 1, behind2: s.review.length > 2,
+      transform: `translate(${dr.x}px, ${Math.min(0, dr.y)}px) rotate(${dr.x / 18}deg)`, transition: s.drag ? 'none' : 'transform .25s cubic-bezier(.2,0,0,1)',
+      outline: hint === 'itIs' ? '#9DB46A' : hint === 'itIsNot' ? '#A04A1C' : hint === 'dontKnow' ? '#34495E' : 'transparent',
+      play: () => rc && this.play('rev' + rc.id), reference: () => this.toast('Chant de référence (xeno-canto) ouvert', 'open_in_new'),
+      no: () => this.answer('itIsNot'), maybe: () => this.answer('dontKnow'), yes: () => this.answer('itIs'),
+      reliability: () => this.setState({ sheet: 'levels' }), stop: (e) => e.stopPropagation(),
+      down: (e) => { this.dragStart = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId); this.setState({ drag: { x: 0, y: 0 } }); },
+      move: (e) => { if (!this.dragStart) return; this.setState({ drag: { x: e.clientX - this.dragStart.x, y: e.clientY - this.dragStart.y } }); },
+      up: () => { if (!this.dragStart) return; this.dragStart = null; const d = this.state.drag || { x: 0, y: 0 }; if (d.x > 90) this.answer('itIs'); else if (d.x < -90) this.answer('itIsNot'); else if (d.y < -90) this.answer('dontKnow'); else this.setState({ drag: null }); },
+    };
+
+    // Fiche
+    const fk = s.species; const f = SP[fk]; const heard = disc.includes(fk) || f.total > 0;
+    const txt = SHEET_TEXT[fk] || { sum: `${f.name} : fiche rédigée à l'avance, disponible hors ligne. Relecture en cours pour les 100 oiseaux les plus courants.`, ear: 'Réécoute tes enregistrements ci-dessus pour te faire l\'oreille : c\'est le meilleur moyen de le retenir.', size: 'Sa taille et sa silhouette arrivent avec la relecture de la fiche.', beh: 'Son comportement arrive avec la relecture de la fiche.', mig: f.pres === 'mig' ? "Migrateur : présent de la fin de l'hiver à l'automne." : 'Sédentaire en France : tu peux l\'entendre toute l\'année.', fun: 'L\'anecdote arrive avec la relecture de la fiche.' };
+    const monthVals = MONTHS.map((_, i) => (f.pres === 'mig' ? (i >= 2 && i <= 9 ? [30, 70, 100, 95, 85, 75, 60, 35][i - 2] : 4) : [70, 75, 85, 95, 100, 90, 80, 75, 80, 78, 72, 70][i]));
+    const peakM = monthVals.indexOf(Math.max(...monthVals));
+    const hours = Array.from({ length: 24 }, (_, i) => Math.max(0, Math.round(100 * Math.exp(-Math.pow((i - 7) / 2.2, 2)) + 35 * Math.exp(-Math.pow((i - 19) / 1.8, 2)))));
+    const scale = (v) => (v <= 0 ? '#DCE2DA' : v < 25 ? '#BFE3E6' : v < 50 ? '#7FCCD3' : v < 75 ? '#19A7B3' : '#0B6E77');
+    const clipsN = heard ? Math.min(14, Math.max(2, Math.round(f.total / 10))) : 0;
+    const fiche = {
+      ...f, heard, verifiedBadge: disc.includes(fk) ? badge('sure') : null, isVerified: disc.includes(fk),
+      heardLine: heard ? `Entendu ${f.total || 1} fois sur ${f.days || 1} jours, depuis le 4 avril.` : "Tu ne l'as pas encore entendu.",
+      precision: disc.includes(fk) ? '9 confirmées sur 10 vérifiées' : '', total: f.total, days: f.days,
+      hereSentence: f.pres === 'mig' ? "Présent de mars à octobre." : "Présent toute l'année.", rareNote: f.rarity === 'rare' ? 'Rare ici en ce moment : une détection sera à confirmer.' : '',
+      months: monthVals.map((v, i) => ({ h: Math.max(3, Math.round(v * 0.36)) + 'px', c: scale(v), l: MONTHS[i], cur: i === 8 ? 1 : 0 })), peakMonth: `Surtout en ${MONTH_NAMES[peakM]}`,
+      hours: hours.map((v) => ({ h: Math.max(2, Math.round(v * 0.52)) + 'px', c: scale(v) })), peakHour: 'Surtout vers 7 h',
+      clips: heard ? [0, 1, 2].map((i) => { const id = fk + i; return { id, line: ['29 sept. · 07:31 · score 0,92', '27 sept. · 07:05 · score 0,88', '21 sept. · 18:42 · score 0,85'][i], fav: s.favs[id] ? 1 : 0, star: s.favs[id] ? '#F4C542' : '#6B5847', playing: s.playing === 'clip' + id, play: () => this.play('clip' + id), toggle: () => this.setState({ favs: { ...s.favs, [id]: !s.favs[id] } }) }; }) : [],
+      moreClips: `Voir les ${clipsN} enregistrements`, hasClips: heard,
+      summary: txt.sum, chips: CHIP_NAMES.map(([id, label]) => { const T = CHIP_TONES[id]; const sel = s.ficheChip === id; return { label, icon: T.icon, bg: sel ? T.bg : '#EEF1EC', ink: sel ? T.ink : '#6B5847', fill: sel ? 1 : 0, ring: sel ? `0 0 0 2px #FFFFFF, 0 0 0 4px ${T.ink}` : 'none', weight: sel ? 700 : 400, seen: (s.ficheSeen || []).includes(id) && !sel ? 1 : 0, pick: () => this.setState({ ficheChip: id, ficheSeen: [...new Set([...(s.ficheSeen || []), id])] }) }; }), chipText: txt[s.ficheChip],
+      cardBg: CHIP_TONES[s.ficheChip].bg, cardInk: CHIP_TONES[s.ficheChip].ink, cardIcon: CHIP_TONES[s.ficheChip].icon, cardKicker: CHIP_TONES[s.ficheChip].kicker,
+      chipStep: `${(s.ficheSeen || []).length}/5 découverts`, chipDots: CHIP_NAMES.map(([id]) => (id === s.ficheChip ? CHIP_TONES[id].ink : (s.ficheSeen || []).includes(id) ? '#9DB46A' : 'rgba(19,35,58,.12)')),
+      nextLabel: CHIP_NAMES.findIndex(([id]) => id === s.ficheChip) === 4 ? 'Revoir' : 'Suivant', nextChip: () => { const i = CHIP_NAMES.findIndex(([id]) => id === s.ficheChip); const n = CHIP_NAMES[(i + 1) % 5][0]; this.setState({ ficheChip: n, ficheSeen: [...new Set([...(s.ficheSeen || []), n])] }); },
+      share: () => this.toast('Fiche partagée', 'share'), reference: () => this.toast('Chant de référence ouvert', 'open_in_new'), lpo: () => this.toast('Envoi à Faune-France préparé', 'send'), openLink: () => this.toast('Page externe ouverte', 'open_in_new'), seeMap: () => this.push('mapx'),
+    };
+
+    // Notebook
+    const inQueue = [...new Set(s.review.map((r) => r.k))].filter((k) => !disc.includes(k));
+    const mysteries = EXPECTED.filter((k) => !disc.includes(k) && !inQueue.includes(k));
+    const expFound = EXPECTED.filter((k) => disc.includes(k)).length;
+    const HINTS = { sittelle: 'Siffle fort sur les troncs', martin: 'Un « tiii » perçant au bord de l\'eau', huppe: 'Un « oup-oup-oup » grave', grive: 'Répète chaque phrase 2 ou 3 fois', pic: 'Un « kik » sec', fauvette: 'Un chant flûté qui s\'emballe' };
+    let cards = [
+      ...disc.map((k) => ({ kind: 'd', k, sort: SP[k].total + (s.newSeen.includes(k) ? 1000 : 0) })),
+      ...inQueue.map((k) => ({ kind: 'c', k, sort: -1 })), ...mysteries.map((k) => ({ kind: 'm', k, sort: -2 })),
+    ].sort((a, b) => b.sort - a.sort);
+    const filt = s.nbFilter;
+    cards = cards.filter((c) => filt === 'all' || (filt === 'discovered' && c.kind === 'd') || (filt === 'toDiscover' && (c.kind === 'm' || c.kind === 'c')) || (filt === 'rare' && SP[c.k].rarity !== 'none'));
+    const rareCount = [...disc, ...mysteries].filter((k) => SP[k].rarity !== 'none').length;
+    const notebook = {
+      caption: `${disc.length} oiseaux dans ton carnet`, heroTitle: 'Les oiseaux du coin', heroLine: `${EXPECTED.length} oiseaux vivent près de chez toi en ce moment. Tu en as trouvé ${expFound}, il en reste ${EXPECTED.length - expFound} !`, silHint: SP.sittelle.silGrey, found: expFound, expected: EXPECTED.length,
+      ring: ring(88, 10, 39, expFound / EXPECTED.length, '#19A7B3', 'rgba(255,255,255,.8)', h('span', { style: { fontFamily: 'Fraunces', fontSize: 34, fontWeight: 600, fontVariationSettings: "'SOFT' 100,'opsz' 34", fontVariantNumeric: 'tabular-nums' } }, String(expFound))),
+      barW: (expFound / EXPECTED.length * 100) + '%', toDiscover: mysteries.length + inQueue.length, rare: rareCount, rareLabel: plural(rareCount, 'oiseau rare', 'oiseaux rares'), cardCount: `${cards.length} ${plural(cards.length, 'carte', 'cartes')}`,
+      filters: [['all', 'Toutes', '#13233A', '#EEF1EC'], ['discovered', 'Mes découvertes', '#E6EDD6', '#13233A'], ['toDiscover', 'À trouver', '#D6EEF0', '#13233A'], ['rare', 'Rares', '#FBEFC8', '#13233A']].map(([id, label, sb, sf]) => ({ label, bg: filt === id ? sb : '#EEF1EC', fg: filt === id ? sf : '#13233A', pick: () => this.setState({ nbFilter: id }) })),
+      setToDiscover: () => this.setState({ nbFilter: 'toDiscover' }), setRare: () => this.setState({ nbFilter: 'rare' }), empty: cards.length === 0, showAll: () => this.setState({ nbFilter: 'all' }),
+      cards: cards.map((c) => { const p = SP[c.k]; const rar = p.rarity; const cornerLabel = rar === 'rare' ? 'Rare' : rar === 'uncommon' ? 'Peu commun' : rar === 'exceptional' ? 'Exceptionnel' : ''; const cornerBg = rar === 'uncommon' ? '#FFFFFF' : '#FBEFC8'; const cornerFg = rar === 'uncommon' ? '#6B5847' : '#7A5A00'; const cornerIcon = rar === 'rare' ? 'diamond' : rar === 'exceptional' ? 'star' : 'visibility'; const corner = ''; const cornerColor = '';
+        if (c.kind === 'd') return { name: p.name, bg: p.tint, border: '1.5px solid transparent', vbg: '#FFFFFF', img: p.sil, op: 1, nameColor: '#13233A', caption: `${p.total} fois`, capColor: '#6B5847', capWeight: 400, isNew: s.newSeen.includes(c.k) ? 1 : 0, corner, cornerColor, cornerLabel, cornerBg, cornerFg, cornerIcon, open: () => { this.setState({ newSeen: s.newSeen.filter((x) => x !== c.k) }); this.openSpecies(c.k); } };
+        if (c.kind === 'c') return { name: p.name, bg: '#FFFFFF', border: '1.5px dashed #A04A1C', vbg: '#EEF1EC', img: p.silLight, op: 0.6, nameColor: '#13233A', caption: 'À confirmer', capColor: '#A04A1C', capWeight: 700, isNew: 0, corner, cornerColor, cornerLabel, cornerBg, cornerFg, cornerIcon, open: () => this.push('review') };
+        return { name: 'Oiseau mystère', bg: '#FFFFFF', border: '1.5px dashed #B9C0B5', vbg: '#EEF1EC', img: p.silGrey, op: 1, nameColor: '#6B5847', caption: HINTS[c.k] || 'Attendu ici cette semaine', capColor: '#6B5847', capWeight: 400, isNew: 0, corner, cornerColor, cornerLabel, cornerBg, cornerFg, cornerIcon, open: () => this.toast('Oiseau attendu ici cette semaine : lance une écoute pour le découvrir', 'hearing') }; }),
+    };
+
+    // Profile
+    const pick = s.pickedLevel;
+    const cells = STATUSES.map((st, i) => ({ from: st.from, el: emblem(st, 48, { reached: i <= cur, current: i === cur, inner: i <= cur }), isCurrent: i === cur, numColor: i === cur ? '#13233A' : '#4B6023', numWeight: i === cur ? 800 : 400, bg: pick === i ? '#FFFFFF' : 'transparent', pick: () => this.setState({ pickedLevel: pick === i ? null : i }) }));
+    const showIdx = pick != null ? pick : next ? cur + 1 : cur; const showSt = STATUSES[showIdx]; const showReached = showIdx <= cur; const isNext = pick == null && next;
+    const reviewer = 42 + s.sorted;
+    const BADGES = [['Chœur de l\'aube', 'wb_twilight', [1, 5, 20], 6, 'Dix espèces vérifiées dans une écoute commencée avant 8 h.'], ['Lève-tôt', 'schedule', [1, 5, 20], 3, 'Une écoute commencée avant le lever du soleil.'], ['Noctambule', 'dark_mode', [1, 3, 6], 1, 'Des oiseaux de nuit vérifiés : chouettes, engoulevent.'], ['Réviseur', 'check', [10, 50, 200], reviewer, 'Des détections triées dans la revue rapide. Chaque réponse compte.'], ['Migrateur', 'flight', [3, 6, 12], 2, 'Des espèces migratrices vérifiées.'], ["7 jours d'affilée", 'calendar_today', [7, 30, 100], 12, "Une série de jours d'écoute. Un jour de repos par semaine est permis."], ['Les mésanges', 'raven', [2, 4, 6], 3, 'Des espèces de mésanges vérifiées.'], ['Oreille fine', 'headphones', [10, 50, 150], s.fineEar, 'Des bonnes réponses au quiz « Qui chante ? ».']];
+    const badges = BADGES.map(([name, icon, tiers, value, rule], i) => { const tier = tiers.filter((t) => value >= t).length; const nt = tiers[tier]; return { name, icon, tier, tiers, value, rule, nextTarget: nt, medal: medal(tier), tile: tier ? MEDALS[tier - 1].tone : '#FFFFFF', tileBorder: tier ? '1.5px solid transparent' : '1.5px dashed #B9C0B5', earned: tier > 0 ? 1 : 0, dots: [0, 1, 2].map((d) => (d < tier ? '#13233A' : '#C5CCC2')), bar: nt ? Math.round(Math.min(1, value / nt) * 100) + '%' : '100%', progress: nt ? `${Math.min(value, nt)} sur ${nt}` : 'Tous les paliers', open: () => this.setState({ sheet: 'badge', sheetData: i }) }; });
+    const sortedBadges = [...badges.filter((b) => b.earned), ...badges.filter((b) => !b.earned)];
+    const profile = {
+      congrats: s.firstName ? `Bravo ${s.firstName}, te voilà` : 'Bravo, te voilà', ring: statusRing(cur, progress, 96), rankCaption: `Niveau ${cur + 1} sur 8`, name: statusName, verified: `${verified} espèces découvertes`,
+      rows: [0, 1].map((r) => { const reached = r * 4 + 3 <= cur; return { cells: cells.slice(r * 4, r * 4 + 4), lineColor: reached ? '#4B6023' : '#C5CCC2', lineH: reached ? '4px' : '2px', lineTop: reached ? '30px' : '31px', segs: [0, 1, 2].map((j) => ({ left: `calc(${12.5 + 25 * j}% + 24px)` })) }; }),
+      info: { emblem: emblem(showSt, 44, { reached: showReached, inner: showReached }), caption: isNext ? 'Prochain niveau' : showIdx === cur ? 'Ton niveau' : showReached ? `Niveau ${showIdx + 1}, atteint` : `Niveau ${showIdx + 1}`, name: STATUS_NAMES[showIdx], isNext: !!isNext, segs: segs.map((f2) => (f2 ? '#0B6E77' : '#DCE2DA')), detail: isNext ? `Encore ${remaining} ${plural(remaining, 'espèce', 'espèces')}` : showReached ? `Dès ${showSt.from} ${plural(showSt.from, 'espèce', 'espèces')}` : `Encore ${showSt.from - verified} espèces`, line: isNext ? '' : STATUS_LINES[showIdx] },
+      streakDays, plumes: badges.reduce((a, b) => a + b.tier, 0), feather: h('svg', { viewBox: '0 0 24 24', width: 20, height: 20, style: { display: 'block' } }, glyph(STATUSES[1], '#7A5A00', 0, 1)),
+      challenge: home.challenge, badges: sortedBadges,
+    };
+    const bsel = s.sheet === 'badge' ? badges[s.sheetData] : null;
+
+    // Quiz
+    const Q = s.quiz; const qq = Q.questions[Q.qi];
+    const quiz = {
+      intro: Q.stage === 'intro', q: Q.stage === 'q', result: Q.stage === 'result',
+      orbit: [['rouge', '22px', 'auto', '24px', 'auto', '-8deg'], ['bleue', 'auto', '8px', '36px', 'auto', '6deg'], ['merle', '30px', 'auto', 'auto', '30px', '5deg'], ['pinson', 'auto', '14px', 'auto', '40px', '-6deg']].map(([k, l, r, t, b, tilt]) => ({ ...SP[k], left: l, right: r, top: t, bottom: b, tilt })),
+      soundOn: Q.sound, soundLabel: Q.sound ? 'Avec son' : 'Sans son', soundIcon: Q.sound ? 'volume_up' : 'volume_off', soundTrack: Q.sound ? '#19A7B3' : '#C5CCC2', soundJustify: Q.sound ? 'flex-end' : 'flex-start', toggleSound: () => this.setState({ quiz: { ...Q, sound: !Q.sound } }),
+      fineEarSegs: Array.from({ length: 10 }, (_, i) => (i < s.fineEar % 10 || s.fineEar >= 10 && i < 10 ? '#19A7B3' : '#DCE2DA')), fineEarLine: s.fineEar >= 10 ? `Première plume gagnée · ${s.fineEar} bonnes réponses` : `Encore ${10 - s.fineEar} bonnes réponses · ${s.fineEar} sur 10`, fineEarTitle: s.fineEar >= 10 ? 'Ta deuxième plume' : 'Ta première plume', fineEarMedal: medal(s.fineEar >= 10 ? 1 : 0),
+      start: () => this.startQuiz(), leaveIcon: Q.stage === 'intro' ? 'arrow_back' : 'close', leave: () => (Q.stage === 'q' ? this.setState({ sheet: 'quitQuiz' }) : this.back()),
+      qn: `${Q.qi + 1} sur 10`, trail: Array.from({ length: 10 }, (_, i) => ({ bg: i < Q.qi ? '#19A7B3' : i === Q.qi ? '#F4C542' : '#DCE2DA', w: i === Q.qi ? '22px' : '10px' })), playing: Q.playing, score: Q.score,
+      play: () => { this.setState({ quiz: { ...Q, playing: true } }); setTimeout(() => this.setState((st) => ({ quiz: { ...st.quiz, playing: false } })), 1800); },
+      answered: Q.picked != null, right: qq && Q.picked === qq.k,
+      feedback: qq && Q.picked != null ? (Q.picked === qq.k ? `Bravo, c'est bien lui : ${SP[qq.k].name}` : `C'était : ${SP[qq.k].name}`) : '',
+      feedbackBg: qq && Q.picked === qq.k ? '#E6EDD6' : '#FFFFFF', feedbackFg: qq && Q.picked === qq.k ? '#4B6023' : '#A04A1C', feedbackIcon: qq && Q.picked === qq.k ? 'check_circle' : 'cancel',
+      choices: qq ? qq.choices.map((k) => { const p = SP[k]; const picked = Q.picked === k, isAns = k === qq.k, done = Q.picked != null; return { ...p, bg: done && isAns ? '#E6EDD6' : done && picked ? '#FFFFFF' : '#FFFFFF', border: done && isAns ? '2px solid #9DB46A' : done && picked ? '2px dashed #A04A1C' : '2px solid transparent', op: done && !isAns && !picked ? 0.5 : 1, mark: done && isAns ? 'check_circle' : done && picked ? 'cancel' : '', markColor: isAns ? '#4B6023' : '#A04A1C', pick: () => { if (Q.picked != null) return; const ok = k === qq.k; this.setState({ quiz: { ...Q, picked: k, score: Q.score + (ok ? 1 : 0) }, fineEar: s.fineEar + (ok ? 1 : 0) }); } }; }) : [],
+      next: () => { if (Q.qi >= 9) this.setState({ quiz: { ...Q, stage: 'result' } }); else { this.setState({ quiz: { ...Q, qi: Q.qi + 1, picked: null, playing: true } }); setTimeout(() => this.setState((st) => ({ quiz: { ...st.quiz, playing: false } })), 1800); } },
+      nextLabel: Q.qi >= 9 ? 'Voir mon score' : 'Suivant',
+      stars: [0.4, 0.7, 1].map((t) => ({ c: Q.score / 10 >= t ? '#F4C542' : '#DCE2DA', rim: Q.score / 10 >= t ? '#C49224' : '#C5CCC2' })), resultTitle: Q.score >= 7 ? 'Belle oreille !' : Q.score >= 4 ? 'Bien joué !' : 'Continue, ça vient !', resultLine: `${Q.score} bonnes réponses sur 10 · +${Q.score} pour Oreille fine`,
+      again: () => this.startQuiz(), finish: () => this.back(),
+      recap: Q.questions.map((qx, i) => ({ ...SP[qx.k] })),
+    };
+
+    // Ranking
+    const factor = { '30': 1, season: 1.7, year: 3.4, all: 6 }[s.rankPeriod];
+    const nShow = { '30': 17, season: 20, year: 24, all: disc.length }[s.rankPeriod];
+    let ranked = disc.map((k) => ({ ...SP[k], value: Math.max(1, Math.round((s.rankOrder === 'days' ? SP[k].days : SP[k].total) * factor * (s.rankConfirmed ? 0.8 : 1) / (s.rankOrder === 'days' ? 1.5 : 3.4))), isNew: NEW_YEAR.includes(k) })).sort((a, b) => b.value - a.value).slice(0, nShow);
+    const leader = ranked[0] ? ranked[0].value : 1; const unit = s.rankOrder === 'days' ? 'jours' : 'contacts';
+    const ranking = {
+      count: ranked.length, label: `espèces ${{ '30': 'en 30 jours', season: 'cette saison', year: 'en 2026', all: 'depuis le début' }[s.rankPeriod]}`, newCount: ranked.filter((r) => r.isNew).length,
+      dates: { '30': ' · du 30 août au 29 septembre', season: ' · depuis le 1er septembre', year: '', all: ' · depuis le 4 avril 2025' }[s.rankPeriod],
+      periods: [['30', '30 jours'], ['season', 'Saison'], ['year', 'Année'], ['all', 'Tout']].map(([id, l]) => ({ l, bg: s.rankPeriod === id ? '#13233A' : '#FFFFFF', fg: s.rankPeriod === id ? '#EEF1EC' : '#13233A', pick: () => this.setState({ rankPeriod: id }) })),
+      confirmedTrack: s.rankConfirmed ? '#19A7B3' : '#C5CCC2', confirmedJustify: s.rankConfirmed ? 'flex-end' : 'flex-start', toggleConfirmed: () => this.setState({ rankConfirmed: !s.rankConfirmed }),
+      orderLabel: s.rankOrder === 'days' ? 'par jours' : 'par contacts', toggleOrder: () => this.setState({ rankOrder: s.rankOrder === 'days' ? 'contacts' : 'days' }), unit,
+      podium: [ranked[1], ranked[0], ranked[2]].filter(Boolean).map((r) => { const rank = r === ranked[0] ? 1 : r === ranked[1] ? 2 : 3; const m = MEDALS[3 - rank]; return { ...r, rank, h: { 1: '240px', 2: '212px', 3: '196px' }[rank], av: rank === 1 ? '80px' : '60px', m, shadow: rank === 1 ? `0 4px 12px ${r.accent}66` : 'none', open: () => this.openSpecies(r.k) }; }),
+      rows: ranked.slice(3).map((r, i) => ({ ...r, rank: i + 4, w: Math.round(r.value / leader * 100) + '%', sep: i ? '1px solid #DCE2DA' : 'none', open: () => this.openSpecies(r.k) })),
+      sort: () => this.setState({ sheet: 'rankSort' }),
+    };
+
+    // Sounds
+    let sounds = disc.slice(0, 18).map((k, i) => { const clips = Math.max(2, Math.round(SP[k].total / 10)); const favN = Object.keys(s.favs).filter((x) => x.startsWith(k) && s.favs[x]).length; return { ...SP[k], clips, favN, count: `${clips} enregistrements${favN ? ' · ' + favN + ' ★' : ''}`, open: () => this.openSpecies(k) }; });
+    const totalClips = sounds.reduce((a, x) => a + x.clips, 0); const totalFav = sounds.reduce((a, x) => a + x.favN, 0);
+    if (s.soundFav) sounds = sounds.filter((x) => x.favN > 0);
+    const soundsV = { total: totalClips, speciesCount: sounds.length, favs: totalFav, rows: sounds.map((x, i) => ({ ...x, sep: i ? '1px solid #DCE2DA' : 'none' })), empty: sounds.length === 0,
+      allBg: s.soundFav ? '#FFFFFF' : '#13233A', allFg: s.soundFav ? '#13233A' : '#EEF1EC', favBg: s.soundFav ? '#13233A' : '#FFFFFF', favFg: s.soundFav ? '#EEF1EC' : '#13233A', starColor: s.soundFav ? '#F4C542' : '#7A5A00', all: () => this.setState({ soundFav: false }), fav: () => this.setState({ soundFav: true }) };
+
+    // Settings
+    const S = s.settings; const setS = (k, v) => this.setState({ settings: { ...S, [k]: v } });
+    const settings = {
+      lang: S.lang, spLang: S.spLang, firstName: s.firstName, setName: (e) => this.setState({ firstName: e.target.value.slice(0, 24) }),
+      pickLang: () => this.setState({ sheet: 'choice', sheetData: { key: 'lang', title: "Langue de l'app", options: ['Système', 'Deutsch', 'English', 'Español', 'Français', 'Italiano', 'Nederlands'] } }),
+      pickSp: () => this.setState({ sheet: 'choice', sheetData: { key: 'spLang', title: 'Noms des espèces', options: ["Comme l'app", 'Système', 'Latin', 'English', 'Français'] } }),
+      themes: [['light', 'Clair', 'light_mode'], ['dark', 'Sombre', 'dark_mode'], ['system', 'Auto', 'smartphone']].map(([id, l, ic]) => ({ l, ic, bg: S.theme === id ? '#13233A' : '#EEF1EC', fg: S.theme === id ? '#EEF1EC' : '#13233A', pick: () => setS('theme', id) })),
+      switches: [['quizSound', 'volume_up', 'Sons du quiz', 'Les petits bruitages, jamais le chant.', '#D6EEF0', '#0B6E77'], ['photos', 'photo_library', 'Photos en grand (en ligne)', 'Chargée depuis iNaturalist quand tu ouvres une fiche.', '#D6EEF0', '#0B6E77'], ['blur', 'blur_on', 'Flouter les espèces sensibles', 'Position arrondie à 10 km dans les exports.', '#E6EDD6', '#4B6023']].map(([k, ic, t, hint, disc2, ink], i) => ({ ic, t, hint, disc: disc2, ink, track: S[k] ? '#19A7B3' : '#C5CCC2', justify: S[k] ? 'flex-end' : 'flex-start', sep: i ? '1px solid #DCE2DA' : 'none', toggle: () => setS(k, !S[k]) })),
+      advanced: go.notImpl,
+      liveThemes: [['dark', 'Sombre', 'dark_mode'], ['light', 'Clair', 'light_mode']].map(([id, l, ic]) => ({ l, ic, bg: S.liveTheme === id ? '#13233A' : '#EEF1EC', fg: S.liveTheme === id ? '#EEF1EC' : '#13233A', pick: () => setS('liveTheme', id) })),
+    };
+
+    // Map
+    const MARKERS = [['merle', 30, 38, 12], ['rouge', 58, 30, 9], ['charb', 70, 52, 6], ['pinson', 42, 60, 4], ['pie', 22, 66, 3], ['bleue', 64, 72, 5]];
+    const mapF = { '30': 1, season: 1.6, year: 3, all: 5 }[s.mapPeriod];
+    const map = {
+      showBack: top === 'mapx', back: () => this.back(),
+      caption: `Tes contacts sur ${{ '30': '30 jours', season: 'la saison', year: "l'année", all: 'toute la période' }[s.mapPeriod]} · ${{ '30': 12, season: 17, year: 26, all: 31 }[s.mapPeriod]} lieux`, layer: s.mapLayer,
+      periodLabel: { '30': '30 jours', season: 'Saison', year: 'Année', all: 'Tout' }[s.mapPeriod],
+      confirmedBg: s.mapConfirmed ? '#13233A' : '#FFFFFF', confirmedFg: s.mapConfirmed ? '#EEF1EC' : '#13233A', confirmedIcon: s.mapConfirmed ? 1 : 0,
+      markers: MARKERS.map(([k, x, y, n], i) => ({ ...SP[k], left: x + '%', top: y + '%', n: Math.max(1, Math.round(n * mapF * (s.mapConfirmed ? 0.7 : 1))), ring: s.markerSel === i ? '#13233A' : SP[k].accent, open: () => this.setState({ sheet: 'area', sheetData: i, markerSel: i }) })),
+      cluster: () => this.setState({ sheet: 'area', sheetData: -1, markerSel: null }),
+      period: () => this.setState({ sheet: 'choice', sheetData: { key: 'mapPeriod', title: 'Période', options: ['30 jours', 'Saison', 'Année', 'Tout'] } }),
+      species: () => this.toast('Choisis une espèce pour ne voir qu\'elle sur la carte', 'filter_alt'), confirmed: () => this.setState({ mapConfirmed: !s.mapConfirmed }),
+      layers: () => this.setState({ sheet: 'choice', sheetData: { key: 'mapLayer', title: 'Fond de carte', options: ['OSM', 'Plan IGN', 'Photos aériennes IGN'] } }),
+      locate: () => this.toast('Carte centrée sur ta position', 'my_location'),
+    };
+
+    // Goal
+    const goal = { ring: ring(120, 12, 54, goalFound / GOAL.length, '#19A7B3', 'rgba(255,255,255,.8)', h('span', { style: { fontSize: 26, fontWeight: 800, fontVariantNumeric: 'tabular-nums' } }, `${goalFound}/${GOAL.length}`)), progress: `${goalFound}/${GOAL.length} espèces entendues`, done: goalFound >= GOAL.length,
+      birds: goalBirds.map((b, i) => ({ ...b, sep: i ? '1px solid #DCE2DA' : 'none', state: b.found ? 'Entendu · Sûr' : 'Pas encore entendu', stateColor: b.found ? '#4B6023' : '#6B5847', icon: b.found ? 'check_circle' : 'hearing', iconColor: b.found ? '#4B6023' : '#0B6E77', img: b.found ? b.sil : b.silGrey, bg: b.found ? b.tint : '#EEF1EC', open: () => this.openSpecies(b.k) })) };
+
+    // Sheets
+    const choice = s.sheet === 'choice' ? s.sheetData : null;
+    const cur2 = choice ? ({ lang: S.lang, spLang: S.spLang, mapLayer: s.mapLayer, mapPeriod: map.periodLabel })[choice.key] : null;
+    const area = s.sheet === 'area' ? (s.sheetData === -1 ? MARKERS.slice(2, 6) : [MARKERS[s.sheetData]]) : [];
+    const sheets = {
+      day: s.sheet === 'day', dayRemind: () => { this.setState({ sheet: null }); this.toast("Rappel demain à 06:40, juste avant l'heure des oiseaux", 'notifications'); },
+      dayRowsRaw: [['dawn', 'Le matin', '06:50 → 08:30', "Le chœur de l'aube : c'est le moment où le plus d'oiseaux chantent. Le meilleur moment pour écouter.", '#D6EEF0', '#0B6E77', '', 1, true], ['sunrise', 'Lever du soleil', '07:36', 'Les merles et les rougegorges ont déjà commencé, les pinsons et les mésanges suivent.', '#EEF1EC', '#7A5A00', 'wb_sunny', 0, false], ['golden', 'Heure dorée', '18:55 → 19:41', 'La lumière est douce et chaude : idéal pour les photos, et les oiseaux se remettent à chanter.', '#FBEFC8', '#7A5A00', 'auto_awesome', 1, false], ['dusk', 'Le soir', '19:10 → 20:10', "Le chœur du soir, plus court : merles et rougegorges surtout. Puis les chouettes prennent le relais.", '#D6EEF0', '#0B6E77', '', 1, true], ['sunset', 'Coucher du soleil', '19:41', 'Écoute encore un peu après : la chouette hulotte chante souvent à la tombée de la nuit.', '#EEF1EC', '#34495E', 'wb_twilight', 0, false]].map(([id, name, time, body, disc, ink, icon, fill, bird]) => ({ name, time, body, disc, ink, icon, fill, bird, bg: 'transparent', ring: s.sheetData === id ? '#19A7B3' : 'transparent', pick: () => this.setState({ sheetData: id }), id, bodyColor: '#13233A' })),
+      quitQuiz: s.sheet === 'quitQuiz', quitLine: `Tes ${Q.score} ${plural(Q.score, 'bonne réponse est gardée', 'bonnes réponses sont gardées')} pour le badge Oreille fine.`, quitYes: () => this.setState({ sheet: null, quiz: { ...Q, stage: 'intro' }, stack: s.stack.slice(0, -1) }),
+      bilanMore: s.sheet === 'bilanMore', more: s.sheet === 'more', listen: s.sheet === 'listen', badge: !!bsel, choice: !!choice, area: s.sheet === 'area', levels: s.sheet === 'levels', rankSort: s.sheet === 'rankSort',
+      moreTiles: [['leaderboard', 'Palmarès', '#FBEFC8', '#7A5A00', 'none', go.ranking], ['map', 'Carte', '#D6EEF0', '#0B6E77', 'none', go.map], ['verified', 'Revue rapide', '#FFFFFF', '#A04A1C', '1.5px dashed #A04A1C', go.review], ['graphic_eq', 'Sonothèque', '#D6EEF0', '#0B6E77', 'none', go.sounds], ['park', 'Oiseaux des jardins', '#E6EDD6', '#4B6023', 'none', go.notImpl], ['search', 'Explorer', '#D6EEF0', '#0B6E77', 'none', go.notImpl], ['library_music', 'Mes sessions', '#D6EEF0', '#0B6E77', 'none', go.notImpl], ['help', 'Aide', '#FFFFFF', '#13233A', 'none', go.notImpl]].map(([icon, label, disc2, ink, border, fn]) => ({ icon, label, disc: disc2, ink, border, go: fn })),
+      advancedOpen: s.moreAdvanced, toggleAdvanced: () => this.setState({ moreAdvanced: !s.moreAdvanced }), advancedIcon: s.moreAdvanced ? 'expand_less' : 'expand_more',
+      tools: [['location_on', "Point d'écoute"], ['route', 'Transect'], ['sensors', 'Station fixe (ARU)'], ['music_note', 'Écouter un enregistrement'], ['upload_file', 'Analyser un fichier']].map(([icon, label]) => ({ icon, label, go: go.notImpl })),
+      modes: Object.entries(MODES).map(([id, [l, c, , ic]]) => ({ l, c, ic, sel: L.mode === id ? 1 : 0, bg: L.mode === id ? '#EEF1EC' : 'transparent', desc: { normal: 'Le réglage de tous les jours.', wind: 'Filtre le souffle du vent.', boost: 'Monte le gain pour les chants lointains.', city: 'À l\'essai : atténue le bruit de fond urbain.' }[id], pick: () => { this.setState({ live: { ...L, mode: id }, sheet: null }); this.toast(`Mode ${l} activé`, ic); } })),
+      badgeSel: bsel ? { ...bsel, tierLabel: bsel.tier ? `${bsel.tier} ${plural(bsel.tier, 'plume', 'plumes')} sur 3` : 'Pas encore gagné', tiersLine: 'Paliers : ' + bsel.tiers.join(' · '), isFineEar: bsel.name === 'Oreille fine' } : null,
+      playQuiz: () => this.push('quiz', { quiz: { ...s.quiz, stage: 'intro' } }),
+      choiceData: choice ? { title: choice.title, options: choice.options.map((o) => ({ o, sel: o === cur2 ? 1 : 0, weight: o === cur2 ? 700 : 400, pick: () => { if (choice.key === 'mapPeriod') this.setState({ mapPeriod: { '30 jours': '30', Saison: 'season', Année: 'year', Tout: 'all' }[o], sheet: null }); else if (choice.key === 'mapLayer') this.setState({ mapLayer: o, sheet: null }); else this.setState({ settings: { ...S, [choice.key]: o }, sheet: null }); } })) } : null,
+      areaTitle: s.sheetData === -1 ? 'Le jardin' : 'Ce lieu', areaCaption: `${map.periodLabel}${s.mapConfirmed ? ' · Confirmées' : ''}`,
+      areaRows: area.map(([k, , , n], i) => ({ ...SP[k], n: `${Math.max(1, Math.round(n * mapF))} contacts`, sep: i ? '1px solid #DCE2DA' : 'none', open: () => this.openSpecies(k) })),
+      levelRows: ['sure', 'probable', 'toCheck'].map((lv) => ({ badge: badge(lv), text: { sure: 'Le chant ressemble beaucoup et l\'oiseau est attendu ici à cette saison.', probable: 'Le chant ressemble bien, mais pas assez pour être sûr, ou l\'app ne sait pas où tu es.', toCheck: 'Le chant ressemble peu : réécoute-le avant de le compter.' }[lv] })),
+      sortRows: [['contacts', 'Contacts'], ['days', 'Jours']].map(([id, l]) => ({ l, sel: s.rankOrder === id ? 1 : 0, weight: s.rankOrder === id ? 700 : 400, pick: () => this.setState({ rankOrder: id, sheet: null }) })),
+      liveLight: s.settings.liveTheme === 'light', liveThemeTrack: s.settings.liveTheme === 'light' ? '#19A7B3' : '#C5CCC2', liveThemeJustify: s.settings.liveTheme === 'light' ? 'flex-end' : 'flex-start', toggleLiveTheme: () => this.setState({ settings: { ...s.settings, liveTheme: s.settings.liveTheme === 'light' ? 'dark' : 'light' } }),
+      openLevels: () => this.setState({ sheet: 'levels' }), help: go.notImpl, settings: () => this.push('settings'), about: go.notImpl,
+    };
+
+    sheets.dayGroups = [{ title: 'Quand les oiseaux chantent', icon: 'music_note', bg: '#D6EEF0', ink: '#0B6E77', ids: ['dawn', 'dusk'] }, { title: 'Le soleil', icon: 'wb_sunny', bg: '#FBEFC8', ink: '#7A5A00', ids: ['sunrise', 'golden', 'sunset'] }].map((g) => ({ ...g, rows: sheets.dayRowsRaw.filter((r) => g.ids.includes(r.id)) }));
+    const app = { go, home, live, bilan, review, fiche, notebook, profile, quiz, ranking, sounds: soundsV, settings, map, goal, sheets };
+    const dark = screen === 'live' && s.settings.liveTheme !== 'light';
+    const INDEX = [['home', 'Accueil', 'home', go.home], ['live', 'Écoute', 'graphic_eq', go.live], ['bilan', "Bilan de l'écoute", 'summarize', go.bilanToday], ['review', 'Revue rapide', 'verified', go.review], ['species', 'Fiche espèce', 'raven', () => this.openSpecies('merle')], ['notebook', 'Mon carnet', 'menu_book', go.notebook], ['map', 'Ma carte', 'map', go.map], ['profile', 'Profil', 'person', go.profile], ['quiz', 'Qui chante ?', 'headphones', go.quiz], ['ranking', 'Palmarès', 'leaderboard', go.ranking], ['sounds', 'Sonothèque', 'library_music', go.sounds], ['settings', 'Réglages', 'tune', go.settings], ['goal', 'Objectif du jour', 'flag', go.goal], ['more', 'Menu Plus', 'menu', () => { this.tab('home'); setTimeout(() => this.setState({ sheet: 'more' }), 0); }]];
+    const isTab = !top;
+    return {
+      app, reset: () => { this.setState(fresh()); this.toast('Démo réinitialisée', 'restart_alt'); },
+      index: INDEX.map(([id, label, icon, fn]) => ({ label, icon, go: fn, bg: screen === id || (id === 'more' && s.sheet === 'more') ? '#EEF1EC' : 'transparent', weight: screen === id ? 700 : 400 })),
+      show: { home: screen === 'home', notebook: screen === 'notebook', map: screen === 'map' || screen === 'mapx', profile: screen === 'profile', live: screen === 'live', bilan: screen === 'bilan', review: screen === 'review', species: screen === 'species', quiz: screen === 'quiz', ranking: screen === 'ranking', sounds: screen === 'sounds', settings: screen === 'settings', goal: screen === 'goal', nav: isTab, sheet: !!s.sheet, toast: !!s.toast },
+      screenBottom: isTab ? '80px' : '0px', toastBottom: isTab ? '96px' : '24px', toast: s.toast, toastIcon: s.toastIcon,
+      phoneBg: dark ? '#13233A' : '#EEF1EC', liveStatusFix: 0, statusBg: dark ? '#13233A' : screen === 'species' ? SP[s.species].tint : '#EEF1EC', statusInk: dark ? '#EEF1EC' : '#13233A',
+      navItems: [['home', 'Accueil', 'home'], ['notebook', 'Carnet', 'menu_book'], ['map', 'Carte', 'map'], ['profile', 'Profil', 'person']].map(([id, label, icon]) => ({ label, icon, go: go[id], ind: s.tab === id ? '#D1ECEF' : 'transparent', iconColor: s.tab === id ? '#13233A' : '#6B5847', fill: s.tab === id ? 1 : 0, labelColor: s.tab === id ? '#0B6E77' : '#6B5847', weight: s.tab === id ? 700 : 400 })),
+    };
+  }
+}
+</script>
+</body>
+</html>

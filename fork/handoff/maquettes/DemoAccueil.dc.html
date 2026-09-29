@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A">
+  <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:16px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px;height:32px"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:30px;height:30px"><span style="font-family:Fraunces;font-size:24px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 24;letter-spacing:-.01em">BirdyGo</span><span style="width:6px;height:6px;border-radius:999px;background:#F4C542;margin-left:-4px;margin-top:10px"></span></div>
+    <div style="display:flex;align-items:flex-start;gap:8px;animation:birdyIn .3s both">
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px"><div style="font-family:Fraunces;font-size:34px;line-height:1.1;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 34">{{ app.home.greeting }}</div><div style="font-size:13px;line-height:1.35;color:#6B5847">{{ app.home.dateLine }}</div>
+        </div>
+      <button onClick="{{ app.go.more }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0" style-active="transform:scale(.97)"><span class="ms" style="font-size:24px">menu</span></button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:4px;flex-shrink:0;flex-wrap:nowrap;overflow:hidden;min-height:26px">
+          <span title="Heure des oiseaux : le chœur de l'aube" onClick="{{ app.home.day.dawn }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:26px;box-sizing:border-box;padding:4px 7px 4px 5px;border-radius:999px;font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;background:#D6EEF0;color:#0B6E77"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:15px;height:15px">06:50</span>
+          <span title="Lever du soleil" onClick="{{ app.home.day.sunrise }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:26px;box-sizing:border-box;padding:4px 7px 4px 5px;border-radius:999px;font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;background:#FFFFFF"><span class="ms" style="font-size:15px;color:#7A5A00">wb_sunny</span>07:36</span>
+          <span title="Heure dorée" onClick="{{ app.home.day.golden }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:26px;box-sizing:border-box;padding:4px 7px 4px 5px;border-radius:999px;font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;background:#FBEFC8;color:#7A5A00"><span class="ms" style="font-size:15px;font-variation-settings:'FILL' 1">auto_awesome</span>18:55</span>
+          <span title="Heure des oiseaux du soir" onClick="{{ app.home.day.dusk }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:26px;box-sizing:border-box;padding:4px 7px 4px 5px;border-radius:999px;font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;background:#D6EEF0;color:#0B6E77"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:15px;height:15px">19:10</span>
+          <span title="Coucher du soleil" onClick="{{ app.home.day.sunset }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:26px;box-sizing:border-box;padding:4px 7px 4px 5px;border-radius:999px;font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;background:#FFFFFF"><span class="ms" style="font-size:15px;color:#34495E">wb_twilight</span>19:41</span>
+        </div>
+
+    <div onClick="{{ app.home.hero.open }}" style="cursor:pointer;position:relative;overflow:hidden;min-height:196px;border-radius:28px;background:{{ app.home.hero.tint }};padding:16px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;flex-shrink:0;animation:birdyIn .3s .04s both" style-active="transform:scale(.985)">
+      <div style="position:absolute;right:-28px;top:-18px;width:176px;height:176px;border-radius:999px;background:radial-gradient(circle,{{ app.home.hero.accent }}5C 45%,{{ app.home.hero.accent }}2E 72%,{{ app.home.hero.accent }}00 100%)"></div>
+      <div style="position:absolute;right:6px;top:8px;width:112px;height:112px;border-radius:999px;border:4px solid #FFFFFF;background:{{ app.home.hero.halo }};box-shadow:0 6px 18px {{ app.home.hero.accent }}59;display:flex;align-items:center;justify-content:center"><img src="{{ app.home.hero.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+      <div style="position:relative;padding-right:100px;display:flex;flex-direction:column">
+        <div style="font-size:13px;line-height:1.35;color:#6B5847">{{ app.home.hero.when }}</div>
+        <div style="height:10px"></div>
+        <div style="font-family:Fraunces;font-size:26px;line-height:1.15;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 26;min-height:60px">{{ app.home.hero.name }}</div>
+        <div style="font-family:Fraunces;font-style:italic;font-size:15px;font-weight:500;color:#6B5847">{{ app.home.hero.latin }}</div>
+      </div>
+      <div style="position:relative;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px">
+        <button onClick="{{ app.home.hero.replay }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:{{ app.home.hero.accent }};display:flex;align-items:center;justify-content:center" style-active="transform:scale(.95)"><span class="ms" style="font-size:24px;color:#13233A;font-variation-settings:'FILL' 1">play_arrow</span></button>
+        <span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ app.home.hero.badge.bg }};border:{{ app.home.hero.badge.border }};color:{{ app.home.hero.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ app.home.hero.badge.fg }};opacity:{{ app.home.hero.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ app.home.hero.badge.fg }};opacity:{{ app.home.hero.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ app.home.hero.badge.fg }};opacity:{{ app.home.hero.badge.o3 }}"></span></span>{{ app.home.hero.badge.label }}</span>
+        <span style="font-size:13px;font-variant-numeric:tabular-nums">{{ app.home.hero.total }}</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;animation:birdyIn .3s .08s both">
+      <div onClick="{{ app.go.goal }}" style="cursor:pointer;background:#D6EEF0;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px" style-active="transform:scale(.97)">
+        <div style="font-size:13px;font-weight:700;color:#0B6E77">Objectif du jour</div>
+        <div style="align-self:center">{{ app.home.goal.ring }}</div>
+        <div style="font-size:15px;font-weight:700">{{ app.home.goal.left }}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ app.home.goal.slots }}" as="g" hint-placeholder-count="3"><div style="width:36px;height:36px;border-radius:999px;border:1.5px dashed #0B6E77;box-sizing:border-box;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center"><img src="{{ g.silGrey }}" alt="" style="width:22px;height:22px;object-fit:contain;opacity:.8"></div></sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div onClick="{{ app.go.profile }}" style="cursor:pointer;flex:1;background:#FBEFC8;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px" style-active="transform:scale(.97)">
+          <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:34px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.home.streak.n }}</span><span style="font-size:13px;font-weight:700;color:#7A5A00">jours de suite</span></div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+            <sc-for list="{{ app.home.streak.days }}" as="d" hint-placeholder-count="7"><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:14px;height:14px;display:flex;align-items:center;justify-content:center"><div style="width:{{ d.size }};height:{{ d.size }};border-radius:999px;box-sizing:border-box;background:{{ d.bg }};border:{{ d.border }};box-shadow:{{ d.shadow }};display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:10px;color:#13233A;font-variation-settings:'wght' 700;opacity:{{ d.check }}">check</span></div></div><div style="font-size:12px;color:#7A5A00;font-weight:{{ d.weight }}">{{ d.letter }}</div></div></sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ app.home.hasToCheck }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ app.go.review }}" style="cursor:pointer;flex:1;background:#FFFFFF;border:1.5px dashed #A04A1C;box-sizing:border-box;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column" style-active="transform:scale(.97)">
+            <div style="display:flex;align-items:center"><span style="flex:1;font-size:34px;line-height:1;font-weight:800;color:#A04A1C;font-variant-numeric:tabular-nums">{{ app.home.toCheck }}</span><span class="ms" style="font-size:20px;color:#A04A1C">search</span></div>
+            <div style="font-size:13px;font-weight:700;margin-top:4px">à vérifier</div>
+            <div style="font-size:13px;color:#6B5847">{{ app.home.reviewTime }}</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div onClick="{{ app.go.profile }}" style="cursor:pointer;background:#E6EDD6;border-radius:28px;padding:20px;display:flex;align-items:center;gap:16px;flex-shrink:0;animation:birdyIn .3s .12s both" style-active="transform:scale(.985)">
+      {{ app.home.status.ring }}
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-family:Fraunces;font-size:17px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">{{ app.home.status.name }}</span><span style="font-size:15px;font-weight:700;color:#4B6023;font-variant-numeric:tabular-nums">{{ app.home.status.frac }}</span></div>
+        <div style="display:flex;gap:2px"><sc-for list="{{ app.home.status.segs }}" as="seg" hint-placeholder-count="15"><div style="flex:1;height:12px;border-radius:999px;background:{{ seg }}"></div></sc-for></div>
+        <div style="display:flex;align-items:center;gap:4px"><span style="flex:1;font-size:13px;line-height:1.35;color:#6B5847">{{ app.home.status.caption }}</span><span class="ms" style="font-size:20px;color:#6B5847">chevron_right</span></div>
+      </div>
+    </div>
+
+    <div onClick="{{ app.go.bilanToday }}" style="cursor:pointer;background:#FFFFFF;border-radius:28px;padding:20px 0 20px 20px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;animation:birdyIn .3s .16s both">
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding-right:20px">
+        <span style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Aujourd'hui</span>
+        <span style="font-size:13px;color:#6B5847;font-variant-numeric:tabular-nums"><sc-for list="{{ app.home.today.stats }}" as="st" hint-placeholder-count="2">{{ st.sep }}<b style="font-weight:700">{{ st.n }}</b> {{ st.l }}</sc-for></span>
+      </div>
+      <div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-right:20px">
+        <sc-for list="{{ app.home.today.chips }}" as="c" hint-placeholder-count="4">
+          <div onClick="{{ c.open }}" style="cursor:pointer;width:92px;flex-shrink:0;border-radius:20px;background:{{ c.tint }};padding:12px 4px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:8px" style-active="transform:scale(.97)">
+            <div style="width:56px;height:56px;border-radius:999px;background:{{ c.halo }};display:flex;align-items:center;justify-content:center"><img src="{{ c.sil }}" alt="" style="width:62%;height:62%;object-fit:contain"></div>
+            <div style="font-size:13px;line-height:1.3;font-weight:700;text-align:center">{{ c.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;padding-right:20px"><span style="flex:1;font-size:15px;font-weight:700;color:#0B6E77">Voir le bilan du jour</span><span class="ms" style="font-size:20px;color:#0B6E77">chevron_right</span></div>
+    </div>
+
+    <div style="background:#FFFFFF;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;animation:birdyIn .3s .2s both">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:999px;background:#D6EEF0;display:flex;align-items:center;justify-content:center"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:24px;height:24px"></div>
+        <div style="flex:1"><div style="font-size:13px;color:#6B5847">Défi de la semaine</div><div style="font-family:Fraunces;font-size:17px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">10 espèces cette semaine</div></div>
+        <span style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">{{ app.home.challenge.value }}/10</span>
+      </div>
+      <div style="font-size:13px;color:#6B5847">{{ app.home.challenge.value }} sur 10 · jusqu'à dimanche</div>
+    </div>
+  </div>
+  <div style="padding:20px;flex-shrink:0">
+    <button onClick="{{ app.go.live }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:72px;border-radius:999px;background:#19A7B3;box-shadow:0 4px 16px rgba(25,167,179,.35);display:flex;align-items:center;justify-content:center;gap:10px;font-size:20px;font-weight:700;color:#13233A" style-active="transform:scale(.97)"><svg viewBox="196 204 180 180" width="28" height="28" style="display:block;overflow:visible;filter:drop-shadow(0 1px 2px rgba(11,60,70,.45))" aria-hidden="true"><g fill="none" stroke-width="30" stroke-linecap="round"><path d="M217.4 333.7L217.4 240.1" stroke="#EEF1EC"></path><path d="M260.6 365.5L268 223.3" stroke="#F4C542"></path><path d="M306.2 349.4L316 256.2" stroke="#EEF1EC"></path><path d="M352.9 331.7L359.3 290.9" stroke="#8CD3D9"></path></g></svg>Écouter</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

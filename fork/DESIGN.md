@@ -755,3 +755,46 @@ Modes d'écoute (`lib/fork/listening_mode/`)
 - Le mode écrit les réglages gain et passe-haut existants, donc le spectre, l'inférence et les
   clips voient le même signal. Un curseur des Réglages bougé à la main affiche « Personnalisé ».
   Le modèle et les seuils ne changent pas.
+
+## Ligne J6h (homogénéité, référence Profil / Quiz)
+
+Source : `fork/handoff/README.md` (captures et maquettes dans `fork/handoff/`). Ces règles priment
+sur les sections précédentes en cas de conflit.
+
+1. **Deux en-têtes seulement.** Onglet : `BirdyTabHeader`, titre 34, légende 13, boutons ronds blancs
+   de 48. Écran poussé : `BirdyOverlayHeader`, retour 48, titre 20. Les actions (tri, filtre,
+   calques) montent dans les boutons ronds de l'en-tête ; plus de ligne d'options flottante.
+2. **Un bloc héros par écran.** Rayon `BirdyRadii.hero` (28), marge `BirdySpace.xl` (20), fond teinté.
+   Il porte le seul grand chiffre de l'écran (anneau ou nombre 34), sa phrase et sa barre.
+3. **Le bloc porte son titre.** Marge de page `BirdySpace.page` (16), `BirdySpace.block` (10) entre
+   blocs. Une liste vit dans un seul bloc blanc (rayon 20) titré `BirdyText.heading` (20), lignes
+   séparées par un filet `c.line` de 1 px. Plus de piles de cartes séparées.
+4. **Une teinte veut dire une seule chose.** `tonal` : écouter, apprendre, progresser. `sure` : acquis,
+   confirmé, niveau. `oriole` : récompense, série, rare. `toCheck` (pointillé) : à vérifier. Jamais
+   d'alternance décorative.
+5. **Une seule ligne de liste.** Disque teinté de 44 avec icône, ou avatar de 48 ; libellé 17 gras,
+   légende 13, chevron ; hauteur minimale `BirdySizes.row` (72). Réglages, Plus, Sonothèque,
+   Objectif, Bilan et les tiroirs la partagent.
+6. **Une seule action forte, en bas.** Pilule de 72, Martin-pêcheur, `listenGlow` ou `ctaGlow`,
+   épinglée en bas. Tout le reste : bouton tonal 48, secondaire 56, ou puce.
+7. **Puces blanches, choix en encre.** La puce choisie passe en `BirdyChipColors.ink` partout.
+   Exception : sur fond Brume, les filtres du Carnet gardent leur teinte de sens.
+8. **Même comportement partout.** Entrée décalée (`BirdyEntrance.staggered`, 40 ms,
+   `staggerMaxItems`), squelettes à la forme finale puis `BirdyCrossFade`, pression à 0,97
+   (`Pressable`), cibles d'au moins 48, jamais de bordure grise sur un bloc.
+
+Règles transverses :
+- **Croix ou flèche.** Flèche ← pour revenir sans rien perdre ; croix ✕ pour sortir d'un parcours
+  (Bilan, Revue rapide, Quiz en partie ou au score). Quitter une partie en cours demande confirmation.
+- **Échelle de texte.** 34 / 26 / 20 / 17 / 15 / 13. Rien sous 12, graphiques et spectrogramme compris.
+- **Pastilles.** Hauteur minimale 26, `BirdyText.badge` (13 gras), marge 4/10/4/7. Même format pour
+  Nouveau, Nouveau cette année, rareté et fiabilité.
+- **Alignement.** Grand chiffre + libellé, ou titre + légende côte à côte : baseline alphabétique,
+  jamais `end`.
+- **Oiseau générique.** Une espèce sans photo montre la silhouette BirdyGo (`BirdyGoSilhouetteIcon`)
+  dans la teinte `deep` de l'espèce sur son halo, pas `AppIcons.bird`.
+- **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
+  Le « ? » est réservé à « Je ne sais pas ».
+- **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
+  #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
+  boutons « Écouter » et « Commencer à écouter ».

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:#EEF1EC;font-family:Atkinson,sans-serif;color:#13233A;animation:birdyFade .2s">
+  <div style="background:{{ app.fiche.tint }};border-radius:0 0 28px 28px;overflow:hidden">
+    <div style="position:relative;aspect-ratio:3/2;background:repeating-linear-gradient(135deg,{{ app.fiche.halo }} 0 10px,transparent 10px 20px);display:flex;align-items:center;justify-content:center">
+      <img src="{{ app.fiche.sil }}" alt="" style="width:46%;height:60%;object-fit:contain">
+      <div style="position:absolute;left:16px;bottom:12px;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:{{ app.fiche.deep }}">photo de l'espèce · repli silhouette</div>
+      <div style="position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between">
+        <button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px">arrow_back</span></button>
+        <button onClick="{{ app.fiche.share }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px">share</span></button>
+      </div>
+    </div>
+    <div style="padding:12px 16px 16px">
+      <div style="font-family:Fraunces;font-size:34px;line-height:1.1;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 34">{{ app.fiche.name }}</div>
+      <div style="font-family:Fraunces;font-style:italic;font-size:17px;font-weight:500;color:#6B5847">{{ app.fiche.latin }}</div>
+    </div>
+  </div>
+
+  <div style="padding:10px 16px 24px;display:flex;flex-direction:column;gap:10px">
+    <div style="background:#E6EDD6;border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:10px;animation:birdyIn .3s both">
+      <sc-if value="{{ app.fiche.heard }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.fiche.total }}</div><div style="font-size:13px;color:#6B5847;margin-top:4px">contacts</div></div>
+          <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.fiche.days }}</div><div style="font-size:13px;color:#6B5847;margin-top:4px">jours</div></div>
+        </div>
+      </sc-if>
+      <div style="font-size:17px;line-height:1.45">{{ app.fiche.heardLine }}</div>
+      <sc-if value="{{ app.fiche.isVerified }}">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:#FFFFFF;color:#4B6023;font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:#4B6023"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:#4B6023"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:#4B6023"></span></span>Sûr</span>
+          <span style="font-size:13px;color:#4B6023">{{ app.fiche.precision }}</span>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;gap:12px;align-items:center;animation:birdyIn .3s .04s both">
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+        <div style="font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Ici en ce moment</div>
+        <div style="font-size:15px;line-height:1.45">{{ app.fiche.hereSentence }}</div>
+        <sc-if value="{{ app.fiche.rareNote }}"><div style="display:flex;gap:4px;font-size:15px;color:#7A5A00"><span class="ms" style="font-size:14px;margin-top:3px;font-variation-settings:'FILL' 1">diamond</span>{{ app.fiche.rareNote }}</div></sc-if>
+      </div>
+      <div style="width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:4px">
+        <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px;align-items:end;height:36px">
+          <sc-for list="{{ app.fiche.months }}" as="m" hint-placeholder-count="12"><div style="height:{{ m.h }};background:{{ m.c }};border-radius:3px 3px 1px 1px"></div></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:2px">
+          <sc-for list="{{ app.fiche.months }}" as="m" hint-placeholder-count="12"><div style="display:flex;flex-direction:column;align-items:center;gap:1px"><div style="width:4px;height:4px;border-radius:999px;background:#13233A;opacity:{{ m.cur }}"></div><span style="font-size:12px;color:#6B5847">{{ m.l }}</span></div></sc-for>
+        </div>
+        <div style="font-size:13px;color:#6B5847;text-align:center">{{ app.fiche.peakMonth }}</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ app.fiche.hasClips }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#FFFFFF;border-radius:20px;padding:16px 16px 8px;display:flex;flex-direction:column;animation:birdyIn .3s .08s both">
+        <div style="display:flex;align-items:center;gap:8px;padding-bottom:4px">
+          <div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Mes sons</div>
+          <button onClick="{{ app.fiche.reference }}" style="all:unset;cursor:pointer;height:48px;padding:0 14px;border-radius:999px;background:#D6EEF0;color:#0B6E77;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700"><span class="ms" style="font-size:18px">open_in_new</span>Chant de référence</button>
+        </div>
+        <sc-for list="{{ app.fiche.clips }}" as="c" hint-placeholder-count="3">
+          <div style="min-height:56px;display:flex;align-items:center;gap:12px;border-top:1px solid #DCE2DA">
+            <button onClick="{{ c.play }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;border:2px solid #0B6E77;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px;color:#0B6E77;font-variation-settings:'FILL' 1">play_arrow</span></button>
+            <span style="flex:1;font-size:15px;font-variant-numeric:tabular-nums">{{ c.line }}</span>
+            <button onClick="{{ c.toggle }}" style="all:unset;cursor:pointer;width:48px;height:48px;display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px;color:{{ c.star }};font-variation-settings:'FILL' {{ c.fav }}">star</span></button>
+          </div>
+        </sc-for>
+        <button onClick="{{ app.go.sounds }}" style="all:unset;cursor:pointer;height:48px;display:flex;align-items:center;font-size:15px;font-weight:700;color:#0B6E77;border-top:1px solid #DCE2DA">{{ app.fiche.moreClips }}</button>
+      </div>
+    </sc-if>
+
+    <div style="background:#FFFFFF;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:birdyIn .3s .12s both">
+      <div style="display:flex;align-items:center;gap:8px"><div style="flex:1;font-family:Fraunces;font-size:20px;line-height:1.25;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Fais sa connaissance</div><span style="font-size:13px;font-weight:700;color:#0B6E77;font-variant-numeric:tabular-nums">{{ app.fiche.chipStep }}</span></div>
+      <div style="font-size:15px;line-height:1.45;color:#6B5847">{{ app.fiche.summary }}</div>
+      <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px">
+        <sc-for list="{{ app.fiche.chips }}" as="ch" hint-placeholder-count="5">
+          <button onClick="{{ ch.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0" style-active="transform:scale(.94)">
+            <div style="position:relative;width:52px;height:52px;border-radius:999px;background:{{ ch.bg }};box-shadow:{{ ch.ring }};display:flex;align-items:center;justify-content:center;transition:all .18s">
+              <span class="ms" style="font-size:26px;color:{{ ch.ink }};font-variation-settings:'FILL' {{ ch.fill }}">{{ ch.icon }}</span>
+              <div style="position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:999px;background:#9DB46A;border:2px solid #FFFFFF;box-sizing:border-box;display:flex;align-items:center;justify-content:center;opacity:{{ ch.seen }}"><span class="ms" style="font-size:11px;color:#13233A;font-variation-settings:'wght' 700">check</span></div>
+            </div>
+            <span style="font-size:13px;line-height:1.2;font-weight:{{ ch.weight }};text-align:center">{{ ch.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="position:relative;border-radius:20px;background:{{ app.fiche.cardBg }};padding:16px 16px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+        <span class="ms" style="position:absolute;right:-8px;top:-10px;font-size:88px;color:{{ app.fiche.cardInk }};opacity:.12;font-variation-settings:'FILL' 1">{{ app.fiche.cardIcon }}</span>
+        <div style="font-size:13px;font-weight:700;color:{{ app.fiche.cardInk }}">{{ app.fiche.cardKicker }}</div>
+        <div style="position:relative;font-size:17px;line-height:1.45">{{ app.fiche.chipText }}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <div style="flex:1;display:flex;gap:4px"><sc-for list="{{ app.fiche.chipDots }}" as="dot" hint-placeholder-count="5"><div style="height:6px;flex:1;border-radius:999px;background:{{ dot }}"></div></sc-for></div>
+          <button onClick="{{ app.fiche.nextChip }}" style="all:unset;cursor:pointer;height:48px;padding:0 14px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700">{{ app.fiche.nextLabel }}<span class="ms" style="font-size:18px">arrow_forward</span></button>
+        </div>
+      </div>
+      <button onClick="{{ app.go.quiz }}" style="all:unset;cursor:pointer;border-radius:20px;background:#FFFFFF;border:1px solid #DCE2DA;padding:16px;display:flex;align-items:center;gap:16px" style-active="transform:scale(.98)">
+        <div style="width:56px;height:56px;border-radius:999px;background:linear-gradient(#0B1728,#0F1E33);border:2px solid #19A7B3;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 64 64" width="52" height="52" style="display:block"><g transform="translate(8 1) scale(.75)"><g fill="#52C0C9" opacity=".55"><path d="M45.55 22.68A3.05 3.05 0 0 0 49.68 22.44L53 19A2.69 2.69 0 0 1 57.31 22.14L53.13 30.06A11.71 11.71 0 0 0 51.78 35.66Z"></path><path d="M18.24 18.63L6.33 20.11L14.76 24.58Z" stroke="#52C0C9" stroke-width="1.5" stroke-linejoin="round"></path><path d="M14.76 25.83L8.06 27.81L17.5 30.04Z" stroke="#52C0C9" stroke-width="1.5" stroke-linejoin="round"></path><path d="M16.64 31.44A11.95 11.95 0 1 1 35.09 16.48A6.79 6.79 0 0 0 39.04 19.34A17.1 17.1 0 1 1 17.65 34.26A3.51 3.51 0 0 0 16.64 31.44Z"></path></g><path d="M29.5 31.5a4.5 4.5 0 1 1 6.2 4.2c-1.4.6-2.2 1.6-2.2 3.2v.8" fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="33.5" cy="45.2" r="2.2" fill="#F4C542"></circle></g><rect x="19.5" y="47.5" width="3" height="5" rx="1.5" fill="#DDF4F5"></rect><rect x="25" y="45.3" width="3" height="9.4" rx="1.5" fill="#F4C542"></rect><rect x="30.5" y="46.4" width="3" height="7.2" rx="1.5" fill="#A8E2E6"></rect><rect x="36" y="47.9" width="3" height="4.3" rx="1.5" fill="#79D0D7"></rect><rect x="41.5" y="48.9" width="3" height="2.2" rx="1.5" fill="#52C0C9"></rect></svg></div>
+        <div style="flex:1"><div style="font-family:Fraunces;font-size:20px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 20">Qui chante ?</div><div style="font-size:15px;line-height:1.4;color:#6B5847;margin-top:4px">Teste ton oreille sur ses chants et ceux de tes sorties. Gagne le badge Oreille fine.</div></div>
+        <span class="ms" style="font-size:24px;color:#6B5847">chevron_right</span>
+      </button>
+      <div style="font-size:13px;color:#6B5847">Texte rédigé à l'avance pour BirdyGo, relu avec Wikipédia et Wikidata.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;animation:birdyIn .3s .16s both">
+      <div style="background:#FFFFFF;border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13px;color:#6B5847">Activité par heure</div>
+        <div style="display:flex;gap:1px;align-items:flex-end;height:52px"><sc-for list="{{ app.fiche.hours }}" as="hr" hint-placeholder-count="24"><div style="flex:1;height:{{ hr.h }};background:{{ hr.c }};border-radius:2px 2px 0 0"></div></sc-for></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#6B5847"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span></div>
+        <div style="font-size:13px;color:#6B5847">{{ app.fiche.peakHour }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div onClick="{{ app.fiche.seeMap }}" style="cursor:pointer;height:96px;border-radius:20px;background:repeating-linear-gradient(135deg,#E3E8DE 0 8px,#DDE3D8 8px 16px);position:relative;display:flex;align-items:center;justify-content:center">
+          <div style="width:30px;height:30px;border-radius:999px;background:#FFFFFF;border:2px solid {{ app.fiche.accent }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(19,35,58,.18)"><img src="{{ app.fiche.sil }}" alt="" style="width:18px;height:18px;object-fit:contain"></div>
+          <span style="position:absolute;left:8px;bottom:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#6B5847">mini-carte</span>
+        </div>
+        <button onClick="{{ app.fiche.seeMap }}" style="all:unset;cursor:pointer;height:48px;display:flex;align-items:center;font-size:15px;font-weight:700;color:#0B6E77">Voir sur la carte</button>
+      </div>
+    </div>
+
+    <button onClick="{{ app.fiche.lpo }}" style="all:unset;cursor:pointer;height:56px;border-radius:999px;background:#FFFFFF;border:1.5px solid #C5CCC2;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700"><span class="ms" style="font-size:22px">send</span>Envoyer à Faune-France</button>
+
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:17px;font-weight:700">En savoir plus</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ app.fiche.openLink }}" style="all:unset;cursor:pointer;height:48px;padding:0 12px;border-radius:12px;border:1px solid #C5CCC2;display:flex;align-items:center;gap:6px;font-size:15px">eBird<span class="ms" style="font-size:14px;color:#6B5847">open_in_new</span></button>
+        <button onClick="{{ app.fiche.openLink }}" style="all:unset;cursor:pointer;height:48px;padding:0 12px;border-radius:12px;border:1px solid #C5CCC2;display:flex;align-items:center;gap:6px;font-size:15px">iNaturalist<span class="ms" style="font-size:14px;color:#6B5847">open_in_new</span></button>
+        <button onClick="{{ app.fiche.openLink }}" style="all:unset;cursor:pointer;height:48px;padding:0 12px;border-radius:12px;border:1px solid #C5CCC2;display:flex;align-items:center;gap:6px;font-size:15px">Wikipédia<span class="ms" style="font-size:14px;color:#6B5847">open_in_new</span></button>
+      </div>
+    </div>
+    <div style="font-size:13px;line-height:1.35;color:#6B5847;padding:0 4px">Garde le son pour toi : un chant diffusé fort dérange les oiseaux, surtout au printemps.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

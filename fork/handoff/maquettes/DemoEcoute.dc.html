@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:{{ app.live.t.bg }};font-family:Atkinson,sans-serif;color:{{ app.live.t.text1 }};animation:birdyFade .25s;transition:background .25s,color .25s">
+  <div style="padding:8px 16px 12px;display:flex;flex-direction:column;gap:12px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button onClick="{{ app.go.back }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:{{ app.live.t.btnBg }};border:1px solid {{ app.live.t.btnBorder }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px">arrow_back</span></button>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden"><img src="fork/brand/birdygo-logo-static.svg" alt="" style="width:22px;height:22px"><span style="font-size:17px;font-weight:700">{{ app.live.status }} · </span><span class="ms" style="font-size:14px;color:{{ app.live.modeColor }}">{{ app.live.modeIcon }}</span><span style="font-size:17px;font-weight:700;color:{{ app.live.modeColor }}">{{ app.live.modeWord }}</span></div>
+        <div style="font-size:13px;color:{{ app.live.t.text2 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ app.live.place }}</div>
+        <sc-if value="{{ app.live.expanded }}"><div style="font-size:13px;color:{{ app.live.t.text2 }}">{{ app.live.summary }}</div></sc-if>
+      </div>
+      <button onClick="{{ app.live.options }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;background:{{ app.live.t.btnBg }};border:1px solid {{ app.live.t.btnBorder }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px;color:{{ app.live.modeColor }}">{{ app.live.optionsIcon }}</span></button>
+    </div>
+    <sc-if value="{{ app.live.compactTiles }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div style="background:{{ app.live.t.s1 }};border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.live.elapsed }}</div><div style="font-size:13px;color:{{ app.live.t.text2 }};margin-top:4px">durée</div></div>
+        <div style="background:{{ app.live.t.s1 }};border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.live.species }}</div><div style="font-size:13px;color:{{ app.live.t.text2 }};margin-top:4px">{{ app.live.speciesLabel }}</div></div>
+        <div style="background:{{ app.live.t.s1 }};border-radius:20px;padding:12px 14px"><div style="font-size:26px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums">{{ app.live.contacts }}</div><div style="font-size:13px;color:{{ app.live.t.text2 }};margin-top:4px">{{ app.live.contactsLabel }}</div></div>
+      </div>
+    </sc-if>
+  </div>
+  <div onClick="{{ app.live.toggleExpand }}" style="cursor:pointer;position:relative;flex-shrink:0;background:linear-gradient(#0B1728,#0F1E33)">
+    {{ app.live.spectro }}
+    <div style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;background:rgba(19,35,58,.55);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;color:#EEF1EC">expand_more</span></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:12px 8px;display:flex;flex-direction:column;gap:8px">
+    <sc-if value="{{ app.live.empty }}">
+      <div style="display:flex;flex-direction:column;gap:8px;padding:4px 8px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:15px;color:{{ app.live.t.text2 }}"><span class="ms" style="font-size:18px;color:{{ app.live.t.accentText }}">hearing</span>L'app écoute. Les oiseaux apparaîtront ici dès qu'ils chantent.</div>
+        <div style="font-size:13px;font-weight:700;color:{{ app.live.t.text2 }};margin-top:6px">Attendus ici ce matin</div>
+        <sc-for list="{{ app.live.expected }}" as="x" hint-placeholder-count="3">
+          <div style="min-height:60px;border-radius:20px;background:{{ app.live.t.expectedRow }};padding:6px 8px;display:flex;align-items:center;gap:10px">
+            <div style="width:52px;height:52px;border-radius:999px;border:1.5px dashed {{ app.live.t.borderStrong }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img src="{{ x.silGrey }}" alt="" style="width:30px;height:30px;object-fit:contain;opacity:.6"></div>
+            <div style="font-family:Fraunces;font-size:15px;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 15;color:{{ app.live.t.text2 }}">{{ x.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-for list="{{ app.live.rows }}" as="r" hint-placeholder-count="0">
+      <div style="min-height:72px;border-radius:20px;background:{{ app.live.t.s1 }};padding:8px;box-sizing:border-box;display:flex;align-items:center;gap:8px;animation:{{ r.anim }};flex-shrink:0">
+        <div onClick="{{ r.open }}" style="cursor:pointer;flex:1;min-width:0;display:flex;align-items:center;gap:10px">
+          <div style="position:relative;flex-shrink:0">
+            <div style="width:48px;height:48px;border-radius:999px;background:{{ r.halo }};display:flex;align-items:center;justify-content:center"><img src="{{ r.sil }}" alt="" style="width:62%;height:62%;object-fit:contain;filter:{{ app.live.t.silFilter }}"></div>
+            <div style="position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:999px;background:{{ r.accent }};border:3px solid {{ app.live.t.bg }};box-sizing:border-box"></div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:Fraunces;font-size:17px;line-height:1.2;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 17">{{ r.name }}</div>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+              <span style="display:flex;align-items:flex-end;gap:2px;height:12px;opacity:{{ r.singing }};transition:opacity .2s"><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s infinite"></span><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s .15s infinite"></span><span style="width:3px;height:12px;border-radius:2px;background:{{ r.accent }};transform-origin:bottom;animation:sing .9s .3s infinite"></span></span>
+              <sc-if value="{{ r.rareHere }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ app.live.t.orioleCont }};border:1.5px dashed {{ app.live.t.orioleText }};color:{{ app.live.t.orioleText }};font-size:13px;font-weight:700;line-height:1"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">diamond</span>Rare ici · à confirmer</span></sc-if>
+              <sc-if value="{{ r.rarityLabel }}"><span style="display:inline-flex;align-items:center;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;gap:5px;border-radius:999px;background:{{ r.rarityBg }};color:{{ r.rarityFg }};font-size:13px;font-weight:700;line-height:1"><span class="ms" style="font-size:14px;font-variation-settings:'FILL' 1">{{ r.rarityIcon }}</span>{{ r.rarityLabel }}</span></sc-if><sc-if value="{{ r.showBadge }}"><span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;box-sizing:border-box;padding:4px 10px 4px 7px;border-radius:999px;background:{{ r.badge.bg }};border:{{ r.badge.border }};color:{{ r.badge.fg }};font-size:13px;font-weight:700;line-height:1"><span style="display:flex;align-items:flex-end;gap:1.4px;height:12px"><span style="width:2.4px;height:4.5px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o1 }}"></span><span style="width:2.4px;height:7px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o2 }}"></span><span style="width:2.4px;height:10px;border-radius:1.2px;background:{{ r.badge.fg }};opacity:{{ r.badge.o3 }}"></span></span>{{ r.badge.label }}</span></sc-if>
+              <span style="font-size:13px;color:{{ app.live.t.text2 }};font-variant-numeric:tabular-nums">{{ r.total }}</span>
+            </div>
+          </div>
+        </div>
+        <span style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">{{ r.count }}</span>
+        <button onClick="{{ r.replay }}" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:999px;border:2px solid {{ app.live.t.accentText }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="ms" style="font-size:24px;color:{{ app.live.t.accentText }};font-variation-settings:'FILL' 1">play_arrow</span></button>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:{{ app.live.t.deep }};border-top:1px solid {{ app.live.t.line }};padding:12px 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+    <button onClick="{{ app.live.stop }}" style="all:unset;cursor:pointer;height:64px;border-radius:999px;background:{{ app.live.t.stopBg }};color:{{ app.live.t.stopFg }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">stop</span>Arrêter</button>
+    <button onClick="{{ app.live.pause }}" style="all:unset;cursor:pointer;height:64px;border-radius:999px;border:1.5px solid {{ app.live.t.borderStrong }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700" style-active="transform:scale(.97)"><sc-if value="{{ app.live.paused }}"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">play_arrow</span>Reprendre</sc-if><span style="display:{{ app.live.pauseDisplay }};align-items:center;gap:8px"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">pause</span>Pause</span></button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;app&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>
