@@ -229,8 +229,20 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     // resolve independently; the header's live region only announces once
     // both have (SPEC.md's common case never announces a second "loading").
     final dataReady = !loadingSnapshot && !loadingGame;
-    // The singing logo, small, alone above the tab header (Accueil only).
-    const topBar = HomeLogoRow();
+    // The singing logo, small, above the tab header (Accueil only), with the
+    // menu button on the same row so both share one vertical center.
+    final topBar = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Expanded(child: HomeLogoRow()),
+        const SizedBox(width: BirdySpace.s),
+        BirdyIconButton(
+          icon: AppIcons.menu,
+          semanticLabel: l10n.forkHomeMenu,
+          onPressed: _showMenu,
+        ),
+      ],
+    );
     final dayTimes = _dayTimes;
     final firstName = ref.watch(firstNameProvider);
 
@@ -350,13 +362,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           child: BirdyTabHeader(
             title: homeGreeting(l10n, now, firstName: firstName),
             caption: homeDateLine(localeName, now, place: _place),
-            actions: [
-              BirdyIconButton(
-                icon: AppIcons.menu,
-                semanticLabel: l10n.forkHomeMenu,
-                onPressed: _showMenu,
-              ),
-            ],
           ),
         ),
       ),
