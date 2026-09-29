@@ -24,6 +24,7 @@ import '../map/sensitive_species.dart';
 import '../species_photo/online_photos_tile.dart';
 import 'birdy_switch_row.dart';
 import 'fork_prefs.dart';
+import 'my_bird_screen.dart'; // FORK: J6i
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -136,6 +137,7 @@ class SimpleSettingsScreen extends ConsumerWidget {
                   key: const ValueKey('settings-theme'),
                   title: l10n.settingsTheme,
                   children: [
+                    const MyBirdRow(key: ValueKey('settings-my-bird')), // FORK: J6i
                     _ThemeChoice(
                       mode: ref.watch(themeModeProvider),
                       onChanged: (mode) {

@@ -596,6 +596,25 @@ abstract final class BirdySizes {
   /// Tinted disc leading a list row (J6h [BirdyListRow]).
   static const double rowDisc = 44;
 
+  /// Bird-choice disc of the onboarding (J6i): the themed logo in a tonal
+  /// disc, its white halo, the logo's width inside it, and the smaller disc
+  /// of a picker card.
+  static const double themeLogoDisc = 132;
+  static const double themeLogoHalo = 8;
+  static const double themeLogoMark = 88;
+  static const double themeCardDisc = 72;
+  static const double themeCardMark = 48;
+
+  /// Launcher-icon preview of the picker, and the logo inside it.
+  static const double iconPreview = 60;
+  static const double iconPreviewMark = 42;
+  static const double iconPreviewRadius = 15;
+
+  /// Ring around the chosen picker card, its check badge and its colour dots.
+  static const double themeRing = 3;
+  static const double themeCheck = 24;
+  static const double themeDot = 14;
+
   /// White disc of the sound library hero (J6h).
   static const double soundHeroDisc = 76;
 
@@ -813,6 +832,9 @@ abstract final class ListeningModeColors {
 abstract final class BirdyAlpha {
   /// Decorative disc of the species accent behind the hero bird.
   static const double heroDisc = 0.18;
+
+  /// White halo around the onboarding's bird disc.
+  static const double themeHalo = 0.7;
 
   /// White fill of a dashed slot on a tonal block.
   static const double slotFill = 0.55;

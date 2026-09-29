@@ -22,6 +22,7 @@ import 'features/live/live_providers.dart';
 import 'features/live/live_screen.dart';
 import 'features/live/live_session.dart';
 import 'fork/design/birdy_theme.dart'; // FORK: BirdyGo design system (J6a)
+import 'fork/app_icon/app_icon.dart'; // FORK: launcher icon follows the bird (J6i)
 import 'fork/settings/fork_prefs.dart'; // FORK: bird theme provider (J6i)
 import 'fork/splash/birdygo_launch_handoff.dart'; // FORK: visible launch handoff
 import 'shared/providers/app_providers.dart';
@@ -78,6 +79,7 @@ class App extends ConsumerWidget {
     final useHighContrastTheme = ref.watch(highContrastThemeProvider);
     final locale = ref.watch(localeProvider);
     final bird = ref.watch(birdyBirdProvider); // FORK: bird theme (J6i)
+    ref.watch(appIconSyncProvider); // FORK: launcher icon follows the bird (J6i)
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {

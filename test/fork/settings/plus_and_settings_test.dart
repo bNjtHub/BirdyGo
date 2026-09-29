@@ -248,6 +248,11 @@ void main() {
       expect(find.text(fr.forkSettingsTitle), findsOneWidget);
 
       // The switch is labelled « Effets sonores du quiz ».
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('settings-quiz-sound')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Effets sonores du quiz'), findsOneWidget);
       expect(find.text('Bruitages du quiz'), findsNothing);
       // Quiz sounds: on by default.

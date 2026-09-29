@@ -26,14 +26,25 @@ import '../settings/fork_prefs.dart';
 import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
 import 'onboarding_permissions_page.dart';
+import 'onboarding_steps.dart';
+
+/// Steps counted in « Étape n sur N » (first name, bird), and the dots of the
+/// other pages (three story pages and the permissions page).
+const int _stepCount = 2;
+const int _dotCount = 4;
 
 class ForkOnboardingScreen extends ConsumerStatefulWidget {
   const ForkOnboardingScreen({super.key});
 
-  /// Story pages, the optional first-name page, then the permissions page.
-  static const int pageCount = 5;
+  /// Story pages, step 1 (first name), step 2 (bird), then the permissions
+  /// page. FORK J6i: the bird step was added.
+  static const int pageCount = 6;
   static const int namePage = 3;
-  static const int permissionsPage = 4;
+  static const int birdPage = 4;
+  static const int permissionsPage = 5;
+
+  /// Pages with their own header and button (the two steps).
+  static bool isStep(int page) => page == namePage || page == birdPage;
 
   @override
   ConsumerState<ForkOnboardingScreen> createState() =>
@@ -131,16 +142,16 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
 
   void _next() => _goTo((_page + 1).clamp(0, ForkOnboardingScreen.pageCount));
 
-  bool get _onName => _page == ForkOnboardingScreen.namePage;
+  bool get _onStep => ForkOnboardingScreen.isStep(_page);
 
-  /// « Continuer » on the name page: same preference as the Settings block.
+  /// « Continuer » on step 1: same preference as the Settings block.
   void _saveName() {
     FocusManager.instance.primaryFocus?.unfocus();
     ref.read(firstNameProvider.notifier).set(_name.text);
     _next();
   }
 
-  /// « Passer » on the name page: nothing saved.
+  /// « Plus tard » on step 1: nothing saved.
   void _skipName() {
     FocusManager.instance.primaryFocus?.unfocus();
     _next();
@@ -178,7 +189,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
                   child: Visibility(
-                    visible: !_last && !_onName,
+                    visible: !_last && !_onStep,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -206,6 +217,9 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
               child: PageView(
                 key: const ValueKey('onb-pages'),
                 controller: _controller,
+                // The steps are left by their own buttons only.
+                physics:
+                    _onStep ? const NeverScrollableScrollPhysics() : null,
                 onPageChanged: (i) {
                   setState(() => _page = i);
                   if (i == ForkOnboardingScreen.permissionsPage) _refresh();
@@ -214,7 +228,17 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                   const OnboardingWelcomePage(),
                   const OnboardingHowPage(),
                   const OnboardingLevelsPage(),
-                  OnboardingNamePage(controller: _name, onSubmitted: _saveName),
+                  OnboardingNameStep(
+                    controller: _name,
+                    onContinue: _saveName,
+                    onLater: _skipName,
+                    total: _stepCount,
+                  ),
+                  BirdyBirdStep(
+                    stepLabel: l10n.forkOnbStep(2, _stepCount),
+                    confirmation: true,
+                    onDone: _next,
+                  ),
                   OnboardingPermissionsPage(
                     mic: _mic,
                     location: _location,
@@ -227,15 +251,14 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                 ],
               ),
             ),
-            _BottomBar(
-              page: _page,
-              last: _last,
-              onName: _onName,
-              finishing: _finishing,
-              onNext: _onName ? _saveName : _next,
-              onSkipName: _skipName,
-              onFinish: _finish,
-            ),
+            if (!_onStep)
+              _BottomBar(
+                page: _page,
+                last: _last,
+                finishing: _finishing,
+                onNext: _next,
+                onFinish: _finish,
+              ),
           ],
         ),
       ),
@@ -247,25 +270,20 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({
     required this.page,
     required this.last,
-    required this.onName,
     required this.finishing,
     required this.onNext,
-    required this.onSkipName,
     required this.onFinish,
   });
 
   final int page;
   final bool last;
-  final bool onName;
   final bool finishing;
   final VoidCallback onNext;
-  final VoidCallback onSkipName;
   final VoidCallback onFinish;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BirdySpace.page,
@@ -281,7 +299,12 @@ class _BottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _Dots(page: page, count: ForkOnboardingScreen.pageCount),
+              // Dots for the story pages and the permissions page; the two
+              // steps have their own counter.
+              _Dots(
+                page: last ? _dotCount - 1 : page,
+                count: _dotCount,
+              ),
               const SizedBox(height: BirdySpace.l),
               if (last)
                 _FinishButton(
@@ -294,22 +317,8 @@ class _BottomBar extends StatelessWidget {
                     key: const ValueKey('onb-next'),
                     style: BirdyButtonStyles.primary(context),
                     onPressed: onNext,
-                    child: Text(
-                      onName ? l10n.forkOnbNameContinue : l10n.next,
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text(l10n.next, textAlign: TextAlign.center),
                   ),
-                ),
-              if (onName && !last)
-                TextButton(
-                  key: const ValueKey('onb-name-skip'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: c.accentText,
-                    minimumSize: const Size.fromHeight(BirdySizes.target),
-                    textStyle: BirdyText.label,
-                  ),
-                  onPressed: onSkipName,
-                  child: Text(l10n.skip),
                 ),
             ],
           ),

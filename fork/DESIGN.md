@@ -883,3 +883,36 @@ Règles transverses :
   deux boutons (`animated`), toutes les 7 s environ (±1,5 s), les barres font une vague douce de 0,9 s,
   décalées, puis reviennent au repos (`BirdyMotion.wingWave*`) ; rien ne tourne entre deux vagues, arrêt
   avec animations réduites. La feuille « Arrêter la partie ? » reprend `QuizLogo`, l'emblème du quiz.
+
+## Onboarding (J6i : prénom et oiseau)
+
+Parcours : Bienvenue, Comment, Niveaux (histoire, inchangées) → Étape 1 Prénom → Étape 2 Choisis ton
+oiseau → Autorisations → Accueil. Premier lancement en Loriot tant que l'enfant n'a pas choisi.
+Références : `fork/handoff/maquettes/DemoPrenom.dc.html`, `DemoTheme.dc.html`, `themes.js`.
+
+- **Les deux étapes** ont leur propre en-tête (« Étape n sur 2 » à droite, flèche ← dans Réglages) et
+  leur propre bouton de 72 (`BirdySizes.listen`, halo du thème). L'en-tête et le bouton restent fixes,
+  le reste défile (320 dp, 130 %). L'écran cache ses points et « Passer » sur ces deux pages, et ne les
+  laisse pas glisser : on en sort par leurs boutons. Les points ne comptent que les 3 pages d'histoire
+  et les autorisations.
+- **Étape 1.** Disque tonal de 132 (`SingingThemeLogo`, halo blanc 8 à 70 %) qui chante une phrase à
+  l'arrivée et au toucher ; wordmark 44 (`BirdyGoWordmark`) ; titre « Bienvenue ! » qui devient
+  « Enchanté, {prénom} ! » pendant la saisie ; « Comment tu t'appelles ? » ; champ dans un bloc blanc
+  (`autofillHints: givenName`, 24 caractères, filet accent), légende cadenas « Il reste sur ton
+  téléphone » ; « Continuer » grisé tant que le champ est vide ; « Plus tard » (texte, 48) ne
+  sauvegarde rien.
+- **Étape 2 et Réglages, « Mon oiseau ».** Même page (`BirdyBirdStep`). Disque 132 recoloré tout de
+  suite et qui chante à chaque carte touchée ; grille 2 × 2 (`BirdyBirdPicker`) de cartes blanches :
+  disque tonal 72 avec le logo, nom (Nunito 17), 3 pastilles de 14 (accent, bec, tonal) ; la carte
+  choisie a un anneau accent de 3 et une coche. Toucher une carte met `birdyBirdProvider` à jour
+  aussitôt : toute l'appli prévisualise l'oiseau, sans attendre « C'est mon oiseau ! ». Encadré
+  « Ton icône sur le téléphone » : aperçu 60 (logo sur dégradé tonal → blanc, celui de la future icône
+  de lanceur, toujours en clair) et le fait sur l'oiseau. Onboarding : le bouton affiche
+  « Bienvenue {prénom} chez les {oiseaux} ! » 1,5 s, puis les autorisations. Réglages : le bouton et la
+  flèche reviennent.
+- **Réglages.** Ligne « Mon oiseau » en tête du bloc Thème : disque tonal 44 avec le logo (immobile),
+  nom de l'oiseau, chevron.
+- **Composants partagés.** `SingingThemeLogo` (disque + chant), `BirdyBirdPicker` / `BirdyBirdCard` /
+  `BirdyIconPreview`, `BirdyBirdLabels` (nom, pluriel, fait). Aucun disque ni carte écrits à la main
+  ailleurs : même emblème partout.
+- **Animations réduites.** Ni chant, ni pop, ni fondu ; l'accueil de l'oiseau ne dure pas.
