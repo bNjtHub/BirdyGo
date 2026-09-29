@@ -806,7 +806,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             ligne de liste unique, préférences `firstName` et `liveTheme`, config des heures du jour.
       - [ ] Accueil : bande « Ta journée » et son tiroir, salutation avec prénom, aile sur « Écouter ».
       - [ ] Écoute : thème clair (`liveTheme`), étiquettes de rareté, noms du spectrogramme sans chevauchement.
-      - [ ] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
+      - [x] Bilan : héros à 3 tuiles, blocs titrés, tiroir « Autres actions ».
       - [ ] Carnet : héros simplifié, bloc « Ma collection », grille 2 colonnes, rareté en mots.
       - [ ] Fiche : héros `sure`, bloc « Fais sa connaissance ».
       - [ ] Profil : traits de l'échelle entre emblèmes, félicitations avec prénom.
