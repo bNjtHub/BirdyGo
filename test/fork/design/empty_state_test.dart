@@ -1,6 +1,7 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/widgets/empty_state.dart';
+import 'package:birdnet_live/fork/game/quiz_logo.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,24 @@ Container _disc(WidgetTester tester) => tester.widget<Container>(
 );
 
 void main() {
+  testWidgets('leading emblem replaces the icon disc, at disc size', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        const BirdyEmptyState(
+          leading: QuizLogo(size: BirdyEmptyState.fullDisc),
+          title: "Pas encore assez d'oiseaux",
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(QuizLogo), findsOneWidget);
+    expect(find.byType(Icon), findsNothing);
+    expect(find.byIcon(AppIcons.headphones), findsNothing);
+    expect(tester.getSize(find.byType(QuizLogo)).width, BirdyEmptyState.fullDisc);
+  });
+
   testWidgets('full state: icon, title, body and primary action', (
     tester,
   ) async {

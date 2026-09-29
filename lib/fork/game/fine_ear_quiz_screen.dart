@@ -37,6 +37,7 @@ import 'fine_ear_quiz_widgets.dart';
 import 'game_config.dart';
 import 'game_loader.dart';
 import 'quiz_fx.dart';
+import 'quiz_logo.dart';
 import 'quiz_sfx.dart';
 import 'quiz_stop_sheet.dart';
 
@@ -315,7 +316,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
               ? const Center(child: CircularProgressIndicator())
               : BirdyEntrance(
                 child: BirdyEmptyState(
-                  icon: AppIcons.headphones,
+                  leading: const QuizLogo(size: BirdyEmptyState.fullDisc),
                   title: l10n.forkQuizEmptyTitle,
                   body: l10n.forkQuizEmpty,
                 ),
