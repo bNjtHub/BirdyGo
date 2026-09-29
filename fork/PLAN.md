@@ -866,7 +866,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 
 ## J7 : publication Android
 
-- [ ] Signature de l'app (clé d'upload), build `appbundle` en release.
+- [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
       de celle d'upstream.
 - [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),

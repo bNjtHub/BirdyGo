@@ -23,6 +23,17 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
+// FORK: loud warning when a release build falls back to debug signing
+// (such a bundle is refused by Google Play). See fork/release/README.md.
+def releaseTaskRequested = gradle.startParameter.taskNames.any {
+    it.toLowerCase().contains('release') || it.toLowerCase().contains('bundle')
+}
+if (!hasKeystore && releaseTaskRequested) {
+    logger.warn("*** WARNING: android/key.properties missing or storeFile not found. " +
+        "Release build is signed with the DEBUG key and cannot be uploaded to Google Play. " +
+        "See android/key.properties.example and fork/release/README.md. ***")
+}
+
 android {
     namespace = "com.birdnet.birdnet_live"
     compileSdk = flutter.compileSdkVersion

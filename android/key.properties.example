@@ -1,0 +1,6 @@
+# Copy to android/key.properties (git-ignored) and fill in. NEVER commit the real file or the keystore.
+# storeFile is resolved from android/app/ ; an absolute path also works.
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=upload
+storeFile=C:/Users/bNj/keystores/birdygo-upload.jks
