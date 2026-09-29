@@ -23,29 +23,10 @@ import 'package:birdnet_live/shared/providers/settings_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// The default test font is a rough substitute with different metrics: the
-/// rect assertions below compare wrapped-or-not text, so they need the real
-/// bundled fonts loaded, or a short name could wrap under the test font and
-/// not on a real phone (or the reverse).
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load('Nunito', 'assets/fonts/Nunito-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 /// `heard()` and `expected()` resolve only when their completer is told to,
 /// so a test can control exactly when each of the two async sources lands.
@@ -155,7 +136,7 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   late SharedPreferences prefs;
   late _DelayedLoader loader;

@@ -17,6 +17,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 
 class BirdyGoLogo extends StatefulWidget {
@@ -62,7 +63,10 @@ class _BirdyGoLogoState extends State<BirdyGoLogo>
   Widget build(BuildContext context) => RepaintBoundary(
     child: CustomPaint(
       size: Size.square(widget.size),
-      painter: BirdyGoLogoPainter(progress: _controller),
+      painter: BirdyGoLogoPainter(
+        progress: _controller,
+        brand: BirdyBrandColors.of(context),
+      ),
     ),
   );
 }
@@ -79,6 +83,7 @@ class BirdyGoLogoPainter extends CustomPainter {
     this.frozenLevel,
     this.eyeClosed,
     this.mouth,
+    this.brand = const BirdyBrandColors(BirdyBird.loriot),
   }) : super(
          repaint: Listenable.merge([
            progress,
@@ -100,6 +105,10 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// sings, with the header singing mark's own angles.
   final Animation<double>? mouth;
 
+  /// The bird theme's colors: plumage, beaks, wing bars 2 and 4 (J6i).
+  /// Loriot (the original look) by default.
+  final BirdyBrandColors brand;
+
   static const double lowerBeakOpenDegrees = -11;
   static const double upperBeakOpenDegrees = 13;
 
@@ -110,17 +119,28 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// Source view box of the SVG.
   static const double _box = 512;
 
-  static const Color plumageTop = Color(0xFF1CAEBA);
-  static const Color plumageBottom = Color(0xFF0E7C86);
-  static const Color lowerBeakColor = Color(0xFFE3A22B);
-  static const Color paleKingfisher = BirdyBrand.wingSky;
-
-  /// Wing bars, bottom point first (the SVG draws them upward).
+  /// Wing bars in the Loriot colors, bottom point first (the SVG draws them
+  /// upward). Bars 1 and 3 are Brume for every bird; use [barsFor] for the
+  /// bird theme's bars 2 and 4.
   static const List<(Offset, Offset, Color)> bars = [
     (Offset(217.4, 333.7), Offset(217.4, 240.1), BirdyBrand.mist),
     (Offset(260.6, 365.5), Offset(268, 223.3), BirdyBrand.oriole),
     (Offset(306.2, 349.4), Offset(316, 256.2), BirdyBrand.mist),
-    (Offset(352.9, 331.7), Offset(359.3, 290.9), paleKingfisher),
+    (Offset(352.9, 331.7), Offset(359.3, 290.9), BirdyBrand.wingSky),
+  ];
+
+  /// [bars] in [brand]'s colors: bar 2 = highlight, bar 4 = accentLight.
+  static List<(Offset, Offset, Color)> barsFor(BirdyBrandColors brand) => [
+    for (final (i, (from, to, color)) in bars.indexed)
+      (
+        from,
+        to,
+        switch (i) {
+          1 => brand.highlight,
+          3 => brand.accentLight,
+          _ => color,
+        },
+      ),
   ];
 
   /// Each bar draws over this share of [progress], starting in turn.
@@ -231,14 +251,14 @@ class BirdyGoLogoPainter extends CustomPainter {
           ..shader = ui.Gradient.linear(
             const Offset(165, 97.7),
             const Offset(361.7, 434.9),
-            const [plumageTop, plumageBottom],
+            [brand.accentHi, brand.accentDeep],
           );
     canvas.drawPath(tail, plumage);
 
     final open = mouth?.value ?? 0;
     for (final (path, color, degrees) in [
-      (lowerBeak, lowerBeakColor, lowerBeakOpenDegrees * open),
-      (upperBeak, BirdyBrand.oriole, upperBeakOpenDegrees * open),
+      (lowerBeak, brand.highlightDeep, lowerBeakOpenDegrees * open),
+      (upperBeak, brand.highlight, upperBeakOpenDegrees * open),
     ]) {
       canvas.save();
       if (degrees != 0) {
@@ -264,7 +284,7 @@ class BirdyGoLogoPainter extends CustomPainter {
 
     final t = progress.value;
     final step = (1 - _barShare) / (bars.length - 1);
-    for (final (i, (from, to, color)) in bars.indexed) {
+    for (final (i, (from, to, color)) in barsFor(brand).indexed) {
       final local = ((t - i * step) / _barShare).clamp(0.0, 1.0);
       if (local == 0) continue;
       final double fraction;
@@ -319,5 +339,6 @@ class BirdyGoLogoPainter extends CustomPainter {
       oldDelegate.level != level ||
       oldDelegate.frozenLevel != frozenLevel ||
       oldDelegate.eyeClosed != eyeClosed ||
-      oldDelegate.mouth != mouth;
+      oldDelegate.mouth != mouth ||
+      oldDelegate.brand != brand;
 }

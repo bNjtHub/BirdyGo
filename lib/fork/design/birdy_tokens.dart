@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../reliability/reliability_config.dart';
+import 'birdy_theme_choice.dart';
 
 /// Brand colors named in fork/DESIGN.md.
 abstract final class BirdyBrand {
@@ -176,6 +177,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.accentText,
     required this.tonal,
     required this.navIndicator,
+    required this.glow,
     required this.oriole,
     required this.onOriole,
     required this.orioleText,
@@ -228,13 +230,13 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Secondary text and quiet icons.
   final Color text2;
 
-  /// Martin-pêcheur fill of actions.
+  /// Fill of actions (the bird theme's brand color, J6i).
   final Color accent;
 
   /// Text and icons on [accent].
   final Color onAccent;
 
-  /// Martin-pêcheur for text and icons on this theme's surfaces (AA).
+  /// Brand color for text and icons on this theme's surfaces (AA).
   final Color accentText;
 
   /// Tonal buttons.
@@ -242,6 +244,9 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
 
   /// Active item of the bottom navigation.
   final Color navIndicator;
+
+  /// Halo under the big « Écouter » buttons: [accent] at 35 %.
+  final Color glow;
 
   /// Loriot fill (Première fois, Nouveau).
   final Color oriole;
@@ -293,21 +298,22 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   ];
 
   /// Glow of the big « Écouter » button only.
-  List<BoxShadow> get ctaGlow => const [
-    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 10), blurRadius: 28),
+  List<BoxShadow> get ctaGlow => [
+    BoxShadow(color: glow, offset: const Offset(0, 10), blurRadius: 28),
   ];
 
   /// Glow of the home « Écouter » button: centered around it and at most
   /// [listenGlowExtent] past its edge, so it fits the equal margins above
   /// the bottom bar without being cut.
-  List<BoxShadow> get listenGlow => const [
-    BoxShadow(color: Color(0x5919A7B3), offset: Offset(0, 4), blurRadius: 16),
+  List<BoxShadow> get listenGlow => [
+    BoxShadow(color: glow, offset: const Offset(0, 4), blurRadius: 16),
   ];
 
   /// How far [listenGlow] reaches below the button (offset + blur).
   static const double listenGlowExtent = 20;
 
-  /// Light theme (notebook), SPEC.md 2.3.
+  /// Light theme (notebook), SPEC.md 2.3. Accent roles are the Loriot bird's
+  /// (the default); [forBird] gives the other birds.
   static const BirdyColors light = BirdyColors(
     brightness: Brightness.light,
     background: BirdyBrand.mist,
@@ -328,6 +334,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     accentText: Color(0xFF0B6E77),
     tonal: Color(0xFFD6EEF0),
     navIndicator: Color(0xFFD1ECEF),
+    glow: Color(0x5919A7B3),
     oriole: BirdyBrand.oriole,
     onOriole: BirdyBrand.ink,
     orioleText: Color(0xFF7A5A00),
@@ -371,6 +378,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     accentText: Color(0xFF4FC3CC),
     tonal: Color(0x2919A7B3),
     navIndicator: Color(0xFF213852),
+    glow: Color(0x5919A7B3),
     oriole: BirdyBrand.oriole,
     onOriole: BirdyBrand.ink,
     orioleText: BirdyBrand.oriole,
@@ -403,6 +411,49 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       theme.extension<BirdyColors>() ??
       (theme.brightness == Brightness.dark ? dark : light);
 
+  /// Tokens of [bird] in [brightness]: [light] or [dark] with the brand
+  /// roles (accent, accentText, tonal, navIndicator, glow) of the bird
+  /// ([BirdyBrandColors]). Everything else is the same for every bird.
+  static BirdyColors forBird(BirdyBird bird, Brightness brightness) {
+    final base = brightness == Brightness.dark ? dark : light;
+    // Loriot is the original set (a test checks it equals its brand roles).
+    if (bird == BirdyBird.loriot) return base;
+    return base._withBrand(BirdyBrandColors(bird, brightness));
+  }
+
+  BirdyColors _withBrand(BirdyBrandColors b) => BirdyColors(
+    brightness: brightness,
+    background: background,
+    backgroundDeep: backgroundDeep,
+    surface1: surface1,
+    surface2: surface2,
+    surface3: surface3,
+    line: line,
+    border: border,
+    borderStrong: borderStrong,
+    progressTrack: progressTrack,
+    dashed: dashed,
+    text1: text1,
+    text2: text2,
+    accent: b.accent,
+    onAccent: onAccent,
+    accentText: b.accentText,
+    tonal: b.tonal,
+    navIndicator: b.navIndicator,
+    glow: b.glow,
+    oriole: oriole,
+    onOriole: onOriole,
+    orioleText: orioleText,
+    orioleContainer: orioleContainer,
+    rarityMuted: rarityMuted,
+    veil: veil,
+    sure: sure,
+    probable: probable,
+    toCheck: toCheck,
+    skeleton: skeleton,
+    skeletonSheen: skeletonSheen,
+  );
+
   /// Tokens are fixed per theme: use [light] or [dark].
   @override
   BirdyColors copyWith() => this;
@@ -430,6 +481,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       accentText: c(accentText, other.accentText),
       tonal: c(tonal, other.tonal),
       navIndicator: c(navIndicator, other.navIndicator),
+      glow: c(glow, other.glow),
       oriole: c(oriole, other.oriole),
       onOriole: c(onOriole, other.onOriole),
       orioleText: c(orioleText, other.orioleText),
@@ -716,8 +768,11 @@ abstract final class BirdySizes {
 /// surfaces (`surface1`-`surface3`) and their light theme counterparts
 /// (`test/fork/design/contrast_test.dart`).
 abstract final class ListeningModeColors {
-  /// Same value as [BirdyColors.accentText]: Normal is the plain, always-on
-  /// setting, so it borrows the app's action color rather than a new one.
+  /// Same value as [BirdyColors.accentText] (Loriot bird): Normal is the
+  /// plain, always-on setting, so it borrows the app's action color rather
+  /// than a new one. The mode's color follows the chosen bird
+  /// (`listeningModeColor` reads [BirdyColors.accentText]); these are the
+  /// Loriot values, kept for the contrast test.
   static const Color normalLight = Color(0xFF0B6E77);
   static const Color normalDark = Color(0xFF4FC3CC);
 

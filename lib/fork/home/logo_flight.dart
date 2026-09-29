@@ -16,6 +16,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../splash/birdygo_splash_painter.dart';
 import 'birdygo_logo.dart';
 
@@ -253,6 +254,7 @@ class LogoWinkBird extends StatelessWidget {
           progress: animation.drive(_Curve(timeline.wingAt)),
           eyeClosed: animation.drive(_Curve(timeline.eyeClosedAt)),
           mouth: animation.drive(_Curve(timeline.mouthAt)),
+          brand: BirdyBrandColors.of(context),
         ),
       ),
     );
@@ -275,6 +277,7 @@ class LogoWinkBird extends StatelessWidget {
                         painter: LogoNotesPainter(
                           animation: animation,
                           timeline: timeline,
+                          brand: BirdyBrandColors.of(context),
                         ),
                       ),
                     ),
@@ -306,11 +309,15 @@ class LogoWinkBird extends StatelessWidget {
 /// ([BirdyGoSingingPainter.paintNote]) in the bird's 512 box, so they follow
 /// its position and size. Paints nothing outside the song.
 class LogoNotesPainter extends CustomPainter {
-  LogoNotesPainter({required this.animation, required this.timeline})
-    : super(repaint: animation);
+  LogoNotesPainter({
+    required this.animation,
+    required this.timeline,
+    this.brand = const BirdyBrandColors(BirdyBird.loriot),
+  }) : super(repaint: animation);
 
   final Animation<double> animation;
   final LogoWinkTimeline timeline;
+  final BirdyBrandColors brand;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -330,6 +337,7 @@ class LogoNotesPainter extends CustomPainter {
         i,
         u,
         reach: BirdyMotion.logoWinkNoteReach,
+        brand: brand,
       );
     }
     canvas.restore();
@@ -337,7 +345,9 @@ class LogoNotesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(LogoNotesPainter oldDelegate) =>
-      oldDelegate.animation != animation || oldDelegate.timeline != timeline;
+      oldDelegate.animation != animation ||
+      oldDelegate.timeline != timeline ||
+      oldDelegate.brand != brand;
 }
 
 class _Curve extends Animatable<double> {

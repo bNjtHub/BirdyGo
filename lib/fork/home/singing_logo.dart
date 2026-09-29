@@ -19,6 +19,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../splash/birdygo_splash_painter.dart';
 import 'logo_flight.dart';
@@ -296,6 +297,7 @@ class _SingingLogoState extends State<SingingLogo>
                   painter: BirdyGoSingingPainter(
                     clock: _clock,
                     still: _reduced,
+                    brand: BirdyBrandColors.of(context),
                   ),
                 ),
               ),

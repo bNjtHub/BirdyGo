@@ -1,13 +1,17 @@
 /// Small fork preferences (J6h): the first name used in greetings and the
-/// theme of the live screen. Both live in SharedPreferences.
+/// theme of the live screen, and the chosen bird theme (J6i). All live in
+/// SharedPreferences.
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/providers/app_providers.dart';
+import '../design/birdy_theme_choice.dart';
 
 const String kFirstNamePref = 'fork_first_name_v1';
 const String kLiveThemePref = 'fork_live_theme_v1';
+const String kBirdyBirdPref = 'fork_birdy_bird_v1';
 
 /// Longest first name kept.
 const int kFirstNameMaxLength = 24;
@@ -90,4 +94,27 @@ class NewSpeciesNotifSetting extends Notifier<bool> {
 
 final newSpeciesNotifProvider = NotifierProvider<NewSpeciesNotifSetting, bool>(
   NewSpeciesNotifSetting.new,
+);
+
+/// The bird stored in [prefs] ([BirdyBird.loriot] when none, or no prefs).
+/// Read before `runApp`, so the launch screen is already in the right theme.
+BirdyBird birdyBirdFromPrefs(SharedPreferences? prefs) =>
+    BirdyBird.fromName(prefs?.getString(kBirdyBirdPref));
+
+class BirdyBirdSetting extends Notifier<BirdyBird> {
+  @override
+  BirdyBird build() => birdyBirdFromPrefs(ref.read(sharedPreferencesProvider));
+
+  /// Picks [bird]: the whole app recolors at once, and the choice is saved.
+  Future<void> set(BirdyBird bird) async {
+    state = bird;
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(kBirdyBirdPref, bird.name);
+  }
+}
+
+/// The chosen bird theme, `loriot` until the child picks one.
+final birdyBirdProvider = NotifierProvider<BirdyBirdSetting, BirdyBird>(
+  BirdyBirdSetting.new,
 );

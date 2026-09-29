@@ -48,6 +48,38 @@ L'écoute s'ouvre en thème sombre par défaut : on l'utilise souvent à l'aube,
 Les rampes de score et les palettes du spectrogramme d'upstream ne changent pas.
 Élévation par teinte de surface (Material 3), pas la même ombre grise sous chaque carte.
 
+### Thèmes d'oiseau (J6i)
+
+L'enfant choisit son oiseau : la couleur de marque, le logo et le splash suivent. Le thème par défaut
+et tant que rien n'est choisi est le **Loriot**, qui garde exactement les jetons d'avant J6i (le
+« Martin-pêcheur » #19A7B3 ci-dessus est l'accent du thème Loriot ; le jaune du bec est le loriot).
+Valeurs exactes dans `fork/handoff/maquettes/themes.js`, reprises dans
+`lib/fork/design/birdy_theme_choice.dart` (seul endroit avec ces couleurs en dur).
+
+| Thème (`BirdyBird`) | acc | accText clair | accText sombre | bec / barre 2 |
+|---|---|---|---|---|
+| `loriot` (défaut) | #19A7B3 | #0B6E77 | #4FC3CC | #F4C542 |
+| `martin` | #3A9BE0 | #1565A8 | #7DBBF0 | #F28C38 |
+| `flamant` | #E86A9A | #A8305F | #F59BC0 | #3A2F4F |
+| `etourneau` | #9D82E0 | #5B3FB0 | #BBA6F0 | #E9C46A |
+
+Ce qui change : `accent` (action, anneaux, halo `glow`), `accentText`, `tonal`, `navIndicator`, le
+logo, le point du wordmark. `BirdyColors.forBird(bird, brightness)` donne les jetons du thème,
+`BirdyBrandColors.of(context)` les rôles de marque (`accentHi`, `accentDeep`, `accentLight`,
+`highlight`, `highlightDeep`, `wordmarkDot`, `accentTextDark`). Le choix est dans
+`birdyBirdProvider` (SharedPreferences `fork_birdy_bird_v1`), lu avant `runApp` : le splash est
+dans le bon thème dès la première image.
+
+Ce qui ne change jamais : niveaux Sûr / Probable / À vérifier, loriot doré (récompense, série, rare),
+médailles et emblèmes de niveau, confettis, teintes d'espèces, modes Vent / Boost / Ville, encre du
+texte sur `accent`. Le mode Normal suit `accentText`. Le logo du quiz (disque sombre aux barres
+turquoise) reste tel quel : c'est son emblème.
+
+Contraste vérifié pour chaque thème (`test/fork/design/birdy_theme_choice_test.dart`) : encre sur
+`accent`, `accentText` sur blanc, Brume, `tonal` et `navIndicator`, `accentTextDark` sur Encre et sur
+les surfaces sombres, tous ≥ 4,5:1. Goldens de l'Accueil, 4 thèmes × clair / sombre :
+`test/fork/goldens/` (tolérance de 2 % : l'Accueil affiche la date et une salutation).
+
 ## Typographie
 
 - Nunito, variable, graisse 800 : titres (`display` 34, `title` 26, `heading` 20) et grands chiffres
@@ -547,6 +579,12 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 Dans `fork/brand/` : `birdygo-logo.svg` (animé en CSS, pour le README), `birdygo-logo-static.svg`
 (même dessin sans animation, base de l'icône d'app et du logo de l'accueil, dont l'animation se refait
 en Flutter), `birdygo-logo-small.svg` (simplifié, de 16 à 32 px).
+
+Recoloration par thème (J6i) : les painters (`BirdyGoLogoPainter`, `BirdyGoSingingPainter`,
+`BirdyWingIcon`, splash) reçoivent un `BirdyBrandColors` (Loriot par défaut). Corps et queue :
+dégradé `accentHi` → `accentDeep` ; bec supérieur et barre 2 : `highlight` ; bec inférieur :
+`highlightDeep` ; barres 1 et 3 : Brume ; barre 4 : `accentLight` ; notes du chant : `accent`,
+`highlightDeep`, `accentDeep`. L'œil et le reflet ne changent pas.
 
 ## Textes
 

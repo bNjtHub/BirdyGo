@@ -683,7 +683,9 @@ class QuizPulse extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: BirdyBrand.kingfisher.withValues(alpha: 0.45 * (1 - e)),
+                color: BirdyColors.of(
+                  context,
+                ).accent.withValues(alpha: 0.45 * (1 - e)),
                 spreadRadius: 9 * e,
               ),
             ],

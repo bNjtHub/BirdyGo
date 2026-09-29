@@ -11,6 +11,7 @@ import 'core/constants/app_constants.dart';
 import 'features/aru/aru_notification.dart';
 import 'features/survey/survey_notification.dart';
 import 'fork/design/font_licenses.dart'; // FORK: OFL font licenses (J6a)
+import 'fork/settings/fork_prefs.dart'; // FORK: bird theme (J6i)
 import 'fork/splash/birdygo_startup.dart'; // FORK: visible startup (J6c)
 import 'fork/splash/birdygo_warm_up.dart'; // FORK: real loading (J6c)
 import 'shared/providers/app_providers.dart';
@@ -21,13 +22,28 @@ import 'shared/widgets/open_street_map_tile_layer.dart';
 // FORK: paint the launch screen before initialization; retain consumed launch
 // intents if initialization fails and the user retries. The startup screen
 // then loads the heavy resources in the app's provider container.
-void main() {
+// FORK: the stored bird theme and theme mode are read first, so the launch
+// screen is in the child's colors from its first frame (J6i).
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences? earlyPrefs;
+  try {
+    earlyPrefs = await SharedPreferences.getInstance();
+  } catch (error) {
+    debugPrint('Could not read the theme before launch: $error');
+  }
+  final launchThemeMode = switch (earlyPrefs?.getString(PrefKeys.themeMode)) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
   Future<SharedAudioFile?>? launchShareRead;
   Future<String?>? launchQuickActionRead;
   late ProviderContainer container;
   runApp(
     BirdyGoStartup(
+      bird: birdyBirdFromPrefs(earlyPrefs),
+      themeMode: launchThemeMode,
       bootstrap:
           () => _initializeApp(
             readLaunchShare: () => launchShareRead ??= _readLaunchShare(),

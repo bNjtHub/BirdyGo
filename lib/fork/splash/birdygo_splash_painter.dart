@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../home/birdygo_logo.dart';
 
@@ -132,11 +133,15 @@ class BirdyGoSingingPainter extends CustomPainter {
     required this.clock,
     this.loop = true,
     this.still = false,
+    this.brand = const BirdyBrandColors(BirdyBird.loriot),
   }) : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final bool loop;
   final bool still;
+
+  /// The bird theme's colors (J6i); Loriot by default.
+  final BirdyBrandColors brand;
 
   /// Source view box of the board: x -80, y 10, 570 × 450.
   static const Size viewBox = Size(570, 450);
@@ -178,12 +183,6 @@ class BirdyGoSingingPainter extends CustomPainter {
   /// Pulse of each wing bar while singing.
   static const List<double> _barPulse = [.08, .13, .10, .16];
 
-  static const List<Color> _noteColors = [
-    BirdyBrand.kingfisher,
-    BirdyGoLogoPainter.lowerBeakColor,
-    BirdyGoLogoPainter.plumageBottom,
-  ];
-
   static final Path _noteFlag =
       Path()
         ..moveTo(6, -14)
@@ -206,11 +205,19 @@ class BirdyGoSingingPainter extends CustomPainter {
   /// One note of age [u] (0 → 1) in the logo's 512 box, leaving the beak and
   /// rising to the left; [i] picks its color and lane. [reach] stretches the
   /// flight and the size (the home easter egg's big bird, logo_flight.dart).
-  static void paintNote(Canvas canvas, int i, double u, {double reach = 1}) {
+  static void paintNote(
+    Canvas canvas,
+    int i,
+    double u, {
+    double reach = 1,
+    BirdyBrandColors brand = const BirdyBrandColors(BirdyBird.loriot),
+  }) {
+    // Notes: accent, lower beak color, deep accent.
+    final noteColors = [brand.accent, brand.highlightDeep, brand.accentDeep];
     final rise = 1 - math.pow(1 - u, 2).toDouble();
     final paint =
         Paint()
-          ..color = _noteColors[i % _noteColors.length].withValues(
+          ..color = noteColors[i % noteColors.length].withValues(
             alpha:
                 _Timeline.easeOut(u / .15) *
                 (1 - _Timeline.smooth((u - .5) / .5)),
@@ -295,10 +302,7 @@ class BirdyGoSingingPainter extends CustomPainter {
           ..shader = ui.Gradient.linear(
             const Offset(165, 97.7),
             const Offset(361.7, 434.9),
-            const [
-              BirdyGoLogoPainter.plumageTop,
-              BirdyGoLogoPainter.plumageBottom,
-            ],
+            [brand.accentHi, brand.accentDeep],
           );
 
     canvas.save();
@@ -310,10 +314,10 @@ class BirdyGoSingingPainter extends CustomPainter {
     for (final (path, color, degrees) in [
       (
         BirdyGoLogoPainter.lowerBeak,
-        BirdyGoLogoPainter.lowerBeakColor,
+        brand.highlightDeep,
         -11 * song,
       ),
-      (BirdyGoLogoPainter.upperBeak, BirdyBrand.oriole, 13 * song),
+      (BirdyGoLogoPainter.upperBeak, brand.highlight, 13 * song),
     ]) {
       canvas.save();
       _rotateAbout(canvas, _beakHinge, degrees);
@@ -332,7 +336,7 @@ class BirdyGoSingingPainter extends CustomPainter {
 
     canvas.drawPath(BirdyGoLogoPainter.body, plumage);
 
-    for (final (i, (from, to, color)) in BirdyGoLogoPainter.bars.indexed) {
+    for (final (i, (from, to, color)) in BirdyGoLogoPainter.barsFor(brand).indexed) {
       final drawn = _Timeline.easeOut(
         (t - _Timeline.barsStart - i * _Timeline.barsStagger) /
             _Timeline.barsDraw,
@@ -387,7 +391,7 @@ class BirdyGoSingingPainter extends CustomPainter {
         }
       }
       if (age == null) continue;
-      paintNote(canvas, i, age / _noteLife);
+      paintNote(canvas, i, age / _noteLife, brand: brand);
     }
     canvas.restore();
   }
@@ -396,14 +400,18 @@ class BirdyGoSingingPainter extends CustomPainter {
   bool shouldRepaint(BirdyGoSingingPainter oldDelegate) =>
       oldDelegate.clock != clock ||
       oldDelegate.loop != loop ||
-      oldDelegate.still != still;
+      oldDelegate.still != still ||
+      oldDelegate.brand != brand;
 }
 
 /// The loading bar: filled to the real share of the startup work done
 /// ([fraction], 0..1), never a made-up percentage.
 class BirdyGoLoadingPainter extends CustomPainter {
-  BirdyGoLoadingPainter({required this.fraction, this.track = lightTrack})
-    : super(repaint: fraction);
+  BirdyGoLoadingPainter({
+    required this.fraction,
+    this.track = lightTrack,
+    this.fill = BirdyBrand.kingfisher,
+  }) : super(repaint: fraction);
 
   /// Empty part of the bar on Brume: Encre at 8 %.
   static const Color lightTrack = Color(0x1413233A);
@@ -412,6 +420,9 @@ class BirdyGoLoadingPainter extends CustomPainter {
 
   /// Empty part of the bar: Encre at 8 % on Brume, Brume at 12 % on Encre.
   final Color track;
+
+  /// The filled part: the bird theme's accent (J6i), Loriot's by default.
+  final Color fill;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -427,11 +438,13 @@ class BirdyGoLoadingPainter extends CustomPainter {
         Rect.fromLTWH(0, 0, size.width * filled, size.height),
         const Radius.circular(2),
       ),
-      Paint()..color = BirdyBrand.kingfisher,
+      Paint()..color = fill,
     );
   }
 
   @override
   bool shouldRepaint(BirdyGoLoadingPainter oldDelegate) =>
-      oldDelegate.fraction != fraction;
+      oldDelegate.fraction != fraction ||
+      oldDelegate.track != track ||
+      oldDelegate.fill != fill;
 }

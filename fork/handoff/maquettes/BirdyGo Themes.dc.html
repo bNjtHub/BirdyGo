@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<script src="./themes.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600..900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+<style>
+@font-face{font-family:'Fraunces';src:url('assets/fonts/Fraunces-Variable.ttf') format('truetype');font-weight:100 900}
+@font-face{font-family:'Atkinson';src:url('assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf') format('truetype');font-weight:200 800}
+html,body{margin:0;background:#DDE2DA}
+a{color:#0B6E77;text-decoration:none}
+a:hover{color:#13233A;text-decoration:underline}
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;white-space:nowrap;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<section id="themes" style="padding:56px;font-family:Atkinson,sans-serif;color:#13233A;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:980px">
+    <div style="font-size:13px;font-weight:700;color:#0B6E77;letter-spacing:.04em">THÈMES DE COULEURS · 1</div>
+    <div style="font-family:Fraunces;font-size:44px;line-height:1.08;font-weight:600;font-variation-settings:'SOFT' 100,'opsz' 44">Un oiseau, une couleur d'appli</div>
+    <div style="font-size:17px;line-height:1.45;max-width:820px;text-wrap:pretty">L'enfant choisit son oiseau à l'accueil. Seuls les <b>rôles de marque</b> changent : action principale, liens, fonds tonals, onglet actif et logo. Les <b>couleurs qui ont un sens</b> ne bougent jamais d'un thème à l'autre.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,480px));gap:12px">
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-family:Fraunces;font-size:20px;font-weight:600">Ce qui change avec le thème</div>
+      <sc-for list="{{ roles }}" as="r" hint-placeholder-count="7"><div style="display:flex;gap:10px;font-size:15px;line-height:1.4"><code style="font-size:13px;color:#0B6E77;min-width:84px">{{ r.k }}</code><span>{{ r.v }}</span></div></sc-for>
+    </div>
+    <div style="background:#FFFFFF;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-family:Fraunces;font-size:20px;font-weight:600">Ce qui ne change jamais</div>
+      <sc-for list="{{ fixed }}" as="f" hint-placeholder-count="6"><div style="display:flex;gap:10px;align-items:center;font-size:15px;line-height:1.4"><span style="width:16px;height:16px;border-radius:999px;background:{{ f.c }};border:{{ f.b }};box-sizing:border-box;flex-shrink:0"></span><span>{{ f.v }}</span></div></sc-for>
+      <div style="font-size:13px;color:#6B5847;margin-top:4px">D'où le choix des oiseaux : aucun thème vert (Sûr), orange-brun (À vérifier), jaune (récompense) ou gris-bleu (Probable).</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="4">
+      <div id="{{ t.anchor }}" style="width:300px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px"><a href="#{{ t.anchor }}" style="background:#13233A;color:#EEF1EC;font-weight:700;font-size:13px;padding:5px 10px;border-radius:999px;text-decoration:none">{{ t.anchor }}</a><span style="font-family:Fraunces;font-size:20px;font-weight:600">{{ t.name }}</span><sc-if value="{{ t.current }}"><span style="font-size:13px;font-weight:700;color:#4B6023;background:#E6EDD6;padding:4px 10px;border-radius:999px">Actuel</span></sc-if></div>
+        <div style="background:#EEF1EC;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div title="Icône de l'appli" style="width:72px;height:72px;border-radius:18px;background:linear-gradient(160deg,{{ t.ton }},#FFFFFF);box-shadow:0 2px 8px rgba(19,35,58,.18),inset 0 0 0 1px rgba(19,35,58,.06);display:flex;align-items:center;justify-content:center;flex-shrink:0"><sc-if value="{{ t.logo }}"><img src="{{ t.logo }}" alt="" style="width:50px;height:50px"></sc-if></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="display:inline-flex;align-items:baseline;white-space:nowrap;line-height:1"><span style="font-family:Nunito,Atkinson,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.22px">Birdy</span><span style="display:inline-block;width:5px;height:5px;border-radius:999px;background:{{ t.dot }};margin:0 3px;transform:translateY(-3px)"></span><span style="font-family:Nunito,Atkinson,sans-serif;font-size:22px;font-weight:900;letter-spacing:-0.22px;color:{{ t.accT }};transition:color .25s">Go</span></span><span style="font-size:13px;color:#6B5847">{{ t.fact }}</span></div>
+          </div>
+          <div style="height:56px;border-radius:999px;background:{{ t.acc }};box-shadow:0 4px 16px {{ t.glow }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:700"><span class="ms" style="font-size:24px">graphic_eq</span>Écouter</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="height:40px;padding:0 14px;border-radius:999px;background:{{ t.ton }};color:{{ t.accT }};display:flex;align-items:center;font-size:15px;font-weight:700">Voir le bilan</div>
+            <div style="width:64px;height:32px;border-radius:999px;background:{{ t.nav }};display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">menu_book</span></div>
+            <span style="font-size:15px;font-weight:700;color:{{ t.accT }}">Lien</span>
+          </div>
+          <div style="height:52px;border-radius:16px;background:#13233A;display:flex;align-items:center;gap:10px;padding:0 14px"><span class="ms" style="font-size:20px;color:{{ t.accTD }}">hearing</span><span style="font-size:15px;font-weight:700;color:{{ t.accTD }}">Écoute sombre</span></div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ t.swatches }}" as="s" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:18px;height:18px;border-radius:6px;background:{{ s.c }};border:1px solid rgba(19,35,58,.12);box-sizing:border-box"></span><code style="width:56px;color:#6B5847">{{ s.k }}</code><span style="flex:1;font-variant-numeric:tabular-nums">{{ s.c }}</span><span style="font-weight:700;color:{{ s.okC }}">{{ s.ratio }}</span></div></sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:#FFFFFF;border-radius:20px;padding:16px;max-width:980px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.45">
+    <div style="font-family:Fraunces;font-size:20px;font-weight:600">Bonnes pratiques appliquées</div>
+    <sc-for list="{{ practices }}" as="p" hint-placeholder-count="6"><div style="display:flex;gap:8px"><span style="color:#0B6E77;font-weight:800">→</span><span>{{ p }}</span></div></sc-for>
+    <div style="margin-top:6px">Démo : <a href="BirdyGo Demo.dc.html">BirdyGo Demo</a> → « Choisir mon oiseau » (ou Réglages → Mon oiseau).</div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const hx = (s) => { s = s.replace('#', ''); return [0, 2, 4].map((i) => parseInt(s.substr(i, 2), 16)); };
+const lum = (a) => { const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }; return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]); };
+const ctr = (a, b) => { const x = lum(hx(a)), y = lum(hx(b)); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+class Component extends DCLogic {
+  componentDidMount() { if (!window.BIRDY_THEMES) { const w = setInterval(() => { if (window.BIRDY_THEMES) { clearInterval(w); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const TH = window.BIRDY_THEMES || [];
+    const chk = (fg, bg, min) => { const r = ctr(fg, bg); return { ratio: r.toFixed(1) + ':1 ' + (r >= min ? '✓' : '✗'), okC: r >= min ? '#4B6023' : '#A04A1C' }; };
+    return {
+      roles: [['acc', 'Bouton principal (Écouter, C\'est parti), anneaux de progression, points de série'], ['accT', 'Liens et textes d\'accent sur fond clair (≥ 4,5:1 sur blanc)'], ['ton', 'Fonds tonals : héros Carnet, Objectif, boutons secondaires'], ['nav', 'Pastille de l\'onglet actif'], ['accTD', 'Accent sur l\'écoute sombre (≥ 4,5:1 sur bleu nuit)'], ['glow', 'Halo sous le bouton principal'], ['logo', 'Corps et queue = acc, bec et 2e barre de l\'aile = hi, 4e barre = accL ; le point de Birdy·Go = dot (jaune pour Loriot, accent pour les autres) ; icône de l\'appli (fond tonal → blanc)']].map(([k, v]) => ({ k, v })),
+      fixed: [['#E6EDD6', 'none', 'Sûr, confirmé, niveau (Lichen)'], ['#E3E9EF', 'none', 'Probable'], ['#FFFFFF', '1.5px dashed #A04A1C', 'À vérifier (pointillé orange-brun)'], ['#FBEFC8', 'none', 'Récompense, série, rare (Loriot doré)'], ['#F4C542', 'none', 'Médailles, emblèmes de niveau, confettis'], ['#FDF1D8', 'none', 'Teintes des espèces (chaque oiseau a la sienne)']].map(([c, b, v]) => ({ c, b, v })),
+      themes: TH.map((t, i) => ({ ...t, anchor: '1' + 'abcd'[i], current: t.id === 'loriot', logo: window.birdyLogoUri(t),
+        swatches: [['acc', t.acc, chk('#13233A', t.acc, 4.5)], ['accT', t.accT, chk(t.accT, '#FFFFFF', 4.5)], ['accT/ton', t.ton, chk(t.accT, t.ton, 4.5)], ['accTD', t.accTD, chk(t.accTD, '#13233A', 4.5)], ['nav', t.nav, { ratio: '', okC: '#6B5847' }], ['hi', t.hi, { ratio: 'logo', okC: '#6B5847' }]].map(([k, c, r]) => ({ k, c, ...r })) })),
+      practices: [
+        'Jetons sémantiques : les écrans lisent accent, accentText, tonal… jamais une couleur d\'oiseau. Changer de thème = changer 10 valeurs, pas 400.',
+        'Contraste vérifié pour chaque thème : texte encre sur bouton, accentText sur blanc et sur tonal, accentTextDark sur l\'écoute sombre, tous ≥ 4,5:1 (colonne de droite).',
+        'Clair et sombre fournis ensemble : chaque thème a sa variante pour l\'écoute sombre.',
+        'Un seul logo, recoloré : même dessin, même aile-spectrogramme ; seules les couleurs suivent le thème (icône de l\'appli comprise, via icônes alternatives iOS/Android).',
+        'Choix réversible et mémorisé : proposé à l\'onboarding, modifiable dans Réglages → Mon oiseau, enregistré sur l\'appareil.',
+        'Aperçu immédiat : toucher un oiseau recolore tout de suite l\'écran et le logo, sans valider ; l\'enfant voit avant de choisir.',
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

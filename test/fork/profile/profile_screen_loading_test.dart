@@ -16,28 +16,10 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsNode;
-import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// See notebook_screen_loading_test.dart: the rect assertions below compare
-/// wrapped-or-not text, so they need the real bundled fonts, not the test
-/// font's different metrics.
-Future<void> _loadRealFonts() async {
-  Future<void> load(String family, String asset) async {
-    final loader = FontLoader(family)
-      ..addFont(rootBundle.load(asset).then((d) => d));
-    await loader.load();
-  }
-
-  await load('Fraunces', 'assets/fonts/Fraunces-Variable.ttf');
-  await load('Nunito', 'assets/fonts/Nunito-Variable.ttf');
-  await load(
-    'AtkinsonHyperlegibleNext',
-    'assets/fonts/AtkinsonHyperlegibleNext-Variable.ttf',
-  );
-}
+import '../helpers/fonts.dart';
 
 GameProgress _player() {
   final now = DateTime.now();
@@ -119,7 +101,7 @@ class _Snapshot {
 }
 
 void main() {
-  setUpAll(_loadRealFonts);
+  setUpAll(loadAppFonts);
 
   Future<void> pump(
     WidgetTester tester, {

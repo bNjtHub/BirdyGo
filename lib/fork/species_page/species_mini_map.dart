@@ -73,7 +73,7 @@ class SpeciesMiniMap extends StatelessWidget {
                             CircleMarker(
                               point: p,
                               radius: 5,
-                              color: BirdyBrand.kingfisher,
+                              color: BirdyColors.of(context).accent,
                               borderColor: Colors.white,
                               borderStrokeWidth: 1.5,
                             ),

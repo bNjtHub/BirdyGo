@@ -201,7 +201,7 @@ class _Progress extends StatelessWidget {
               margin: const EdgeInsets.only(left: 4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: i < value ? BirdyBrand.kingfisher : null,
+                color: i < value ? c.accent : null,
                 border:
                     i < value
                         ? null
