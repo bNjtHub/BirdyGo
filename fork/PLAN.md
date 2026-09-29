@@ -817,7 +817,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [ ] Menu Plus : tuiles Brume, seul le disque teinté ; retirer `HomeMenuEntry`/`HomeMenuSheet`.
       - [ ] Objectif : héros à anneau, liste en bloc, bouton épinglé avec l'aile.
       - [ ] Carte : puces en encre, retour quand elle est poussée.
-      - [ ] Revue : pile centrée verticalement.
+      - [x] Revue : pile centrée verticalement.
       - [ ] Premier lancement : étape prénom facultative.
       - [ ] « Me le rappeler » (tiroir Ta journée) : reporté. Demande `timezone` en dépendance directe
             pour `zonedSchedule` ; à décider. Côté iOS : autorisation de notification à demander.
