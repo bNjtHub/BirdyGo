@@ -21,6 +21,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/pressable.dart';
+import '../settings/fork_prefs.dart';
 import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
 import 'onboarding_permissions_page.dart';
@@ -28,9 +29,10 @@ import 'onboarding_permissions_page.dart';
 class ForkOnboardingScreen extends ConsumerStatefulWidget {
   const ForkOnboardingScreen({super.key});
 
-  /// Story pages, then the permissions page.
-  static const int pageCount = 4;
-  static const int permissionsPage = 3;
+  /// Story pages, the optional first-name page, then the permissions page.
+  static const int pageCount = 5;
+  static const int namePage = 3;
+  static const int permissionsPage = 4;
 
   @override
   ConsumerState<ForkOnboardingScreen> createState() =>
@@ -40,6 +42,7 @@ class ForkOnboardingScreen extends ConsumerStatefulWidget {
 class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
     with WidgetsBindingObserver {
   final PageController _controller = PageController();
+  final TextEditingController _name = TextEditingController();
   int _page = 0;
 
   OnboardingPermState _mic = OnboardingPermState.unknown;
@@ -64,6 +67,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -126,6 +130,21 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
 
   void _next() => _goTo((_page + 1).clamp(0, ForkOnboardingScreen.pageCount));
 
+  bool get _onName => _page == ForkOnboardingScreen.namePage;
+
+  /// « Continuer » on the name page: same preference as the Settings block.
+  void _saveName() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    ref.read(firstNameProvider.notifier).set(_name.text);
+    _next();
+  }
+
+  /// « Passer » on the name page: nothing saved.
+  void _skipName() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    _next();
+  }
+
   /// The button of the last page. With the microphone not asked yet it asks
   /// first, and stays here if the answer is no (the card says why the
   /// microphone is needed); the next tap finishes anyway, so nobody is stuck.
@@ -158,7 +177,7 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: BirdySpace.s),
                   child: Visibility(
-                    visible: !_last,
+                    visible: !_last && !_onName,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -195,6 +214,10 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
                   const OnboardingWelcomePage(),
                   const OnboardingHowPage(),
                   const OnboardingLevelsPage(),
+                  OnboardingNamePage(
+                    controller: _name,
+                    onSubmitted: _saveName,
+                  ),
                   OnboardingPermissionsPage(
                     mic: _mic,
                     location: _location,
@@ -210,8 +233,10 @@ class _ForkOnboardingScreenState extends ConsumerState<ForkOnboardingScreen>
             _BottomBar(
               page: _page,
               last: _last,
+              onName: _onName,
               finishing: _finishing,
-              onNext: _next,
+              onNext: _onName ? _saveName : _next,
+              onSkipName: _skipName,
               onFinish: _finish,
             ),
           ],
@@ -225,20 +250,25 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({
     required this.page,
     required this.last,
+    required this.onName,
     required this.finishing,
     required this.onNext,
+    required this.onSkipName,
     required this.onFinish,
   });
 
   final int page;
   final bool last;
+  final bool onName;
   final bool finishing;
   final VoidCallback onNext;
+  final VoidCallback onSkipName;
   final VoidCallback onFinish;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BirdySpace.page,
@@ -267,8 +297,22 @@ class _BottomBar extends StatelessWidget {
                     key: const ValueKey('onb-next'),
                     style: BirdyButtonStyles.primary(context),
                     onPressed: onNext,
-                    child: Text(l10n.next, textAlign: TextAlign.center),
+                    child: Text(
+                      onName ? l10n.forkOnbNameContinue : l10n.next,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
+                ),
+              if (onName && !last)
+                TextButton(
+                  key: const ValueKey('onb-name-skip'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: c.accentText,
+                    minimumSize: const Size.fromHeight(BirdySizes.target),
+                    textStyle: BirdyText.label,
+                  ),
+                  onPressed: onSkipName,
+                  child: Text(l10n.skip),
                 ),
             ],
           ),
