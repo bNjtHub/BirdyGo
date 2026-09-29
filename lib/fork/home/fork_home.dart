@@ -16,27 +16,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/about/about_screen.dart';
-import '../../features/aru/aru_active_screen.dart';
-import '../../features/aru/aru_controller.dart';
-import '../../features/aru/aru_providers.dart';
-import '../../features/aru/aru_setup_screen.dart';
 import '../../features/explore/explore_providers.dart';
-import '../../features/explore/explore_screen.dart';
 import '../../features/explore/widgets/species_info_overlay.dart';
-import '../../features/file_analysis/file_analysis_screen.dart';
-import '../../features/history/session_library_screen.dart';
 import '../../features/history/widgets/clip_player_sheet.dart';
-import '../../features/home/help_screen.dart';
 import '../../features/live/live_screen.dart';
 import '../../features/live/live_providers.dart';
 import '../../features/live/live_session.dart';
-import '../../features/point_count/point_count_setup_screen.dart';
-import '../../features/settings/settings_screen.dart';
-import '../../features/survey/survey_setup_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
-import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
 import '../daily_goal/daily_goal_block.dart';
 import '../daily_goal/daily_goal_screen.dart';
@@ -51,18 +38,15 @@ import '../game/challenges.dart';
 import '../game/game_loader.dart';
 import '../game/status_celebration.dart';
 import '../game/streak.dart';
-import '../garden/garden_count_screen.dart';
-import '../map/contact_map_screen.dart';
 import '../profile/profile_screen.dart';
-import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../shell/fork_shell.dart';
-import '../sound_library/sound_library_screen.dart';
 import '../summary/listening_summary_screen.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
 import 'home_text.dart';
 import 'home_widgets.dart';
+import 'more_sheet.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -182,116 +166,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     }
   }
 
-  void _openAru() {
-    final session = ref.read(aruSessionProvider);
-    final state = ref.read(aruStateProvider);
-    final running =
-        session != null &&
-        state != AruControllerState.completed &&
-        state != AruControllerState.idle;
-    _open(running ? const AruActiveScreen() : const AruSetupScreen());
-  }
-
-  void _showMenu() {
-    final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder:
-          (_) => HomeMenuSheet(
-            groups: [
-              [
-                HomeMenuEntry(
-                  AppIcons.flagRounded,
-                  l10n.forkDailyGoalTitle,
-                  () => _open(const DailyGoalScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.libraryMusic,
-                  l10n.sessionLibraryTitle,
-                  () => _open(const SessionLibraryScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.sort,
-                  l10n.forkRanking,
-                  () => _open(const RankingScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.mapSheet,
-                  l10n.forkMap,
-                  () => _open(const ContactMapScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.verifiedRounded,
-                  l10n.forkQuickReview,
-                  () => _open(const QuickReviewScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.graphicEqRounded,
-                  l10n.forkSoundLibrary,
-                  () => _open(const SoundLibraryScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.parkRounded,
-                  l10n.forkGardenTitle,
-                  () => _open(const GardenCountScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.searchRounded,
-                  l10n.exploreMode,
-                  () => _open(const ExploreScreen()),
-                ),
-              ],
-              [
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.pointCount),
-                  l10n.pointCountMode,
-                  () => _open(const PointCountSetupScreen()),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.survey),
-                  l10n.surveyMode,
-                  () => _open(const SurveySetupScreen()),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.aru),
-                  l10n.aruMode,
-                  _openAru,
-                ),
-                HomeMenuEntry(
-                  AppIcons.musicNote,
-                  l10n.forkPracticeMenu,
-                  () => _open(const LiveScreen(forkPractice: true)),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.fileUpload),
-                  l10n.fileAnalysisMode,
-                  () => _open(const FileAnalysisScreen()),
-                ),
-              ],
-              [
-                HomeMenuEntry(
-                  AppIcons.tuneRounded,
-                  l10n.settings,
-                  () => _open(const SettingsScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.helpOutlineRounded,
-                  l10n.helpTitle,
-                  () => _open(const HelpScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.infoOutline,
-                  l10n.about,
-                  () => _open(const AboutScreen()),
-                ),
-              ],
-            ],
-          ),
-    );
-  }
+  // FORK: J6g-c, the menu is now the « Plus » sheet (more_sheet.dart).
+  void _showMenu() => showMoreSheet(context, ref);
 
   @override
   Widget build(BuildContext context) {

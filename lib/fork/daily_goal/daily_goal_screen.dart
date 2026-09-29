@@ -14,9 +14,16 @@ import '../../features/live/live_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/providers/settings_providers.dart';
+import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/widgets/content_width_constraint.dart';
 import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
+import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
 import '../design/widgets/species_tile.dart';
 import 'daily_goal.dart';
@@ -110,148 +117,277 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
     final progress = ref.watch(dailyGoalProgressProvider);
     final completed = progress.value ?? const <String>{};
     final c = BirdyColors.of(context);
+    final loadingProgress = progress.isLoading && !progress.hasValue;
     return Scaffold(
       backgroundColor: c.background,
-      appBar: AppBar(title: Text(l10n.forkDailyGoalTitle)),
       body: SafeArea(
         child: ContentWidthConstraint(
-          child:
-              goal == null
-                  ? _empty(state.status)
-                  : RefreshIndicator(
-                    onRefresh: () async {
-                      ref.invalidate(dailyGoalProgressProvider);
-                      try {
-                        await ref.read(dailyGoalProgressProvider.future);
-                      } catch (_) {
-                        // The provider's error state displays the retry action.
-                      }
-                    },
-                    child: ListView(
-                      padding: const EdgeInsets.all(BirdySpace.l),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        Text(
-                          DateFormat.yMMMMd(l10n.localeName).format(goal.day),
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.forkDailyGoalDescription(
-                            DailyGoalConfig.radiusKm,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${l10n.forkDailyGoalLocation}: '
-                          '${goal.latitude.toStringAsFixed(3)}, '
-                          '${goal.longitude.toStringAsFixed(3)}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 20),
-                        if (progress.hasError)
-                          _retry(
-                            l10n.forkDailyGoalError,
-                            () => ref.invalidate(dailyGoalProgressProvider),
-                          )
-                        else if (progress.isLoading)
-                          const LinearProgressIndicator()
-                        else ...[
-                          Text(
-                            l10n.forkDailyGoalProgress(
-                              completed.length,
-                              goal.total,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  BirdySpace.page,
+                  BirdySpace.s,
+                  BirdySpace.page,
+                  BirdySpace.s,
+                ),
+                child: BirdyOverlayHeader(title: l10n.forkDailyGoalTitle),
+              ),
+              Expanded(
+                child:
+                    goal == null
+                        ? _empty(state.status)
+                        : RefreshIndicator(
+                          onRefresh: () async {
+                            ref.invalidate(dailyGoalProgressProvider);
+                            try {
+                              await ref.read(dailyGoalProgressProvider.future);
+                            } catch (_) {
+                              // The provider's error state displays the retry action.
+                            }
+                          },
+                          child: ListView(
+                            padding: const EdgeInsets.fromLTRB(
+                              BirdySpace.page,
+                              BirdySpace.s,
+                              BirdySpace.page,
+                              BirdySpace.xxl,
                             ),
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value:
-                                goal.total == 0
-                                    ? 0
-                                    : completed.length / goal.total,
-                            semanticsLabel: l10n.forkDailyGoalProgress(
-                              completed.length,
-                              goal.total,
-                            ),
-                          ),
-                          if (goal.total > 0 && completed.length == goal.total)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text(l10n.forkDailyGoalComplete),
-                            ),
-                        ],
-                        const SizedBox(height: 20),
-                        for (final species in goal.species)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: SpeciesTile(
-                              name: _name(species),
-                              scientificName: species.scientificName,
-                              avatar: SpeciesAvatar(
-                                image: switch (taxonomy?.assetImagePath(
-                                  species.scientificName,
-                                )) {
-                                  final String path => AssetImage(path),
-                                  null => null,
-                                },
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              _intro(goal, l10n, c),
+                              const SizedBox(height: BirdySpace.block),
+                              _progressBlock(
+                                goal,
+                                progress,
+                                completed,
+                                loadingProgress,
+                                l10n,
+                                c,
                               ),
-                              meta:
-                                  completed.contains(species.scientificName)
-                                      ? Text(l10n.detectionEvidenceHeard)
-                                      : null,
-                              count:
-                                  completed.contains(species.scientificName)
-                                      ? Icon(
-                                        AppIcons.checkCircle,
-                                        color: c.accentText,
-                                      )
-                                      : null,
-                              action: IconButton(
-                                icon: const Icon(AppIcons.swapHoriz),
-                                tooltip: l10n.forkDailyGoalReplace(
-                                  _name(species),
-                                ),
-                                onPressed:
-                                    _replacing
-                                        ? null
-                                        : () => _replace(goal, species),
-                              ),
-                              onTap:
-                                  () => SpeciesInfoOverlay.show(
-                                    context,
-                                    ref,
-                                    scientificName: species.scientificName,
-                                    commonName: _name(species),
+                              const SizedBox(height: BirdySpace.block),
+                              if (loadingProgress)
+                                for (final _ in goal.species) ...[
+                                  BirdySkeleton.box(
+                                    width: double.infinity,
+                                    height: BirdySizes.row,
+                                    radius: BirdyRadii.card,
                                   ),
-                            ),
-                          ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          icon: const Icon(AppIcons.hearing),
-                          label: Text(l10n.forkDailyGoalListen),
-                          onPressed:
-                              () => Navigator.of(context).push<void>(
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => const LiveScreen(
-                                        forceAutoStart: true,
+                                  const SizedBox(height: BirdySpace.s),
+                                ]
+                              else
+                                for (final species in goal.species)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: BirdySpace.s,
+                                    ),
+                                    child: _tile(
+                                      goal,
+                                      species,
+                                      completed.contains(
+                                        species.scientificName,
+                                      ),
+                                      taxonomy,
+                                      l10n,
+                                      c,
+                                    ),
+                                  ),
+                              const SizedBox(height: BirdySpace.l),
+                              Pressable(
+                                child: FilledButton.icon(
+                                  style: BirdyButtonStyles.primary(context),
+                                  icon: const Icon(AppIcons.hearing),
+                                  label: Text(l10n.forkDailyGoalListen),
+                                  onPressed:
+                                      () => Navigator.of(context).push<void>(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (_) => const LiveScreen(
+                                                forceAutoStart: true,
+                                              ),
+                                        ),
                                       ),
                                 ),
                               ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _tile(
+    DailyGoal goal,
+    DailyGoalSpecies species,
+    bool heard,
+    TaxonomyService? taxonomy,
+    AppLocalizations l10n,
+    BirdyColors c,
+  ) {
+    final imagePath = taxonomy?.assetImagePath(species.scientificName);
+    return SpeciesTile(
+      name: _name(species),
+      scientificName: species.scientificName,
+      avatar: SpeciesAvatar(
+        image: imagePath is String ? AssetImage(imagePath) : null,
+      ),
+      meta: heard ? Text(l10n.detectionEvidenceHeard) : null,
+      count: heard ? Icon(AppIcons.checkCircle, color: c.accentText) : null,
+      action: BirdyIconButton(
+        icon: AppIcons.swapHoriz,
+        semanticLabel: l10n.forkDailyGoalReplace(_name(species)),
+        onPressed: _replacing ? null : () => _replace(goal, species),
+      ),
+      onTap:
+          () => SpeciesInfoOverlay.show(
+            context,
+            ref,
+            scientificName: species.scientificName,
+            commonName: _name(species),
+          ),
+    );
+  }
+
+  Widget _intro(DailyGoal goal, AppLocalizations l10n, BirdyColors c) {
+    return BirdyBlock(
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      radius: BirdyRadii.hero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            DateFormat.yMMMMd(l10n.localeName).format(goal.day),
+            style: BirdyText.heading.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.s),
+          Text(
+            l10n.forkDailyGoalDescription(DailyGoalConfig.radiusKm),
+            style: BirdyText.bodyCompact.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.s),
+          Text(
+            '${l10n.forkDailyGoalLocation}: '
+            '${goal.latitude.toStringAsFixed(3)}, '
+            '${goal.longitude.toStringAsFixed(3)}',
+            style: BirdyText.caption.copyWith(color: c.text2),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _progressBlock(
+    DailyGoal goal,
+    AsyncValue<Set<String>> progress,
+    Set<String> completed,
+    bool loading,
+    AppLocalizations l10n,
+    BirdyColors c,
+  ) {
+    if (progress.hasError) {
+      return BirdyBlock(
+        tone: BirdyBlockTone.toCheck,
+        child: _retry(
+          l10n.forkDailyGoalError,
+          () => ref.invalidate(dailyGoalProgressProvider),
+          c,
+        ),
+      );
+    }
+    final label = l10n.forkDailyGoalProgress(completed.length, goal.total);
+    if (loading) {
+      return BirdyBlock(
+        tone: BirdyBlockTone.tonal,
+        padding: const EdgeInsets.all(BirdySpace.xl),
+        radius: BirdyRadii.hero,
+        child: Column(
+          key: const ValueKey('dailyGoalProgressSkeleton'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BirdySkeleton.text(BirdyText.title, placeholder: label),
+            const SizedBox(height: BirdySpace.m),
+            BirdySkeleton.box(
+              width: double.infinity,
+              height: BirdySizes.progressBar,
+              radius: BirdyRadii.pill,
+            ),
+          ],
+        ),
+      );
+    }
+    return BirdyBlock(
+      tone: BirdyBlockTone.tonal,
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      radius: BirdyRadii.hero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            label: label,
+            excludeSemantics: true,
+            child: Text(label, style: BirdyText.title.copyWith(color: c.text1)),
+          ),
+          const SizedBox(height: BirdySpace.m),
+          ExcludeSemantics(
+            child: BirdyProgressBar(
+              value: goal.total == 0 ? 0 : completed.length / goal.total,
+              color: c.accent,
+              track: birdyTrackOnTint(c),
+            ),
+          ),
+          if (goal.total > 0 && completed.length == goal.total) ...[
+            const SizedBox(height: BirdySpace.m),
+            Text(
+              l10n.forkDailyGoalComplete,
+              style: BirdyText.bodyCompact.copyWith(color: c.text1),
+            ),
+          ],
+        ],
       ),
     );
   }
 
   Widget _empty(DailyGoalStatus status) {
     final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
     if (status == DailyGoalStatus.loading || status == DailyGoalStatus.idle) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView(
+        key: const ValueKey('dailyGoalSkeleton'),
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          BirdySpace.page,
+          BirdySpace.s,
+          BirdySpace.page,
+          BirdySpace.xxl,
+        ),
+        children: [
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: BirdySizes.heroMinHeight - BirdySizes.row,
+            radius: BirdyRadii.hero,
+          ),
+          const SizedBox(height: BirdySpace.block),
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: BirdySizes.heroMinHeight / 2,
+            radius: BirdyRadii.hero,
+          ),
+          const SizedBox(height: BirdySpace.block),
+          for (var i = 0; i < 4; i++) ...[
+            BirdySkeleton.box(
+              width: double.infinity,
+              height: BirdySizes.row,
+              radius: BirdyRadii.card,
+            ),
+            const SizedBox(height: BirdySpace.s),
+          ],
+        ],
+      );
     }
     final message = switch (status) {
       DailyGoalStatus.needsLocation => l10n.forkDailyGoalNoLocation,
@@ -259,26 +395,59 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
       _ => l10n.forkDailyGoalError,
     };
     return ListView(
-      padding: const EdgeInsets.all(BirdySpace.l),
+      padding: const EdgeInsets.all(BirdySpace.page),
       children: [
-        Text(message),
-        const SizedBox(height: 16),
-        FilledButton(
-          onPressed: () => ref.read(dailyGoalProvider.notifier).ensureToday(),
-          child: Text(l10n.retry),
+        BirdyBlock(
+          tone: BirdyBlockTone.toCheck,
+          padding: const EdgeInsets.all(BirdySpace.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: BirdyText.body.copyWith(color: c.text1)),
+              const SizedBox(height: BirdySpace.l),
+              Wrap(
+                spacing: BirdySpace.s,
+                runSpacing: BirdySpace.s,
+                children: [
+                  Pressable(
+                    child: FilledButton(
+                      style: BirdyButtonStyles.tonal(context),
+                      onPressed:
+                          () =>
+                              ref
+                                  .read(dailyGoalProvider.notifier)
+                                  .ensureToday(),
+                      child: Text(l10n.retry),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _settings,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(64, BirdySizes.target),
+                      textStyle: BirdyText.labelCompact,
+                    ),
+                    child: Text(l10n.settings),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        TextButton(onPressed: _settings, child: Text(l10n.settings)),
       ],
     );
   }
 
-  Widget _retry(String message, VoidCallback retry) => Column(
+  Widget _retry(String message, VoidCallback retry, BirdyColors c) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(message),
-      TextButton(
-        onPressed: retry,
-        child: Text(AppLocalizations.of(context)!.retry),
+      Text(message, style: BirdyText.body.copyWith(color: c.text1)),
+      const SizedBox(height: BirdySpace.s),
+      Pressable(
+        child: FilledButton(
+          style: BirdyButtonStyles.tonal(context),
+          onPressed: retry,
+          child: Text(AppLocalizations.of(context)!.retry),
+        ),
       ),
     ],
   );

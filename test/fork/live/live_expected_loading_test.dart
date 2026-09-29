@@ -136,7 +136,7 @@ void main() {
     );
     // Entrance (BirdyEntrance.staggered) is a fixed-duration animation,
     // no pending future: it settles on its own.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
   }
 
   testWidgets(
@@ -148,7 +148,7 @@ void main() {
       await tester.pumpWidget(
         _app(LiveExpectedView(now: _morning, species: _five)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       loading.expectUnchanged(_Snapshot(tester));
 
       expect(find.text('Rougegorge'), findsOneWidget);
@@ -167,7 +167,7 @@ void main() {
           textScale: 1.3,
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       loading.expectUnchanged(_Snapshot(tester));
     },
   );
@@ -189,7 +189,7 @@ void main() {
       await tester.pumpWidget(
         _app(LiveExpectedView(now: _morning, species: [])),
       );
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byKey(const ValueKey('expected-row-0')), findsNothing);
       expect(find.byType(LiveExpectedTip), findsOneWidget);
     },

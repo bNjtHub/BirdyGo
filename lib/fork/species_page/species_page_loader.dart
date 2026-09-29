@@ -107,6 +107,21 @@ class SpeciesPageLoader {
     }
   }
 
+  /// Newest session with a confirmed, positioned contact of
+  /// [scientificName]: what « Envoyer à Faune-France » sends from the
+  /// species page (J6g-e). Null when there is none, or without the index.
+  Future<String?> lastConfirmedSession(String scientificName) async {
+    try {
+      final points = await (await _index()).mapPoints(
+        confirmedOnly: true,
+        scientificName: scientificName,
+      );
+      return points.isEmpty ? null : points.first.sessionId;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Marks or unmarks a recording as favorite (same list as the sound
   /// library).
   Future<void> setFavorite(String key, {required bool favorite}) async =>

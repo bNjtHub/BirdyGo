@@ -185,6 +185,15 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
+- Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule
+  boucle permise, et seulement tant que le chargement dure. Une bande de lumière diagonale (inclinée de
+  20°, large de la moitié de l'écran) balaie toutes les formes de gauche à droite en 1,1 s (ease-in-out,
+  `BirdyMotion.shimmerSweep`), puis repose 0,3 s (`shimmerPause`) : un cycle de 1,4 s. Un seul ticker
+  partagé (`BirdyShimmerClock`, compté par référence) pour tout l'écran : les formes sont synchronisées
+  et la bande se lit en coordonnées d'écran. Il démarre avec le premier squelette visible et s'arrête
+  avec le dernier (retiré de l'arbre, ou masqué par un `TickerMode`). Couleurs : `skeleton` de base,
+  `skeletonSheen` par-dessus (clair : blanc à 55 %, sombre : blanc à 12 %). Animations réduites : aucun
+  ticker, aplat `skeleton` fixe. Les formes et leurs dimensions ne changent pas.
 
 ## Mise en œuvre (J6a)
 
@@ -544,7 +553,7 @@ Règles :
   compare à la période « Tout », la Carte sait si l'index est vide, la Sonothèque regarde le filtre
   « Favoris seulement ». Le cas « rien encore » ne doit jamais s'afficher alors que d'autres réglages
   montreraient quelque chose.
-- Un chargement n'est pas un vide : indicateur de progression tant que les données ne sont pas là,
+- Un chargement n'est pas un vide : indicateur de progression ou squelettes (balayage de lumière) tant que les données ne sont pas là,
   puis l'écran vide en fondu (`BirdyEntrance`, fondu seul en animations réduites).
 - Textes : clé `<écran>EmptyTitle` pour le titre, `<écran>Empty` pour la phrase, dans `app_fr.arb`
   et `app_en.arb`. Les trois situations sont visibles dans la galerie du design system.

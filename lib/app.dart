@@ -26,7 +26,7 @@ import 'fork/splash/birdygo_launch_handoff.dart'; // FORK: visible launch handof
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
-import 'features/onboarding/onboarding_screen.dart';
+import 'fork/onboarding/fork_onboarding_screen.dart'; // FORK: BirdyGo onboarding replaces upstream's
 import 'features/home/home_screen.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -877,7 +877,7 @@ class _AppGate extends ConsumerWidget {
     // independently so a future settings reset of either flag re-shows the
     // onboarding flow.
     if (!onboardingComplete || !termsAccepted) {
-      return const OnboardingScreen();
+      return const ForkOnboardingScreen(); // FORK: BirdyGo onboarding (J6g-a)
     }
 
     return const HomeScreen();

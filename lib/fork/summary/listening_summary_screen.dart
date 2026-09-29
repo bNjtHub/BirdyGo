@@ -1,5 +1,5 @@
-/// « Bilan de l'écoute »: opens after « Arrêter » when the session was saved
-/// (fork/PLAN.md J6c). Wires [ListeningSummaryView] to the index, the
+/// « Bilan de l'écoute »: opens after « Arrêter » (fork/PLAN.md J6c), whether
+/// the session was saved or not (J6g-e). Wires [ListeningSummaryView] to the index, the
 /// geo-model and the other screens.
 library;
 
@@ -29,10 +29,26 @@ import 'listening_summary_view.dart';
 import 'summary_text.dart';
 
 class ListeningSummaryScreen extends ConsumerStatefulWidget {
-  const ListeningSummaryScreen({super.key, required this.session});
+  const ListeningSummaryScreen({
+    super.key,
+    required this.session,
+    this.saved = true,
+    this.fromLive = true,
+  });
 
-  /// The session just stopped, already saved.
+  /// The session to sum up.
   final LiveSession session;
+
+  /// False when the user turned off automatic saving (J6g-e): the Bilan then
+  /// shows what was heard with a « non enregistrée » note, offers to save it,
+  /// asks before leaving, and keeps the session out of the index and the
+  /// library until it is saved.
+  final bool saved;
+
+  /// Opened right after « Arrêter »: closing goes back to the first route.
+  /// False when opened from elsewhere (see `openListeningSummary`): closing
+  /// pops one level, back to where the user came from.
+  final bool fromLive;
 
   @override
   ConsumerState<ListeningSummaryScreen> createState() =>
@@ -42,6 +58,7 @@ class ListeningSummaryScreen extends ConsumerStatefulWidget {
 class _ListeningSummaryScreenState
     extends ConsumerState<ListeningSummaryScreen> {
   late LiveSession _session = widget.session;
+  late var _saved = widget.saved;
   ListeningSummary? _summary;
   String? _place;
   var _saving = false;
@@ -54,7 +71,7 @@ class _ListeningSummaryScreenState
     super.initState();
     _place = _session.locationName;
     unawaited(_load());
-    if (_place == null) unawaited(_resolvePlace());
+    if (_place == null && _saved) unawaited(_resolvePlace());
   }
 
   Future<void> _load() async {
@@ -62,7 +79,16 @@ class _ListeningSummaryScreenState
     final session = _session;
     ListeningSummary summary;
     try {
-      summary = await ref.read(listeningSummaryLoaderProvider)(session);
+      // An unsaved session stays out of the index: nothing counts yet.
+      summary =
+          _saved
+              ? await ref.read(listeningSummaryLoaderProvider)(session)
+              : ListeningSummary.of(
+                session,
+                verifiedBefore: {
+                  for (final d in session.detections) d.scientificName,
+                },
+              );
     } catch (error) {
       debugPrint('Listening summary without the index: $error');
       // Without the index, no species can be called a first.
@@ -115,6 +141,11 @@ class _ListeningSummaryScreenState
   Future<void> _reload() async {
     final saved = await ref.read(sessionRepositoryProvider).load(_session.id);
     if (!mounted) return;
+    if (!_saved) {
+      // The review may have saved it meanwhile.
+      if (saved == null) return;
+      _saved = true;
+    }
     if (saved == null) {
       // Deleted from the session review: nothing left to sum up.
       _done();
@@ -220,8 +251,79 @@ class _ListeningSummaryScreenState
     if (mounted) await _reload();
   }
 
+  void _close() {
+    final navigator = Navigator.of(context);
+    if (widget.fromLive) {
+      navigator.popUntil((route) => route.isFirst);
+    } else {
+      navigator.pop();
+    }
+  }
+
   void _done() {
-    if (!_saving) Navigator.of(context).popUntil((route) => route.isFirst);
+    if (_saving) return;
+    if (_saved) {
+      _close();
+    } else {
+      unawaited(_confirmLeaveUnsaved());
+    }
+  }
+
+  /// Same choice as the session review's exit for a never-saved session.
+  Future<void> _confirmLeaveUnsaved() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(l10n.forkSummaryUnsavedTitle),
+            content: Text(l10n.sessionUnsavedSession),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(ctx).colorScheme.error,
+                ),
+                onPressed: () => Navigator.of(ctx).pop('discard'),
+                child: Text(l10n.sessionDiscard),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop('save'),
+                child: Text(l10n.sessionSave),
+              ),
+            ],
+          ),
+    );
+    if (!mounted) return;
+    if (result == 'save') {
+      if (await _saveSession() && mounted) _close();
+    } else if (result == 'discard') {
+      // Never saved, but the recordings are on disk already.
+      await ref.read(sessionRepositoryProvider).delete(_session.id);
+      ref.invalidate(sessionListProvider);
+      if (mounted) _close();
+    }
+  }
+
+  /// Keeps an unsaved session: same write as the session review's save.
+  Future<bool> _saveSession() async {
+    if (_saving) return false;
+    setState(() => _saving = true);
+    try {
+      await ref.read(sessionRepositoryProvider).save(_session);
+      ref.invalidate(sessionListProvider);
+      _saved = true;
+      if (mounted) {
+        await _load();
+        if (_place == null && mounted) unawaited(_resolvePlace());
+      }
+      return true;
+    } catch (error) {
+      debugPrint('Could not save the listening: $error');
+      if (mounted) _showSaveFailure();
+      return false;
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _share(
@@ -286,21 +388,33 @@ class _ListeningSummaryScreenState
               scientificName: s.scientificName,
               commonName: nameOf(s),
             ),
+        // The quick review reads the index and the edits below write the
+        // session: none of them before it is saved.
         onCheck:
-            _saving ? null : (keys) => _push(QuickReviewScreen(onlyKeys: keys)),
+            _saving || !_saved
+                ? null
+                : (keys) => _push(QuickReviewScreen(onlyKeys: keys)),
         onDetails:
             _saving
                 ? null
-                : () => _push(SessionReviewScreen(session: _session)),
+                : () => _push(
+                  SessionReviewScreen(session: _session, autoSaved: _saved),
+                ),
         onAddObservation:
-            summary.isRecording || _saving ? null : _addObservation,
+            summary.isRecording || _saving || !_saved ? null : _addObservation,
         savingObservation: _savingObservation,
         // A file analysis never counts: nothing to mark.
         onMarkRecording:
-            _session.type == SessionType.fileUpload || _saving
+            _session.type == SessionType.fileUpload || _saving || !_saved
                 ? null
                 : _markRecording,
-        footer: LpoSendButton(session: _session),
+        notice:
+            _saved
+                ? null
+                : UnsavedListeningNotice(
+                  onSave: _saving ? null : () => unawaited(_saveSession()),
+                ),
+        footer: _saved ? LpoSendButton(session: _session) : null,
       ),
     );
   }

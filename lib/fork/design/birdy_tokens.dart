@@ -171,6 +171,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.probable,
     required this.toCheck,
     required this.skeleton,
+    required this.skeletonSheen,
   });
 
   final Brightness brightness;
@@ -241,9 +242,12 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
-  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
-  /// loops, so no shimmer or pulse).
+  /// Muted fill of a loading skeleton.
   final Color skeleton;
+
+  /// Light band sweeping over the skeletons (the shimmer, `BirdyShimmer`):
+  /// translucent, painted over [skeleton]. Static fill with reduced motion.
+  final Color skeletonSheen;
 
   final LevelColors sure;
   final LevelColors probable;
@@ -311,6 +315,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
     skeleton: Color(0xFFD6DCD2),
+    skeletonSheen: Color(0x8CFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -352,6 +357,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
     skeleton: Color(0xFF29425F),
+    skeletonSheen: Color(0x1FFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -409,6 +415,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
       skeleton: c(skeleton, other.skeleton),
+      skeletonSheen: c(skeletonSheen, other.skeletonSheen),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
@@ -608,4 +615,44 @@ abstract final class BirdyAlpha {
 
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;
+}
+
+/// Contact map markers (J6g-f). The map tiles stay light in both themes, so
+/// the marker disc and its ring do not follow the theme: they must read on
+/// any tile, and on the dark placeholder shown before tiles are allowed.
+abstract final class BirdyMapStyle {
+  /// Disc under a species photo and border of the cluster bubble.
+  static const Color disc = Color(0xFFFFFFFF);
+
+  /// Soft drop shadow under a marker (Encre at 18 %).
+  static const Color shadow = Color(0x2E13233A);
+
+  /// Contact-count badge (Encre with Brume text: 14:1 on any tile).
+  static const Color badge = BirdyBrand.ink;
+  static const Color onBadge = BirdyBrand.mist;
+
+  /// Text on the Martin-pêcheur cluster disc.
+  static const Color onCluster = BirdyBrand.ink;
+
+  /// Species marker: disc, ring, photo and badge height.
+  static const double markerDisc = 44;
+  static const double markerRing = 3;
+  static const double markerPhoto = 34;
+  static const double badgeHeight = 22;
+
+  /// Cluster bubble diameter and border.
+  static const double cluster = 56;
+  static const double clusterBorder = 3;
+
+  /// User position dot and its border.
+  static const double userDot = 14;
+  static const double userDotBorder = 3;
+
+  /// Ring around a species avatar in the map sheets.
+  static const double avatarRing = 2;
+
+  /// Shadow lifting a marker off the tiles.
+  static List<BoxShadow> get lift => const [
+    BoxShadow(color: shadow, offset: Offset(0, 4), blurRadius: 12),
+  ];
 }

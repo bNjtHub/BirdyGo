@@ -221,7 +221,7 @@ void main() {
   ) async {
     await pump(tester);
     await tester.tap(tab('Profil'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     // Swiping right from Profil enters the map.
     await tester.fling(find.byType(PageView), const Offset(300, 0), 1000);
     await settleOnMap(tester);
@@ -268,7 +268,7 @@ void main() {
     await tester.pump();
     expect(selected(tester), 3);
     expect(find.byType(ProfileScreen), findsOneWidget);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     expect(find.byType(ContactMapScreen, skipOffstage: false), findsNothing);
   });
 
