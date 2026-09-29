@@ -673,7 +673,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                     foregroundColor: c.onAccent,
                     minimumSize: const Size(64, BirdySizes.listen),
                     shape: const StadiumBorder(),
-                    textStyle: BirdyText.label.copyWith(fontSize: 20),
+                    textStyle: BirdyText.labelLarge,
                     iconSize: 22,
                   ),
                   onPressed: _next,
@@ -744,7 +744,7 @@ class _StreakPill extends StatelessWidget {
     final c = BirdyColors.of(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 30),
-      padding: const EdgeInsets.fromLTRB(4, 2, 12, 2),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.xs, BirdySpace.xxs, BirdySpace.m, BirdySpace.xxs),
       decoration: BoxDecoration(
         color: c.oriole,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -754,15 +754,15 @@ class _StreakPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 20,
-            height: 20,
+            width: BirdySpace.xl,
+            height: BirdySpace.xl,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: c.surface1,
               shape: BoxShape.circle,
             ),
             child: QuizLoop(
-              period: const Duration(milliseconds: 1600),
+              period: QuizMotion.pulse,
               builder:
                   (context, t, child) => Opacity(
                     opacity: quizKeyframes(
@@ -775,7 +775,7 @@ class _StreakPill extends StatelessWidget {
                   ),
               child: Icon(
                 AppIcons.quizSpark,
-                size: 13,
+                size: BirdyGlyph.xs,
                 fill: 1,
                 color: c.oriole,
               ),
@@ -816,7 +816,7 @@ class _ScoreChip extends StatelessWidget {
       excludeSemantics: true,
       child: Container(
         constraints: const BoxConstraints(minHeight: 30),
-        padding: const EdgeInsets.fromLTRB(10, 0, 12, 0),
+        padding: const EdgeInsets.fromLTRB(BirdySpace.cozy, 0, BirdySpace.m, 0),
         decoration: BoxDecoration(
           color: c.sure.background,
           borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -824,7 +824,7 @@ class _ScoreChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(AppIcons.quizCheck, size: 16, color: c.sure.foreground),
+            Icon(AppIcons.quizCheck, size: BirdyGlyph.m, color: c.sure.foreground),
             const SizedBox(width: BirdySpace.xs),
             Text(
               '$right',

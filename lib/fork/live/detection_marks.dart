@@ -356,7 +356,7 @@ class _DetectionMarksState extends State<DetectionMarks>
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final labelStyle = BirdyText.labelCompact.copyWith(
-      fontSize: 13,
+      fontSize: BirdyText.captionSize,
       color: c.text1,
     );
     final textScaler = MediaQuery.textScalerOf(context);

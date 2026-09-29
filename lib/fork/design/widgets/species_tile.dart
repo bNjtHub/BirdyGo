@@ -55,7 +55,7 @@ class SpeciesTile extends StatelessWidget {
     final body = Row(
       children: [
         avatar,
-        const SizedBox(width: 10),
+        const SizedBox(width: BirdySpace.cozy),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +71,7 @@ class SpeciesTile extends StatelessWidget {
                   scientificName!,
                   style: BirdyText.latinCompact.copyWith(
                     color: c.text2,
-                    fontSize: 13,
+                    fontSize: BirdyText.captionSize,
                   ),
                 ),
               if (meta != null) ...[
@@ -97,7 +97,7 @@ class SpeciesTile extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: BirdySpace.s,
-            vertical: compact ? 6 : BirdySpace.s,
+            vertical: compact ? BirdySpace.snug : BirdySpace.s,
           ),
           child: Row(
             children: [

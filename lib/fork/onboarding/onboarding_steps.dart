@@ -303,7 +303,7 @@ class OnboardingNameStep extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: BirdySpace.xs / 4),
+                          padding: const EdgeInsets.only(top: BirdySpace.xs / BirdySpace.xs),
                           child: Icon(
                             AppIcons.lockOutline,
                             size: BirdySizes.inlineIcon,
@@ -374,7 +374,7 @@ class BirdyBirdStep extends ConsumerStatefulWidget {
   final bool confirmation;
 
   /// How long the welcome stays before the next page.
-  static const Duration welcomeTime = Duration(milliseconds: 1500);
+  static const Duration welcomeTime = BirdyMotion.welcomeBird;
 
   @override
   ConsumerState<BirdyBirdStep> createState() => _BirdyBirdStepState();

@@ -120,15 +120,15 @@ class _Chevron extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 32,
-    height: 32,
+    width: BirdySpace.xxxl,
+    height: BirdySpace.xxxl,
     decoration: BoxDecoration(
       color: BirdyBrand.ink.withValues(alpha: 0.55),
       shape: BoxShape.circle,
     ),
     child: Icon(
       expanded ? AppIcons.expandLess : AppIcons.expandMore,
-      size: 22,
+      size: BirdyGlyph.xxl,
       color: color,
     ),
   );

@@ -7,6 +7,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 
 /// Bars for [values], with a few axis [labels] under them.
 class ActivityBars extends StatelessWidget {
@@ -109,13 +110,13 @@ class ActivityBars extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: BirdySpace.xs),
           LayoutBuilder(
             builder: (context, constraints) {
               final slot = constraints.maxWidth / values.length;
               final keys = labels.keys.toList()..sort();
               return SizedBox(
-                height: 16,
+                height: BirdySpace.l,
                 child: Stack(
                   children: [
                     for (var i = 0; i < keys.length; i++)

@@ -73,7 +73,7 @@ class LiveControlBar extends StatelessWidget {
                                     phase == LiveControlPhase.paused)
                             ? const SizedBox.shrink()
                             : const Padding(
-                              padding: EdgeInsets.only(bottom: 10),
+                              padding: EdgeInsets.only(bottom: BirdySpace.cozy),
                               child: BirdyEntrance(child: _ReplayToast()),
                             ),
               ),
@@ -121,7 +121,7 @@ class _StartButton extends StatelessWidget {
                 ? SizedBox.square(
                   dimension: 20,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2,
+                    strokeWidth: BirdyStroke.regular,
                     color: c.text2,
                   ),
                 )
@@ -197,8 +197,8 @@ class _ReplayToast extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(AppIcons.volumeDown, size: 20, color: c.accentText),
-              const SizedBox(width: 10),
+              Icon(AppIcons.volumeDown, size: BirdyGlyph.xl, color: c.accentText),
+              const SizedBox(width: BirdySpace.cozy),
               Expanded(
                 child: Text(
                   l10n.forkLiveReplayToast,

@@ -55,7 +55,7 @@ class BirdySwitchRow extends StatelessWidget {
                       color: c.tonal,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, size: 22, color: c.accentText, fill: 1),
+                    child: Icon(icon, size: BirdyGlyph.xxl, color: c.accentText, fill: 1),
                   ),
                   const SizedBox(width: BirdySpace.m),
                 ],

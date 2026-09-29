@@ -211,13 +211,13 @@ class HomeHero extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: c.isDark ? c.surface1 : Colors.white,
-                      width: 4,
+                      color: c.isDark ? c.surface1 : BirdyBrand.white,
+                      width: BirdyStroke.chunky,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: tint.accent.withValues(alpha: 0.35),
-                        blurRadius: 18,
+                        blurRadius: BirdyBlur.xl,
                         offset: const Offset(0, 6),
                       ),
                     ],
@@ -364,8 +364,8 @@ class _ReliabilityBadgeSkeleton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BirdySkeleton.box(width: 12, height: 12, radius: BirdyRadii.thumb),
-          const SizedBox(width: 5),
+          BirdySkeleton.box(width: BirdySpace.m, height: BirdySpace.m, radius: BirdyRadii.thumb),
+          const SizedBox(width: BirdySpace.tight),
           // « Sûr », the shortest level label: a longer one only grows
           // this pill a little once real, never shrinks it.
           BirdySkeleton.text(BirdyText.badge, placeholder: 'Sûr'),
@@ -745,7 +745,7 @@ class StatusBlock extends StatelessWidget {
                         style: BirdyText.caption.copyWith(color: c.text2),
                       ),
                     ),
-                    Icon(AppIcons.chevronRight, size: 20, color: c.text2),
+                    Icon(AppIcons.chevronRight, size: BirdyGlyph.xl, color: c.text2),
                   ],
                 ),
               ],
@@ -847,7 +847,7 @@ class StatusBlockSkeleton extends StatelessWidget {
                           maxLines: null,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      const SizedBox(width: BirdySpace.xl),
                     ],
                   ),
                 ],
@@ -1005,7 +1005,7 @@ class TodayBlock extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(AppIcons.chevronRight, size: 20, color: c.accentText),
+                  Icon(AppIcons.chevronRight, size: BirdyGlyph.xl, color: c.accentText),
                 ],
               ),
             ),
@@ -1046,7 +1046,7 @@ class TodayEmptyBlock extends StatelessWidget {
               color: birdyTrackOnTint(c),
               shape: BoxShape.circle,
             ),
-            child: Icon(AppIcons.hearing, size: 36, color: c.accentText),
+            child: Icon(AppIcons.hearing, size: BirdyGlyph.disc36, color: c.accentText),
           ),
           const SizedBox(width: BirdySpace.l),
           Expanded(
@@ -1161,7 +1161,7 @@ class TodayBlockSkeleton extends StatelessWidget {
                       placeholder: l10n.forkHomeTodayOpen,
                     ),
                   ),
-                  const SizedBox(width: 20, height: 20),
+                  const SizedBox(width: BirdySpace.xl, height: BirdySpace.xl),
                 ],
               ),
             ),

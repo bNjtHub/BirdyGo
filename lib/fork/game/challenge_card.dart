@@ -90,7 +90,7 @@ class ChallengeCard extends StatelessWidget {
       color: background,
       padding: const EdgeInsets.symmetric(
         horizontal: BirdySpace.l,
-        vertical: 14,
+        vertical: BirdySpace.comfy,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,7 +107,7 @@ class ChallengeCard extends StatelessWidget {
                 child: Center(
                   child:
                       done
-                          ? Icon(AppIcons.check, size: 22, color: c.onOriole)
+                          ? Icon(AppIcons.check, size: BirdyGlyph.xxl, color: c.onOriole)
                           : challengeGlyph(challenge.kind, c.accentText, 22),
                 ),
               ),
@@ -196,16 +196,16 @@ class _Progress extends StatelessWidget {
         children: [
           for (var i = 0; i < challenge.target; i++)
             Container(
-              width: 14,
-              height: 14,
-              margin: const EdgeInsets.only(left: 4),
+              width: BirdySpace.comfy,
+              height: BirdySpace.comfy,
+              margin: const EdgeInsets.only(left: BirdySpace.xs),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: i < value ? c.accent : null,
                 border:
                     i < value
                         ? null
-                        : Border.all(color: c.borderStrong, width: 2),
+                        : Border.all(color: c.borderStrong, width: BirdyStroke.regular),
               ),
             ),
         ],

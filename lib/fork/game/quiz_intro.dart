@@ -103,7 +103,7 @@ class QuizIntro extends StatelessWidget {
                               TextSpan(text: l10n.forkQuizTitleWord),
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
-                                child: SizedBox(width: 2),
+                                child: SizedBox(width: BirdySpace.xxs),
                               ),
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
@@ -187,12 +187,12 @@ class _IntroWell extends StatelessWidget {
                               color: birds[i].tint.accent.withValues(
                                 alpha: 0.35,
                               ),
-                              blurRadius: 3,
+                              blurRadius: BirdyBlur.s,
                               spreadRadius: 3,
                             ),
                             const BoxShadow(
-                              color: Color(0x40000000),
-                              blurRadius: 16,
+                              color: BirdyBrand.shadowSoft,
+                              blurRadius: BirdyBlur.l,
                               offset: Offset(0, 6),
                             ),
                           ],
@@ -220,14 +220,14 @@ class _IntroWell extends StatelessWidget {
                         label:
                             AppLocalizations.of(context)!.forkQuizIntroBubble,
                       ),
-                      SizedBox(height: 10 * k),
+                      SizedBox(height: BirdySpace.cozy * k),
                       QuizBounce(
                         child: QuizMysteryDisc(
-                          size: 128 * k,
+                          size: BirdySizes.quizIntroBird * k,
                           silhouette: 104 * k,
                         ),
                       ),
-                      SizedBox(height: 14 * k),
+                      SizedBox(height: BirdySpace.comfy * k),
                       QuizBars(
                         heights: const [14, 26, 20, 12, 6],
                         colors: BirdyQuizColors.barsIntro,
@@ -235,7 +235,7 @@ class _IntroWell extends StatelessWidget {
                           for (var i = 0; i < 5; i++)
                             QuizMotion.barIntroStep * i,
                         ],
-                        width: 6,
+                        width: BirdySpace.snug,
                         gap: 5,
                         period: QuizMotion.barIntro,
                       ),
@@ -303,8 +303,8 @@ class _StepCards extends StatelessWidget {
               child: Transform.rotate(
                 angle: steps[i].tilt,
                 child: QuizPop(
-                  duration: const Duration(milliseconds: 380),
-                  delay: Duration(milliseconds: 120 + i * 100),
+                  duration: BirdyMotion.podiumPopIn,
+                  delay: BirdyMotion.introCardDelay(i),
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(
                       BirdySpace.xs,
@@ -314,13 +314,13 @@ class _StepCards extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: steps[i].bg,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(BirdyRadii.card),
                     ),
                     child: Column(
                       children: [
                         Container(
-                          width: 26,
-                          height: 26,
+                          width: BirdyGlyph.x4l,
+                          height: BirdyGlyph.x4l,
                           alignment: Alignment.center,
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle,
@@ -334,10 +334,10 @@ class _StepCards extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: BirdySpace.snug),
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: BirdyGlyph.disc44,
+                          height: BirdyGlyph.disc44,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: c.surface1,
@@ -345,16 +345,16 @@ class _StepCards extends StatelessWidget {
                           ),
                           child: Icon(
                             steps[i].icon,
-                            size: 26,
+                            size: BirdyGlyph.x4l,
                             color: steps[i].ink,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: BirdySpace.snug),
                         Text(
                           steps[i].title,
                           style: BirdyText.species.copyWith(color: c.text1),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: BirdySpace.xxs),
                         Text(
                           steps[i].body,
                           textAlign: TextAlign.center,
@@ -412,7 +412,7 @@ class _IntroBadgeCard extends StatelessWidget {
                 tier: badge.tier,
                 icon: badgeIcon(badge.kind),
                 glyph: badgeGlyph(badge.kind),
-                size: 44,
+                size: BirdyGlyph.disc44,
               ),
             ),
           ),
@@ -437,16 +437,16 @@ class _IntroBadgeCard extends StatelessWidget {
                         : l10n.forkQuizNextFeather(badge.tier + 1),
                     style: BirdyText.species.copyWith(
                       color: c.text1,
-                      fontSize: 20,
+                      fontSize: BirdyText.ctaSize,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: BirdySpace.snug),
                 if (segmented)
                   QuizProgressSegments(total: next, filled: badge.value)
                 else
                   QuizBadgeBar(value: toNextTier(badge)),
-                const SizedBox(height: 6),
+                const SizedBox(height: BirdySpace.snug),
                 Text(
                   next == null
                       ? l10n.forkBadgeAllTiers
@@ -479,8 +479,8 @@ class _QuizTitleMark extends StatelessWidget {
     return Transform.rotate(
       angle: -8 * math.pi / 180,
       child: Container(
-        width: 40,
-        height: 40,
+        width: BirdyGlyph.disc40,
+        height: BirdyGlyph.disc40,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: BirdyBrand.oriole,
@@ -517,7 +517,7 @@ class _GoButton extends StatelessWidget {
             foregroundColor: c.onAccent,
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
-            textStyle: BirdyText.label.copyWith(fontSize: 20),
+            textStyle: BirdyText.labelLarge,
             iconSize: 32,
           ),
           onPressed: onPressed,
@@ -557,17 +557,17 @@ class QuizSoundSwitch extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: BirdySizes.target),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 8, 0),
+                padding: const EdgeInsets.fromLTRB(BirdySpace.comfy, 0, BirdySpace.s, 0),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       on ? AppIcons.volumeUpRounded : AppIcons.volumeOffRounded,
-                      size: 22,
+                      size: BirdyGlyph.xxl,
                       fill: 1,
                       color: on ? c.accentText : c.text2,
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: BirdySpace.cozy),
                     Flexible(
                       child: Text(
                         on ? l10n.forkQuizEffectsOn : l10n.forkQuizEffectsOff,
@@ -576,13 +576,13 @@ class QuizSoundSwitch extends StatelessWidget {
                         style: BirdyText.labelCompact.copyWith(color: c.text1),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: BirdySpace.cozy),
                     AnimatedContainer(
                       duration: reduced ? Duration.zero : QuizMotion.knob,
                       curve: QuizMotion.out,
-                      width: 44,
-                      height: 28,
-                      padding: const EdgeInsets.all(3),
+                      width: BirdyGlyph.disc44,
+                      height: BirdyGlyph.x5l,
+                      padding: const EdgeInsets.all(BirdySpace.thin),
                       decoration: BoxDecoration(
                         color: on ? c.accent : c.border,
                         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -593,8 +593,8 @@ class QuizSoundSwitch extends StatelessWidget {
                         alignment:
                             on ? Alignment.centerRight : Alignment.centerLeft,
                         child: Container(
-                          width: 22,
-                          height: 22,
+                          width: BirdySizes.switchKnob,
+                          height: BirdySizes.switchKnob,
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: BirdyQuizColors.knob,
@@ -602,7 +602,7 @@ class QuizSoundSwitch extends StatelessWidget {
                               BoxShadow(
                                 color: BirdyQuizColors.knobShadow,
                                 offset: Offset(0, 1),
-                                blurRadius: 3,
+                                blurRadius: BirdyBlur.s,
                               ),
                             ],
                           ),

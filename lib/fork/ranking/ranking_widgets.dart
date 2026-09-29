@@ -293,7 +293,7 @@ class _PodiumStep extends StatelessWidget {
                       colors: [BirdyBrand.oriole, c.accent, tint.accent],
                     ),
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(BirdySpace.cozy),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -387,7 +387,7 @@ class _RankingBarState extends State<_RankingBar> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(BirdyRadii.pill),
       child: SizedBox(
-        height: 8,
+        height: BirdySpace.s,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -454,7 +454,7 @@ class RankingRow extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 28,
+                  width: BirdyGlyph.x5l,
                   child: Text(
                     '$rank',
                     style: BirdyText.label.copyWith(color: c.rarityMuted),
@@ -463,12 +463,12 @@ class RankingRow extends StatelessWidget {
                 _RingedAvatar(
                   image: species.image,
                   tint: tint,
-                  size: 36,
+                  size: BirdyGlyph.disc36,
                   discColor: tint.cardBackground(Theme.of(context).brightness),
                   ringColor: tint.accent.withValues(alpha: 0.5),
                   ringWidth: 1.5,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: BirdySpace.cozy),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,7 +486,7 @@ class RankingRow extends StatelessWidget {
                             const NoveltyPill(kind: NoveltyKind.newThisYear),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: BirdySpace.snug),
                       _RankingBar(fraction: fraction, index: index, tint: tint),
                     ],
                   ),

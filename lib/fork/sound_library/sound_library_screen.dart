@@ -315,7 +315,7 @@ class _Hero extends StatelessWidget {
                 color: c.surface1,
                 shape: BoxShape.circle,
               ),
-              child: Icon(AppIcons.graphicEq, size: 36, color: c.accentText),
+              child: Icon(AppIcons.graphicEq, size: BirdyGlyph.disc36, color: c.accentText),
             ),
             const SizedBox(width: BirdySpace.l),
             Expanded(

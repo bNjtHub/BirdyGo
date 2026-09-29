@@ -107,7 +107,7 @@ class SpeciesCard extends StatelessWidget {
     final nameHeight = twoLineTextHeight(context, effectiveNameStyle);
 
     Widget content = Padding(
-      padding: EdgeInsets.all(hero ? BirdySpace.l : 10),
+      padding: EdgeInsets.all(hero ? BirdySpace.l : BirdySpace.cozy),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         // Hero cards size to their own content (no bounded height to fill);
@@ -116,7 +116,7 @@ class SpeciesCard extends StatelessWidget {
         mainAxisSize: hero ? MainAxisSize.min : MainAxisSize.max,
         children: [
           visual,
-          const SizedBox(height: 6),
+          const SizedBox(height: BirdySpace.snug),
           SizedBox(
             height: nameHeight,
             child: Align(
@@ -130,7 +130,7 @@ class SpeciesCard extends StatelessWidget {
             ),
           ),
           if (caption != null) ...[
-            if (hero) const SizedBox(height: 6) else const Spacer(),
+            if (hero) const SizedBox(height: BirdySpace.snug) else const Spacer(),
             DefaultTextStyle.merge(
               style: BirdyText.caption.copyWith(
                 color: isMystery || !c.isDark ? c.text2 : c.text1,
@@ -145,7 +145,7 @@ class SpeciesCard extends StatelessWidget {
       content = Stack(
         children: [
           content,
-          PositionedDirectional(top: 10, end: 10, child: corner!),
+          PositionedDirectional(top: BirdySpace.cozy, end: BirdySpace.cozy, child: corner!),
         ],
       );
     }

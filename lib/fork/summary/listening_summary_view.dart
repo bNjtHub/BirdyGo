@@ -308,7 +308,7 @@ class _Numbers extends StatelessWidget {
                           text: ' $unit',
                           style: BirdyText.label.copyWith(
                             color: c.text1,
-                            fontSize: 15,
+                            fontSize: BirdyText.emphasisSize,
                           ),
                         ),
                     ],
@@ -463,7 +463,7 @@ class _NoveltyRow extends StatelessWidget {
             SpeciesAvatar(
               image: image,
               tint: SpeciesAccents.tintOf(species.scientificName),
-              size: 48,
+              size: BirdyGlyph.disc48,
               muted: muted,
             ),
             const SizedBox(width: BirdySpace.m),
@@ -487,7 +487,7 @@ class _NoveltyRow extends StatelessWidget {
             ),
             if (onTap != null) ...[
               const SizedBox(width: BirdySpace.s),
-              Icon(AppIcons.chevronRight, size: 24, color: c.text2),
+              Icon(AppIcons.chevronRight, size: BirdyGlyph.x3l, color: c.text2),
             ],
           ],
         ),
@@ -596,7 +596,7 @@ class _StripItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(BirdyRadii.thumb),
         child: Padding(
-          padding: const EdgeInsetsDirectional.only(end: 10),
+          padding: const EdgeInsetsDirectional.only(end: BirdySpace.cozy),
           child: SizedBox(
             width: BirdySizes.target,
             child: Column(
@@ -615,7 +615,7 @@ class _StripItem extends StatelessWidget {
                           child: SpeciesAvatar(
                             image: image,
                             tint: tint,
-                            size: 40,
+                            size: BirdyGlyph.disc40,
                           ),
                         ),
                       ),
@@ -625,8 +625,8 @@ class _StripItem extends StatelessWidget {
                         top: 0,
                         end: 0,
                         child: Container(
-                          width: 8,
-                          height: 8,
+                          width: BirdySpace.s,
+                          height: BirdySpace.s,
                           decoration: BoxDecoration(
                             color: dotColor,
                             shape: BoxShape.circle,

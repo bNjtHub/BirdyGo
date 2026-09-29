@@ -59,7 +59,7 @@ class BirdyListBlock extends StatelessWidget {
               ),
             ),
           for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) Divider(height: 1, thickness: 1, color: c.line),
+            if (i > 0) Divider(height: BirdyStroke.hairline, thickness: BirdyStroke.hairline, color: c.line),
             children[i],
           ],
         ],

@@ -119,7 +119,7 @@ class QuizResult extends StatelessWidget {
                     ),
                   ),
                   onPressed: onAgain,
-                  icon: const Icon(AppIcons.restartAlt, size: 22),
+                  icon: const Icon(AppIcons.restartAlt, size: BirdyGlyph.xxl),
                   label: Text(
                     l10n.forkQuizAgain,
                     textAlign: TextAlign.center,
@@ -159,7 +159,7 @@ class _ScoreCard extends StatelessWidget {
     return Container(
       key: const ValueKey('quiz-score-card'),
       clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.xl, BirdySpace.xl, BirdySpace.xl, BirdySpace.roomy),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
         gradient: RadialGradient(
@@ -176,7 +176,7 @@ class _ScoreCard extends StatelessWidget {
             label: l10n.forkQuizStars(stars),
             child: ExcludeSemantics(
               child: SizedBox(
-                height: 56,
+                height: BirdyGlyph.disc56,
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
@@ -193,7 +193,7 @@ class _ScoreCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         for (var i = 0; i < 3; i++) ...[
-                          if (i > 0) const SizedBox(width: 6),
+                          if (i > 0) const SizedBox(width: BirdySpace.snug),
                           QuizPop(
                             duration: QuizMotion.star,
                             delay:
@@ -518,7 +518,7 @@ class _MedalCard extends StatelessWidget {
             )
             : GameConfig.badgeMedals[badge.tier - 1].tone;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l, vertical: BirdySpace.comfy),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(BirdyRadii.card),
@@ -531,7 +531,7 @@ class _MedalCard extends StatelessWidget {
                 '${l10n.forkBadgeTier(badge.tier)}',
             child: ExcludeSemantics(child: medal),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: BirdySpace.comfy),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -558,7 +558,7 @@ class _MedalCard extends StatelessWidget {
                           background: c.oriole,
                           leading: Icon(
                             AppIcons.quizSpark,
-                            size: 14,
+                            size: BirdyGlyph.s,
                             color: c.onOriole,
                             fill: 1,
                           ),
@@ -566,13 +566,13 @@ class _MedalCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: BirdySpace.snug),
                 QuizBadgeBar(
                   key: const ValueKey('quiz-medal-bar'),
                   value: toNextTier(badge),
                   from: newTier ? 0 : toNextTier(before),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: BirdySpace.snug),
                 Text.rich(
                   TextSpan(
                     style: BirdyText.caption.copyWith(color: c.text2),

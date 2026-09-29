@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import '../design/birdy_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
@@ -114,7 +115,7 @@ Future<void> runBirdyGoWarmUp(
 /// Waits for the next frame to be drawn, or at most 100 ms (no frame comes
 /// while the app is in the background).
 Future<void> birdyGoFramePause() => SchedulerBinding.instance.endOfFrame
-    .timeout(const Duration(milliseconds: 100), onTimeout: () {});
+    .timeout(BirdyMotion.framePauseTimeout, onTimeout: () {});
 
 /// The loading tasks of the app, read from its provider [container]. They
 /// are the same futures the home screen warms up, so nothing loads twice.

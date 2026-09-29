@@ -265,7 +265,7 @@ class SpeciesColorDot extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: ring, width: 3),
+            border: Border.all(color: ring, width: BirdyStroke.thick),
           ),
         ),
       ),
@@ -328,7 +328,7 @@ class SingingBars extends StatefulWidget {
 
 class _SingingBarsState extends State<SingingBars>
     with SingleTickerProviderStateMixin {
-  static const Duration _period = Duration(milliseconds: 900);
+  static const Duration _period = BirdyMotion.singingBars;
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: _period,

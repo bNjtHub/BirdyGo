@@ -67,7 +67,7 @@ class BirdyGoWordmark extends StatelessWidget {
                     margin,
                     0,
                     margin,
-                    fs * nunitoXHeight / 2 - dot / 2,
+                    fs * nunitoXHeight / BirdySpace.xxs - dot / BirdySpace.xxs,
                   ),
                   child: SizedBox.square(
                     dimension: dot,

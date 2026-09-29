@@ -31,6 +31,11 @@ const double _kLargeTracking = -0.01;
 /// Styles carry no color: they inherit it from the surrounding
 /// [DefaultTextStyle], or take one from [BirdyColors].
 abstract final class BirdyText {
+  /// Font sizes of the few inline overrides (caption, emphasis, call-to-action).
+  static const double captionSize = 13;
+  static const double emphasisSize = 15;
+  static const double ctaSize = 20;
+
   /// Display 34, Nunito 800.
   static const TextStyle display = TextStyle(
     fontFamily: BirdyFonts.rounded,

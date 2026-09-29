@@ -54,7 +54,7 @@ Future<void> applyListeningModeChoice(
         backgroundColor: c.surface3,
         content: Row(
           children: [
-            Icon(mode.icon, size: 20, color: listeningModeColor(c, mode)),
+            Icon(mode.icon, size: BirdyGlyph.xl, color: listeningModeColor(c, mode)),
             const SizedBox(width: BirdySpace.s),
             Expanded(
               child: Text(
@@ -191,7 +191,7 @@ class _ModeOption extends StatelessWidget {
                 children: [
                   // Always the mode's own color, selected or not: the outline
                   // and the check already say which one is active (J6f).
-                  Icon(mode.icon, size: 24, color: modeColor),
+                  Icon(mode.icon, size: BirdyGlyph.x3l, color: modeColor),
                   const SizedBox(width: BirdySpace.m),
                   Expanded(
                     child: Column(
@@ -204,7 +204,7 @@ class _ModeOption extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: BirdySpace.xxs),
                         Text(
                           listeningModeDescription(l10n, mode),
                           style: BirdyText.caption.copyWith(color: c.text2),
@@ -216,7 +216,7 @@ class _ModeOption extends StatelessWidget {
                     const SizedBox(width: BirdySpace.s),
                     Icon(
                       AppIcons.listeningSelected,
-                      size: 22,
+                      size: BirdyGlyph.xxl,
                       color: c.accentText,
                       semanticLabel: l10n.forkListeningModeSelected,
                     ),

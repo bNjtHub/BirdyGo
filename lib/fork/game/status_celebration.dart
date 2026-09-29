@@ -126,7 +126,7 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(
                         BirdySpace.xl,
-                        BirdySpace.xxxl * 2,
+                        BirdySpace.xxxl * BirdySpace.xxs,
                         BirdySpace.xl,
                         BirdySpace.xxl,
                       ),
@@ -137,7 +137,7 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
                             clipBehavior: Clip.none,
                             children: [
                               MomentAppear(
-                                child: StatusEmblem(status: status, size: 136),
+                                child: StatusEmblem(status: status, size: BirdyGlyph.disc136),
                               ),
                               BirdyConfetti.burst(
                                 colors: [
@@ -229,7 +229,7 @@ class _NextCard extends StatelessWidget {
             const SizedBox(height: BirdySpace.s),
             Row(
               children: [
-                StatusEmblem(status: next, size: 40, reached: false),
+                StatusEmblem(status: next, size: BirdyGlyph.disc40, reached: false),
                 const SizedBox(width: BirdySpace.m),
                 Expanded(
                   child: Text(

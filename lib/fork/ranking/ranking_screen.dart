@@ -496,7 +496,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                 if (checked)
                   Icon(AppIcons.checkRounded, color: c.accentText)
                 else
-                  const SizedBox(width: 24),
+                  const SizedBox(width: BirdySpace.xxl),
               ],
             ),
           ),
@@ -524,7 +524,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
               ),
               for (final o in RankingOrder.values)
                 option(_orderLabel(l10n, o), _order == o, () => _order = o),
-              Divider(height: 1, thickness: 1, color: c.line),
+              Divider(height: BirdyStroke.hairline, thickness: BirdyStroke.hairline, color: c.line),
               option(
                 l10n.forkBirdsOnly,
                 _birdsOnly,
@@ -605,14 +605,14 @@ class _RankingListSkeleton extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 28,
+                    width: BirdyGlyph.x5l,
                     child: BirdySkeleton.text(
                       BirdyText.label,
                       placeholder: '00',
                     ),
                   ),
-                  BirdySkeleton.box(width: 36, height: 36, radius: 18),
-                  const SizedBox(width: 10),
+                  BirdySkeleton.box(width: BirdyGlyph.disc36, height: BirdyGlyph.disc36, radius: BirdyRadii.pill),
+                  const SizedBox(width: BirdySpace.cozy),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,8 +621,8 @@ class _RankingListSkeleton extends StatelessWidget {
                           BirdyText.species,
                           placeholder: '000000000000000',
                         ),
-                        const SizedBox(height: 6),
-                        BirdySkeleton.bar(height: 8),
+                        const SizedBox(height: BirdySpace.snug),
+                        BirdySkeleton.bar(height: BirdySpace.s),
                       ],
                     ),
                   ),

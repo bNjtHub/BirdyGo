@@ -37,7 +37,7 @@ class RareHereSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(AppIcons.diamond, size: 20, fill: 1, color: c.orioleText),
+              Icon(AppIcons.diamond, size: BirdyGlyph.xl, fill: 1, color: c.orioleText),
               const SizedBox(width: BirdySpace.s),
               Flexible(
                 child: Text(

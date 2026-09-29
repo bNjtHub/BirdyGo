@@ -81,8 +81,8 @@ class SpeciesPhoto extends ConsumerWidget {
                 iconSize: BirdySizes.blockIcon,
                 icon: const Icon(AppIcons.infoOutline),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.black.withValues(alpha: 0.45),
-                  foregroundColor: Colors.white,
+                  backgroundColor: BirdyBrand.black.withValues(alpha: BirdyAlpha.photoButtonScrim),
+                  foregroundColor: BirdyBrand.white,
                 ),
               ),
             ),

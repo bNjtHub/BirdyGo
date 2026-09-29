@@ -33,7 +33,7 @@ class BirdyGoSplash extends StatefulWidget {
   /// Shortest time the splash stays up on a normal launch, however fast the
   /// app initializes: the whole intro, until the footer has faded in
   /// ([BirdyGoSplashTimeline.settled]).
-  static const minimumDisplay = Duration(milliseconds: 4500);
+  static const minimumDisplay = BirdyMotion.splashMinimum;
 
   final VoidCallback? onRetry;
 
@@ -236,7 +236,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
           textAlign: TextAlign.center,
         ),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: BirdySpace.m),
       FilledButton(onPressed: widget.onRetry, child: Text(l10n.retry)),
     ],
   );
@@ -278,7 +278,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: BirdySpace.xxl),
               Text(
                 l10n.forkPoweredByBirdnet,
                 style: BirdyText.caption.copyWith(color: _soft),
@@ -348,7 +348,12 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                     minHeight: constraints.maxHeight,
                   ),
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(28, 16, 28, padding),
+                    padding: EdgeInsets.fromLTRB(
+        BirdySpace.splashSide,
+        BirdySpace.l,
+        BirdySpace.splashSide,
+        padding,
+      ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -392,7 +397,7 @@ class _BirdyGoSplashState extends State<BirdyGoSplash>
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: compact ? 16 : 32),
+                          padding: EdgeInsets.only(top: compact ? BirdySpace.l : BirdySpace.xxxl),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 480),
                             child:

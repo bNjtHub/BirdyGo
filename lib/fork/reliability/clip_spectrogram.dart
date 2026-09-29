@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../design/birdy_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -76,7 +77,7 @@ class _ClipSpectrogramState extends ConsumerState<ClipSpectrogram> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(BirdyRadii.thumb),
       child: Container(
         height: widget.height,
         width: double.infinity,

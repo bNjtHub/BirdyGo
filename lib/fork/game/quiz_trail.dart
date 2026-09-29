@@ -190,13 +190,13 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: c.surface1,
-              border: Border.all(color: c.accent, width: 3 * scale),
+              border: Border.all(color: c.accent, width: BirdyStroke.thick * scale),
             ),
             child: Text(
               '$number',
               textScaler: TextScaler.noScaling,
               style: BirdyText.badge.copyWith(
-                fontSize: 13 * scale,
+                fontSize: BirdyText.captionSize * scale,
                 color: c.accentText,
                 fontWeight: FontWeight.w800,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -216,7 +216,7 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: tint.cardBackground(c.brightness),
-              border: Border.all(color: tint.accent, width: 2 * scale),
+              border: Border.all(color: tint.accent, width: BirdyStroke.regular * scale),
             ),
             child: QuizBirdArt(
               bird: bird,
@@ -237,9 +237,9 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: c.surface1,
-              border: Border.all(color: c.border, width: 2 * scale),
+              border: Border.all(color: c.border, width: BirdyStroke.regular * scale),
             ),
-            child: Icon(AppIcons.quizClose, size: 14 * scale, color: c.text2),
+            child: Icon(AppIcons.quizClose, size: BirdyGlyph.s * scale, color: c.text2),
           ),
         );
     }

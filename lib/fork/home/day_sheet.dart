@@ -107,14 +107,14 @@ class _DaySheetState extends State<DaySheet> {
       rows: [
         row(
           moment: DayMoment.morningBirds,
-          icon: BirdyGoSilhouetteIcon.glyph(size: 24, color: c.accentText),
+          icon: BirdyGoSilhouetteIcon.glyph(size: BirdyGlyph.x3l, color: c.accentText),
           title: l10n.forkDayMorningTitle,
           time: range(times.morningBirds),
           text: l10n.forkDayMorningText,
         ),
         row(
           moment: DayMoment.eveningBirds,
-          icon: BirdyGoSilhouetteIcon.glyph(size: 24, color: c.accentText),
+          icon: BirdyGoSilhouetteIcon.glyph(size: BirdyGlyph.x3l, color: c.accentText),
           title: l10n.forkDayEveningTitle,
           time: range(times.eveningBirds),
           text: l10n.forkDayEveningText,
@@ -129,7 +129,7 @@ class _DaySheetState extends State<DaySheet> {
       rows: [
         row(
           moment: DayMoment.sunrise,
-          icon: Icon(AppIcons.wbSunny, size: 22, color: c.orioleText, fill: 1),
+          icon: Icon(AppIcons.wbSunny, size: BirdyGlyph.xxl, color: c.orioleText, fill: 1),
           title: l10n.forkDaySunriseTitle,
           time: at(times.sunrise),
           text: l10n.forkDaySunriseText,
@@ -138,7 +138,7 @@ class _DaySheetState extends State<DaySheet> {
           moment: DayMoment.goldenHour,
           icon: Icon(
             AppIcons.autoAwesome,
-            size: 22,
+            size: BirdyGlyph.xxl,
             color: c.orioleText,
             fill: 1,
           ),
@@ -150,7 +150,7 @@ class _DaySheetState extends State<DaySheet> {
           moment: DayMoment.sunset,
           icon: Icon(
             AppIcons.wbTwilight,
-            size: 22,
+            size: BirdyGlyph.xxl,
             color: c.probable.foreground,
           ),
           title: l10n.forkDaySunsetTitle,
@@ -255,7 +255,7 @@ class _TintedGroup extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(headerIcon, size: 18, color: headerColor, fill: 1),
+                  Icon(headerIcon, size: BirdyGlyph.l, color: headerColor, fill: 1),
                   const SizedBox(width: BirdySpace.s),
                   Expanded(
                     child: Semantics(
@@ -302,8 +302,8 @@ class _MomentRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(BirdyRadii.inset),
         border:
             highlighted
-                ? Border.all(color: c.accent, width: 2)
-                : Border.all(color: Colors.transparent, width: 2),
+                ? Border.all(color: c.accent, width: BirdyStroke.regular)
+                : Border.all(color: Colors.transparent, width: BirdyStroke.regular),
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: BirdySpace.s,

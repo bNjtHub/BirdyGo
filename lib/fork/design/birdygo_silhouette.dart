@@ -271,7 +271,7 @@ class BirdyGoSilhouettePainter extends CustomPainter {
   List<Color> get barColors => [
     for (final (_, _, original) in BirdyGoLogoPainter.bars)
       muted
-          ? Color.lerp(color, const Color(0xFFFFFFFF), mutedWingLighten)!
+          ? Color.lerp(color, BirdyBrand.white, mutedWingLighten)!
           : original,
   ];
 

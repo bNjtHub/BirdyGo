@@ -22,7 +22,7 @@ class PracticeBanner extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(AppIcons.musicNote, size: 16, color: c.text2),
+          Icon(AppIcons.musicNote, size: BirdyGlyph.m, color: c.text2),
           const SizedBox(width: BirdySpace.xs),
           Text(l10n.forkPracticeBanner, style: style),
         ],
