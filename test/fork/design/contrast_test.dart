@@ -200,4 +200,26 @@ void main() {
       closeTo(5.25, 0.05),
     );
   });
+
+  test('day sheet and strip (J6h)', () {
+    for (final c in [BirdyColors.light, BirdyColors.dark]) {
+      final tonal = on(c.tonal, c.surface1);
+      final oriole = on(c.orioleContainer, c.surface1);
+      expectAA(c.text1, tonal, 'sheet title/tonal');
+      expectAA(c.text2, tonal, 'sheet text/tonal');
+      expectAA(c.accentText, tonal, 'sheet header/tonal');
+      expectAA(c.text1, oriole, 'sheet title/oriole');
+      expectAA(c.text2, oriole, 'sheet text/oriole');
+      expectAA(c.orioleText, oriole, 'sheet header/oriole');
+      // Strip pills and the sheet's white discs.
+      expectAA(c.text1, c.surface1, 'pill text/surface1');
+      expectAA(c.orioleText, c.surface1, 'sunrise icon/surface1');
+      expectAA(
+        c.probable.foreground,
+        c.surface1,
+        'sunset icon/surface1',
+        min: 3,
+      );
+    }
+  });
 }

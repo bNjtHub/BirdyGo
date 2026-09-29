@@ -9,15 +9,19 @@ import '../summary/listening_summary.dart';
 import '../summary/summary_text.dart';
 
 /// « Bonjour », « Bon après-midi », « Bonsoir », « Bonne nuit » (same hours
-/// as the listening summary's headline).
-String homeGreeting(AppLocalizations l10n, DateTime now) => switch (dayPartOf(
-  now,
-)) {
-  DayPart.morning => l10n.forkHomeMorning,
-  DayPart.afternoon => l10n.forkHomeAfternoon,
-  DayPart.evening => l10n.forkHomeEvening,
-  DayPart.night => l10n.forkHomeNight,
-};
+/// as the listening summary's headline), followed by the [firstName] when one
+/// is saved (« Bonjour Benjamin », J6h).
+String homeGreeting(AppLocalizations l10n, DateTime now, {String? firstName}) {
+  final greeting = switch (dayPartOf(now)) {
+    DayPart.morning => l10n.forkHomeMorning,
+    DayPart.afternoon => l10n.forkHomeAfternoon,
+    DayPart.evening => l10n.forkHomeEvening,
+    DayPart.night => l10n.forkHomeNight,
+  };
+  return firstName == null || firstName.isEmpty
+      ? greeting
+      : l10n.forkHomeGreetingName(greeting, firstName);
+}
 
 /// « Samedi 26 septembre · Beaulieu-sur-Brenne · lever du soleil 07:36 ».
 /// [sunrise] is the already worded part ([homeSunrise]).

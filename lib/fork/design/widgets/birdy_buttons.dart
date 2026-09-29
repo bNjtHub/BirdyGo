@@ -9,9 +9,9 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
+import 'birdy_wing_icon.dart';
 import 'pressable.dart';
 
 abstract final class BirdyButtonStyles {
@@ -109,7 +109,7 @@ class ListenButton extends StatelessWidget {
             textStyle: BirdyText.label.copyWith(fontSize: 20),
             iconSize: 28,
           ),
-          icon: const Icon(AppIcons.graphicEq),
+          icon: const BirdyWingIcon(size: 28),
           label: Text(l10n.forkListen),
         ),
       ),
