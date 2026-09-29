@@ -1,6 +1,8 @@
 import 'package:birdnet_live/fork/audio_output/media_volume.dart';
 import 'package:birdnet_live/fork/audio_output/media_volume_config.dart';
+import 'package:birdnet_live/fork/audio_output/volume_alert_block.dart';
 import 'package:birdnet_live/fork/audio_output/volume_guard.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -79,6 +81,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Son faible'), findsNothing);
   });
+
+  for (final dark in [false, true]) {
+    testWidgets('floating toast is blurred and opaque (dark: $dark)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        FakeVolume(0),
+        VolumePromptThrottle(),
+        theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
+      );
+      expect(await _check(tester), isTrue);
+      final block = find.byType(VolumeAlertBlock);
+      expect(
+        find.descendant(of: block, matching: find.byType(BackdropFilter)),
+        findsOneWidget,
+      );
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(of: block, matching: find.byType(DecoratedBox))
+            .first,
+      );
+      final color = (box.decoration as BoxDecoration).color!;
+      expect(color.a, 1.0);
+      final c = dark ? BirdyColors.dark : BirdyColors.light;
+      expect(color, Color.alphaBlend(c.orioleContainer, c.surface1));
+      await tester.pump(MediaVolumeConfig.promptDuration);
+      await tester.pumpAndSettle();
+    });
+  }
 
   testWidgets('silent when the volume is fine or unknown', (tester) async {
     await _pump(tester, FakeVolume(0.5), VolumePromptThrottle());
