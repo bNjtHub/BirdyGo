@@ -16,26 +16,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/about/about_screen.dart';
-import '../../features/aru/aru_active_screen.dart';
-import '../../features/aru/aru_controller.dart';
-import '../../features/aru/aru_providers.dart';
-import '../../features/aru/aru_setup_screen.dart';
 import '../../features/explore/explore_providers.dart';
-import '../../features/explore/explore_screen.dart';
 import '../../features/explore/widgets/species_info_overlay.dart';
-import '../../features/file_analysis/file_analysis_screen.dart';
-import '../../features/history/session_library_screen.dart';
 import '../../features/history/widgets/clip_player_sheet.dart';
-import '../../features/home/help_screen.dart';
 import '../../features/live/live_screen.dart';
+import '../../features/live/live_providers.dart';
 import '../../features/live/live_session.dart';
-import '../../features/point_count/point_count_setup_screen.dart';
-import '../../features/settings/settings_screen.dart';
-import '../../features/survey/survey_setup_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
-import '../../shared/utils/session_type_visuals.dart';
 import '../data/observation_index_service.dart';
 import '../daily_goal/daily_goal_block.dart';
 import '../daily_goal/daily_goal_screen.dart';
@@ -43,26 +31,22 @@ import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_headers.dart';
-import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/birdy_cross_fade.dart';
-import '../design/widgets/birdy_sheet.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
 import '../game/game_loader.dart';
 import '../game/status_celebration.dart';
 import '../game/streak.dart';
-import '../garden/garden_count_screen.dart';
-import '../map/contact_map_screen.dart';
 import '../profile/profile_screen.dart';
-import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../shell/fork_shell.dart';
-import '../sound_library/sound_library_screen.dart';
+import '../summary/listening_summary_screen.dart';
 import 'home_loader.dart';
 import 'home_model.dart';
 import 'home_text.dart';
 import 'home_widgets.dart';
+import 'more_sheet.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -143,6 +127,35 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     ref.invalidate(gameProgressProvider);
   }
 
+  /// « Aujourd'hui »: the Bilan of today's latest listening. The Bilan sums
+  /// up one session, so with several listenings today it opens the most
+  /// recent one (the block says so). The session comes from its saved JSON,
+  /// the source of truth; a session gone since the index was built shows a
+  /// message instead.
+  Future<void> _openTodayBilan(String sessionId) async {
+    final LiveSession? session;
+    try {
+      session = await ref.read(sessionRepositoryProvider).load(sessionId);
+    } catch (_) {
+      if (mounted) _showBilanFailure();
+      return;
+    }
+    if (!mounted) return;
+    if (session == null) {
+      _showBilanFailure();
+      return;
+    }
+    _open(ListeningSummaryScreen(session: session));
+  }
+
+  void _showBilanFailure() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.forkHomeTodayOpenFailed),
+      ),
+    );
+  }
+
   /// The Profil tab, or the profile page outside the bottom navigation.
   void _openProfile() {
     final shell = ForkShellScope.maybeOf(context);
@@ -153,119 +166,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     }
   }
 
-  void _openAru() {
-    final session = ref.read(aruSessionProvider);
-    final state = ref.read(aruStateProvider);
-    final running =
-        session != null &&
-        state != AruControllerState.completed &&
-        state != AruControllerState.idle;
-    _open(running ? const AruActiveScreen() : const AruSetupScreen());
-  }
-
-  void _showMenu() {
-    final l10n = AppLocalizations.of(context)!;
-    showBirdySheet<void>(
-      context: context,
-      isScrollControlled: true,
-      // HomeMenuSheet's ListView adds the bottom inset itself, as trailing
-      // scroll padding: it can grow to the full sheet height (many menu
-      // entries), and wrapping it in outer padding here would shrink that
-      // scrolling viewport instead of just clearing the nav bar.
-      addBottomInset: false,
-      builder:
-          (_) => HomeMenuSheet(
-            groups: [
-              [
-                HomeMenuEntry(
-                  AppIcons.flagRounded,
-                  l10n.forkDailyGoalTitle,
-                  () => _open(const DailyGoalScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.libraryMusic,
-                  l10n.sessionLibraryTitle,
-                  () => _open(const SessionLibraryScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.sort,
-                  l10n.forkRanking,
-                  () => _open(const RankingScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.mapSheet,
-                  l10n.forkMap,
-                  () => _open(const ContactMapScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.verifiedRounded,
-                  l10n.forkQuickReview,
-                  () => _open(const QuickReviewScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.graphicEqRounded,
-                  l10n.forkSoundLibrary,
-                  () => _open(const SoundLibraryScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.parkRounded,
-                  l10n.forkGardenTitle,
-                  () => _open(const GardenCountScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.searchRounded,
-                  l10n.exploreMode,
-                  () => _open(const ExploreScreen()),
-                ),
-              ],
-              [
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.pointCount),
-                  l10n.pointCountMode,
-                  () => _open(const PointCountSetupScreen()),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.survey),
-                  l10n.surveyMode,
-                  () => _open(const SurveySetupScreen()),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.aru),
-                  l10n.aruMode,
-                  _openAru,
-                ),
-                HomeMenuEntry(
-                  AppIcons.musicNote,
-                  l10n.forkPracticeMenu,
-                  () => _open(const LiveScreen(forkPractice: true)),
-                ),
-                HomeMenuEntry(
-                  sessionTypeIcon(SessionType.fileUpload),
-                  l10n.fileAnalysisMode,
-                  () => _open(const FileAnalysisScreen()),
-                ),
-              ],
-              [
-                HomeMenuEntry(
-                  AppIcons.tuneRounded,
-                  l10n.settings,
-                  () => _open(const SettingsScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.helpOutlineRounded,
-                  l10n.helpTitle,
-                  () => _open(const HelpScreen()),
-                ),
-                HomeMenuEntry(
-                  AppIcons.infoOutline,
-                  l10n.about,
-                  () => _open(const AboutScreen()),
-                ),
-              ],
-            ],
-          ),
-    );
-  }
+  // FORK: J6g-c, the menu is now the « Plus » sheet (more_sheet.dart).
+  void _showMenu() => showMoreSheet(context, ref);
 
   @override
   Widget build(BuildContext context) {
@@ -392,11 +294,9 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         return (
           'empty',
           _crossFade(
-            BirdyEmptyState.inline(
+            TodayEmptyBlock(
               key: const ValueKey('home-today-empty'),
-              icon: AppIcons.hearing,
-              title: l10n.forkHomeEmptyDayTitle,
-              body: l10n.forkHomeEmptyDay,
+              onListen: () => _open(const LiveScreen(forceAutoStart: true)),
             ),
           ),
         );
@@ -410,6 +310,10 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
             nameOf: (s) => nameOf(s.scientificName, s.commonName),
             imageOf: imageOf,
             onSpecies: (s, name) => _openSpecies(s.scientificName, name),
+            onOpen:
+                snapshot.today.latestSessionId == null
+                    ? null
+                    : () => _openTodayBilan(snapshot.today.latestSessionId!),
           ),
         ),
       );

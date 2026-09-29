@@ -150,6 +150,10 @@ class BirdyGoLogoPainter extends CustomPainter {
         )
         ..close();
 
+  /// The eye (ink disc), also cut out of the map's place silhouette.
+  static const Offset eyeCenter = Offset(176.2, 172.6);
+  static const double eyeRadius = 18.7;
+
   static final Path upperBeak =
       Path()
         ..moveTo(145.9, 149)
@@ -228,11 +232,7 @@ class BirdyGoLogoPainter extends CustomPainter {
     }
 
     canvas
-      ..drawCircle(
-        const Offset(176.2, 172.6),
-        18.7,
-        Paint()..color = BirdyBrand.ink,
-      )
+      ..drawCircle(eyeCenter, eyeRadius, Paint()..color = BirdyBrand.ink)
       ..drawCircle(
         const Offset(171, 166.6),
         5.4,

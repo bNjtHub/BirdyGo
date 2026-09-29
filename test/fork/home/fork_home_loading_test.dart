@@ -238,17 +238,17 @@ void main() {
     // scale) finishes before the comparison: it is a fixed-duration
     // animation with no pending future, so it settles on its own even
     // though the loader and the game progress are still pending.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     final firstFrame = _Snapshot(tester);
 
     // The saved-session snapshot lands...
     loader.resolve();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     firstFrame.expectUnchanged(_Snapshot(tester));
 
     // ...well before the game progress.
     gameGate.complete(_game());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     firstFrame.expectUnchanged(_Snapshot(tester));
 
     // The real content did take over.
@@ -275,7 +275,7 @@ void main() {
     'grid or the status block',
     (tester) async {
       await pump(tester);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       final grid = tester.getRect(find.byKey(const ValueKey('home-grid')));
       final status = tester.getRect(find.byKey(const ValueKey('home-status')));
 
@@ -283,14 +283,14 @@ void main() {
       // the status block must still be skeletons, at their final size,
       // since the game progress is not in yet.
       loader.resolve();
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       expect(tester.getRect(find.byKey(const ValueKey('home-grid'))), grid);
       expect(tester.getRect(find.byKey(const ValueKey('home-status'))), status);
 
       // The game progress lands: same blocks, same rects, real content
       // fades in.
       gameGate.complete(_game());
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       expect(tester.getRect(find.byKey(const ValueKey('home-grid'))), grid);
       expect(tester.getRect(find.byKey(const ValueKey('home-status'))), status);
     },
@@ -309,7 +309,7 @@ void main() {
     }
     loader.resolve();
     gameGate.complete(_game());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     // The real block took over (its numbers are split across several
     // `TextSpan`s, so a plural label alone, not the whole "13 espèces",
     // is what a single `Text` finder can match).
@@ -325,7 +325,7 @@ void main() {
     // `pumpAndSettle`, not a bare `pump`: at opacity 0 (the entrance's
     // first frame), a node is excluded from the semantics tree, which
     // would hide the header long before anything is actually loaded.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     final data = tester.getSemantics(find.byType(ForkHome));
     String allLabels(SemanticsNode node) {
@@ -345,7 +345,7 @@ void main() {
 
     loader.resolve();
     gameGate.complete(_game());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     final loaded = tester.getSemantics(find.byType(ForkHome));
     expect(allLabels(loaded), isNot(contains("Chargement de l'accueil")));
     handle.dispose();
@@ -359,7 +359,7 @@ void main() {
       await tester.pump();
       loader.resolve();
       gameGate.complete(_game(streak: _streak(current: 0)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
 
       // The hero and the grid's two right-hand cells are gone; the goal
       // cell alone still spans the grid's width.

@@ -7,8 +7,11 @@ import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
+import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/map/contact_map_screen.dart';
+import 'package:birdnet_live/fork/ranking/activity_bars.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
@@ -25,6 +28,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../summary/summary_fixture.dart';
+
 const _robin = 'Erithacus rubecula';
 
 class _FakeLoader implements SpeciesPageLoader {
@@ -33,6 +38,7 @@ class _FakeLoader implements SpeciesPageLoader {
   final SpeciesRecord recordValue;
   final YearPresence? year;
   bool unexpected = false;
+  String? lpoSession;
   final favoriteCalls = <(String, bool)>[];
 
   @override
@@ -48,8 +54,23 @@ class _FakeLoader implements SpeciesPageLoader {
   }) async => unexpected;
 
   @override
+  Future<String?> lastConfirmedSession(String scientificName) async =>
+      lpoSession;
+
+  @override
   Future<void> setFavorite(String key, {required bool favorite}) async =>
       favoriteCalls.add((key, favorite));
+}
+
+/// Serves one session by id.
+class _OneSessionRepository extends SessionRepository {
+  _OneSessionRepository(this.session);
+
+  final LiveSession session;
+
+  @override
+  Future<LiveSession?> load(String id) async =>
+      id == session.id ? session : null;
 }
 
 class _FakePlayer implements SpeciesClipPlayer {
@@ -150,6 +171,8 @@ void main() {
     Size size = const Size(390, 844),
     SpeciesSheets? sheets,
     LiveState liveState = LiveState.ready,
+    SessionRepository? lpoRepository,
+    bool reduceMotion = false,
   }) async {
     tester.view.physicalSize = size * 2;
     tester.view.devicePixelRatio = 2;
@@ -159,7 +182,11 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
           taxonomyServiceProvider.overrideWith(
-            (ref) async => TaxonomyService(),
+            (ref) async =>
+                TaxonomyService()..loadFromCsv(
+                  'scientific_name,common_name\n'
+                  '$_robin,Rougegorge familier',
+                ),
           ),
           effectiveSpeciesLocaleProvider.overrideWithValue('fr'),
           speciesSheetsProvider.overrideWith(
@@ -169,6 +196,8 @@ void main() {
             _FakeDescriptions(),
           ),
           speciesPageLoaderProvider.overrideWithValue(loader),
+          if (lpoRepository != null)
+            sessionRepositoryProvider.overrideWithValue(lpoRepository),
           speciesClipPlayerProvider.overrideWithValue(player),
           speciesMiniMapTilesProvider.overrideWithValue(null),
           observationIndexServiceProvider.overrideWith(
@@ -185,7 +214,10 @@ void main() {
               (context, child) => MediaQuery(
                 data: MediaQuery.of(
                   context,
-                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                ).copyWith(
+                  textScaler: TextScaler.linear(textScale),
+                  disableAnimations: reduceMotion,
+                ),
                 child: child!,
               ),
           home:
@@ -217,7 +249,17 @@ void main() {
     expect(find.text('Voir les 9 enregistrements'), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.summary]!), findsOneWidget);
     expect(find.text('Activité par heure'), findsOneWidget);
+    // J6f-b fix: hour labels every 6 h, and the peak hour named below the
+    // chart (hour 7 has the tally's only busy value).
+    expect(find.text('0 h'), findsOneWidget);
+    expect(find.text('6 h'), findsOneWidget);
+    expect(find.text('12 h'), findsOneWidget);
+    expect(find.text('18 h'), findsOneWidget);
+    expect(find.text('Surtout vers 7 h'), findsOneWidget);
     expect(find.text('Voir sur la carte'), findsOneWidget);
+    // J6f-b fix: the label is short enough to stay on one line.
+    expect(find.text('En savoir plus'), findsOneWidget);
+    expect(find.text('En savoir plus sur cette espèce'), findsNothing);
     expect(find.textContaining('Garde le son pour toi'), findsOneWidget);
     // The upstream description gives way to the AI sheet.
     expect(find.text('Description upstream.'), findsNothing);
@@ -246,6 +288,97 @@ void main() {
     expect(find.text(explanation), findsOneWidget);
   });
 
+  testWidgets(
+    'tapping an hour bar shows its own hour and count (J6f-b fix)',
+    (tester) async {
+      await pump(tester);
+      expect(find.text('Surtout vers 7 h'), findsOneWidget);
+
+      // The seasons chart (« Ici en ce moment ») also uses `ActivityBars`
+      // now (J6f-b fix): the hour chart is the last one on the page.
+      final hourChart = find.byType(ActivityBars).last;
+      await tester.ensureVisible(hourChart);
+      final rect = tester.getRect(hourChart);
+      final slot = rect.width / 24;
+      // Hour 4 has a single contact: distinct from the busy hour 7.
+      await tester.tapAt(Offset(rect.left + slot * 4.5, rect.top + 5));
+      await tester.pump();
+
+      expect(find.text('Surtout vers 7 h'), findsNothing);
+      expect(find.text('4 h — 1 contact'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'the seasons chart: peak caption, tap detail, current month marked '
+    '(J6f-b fix)',
+    (tester) async {
+      // May (index 4) at its top, March (index 2) at half of it: a clear
+      // peak and a distinct value to tap.
+      final weeks = [
+        for (var w = 0; w < 48; w++)
+          switch (w ~/ 4) {
+            4 => 1.0,
+            2 => 0.5,
+            _ => 0.0,
+          },
+      ];
+      loader = _FakeLoader(
+        recordValue: _heard(),
+        year: YearPresence.fromWeeks(weeks),
+      );
+      await pump(tester);
+
+      expect(find.text('Surtout en mai'), findsOneWidget);
+      final seasons = find.byType(ActivityBars).first;
+      final chart = tester.widget<ActivityBars>(seasons);
+      // All 12 initials at 100 % text, the current month marked.
+      expect(chart.labels.length, 12);
+      expect(chart.highlightIndex, DateTime.now().month - 1);
+
+      final rect = tester.getRect(seasons);
+      final slot = rect.width / 12;
+      await tester.tapAt(Offset(rect.left + slot * 2.5, rect.top + 5));
+      await tester.pump();
+
+      expect(find.text('Surtout en mai'), findsNothing);
+      expect(find.text('Mars — 50 % du pic'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'the seasons chart: quarterly labels at 130 % text (J6f-b fix)',
+    (tester) async {
+      await pump(tester, textScale: 1.3);
+      final chart = tester.widget<ActivityBars>(
+        find.byType(ActivityBars).first,
+      );
+      expect(chart.labels.length, 4);
+    },
+  );
+
+  testWidgets(
+    '« Voir sur la carte » opens the contact map filtered on the species',
+    (tester) async {
+      await pump(tester);
+      await tester.ensureVisible(find.text('Voir sur la carte'));
+      await tester.tap(find.text('Voir sur la carte'));
+      // Not pumpAndSettle: the map screen it opens keeps timers running
+      // (tile loading, location) that never quiesce on their own.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final map = tester.widget<ContactMapScreen>(
+        find.byType(ContactMapScreen),
+      );
+      expect(map.initialSpecies?.scientificName, _robin);
+      expect(map.initialSpecies?.commonName, 'Rougegorge familier');
+      // The species chip shows its name, not "Toutes les espèces".
+      expect(find.text('Rougegorge familier'), findsWidgets);
+      expect(find.text('Toutes les espèces'), findsNothing);
+    },
+  );
+
   testWidgets('play a recording and change a favorite', (tester) async {
     await pump(tester);
     await tester.ensureVisible(find.byTooltip('Réécouter').first);
@@ -270,6 +403,19 @@ void main() {
     expect(find.text('Ici en ce moment'), findsNothing);
     expect(find.text('Activité par heure'), findsNothing);
   });
+
+  testWidgets(
+    'the tinted header shows the back button and the title at 130 % text',
+    (tester) async {
+      await pump(tester, textScale: 1.3);
+      expect(tester.takeException(), isNull);
+      // J6f: the mockup keeps the back button over the photo (unlike the
+      // other overlays' `BirdyOverlayHeader`), so it carries the system
+      // tooltip too.
+      expect(find.byTooltip('Retour'), findsOneWidget);
+      expect(find.text('Rougegorge familier'), findsOneWidget);
+    },
+  );
 
   for (final (label, dark, scale, size) in [
     ('dark', true, 1.0, const Size(390, 844)),
@@ -331,6 +477,140 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.byType(SpeciesPage), findsOneWidget);
+    // Same close gesture as the full page, in the back arrow's place
+    // (J6g-e): a close X and a visible grab handle, no back arrow.
     expect(find.byTooltip('Retour'), findsNothing);
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsOneWidget);
+    final full = tester.getTopLeft(find.byTooltip('Fermer'));
+
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(full.dx, lessThan(40));
+  });
+
+  testWidgets('the sheet close button is a 48 dp target', (tester) async {
+    await pump(
+      tester,
+      liveState: LiveState.active,
+      home: opener(
+        (context, ref) => showSpeciesPage(
+          context,
+          ref,
+          scientificName: _robin,
+          commonName: 'Rougegorge familier',
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final size = tester.getSize(find.byTooltip('Fermer'));
+    expect(size.width, greaterThanOrEqualTo(48));
+    expect(size.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('the full page keeps its back arrow, no grab handle', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byTooltip('Retour'), findsOneWidget);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsNothing);
+  });
+
+  testWidgets('no Faune-France entry without a confirmed sighting', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('fiche-lpo-send')), findsNothing);
+  });
+
+  testWidgets('the Faune-France entry opens the send screen', (tester) async {
+    final session =
+        morningSession()
+          ..detections.clear()
+          ..detections.addAll([
+            for (final name in [_robin, 'Turdus merula'])
+              DetectionRecord(
+                scientificName: name,
+                commonName: name,
+                confidence: 0.9,
+                timestamp: DateTime(2026, 5, 1, 7, 10),
+                latitude: 46.7,
+                longitude: 1.2,
+                reviewStatus: ReviewStatus.confirmed,
+              ),
+          ]);
+    loader.lpoSession = session.id;
+    await pump(tester, lpoRepository: _OneSessionRepository(session));
+    final button = find.byKey(const ValueKey('fiche-lpo-send'));
+    await tester.scrollUntilVisible(
+      button,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    final screen = tester.widget<LpoSendScreen>(find.byType(LpoSendScreen));
+    // Only this species goes to the send screen.
+    expect(screen.detections, hasLength(1));
+    expect(screen.detections!.single.scientificName, _robin);
+  });
+
+  for (final dark in [false, true]) {
+    testWidgets(
+      'LPO entry at 320 dp, 130 % text: no overflow, 48 dp target '
+      '(${dark ? 'dark' : 'light'})',
+      (tester) async {
+        loader.lpoSession = 'sess-1';
+        await pump(
+          tester,
+          dark: dark,
+          textScale: 1.3,
+          size: const Size(320, 640),
+        );
+        final button = find.byKey(const ValueKey('fiche-lpo-send'));
+        await tester.scrollUntilVisible(
+          button,
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(tester.takeException(), isNull);
+        final size = tester.getSize(button);
+        expect(size.height, greaterThanOrEqualTo(48));
+        expect(size.width, greaterThanOrEqualTo(48));
+      },
+    );
+  }
+
+  testWidgets('reduced motion: the sheet closes with the X, no animation', (
+    tester,
+  ) async {
+    Widget home() => opener(
+      (context, ref) => showSpeciesPage(
+        context,
+        ref,
+        scientificName: _robin,
+        commonName: 'Rougegorge familier',
+      ),
+    );
+    await pump(
+      tester,
+      liveState: LiveState.active,
+      home: home(),
+      reduceMotion: true,
+      size: const Size(320, 640),
+      textScale: 1.3,
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('fiche-grab-handle')), findsOneWidget);
+    expect(find.byTooltip('Fermer'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }

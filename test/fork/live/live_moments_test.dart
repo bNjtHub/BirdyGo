@@ -1,6 +1,7 @@
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
+import 'package:birdnet_live/fork/design/birdy_motion.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/live/live_moments.dart';
 import 'package:birdnet_live/fork/live/live_moments_model.dart';
@@ -9,6 +10,7 @@ import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,10 +117,14 @@ void main() {
       WidgetTester tester,
       List<LiveTableEntry> entries, {
       Set<String> verified = const {},
+      Size size = const Size(400, 900),
+      double textScale = 1,
+      bool reduced = false,
+      ThemeData? theme,
     }) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      tester.view.physicalSize = const Size(400, 900);
+      tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
@@ -130,8 +136,16 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: BirdyTheme.dark(),
+            theme: theme ?? BirdyTheme.dark(),
             locale: const Locale('fr'),
+            builder:
+                (context, child) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(textScale),
+                    disableAnimations: reduced,
+                  ),
+                  child: child!,
+                ),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
@@ -180,6 +194,71 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('Première rencontre !'), findsNothing);
     });
+
+    testWidgets('first encounter: the bird bursts into confetti, once', (
+      tester,
+    ) async {
+      await pump(tester, [_entry('Dendrocopos major', 0.95)]);
+      final particles = tester.widget<ConfettiWidget>(
+        find.byType(ConfettiWidget),
+      );
+      expect(
+        particles.confettiController.state,
+        ConfettiControllerState.playing,
+      );
+      expect(particles.shouldLoop, isFalse);
+      // From the bird's center.
+      final bird = tester.getCenter(
+        find.byKey(const ValueKey('first-time-bird')),
+      );
+      expect(
+        (tester.getTopLeft(find.byType(ConfettiWidget)) - bird).distance,
+        lessThan(1),
+      );
+      // One burst: gone long before the card closes by itself.
+      await tester.pump(BirdyConfettiMotion.burstLife);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(find.text('Première rencontre !'), findsOneWidget);
+    });
+
+    testWidgets('first encounter, reduced motion: no confetti, all shown', (
+      tester,
+    ) async {
+      await pump(tester, [_entry('Dendrocopos major', 0.95)], reduced: true);
+      expect(find.byType(ConfettiWidget), findsNothing);
+      expect(find.text('Première rencontre !'), findsOneWidget);
+      expect(find.text('Oisillon'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ConfettiWidget), findsNothing);
+    });
+
+    for (final (label, size, dark) in [
+      ('portrait 320 × 640, light', const Size(320, 640), false),
+      ('landscape 800 × 360, dark', const Size(800, 360), true),
+    ]) {
+      testWidgets('first encounter at 130 % text, $label: no overflow', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          [_entry('Dendrocopos major', 0.95)],
+          size: size,
+          textScale: 1.3,
+          theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
+        );
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.takeException(), isNull);
+        await tester.ensureVisible(find.text("Continuer l'écoute"));
+        await tester.pump(const Duration(milliseconds: 100));
+        final button = tester.getRect(
+          find.widgetWithText(FilledButton, "Continuer l'écoute"),
+        );
+        expect(button.height, greaterThanOrEqualTo(48));
+        expect(button.bottom, lessThanOrEqualTo(size.height));
+        expect(tester.takeException(), isNull);
+      });
+    }
 
     testWidgets('rare bird: « C\'est bien lui » confirms, then the party', (
       tester,

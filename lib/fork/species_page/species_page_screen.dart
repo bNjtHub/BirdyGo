@@ -24,15 +24,19 @@ import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
+import '../lpo/species_lpo_entry.dart';
 import '../ranking/species_activity_section.dart';
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
+import 'species_page_drag_close.dart';
 import 'species_page_loader.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -59,10 +63,17 @@ Future<void> showSpeciesPage(
       ),
     );
   }
-  return showModalBottomSheet<void>(
+  return showBirdySheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
+    showDragHandle: false,
+    // The DraggableScrollableSheet below already sizes itself to (nearly)
+    // the full screen height: wrapping it in the helper's usual outer
+    // bottom padding would shrink that available height instead of just
+    // clearing the nav bar. SpeciesPage adds the same inset itself, as
+    // trailing padding inside its own scroll view (species_page_screen.dart
+    // `MediaQuery.viewPaddingOf(context).bottom`).
+    addBottomInset: false,
     clipBehavior: Clip.antiAlias,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
@@ -107,7 +118,7 @@ class SpeciesPage extends ConsumerStatefulWidget {
   /// Shown until the taxonomy gives the localized name.
   final String commonName;
 
-  /// Set inside a sheet: no back button, the sheet scrolls.
+  /// Set inside a sheet: close X and grab handle, the sheet scrolls.
   final ScrollController? scrollController;
 
   @override
@@ -124,6 +135,14 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
   String? _description;
   SpeciesRecord? _record;
   YearPresence? _year;
+
+  /// Session « Envoyer à Faune-France » sends from; null hides the entry.
+  String? _lpoSessionId;
+
+  /// Only used outside a sheet (a sheet already carries its own drag
+  /// controller): lets the drag-to-close gesture tell whether the page is
+  /// scrolled to the top (J6f-b fix).
+  final ScrollController _pageScroll = ScrollController();
 
   /// Unexpected here this week (J3b): the page explains why.
   bool _unexpectedNow = false;
@@ -149,6 +168,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
         (_record?.clips ?? const []).any((c) => c.clipPath == playing)) {
       unawaited(_player.stop());
     }
+    _pageScroll.dispose();
     super.dispose();
   }
 
@@ -175,6 +195,22 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final record = await _loader.record(widget.scientificName);
     if (!mounted || generation != _loadGeneration) return;
     setState(() => _record = record);
+    final lpo = await _loader.lastConfirmedSession(widget.scientificName);
+    if (mounted && generation == _loadGeneration && lpo != _lpoSessionId) {
+      setState(() => _lpoSessionId = lpo);
+    }
+  }
+
+  Future<void> _sendToLpo() async {
+    final id = _lpoSessionId;
+    if (id == null) return;
+    final session = await ref.read(sessionRepositoryProvider).load(id);
+    if (session == null || !mounted) return;
+    await openLpoSendForSpecies(
+      context,
+      session: session,
+      scientificName: widget.scientificName,
+    );
   }
 
   Future<void> _loadYear() async {
@@ -288,40 +324,78 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final referenceUrl = detail?.ebirdListenUrl;
     final inSheet = widget.scrollController != null;
 
+    final loadingRecord = record == null;
+    final showSounds =
+        loadingRecord || (record.clips.isNotEmpty || referenceUrl != null);
+    final showActivity = loadingRecord || record.heard;
+
     final blocks = <Widget>[
-      if (record != null) HeardBlock(record: record, heard: heard),
+      // The counters, recordings and activity/map blocks are always in
+      // place from the first frame (their skeletons reserve the same shape
+      // `_load...` will fill in): only the AI sheet/description and the
+      // links block below still wait on their own data to appear, since
+      // whether they will show at all is not knowable ahead of time.
+      KeyedSubtree(
+        key: const ValueKey('fiche-heard'),
+        child: _crossFade(
+          loadingRecord
+              ? KeyedSubtree(
+                key: const ValueKey('fiche-heard-skeleton'),
+                child: HeardBlock.skeleton(context),
+              )
+              : KeyedSubtree(
+                key: const ValueKey('fiche-heard-real'),
+                child: HeardBlock(record: record, heard: heard),
+              ),
+        ),
+      ),
       if (_year != null)
         HereNowCard(
           year: _year!,
           sentence: presenceSentence(l10n, language, _year!, now: now),
-          monthsCaption: monthsCaption(language),
           currentMonth: now.month,
           rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
-      if ((record?.clips.isNotEmpty ?? false) || referenceUrl != null)
-        ValueListenableBuilder<String?>(
-          valueListenable: _player.playing,
-          builder:
-              (context, playing, _) => MySoundsBlock(
-                clips: record?.clips ?? const [],
-                favorites: record?.favorites ?? const {},
-                playing: playing,
-                lineOf: (clip) => clipLine(l10n, language, clip, now: now),
-                onPlay: _play,
-                onFavorite: _setFavorite,
-                onReference:
-                    referenceUrl == null
-                        ? null
-                        : () => openExternalUrl(context, referenceUrl),
-                moreCount: record?.clipCount ?? 0,
-                onMore:
-                    () => _push(
-                      SpeciesClipsScreen(
-                        scientificName: widget.scientificName,
-                        fallbackName: _name,
-                      ),
-                    ),
-              ),
+      if (showSounds)
+        KeyedSubtree(
+          key: const ValueKey('fiche-sounds'),
+          child: _crossFade(
+            loadingRecord
+                ? KeyedSubtree(
+                  key: const ValueKey('fiche-sounds-skeleton'),
+                  child: MySoundsBlock.skeleton(context),
+                )
+                : KeyedSubtree(
+                  key: const ValueKey('fiche-sounds-real'),
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: _player.playing,
+                    builder:
+                        (context, playing, _) => MySoundsBlock(
+                          clips: record.clips,
+                          favorites: record.favorites,
+                          playing: playing,
+                          lineOf:
+                              (clip) =>
+                                  clipLine(l10n, language, clip, now: now),
+                          onPlay: _play,
+                          onFavorite: _setFavorite,
+                          onReference:
+                              referenceUrl == null
+                                  ? null
+                                  : () =>
+                                      openExternalUrl(context, referenceUrl),
+                          moreCount: record.clipCount,
+                          onMore:
+                              () => _push(
+                                SpeciesClipsScreen(
+                                  scientificName: widget.scientificName,
+                                  fallbackName: _name,
+                                ),
+                              ),
+                        ),
+                  ),
+                ),
+          ),
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
         SheetChipsBlock(sheet: sheet)
@@ -330,26 +404,39 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           text: _description!,
           source: detail?.descriptionSource,
         ),
-      if (record != null && record.heard)
-        ActivityAndMap(
-          hours: record.hours,
-          barColor: c.isDark ? tint.accent : tint.deep,
-          map:
-              record.spots.isEmpty
-                  ? null
-                  : SpeciesMiniMap(
-                    spots: record.spots,
-                    tileLayer: ref.watch(speciesMiniMapTilesProvider),
-                    semanticLabel: l10n.forkFicheMapLabel,
-                    onTap: _openMap,
+      if (showActivity)
+        KeyedSubtree(
+          key: const ValueKey('fiche-activity'),
+          child: _crossFade(
+            loadingRecord
+                ? KeyedSubtree(
+                  key: const ValueKey('fiche-activity-skeleton'),
+                  child: ActivityAndMap.skeleton(context),
+                )
+                : KeyedSubtree(
+                  key: const ValueKey('fiche-activity-real'),
+                  child: ActivityAndMap(
+                    hours: record.hours,
+                    map:
+                        record.spots.isEmpty
+                            ? null
+                            : SpeciesMiniMap(
+                              spots: record.spots,
+                              tileLayer: ref.watch(speciesMiniMapTilesProvider),
+                              semanticLabel: l10n.forkFicheMapLabel,
+                              onTap: _openMap,
+                            ),
+                    onSeeOnMap: record.spots.isEmpty ? null : _openMap,
                   ),
-          onSeeOnMap: record.spots.isEmpty ? null : _openMap,
+                ),
+          ),
         ),
       if (detail != null)
         LinksBlock(
           links: _links(detail),
           onOpen: (url) => openExternalUrl(context, url),
         ),
+      if (_lpoSessionId != null) SpeciesLpoEntry(onSend: _sendToLpo),
       const SpeciesPageFooter(),
     ];
 
@@ -365,14 +452,20 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               tint: tint,
               photo: SpeciesPhoto(species: detail),
               onShare: () => _share(latin, heard),
-              onBack: inSheet ? null : () => Navigator.of(context).maybePop(),
+              // The sheet closes like the page (J6g-e).
+              onBack: () => Navigator.of(context).maybePop(),
+              inSheet: inSheet,
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
                 BirdySpace.gutter,
                 BirdySpace.l,
                 BirdySpace.gutter,
-                BirdySpace.xxxl + MediaQuery.paddingOf(context).bottom,
+                // FORK: viewPaddingOf, not paddingOf — inside a sheet
+                // (showBirdySheet, useSafeArea: true) the ambient padding
+                // does not carry the bottom nav bar inset, only viewPadding
+                // does (J6f-b bugfix).
+                BirdySpace.xxxl + MediaQuery.viewPaddingOf(context).bottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -390,12 +483,24 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       ),
     );
 
+    // The sheet already scrolls with its own controller; outside a sheet,
+    // this page needs one of its own to tell the drag-to-close gesture
+    // whether it is scrolled to the top.
+    final effectiveController = widget.scrollController ?? _pageScroll;
     final scroll = SingleChildScrollView(
-      controller: widget.scrollController,
+      controller: effectiveController,
       child: content,
     );
-    if (inSheet) return ColoredBox(color: c.background, child: scroll);
-    return Scaffold(backgroundColor: c.background, body: scroll);
+    // Drag down to close, like a sheet, on Android too (J6f-b fix): a drag
+    // from the header, or anywhere once scrolled back to the top, follows
+    // the finger and pops the page past a threshold or a fling.
+    final body = SpeciesPageDragClose(
+      scrollController: effectiveController,
+      onClose: () => Navigator.of(context).maybePop(),
+      child: scroll,
+    );
+    if (inSheet) return ColoredBox(color: c.background, child: body);
+    return Scaffold(backgroundColor: c.background, body: body);
   }
 
   void _openMap() => _push(
@@ -403,6 +508,10 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       initialSpecies: SpeciesChoice(widget.scientificName, _name),
     ),
   );
+
+  /// Fades [child] in in place: a loaded block replacing its skeleton.
+  /// [child]'s own key tells the switcher when to cross-fade.
+  static Widget _crossFade(Widget child) => BirdyCrossFade(child: child);
 }
 
 /// Whether `SpeciesInfoOverlay.show` opens this page instead of the

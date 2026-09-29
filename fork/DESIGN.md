@@ -9,7 +9,8 @@ cache). Le reste est calme, lisible en plein soleil et utilisable d'une main, pa
 Le mouvement est sobre, comme dans une app pro : court, discret, utile. Les moments d'oiseaux
 (l'arrivée d'une espèce, la toute première rencontre, l'oiseau rare, un nouveau statut) sont marqués,
 mais avec retenue : un fondu, un léger glissement, une teinte de la couleur de l'oiseau, une vibration
-légère. Jamais de confettis, de scintillements en boucle ni d'effets empilés. Ailleurs, pas d'effet gratuit.
+légère. Pas de scintillements en boucle ni d'effets empilés ; des confettis seulement pour une
+première rencontre, un nouveau statut et le quiz, en une seule gerbe. Ailleurs, pas d'effet gratuit.
 
 ## Les principes
 
@@ -149,9 +150,9 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Carte de revue balayée | ressort interruptible | suit le doigt, repart avec la vitesse du geste |
 | Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
 | Nouvelle espèce en Live | 220 ms | glisse de 8 px, échelle 0,97 vers 1, fondu, vibration légère |
-| Toute première espèce | 250 ms, une seule fois | carte « Première rencontre » en fondu, légère teinte de la couleur de l'oiseau derrière (opacité 15 % au plus), vibration légère |
+| Toute première espèce | 250 ms pour la carte, séquence d'environ 2,5 s, une seule fois | carte « Première rencontre » (fondu, 0,97 vers 1), légère teinte de la couleur de l'oiseau derrière (opacité 15 % au plus), puis l'oiseau, son anneau, les textes et une gerbe de confettis (détail en J6f), vibration légère |
 | Oiseau rare | attente, puis 450 ms | carte dorée immobile (fin liseré Loriot) en attendant « C'est bien lui » ; puis un seul anneau doux et la pastille « +1 espèce rare » en fondu |
-| Nouveau statut | 300 ms, une seule fois | l'emblème apparaît en fondu (échelle 0,97 vers 1), le texte suit 60 ms après, vibration légère |
+| Nouveau statut | 300 ms, une seule fois | l'emblème apparaît en fondu (échelle 0,97 vers 1), le texte suit 60 ms après, une gerbe de confettis part de l'emblème une fois celui-ci arrivé, vibration légère |
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
 - Jamais d'apparition depuis une échelle 0 : partir de 0,95 avec une opacité 0.
@@ -167,6 +168,15 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   terrain. Avec les animations réduites, tout s'arrête : états finaux immobiles, aucun confetti.
   Les bruitages (jingle, fanfare) suivent l'interrupteur « Avec son / Sans son » et jamais pendant
   une écoute Live.
+- Confettis (J6f) : un seul composant partagé, `BirdyConfetti` (`lib/fork/design/widgets/birdy_confetti.dart`,
+  paquet confetti), en gerbe (`.burst`) ou en pluie (`.rain`). Couleurs `BirdyConfettiColors`, durées et
+  physique `BirdyConfettiMotion` (émission 300 ms, 110 particules, fondu sur les 400 dernières ms, retiré
+  de l'arbre après 2,3 s ; pluie 4,6 s). Permis seulement pour : le quiz (gerbe d'une bonne réponse, pluie
+  d'un bon score), la « Première rencontre » en Live et l'écran « Nouveau statut ». Une seule émission,
+  jamais en boucle, jamais sur une interface calme (listes, Bilan, onglets). Animations réduites : aucun
+  confetti. La séquence « Première rencontre » (environ 2,5 s avec l'anneau et les confettis) dépasse
+  `celebrationMax` (500 ms) : exception acceptée, comme le quiz, car rien n'attend la fin (la carte et ses
+  boutons sont là dès 250 ms, l'écoute continue) et ce moment n'arrive qu'une fois par espèce dans une vie.
 - Exception autorisée : un double appui sur le logo de l'accueil (J6f, `lib/fork/home/logo_flight.dart`)
   fait s'envoler l'oiseau à travers l'écran (chemin courbe, une boucle, retour à sa place), 2 à 2,5 s,
   au-delà des 500 ms. Explicite et voulu par la personne (deux appuis, jamais tout seul), donc pas
@@ -175,6 +185,15 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   comporte comme un simple appui, pas de vol. Un second double appui pendant le vol est ignoré.
 - Outils : flutter_animate pour les effets déclaratifs, le paquet animations de Google pour les
   transitions Material, Hero et `ColorScheme.fromImageProvider` fournis par Flutter.
+- Squelettes de chargement (`BirdySkeleton`, `lib/fork/design/widgets/birdy_skeleton.dart`) : seule
+  boucle permise, et seulement tant que le chargement dure. Une bande de lumière diagonale (inclinée de
+  20°, large de la moitié de l'écran) balaie toutes les formes de gauche à droite en 1,1 s (ease-in-out,
+  `BirdyMotion.shimmerSweep`), puis repose 0,3 s (`shimmerPause`) : un cycle de 1,4 s. Un seul ticker
+  partagé (`BirdyShimmerClock`, compté par référence) pour tout l'écran : les formes sont synchronisées
+  et la bande se lit en coordonnées d'écran. Il démarre avec le premier squelette visible et s'arrête
+  avec le dernier (retiré de l'arbre, ou masqué par un `TickerMode`). Couleurs : `skeleton` de base,
+  `skeletonSheen` par-dessus (clair : blanc à 55 %, sombre : blanc à 12 %). Animations réduites : aucun
+  ticker, aplat `skeleton` fixe. Les formes et leurs dimensions ne changent pas.
 - Seconde exception, plus discrète : le logo de l'écoute (J6f, `lib/fork/live/live_header.dart`
   `_LiveLogo`, `BirdyGoLogoPainter`). Il remplace le point vivant qui pulsait ; tant que l'écoute
   est active, ses quatre barres d'aile oscillent seules, comme un petit vumètre, décalées entre
@@ -388,6 +407,12 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   « espèces » en dessous.
 - Puces et boutons au-dessus de la carte : blancs avec l'ombre des couches flottantes.
 - Position de l'utilisateur : point de 14 dp et halo fixe, sans animation.
+- Petits zooms (J6f) : chaque lieu (case de la grille hexagonale) est le logo BirdyGo en
+  couleurs (dégradé Martin-pêcheur, ailes en barres, bec Loriot, œil), centré sur la case, sur un
+  halo blanc de 3 dp qui le détache de n'importe quel fond. Le nombre de contacts se lit à la
+  taille, de 24 à 40 dp, jamais à l'opacité : un lieu calme est un petit oiseau, pas un oiseau
+  délavé. Les plus gros sont dessinés en dernier. Logo enregistré une fois en image, puis
+  seulement déplacé et mis à l'échelle (`place_bird_layer.dart`).
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 
@@ -395,6 +420,17 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
   Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
   garde toutes ses entrées.
+- Gestes (J6f) : un balayage horizontal passe à l'onglet voisin, dans l'ordre de la barre, et la
+  pastille suit dès que la page voisine dépasse la moitié de l'écran. Sur l'onglet Carte, le
+  balayage est coupé (la carte se déplace au doigt) : on en sort par la barre ou par le retour ;
+  entrer dans la carte depuis Carnet ou Profil par un balayage reste possible. Les défileurs
+  horizontaux des onglets (puces du Carnet, rangée « Aujourd'hui ») gardent leur geste. Un appui
+  sur la barre fait glisser les pages (`BirdyMotion.reorder`, 250 ms, courbe `BirdyMotion.move`) ;
+  avec les animations réduites, l'onglet change d'un coup (le balayage suit toujours le doigt).
+  Chaque onglet reste en vie hors de l'écran (défilement, filtres, carte) et n'est construit
+  qu'à sa première visite ; une fois entièrement hors de l'écran, il est masqué pour
+  `Visibility.of` (le logo de l'Accueil ne chante pas quand on ne le voit pas). Le retour
+  système depuis un autre onglet ramène à l'Accueil, puis quitte l'application.
 - Carnet (`lib/fork/notebook/`) : titre « Mon carnet » et bouton podium, carte de progression
   (découvertes, « N sur M espèces attendues ici cette semaine », barre Martin-pêcheur sans gain
   animé), puces en ligne qui défile, grille de 3 cartes `SpeciesCard` (écart 10). Ordre de « Toutes » :
@@ -468,6 +504,11 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
   (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
   remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
+- Profil en couleur (J6f), langage de blocs de l'Accueil : statut sur bloc Sûr, échelle dans un bloc
+  blanc avec le statut en cours sur une pastille tonale (seuil en Martin-pêcheur texte), série sur
+  bloc Loriot, badges en mini-blocs Loriot / tonal / Sûr en alternance (jamais deux voisins pareils),
+  « Qui chante ? » sur bloc tonal avec un disque Martin-pêcheur de 60 dp (casque) et un « ? » Loriot,
+  défi réussi en bloc Loriot avec une coche sur disque Loriot (aussi sur l'Accueil).
 - Garde-fous : rien ne se gagne avec une détection Probable ou À vérifier tant qu'elle n'est pas
   confirmée, un oiseau rare se confirme avant la fête, pas de notification culpabilisante, rien qui
   pousse à déranger les oiseaux (repasse) ou à publier la position d'une espèce sensible.
@@ -519,7 +560,7 @@ Règles :
   compare à la période « Tout », la Carte sait si l'index est vide, la Sonothèque regarde le filtre
   « Favoris seulement ». Le cas « rien encore » ne doit jamais s'afficher alors que d'autres réglages
   montreraient quelque chose.
-- Un chargement n'est pas un vide : indicateur de progression tant que les données ne sont pas là,
+- Un chargement n'est pas un vide : indicateur de progression ou squelettes (balayage de lumière) tant que les données ne sont pas là,
   puis l'écran vide en fondu (`BirdyEntrance`, fondu seul en animations réduites).
 - Textes : clé `<écran>EmptyTitle` pour le titre, `<écran>Empty` pour la phrase, dans `app_fr.arb`
   et `app_en.arb`. Les trois situations sont visibles dans la galerie du design system.
@@ -672,6 +713,21 @@ Accueil
   toujours visible dans le statut, y compris Normal : « En écoute · Vent », « En écoute · Normal »,
   « En écoute · Personnalisé », son mot et son icône (petite, avant le mot) dans la couleur du mode.
   Les moments (Première fois, Oiseau rare) gardent l'en-tête et ce bouton.
+
+Moment « Première rencontre » (`lib/fork/live/live_moments.dart`, maquette AppPremiere)
+- Séquence : voile en fondu (220 ms) ; carte en pop (bg-pop, fondu et 0,97 vers 1, 250 ms), avec ses
+  boutons, utilisables tout de suite ; l'oiseau en pop 60 ms plus tard ; derrière lui un halo (bg-glow,
+  couleur de l'oiseau à 15 % au plus) et un anneau (bg-ring : opacité 0 → 0,6 → 0, échelle 1 → 1,1,
+  1,2 s), une seule fois ; une gerbe de confettis part du centre de l'oiseau à 250 ms (couleurs de
+  l'oiseau + Loriot, Martin-pêcheur, Lichen) ; noms, titre et « Ajouté à ton carnet » montent (bg-rise,
+  8 px, 220 ms) à partir de 120 ms, 40 ms d'écart ; le statut atterrit (bg-land, 250 ms), puis la
+  ligne « Encore N espèces ». Jetons : `BirdyMotion.firstEncounter*`, `ring*`, `glowPeakAt`.
+- Toujours : aucun son (le micro l'entendrait), une vibration légère, fermeture seule après 6 s,
+  l'en-tête et sa pilule de mode restent visibles, confettis et anneau limités à la zone du moment
+  (jamais sur « Arrêter » / « Pause »). Animations réduites : fondus seuls, ni anneau, ni halo, ni
+  confettis.
+- Bilan : pas de confettis sur la carte « Première fois » ; elle a déjà été fêtée en direct, le Bilan
+  se rouvre depuis le journal et peut enchaîner avec « Nouveau statut ».
 
 Modes d'écoute (`lib/fork/listening_mode/`)
 - Chaque mode a sa couleur (`ListeningModeColors`, `lib/fork/design/birdy_tokens.dart`), distincte

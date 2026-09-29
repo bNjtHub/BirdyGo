@@ -757,6 +757,23 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             écran éteint), changement de mode en pleine écoute, mode retrouvé après redémarrage.
       - [ ] Décider de garder Ville après le terrain (lever le drapeau ou retirer le mode).
       - [ ] Enregistrer le mode dans la session (champ `SessionSettings`, hors fork aujourd'hui).
+      - [x] J6f-e Profil et Quiz (PR « J6f-e Profil et Quiz : … », maquettes Claude Design `AppProfil`
+            et `AppQuiz`). Profil en 3 blocs : « Mon niveau » (anneau, échelle 2×4 qu'on touche, encart
+            du prochain niveau avec barre à cases), « Série », « À gagner » (plumes, défi, badges sur 3
+            colonnes gagnés d'abord, entrée du quiz avec le nouveau `QuizLogo`). Les rangs du jeu
+            s'appellent « niveau » partout (valeurs des chaînes seulement). Quiz : accueil (étincelles,
+            oiseaux en orbite, bulle, cartes Écoute / Devine / Gagne, carte badge à cases), pastille de
+            score, scène d'écoute (bulle, anneaux, spectre 27 barres), encouragement sur une erreur,
+            récap « N trouvés », carte médaille au ton du métal, « +N cette partie ». Les photos restent ;
+            l'oiseau mystère prend la silhouette BirdyGo.
+      - [x] (Benjamin) Téléphone : 60 images par seconde sur l'accueil du quiz (décor animé) et le Profil.
+      - [x] J6f-f Palmarès (PR « J6f-f Palmarès : … », maquette Claude Design `AppPalmares`) : podium
+            2-1-3 à hauteurs 240 / 212 / 196 avec médailles or, argent, bronze (`BadgeMedal` avec le
+            rang), photos dans un disque cerclé de l'accent, scintillements fixes sur le premier ;
+            lignes de 60 dp avec barre proportionnelle au premier qui pousse une fois ; nombre de
+            nouvelles de l'année en Loriot ; interrupteur partagé `BirdySwitch`. Pas de boucle ni de
+            rebond (DESIGN.md prime sur la maquette).
+      - [ ] (Benjamin) Téléphone : Palmarès, podium et barres, clair et sombre.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;

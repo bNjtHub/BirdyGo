@@ -32,11 +32,39 @@ abstract final class BirdyBrand {
   /// Background of the spectrogram well (both themes).
   static const Color wellTop = Color(0xFF0B1728);
   static const Color wellBottom = Color(0xFF0F1E33);
+
+  /// Small "current level" check badge on the Profil ladder (J6f), both
+  /// themes: real metal green, not a theme token.
+  static const Color checkGreen = Color(0xFF3E8E4F);
+
+  /// Faint radial highlight over the well (Quiz v2 mockup's hero and stage).
+  static const Color wellHighlight = Color(0xFF173A55);
+}
+
+/// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
+/// the same in both themes.
+abstract final class BirdyConfettiColors {
+  /// Rain over a good quiz score.
+  static const List<Color> rain = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF3B8FDB),
+    Color(0xFFE9836B),
+  ];
+
+  /// Burst from a bird or an emblem, besides its own colors.
+  static const List<Color> burst = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+  ];
 }
 
 /// Colors of the « Qui chante ? » quiz (J6e, Quiz v2 mockup) that are not
-/// theme tokens: the equalizer bars on the dark well, the confetti and the
-/// small marks of the round's recap.
+/// theme tokens: the equalizer bars on the dark well and the small marks of
+/// the round's recap. Its confetti use [BirdyConfettiColors].
 abstract final class BirdyQuizColors {
   /// Equalizer bars, from the deepest to the lightest Martin-pêcheur shade.
   static const Color bar1 = Color(0xFF52C0C9);
@@ -57,23 +85,6 @@ abstract final class BirdyQuizColors {
     bar1,
   ];
 
-  /// Rain of confetti on a good score.
-  static const List<Color> rain = [
-    BirdyBrand.oriole,
-    BirdyBrand.kingfisher,
-    BirdyBrand.lichen,
-    Color(0xFFEC7A3C),
-    Color(0xFF3B8FDB),
-    Color(0xFFE9836B),
-  ];
-
-  /// Burst on a right answer, besides the bird's own colors.
-  static const List<Color> burst = [
-    BirdyBrand.oriole,
-    BirdyBrand.kingfisher,
-    BirdyBrand.lichen,
-  ];
-
   /// Cross mark of a missed bird in the recap, light and dark.
   static const Color missedLight = Color(0xFF9AA39A);
   static const Color missedDark = Color(0xFF6E7A86);
@@ -87,6 +98,20 @@ abstract final class BirdyQuizColors {
 
   /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
   static const double mysteryBrightness = 2.2;
+
+  /// Sparks, twinkles and star burst particles on the intro hero, the
+  /// result and a right reveal (Quiz v2 mockup).
+  static const List<Color> sparkColors = [
+    BirdyBrand.oriole,
+    BirdyBrand.kingfisher,
+    BirdyBrand.lichen,
+    Color(0xFFEC7A3C),
+    Color(0xFF5AA9E6),
+    Color(0xFFE9836B),
+  ];
+
+  /// Rim of an earned result star (a shaded gold), both themes.
+  static const Color starRim = Color(0xFFC49224);
 }
 
 /// Foreground and background of one reliability level.
@@ -146,6 +171,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.probable,
     required this.toCheck,
     required this.skeleton,
+    required this.skeletonSheen,
   });
 
   final Brightness brightness;
@@ -216,9 +242,12 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// Layer behind moments.
   final Color veil;
 
-  /// Muted fill of a loading skeleton (static: DESIGN.md forbids animation
-  /// loops, so no shimmer or pulse).
+  /// Muted fill of a loading skeleton.
   final Color skeleton;
+
+  /// Light band sweeping over the skeletons (the shimmer, `BirdyShimmer`):
+  /// translucent, painted over [skeleton]. Static fill with reduced motion.
+  final Color skeletonSheen;
 
   final LevelColors sure;
   final LevelColors probable;
@@ -286,6 +315,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: BirdyBrand.bark,
     veil: Color(0xC70C1829),
     skeleton: Color(0xFFD6DCD2),
+    skeletonSheen: Color(0x8CFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -327,6 +357,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     rarityMuted: Color(0xFFC9B8A4),
     veil: Color(0xC70C1829),
     skeleton: Color(0xFF29425F),
+    skeletonSheen: Color(0x1FFFFFFF),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -384,6 +415,7 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       rarityMuted: c(rarityMuted, other.rarityMuted),
       veil: c(veil, other.veil),
       skeleton: c(skeleton, other.skeleton),
+      skeletonSheen: c(skeletonSheen, other.skeletonSheen),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
@@ -510,11 +542,47 @@ abstract final class BirdySizes {
   /// Status disc of the status block.
   static const double statusDisc = 52;
 
+  /// Ring of the home level block (J6g-b), the Profil ring's little sibling.
+  static const double homeLevelRing = 72;
+
+  /// Ring of the notebook progress block (J6g-b).
+  static const double notebookRing = 88;
+
   /// Small icon disc leading a block (weekly challenge).
   static const double blockIconDisc = 40;
 
   /// Icon of a one-line tip (empty live table).
   static const double tipIcon = 18;
+
+
+  /// Illustration disc of the « Qui chante ? » block on the Profil, and the
+  /// Loriot question mark pinned on its corner.
+  static const double quizDisc = 60;
+  static const double quizDiscBadge = 24;
+
+  /// The quiz entry's logo (J6f, [QuizLogo]), the Profil quiz row.
+  static const double quizLogo = 56;
+
+  /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
+  /// check badge on the current one.
+  static const double levelEmblem = 48;
+  static const double levelCellMinHeight = 84;
+  static const double levelCheckBadge = 20;
+
+  /// Icon disc leading the level info box and a weekly challenge inset.
+  static const double levelInfoIcon = 44;
+
+  /// A segmented bar's bar height and the gap between bars (level info box,
+  /// weekly challenge).
+  static const double segmentHeight = 12;
+  static const double segmentGap = 3;
+
+  /// Above this many segments, a segmented bar falls back to one continuous
+  /// [BirdyProgressBar] (too many slivers to read).
+  static const int segmentBarMax = 25;
+
+  /// Minimum height of a badge tile (Profil « À gagner »).
+  static const double badgeTile = 136;
 
   /// Live header logo (J6f): about the status line's height, a bit more.
   static const double liveLogo = 22;
@@ -570,4 +638,48 @@ abstract final class BirdyAlpha {
   /// [BirdyColors.surface1] of an expected species row in the empty live
   /// table (it is not there yet).
   static const double expectedRow = 0.55;
+
+
+  /// Thin inner white ring on a reached level emblem/ring (J6f).
+  static const double emblemInnerRing = 0.5;
+}
+
+/// Contact map markers (J6g-f). The map tiles stay light in both themes, so
+/// the marker disc and its ring do not follow the theme: they must read on
+/// any tile, and on the dark placeholder shown before tiles are allowed.
+abstract final class BirdyMapStyle {
+  /// Disc under a species photo and border of the cluster bubble.
+  static const Color disc = Color(0xFFFFFFFF);
+
+  /// Soft drop shadow under a marker (Encre at 18 %).
+  static const Color shadow = Color(0x2E13233A);
+
+  /// Contact-count badge (Encre with Brume text: 14:1 on any tile).
+  static const Color badge = BirdyBrand.ink;
+  static const Color onBadge = BirdyBrand.mist;
+
+  /// Text on the Martin-pêcheur cluster disc.
+  static const Color onCluster = BirdyBrand.ink;
+
+  /// Species marker: disc, ring, photo and badge height.
+  static const double markerDisc = 44;
+  static const double markerRing = 3;
+  static const double markerPhoto = 34;
+  static const double badgeHeight = 22;
+
+  /// Cluster bubble diameter and border.
+  static const double cluster = 56;
+  static const double clusterBorder = 3;
+
+  /// User position dot and its border.
+  static const double userDot = 14;
+  static const double userDotBorder = 3;
+
+  /// Ring around a species avatar in the map sheets.
+  static const double avatarRing = 2;
+
+  /// Shadow lifting a marker off the tiles.
+  static List<BoxShadow> get lift => const [
+    BoxShadow(color: shadow, offset: Offset(0, 4), blurRadius: 12),
+  ];
 }

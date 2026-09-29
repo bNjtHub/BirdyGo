@@ -19,7 +19,7 @@ import '../explore/explore_providers.dart';
 import '../../fork/live/live_position.dart'; // FORK: GPS track (J6c)
 import '../explore/widgets/species_info_overlay.dart';
 import '../history/session_library_screen.dart';
-import '../history/session_review_screen.dart';
+// FORK: SessionReviewScreen import dropped, the stop flow opens the Bilan (J6g-e)
 import '../inference/advanced_pooling_params.dart';
 import '../recording/recording_service.dart';
 import '../settings/settings_screen.dart';
@@ -50,7 +50,7 @@ import '../../fork/listening_mode/listening_mode.dart'; // FORK: listening scree
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
 import '../../fork/live/live_tip_motion.dart'; // FORK: tip cards
-import '../../fork/summary/listening_summary_screen.dart'; // FORK: listening summary (J6c)
+import '../../fork/summary/open_listening_summary.dart'; // FORK: listening summary (J6c, J6g-e)
 
 // =============================================================================
 // Live Mode Screen — Edge-to-Edge Layout
@@ -721,18 +721,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             pageBuilder: (a, b, c) => const SessionLibraryScreen(),
           ),
         );
-        navigator.push(
-          MaterialPageRoute<void>(
-            builder:
-                (_) =>
-                    autoSave // FORK: listening summary when saved (J6c)
-                        ? ListeningSummaryScreen(session: session)
-                        : SessionReviewScreen(
-                          session: session,
-                          autoSaved: autoSave,
-                        ),
-          ),
-        );
+        // FORK: always the listening summary, saved or not (J6c, J6g-e)
+        navigator.push(afterStopSummaryRoute(session, saved: autoSave));
       }
     } else {
       if (mounted) Navigator.of(context).pop();

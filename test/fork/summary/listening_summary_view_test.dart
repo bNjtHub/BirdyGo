@@ -46,6 +46,7 @@ void main() {
     bool reduceMotion = false,
     VoidCallback? onAddObservation,
     Size size = const Size(360, 800),
+    Widget? notice,
   }) async {
     tester.view.physicalSize = size * 3;
     tester.view.devicePixelRatio = 3;
@@ -74,6 +75,7 @@ void main() {
           onCheck: (keys) => checked = keys,
           onDetails: () => details++,
           onAddObservation: onAddObservation,
+          notice: notice,
           onMarkRecording: (recording) => markedRecording = recording,
         ),
       ),
@@ -233,7 +235,9 @@ void main() {
   testWidgets('share and map buttons have labels', (tester) async {
     await pump(tester, _morning());
 
-    expect(find.byTooltip('Terminer'), findsOneWidget);
+    // The header's back button carries the system tooltip (« Retour »),
+    // like every `BirdyOverlayHeader` (J6f).
+    expect(find.byTooltip('Fermer'), findsOneWidget);
     expect(find.byTooltip('Revoir sur la carte'), findsOneWidget);
     await tester.tap(find.byTooltip('Partager'));
     expect(shared, 1);
@@ -254,6 +258,16 @@ void main() {
     });
   }
 
+  testWidgets(
+    'BirdyOverlayHeader shows the back button and the title at 130 % text',
+    (tester) async {
+      await pump(tester, _morning(), textScale: 1.3);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Bilan de l\'écoute'), findsOneWidget);
+      expect(find.byTooltip('Fermer'), findsOneWidget);
+    },
+  );
+
   testWidgets('landscape keeps a readable column', (tester) async {
     await pump(tester, _morning(), size: const Size(800, 360));
     expect(tester.takeException(), isNull);
@@ -265,4 +279,43 @@ void main() {
     expect(find.text('Belle matinée !'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  for (final dark in [false, true]) {
+    testWidgets(
+      'unsaved notice at 320 dp, 130 % text: no overflow, 48 dp button '
+      '(${dark ? 'dark' : 'light'})',
+      (tester) async {
+        var saved = 0;
+        await pump(
+          tester,
+          _morning(),
+          dark: dark,
+          textScale: 1.3,
+          size: const Size(320, 640),
+          notice: UnsavedListeningNotice(onSave: () => saved++),
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.text('Écoute non enregistrée'), findsOneWidget);
+        final button = find.text('Enregistrer');
+        expect(button, findsOneWidget);
+        final target = tester.getSize(
+          find.ancestor(of: button, matching: find.byType(FilledButton)),
+        );
+        expect(target.height, greaterThanOrEqualTo(48));
+        expect(target.width, greaterThanOrEqualTo(48));
+        await tester.tap(button);
+        expect(saved, 1);
+        // The note title is announced as a header.
+        final handle = tester.ensureSemantics();
+        expect(
+          tester
+              .getSemantics(find.text('Écoute non enregistrée'))
+              .flagsCollection
+              .isHeader,
+          isTrue,
+        );
+        handle.dispose();
+      },
+    );
+  }
 }

@@ -183,6 +183,8 @@ class HomeHero extends StatelessWidget {
           onTap: onTap,
           child: Stack(
             children: [
+              // Relief: a soft halo of the species accent, a second ring
+              // inside it, then the bird on a white-ringed disc.
               PositionedDirectional(
                 end: _heroDiscEnd,
                 top: _heroDiscTop,
@@ -190,18 +192,42 @@ class HomeHero extends StatelessWidget {
                   width: BirdySizes.heroDisc,
                   height: BirdySizes.heroDisc,
                   decoration: BoxDecoration(
-                    color: tint.accent.withValues(alpha: BirdyAlpha.heroDisc),
                     shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        tint.accent.withValues(alpha: BirdyAlpha.heroDisc * 2),
+                        tint.accent.withValues(alpha: BirdyAlpha.heroDisc),
+                        tint.accent.withValues(alpha: 0),
+                      ],
+                      stops: const [0.45, 0.72, 1],
+                    ),
                   ),
                 ),
               ),
               PositionedDirectional(
                 end: _heroBirdEnd,
                 top: _heroBirdTop,
-                child: SpeciesAvatar(
-                  image: image,
-                  tint: tint,
-                  size: BirdySizes.heroBird,
+                child: DecoratedBox(
+                  key: const ValueKey('home-hero-bird'),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: c.isDark ? c.surface1 : Colors.white,
+                      width: 4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tint.accent.withValues(alpha: 0.35),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: SpeciesAvatar(
+                    image: image,
+                    tint: tint,
+                    size: BirdySizes.heroBird - 8,
+                  ),
                 ),
               ),
               content,
@@ -638,30 +664,29 @@ class StatusBlock extends StatelessWidget {
             ? l10n.forkStatusTop
             : l10n.forkStatusNext(progress.remaining, statusName(l10n, next));
     final percent = (progress.progress * 100).round();
+    final from = status?.from ?? 0;
+    final total = next == null ? 0 : next.from - from;
+    final filled = (progress.verified - from).clamp(0, total);
     return BirdyBlock(
       key: const ValueKey('home-status-block'),
       tone: BirdyBlockTone.sure,
+      radius: BirdyRadii.hero,
+      padding: const EdgeInsets.all(BirdySpace.xl),
       onTap: onTap,
       semanticLabel:
           '$name. ${l10n.forkNotebookDiscovered(progress.verified)}. '
-          '${l10n.forkStatusRingLabel(percent)}. $caption',
+          '${l10n.forkStatusRingLabel(percent)}. $caption. '
+          '${l10n.forkHomeLevelOpen}',
       child: Row(
         children: [
-          Container(
-            width: BirdySizes.statusDisc,
-            height: BirdySizes.statusDisc,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: BirdyBrand.lichen,
-              shape: BoxShape.circle,
-            ),
-            child: StatusEmblem(
-              status: status ?? GameConfig.statuses.first,
-              reached: status != null,
-              size: BirdySizes.statusDisc - 2 * BirdySpace.xs,
-            ),
+          // Same ring and emblem as the Profil « Mon niveau » card.
+          StatusRing(
+            status: status,
+            progress: progress.progress,
+            size: BirdySizes.homeLevelRing,
+            semanticLabel: l10n.forkStatusRingLabel(percent),
           ),
-          const SizedBox(width: BirdySpace.m),
+          const SizedBox(width: BirdySpace.l),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -689,15 +714,37 @@ class StatusBlock extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: BirdySpace.s),
-                BirdyProgressBar(
-                  value: progress.progress,
-                  color: c.sure.foreground,
-                  track: birdyTrackOnTint(c),
+                // Segmented like the Profil's next-level bar, one segment per
+                // species still to find.
+                SizedBox(
+                  height: BirdySizes.segmentHeight,
+                  child: Align(
+                    child:
+                        next == null
+                            ? BirdyProgressBar(
+                              value: 1,
+                              color: c.sure.foreground,
+                              track: birdyTrackOnTint(c),
+                            )
+                            : SegmentedBar(
+                              count: total,
+                              filled: filled,
+                              color: c.sure.foreground,
+                              track: birdyTrackOnTint(c),
+                            ),
+                  ),
                 ),
                 const SizedBox(height: BirdySpace.s),
-                Text(
-                  caption,
-                  style: BirdyText.caption.copyWith(color: c.text2),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        caption,
+                        style: BirdyText.caption.copyWith(color: c.text2),
+                      ),
+                    ),
+                    Icon(AppIcons.chevronRight, size: 20, color: c.text2),
+                  ],
                 ),
               ],
             ),
@@ -743,14 +790,16 @@ class StatusBlockSkeleton extends StatelessWidget {
     return ExcludeSemantics(
       child: BirdyBlock(
         tone: BirdyBlockTone.sure,
+        radius: BirdyRadii.hero,
+        padding: const EdgeInsets.all(BirdySpace.xl),
         child: Row(
           children: [
             BirdySkeleton.box(
-              width: BirdySizes.statusDisc,
-              height: BirdySizes.statusDisc,
+              width: BirdySizes.homeLevelRing,
+              height: BirdySizes.homeLevelRing,
               radius: BirdyRadii.pill,
             ),
-            const SizedBox(width: BirdySpace.m),
+            const SizedBox(width: BirdySpace.l),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -776,16 +825,28 @@ class StatusBlockSkeleton extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: BirdySpace.s),
-                  BirdyProgressBar(
-                    value: 0,
-                    color: c.sure.foreground,
-                    track: birdyTrackOnTint(c),
+                  SizedBox(
+                    height: BirdySizes.segmentHeight,
+                    child: Align(
+                      child: BirdyProgressBar(
+                        value: 0,
+                        color: c.sure.foreground,
+                        track: birdyTrackOnTint(c),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: BirdySpace.s),
-                  BirdySkeleton.text(
-                    BirdyText.caption,
-                    placeholder: placeholderCaption,
-                    maxLines: null,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: BirdySkeleton.text(
+                          BirdyText.caption,
+                          placeholder: placeholderCaption,
+                          maxLines: null,
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                    ],
                   ),
                 ],
               ),
@@ -805,9 +866,14 @@ class TodayBlock extends StatelessWidget {
     required this.nameOf,
     this.imageOf,
     this.onSpecies,
+    this.onOpen,
   });
 
   final DaySummary today;
+
+  /// Opens the Bilan of today's latest listening: the whole block is one
+  /// target (J6g-b). The species cards keep their own tap (species page).
+  final VoidCallback? onOpen;
 
   /// Localized common name of a species of the day.
   final String Function(DaySpecies species) nameOf;
@@ -826,16 +892,19 @@ class TodayBlock extends StatelessWidget {
         (today.newSpecies, l10n.forkHomeNewStat(today.newSpecies)),
     ];
     return BirdyBlock(
+      key: const ValueKey('home-today-block'),
+      radius: BirdyRadii.hero,
+      onTap: onOpen,
       padding: const EdgeInsetsDirectional.only(
-        start: BirdySpace.l,
-        top: BirdySpace.l,
-        bottom: BirdySpace.l,
+        start: BirdySpace.xl,
+        top: BirdySpace.xl,
+        bottom: BirdySpace.xl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+            padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
             child: Wrap(
               spacing: BirdySpace.m,
               runSpacing: BirdySpace.xs,
@@ -871,7 +940,7 @@ class TodayBlock extends StatelessWidget {
             SingleChildScrollView(
               key: const ValueKey('home-today-row'),
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -893,6 +962,93 @@ class TodayBlock extends StatelessWidget {
               ),
             ),
           ],
+          ...[
+            const SizedBox(height: BirdySpace.block),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      today.sessionCount > 1
+                          ? l10n.forkHomeTodayOpenMany(today.sessionCount)
+                          : l10n.forkHomeTodayOpen,
+                      style: BirdyText.labelCompact.copyWith(
+                        color: c.accentText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Icon(AppIcons.chevronRight, size: 20, color: c.accentText),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// « Aucun oiseau pour l'instant » (J6g-b): the today block of a day with
+/// nothing heard yet, on the tonal tint, inviting to listen. Tapping it
+/// starts a listening, like the pinned « Écouter » button.
+class TodayEmptyBlock extends StatelessWidget {
+  const TodayEmptyBlock({super.key, this.onListen});
+
+  final VoidCallback? onListen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return BirdyBlock(
+      tone: BirdyBlockTone.tonal,
+      radius: BirdyRadii.hero,
+      padding: const EdgeInsets.all(BirdySpace.xl),
+      onTap: onListen,
+      semanticLabel:
+          '${l10n.forkHomeTodayTitle}. ${l10n.forkHomeEmptyDayTitle}. '
+          '${l10n.forkHomeEmptyDay}',
+      child: Row(
+        children: [
+          Container(
+            width: BirdySizes.homeLevelRing,
+            height: BirdySizes.homeLevelRing,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: birdyTrackOnTint(c),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(AppIcons.hearing, size: 36, color: c.accentText),
+          ),
+          const SizedBox(width: BirdySpace.l),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.forkHomeEmptyDayTitle,
+                  style: BirdyText.heading.copyWith(color: c.text1),
+                ),
+                const SizedBox(height: BirdySpace.xs),
+                Text(
+                  l10n.forkHomeEmptyDay,
+                  style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                ),
+                if (onListen != null) ...[
+                  const SizedBox(height: BirdySpace.s),
+                  Text(
+                    l10n.forkHomeEmptyDayAction,
+                    style: BirdyText.labelCompact.copyWith(
+                      color: c.accentText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -922,16 +1078,17 @@ class TodayBlockSkeleton extends StatelessWidget {
     ].join(' · ');
     return ExcludeSemantics(
       child: BirdyBlock(
+        radius: BirdyRadii.hero,
         padding: const EdgeInsetsDirectional.only(
-          start: BirdySpace.l,
-          top: BirdySpace.l,
-          bottom: BirdySpace.l,
+          start: BirdySpace.xl,
+          top: BirdySpace.xl,
+          bottom: BirdySpace.xl,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
               child: Wrap(
                 spacing: BirdySpace.m,
                 runSpacing: BirdySpace.xs,
@@ -951,7 +1108,7 @@ class TodayBlockSkeleton extends StatelessWidget {
             ),
             const SizedBox(height: BirdySpace.block),
             Padding(
-              padding: const EdgeInsetsDirectional.only(end: BirdySpace.l),
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -962,6 +1119,21 @@ class TodayBlockSkeleton extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: BirdySpace.block),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: BirdySpace.xl),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: BirdySkeleton.text(
+                      BirdyText.labelCompact,
+                      placeholder: l10n.forkHomeTodayOpen,
+                    ),
+                  ),
+                  const SizedBox(width: 20, height: 20),
+                ],
               ),
             ),
           ],

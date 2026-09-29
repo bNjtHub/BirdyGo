@@ -26,6 +26,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_confetti.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/pressable.dart';
@@ -90,10 +91,10 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     (_) => GlobalKey(),
   );
   final ConfettiController _burst = ConfettiController(
-    duration: QuizMotion.confetti,
+    duration: BirdyConfettiMotion.emission,
   );
   final ConfettiController _rain = ConfettiController(
-    duration: QuizMotion.confetti,
+    duration: BirdyConfettiMotion.emission,
   );
 
   /// The round ended well enough for the rain of confetti.
@@ -101,7 +102,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   /// Where the last burst starts (center of the tapped card) and its colors.
   Offset? _burstOrigin;
-  List<Color> _burstColors = BirdyQuizColors.burst;
+  List<Color> _burstColors = BirdyConfettiColors.burst;
 
   @override
   void initState() {
@@ -205,7 +206,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       _results.add(right);
       if (right) {
         _burstOrigin = _centerOf(index);
-        _burstColors = [tint.accent, ...BirdyQuizColors.burst, tint.deep];
+        _burstColors = [tint.accent, ...BirdyConfettiColors.burst, tint.deep];
       }
     });
     // The clip stops: the reveal takes the stage.
@@ -362,21 +363,21 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                 Positioned(
                   left: origin.dx,
                   top: origin.dy,
-                  child: QuizConfetti.burst(
+                  child: BirdyConfetti.burst(
                     key: ValueKey('quiz-burst $_current'),
                     controller: _burst,
                     colors: _burstColors,
                   ),
                 ),
               if (!reduced && _party && _phase == _Phase.result)
-                for (final spot in QuizMotion.rainSpots)
+                for (final spot in BirdyConfettiMotion.rainSpots)
                   Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
                     child: Align(
                       alignment: Alignment(spot * 2 - 1, -1),
-                      child: QuizConfetti.rain(
+                      child: BirdyConfetti.rain(
                         key: ValueKey('quiz-rain $spot'),
                         controller: _rain,
                       ),
@@ -455,7 +456,6 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   }
 
   Widget _intro() {
-    final clips = _clips!;
     final correct = ref.watch(fineEarStoreProvider).correct();
     return QuizIntro(
       birds: [
@@ -464,7 +464,6 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       ],
       questions: _questions.length,
       choices: GameConfig.quizChoices,
-      birdCount: clips.length,
       badge: fineEarBadge(correct),
       onStart: _start,
     );
@@ -525,12 +524,28 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                   ),
                 ),
               ),
-              if (streak >= 2)
-                QuizPop(
-                  key: ValueKey('streak $streak'),
-                  duration: QuizMotion.pill,
-                  child: _StreakPill(label: l10n.forkQuizStreak(streak)),
+              const SizedBox(width: BirdySpace.xs),
+              // A Wrap, not a Row: at 130 % text on a small phone, the
+              // streak pill and the score chip together can be wider than
+              // the space left; they wrap to a second line instead of
+              // overflowing.
+              Flexible(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: BirdySpace.xs,
+                  runSpacing: 4,
+                  children: [
+                    if (streak >= 2)
+                      QuizPop(
+                        key: ValueKey('streak $streak'),
+                        duration: QuizMotion.pill,
+                        child: _StreakPill(label: l10n.forkQuizStreak(streak)),
+                      ),
+                    _ScoreChip(right: _results.where((r) => r).length),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -626,12 +641,25 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
             duration: QuizMotion.nextRise,
             delay: QuizMotion.nextDelay,
             child: Pressable(
-              child: FilledButton.icon(
-                style: BirdyButtonStyles.primary(context),
-                onPressed: _next,
-                iconAlignment: IconAlignment.end,
-                icon: const Icon(AppIcons.arrowForwardRounded),
-                label: Text(last ? l10n.forkQuizFinish : l10n.forkQuizNext),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                  boxShadow: c.ctaGlow,
+                ),
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: c.accent,
+                    foregroundColor: c.onAccent,
+                    minimumSize: const Size(64, BirdySizes.listen),
+                    shape: const StadiumBorder(),
+                    textStyle: BirdyText.label.copyWith(fontSize: 20),
+                    iconSize: 22,
+                  ),
+                  onPressed: _next,
+                  iconAlignment: IconAlignment.end,
+                  icon: const Icon(AppIcons.arrowForwardRounded),
+                  label: Text(last ? l10n.forkQuizFinish : l10n.forkQuizNext),
+                ),
               ),
             ),
           ),
@@ -675,6 +703,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       results: _results,
       badge: fineEarBadge(store.correct()),
       before: fineEarBadge(_startCorrect),
+      party: _party,
       onAgain: _start,
       // pop, not maybePop: PopScope turns a back in a round into « intro ».
       onDone: () => Navigator.of(context).pop(),
@@ -682,7 +711,8 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   }
 }
 
-/// « 3 d'affilée ! », Loriot.
+/// « 3 d'affilée ! », Loriot, ringed with its container tint and a small
+/// twinkling star disc (Quiz v2 mockup, J6f-e).
 class _StreakPill extends StatelessWidget {
   const _StreakPill({required this.label});
 
@@ -692,22 +722,91 @@ class _StreakPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return Container(
-      constraints: const BoxConstraints(minHeight: 28),
-      padding: const EdgeInsets.fromLTRB(8, 2, 12, 2),
+      constraints: const BoxConstraints(minHeight: 30),
+      padding: const EdgeInsets.fromLTRB(4, 2, 12, 2),
       decoration: BoxDecoration(
         color: c.oriole,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
+        boxShadow: [BoxShadow(color: c.orioleContainer, spreadRadius: 3)],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(AppIcons.quizSpark, size: 14, fill: 1, color: c.onOriole),
+          Container(
+            width: 20,
+            height: 20,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: c.surface1, shape: BoxShape.circle),
+            child: QuizLoop(
+              period: const Duration(milliseconds: 1600),
+              builder:
+                  (context, t, child) => Opacity(
+                    opacity: quizKeyframes(
+                      t,
+                      const [0, 0.5, 1],
+                      const [0.3, 1, 0.3],
+                      QuizMotion.inOut,
+                    ),
+                    child: child,
+                  ),
+              child: Icon(AppIcons.quizSpark, size: 13, fill: 1, color: c.oriole),
+            ),
+          ),
           const SizedBox(width: BirdySpace.xs),
-          Text(
-            label,
-            style: BirdyText.badge.copyWith(height: 1.2, color: c.onOriole),
+          Flexible(
+            child: Text(
+              label,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: BirdyText.badge.copyWith(
+                height: 1.2,
+                color: c.onOriole,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The always-visible score chip: right answers so far (Quiz v2 mockup,
+/// J6f-e), Sûr green.
+class _ScoreChip extends StatelessWidget {
+  const _ScoreChip({required this.right});
+
+  final int right;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Semantics(
+      label: l10n.forkQuizRightSoFar(right),
+      excludeSemantics: true,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 30),
+        padding: const EdgeInsets.fromLTRB(10, 0, 12, 0),
+        decoration: BoxDecoration(
+          color: c.sure.background,
+          borderRadius: BorderRadius.circular(BirdyRadii.pill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(AppIcons.quizCheck, size: 16, color: c.sure.foreground),
+            const SizedBox(width: BirdySpace.xs),
+            Text(
+              '$right',
+              style: BirdyText.badge.copyWith(
+                color: c.sure.foreground,
+                fontWeight: FontWeight.w800,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

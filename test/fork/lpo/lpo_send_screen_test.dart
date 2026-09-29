@@ -8,6 +8,9 @@ import 'package:birdnet_live/fork/reliability/geo_presence_service.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -186,8 +189,26 @@ void main() {
       LpoSendScreen(session: session, detections: [session.detections.last]),
     );
     expect(find.textContaining('Espèce sensible'), findsOneWidget);
-    final toggle = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
-    expect(toggle.value, isTrue);
+    expect(tester.widget<BirdySwitch>(find.byType(BirdySwitch)).value, isTrue);
+    // The whole row is the target, and it reports a toggled state.
+    await tester.tap(find.text('Masquer la donnée sur Faune-France'));
+    await tester.pump();
+    expect(tester.widget<BirdySwitch>(find.byType(BirdySwitch)).value, isFalse);
+  });
+
+  testWidgets('overlay header, no Material app bar, chips for the answers', (
+    tester,
+  ) async {
+    final session = _session();
+    await pump(tester, LpoSendScreen(session: session));
+    expect(find.byType(BirdyOverlayHeader), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byType(SegmentedButton<bool>), findsNothing);
+    final yes = find.widgetWithText(BirdyFilterChip, 'Oui').first;
+    await tester.ensureVisible(yes);
+    await tester.tap(yes);
+    await tester.pump();
+    expect(tester.widget<BirdyFilterChip>(yes).selected, isTrue);
   });
 
   testWidgets('dark at 130 %: the cards lay out (J6c)', (tester) async {

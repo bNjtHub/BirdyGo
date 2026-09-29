@@ -15,6 +15,14 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
+import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_sheet.dart';
+import '../design/widgets/pressable.dart';
 import '../design/widgets/empty_state.dart';
 import '../lpo/lpo_config.dart';
 import 'garden_count.dart';
@@ -65,16 +73,35 @@ class _GardenCountScreenState extends ConsumerState<GardenCountScreen> {
     final l10n = AppLocalizations.of(context)!;
     final count = ref.watch(gardenCountProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.forkGardenTitle)),
-      body: switch (count) {
-        null => _Intro(
-          onStart:
-              () =>
-                  ref.read(gardenCountProvider.notifier).start(DateTime.now()),
+      backgroundColor: BirdyColors.of(context).background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BirdySpace.page,
+                BirdySpace.s,
+                BirdySpace.page,
+                BirdySpace.s,
+              ),
+              child: BirdyOverlayHeader(title: l10n.forkGardenTitle),
+            ),
+            Expanded(
+              child: switch (count) {
+                null => _Intro(
+                  onStart:
+                      () => ref
+                          .read(gardenCountProvider.notifier)
+                          .start(DateTime.now()),
+                ),
+                GardenCount(finished: false) => _Running(count: count),
+                _ => _Summary(count: count),
+              },
+            ),
+          ],
         ),
-        GardenCount(finished: false) => _Running(count: count),
-        _ => _Summary(count: count),
-      },
+      ),
     );
   }
 }
@@ -88,30 +115,55 @@ class _Intro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final national = isNationalGardenWeekend(DateTime.now());
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.page,
+        BirdySpace.s,
+        BirdySpace.page,
+        BirdySpace.xxxl,
+      ),
       children: [
-        Text(l10n.forkGardenIntro, style: theme.textTheme.bodyLarge),
-        const SizedBox(height: 12),
-        Text(l10n.forkGardenRule, style: theme.textTheme.bodyLarge),
-        const SizedBox(height: 12),
-        Text(l10n.forkGardenSoundHint, style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 12),
-        Text(
-          national ? l10n.forkGardenNational : l10n.forkGardenFree,
-          style: theme.textTheme.titleMedium,
-        ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(56),
-            shape: const StadiumBorder(),
+        BirdyBlock(
+          radius: BirdyRadii.hero,
+          padding: const EdgeInsets.all(BirdySpace.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.forkGardenIntro,
+                style: BirdyText.body.copyWith(color: c.text1),
+              ),
+              const SizedBox(height: BirdySpace.m),
+              Text(
+                l10n.forkGardenRule,
+                style: BirdyText.body.copyWith(color: c.text1),
+              ),
+              const SizedBox(height: BirdySpace.m),
+              Text(
+                l10n.forkGardenSoundHint,
+                style: BirdyText.bodyCompact.copyWith(color: c.text2),
+              ),
+            ],
           ),
-          icon: const Icon(AppIcons.timerRounded),
-          label: Text(l10n.forkGardenStart),
-          onPressed: onStart,
+        ),
+        const SizedBox(height: BirdySpace.block),
+        BirdyBlock(
+          tone: BirdyBlockTone.tonal,
+          child: Text(
+            national ? l10n.forkGardenNational : l10n.forkGardenFree,
+            style: BirdyText.label.copyWith(color: c.text1),
+          ),
+        ),
+        const SizedBox(height: BirdySpace.xxl),
+        Pressable(
+          child: FilledButton.icon(
+            style: BirdyButtonStyles.primary(context),
+            icon: const Icon(AppIcons.timerRounded),
+            label: Text(l10n.forkGardenStart),
+            onPressed: onStart,
+          ),
         ),
       ],
     );
@@ -127,7 +179,7 @@ class _Running extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final controller = ref.read(gardenCountProvider.notifier);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final locale = ref.watch(effectiveSpeciesLocaleProvider);
@@ -145,43 +197,75 @@ class _Running extends ConsumerWidget {
         ).where((s) => !count.counts.containsKey(s)).toList();
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.page,
+        BirdySpace.s,
+        BirdySpace.page,
+        BirdySpace.xxxl,
+      ),
       children: [
-        Text(
-          gardenDuration(l10n, elapsed),
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-        ),
-        Text(
-          planned == null
-              ? l10n.forkGardenFreeRunning
-              : elapsed >= planned
-              ? l10n.forkGardenHourDone
-              : l10n.forkGardenOf(gardenDuration(l10n, planned)),
-          style: theme.textTheme.bodyLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(l10n.forkGardenRule, style: theme.textTheme.bodyMedium),
-        if (heard.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text(l10n.forkGardenHeardTitle, style: theme.textTheme.titleMedium),
-          Text(l10n.forkGardenHeardHint, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
+        BirdyBlock(
+          tone: BirdyBlockTone.tonal,
+          radius: BirdyRadii.hero,
+          padding: const EdgeInsets.all(BirdySpace.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final sci in heard)
-                ActionChip(
-                  avatar: const Icon(AppIcons.add, size: 18),
-                  label: Text(name(sci)),
-                  onPressed: () => controller.addSpecies(sci),
-                ),
+              Text(
+                gardenDuration(l10n, elapsed),
+                style: BirdyText.numberXL.copyWith(color: c.text1),
+              ),
+              const SizedBox(height: BirdySpace.xs),
+              Text(
+                planned == null
+                    ? l10n.forkGardenFreeRunning
+                    : elapsed >= planned
+                    ? l10n.forkGardenHourDone
+                    : l10n.forkGardenOf(gardenDuration(l10n, planned)),
+                style: BirdyText.body.copyWith(color: c.text1),
+              ),
+              const SizedBox(height: BirdySpace.s),
+              Text(
+                l10n.forkGardenRule,
+                style: BirdyText.caption.copyWith(color: c.text2),
+              ),
             ],
           ),
+        ),
+        if (heard.isNotEmpty) ...[
+          const SizedBox(height: BirdySpace.block),
+          BirdyBlock(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.forkGardenHeardTitle,
+                  style: BirdyText.heading.copyWith(color: c.text1),
+                ),
+                const SizedBox(height: BirdySpace.xs),
+                Text(
+                  l10n.forkGardenHeardHint,
+                  style: BirdyText.caption.copyWith(color: c.text2),
+                ),
+                const SizedBox(height: BirdySpace.m),
+                Wrap(
+                  spacing: BirdySpace.s,
+                  runSpacing: BirdySpace.s,
+                  children: [
+                    for (final sci in heard)
+                      BirdyFilterChip(
+                        label: name(sci),
+                        selected: true,
+                        leading: const Icon(AppIcons.add),
+                        onSelected: () => controller.addSpecies(sci),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: BirdySpace.block),
         if (count.counts.isEmpty)
           BirdyEmptyState.inline(
             icon: AppIcons.add,
@@ -189,34 +273,34 @@ class _Running extends ConsumerWidget {
             body: l10n.forkGardenEmpty,
           )
         else
-          for (final e in count.counts.entries)
+          for (final e in count.counts.entries) ...[
             _CounterRow(
               name: name(e.key),
               value: e.value,
               onChanged: (v) => controller.setCount(e.key, v),
             ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-            shape: const StadiumBorder(),
+            const SizedBox(height: BirdySpace.s),
+          ],
+        const SizedBox(height: BirdySpace.s),
+        Pressable(
+          child: OutlinedButton.icon(
+            style: BirdyButtonStyles.secondary(context),
+            icon: const Icon(AppIcons.add),
+            label: Text(l10n.forkGardenAddSpecies),
+            onPressed:
+                () => _pickSpecies(context, taxonomy, locale).then((sci) {
+                  if (sci != null) controller.addSpecies(sci);
+                }),
           ),
-          icon: const Icon(AppIcons.add),
-          label: Text(l10n.forkGardenAddSpecies),
-          onPressed:
-              () => _pickSpecies(context, taxonomy, locale).then((sci) {
-                if (sci != null) controller.addSpecies(sci);
-              }),
         ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(56),
-            shape: const StadiumBorder(),
+        const SizedBox(height: BirdySpace.xxl),
+        Pressable(
+          child: FilledButton.icon(
+            style: BirdyButtonStyles.primary(context),
+            icon: const Icon(AppIcons.check),
+            label: Text(l10n.forkGardenFinish),
+            onPressed: () => controller.finish(DateTime.now()),
           ),
-          icon: const Icon(AppIcons.check),
-          label: Text(l10n.forkGardenFinish),
-          onPressed: () => controller.finish(DateTime.now()),
         ),
       ],
     );
@@ -226,10 +310,9 @@ class _Running extends ConsumerWidget {
     BuildContext context,
     TaxonomyService? taxonomy,
     String locale,
-  ) => showModalBottomSheet<String>(
+  ) => showBirdySheet<String>(
     context: context,
     isScrollControlled: true,
-    showDragHandle: true,
     builder: (_) => _SpeciesPicker(taxonomy: taxonomy, locale: locale),
   );
 }
@@ -249,34 +332,43 @@ class _CounterRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(child: Text(name, style: theme.textTheme.titleMedium)),
-        IconButton(
-          tooltip: l10n.forkLpoCountLess,
-          icon: const Icon(AppIcons.remove),
-          onPressed: value > 0 ? () => onChanged(value - 1) : null,
-        ),
-        SizedBox(
-          width: 40,
-          child: Text(
-            '$value',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
+    final c = BirdyColors.of(context);
+    return BirdyBlock(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BirdySpace.l,
+        vertical: BirdySpace.s,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              name,
+              style: BirdyText.species.copyWith(color: c.text1),
             ),
           ),
-        ),
-        IconButton(
-          tooltip: l10n.forkLpoCountMore,
-          icon: const Icon(AppIcons.add),
-          onPressed:
-              value < LpoConfig.gardenMaxCount
-                  ? () => onChanged(value + 1)
-                  : null,
-        ),
-      ],
+          BirdyIconButton(
+            semanticLabel: l10n.forkLpoCountLess,
+            icon: AppIcons.remove,
+            onPressed: value > 0 ? () => onChanged(value - 1) : null,
+          ),
+          SizedBox(
+            width: BirdySizes.target,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: BirdyText.numberM.copyWith(color: c.text1),
+            ),
+          ),
+          BirdyIconButton(
+            semanticLabel: l10n.forkLpoCountMore,
+            icon: AppIcons.add,
+            onPressed:
+                value < LpoConfig.gardenMaxCount
+                    ? () => onChanged(value + 1)
+                    : null,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -321,7 +413,12 @@ class _SpeciesPickerState extends State<_SpeciesPicker> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(
+              BirdySpace.page,
+              0,
+              BirdySpace.page,
+              BirdySpace.s,
+            ),
             child: TextField(
               autofocus: false,
               decoration: InputDecoration(
@@ -336,11 +433,18 @@ class _SpeciesPickerState extends State<_SpeciesPicker> {
               children: [
                 for (final sci in results)
                   ListTile(
-                    minTileHeight: 48,
-                    title: Text(name(sci)),
+                    minTileHeight: BirdySizes.target,
+                    title: Text(
+                      name(sci),
+                      style: BirdyText.species.copyWith(
+                        color: BirdyColors.of(context).text1,
+                      ),
+                    ),
                     subtitle: Text(
                       sci,
-                      style: const TextStyle(fontStyle: FontStyle.italic),
+                      style: BirdyText.latinCompact.copyWith(
+                        color: BirdyColors.of(context).text2,
+                      ),
                     ),
                     onTap: () => Navigator.of(context).pop(sci),
                   ),
@@ -362,7 +466,7 @@ class _Summary extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final c = BirdyColors.of(context);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final lines = gardenSummaryLines(
       l10n,
@@ -372,44 +476,58 @@ class _Summary extends ConsumerWidget {
     );
     final text = lines.join('\n');
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.page,
+        BirdySpace.s,
+        BirdySpace.page,
+        BirdySpace.xxxl,
+      ),
       children: [
-        Text(l10n.forkGardenSummaryIntro, style: theme.textTheme.bodyLarge),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: SelectableText(text, style: theme.textTheme.bodyLarge),
+        Text(
+          l10n.forkGardenSummaryIntro,
+          style: BirdyText.body.copyWith(color: c.text1),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: BirdySpace.m),
+        BirdyBlock(
+          tone: BirdyBlockTone.tonal,
+          child: SelectableText(
+            text,
+            style: BirdyText.body.copyWith(color: c.text1),
+          ),
+        ),
+        const SizedBox(height: BirdySpace.l),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.s,
           children: [
-            FilledButton.icon(
-              style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-              icon: const Icon(AppIcons.contentCopy),
-              label: Text(l10n.forkLpoCopy),
-              onPressed: () async {
-                final messenger = ScaffoldMessenger.of(context);
-                await Clipboard.setData(ClipboardData(text: text));
-                messenger.showSnackBar(
-                  SnackBar(content: Text(l10n.forkGardenCopied)),
-                );
-              },
+            Pressable(
+              child: FilledButton.icon(
+                style: BirdyButtonStyles.primary(context),
+                icon: const Icon(AppIcons.contentCopy),
+                label: Text(l10n.forkLpoCopy),
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  await Clipboard.setData(ClipboardData(text: text));
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n.forkGardenCopied)),
+                  );
+                },
+              ),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
-              icon: const Icon(AppIcons.openInNew),
-              label: Text(l10n.forkGardenOpenSite),
-              onPressed:
-                  () => openExternalUrl(context, LpoConfig.oiseauxDesJardins),
+            Pressable(
+              child: OutlinedButton.icon(
+                style: BirdyButtonStyles.secondary(context),
+                icon: const Icon(AppIcons.openInNew),
+                label: Text(l10n.forkGardenOpenSite),
+                onPressed:
+                    () => openExternalUrl(context, LpoConfig.oiseauxDesJardins),
+              ),
             ),
             TextButton(
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(BirdySizes.target, BirdySizes.target),
+                textStyle: BirdyText.labelCompact,
+              ),
               onPressed: () => ref.read(gardenCountProvider.notifier).clear(),
               child: Text(l10n.forkGardenNew),
             ),

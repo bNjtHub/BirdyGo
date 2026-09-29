@@ -11,6 +11,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/svg_path.dart';
+import '../design/widgets/birdy_block.dart' show BirdyProgressBar;
 import 'game_config.dart';
 
 final Map<String, Path> _paths = {};
@@ -52,6 +53,7 @@ class StatusEmblem extends StatelessWidget {
     this.size = 36,
     this.reached = true,
     this.current = false,
+    this.innerRing = false,
   });
 
   final StatusDef status;
@@ -60,6 +62,10 @@ class StatusEmblem extends StatelessWidget {
 
   /// 3 px ink ring with a 4 px gap (the ladder's current status).
   final bool current;
+
+  /// Thin white ring near the edge, at half opacity (J6f, reached levels on
+  /// the ladder and the level ring): the mockup's premium-medal touch.
+  final bool innerRing;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +87,7 @@ class StatusEmblem extends StatelessWidget {
                   alpha: 0.4,
                 ),
         ring: current ? c.text1 : null,
+        innerRing: reached && innerRing,
       ),
     );
   }
@@ -92,12 +99,14 @@ class _EmblemPainter extends CustomPainter {
     required this.fill,
     required this.ink,
     this.ring,
+    this.innerRing = false,
   });
 
   final StatusDef status;
   final Color fill;
   final Color ink;
   final Color? ring;
+  final bool innerRing;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -115,6 +124,18 @@ class _EmblemPainter extends CustomPainter {
       radius -= 7;
     }
     canvas.drawCircle(center, radius, Paint()..color = fill);
+    if (innerRing) {
+      canvas.drawCircle(
+        center,
+        radius * 0.86,
+        Paint()
+          ..color = const Color(0xFFFFFFFF).withValues(
+            alpha: BirdyAlpha.emblemInnerRing,
+          )
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = radius * 0.05,
+      );
+    }
     final glyph = radius * 2 * 14 / 24;
     paintGlyph(
       canvas,
@@ -129,7 +150,8 @@ class _EmblemPainter extends CustomPainter {
       old.status != status ||
       old.fill != fill ||
       old.ink != ink ||
-      old.ring != ring;
+      old.ring != ring ||
+      old.innerRing != innerRing;
 }
 
 /// Progress ring around the current status (SPEC.md 5.7): track, arc of
@@ -176,6 +198,7 @@ class StatusRing extends StatelessWidget {
               status: shown,
               size: size * 58 / 84,
               reached: status != null,
+              innerRing: true,
             ),
           ],
         ),
@@ -233,6 +256,7 @@ class BadgeMedal extends StatelessWidget {
     required this.tier,
     this.icon,
     this.glyph,
+    this.child,
     this.size = 52,
   });
 
@@ -240,6 +264,10 @@ class BadgeMedal extends StatelessWidget {
   final int tier;
   final IconData? icon;
   final Glyph? glyph;
+
+  /// Replaces the icon/glyph face (the palmarès podium's rank number,
+  /// J6f-f), built with the medal's own ink color.
+  final Widget Function(Color ink)? child;
   final double size;
 
   @override
@@ -250,7 +278,9 @@ class BadgeMedal extends StatelessWidget {
     final rim = math.max(1.5, size / 26);
     final glyphSize = size / 2;
     final face =
-        glyph != null
+        child != null
+            ? child!(ink)
+            : glyph != null
             ? CustomPaint(
               size: Size.square(glyphSize),
               painter: _GlyphPainter(glyph!, ink),
@@ -307,6 +337,21 @@ class BadgeMedal extends StatelessWidget {
   }
 }
 
+/// A [Glyph] painted at [size] (the plumes counter pill, J6f).
+class GlyphIcon extends StatelessWidget {
+  const GlyphIcon({super.key, required this.glyph, required this.color, this.size = 24});
+
+  final Glyph glyph;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size.square(size),
+    painter: _GlyphPainter(glyph, color),
+  );
+}
+
 class _GlyphPainter extends CustomPainter {
   const _GlyphPainter(this.glyph, this.color);
 
@@ -344,6 +389,53 @@ class TierDots extends StatelessWidget {
               color: i < filled ? c.text1 : c.borderStrong,
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// A bar of [count] equal segments, [filled] of them colored, the rest on
+/// [track] (J6f: the level ladder's info box, the weekly challenge). Falls
+/// back to one continuous [BirdyProgressBar] past
+/// [BirdySizes.segmentBarMax] segments (too many slivers to read).
+class SegmentedBar extends StatelessWidget {
+  const SegmentedBar({
+    super.key,
+    required this.count,
+    required this.filled,
+    required this.color,
+    required this.track,
+  });
+
+  final int count;
+  final int filled;
+  final Color color;
+  final Color track;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox.shrink();
+    if (count > BirdySizes.segmentBarMax) {
+      return BirdyProgressBar(
+        value: count == 0 ? 0 : filled / count,
+        color: color,
+        track: track,
+      );
+    }
+    return Row(
+      children: [
+        for (var i = 0; i < count; i++) ...[
+          if (i > 0) const SizedBox(width: BirdySpace.xs / 2),
+          Expanded(
+            child: Container(
+              height: BirdySizes.segmentHeight,
+              decoration: BoxDecoration(
+                color: i < filled ? color : track,
+                borderRadius: BorderRadius.circular(BirdyRadii.pill),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

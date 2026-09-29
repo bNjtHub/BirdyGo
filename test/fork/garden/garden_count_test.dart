@@ -1,4 +1,6 @@
 import 'package:birdnet_live/features/explore/explore_providers.dart';
+import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/fork/garden/garden_count.dart';
 import 'package:birdnet_live/fork/garden/garden_count_screen.dart';
 import 'package:birdnet_live/fork/garden/garden_summary.dart';
@@ -158,5 +160,52 @@ void main() {
     await tester.tap(find.text('Nouveau comptage'));
     await tester.pumpAndSettle();
     expect(find.text('Commencer le comptage'), findsOneWidget);
+  });
+
+  testWidgets('overlay header, no overflow on a small phone at 130 %, dark', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
+        ],
+        child: MaterialApp(
+          theme: BirdyTheme.dark(),
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(1.3)),
+                child: child!,
+              ),
+          home: const GardenCountScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(BirdyOverlayHeader), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(
+      find.text('Commencer le comptage'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Commencer le comptage'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }

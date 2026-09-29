@@ -1,13 +1,15 @@
 /// Loading skeletons (fix/j6f-b-notebook-loading): placeholders that reserve
 /// exactly the size the real content will take, so a screen's layout never
-/// shifts once data arrives. DESIGN.md forbids animation loops (no shimmer
-/// sweep, no repeating pulse), so a skeleton is a plain static fill; it does
-/// not need a reduced-motion branch because it never animates.
+/// shifts once data arrives. Each shape is wrapped in a [BirdyShimmer]: a
+/// light band sweeps over all of a screen's skeletons in sync (one shared
+/// ticker), only while they are shown; a plain static fill with reduced
+/// motion. No call-site change is needed.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../birdy_tokens.dart';
+import 'birdy_shimmer.dart';
 
 abstract final class BirdySkeleton {
   /// A muted bar the height and alphabetic baseline of [style]'s text, so it
@@ -59,14 +61,16 @@ class _SkeletonText extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return ExcludeSemantics(
-      child: Text(
-        placeholder,
-        maxLines: maxLines,
-        softWrap: maxLines != 1,
-        overflow: maxLines == 1 ? TextOverflow.clip : TextOverflow.visible,
-        style: style.copyWith(
-          color: Colors.transparent,
-          backgroundColor: c.skeleton,
+      child: BirdyShimmer(
+        child: Text(
+          placeholder,
+          maxLines: maxLines,
+          softWrap: maxLines != 1,
+          overflow: maxLines == 1 ? TextOverflow.clip : TextOverflow.visible,
+          style: style.copyWith(
+            color: Colors.transparent,
+            backgroundColor: c.skeleton,
+          ),
         ),
       ),
     );
@@ -89,12 +93,14 @@ class _SkeletonBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return ExcludeSemantics(
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: c.skeleton,
-          borderRadius: BorderRadius.circular(radius),
+      child: BirdyShimmer(
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: c.skeleton,
+            borderRadius: BorderRadius.circular(radius),
+          ),
         ),
       ),
     );

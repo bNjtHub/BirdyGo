@@ -20,7 +20,11 @@ import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
+import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_filter_chip.dart';
+import '../design/widgets/birdy_headers.dart';
+import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/empty_state.dart';
 import '../design/widgets/species_avatar.dart';
@@ -48,41 +52,32 @@ ImageProvider? _imageOf(WidgetRef ref, String scientificName) {
   return path == null ? null : AssetImage(path);
 }
 
-/// BirdyGo top bar: back button and title (SPEC.md 5.x sub-pages).
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.title});
-
-  final String title;
+/// Placeholder rows shaped like the final list (species or clip rows).
+class _RowsSkeleton extends StatelessWidget {
+  const _RowsSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return SizedBox(
-      height: BirdySizes.topBar,
-      child: Row(
-        children: [
-          BirdyIconButton(
-            icon: AppIcons.arrowBackRounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: () => Navigator.of(context).maybePop(),
+    return ListView(
+      key: const ValueKey('soundLibrarySkeleton'),
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: BirdySpace.xxl),
+      children: [
+        for (var i = 0; i < 6; i++) ...[
+          BirdySkeleton.box(
+            width: double.infinity,
+            height: BirdySizes.row,
+            radius: BirdyRadii.card,
           ),
-          const SizedBox(width: BirdySpace.m),
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: BirdyText.heading.copyWith(color: c.text1),
-            ),
-          ),
+          const SizedBox(height: BirdySpace.s),
         ],
-      ),
+      ],
     );
   }
 }
 
 /// Page frame shared by both screens: background, safe area, 600 dp
-/// column, gutters and the top bar.
+/// column, gutters and the overlay header.
 class _Page extends StatelessWidget {
   const _Page({required this.title, required this.child});
 
@@ -99,12 +94,16 @@ class _Page extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BirdySpace.gutter,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: BirdySpace.page),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [_TopBar(title: title), Expanded(child: child)],
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: BirdySpace.s),
+                    child: BirdyOverlayHeader(title: title),
+                  ),
+                  Expanded(child: child),
+                ],
               ),
             ),
           ),
@@ -131,7 +130,7 @@ class SoundLibraryScreen extends ConsumerWidget {
         builder: (context, snapshot) {
           final species = snapshot.data;
           if (species == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const _RowsSkeleton();
           }
           if (species.isEmpty) {
             return BirdyEmptyState(
@@ -149,32 +148,33 @@ class SoundLibraryScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final s = species[i];
               final name = _speciesName(ref, s.scientificName, s.commonName);
-              return InkWell(
-                borderRadius: BorderRadius.circular(BirdyRadii.thumb),
-                onTap:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder:
-                            (_) => SpeciesClipsScreen(
-                              scientificName: s.scientificName,
-                              fallbackName: s.commonName,
-                            ),
-                      ),
-                    ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: BirdySizes.rowCompact,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: BirdySpace.s),
+                child: BirdyBlock(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BirdySpace.m,
+                    vertical: BirdySpace.s,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: BirdySpace.xs,
+                  onTap:
+                      () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder:
+                              (_) => SpeciesClipsScreen(
+                                scientificName: s.scientificName,
+                                fallbackName: s.commonName,
+                              ),
+                        ),
+                      ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: BirdySizes.rowCompact,
                     ),
                     child: Row(
                       children: [
                         SpeciesAvatar(
                           image: _imageOf(ref, s.scientificName),
                           tint: SpeciesAccents.tintOf(s.scientificName),
-                          size: 44,
+                          size: BirdySizes.target,
                         ),
                         const SizedBox(width: BirdySpace.m),
                         Expanded(
@@ -294,30 +294,24 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 for (final byDate in [false, true])
-                  ChoiceChip(
-                    label: Text(
-                      byDate
-                          ? l10n.forkSoundLibraryByDate
-                          : l10n.forkSoundLibraryByScore,
-                    ),
+                  BirdyFilterChip(
+                    label:
+                        byDate
+                            ? l10n.forkSoundLibraryByDate
+                            : l10n.forkSoundLibraryByScore,
                     selected: _byDate == byDate,
-                    onSelected: (_) {
+                    onSelected: () {
                       _byDate = byDate;
                       _reload();
                     },
                   ),
-                FilterChip(
-                  avatar: Icon(
-                    AppIcons.star,
-                    fill: 1,
-                    size: 18,
-                    color: c.orioleText,
-                  ),
-                  label: Text(l10n.forkSoundLibraryFavoritesOnly),
+                BirdyFilterChip(
+                  leading: Icon(AppIcons.star, fill: 1, color: c.orioleText),
+                  label: l10n.forkSoundLibraryFavoritesOnly,
                   selected: _favoritesOnly,
-                  showCheckmark: false,
-                  onSelected: (value) {
-                    _favoritesOnly = value;
+                  selectedColors: BirdyChipColors.oriole(c),
+                  onSelected: () {
+                    _favoritesOnly = !_favoritesOnly;
                     _reload();
                   },
                 ),
@@ -330,7 +324,7 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
               builder: (context, snapshot) {
                 final data = snapshot.data;
                 if (data == null) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const _RowsSkeleton();
                 }
                 final (clips, favorites) = data;
                 if (clips.isEmpty) {
@@ -352,69 +346,70 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.only(bottom: BirdySpace.xxl),
                   itemCount: clips.length,
-                  separatorBuilder: (_, _) => Divider(height: 1, color: c.line),
+                  separatorBuilder:
+                      (_, _) => const SizedBox(height: BirdySpace.s),
                   itemBuilder: (context, i) {
                     final clip = clips[i];
                     final isFavorite = favorites.contains(clip.key);
                     final place = _place(clip, west: l10n.forkWestLetter);
-                    return InkWell(
+                    return BirdyBlock(
                       onTap: () => _play(clip, name),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: BirdySpace.s,
-                        ),
-                        child: Row(
-                          children: [
-                            ClipPlayButton(
-                              state: ClipPlayState.idle,
-                              semanticLabel: '${l10n.forkReplay} : $name',
-                              onPressed: () => _play(clip, name),
-                            ),
-                            const SizedBox(width: BirdySpace.m),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    dateFormat.format(clip.start.toLocal()),
-                                    style: BirdyText.bodyCompact.copyWith(
-                                      color: c.text1,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BirdySpace.m,
+                        vertical: BirdySpace.s,
+                      ),
+                      child: Row(
+                        children: [
+                          ClipPlayButton(
+                            state: ClipPlayState.idle,
+                            semanticLabel: '${l10n.forkReplay} : $name',
+                            onPressed: () => _play(clip, name),
+                          ),
+                          const SizedBox(width: BirdySpace.m),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  dateFormat.format(clip.start.toLocal()),
+                                  style: BirdyText.bodyCompact.copyWith(
+                                    color: c.text1,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
                                   ),
-                                  Text(
-                                    [
-                                      l10n.forkSoundLibraryScore(
-                                        scoreFormat.format(clip.confidence),
-                                      ),
-                                      if (place != null) place,
-                                    ].join(' · '),
-                                    style: BirdyText.caption.copyWith(
-                                      color: c.text2,
+                                ),
+                                Text(
+                                  [
+                                    l10n.forkSoundLibraryScore(
+                                      scoreFormat.format(clip.confidence),
                                     ),
+                                    if (place != null) place,
+                                  ].join(' · '),
+                                  style: BirdyText.caption.copyWith(
+                                    color: c.text2,
                                   ),
-                                  const SizedBox(height: BirdySpace.xs),
-                                  _ClipLevel(clip: clip),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: BirdySpace.xs),
+                                _ClipLevel(clip: clip),
+                              ],
                             ),
-                            IconButton(
-                              tooltip:
+                          ),
+                          // Material Symbols read `fill` from the icon theme:
+                          // a filled star means favorite.
+                          IconTheme.merge(
+                            data: IconThemeData(fill: isFavorite ? 1 : 0),
+                            child: BirdyIconButton(
+                              semanticLabel:
                                   isFavorite
                                       ? l10n.forkSoundLibraryUnfavorite
                                       : l10n.forkSoundLibraryFavorite,
-                              icon: Icon(
-                                AppIcons.star,
-                                fill: isFavorite ? 1 : 0,
-                                color: isFavorite ? c.orioleText : c.text2,
-                              ),
+                              icon: AppIcons.star,
                               onPressed:
                                   () => _toggleFavorite(clip, !isFavorite),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },

@@ -8,6 +8,7 @@ import 'package:birdnet_live/fork/summary/listening_summary.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_loader.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_screen.dart';
 import 'package:birdnet_live/fork/summary/listening_summary_view.dart';
+import 'package:birdnet_live/fork/summary/open_listening_summary.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
@@ -21,7 +22,15 @@ import 'summary_fixture.dart';
 /// Keeps saved sessions in memory.
 class _MemoryRepository extends SessionRepository {
   final saved = <LiveSession>[];
+  final deleted = <String>[];
+  final stored = <String, LiveSession>{};
   bool failSave = false;
+
+  @override
+  Future<void> delete(String id) async => deleted.add(id);
+
+  @override
+  Future<LiveSession?> load(String id) async => stored[id];
 
   @override
   Future<void> save(LiveSession session) async {
@@ -38,6 +47,8 @@ void main() {
     Future<ListeningSummary> Function(LiveSession session) loader, {
     SessionRepository? repository,
     LiveSession? session,
+    bool saved = true,
+    bool fromLive = true,
   }) async {
     tester.view.physicalSize = const Size(360, 800) * 3;
     tester.view.devicePixelRatio = 3;
@@ -83,6 +94,8 @@ void main() {
                                   builder:
                                       (_) => ListeningSummaryScreen(
                                         session: session ?? morningSession(),
+                                        saved: saved,
+                                        fromLive: fromLive,
                                       ),
                                 ),
                               ),
@@ -208,7 +221,7 @@ void main() {
     });
   }
 
-  testWidgets('shows the loaded summary; « Terminer » goes home', (
+  testWidgets('shows the loaded summary; the back button goes home', (
     tester,
   ) async {
     await pump(
@@ -232,10 +245,193 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byTooltip('Terminer'));
+    // J6f: the header is now `BirdyOverlayHeader`, whose back button
+    // carries the system back tooltip (« Retour »), not « Terminer ».
+    await tester.tap(find.byTooltip('Fermer'));
     await tester.pumpAndSettle();
     expect(find.text('Accueil'), findsOneWidget);
     expect(find.text('Bibliothèque'), findsNothing);
+  });
+
+  testWidgets('opened from elsewhere, close pops one level only', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      (session) async => ListeningSummary.of(session, verifiedBefore: {}),
+      fromLive: false,
+    );
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bibliothèque'), findsOneWidget);
+    expect(find.byType(ListeningSummaryView), findsNothing);
+  });
+
+  group('unsaved listening (J6g-e)', () {
+    Future<_MemoryRepository> pumpUnsaved(WidgetTester tester) async {
+      final repository = _MemoryRepository();
+      await pump(
+        tester,
+        // The index is never reached for an unsaved session.
+        (session) async => throw StateError('index must not be used'),
+        repository: repository,
+        session: morningSession()..locationName = 'Test place',
+        saved: false,
+      );
+      return repository;
+    }
+
+    testWidgets('shows what was heard with a « non enregistrée » note', (
+      tester,
+    ) async {
+      final repository = await pumpUnsaved(tester);
+      expect(find.text('Écoute non enregistrée'), findsOneWidget);
+      expect(find.text('Belle matinée !'), findsOneWidget);
+      expect(repository.saved, isEmpty);
+      final view = tester.widget<ListeningSummaryView>(
+        find.byType(ListeningSummaryView),
+      );
+      // Nothing that writes the session or reads the index before saving.
+      expect(view.onCheck, isNull);
+      expect(view.onAddObservation, isNull);
+      expect(view.onMarkRecording, isNull);
+      expect(view.onDetails, isNotNull);
+      expect(find.text('Envoyer à Faune-France (LPO)'), findsNothing);
+    });
+
+    testWidgets('the save button keeps it and drops the note', (tester) async {
+      final repository = await pumpUnsaved(tester);
+      await tester.tap(find.text('Enregistrer'));
+      await tester.pump();
+      await tester.pump();
+      expect(repository.saved, hasLength(1));
+    });
+
+    testWidgets('leaving asks; discard deletes and goes back', (tester) async {
+      final repository = await pumpUnsaved(tester);
+      await tester.tap(find.byTooltip('Fermer'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Supprimer'));
+      await tester.pumpAndSettle();
+      expect(repository.deleted, [morningSession().id]);
+      expect(find.text('Accueil'), findsOneWidget);
+    });
+
+    testWidgets('leaving asks; save keeps it and goes back', (tester) async {
+      final repository = await pumpUnsaved(tester);
+      await tester.tap(find.byTooltip('Fermer'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Enregistrer'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repository.saved, hasLength(1));
+      expect(find.text('Accueil'), findsOneWidget);
+    });
+  });
+
+  testWidgets('the stop flow always builds the Bilan, saved or not', (
+    tester,
+  ) async {
+    final session = morningSession();
+    for (final saved in [true, false]) {
+      final route = afterStopSummaryRoute(session, saved: saved);
+      expect(route, isA<MaterialPageRoute<void>>());
+      late Widget page;
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            page = (route as MaterialPageRoute<void>).builder(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      final screen = page as ListeningSummaryScreen;
+      expect(screen.saved, saved);
+      expect(screen.fromLive, isTrue);
+      expect(screen.session, same(session));
+    }
+  });
+
+  testWidgets('openListeningSummary opens a saved session, one level deep', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800) * 3;
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final session = morningSession()..locationName = 'Test place';
+    final repository = _MemoryRepository()..stored[session.id] = session;
+    late bool opened;
+    late bool missing;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          listeningSummaryLoaderProvider.overrideWithValue(
+            (s) async => ListeningSummary.of(s, verifiedBefore: {}),
+          ),
+          sessionRepositoryProvider.overrideWithValue(repository),
+          geoCommonnessProvider.overrideWith((ref) async => null),
+          currentLocationProvider.overrideWith((ref) async => null),
+          rawGeoScoresProvider.overrideWith((ref) async => null),
+          taxonomyServiceProvider.overrideWith(
+            (ref) async => TaxonomyService(),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Consumer(
+            builder:
+                (context, ref, _) => Scaffold(
+                  body: Column(
+                    children: [
+                      TextButton(
+                        onPressed: () async {
+                          missing = await openListeningSummary(
+                            context,
+                            ref,
+                            sessionId: 'nope',
+                          );
+                        },
+                        child: const Text('Absent'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          opened = await openListeningSummary(
+                            context,
+                            ref,
+                            sessionId: session.id,
+                          );
+                        },
+                        child: const Text('Bilan du jour'),
+                      ),
+                    ],
+                  ),
+                ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Absent'));
+    await tester.pumpAndSettle();
+    expect(missing, isFalse);
+    expect(find.byType(ListeningSummaryView), findsNothing);
+
+    await tester.tap(find.text('Bilan du jour'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListeningSummaryView), findsOneWidget);
+    await tester.tap(find.byTooltip('Fermer'));
+    await tester.pumpAndSettle();
+    expect(opened, isTrue);
+    expect(find.text('Bilan du jour'), findsOneWidget);
   });
 
   testWidgets('back also goes home', (tester) async {

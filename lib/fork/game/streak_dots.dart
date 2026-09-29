@@ -1,14 +1,15 @@
-/// Shared 7-day strip of the série (J6f): a dot per day, filled when
-/// listened, outlined otherwise, with the narrow weekday letter beneath.
-/// Used on the home série block and the Profil série block, so both show
-/// the exact same look.
+/// Shared 7-day strip of the série (J6f Profil mockup): a dot per day, with
+/// the narrow weekday letter beneath. Used on the home série block and the
+/// Profil série block, so both show the exact same look.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
+import '../design/widgets/dashed_border.dart';
 import 'streak.dart';
 
 /// The 7 days ending today (today last), from the two-week calendar
@@ -27,9 +28,11 @@ List<StreakDay> lastSevenDays(Streak streak) {
 }
 
 /// Row of 7 day dots ([days], a [lastSevenDays] window), each with its
-/// narrow weekday letter underneath. Filled [BirdyColors.orioleText] when
-/// listened, outlined at [BirdyAlpha.dayDotOutline] otherwise; today's
-/// letter is bold, the only mark for "today" (no extra ring).
+/// narrow weekday letter underneath (J6f Profil mockup): a listened day is
+/// an accent disc with an ink check, a day without listening is a plain
+/// line-color disc, a rest day is a dashed accent ring, an upcoming day is
+/// a plain outline, and today is a small accent dot ringed twice (the card
+/// background, then ink) regardless of whether it was listened to yet.
 class StreakDots extends StatelessWidget {
   const StreakDots({
     super.key,
@@ -60,7 +63,7 @@ class StreakDots extends StatelessWidget {
                 dayLabel?.call(day),
                 Column(
                   children: [
-                    _StreakDot(listened: day.state == StreakDayState.listened),
+                    _StreakDot(day: day),
                     const SizedBox(height: BirdySpace.xs),
                     Text(
                       weekday.format(day.date).toUpperCase(),
@@ -85,34 +88,85 @@ class StreakDots extends StatelessWidget {
           : Semantics(label: label, child: ExcludeSemantics(child: child));
 }
 
-/// Filled when listened, outlined otherwise. Loriot text color, not the
-/// Loriot fill: the fill is too pale on its own container.
+/// One day of [StreakDots] (J6f Profil mockup): today always shows its own
+/// small ringed dot, whatever its listened state; otherwise the dot follows
+/// [StreakDay.state].
 class _StreakDot extends StatelessWidget {
-  const _StreakDot({required this.listened});
+  const _StreakDot({required this.day});
 
-  final bool listened;
+  final StreakDay day;
 
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    return Container(
-      key: ValueKey(listened ? 'day-listened' : 'day-open'),
-      width: BirdySizes.dayDot,
-      height: BirdySizes.dayDot,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: listened ? c.orioleText : null,
-        border:
-            listened
-                ? null
-                : Border.all(
-                  color: c.orioleText.withValues(
-                    alpha: BirdyAlpha.dayDotOutline,
-                  ),
-                  width: BirdySizes.dayDotStroke,
-                ),
-      ),
-    );
+    if (day.isToday) {
+      // The card these dots sit in is always the série block's Loriot tone
+      // (home and Profil both use it), so the outer ring matches it.
+      return Container(
+        key: const ValueKey('day-today'),
+        width: BirdySizes.dayDot,
+        height: BirdySizes.dayDot,
+        alignment: Alignment.center,
+        child: Container(
+          width: BirdySizes.dayDot * 16 / 20,
+          height: BirdySizes.dayDot * 16 / 20,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: c.accent,
+            boxShadow: [
+              BoxShadow(color: c.orioleContainer, spreadRadius: 2),
+              BoxShadow(color: c.text1, spreadRadius: 4),
+            ],
+          ),
+        ),
+      );
+    }
+    switch (day.state) {
+      case StreakDayState.listened:
+        return Container(
+          key: const ValueKey('day-listened'),
+          width: BirdySizes.dayDot,
+          height: BirdySizes.dayDot,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: c.accent),
+          child: Icon(
+            AppIcons.check,
+            size: BirdySizes.dayDot * 0.7,
+            color: c.onAccent,
+          ),
+        );
+      case StreakDayState.rest:
+        return SizedBox(
+          key: const ValueKey('day-rest'),
+          width: BirdySizes.dayDot,
+          height: BirdySizes.dayDot,
+          child: CustomPaint(
+            painter: DashedBorderPainter(
+              color: c.accent,
+              radius: BirdySizes.dayDot / 2,
+              strokeWidth: 2,
+              dash: 2,
+              gap: 1.6,
+            ),
+          ),
+        );
+      case StreakDayState.open:
+        return Container(
+          key: const ValueKey('day-open'),
+          width: BirdySizes.dayDot,
+          height: BirdySizes.dayDot,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: c.borderStrong, width: 1.5),
+          ),
+        );
+      case StreakDayState.missed:
+        return Container(
+          key: const ValueKey('day-missed'),
+          width: BirdySizes.dayDot,
+          height: BirdySizes.dayDot,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: c.lineOpaque),
+        );
+    }
   }
 }
 
