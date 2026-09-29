@@ -144,6 +144,26 @@ void main() {
     });
   });
 
+  test('volume alert block reaches AA in both themes (J6h)', () {
+    for (final (mode, c) in [
+      ('light', BirdyColors.light),
+      ('dark', BirdyColors.dark),
+    ]) {
+      expectAA(c.text1, c.surface1, '$mode title/surface1');
+      expectAA(c.text2, c.surface1, '$mode caption/surface1');
+      expectAA(
+        c.orioleText,
+        on(c.orioleContainer, c.surface1),
+        '$mode disc icon/orioleContainer',
+      );
+      expectAA(
+        c.accentText,
+        on(c.tonal, c.surface1),
+        '$mode button/tonal on surface1',
+      );
+    }
+  });
+
   test('Material roles of both themes reach AA', () {
     for (final theme in [BirdyTheme.light(), BirdyTheme.dark()]) {
       final s = theme.colorScheme;

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/app_providers.dart';
+import '../audio_output/volume_guard.dart';
 import '../design/widgets/clip_play_button.dart';
 
 /// SharedPreferences key: the replay notice was shown once.
@@ -78,6 +79,7 @@ class ReplayButton extends ConsumerWidget {
               return;
             }
             _showNoticeOnce(context, ref, l10n);
+            ensureAudible(context, ref);
             controller.replayClip(clipPath);
           },
         );

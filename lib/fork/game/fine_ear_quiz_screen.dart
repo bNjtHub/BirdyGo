@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
+import '../audio_output/volume_guard.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
@@ -174,12 +175,15 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   void _playCurrent() {
     final path = _question?.answer.clipPath;
-    if (path != null) unawaited(_player.play(path));
+    if (path == null) return;
+    ensureAudible(context, ref);
+    unawaited(_player.play(path));
   }
 
   void _togglePlay() {
     final path = _question?.answer.clipPath;
     if (path == null) return;
+    if (_player.playing.value != path) ensureAudible(context, ref);
     unawaited(
       _player.playing.value == path ? _player.stop() : _player.play(path),
     );
