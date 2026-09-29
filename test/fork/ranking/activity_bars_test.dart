@@ -107,4 +107,26 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('the highlighted bar label is bold, in the highlight color', (
+    tester,
+  ) async {
+    const mark = Color(0xFF13233A);
+    await pump(
+      tester,
+      ActivityBars(
+        values: const [1, 2, 3, 4],
+        labels: const {0: 'J', 1: 'F', 2: 'M', 3: 'A'},
+        semanticLabel: 'test',
+        highlightIndex: 2,
+        highlightColor: mark,
+      ),
+    );
+    final current = tester.widget<Text>(find.text('M')).style!;
+    expect(current.fontWeight, FontWeight.w800);
+    expect(current.color, mark);
+    final other = tester.widget<Text>(find.text('F')).style!;
+    expect(other.fontWeight, isNot(FontWeight.w800));
+    expect(other.color, isNot(mark));
+  });
 }

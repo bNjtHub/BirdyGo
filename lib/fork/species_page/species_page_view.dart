@@ -328,7 +328,8 @@ class _HereNowCardState extends State<HereNowCard> {
                 children: [
                   ActivityBars(
                     values: percents,
-                    height: 36,
+                    // 36 px of bars plus the current month's dot strip.
+                    height: 45,
                     colorForValue: scale.of,
                     trackColor: c.line,
                     labels: labels,

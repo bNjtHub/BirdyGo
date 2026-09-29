@@ -47,11 +47,14 @@ class ActivityBars extends StatelessWidget {
   /// Called with a bar's index and value on tap or long press (J6f-b fix).
   final void Function(int index, int value)? onSelect;
 
-  /// Bar marked as the current one (e.g. today's month), with a small dot
-  /// at its base, independent of its color (J6f-b fix).
+  /// Bar marked as the current one (e.g. today's month), independent of its
+  /// color: a dot under the bar, on the background rather than on the bar
+  /// (a light dot on a light bar was hard to see), and its label in bold
+  /// [highlightColor] (J6f-b fix).
   final int? highlightIndex;
 
-  /// Color of the [highlightIndex] dot; the theme's primary by default.
+  /// Color of the [highlightIndex] dot and label; the theme's primary by
+  /// default.
   final Color? highlightColor;
 
   void _select(Offset local, double width) {
@@ -122,7 +125,15 @@ class ActivityBars extends StatelessWidget {
                             slot,
                         child: Text(
                           labels[keys[i]]!,
-                          style: style,
+                          style:
+                              keys[i] == highlightIndex
+                                  ? style?.copyWith(
+                                    color:
+                                        highlightColor ??
+                                        theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w800,
+                                  )
+                                  : style,
                           maxLines: 1,
                           textAlign:
                               keys.length == values.length
@@ -158,6 +169,10 @@ class _BarsPainter extends CustomPainter {
   final int? highlightIndex;
   final Color highlightColor;
 
+  /// Dot of the highlighted bar, and the strip it sits in under the bars.
+  static const double _dotRadius = 3;
+  static const double _dotStrip = 2 * _dotRadius + 3;
+
   @override
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
@@ -165,12 +180,16 @@ class _BarsPainter extends CustomPainter {
     final slot = size.width / values.length;
     final barWidth = math.max(slot * 0.7, 1.0);
     final radius = Radius.circular(math.min(barWidth / 2, 3));
+    // With a highlighted bar, the bars leave a strip at the bottom for its
+    // dot, so the dot sits on the background, never on a bar.
+    final bars =
+        highlightIndex == null ? size.height : size.height - _dotStrip;
     for (var i = 0; i < values.length; i++) {
       final ratio = maxValue == 0 ? 0.0 : values[i] / maxValue;
-      final h = math.max(ratio * size.height, 2.0);
+      final h = math.max(ratio * bars, 2.0);
       final rect = Rect.fromLTWH(
         i * slot + (slot - barWidth) / 2,
-        size.height - h,
+        bars - h,
         barWidth,
         h,
       );
@@ -183,10 +202,9 @@ class _BarsPainter extends CustomPainter {
         Paint()..color = barColor,
       );
       if (i == highlightIndex) {
-        final dotRadius = math.min(barWidth / 2, 3.0);
         canvas.drawCircle(
-          Offset(i * slot + slot / 2, size.height - dotRadius),
-          dotRadius,
+          Offset(i * slot + slot / 2, size.height - _dotRadius),
+          _dotRadius,
           Paint()..color = highlightColor,
         );
       }
