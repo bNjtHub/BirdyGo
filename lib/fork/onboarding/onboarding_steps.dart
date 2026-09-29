@@ -176,8 +176,8 @@ class _StepButton extends StatelessWidget {
             disabledForegroundColor: c.text2,
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
-            textStyle: BirdyText.label.copyWith(fontSize: 20),
-            iconSize: 24,
+            textStyle: BirdyText.labelLarge,
+            iconSize: BirdySizes.ctaIcon,
           ),
           iconAlignment: IconAlignment.end,
           onPressed: onPressed,
@@ -273,12 +273,7 @@ class OnboardingNameStep extends StatelessWidget {
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.done,
                       autocorrect: false,
-                      style: BirdyText.title.copyWith(
-                        fontFamily: BirdyFonts.sans,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0,
-                        color: c.text1,
-                      ),
+                      style: BirdyText.inputLarge.copyWith(color: c.text1),
                       cursorColor: c.accentText,
                       decoration: InputDecoration(
                         hintText: l10n.forkOnbNamePlaceholder,
@@ -308,10 +303,10 @@ class OnboardingNameStep extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 1),
+                          padding: const EdgeInsets.only(top: BirdySpace.xs / 4),
                           child: Icon(
                             AppIcons.lockOutline,
-                            size: 16,
+                            size: BirdySizes.inlineIcon,
                             color: c.text2,
                           ),
                         ),

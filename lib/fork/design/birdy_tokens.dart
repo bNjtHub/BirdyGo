@@ -605,6 +605,12 @@ abstract final class BirdySizes {
   static const double themeCardDisc = 72;
   static const double themeCardMark = 48;
 
+  /// Icon of the onboarding call-to-action, small inline icons (lock, check)
+  /// and the logo of the « Mon oiseau » row disc.
+  static const double ctaIcon = 24;
+  static const double inlineIcon = 16;
+  static const double myBirdRowMark = 28;
+
   /// Launcher-icon preview of the picker, and the logo inside it.
   static const double iconPreview = 60;
   static const double iconPreviewMark = 42;

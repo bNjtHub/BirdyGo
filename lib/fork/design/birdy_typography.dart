@@ -144,6 +144,33 @@ abstract final class BirdyText {
     letterSpacing: 0,
   );
 
+  /// Label of the onboarding call-to-action, Atkinson bold 20 (J6i).
+  static const TextStyle labelLarge = TextStyle(
+    fontFamily: BirdyFonts.sans,
+    fontSize: 20,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Text typed in the onboarding name field, Atkinson bold 26 (J6i).
+  static const TextStyle inputLarge = TextStyle(
+    fontFamily: BirdyFonts.sans,
+    fontSize: 26,
+    height: 1.15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Bird name on a picker card, Nunito 800 17 (J6i).
+  static const TextStyle headingSmall = TextStyle(
+    fontFamily: BirdyFonts.rounded,
+    fontSize: 17,
+    height: 1.25,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+  );
+
   /// Label of tonal buttons and chips, Atkinson bold 15.
   static const TextStyle labelCompact = TextStyle(
     fontFamily: BirdyFonts.sans,

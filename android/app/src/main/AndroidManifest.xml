@@ -11,7 +11,8 @@
     <application
         android:label="BirdyGo"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_loriot"
+        android:roundIcon="@mipmap/ic_launcher_loriot_round"
         android:enableOnBackInvokedCallback="true">
         <!-- screenOrientation is "fullUser", not the default "unspecified":
              phones leave the 180° reverse-portrait position out of sensor
