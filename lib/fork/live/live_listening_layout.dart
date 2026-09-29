@@ -14,9 +14,10 @@ import 'package:flutter/material.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../practice/practice_banner.dart';
-import '../reliability/levels_sheet.dart';
+import '../listening_mode/listening_mode.dart';
 import 'detection_marks.dart';
 import 'live_control_bar.dart';
+import 'listening_options.dart';
 import 'live_header.dart';
 import 'live_spectrogram_panel.dart';
 import 'live_table.dart';
@@ -50,7 +51,7 @@ class LiveListeningLayout extends StatefulWidget {
     this.moment,
     this.practice = false,
     this.place,
-    this.modeChip,
+    this.listeningMode = ListeningMode.normal,
   });
 
   final String statusText;
@@ -100,8 +101,9 @@ class LiveListeningLayout extends StatefulWidget {
   /// Place name under the status (J6f).
   final String? place;
 
-  /// Listening mode pill of the header (J6f), 48 dp.
-  final Widget? modeChip;
+  /// Active listening mode (J6f), null for « Personnalisé »: shown in the
+  /// status and on the header's options button.
+  final ListeningMode? listeningMode;
 
   @override
   State<LiveListeningLayout> createState() => _LiveListeningLayoutState();
@@ -140,15 +142,15 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
       bottom: false,
       child: LiveHeader(
         statusText: widget.statusText,
-        live: widget.live,
+        phase: widget.phase,
         stats: stats,
         elapsed: widget.elapsed,
         expanded: _expanded,
         showTiles: !landscape,
         place: widget.place,
-        modeChip: widget.modeChip,
-        onLevelsInfo:
-            () => showLevelsSheet(
+        listeningMode: widget.listeningMode,
+        onOptions:
+            () => showListeningOptionsSheet(
               context,
               onHelp: widget.onHelp,
               onSettings: widget.onSettings,

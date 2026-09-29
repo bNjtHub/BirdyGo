@@ -554,9 +554,6 @@ abstract final class BirdySizes {
   /// Icon of a one-line tip (empty live table).
   static const double tipIcon = 18;
 
-  /// Icon and chevron of the listening mode pill (live header).
-  static const double modeIcon = 20;
-  static const double modeChevron = 16;
 
   /// Illustration disc of the « Qui chante ? » block on the Profil, and the
   /// Loriot question mark pinned on its corner.
@@ -586,6 +583,38 @@ abstract final class BirdySizes {
 
   /// Minimum height of a badge tile (Profil « À gagner »).
   static const double badgeTile = 136;
+
+  /// Live header logo (J6f): about the status line's height, a bit more.
+  static const double liveLogo = 22;
+
+  /// Mode icon inline before the mode word in the live status line (J6f).
+  static const double statusModeIcon = 14;
+}
+
+/// Text and icon colors of each listening mode (J6f, `lib/fork/listening_mode`),
+/// distinct in hue and lightness so the mode reads at a glance: Martin-pêcheur
+/// for Normal, a Lichen green for Vent, Loriot for Boost, a rose for Ville.
+/// Each value reaches 4.5:1 on the live dark background, the options sheet
+/// surfaces (`surface1`-`surface3`) and their light theme counterparts
+/// (`test/fork/design/contrast_test.dart`).
+abstract final class ListeningModeColors {
+  /// Same value as [BirdyColors.accentText]: Normal is the plain, always-on
+  /// setting, so it borrows the app's action color rather than a new one.
+  static const Color normalLight = Color(0xFF0B6E77);
+  static const Color normalDark = Color(0xFF4FC3CC);
+
+  /// Lichen-based green, distinct in hue from Normal's teal.
+  static const Color windLight = Color(0xFF4B6023);
+  static const Color windDark = Color(0xFFB7CF83);
+
+  /// Same value as [BirdyColors.orioleText]: Boost raises the gain, close
+  /// enough to Loriot's "more" meaning.
+  static const Color boostLight = Color(0xFF7A5A00);
+  static const Color boostDark = Color(0xFFF4C542);
+
+  /// Rose, for Ville: the fourth hue, distinct from teal, green and gold.
+  static const Color cityLight = Color(0xFF8A2F45);
+  static const Color cityDark = Color(0xFFF0A5AE);
 }
 
 /// Opacities of layered block details (J6f). Colors themselves come from
@@ -610,8 +639,6 @@ abstract final class BirdyAlpha {
   /// table (it is not there yet).
   static const double expectedRow = 0.55;
 
-  /// [BirdyColors.accentText] outline of the listening mode pill.
-  static const double modePillBorder = 0.4;
 
   /// Thin inner white ring on a reached level emblem/ring (J6f).
   static const double emblemInnerRing = 0.5;

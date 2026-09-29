@@ -118,6 +118,55 @@ void main() {
     }
   });
 
+  group('listening mode colors reach AA (J6f)', () {
+    const light = BirdyColors.light;
+    const dark = BirdyColors.dark;
+
+    test('light theme: on the sheet surfaces', () {
+      for (final (name, color) in [
+        ('normal', ListeningModeColors.normalLight),
+        ('wind', ListeningModeColors.windLight),
+        ('boost', ListeningModeColors.boostLight),
+        ('city', ListeningModeColors.cityLight),
+      ]) {
+        expectAA(color, light.background, '$name/background');
+        expectAA(color, light.surface1, '$name/surface1');
+        expectAA(color, light.surface2, '$name/surface2');
+      }
+    });
+
+    test('dark theme (live screen and options sheet)', () {
+      for (final (name, color) in [
+        ('normal', ListeningModeColors.normalDark),
+        ('wind', ListeningModeColors.windDark),
+        ('boost', ListeningModeColors.boostDark),
+        ('city', ListeningModeColors.cityDark),
+      ]) {
+        expectAA(color, dark.background, '$name/background');
+        expectAA(color, dark.surface1, '$name/surface1');
+        expectAA(color, dark.surface2, '$name/surface2');
+        expectAA(color, dark.surface3, '$name/surface3');
+      }
+    });
+
+    test('distinct in hue: no two modes share a color', () {
+      final lightColors = {
+        ListeningModeColors.normalLight,
+        ListeningModeColors.windLight,
+        ListeningModeColors.boostLight,
+        ListeningModeColors.cityLight,
+      };
+      final darkColors = {
+        ListeningModeColors.normalDark,
+        ListeningModeColors.windDark,
+        ListeningModeColors.boostDark,
+        ListeningModeColors.cityDark,
+      };
+      expect(lightColors, hasLength(4));
+      expect(darkColors, hasLength(4));
+    });
+  });
+
   test('contrastRatio matches WCAG reference values', () {
     expect(
       contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)),

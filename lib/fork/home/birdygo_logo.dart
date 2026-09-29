@@ -4,6 +4,11 @@
 /// On arrival the four wing bars, a spectrogram, draw upward one after the
 /// other; the bird itself does not move (fork/DESIGN.md: one effect at a
 /// time, 500 ms at most). With reduced motion the mark is drawn at once.
+///
+/// The live header (`lib/fork/live/live_header.dart`) reuses the same
+/// painter for its logo, past the arrival: while listening the bars idle in
+/// a level-meter loop (`BirdyGoLogoPainter.level`), the fork's one exception
+/// to "no loops" (fork/DESIGN.md, Animations).
 library;
 
 import 'dart:ui' as ui;
@@ -61,11 +66,24 @@ class _BirdyGoLogoState extends State<BirdyGoLogo>
   );
 }
 
-/// Paints the mark in a square. [progress] (0 → 1) draws the wing bars.
+/// Paints the mark in a square. [progress] (0 → 1) draws the wing bars once
+/// on arrival. Once it reaches 1, [level] (0 → 1, repeating) makes each bar
+/// oscillate like a level meter, staggered, while the bird stays still (J6f,
+/// live header). [frozenLevel] holds the bars at a fixed length instead
+/// (paused). Neither is read while [progress] is still drawing the bars in.
 class BirdyGoLogoPainter extends CustomPainter {
-  BirdyGoLogoPainter({required this.progress}) : super(repaint: progress);
+  BirdyGoLogoPainter({required this.progress, this.level, this.frozenLevel})
+    : super(repaint: level == null ? progress : Listenable.merge([
+        progress,
+        level,
+      ]));
 
   final Animation<double> progress;
+  final Animation<double>? level;
+  final double? frozenLevel;
+
+  /// Shortest length a bar takes, oscillating or paused: never fully gone.
+  static const double pausedBarLevel = 0.55;
 
   /// Source view box of the SVG.
   static const double _box = 512;
@@ -188,10 +206,24 @@ class BirdyGoLogoPainter extends CustomPainter {
     for (final (i, (from, to, color)) in bars.indexed) {
       final local = ((t - i * step) / _barShare).clamp(0.0, 1.0);
       if (local == 0) continue;
-      final eased = BirdyMotion.standard.transform(local);
+      final double fraction;
+      if (local < 1) {
+        // Drawing in on arrival: unaffected by the live level meter.
+        fraction = BirdyMotion.standard.transform(local);
+      } else if (frozenLevel != null) {
+        fraction = frozenLevel!;
+      } else if (level != null) {
+        // Staggered level meter: each bar a phrase-length behind the last.
+        final phase = (level!.value + i / bars.length) % 1.0;
+        final triangle = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+        final eased = BirdyMotion.standard.transform(triangle);
+        fraction = pausedBarLevel + (1 - pausedBarLevel) * eased;
+      } else {
+        fraction = 1;
+      }
       canvas.drawLine(
         from,
-        Offset.lerp(from, to, eased)!,
+        Offset.lerp(from, to, fraction)!,
         Paint()
           ..color = color
           ..strokeWidth = 30
@@ -211,5 +243,7 @@ class BirdyGoLogoPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BirdyGoLogoPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress ||
+      oldDelegate.level != level ||
+      oldDelegate.frozenLevel != frozenLevel;
 }

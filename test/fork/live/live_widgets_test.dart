@@ -12,7 +12,6 @@ import 'package:birdnet_live/fork/live/live_table.dart';
 import 'package:birdnet_live/fork/live/live_table_model.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/widgets/confirm_destructive.dart';
-import 'package:birdnet_live/fork/reliability/levels_sheet.dart';
 import 'package:birdnet_live/fork/design/species_accents.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +37,21 @@ Widget _app(
       ),
   home: scaffold ? Scaffold(body: child) : child,
 );
+
+/// The status line's `Text.rich` (icon + colored mode word, J6f), matched
+/// by its semantics label rather than its rendered text, which embeds the
+/// icon as a `WidgetSpan` placeholder character.
+Text _statusText(WidgetTester tester) => tester
+    .widgetList<Text>(find.byType(Text))
+    .firstWhere((t) => t.textSpan != null);
+
+/// Not pumpAndSettle: while listening, the live logo's level meter loops
+/// (J6f, the one animation exception), so a real settle never completes.
+Future<void> _pumpSettled(WidgetTester tester) async {
+  for (var i = 0; i < 12; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
 
 final _t0 = DateTime(2026, 9, 26, 7, 0);
 
@@ -358,11 +372,11 @@ void main() {
 
     Widget header({required bool expanded}) => LiveHeader(
       statusText: 'En écoute',
-      live: true,
+      phase: LiveControlPhase.active,
       stats: const LiveStats(species: 5, contacts: 12),
       elapsed: () => const Duration(minutes: 12, seconds: 47),
       expanded: expanded,
-      onLevelsInfo: () {},
+      onOptions: () {},
       onBack: () {},
     );
 
@@ -380,12 +394,12 @@ void main() {
               width: width,
               child: LiveHeader(
                 statusText: status,
-                live: true,
+                phase: LiveControlPhase.active,
                 stats: const LiveStats(species: 5, contacts: 12),
                 elapsed: () => const Duration(minutes: 12, seconds: 47),
                 expanded: false,
                 showTiles: tiles,
-                onLevelsInfo: () {},
+                onOptions: () {},
                 onBack: () {},
               ),
             ),
@@ -404,9 +418,10 @@ void main() {
         expect(tester.getSize(find.byType(LiveHeader)), size);
         await tester.pump(const Duration(milliseconds: 300));
         expect(tester.getSize(find.byType(LiveHeader)), size);
-        expect(find.text('En écoute'), findsNothing);
-        final status = tester.widget<Text>(
-          find.text('Chargement du modèle, cela peut prendre un moment…'),
+        final status = _statusText(tester);
+        expect(
+          status.semanticsLabel,
+          'Chargement du modèle, cela peut prendre un moment… · Normal',
         );
         expect(status.maxLines, 1);
         expect(status.overflow, TextOverflow.ellipsis);
@@ -423,12 +438,12 @@ void main() {
       expect(find.text('12:47'), findsOneWidget);
       expect(find.text('espèces'), findsOneWidget);
       expect(find.text('contacts'), findsOneWidget);
-      // The « i » button replaced the enlarge chevron (J6c-bis-c).
-      expect(find.byTooltip('Niveaux, aide et réglages'), findsOneWidget);
+      // The options button replaced the enlarge chevron (J6c-bis-c, J6f).
+      expect(find.byTooltip("Options d'écoute, mode Normal"), findsOneWidget);
       expect(find.byTooltip('Agrandir le spectre'), findsNothing);
 
       await tester.pumpWidget(_app(header(expanded: true)));
-      await tester.pumpAndSettle();
+      await _pumpSettled(tester);
       expect(find.text('12:47'), findsNothing);
       expect(find.text('5 espèces · 12 contacts'), findsOneWidget);
       expect(find.byTooltip('Réduire le spectre'), findsNothing);
@@ -520,7 +535,7 @@ void main() {
 
       // Landscape too, once.
       tester.view.physicalSize = const Size(900, 400);
-      await tester.pumpAndSettle();
+      await _pumpSettled(tester);
       expect(find.text('Enregistrement'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -541,7 +556,7 @@ void main() {
       expect(find.byIcon(AppIcons.expandMore), findsOneWidget);
 
       await tester.tap(find.byType(LiveSpectrogramPanel));
-      await tester.pumpAndSettle();
+      await _pumpSettled(tester);
       expect(find.byIcon(AppIcons.expandLess), findsOneWidget);
       final body = tester.getSize(find.byType(LayoutBuilder).first).height;
       expect(find.text('spectre agrandi'), findsOneWidget);
@@ -578,7 +593,7 @@ void main() {
 
         // A tap widens the spectrogram.
         await tester.tap(find.byType(LiveSpectrogramPanel));
-        await tester.pumpAndSettle();
+        await _pumpSettled(tester);
         expect(
           tester.getSize(find.byType(LiveSpectrogramPanel)).width,
           closeTo(900 * 0.65, 1),
@@ -656,12 +671,12 @@ void main() {
       expect(_Counted.created, 1);
 
       tester.view.physicalSize = const Size(900, 420);
-      await tester.pumpAndSettle();
+      await _pumpSettled(tester);
       expect(find.byType(_Counted), findsOneWidget);
       expect(_Counted.created, 1);
 
       tester.view.physicalSize = const Size(400, 900);
-      await tester.pumpAndSettle();
+      await _pumpSettled(tester);
       expect(_Counted.created, 1);
       expect(tester.takeException(), isNull);
     });
@@ -673,19 +688,6 @@ void main() {
       await tester.pumpWidget(app(live()));
       final dot = tester.widget<SpeciesColorDot>(find.byType(SpeciesColorDot));
       expect(dot.color, SpeciesAccents.accentOf('Merle'));
-    });
-
-    testWidgets('the « i » button explains the levels', (tester) async {
-      tester.view.physicalSize = const Size(400, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(app(live()));
-      await tester.tap(find.byTooltip('Niveaux, aide et réglages'));
-      await tester.pumpAndSettle();
-      expect(find.byType(LevelsSheet), findsOneWidget);
-      expect(find.text("À quel point l'app est sûre ?"), findsOneWidget);
-      expect(find.text('Rare ici · à confirmer'), findsOneWidget);
-      expect(tester.takeException(), isNull);
     });
   });
 }

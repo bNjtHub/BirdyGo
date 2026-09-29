@@ -13,6 +13,7 @@ import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
 import '../design/species_tint.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_sheet.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/birdygo_wordmark.dart';
 import '../design/widgets/pressable.dart';
@@ -1258,7 +1259,14 @@ class HomeMenuSheet extends StatelessWidget {
     final c = BirdyColors.of(context);
     return ListView(
       shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: BirdySpace.l),
+      // The bottom nav bar inset goes here, as trailing scroll padding,
+      // rather than around this ListView from showBirdySheet
+      // (addBottomInset: false in fork_home.dart) — this list can grow to
+      // fill the sheet, and outer padding would shrink that scrolling
+      // viewport instead of just clearing the nav bar (J6f-c bugfix).
+      padding: EdgeInsets.only(
+        bottom: BirdySpace.l + birdySheetBottomInset(context),
+      ),
       children: [
         for (final (i, group) in groups.indexed) ...[
           if (i > 0) Divider(color: c.line, height: BirdySpace.l),
