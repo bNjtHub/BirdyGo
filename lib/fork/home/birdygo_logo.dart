@@ -116,6 +116,18 @@ class BirdyGoLogoPainter extends CustomPainter {
   /// is [BirdyMotion.listeningBarMin]): never fully gone.
   static const double pausedBarLevel = 0.55;
 
+  /// Length share of bar [index] in the listening level meter at loop
+  /// position [level] (0 → 1): staggered, between
+  /// [BirdyMotion.listeningBarMin] and full length. Shared with the wing icon
+  /// of the « Écouter » disc.
+  static double levelFraction(double level, int index) {
+    final phase = (level - index * BirdyMotion.listeningBarStagger) % 1.0;
+    final triangle = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+    final eased = BirdyMotion.standard.transform(triangle);
+    return BirdyMotion.listeningBarMin +
+        (1 - BirdyMotion.listeningBarMin) * eased;
+  }
+
   /// Source view box of the SVG.
   static const double _box = 512;
 
@@ -294,14 +306,7 @@ class BirdyGoLogoPainter extends CustomPainter {
       } else if (frozenLevel != null) {
         fraction = frozenLevel!;
       } else if (level != null) {
-        // Staggered level meter: each bar a little behind the last.
-        final phase =
-            (level!.value - i * BirdyMotion.listeningBarStagger) % 1.0;
-        final triangle = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
-        final eased = BirdyMotion.standard.transform(triangle);
-        fraction =
-            BirdyMotion.listeningBarMin +
-            (1 - BirdyMotion.listeningBarMin) * eased;
+        fraction = levelFraction(level!.value, i);
       } else {
         fraction = 1;
       }

@@ -1018,7 +1018,7 @@ class TodayBlock extends StatelessWidget {
 
 /// « Aucun oiseau pour l'instant » (J6g-b): the today block of a day with
 /// nothing heard yet, on the tonal tint, inviting to listen. Tapping it
-/// starts a listening, like the pinned « Écouter » button.
+/// starts a listening, like the « Écouter » disc of the bar.
 class TodayEmptyBlock extends StatelessWidget {
   const TodayEmptyBlock({super.key, this.onListen});
 

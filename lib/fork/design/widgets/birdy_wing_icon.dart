@@ -3,11 +3,15 @@
 /// no outline. Used on « Écouter », « Commencer à écouter » and the quiz's
 /// question mark.
 ///
-/// With [BirdyWingIcon.animated], every few seconds the bars do a short
+/// With [BirdyWingIcon.animated], every 7 seconds the bars do a short
 /// smooth wave (`BirdyMotion.wingWave`) and come back exactly to rest. One
 /// controller runs only during the wave (a cancellable timer covers the rest
 /// gap, so nothing ticks in between), the painter repaints alone, and it is
 /// all off with reduced motion or under a muted [TickerMode].
+///
+/// With [BirdyWingIcon.listening] (the « Écouter » disc while the app
+/// listens, J6j) the bars loop as the listening logo's level meter instead,
+/// under the same reduced motion and [TickerMode] rules.
 library;
 
 import 'dart:async';
@@ -21,13 +25,21 @@ import '../birdy_theme_choice.dart';
 import '../birdy_tokens.dart';
 
 class BirdyWingIcon extends StatefulWidget {
-  const BirdyWingIcon({super.key, this.size = 28, this.animated = false});
+  const BirdyWingIcon({
+    super.key,
+    this.size = 28,
+    this.animated = false,
+    this.listening = false,
+  });
 
   /// Side of the square box the wing fills.
   final double size;
 
   /// Whether the bars wave from time to time.
   final bool animated;
+
+  /// Whether the bars loop as a level meter (takes over from [animated]).
+  final bool listening;
 
   /// Length factor of bar [index] at wave progress [t] (0 → 1): 1 at rest,
   /// swelling by `BirdyMotion.wingWaveAmplitude` mid-way, bars staggered.
@@ -46,12 +58,18 @@ class BirdyWingIcon extends StatefulWidget {
 }
 
 class _BirdyWingIconState extends State<BirdyWingIcon>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _wave = AnimationController(
     vsync: this,
     duration: BirdyMotion.wingWave,
   );
-  final math.Random _random = math.Random();
+  late final AnimationController _level = AnimationController(
+    vsync: this,
+    duration: BirdyMotion.listeningLevelPeriod,
+    // Same as the listening logo: the loop keeps its rhythm whatever the
+    // platform's animation scale.
+    animationBehavior: AnimationBehavior.preserve,
+  );
   Timer? _timer;
 
   @override
@@ -67,21 +85,25 @@ class _BirdyWingIconState extends State<BirdyWingIcon>
 
   void _schedule() {
     _timer?.cancel();
-    final jitter = BirdyMotion.wingWaveJitter.inMilliseconds;
-    final gap =
-        BirdyMotion.wingWaveInterval +
-        Duration(milliseconds: _random.nextInt(2 * jitter + 1) - jitter);
-    _timer = Timer(gap, () {
+    _timer = Timer(BirdyMotion.wingWaveInterval, () {
       _timer = null;
       if (mounted) _wave.forward(from: 0);
     });
   }
 
   void _sync() {
-    final on =
-        widget.animated &&
-        TickerMode.valuesOf(context).enabled &&
-        !BirdyMotion.reduced(context);
+    final live =
+        TickerMode.valuesOf(context).enabled && !BirdyMotion.reduced(context);
+    if (widget.listening && live) {
+      _timer?.cancel();
+      _timer = null;
+      _wave.stop();
+      _wave.value = 0;
+      if (!_level.isAnimating) _level.repeat();
+      return;
+    }
+    if (_level.isAnimating) _level.stop();
+    final on = widget.animated && !widget.listening && live;
     if (on) {
       if (_timer == null && !_wave.isAnimating) _schedule();
     } else {
@@ -108,6 +130,7 @@ class _BirdyWingIconState extends State<BirdyWingIcon>
   void dispose() {
     _timer?.cancel();
     _wave.dispose();
+    _level.dispose();
     super.dispose();
   }
 
@@ -116,20 +139,28 @@ class _BirdyWingIconState extends State<BirdyWingIcon>
     child: RepaintBoundary(
       child: CustomPaint(
         size: Size.square(widget.size),
-        painter: _WingPainter(_wave, BirdyBrandColors.of(context)),
+        painter: _WingPainter(
+          _wave,
+          widget.listening && !BirdyMotion.reduced(context) ? _level : null,
+          BirdyBrandColors.of(context),
+        ),
       ),
     ),
   );
 }
 
 class _WingPainter extends CustomPainter {
-  _WingPainter(this.wave, this.brand) : super(repaint: wave);
+  _WingPainter(this.wave, this.level, this.brand)
+    : super(repaint: level == null ? wave : Listenable.merge([wave, level]));
 
   /// Bars 2 and 4 follow the bird theme (J6i).
   final BirdyBrandColors brand;
 
   /// Wave progress; 0 (rest) draws the bars exactly as the logo does.
   final Animation<double> wave;
+
+  /// Listening level meter's loop position, or null outside listening.
+  final Animation<double>? level;
 
   /// Stroke of a bar, in the logo's 512 box (same as the logo painter).
   static const double _stroke = 30;
@@ -151,7 +182,12 @@ class _WingPainter extends CustomPainter {
 
   /// The bar's top end once the wave stretched it from its bottom point.
   Offset _grown(Offset from, Offset to, int index) {
-    final k = wave.value == 0 ? 1.0 : BirdyWingIcon.barScale(index, wave.value);
+    final k =
+        level != null
+            ? BirdyGoLogoPainter.levelFraction(level!.value, index)
+            : wave.value == 0
+            ? 1.0
+            : BirdyWingIcon.barScale(index, wave.value);
     return Offset.lerp(from, to, k)!;
   }
 
@@ -197,5 +233,5 @@ class _WingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_WingPainter old) =>
-      old.wave != wave || old.brand != brand;
+      old.wave != wave || old.level != level || old.brand != brand;
 }

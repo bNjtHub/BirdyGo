@@ -116,10 +116,12 @@ Accueil
 │ Nouvelles cette année      > │
 │ [photo] [photo] [photo]      │
 │ 3 détections à vérifier    > │
-│                              │
-│        ( ●  Écouter )        │
+│            ╭───╮             │
+├────────────┤ ● ├─────────────┤
+│ Accueil Carnet Écouter Carte Profil │
 └─────────────────────────────┘
 ```
+Depuis J6j, « Écouter » est le disque du milieu de la barre du bas, qui dépasse de 22 dp.
 
 Live
 ```
@@ -181,6 +183,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Élément | Durée | Courbe |
 |---|---|---|
 | Appui sur un bouton, échelle 0,97 | 120 ms | `Cubic(0.23, 1, 0.32, 1)` |
+| Appui sur le disque « Écouter » de la barre, échelle 0,95 (exception explicite, voir plus bas) | 120 ms | `Cubic(0.23, 1, 0.32, 1)` |
 | Entrée d'un élément | 200 à 250 ms | `Cubic(0.23, 1, 0.32, 1)` |
 | Sortie | 150 ms | même courbe, toujours plus courte que l'entrée |
 | Déplacement à l'écran | 250 ms | `Cubic(0.77, 0, 0.175, 1)` |
@@ -263,6 +266,10 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   1,3 s) ; l'oiseau ne bouge jamais. En pause, les barres se figent à une longueur moyenne. Hors
   écoute ou animations réduites : le logo plein, immobile. Une seule `AnimationController`, un
   seul `CustomPainter` (`repaint: level`), aucune reconstruction de l'en-tête à chaque image.
+- Troisième exception, l'appui sur le disque « Écouter » de la barre du bas (J6j) : échelle 0,95
+  (`BirdyMotion.listenDiscPressScale`) au lieu de 0,97. C'est le bouton le plus important de l'app et
+  il est rond : à 0,97 l'appui ne se verrait pas. Même durée et même courbe que les autres appuis,
+  rien de plus, et rien du tout avec les animations réduites.
 
 ## Mise en œuvre (J6a)
 
@@ -393,23 +400,25 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   (une seule cible, bien plus grande que 48 dp). Sans objectif du jour : phrase d'invitation et
   « Choisir les oiseaux du jour », aucun appel GPS depuis l'accueil.
 - La couleur ne vient que des oiseaux (ronds, dernier oiseau) et du statut (anneau de la carte de
-  statut). « Écouter » (pilule Martin-pêcheur de 72 dp, seul `FilledButton` de l'écran) est fixé
-  au-dessus de la barre du bas, hors de la zone qui défile. Sa marge basse (J6f) tient toute la
-  lueur (`ctaGlow`, rayon de flou 28) : moins, et la barre de navigation en coupe le bas.
+  statut). Depuis J6j, plus aucun `FilledButton` sur l'écran : « Écouter » est le disque du milieu de
+  la barre du bas (voir J6e-a). La liste descend jusqu'à la barre : marge basse de 38
+  (`BirdySpace.page` + `BirdySizes.listenDiscLift`) pour que le disque ne cache jamais le dernier
+  bloc, et un fondu de 28 dp (`BirdySizes.listFade`, du transparent au fond, sans toucher aux
+  appuis) adoucit la coupe au-dessus de la barre.
 - Mouvement : les 5 premiers blocs montent une fois (220 ms, 40 ms d'écart), les suivants arrivent
   sans animation ; rien en boucle ; animations réduites : aucune entrée, pas même un fondu.
 - Tuiles du jour depuis l'index : espèces, contacts, nouvelles (Sûres ou confirmées aujourd'hui,
   jamais vérifiées avant : même règle que « Première fois » du Bilan, via `verifiedSpecies(before:)`).
   Sans écoute du jour : phrase d'invitation à la place des tuiles.
 - « Dernier oiseau entendu » sur la teinte de l'espèce (niveau, heure au format de la langue, total),
-  vers la fiche. « N détections à vérifier » (cachée à 0), vers la revue rapide. « Écouter » fixé en
-  bas, au pouce.
+  vers la fiche. « N détections à vérifier » (cachée à 0), vers la revue rapide. « Écouter » est au
+  milieu de la barre du bas, au pouce.
 - Les chiffres se chargent après la première image et se remettent à jour quand l'index change.
 - Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
   Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
   fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
-- Paysage large : salutation et objectif du jour à gauche ; statut, tuiles, cartes et « Écouter » à
-  droite. Colonne de 600 dp au plus sur tablette.
+- Paysage large : salutation et objectif du jour à gauche ; statut, tuiles et cartes à droite (chaque
+  colonne a sa marge basse et son fondu). Colonne de 600 dp au plus sur tablette.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
   navigation (Accueil, Carnet, Carte, Profil).
 
@@ -479,10 +488,28 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 
 ## Mise en œuvre (J6e-a, navigation et Carnet)
 
-- Barre du bas (`lib/fork/shell/fork_shell.dart`) : `NavigationBar` du thème (80 dp, pastille
-  Martin-pêcheur sur l'onglet actif), sans animation de l'indicateur (vue cent fois par jour).
-  Accueil, Carnet, Carte, Profil ; le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil
-  garde toutes ses entrées.
+- Barre du bas (`lib/fork/shell/fork_nav_bar.dart`, J6j) : 5 emplacements, Accueil, Carnet,
+  « Écouter », Carte, Profil, dans cet ordre pour le focus et les lecteurs d'écran. Le `NavigationBar`
+  de Material ne peut pas porter un emplacement plus haut que lui : la barre est dessinée à la main
+  et reprend le look du thème (80 dp, pastille de 64 × 32 sur l'onglet actif, styles d'icône et
+  d'étiquette lus dans `NavigationBarTheme`), sans animation de l'indicateur (vue cent fois par
+  jour). Le fond et le filet du haut (1 px, `line`) ne couvrent que les 80 dp du bas (plus la zone
+  sûre) ; les 22 dp au-dessus sont transparents et laissent passer les appuis vers la page, sauf sur
+  le disque. Les pages s'arrêtent au fond de la barre (`Stack` du `ForkShell`), la barre flotte
+  dessus. Clavier ouvert (champ de recherche d'une feuille) : la barre se cache et les pages
+  descendent jusqu'en bas. Le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil garde toutes ses entrées ;
+  sur Profil, son bouton en haut à droite est le même menu (Palmarès est la première entrée).
+- Disque « Écouter » : 68 dp (`BirdySizes.listenDisc`), fond `accent`, liseré de 4 dp de la couleur
+  de la barre (`listenDiscRim`), lueur `listenGlow`, haut du disque à 22 dp au-dessus de la barre
+  (`listenDiscLift`). Aile de 30 dp au centre (`BirdyGlyph.x6l`), étiquette « Écouter » en
+  `accentText` sous le disque, alignée sur la ligne de base des autres étiquettes. Appui à 0,95
+  (exception explicite à la règle des 0,97, voir Animations). Tout l'emplacement (disque et
+  étiquette) est une cible ; la bande vide à côté du disque n'en est pas une. Un appui ne change
+  jamais d'onglet : il ouvre l'écoute (`LiveScreen(forceAutoStart: true)`) ou, si une écoute est en
+  cours ou en pause, rouvre son écran sans la relancer.
+- Écoute en cours (active ou en pause) : l'aile du disque fait le vumètre du logo de l'écoute
+  (`BirdyGoLogoPainter.levelFraction`, `BirdyMotion.listeningLevelPeriod`), à l'arrêt avec les
+  animations réduites ou hors écran. Sinon, une vague toutes les 7 s pile, sans variation.
 - Gestes (J6f) : un balayage horizontal passe à l'onglet voisin, dans l'ordre de la barre, et la
   pastille suit dès que la page voisine dépasse la moitié de l'écran. Sur l'onglet Carte, le
   balayage est coupé (la carte se déplace au doigt) : on en sort par la barre ou par le retour ;
@@ -762,10 +789,11 @@ Accueil
   espèces », 3 silhouettes au plus), série sur Loriot (7 pastilles de la semaine remplies en
   `orioleText` pour garder 3:1), « À vérifier » en pointillé (« N min de revue », 10 s par
   détection) ; statut sur Sûr avec barre ; « Aujourd'hui » (3 chiffres sur une ligne, cartes
-  teintées qui défilent, la plus récente d'abord) ; défi de la semaine ; « Écouter » fixé en bas.
+  teintées qui défilent, la plus récente d'abord) ; défi de la semaine ; « Écouter » au milieu de la
+  barre du bas.
 - Un bloc sans donnée disparaît et l'objectif prend toute la largeur. La pastille de série quitte le
   haut de l'écran.
-- « Écouter » (et « Commencer à écouter » de l'objectif) lance l'écoute tout de suite :
+- « Écouter » (disque de la barre, et « Commencer à écouter » de l'objectif) lance l'écoute tout de suite :
   `LiveScreen(forceAutoStart: true)`, aucun écran intermédiaire.
 
 Écoute : état vide
@@ -851,8 +879,8 @@ sur les sections précédentes en cas de conflit.
 5. **Une seule ligne de liste.** Disque teinté de 44 avec icône, ou avatar de 48 ; libellé 17 gras,
    légende 13, chevron ; hauteur minimale `BirdySizes.row` (72). Réglages, Plus, Sonothèque,
    Objectif, Bilan et les tiroirs la partagent.
-6. **Une seule action forte, en bas.** Pilule de 72, Martin-pêcheur, `listenGlow` ou `ctaGlow`,
-   épinglée en bas. Tout le reste : bouton tonal 48, secondaire 56, ou puce.
+6. **Une seule action forte, en bas.** Depuis J6j, le disque « Écouter » de la barre du bas (68,
+   `accent`, `listenGlow`) ; ailleurs, pilule de 72 (`ctaGlow`). Tout le reste : bouton tonal 48, secondaire 56, ou puce.
 7. **Puces blanches, choix en encre.** La puce choisie passe en `BirdyChipColors.ink` partout.
    Exception : sur fond Brume, les filtres du Carnet gardent leur teinte de sens.
 8. **Même comportement partout.** Entrée décalée (`BirdyEntrance.staggered`, 40 ms,
@@ -882,9 +910,10 @@ Règles transverses :
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
   boutons « Écouter » et « Commencer à écouter » (écart icône/texte : +`BirdySpace.wingLabelGap`). Sur ces
-  deux boutons (`animated`), toutes les 7 s environ (±1,5 s), les barres font une vague douce de 0,9 s,
-  décalées, puis reviennent au repos (`BirdyMotion.wingWave*`) ; rien ne tourne entre deux vagues, arrêt
-  avec animations réduites. La feuille « Arrêter la partie ? » reprend `QuizLogo`, l'emblème du quiz.
+  deux boutons et sur le disque de la barre (`animated`), toutes les 7 s pile (J6j : plus de variation),
+  les barres font une vague douce de 0,9 s, décalées, puis reviennent au repos
+  (`BirdyMotion.wingWave*`) ; rien ne tourne entre deux vagues, arrêt avec animations réduites.
+  Pendant l'écoute (`listening`), le disque passe au vumètre. La feuille « Arrêter la partie ? » reprend `QuizLogo`, l'emblème du quiz.
 
 ## Onboarding (J6i : prénom et oiseau)
 

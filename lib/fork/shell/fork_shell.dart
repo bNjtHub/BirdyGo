@@ -1,6 +1,7 @@
 /// Bottom navigation of BirdyGo (J6e, SPEC.md 5.8): Accueil, Carnet, Carte,
-/// Profil. Listening, fiches and the other screens open above it, full
-/// screen.
+/// Profil, and « Écouter » as a disc in the middle of the bar (J6j, see
+/// `ForkNavBar`): it opens the listening screen and is never a tab. Listening,
+/// fiches and the other screens open above it, full screen.
 ///
 /// The tabs sit side by side in a [PageView] (J6f): a horizontal swipe moves
 /// to the next tab in the order of the bar, and the bar follows. On the Carte
@@ -8,15 +9,19 @@
 /// still leaves it, and swiping from Carnet or Profil into the map works.
 library;
 
-import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../../features/live/live_controller.dart';
+import '../../features/live/live_providers.dart';
+import '../../features/live/live_screen.dart';
 import '../design/birdy_motion.dart';
+import '../design/birdy_tokens.dart';
 import '../home/fork_home.dart';
 import '../map/contact_map_screen.dart';
 import '../notebook/notebook_screen.dart';
 import '../profile/profile_screen.dart';
+import 'fork_nav_bar.dart';
 
 enum ForkTab { home, notebook, map, profile }
 
@@ -34,14 +39,14 @@ class ForkShellScope extends InheritedWidget {
   bool updateShouldNotify(ForkShellScope old) => false;
 }
 
-class ForkShell extends StatefulWidget {
+class ForkShell extends ConsumerStatefulWidget {
   const ForkShell({super.key});
 
   @override
-  State<ForkShell> createState() => _ForkShellState();
+  ConsumerState<ForkShell> createState() => _ForkShellState();
 }
 
-class _ForkShellState extends State<ForkShell> {
+class _ForkShellState extends ConsumerState<ForkShell> {
   final PageController _pages = PageController();
 
   /// Tab shown by the bar. Follows a swipe as soon as the next page is
@@ -124,6 +129,22 @@ class _ForkShellState extends State<ForkShell> {
     return false;
   }
 
+  /// The « Écouter » disc: starts listening, or reopens the screen of the
+  /// listening already on (active or paused). The selected tab stays.
+  void _listen() {
+    final state = ref.read(liveStateProvider);
+    final running = state == LiveState.active || state == LiveState.paused;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder:
+            (_) =>
+                running
+                    ? const LiveScreen()
+                    : const LiveScreen(forceAutoStart: true),
+      ),
+    );
+  }
+
   Widget _page(ForkTab tab) => switch (tab) {
     ForkTab.home => const ForkHome(),
     ForkTab.notebook => const NotebookScreen(),
@@ -142,7 +163,10 @@ class _ForkShellState extends State<ForkShell> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    // Keyboard open (a search field in a tab's sheet): the bar hides, as the
+    // Scaffold's own bar used to stay under the keyboard.
+    final showBar = MediaQuery.viewInsetsOf(context).bottom == 0;
     return PopScope(
       // Back from another tab returns to Accueil; back from Accueil leaves.
       canPop: _tab == ForkTab.home,
@@ -150,60 +174,62 @@ class _ForkShellState extends State<ForkShell> {
         if (!didPop) _select(ForkTab.home);
       },
       child: Scaffold(
-        body: ForkShellScope(
-          select: _select,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: _onScroll,
-            child: PageView(
-              controller: _pages,
-              // The map pans with horizontal drags: no swiping out of it.
-              physics:
-                  _settled == ForkTab.map
-                      ? const NeverScrollableScrollPhysics()
-                      : null,
-              onPageChanged: _onPageChanged,
-              children: [
-                for (final tab in ForkTab.values)
-                  _TabPage(
-                    key: ValueKey(tab),
-                    pages: _pages,
-                    visible: () => _onScreen(tab),
-                    child:
-                        _built.contains(tab)
-                            ? _page(tab)
-                            : const SizedBox.expand(),
+        // The bar is not the Scaffold's: its disc overhangs the pages, so the
+        // pages stop at the bar's surface and the bar floats over them.
+        body: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: showBar ? BirdySizes.navBar + safeBottom : 0,
+              // The pages' own screens must not add the safe inset a second
+              // time (the Scaffold used to remove it under its bar).
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: ForkShellScope(
+                  select: _select,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: _onScroll,
+                    child: PageView(
+                      controller: _pages,
+                      // The map pans with horizontal drags: no swiping out
+                      // of it.
+                      physics:
+                          _settled == ForkTab.map
+                              ? const NeverScrollableScrollPhysics()
+                              : null,
+                      onPageChanged: _onPageChanged,
+                      children: [
+                        for (final tab in ForkTab.values)
+                          _TabPage(
+                            key: ValueKey(tab),
+                            pages: _pages,
+                            visible: () => _onScreen(tab),
+                            child:
+                                _built.contains(tab)
+                                    ? _page(tab)
+                                    : const SizedBox.expand(),
+                          ),
+                      ],
+                    ),
                   ),
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-        bottomNavigationBar: Semantics(
-          container: true,
-          label: l10n.forkNavLabel,
-          child: NavigationBar(
-            selectedIndex: _tab.index,
-            onDestinationSelected: (i) => _select(ForkTab.values[i]),
-            // Seen a hundred times a day: no indicator animation.
-            animationDuration: Duration.zero,
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(AppIcons.home),
-                label: l10n.forkNavHome,
+            if (showBar)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: ForkNavBar(
+                  selected: _tab,
+                  onSelect: _select,
+                  onListen: _listen,
+                ),
               ),
-              NavigationDestination(
-                icon: const Icon(AppIcons.menuBook),
-                label: l10n.forkNavNotebook,
-              ),
-              NavigationDestination(
-                icon: const Icon(AppIcons.mapSheet),
-                label: l10n.forkMap,
-              ),
-              NavigationDestination(
-                icon: const Icon(AppIcons.personOutline),
-                label: l10n.forkNavProfile,
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
