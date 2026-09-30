@@ -977,4 +977,12 @@ Références : `fork/handoff/maquettes/DemoPrenom.dc.html`, `DemoTheme.dc.html`,
 - **Composants partagés.** `SingingThemeLogo` (disque + chant), `BirdyBirdPicker` / `BirdyBirdCard` /
   `BirdyIconPreview`, `BirdyBirdLabels` (nom, pluriel, fait). Aucun disque ni carte écrits à la main
   ailleurs : même emblème partout.
+- **Autorisations, carte en ligne.** Après Micro (« Nécessaire ») et Position (« Facultatif »), une
+  troisième carte `onb-map` (même composant, ton tonal, icône `AppIcons.mapSheet`, tag « Facultatif »)
+  demande « Carte en ligne » : les fonds viennent d'OpenStreetMap et de l'IGN par Internet, modifiable
+  dans Réglages. Deux boutons pleine largeur de 48 : « Oui, afficher la carte » (tonal) et « Non merci »
+  (texte). Rien n'est choisi d'office ; le bouton choisi prend une coche, le Oui passe en accent
+  (`accent` / `onAccent`), le Non en fond tonal. Le choix écrit `privacyAllowMapProvider` tout de suite et
+  reste modifiable ; sans choix, « Non » (valeur par défaut) et on continue. Le dialogue de consentement de
+  la carte reste la voie de rattrapage. Plus d'interrupteur dans la carte Position.
 - **Animations réduites.** Ni chant, ni pop, ni fondu ; l'accueil de l'oiseau ne dure pas.
