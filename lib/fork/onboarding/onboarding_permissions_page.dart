@@ -17,7 +17,6 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
-import '../design/widgets/birdy_switch.dart';
 import '../design/widgets/pressable.dart';
 import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
@@ -85,7 +84,17 @@ class OnboardingPermissionsPage extends ConsumerWidget {
                 unavailableText: l10n.forkOnbLocOff,
                 onAllow: onAllowLocation,
                 onOpenSettings: onOpenSettings,
-                extra: const _MapSwitchRow(),
+              ),
+              const SizedBox(height: BirdySpace.block),
+              _PermissionCard.custom(
+                key: const ValueKey('onb-map'),
+                id: 'onb-map',
+                tone: BirdyBlockTone.tonal,
+                icon: AppIcons.mapSheet,
+                name: l10n.forkOnbMapName,
+                tag: l10n.forkOnbOptional,
+                why: l10n.forkOnbMapWhy,
+                action: const _MapChoice(),
               ),
               const SizedBox(height: BirdySpace.l),
               Text(
@@ -129,8 +138,26 @@ class _PermissionCard extends StatelessWidget {
     required this.unavailableText,
     required this.onAllow,
     required this.onOpenSettings,
-    this.extra,
-  });
+  }) : action = null;
+
+  /// A card whose body is [action] instead of a permission button (the
+  /// online map question: nothing to ask the system).
+  const _PermissionCard.custom({
+    super.key,
+    required this.id,
+    required this.tone,
+    required this.icon,
+    required this.name,
+    required this.tag,
+    required this.why,
+    required Widget this.action,
+  }) : state = OnboardingPermState.unknown,
+       busy = false,
+       allowLabel = '',
+       refusedText = '',
+       unavailableText = '',
+       onAllow = _noop,
+       onOpenSettings = _noop;
 
   final String id;
   final BirdyBlockTone tone;
@@ -145,13 +172,13 @@ class _PermissionCard extends StatelessWidget {
   final String unavailableText;
   final VoidCallback onAllow;
   final VoidCallback onOpenSettings;
-  final Widget? extra;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final stateWidget = switch (state) {
+    final stateWidget = action ?? switch (state) {
       OnboardingPermState.granted => Semantics(
         liveRegion: true,
         child: Row(
@@ -279,51 +306,100 @@ class _PermissionCard extends StatelessWidget {
           Text(why, style: BirdyText.body.copyWith(color: c.text1)),
           const SizedBox(height: BirdySpace.m),
           stateWidget,
-          if (extra != null) ...[const SizedBox(height: BirdySpace.s), extra!],
         ],
       ),
     );
   }
 }
 
-/// « Afficher la carte en ligne »: upstream's map-tiles consent
-/// (`privacyAllowMapProvider`), off until the person turns it on.
-class _MapSwitchRow extends ConsumerWidget {
-  const _MapSwitchRow();
+void _noop() {}
+
+/// « Afficher la carte en ligne ? »: upstream's map-tiles consent
+/// (`privacyAllowMapProvider`) as two plain buttons. Nothing is preselected;
+/// « Non » is the default value of the setting, but the question is asked.
+/// The choice can be changed until the page is left.
+class _MapChoice extends ConsumerStatefulWidget {
+  const _MapChoice();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MapChoice> createState() => _MapChoiceState();
+}
+
+class _MapChoiceState extends ConsumerState<_MapChoice> {
+  bool? _choice;
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(privacyAllowMapProvider)) _choice = true;
+  }
+
+  void _pick(bool allow) {
+    setState(() => _choice = allow);
+    ref.read(privacyAllowMapProvider.notifier).set(allow);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final on = ref.watch(privacyAllowMapProvider);
-    void toggle(bool v) => ref.read(privacyAllowMapProvider.notifier).set(v);
-    return Semantics(
-      toggled: on,
-      label: l10n.forkOnbMapSwitch,
-      excludeSemantics: true,
-      onTap: () => toggle(!on),
-      child: InkWell(
-        key: const ValueKey('onb-map-switch'),
-        borderRadius: BorderRadius.circular(BirdyRadii.thumb),
-        onTap: () => toggle(!on),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: BirdySizes.target),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.forkOnbMapSwitch,
-                  style: BirdyText.label.copyWith(color: c.text1),
+    final yes = _choice == true;
+    final no = _choice == false;
+    const selectedIcon = Icon(AppIcons.checkRounded);
+    final fullWidth = WidgetStatePropertyAll(
+      const Size.fromHeight(BirdySizes.target),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          selected: yes,
+          excludeSemantics: true,
+          label: l10n.forkOnbMapYes,
+          onTap: () => _pick(true),
+          child: Pressable(
+            child: FilledButton.icon(
+              key: const ValueKey('onb-map-yes'),
+              style: BirdyButtonStyles.tonal(context).copyWith(
+                minimumSize: fullWidth,
+                backgroundColor: WidgetStatePropertyAll(
+                  yes ? c.accent : c.tonal,
+                ),
+                foregroundColor: WidgetStatePropertyAll(
+                  yes ? c.onAccent : c.accentText,
                 ),
               ),
-              const SizedBox(width: BirdySpace.m),
-              IgnorePointer(
-                child: BirdySwitch(value: on, onChanged: toggle),
-              ),
-            ],
+              onPressed: () => _pick(true),
+              icon: yes ? selectedIcon : null,
+              label: Text(l10n.forkOnbMapYes, textAlign: TextAlign.center),
+            ),
           ),
         ),
-      ),
+        const SizedBox(height: BirdySpace.s),
+        Semantics(
+          button: true,
+          selected: no,
+          excludeSemantics: true,
+          label: l10n.forkOnbMapNo,
+          onTap: () => _pick(false),
+          child: Pressable(
+            child: TextButton.icon(
+              key: const ValueKey('onb-map-no'),
+              style: TextButton.styleFrom(
+                foregroundColor: c.accentText,
+                backgroundColor: no ? c.tonal : null,
+                minimumSize: const Size.fromHeight(BirdySizes.target),
+                shape: const StadiumBorder(),
+                textStyle: BirdyText.labelCompact,
+              ),
+              onPressed: () => _pick(false),
+              icon: no ? selectedIcon : null,
+              label: Text(l10n.forkOnbMapNo, textAlign: TextAlign.center),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

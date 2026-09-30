@@ -6,6 +6,8 @@ import 'package:birdnet_live/fork/onboarding/onboarding_steps.dart';
 import 'package:birdnet_live/fork/settings/fork_prefs.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
+import 'package:birdnet_live/shared/providers/settings_providers.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -159,7 +161,7 @@ void main() {
     )).visible, isFalse);
 
     await skipSteps(tester, false);
-    expect(find.text('Deux autorisations, et c\'est parti'), findsOneWidget);
+    expect(find.text('Trois questions, et c\'est parti'), findsOneWidget);
     expect(find.text('Passer'), findsOneWidget);
     expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
     // « Passer » is hidden (kept for layout) on the last page.
@@ -279,6 +281,95 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('onb-finish')));
       await settle(tester, true);
       expect(find.text('HOME'), findsOneWidget);
+    });
+  });
+
+  group('online map question', () {
+    Future<ProviderContainer> toMapCard(WidgetTester tester) async {
+      final perms = FakePermissions(
+        mic: OnboardingPermState.granted,
+        location: OnboardingPermState.granted,
+      );
+      await pump(tester, perms, reduced: true);
+      await tester.tap(find.byKey(const ValueKey('onb-skip')));
+      await settle(tester, true);
+      await skipSteps(tester, true);
+      await tester.ensureVisible(find.byKey(const ValueKey('onb-map')));
+      return ProviderScope.containerOf(
+        tester.element(find.byKey(const ValueKey('onb-map'))),
+      );
+    }
+
+    testWidgets('the card is there, optional, with nothing chosen', (
+      tester,
+    ) async {
+      final container = await toMapCard(tester);
+      expect(find.text('Carte en ligne'), findsOneWidget);
+      expect(find.textContaining("l'IGN"), findsOneWidget);
+      expect(find.text('Oui, afficher la carte'), findsOneWidget);
+      expect(find.text('Non merci'), findsOneWidget);
+      expect(find.text('Facultatif'), findsNWidgets(2));
+      expect(find.byKey(const ValueKey('onb-map-switch')), findsNothing);
+      expect(container.read(privacyAllowMapProvider), isFalse);
+      expect(find.byIcon(AppIcons.checkRounded), findsNothing);
+    });
+
+    testWidgets('Oui turns the map on, Non turns it back off', (tester) async {
+      final container = await toMapCard(tester);
+      await tester.tap(find.byKey(const ValueKey('onb-map-yes')));
+      await settle(tester, true);
+      expect(container.read(privacyAllowMapProvider), isTrue);
+      expect(find.byIcon(AppIcons.checkRounded), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('onb-map-no')));
+      await settle(tester, true);
+      expect(container.read(privacyAllowMapProvider), isFalse);
+      expect(find.byIcon(AppIcons.checkRounded), findsOneWidget);
+    });
+
+    testWidgets('Non keeps the map off', (tester) async {
+      final container = await toMapCard(tester);
+      await tester.tap(find.byKey(const ValueKey('onb-map-no')));
+      await settle(tester, true);
+      expect(container.read(privacyAllowMapProvider), isFalse);
+    });
+
+    testWidgets('one can carry on without choosing', (tester) async {
+      final container = await toMapCard(tester);
+      await tester.ensureVisible(find.byKey(const ValueKey('onb-finish')));
+      await tester.tap(find.byKey(const ValueKey('onb-finish')));
+      await settle(tester, true);
+      expect(find.text('HOME'), findsOneWidget);
+      expect(container.read(privacyAllowMapProvider), isFalse);
+    });
+
+    testWidgets('the buttons are labelled and expose their selection', (
+      tester,
+    ) async {
+      await toMapCard(tester);
+      final handle = tester.ensureSemantics();
+      await tester.tap(find.byKey(const ValueKey('onb-map-yes')));
+      await settle(tester, true);
+      expect(
+        tester.getSemantics(find.byKey(const ValueKey('onb-map-yes'))),
+        matchesSemantics(
+          label: 'Oui, afficher la carte',
+          isButton: true,
+          isSelected: true,
+          hasSelectedState: true,
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(const ValueKey('onb-map-no'))),
+        matchesSemantics(
+          label: 'Non merci',
+          isButton: true,
+          hasSelectedState: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
     });
   });
 
