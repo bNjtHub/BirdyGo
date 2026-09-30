@@ -58,23 +58,14 @@ class StreakDots extends StatelessWidget {
       children: [
         // Connectors between neighbouring dots, behind the cells.
         Positioned.fill(
-          child: _StreakConnectors(
-            count: days.length,
-            colorAt:
-                (i) =>
-                    _counts(days[i]) && _counts(days[i + 1])
-                        ? c.accent
-                        : c.borderStrong,
-          ),
+          // orioleText: the one line color that keeps 3:1 on the Loriot
+          // block, where borderStrong nearly vanished.
+          child: _StreakConnectors(count: days.length, color: c.orioleText),
         ),
         _cells(c, weekday),
       ],
     );
   }
-
-  /// A day that keeps the série going (listened or rest day).
-  static bool _counts(StreakDay day) =>
-      day.state == StreakDayState.listened || day.state == StreakDayState.rest;
 
   Widget _cells(BirdyColors c, DateFormat weekday) {
     return Row(
@@ -215,10 +206,7 @@ class StreakDotsSkeleton extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: _StreakConnectors(
-            count: days.length,
-            colorAt: (_) => c.borderStrong,
-          ),
+          child: _StreakConnectors(count: days.length, color: c.orioleText),
         ),
         Row(
           children: [
@@ -251,41 +239,58 @@ class StreakDotsSkeleton extends StatelessWidget {
 
 /// Lines between neighbouring day dots, shared by [StreakDots] and its
 /// skeleton so the home and Profil blocks look the same while loading too.
+/// Built from the same equal cells as the dots (no LayoutBuilder: the home
+/// block sits in an IntrinsicHeight, and its half-width cells leave only a
+/// few dp between two dots, so the line runs edge to edge). Each connector
+/// is two halves, one ending cell [i], one starting cell [i] + 1, keyed
+/// `streak-connector-<i>-end` and `streak-connector-<i>-start`.
 class _StreakConnectors extends StatelessWidget {
-  const _StreakConnectors({required this.count, required this.colorAt});
+  const _StreakConnectors({required this.count, required this.color});
 
   final int count;
+  final Color color;
 
-  /// Color of the connector between dot [i] and dot [i] + 1.
-  final Color Function(int i) colorAt;
+  Widget _half(String key) => Expanded(
+    child: Center(
+      child: SizedBox(
+        key: ValueKey(key),
+        height: BirdyStroke.regular,
+        width: double.infinity,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(BirdyRadii.pill),
+          ),
+        ),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) {
-        final cell = count == 0 ? 0.0 : box.maxWidth / count;
-        const reach = BirdySizes.dayDot / 2 + BirdySpace.tight;
-        final width = cell - 2 * reach;
-        if (width <= 0) return const SizedBox.shrink();
-        return Stack(
-          children: [
-            for (var i = 0; i < count - 1; i++)
-              Positioned(
-                key: ValueKey('streak-connector-$i'),
-                left: cell * (i + 0.5) + reach,
-                top: (BirdySizes.dayDot - BirdyStroke.regular) / 2,
-                width: width,
-                height: BirdyStroke.regular,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorAt(i),
-                    borderRadius: BorderRadius.circular(BirdyRadii.pill),
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ClipRect(
+        child: SizedBox(
+          height: BirdySizes.dayDot,
+          child: Row(
+            children: [
+              for (var i = 0; i < count; i++)
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (i > 0) _half('streak-connector-${i - 1}-start'),
+                      if (i == 0) const Spacer(),
+                      const SizedBox(width: BirdySizes.dayDot),
+                      if (i < count - 1) _half('streak-connector-$i-end'),
+                      if (i == count - 1) const Spacer(),
+                    ],
                   ),
                 ),
-              ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

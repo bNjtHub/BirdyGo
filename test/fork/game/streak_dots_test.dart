@@ -73,13 +73,14 @@ void main() {
     final week = lastSevenDays(streak);
     await tester.pumpWidget(app(StreakDots(days: week, localeName: 'fr')));
     for (var i = 0; i < 6; i++) {
-      final finder = find.byKey(ValueKey('streak-connector-$i'));
-      expect(finder, findsOneWidget);
-      final size = tester.getSize(finder);
-      expect(size.width, greaterThan(0));
-      expect(size.height, greaterThan(0));
+      for (final part in ['end', 'start']) {
+        final finder = find.byKey(ValueKey('streak-connector-$i-$part'));
+        expect(finder, findsOneWidget);
+        expect(tester.getSize(finder).width, greaterThan(0));
+        expect(tester.getSize(finder).height, greaterThan(0));
+      }
     }
-    expect(find.byKey(const ValueKey('streak-connector-6')), findsNothing);
+    expect(find.byKey(const ValueKey('streak-connector-6-end')), findsNothing);
   });
 
   testWidgets('dayLabel wraps each dot in its own semantics, else silent', (
