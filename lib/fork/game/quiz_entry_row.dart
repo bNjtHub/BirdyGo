@@ -11,6 +11,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
 import 'fine_ear_quiz_screen.dart';
+import 'game_progress.dart';
 import 'quiz_logo.dart';
 
 class QuizEntryRow extends StatelessWidget {
@@ -19,6 +20,7 @@ class QuizEntryRow extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.bordered = false,
+    this.progress,
   });
 
   /// Defaults to the Profil's line.
@@ -30,11 +32,39 @@ class QuizEntryRow extends StatelessWidget {
   /// A hairline outline (the Profil's look, on its background).
   final bool bordered;
 
+  /// The Oreille fine badge progress: the hook replaces the subtitle and a
+  /// segmented bar shows the way to the next plume (the Accueil block).
+  final BadgeProgress? progress;
+
+  /// Segments filled on the bar: the share of the way from the previous tier
+  /// to the next one, rounded down; all of them once the last tier is won.
+  static int filledSegments(BadgeProgress progress) {
+    const total = BirdySizes.quizEntrySegments;
+    final next = progress.nextTarget;
+    if (next == null) return total;
+    final tier = progress.tier;
+    final from = tier == 0 ? 0 : progress.tiers[tier - 1];
+    final share = (progress.value - from) / (next - from);
+    return (share * total).floor().clamp(0, total);
+  }
+
+  static String _hook(AppLocalizations l10n, BadgeProgress progress) =>
+      switch (progress.tier) {
+        0 => l10n.forkQuizEntryHook(progress.nextTarget! - progress.value),
+        1 => l10n.forkQuizEntryHookNext,
+        2 => l10n.forkQuizEntryHookTier('two'),
+        _ => l10n.forkQuizEntryHookTier('all'),
+      };
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final line = subtitle ?? l10n.forkQuizEntrySubtitle;
+    final progress = this.progress;
+    final line =
+        progress != null
+            ? _hook(l10n, progress)
+            : subtitle ?? l10n.forkQuizEntrySubtitle;
     return Semantics(
       label: '${l10n.forkQuizTitle}. $line',
       button: true,
@@ -72,8 +102,15 @@ class QuizEntryRow extends StatelessWidget {
                         const SizedBox(height: BirdySpace.xs),
                         Text(
                           line,
-                          style: BirdyText.bodyCompact.copyWith(color: c.text2),
+                          style: (progress != null
+                                  ? BirdyText.caption
+                                  : BirdyText.bodyCompact)
+                              .copyWith(color: c.text2),
                         ),
+                        if (progress != null) ...[
+                          const SizedBox(height: BirdySpace.snug),
+                          _SegmentBar(filled: filledSegments(progress)),
+                        ],
                       ],
                     ),
                   ),
@@ -83,6 +120,38 @@ class QuizEntryRow extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SegmentBar extends StatelessWidget {
+  const _SegmentBar({required this.filled});
+
+  final int filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return ExcludeSemantics(
+      child: Row(
+        children: [
+          for (var i = 0; i < BirdySizes.quizEntrySegments; i++) ...[
+            if (i > 0) const SizedBox(width: BirdySpace.thin),
+            Expanded(
+              child: Container(
+                key: ValueKey(
+                  i < filled ? 'quiz-segment-on' : 'quiz-segment-off',
+                ),
+                height: BirdySizes.quizEntrySegmentHeight,
+                decoration: BoxDecoration(
+                  color: i < filled ? c.accent : c.line,
+                  borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

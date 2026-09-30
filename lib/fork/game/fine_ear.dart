@@ -74,6 +74,10 @@ IndexedDetection? quizClip(
   return null;
 }
 
+/// Whether [clips] (one detection per species) are enough for a round.
+bool hasQuizRound(Map<String, IndexedDetection> clips) =>
+    clips.length >= GameConfig.quizChoices;
+
 /// A round drawn at random from [clips] (one detection per species): up to
 /// [GameConfig.quizQuestions] questions, each species asked once, the other
 /// choices taken from the other species. Empty below
@@ -82,7 +86,7 @@ List<QuizQuestion> drawQuiz(
   Map<String, IndexedDetection> clips,
   Random random,
 ) {
-  if (clips.length < GameConfig.quizChoices) return const [];
+  if (!hasQuizRound(clips)) return const [];
   final species = clips.keys.toList()..shuffle(random);
   return [
     for (final name in species.take(GameConfig.quizQuestions))
