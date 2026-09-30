@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/explore/widgets/species_info_overlay.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/inference/geo_model.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/ranking/activity_bars.dart';
@@ -288,6 +291,43 @@ void main() {
     expect(find.text(explanation), findsOneWidget);
   });
 
+  testWidgets('sounds come right after the counters, before here and now '
+      '(J7)', (tester) async {
+    await pump(tester);
+    final heard = tester.getTopLeft(find.byKey(const ValueKey('fiche-heard')));
+    final sounds = tester.getTopLeft(
+      find.byKey(const ValueKey('fiche-sounds')),
+    );
+    final here = tester.getTopLeft(find.text('Ici en ce moment'));
+    expect(heard.dy, lessThan(sounds.dy));
+    expect(sounds.dy, lessThan(here.dy));
+    // The best recording leads with the big play button.
+    final featured = find.descendant(
+      of: find.byKey(const ValueKey('fiche-sounds-featured')),
+      matching: find.byType(ClipPlayButton),
+    );
+    expect(tester.widget<ClipPlayButton>(featured).size, BirdySizes.mainAction);
+  });
+
+  testWidgets('no nesting band without the field in the sheet (J7)', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('fiche-nesting')), findsNothing);
+    expect(find.textContaining('Nidification'), findsNothing);
+  });
+
+  testWidgets('nesting band drawn from the sheet (J7)', (tester) async {
+    final withNesting = SpeciesSheet.fromJson({
+      'name': 'Rougegorge familier',
+      'summary': 'Le petit oiseau.',
+      'nesting': '4-7',
+    });
+    await pump(tester, sheets: SpeciesSheets({_robin: withNesting}));
+    expect(find.byKey(const ValueKey('fiche-nesting')), findsOneWidget);
+    expect(find.text('Nidification : avril à juillet'), findsOneWidget);
+  });
+
   testWidgets(
     'tapping an hour bar shows its own hour and count (J6f-b fix)',
     (tester) async {
@@ -332,16 +372,21 @@ void main() {
       expect(find.text('Surtout en mai'), findsOneWidget);
       final seasons = find.byType(ActivityBars).first;
       final chart = tester.widget<ActivityBars>(seasons);
-      // All 12 initials at 100 % text, the current month marked.
+      // 48 weekly bars, all 12 month initials at 100 % text, the current
+      // week marked (J7).
+      expect(chart.values.length, 48);
       expect(chart.labels.length, 12);
-      expect(chart.highlightIndex, DateTime.now().month - 1);
+      expect(
+        chart.highlightIndex,
+        GeoModel.dateTimeToWeek(DateTime.now()) - 1,
+      );
 
       // The page is taller since J6h: bring the chart on screen first.
       await tester.ensureVisible(seasons);
       await tester.pump();
       final rect = tester.getRect(seasons);
-      final slot = rect.width / 12;
-      await tester.tapAt(Offset(rect.left + slot * 2.5, rect.top + 5));
+      final slot = rect.width / 48;
+      await tester.tapAt(Offset(rect.left + slot * 10.5, rect.top + 5));
       await tester.pump();
 
       expect(find.text('Surtout en mai'), findsNothing);

@@ -702,6 +702,9 @@ abstract final class BirdySizes {
   static const double activityBarsHeight = 45;
   static const double hourBarsHeight = 52;
 
+  /// Nesting band under the weekly presence chart of the species page.
+  static const double nestingBandHeight = 6;
+
   /// Clip spectrogram height in the quick review.
   static const double clipSpectrogram = 80;
 
