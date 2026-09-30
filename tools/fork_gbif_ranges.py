@@ -58,6 +58,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 from array import array
+from collections import Counter
 from datetime import date
 from pathlib import Path
 
@@ -171,32 +172,57 @@ def build_sql(step=GRID_STEP):
     # which only holds for these meteorological seasons in this order.
     for i, name in enumerate(SEASONS):
         assert all((m % 12) // 3 == i for m in SEASON_MONTHS[name]), name
-    licenses = ", ".join(f"'{x}'" for x in LICENSES)
-    basis = ", ".join(f"'{x}'" for x in BASIS_OF_RECORD)
+    # The first download came back empty: the literal values GBIF's SQL table
+    # uses for license / basisofrecord / occurrencestatus are not documented.
+    # So they are grouped on and filtered here (row_is_open), whatever their
+    # spelling; the values seen are reported by `build`.
     max_uncertainty = int(step * METERS_PER_DEGREE)
     return f"""SELECT
   specieskey,
   FLOOR((decimallongitude - ({LON_MIN})) / {step}) AS cx,
   FLOOR((decimallatitude - ({LAT_MIN})) / {step}) AS cy,
   FLOOR(MOD("month", 12) / 3) AS season,
+  license,
+  basisofrecord,
+  occurrencestatus,
   COUNT(*) AS n
 FROM occurrence
 WHERE classkey = {AVES_CLASS_KEY}
   AND specieskey IS NOT NULL
-  AND occurrencestatus = 'PRESENT'
   AND "year" >= {YEAR_MIN}
   AND "month" IS NOT NULL
-  AND basisofrecord IN ({basis})
-  AND license IN ({licenses})
   AND hasgeospatialissues = FALSE
   AND decimallatitude >= {LAT_MIN} AND decimallatitude < {LAT_MAX}
   AND decimallongitude >= {LON_MIN} AND decimallongitude < {LON_MAX}
   AND (coordinateuncertaintyinmeters IS NULL
        OR coordinateuncertaintyinmeters < {max_uncertainty})
-GROUP BY specieskey, cx, cy, season"""
+GROUP BY specieskey, cx, cy, season, license, basisofrecord,
+  occurrencestatus"""
 
 
 # ------------------------------------------------------ aggregation (pure) --
+def _norm(value):
+    return re.sub(r"[^A-Z0-9]+", "_", (value or "").upper()).strip("_")
+
+
+REJECTED = Counter()  # (column, value) -> records dropped, for the report
+
+
+def row_is_open(license_, basis, status):
+    """Keeps CC0 / CC BY (no NC) human observations marked present, whatever
+    the spelling (enum like CC_BY_4_0 or a Creative Commons URL)."""
+    lic = _norm(license_)
+    lic_ok = "NC" not in lic.split("_") and (
+        "CC0" in lic or "ZERO" in lic or "CC_BY" in lic or "LICENSES_BY" in lic
+    )
+    # HUMAN_OBSERVATION, HumanObservation...: compared without separators.
+    basis_ok = _norm(basis).replace("_", "") in {
+        b.replace("_", "") for b in BASIS_OF_RECORD
+    }
+    status_ok = _norm(status) in ("", "PRESENT")
+    return lic_ok and basis_ok and status_ok
+
+
 def stream_counts(rows, step=GRID_STEP):
     """Pass 1: records of all birds per (season, cell). `rows` yields
     (species_key, cell, season, n)."""
@@ -542,7 +568,15 @@ def iter_file_rows(path, step=GRID_STEP):
         reader = csv.DictReader(itertools.chain([head], text), delimiter=delimiter)
         columns = {c.lower(): c for c in reader.fieldnames or []}
         if {"cx", "cy", "season", "n"} <= columns.keys():
+            vocab = [columns.get(c) for c in ("license", "basisofrecord", "occurrencestatus")]
             for row in reader:
+                if all(vocab):
+                    values = [row[c] for c in vocab]
+                    if not row_is_open(*values):
+                        n = int(row[columns["n"]])
+                        for name, value in zip(("license", "basisofrecord", "occurrencestatus"), values):
+                            REJECTED[(name, value)] += n
+                        continue
                 cell = cell_from_south(int(float(row[columns["cx"]])), int(float(row[columns["cy"]])), step)
                 if cell is not None and row[columns["specieskey"]]:
                     yield (
@@ -590,6 +624,11 @@ def cmd_build(args):
     print(f"{len(keys)} bird species with a GBIF key")
     print("Pass 1: totals per cell and season")
     totals = stream_counts(iter_file_rows(path))
+    if REJECTED:
+        print("Records dropped by the open-licence / observation filter (pass 1):")
+        for (column, value), n in REJECTED.most_common(12):
+            print(f"  {column} = {value!r}: {n}")
+        REJECTED.clear()
     print("Pass 2: reporting rates per species")
     levels = species_levels(iter_file_rows(path), totals, set(keys))
     by_name = {keys[k]: v for k, v in levels.items()}

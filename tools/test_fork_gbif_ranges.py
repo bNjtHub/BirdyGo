@@ -113,10 +113,26 @@ class EncodingTest(unittest.TestCase):
 class SqlTest(unittest.TestCase):
     def test_sql_has_the_filters(self):
         sql = g.build_sql()
-        for needle in ("classkey = 212", '"year" >= 2010', 'MOD("month", 12)', "CC_BY_4_0", "CC0_1_0",
-                       "hasgeospatialissues = FALSE", "GROUP BY specieskey"):
+        for needle in ("classkey = 212", '"year" >= 2010', 'MOD("month", 12)',
+                       "hasgeospatialissues = FALSE", "GROUP BY specieskey",
+                       "license", "basisofrecord", "occurrencestatus"):
             self.assertIn(needle, sql)
-        self.assertNotIn("_NC_", sql)
+        # Filtered locally (row_is_open): the SQL table's spelling is unknown.
+        self.assertNotIn("license IN", sql)
+
+    def test_row_is_open_any_spelling(self):
+        ok = g.row_is_open
+        self.assertTrue(ok("CC_BY_4_0", "HUMAN_OBSERVATION", "PRESENT"))
+        self.assertTrue(ok("CC0_1_0", "OCCURRENCE", "PRESENT"))
+        self.assertTrue(ok("http://creativecommons.org/licenses/by/4.0/legalcode",
+                           "HumanObservation", "present"))
+        self.assertTrue(ok("http://creativecommons.org/publicdomain/zero/1.0/legalcode",
+                           "HUMAN_OBSERVATION", ""))
+        self.assertFalse(ok("CC_BY_NC_4_0", "HUMAN_OBSERVATION", "PRESENT"))
+        self.assertFalse(ok("http://creativecommons.org/licenses/by-nc/4.0/legalcode",
+                            "HUMAN_OBSERVATION", "PRESENT"))
+        self.assertFalse(ok("CC_BY_4_0", "PRESERVED_SPECIMEN", "PRESENT"))
+        self.assertFalse(ok("CC_BY_4_0", "HUMAN_OBSERVATION", "ABSENT"))
 
 
 class FileTest(unittest.TestCase):
