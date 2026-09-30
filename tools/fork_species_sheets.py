@@ -69,7 +69,7 @@ MAX_ARTICLE_CHARS = 24_000
 # Sections of a sheet, in display order. `hint` feeds the game notebook (J6e).
 FIELDS = [
     "summary", "size", "behaviour", "why_here", "migration", "enemies",
-    "by_ear", "confusions", "anecdote", "hint",
+    "by_ear", "confusions", "anecdote", "hint", "nesting",
 ]
 
 STATUS_FR = {
@@ -893,6 +893,7 @@ REVIEW_LABELS = {
     "enemies": "Ennemis (qui le chasse)",
     "by_ear": "À l'oreille", "confusions": "Confusions possibles",
     "anecdote": "Le saviez-vous ?", "hint": "Indice du carnet (jeu)",
+    "nesting": "Nidification (mois début-fin)",
 }
 
 
@@ -931,6 +932,20 @@ def cmd_apply_review(args) -> None:
     print(f"{applied} decisions applied to {SHEETS_JSONL.relative_to(ROOT)}")
 
 
+NESTING_RE = re.compile(r"^\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*$")
+
+
+def valid_nesting(text: str) -> str:
+    """Normalized « M-N » (months 1 to 12), or '' when missing or invalid."""
+    match = NESTING_RE.match(text or "")
+    if not match:
+        return ""
+    start, end = int(match.group(1)), int(match.group(2))
+    if not (1 <= start <= 12 and 1 <= end <= 12):
+        return ""
+    return f"{start}-{end}"
+
+
 def bundle_payload(sheets: dict) -> dict:
     species = {}
     for sci, sheet in sorted(sheets.items()):
@@ -939,6 +954,8 @@ def bundle_payload(sheets: dict) -> dict:
         entry = {"name": sheet["name"]}
         for field in FIELDS:
             text = sheet["fields"].get(field, "")
+            if field == "nesting":
+                text = valid_nesting(text)
             if text:
                 entry[field] = text
         species[sci] = entry
