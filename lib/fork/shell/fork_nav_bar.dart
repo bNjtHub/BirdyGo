@@ -42,8 +42,7 @@ class ForkNavBar extends StatelessWidget {
 
   /// Height of the bar's box without the safe inset: the surface and the
   /// disc's overhang.
-  static const double boxHeight =
-      BirdySizes.navBar + BirdySizes.listenDiscLift;
+  static const double boxHeight = BirdySizes.navBar + BirdySizes.listenDiscLift;
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +83,18 @@ class ForkNavBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   tab(ForkTab.home, AppIcons.home, l10n.forkNavHome),
-                  tab(ForkTab.notebook, AppIcons.menuBook, l10n.forkNavNotebook),
+                  tab(
+                    ForkTab.notebook,
+                    AppIcons.menuBook,
+                    l10n.forkNavNotebook,
+                  ),
                   Expanded(child: _ListenSlot(onTap: onListen)),
                   tab(ForkTab.map, AppIcons.mapSheet, l10n.forkMap),
-                  tab(ForkTab.profile, AppIcons.personOutline, l10n.forkNavProfile),
+                  tab(
+                    ForkTab.profile,
+                    AppIcons.personOutline,
+                    l10n.forkNavProfile,
+                  ),
                 ],
               ),
             ),
@@ -186,6 +193,9 @@ class _ListenSlot extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
+    final tabLabel = NavigationBarTheme.of(
+      context,
+    ).labelTextStyle?.resolve({WidgetState.selected});
     final listening = ref.watch(
       liveStateProvider.select(
         (s) => s == LiveState.active || s == LiveState.paused,
@@ -234,9 +244,12 @@ class _ListenSlot extends ConsumerWidget {
                   color: Colors.transparent,
                   child: Text(
                     l10n.forkListen,
+                    // The tabs' label size and line height, so the baselines
+                    // line up across the bar.
                     style: BirdyText.labelCompact.copyWith(
                       color: c.accentText,
-                      height: 1.2,
+                      fontSize: tabLabel?.fontSize,
+                      height: tabLabel?.height,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

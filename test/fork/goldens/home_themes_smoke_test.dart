@@ -1,5 +1,6 @@
 import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_buttons.dart';
+import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,8 +23,8 @@ void main() {
       ) async {
         await pumpHome(tester, bird, dark);
         expect(tester.takeException(), isNull);
-        expect(find.byType(ListenButton), findsOneWidget);
-        final context = tester.element(find.byType(ListenButton));
+        expect(find.byType(ListenButton), findsNothing);
+        final context = tester.element(find.byType(ForkHome));
         final brand = BirdyBrandColors(
           bird,
           dark ? Brightness.dark : Brightness.light,

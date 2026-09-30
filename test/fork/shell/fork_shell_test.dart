@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
+import 'package:birdnet_live/features/live/live_controller.dart';
+import 'package:birdnet_live/features/live/live_providers.dart';
+import 'package:birdnet_live/features/live/live_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
 import 'package:birdnet_live/fork/home/home_model.dart';
@@ -16,11 +20,14 @@ import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/profile/profile_screen.dart';
+import 'package:birdnet_live/fork/shell/fork_nav_bar.dart';
 import 'package:birdnet_live/fork/shell/fork_shell.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/l10n/app_localizations_fr.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,6 +78,9 @@ void main() {
     List<HeardSpecies> heard = const [],
     double width = 390,
     bool reducedMotion = false,
+    LiveState? liveState,
+    NavigatorObserver? observer,
+    bool settle = true,
   }) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -81,6 +91,8 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
+          if (liveState != null)
+            liveStateProvider.overrideWith((ref) => liveState),
           homeLoaderProvider.overrideWithValue(_FakeHome()),
           notebookLoaderProvider.overrideWithValue(_FakeNotebook(heard)),
           gameProgressProvider.overrideWith(
@@ -103,27 +115,32 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          navigatorObservers: [if (observer != null) observer],
           theme: BirdyTheme.light(),
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(disableAnimations: reducedMotion),
-            child: child!,
-          ),
+          builder:
+              (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(disableAnimations: reducedMotion),
+                child: child!,
+              ),
           home: const ForkShell(),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // The listening wing loops while active: nothing settles then.
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump(const Duration(seconds: 1));
+    }
   }
 
-  Finder tab(String label) => find.descendant(
-    of: find.byType(NavigationBar),
-    matching: find.text(label),
-  );
+  Finder tab(String label) =>
+      find.descendant(of: find.byType(ForkNavBar), matching: find.text(label));
 
   testWidgets('four tabs, Accueil first, the others built on first visit', (
     tester,
@@ -161,7 +178,7 @@ void main() {
     expect(find.text('Mon carnet'), findsNothing);
     expect(find.byType(ForkHome), findsOneWidget);
     expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      tester.widget<ForkNavBar>(find.byType(ForkNavBar)).selected.index,
       0,
     );
   });
@@ -176,7 +193,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('home-streak')));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      tester.widget<ForkNavBar>(find.byType(ForkNavBar)).selected.index,
       3,
     );
 
@@ -185,14 +202,14 @@ void main() {
     await tester.tap(find.text('Sentinelle des haies'));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      tester.widget<ForkNavBar>(find.byType(ForkNavBar)).selected.index,
       3,
     );
     expect(find.text('Série : 9 jours'), findsOneWidget);
   });
 
   int selected(WidgetTester tester) =>
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex;
+      tester.widget<ForkNavBar>(find.byType(ForkNavBar)).selected.index;
 
   Future<void> swipe(WidgetTester tester, double dx, {Finder? from}) async {
     await tester.fling(from ?? find.byType(PageView), Offset(dx, 0), 1000);
@@ -334,6 +351,168 @@ void main() {
     expect(selected(tester), 0);
     expect(find.byType(ForkHome), findsOneWidget);
   });
+
+  // FORK: J6j, the « Écouter » disc in the middle of the bar.
+  group('« Écouter » disc', () {
+    final disc = find.descendant(
+      of: find.byType(ForkNavBar),
+      matching: find.text('Écouter'),
+    );
+
+    /// The screen built by the last route pushed on [observer].
+    Widget lastPushed(BuildContext context, _Pushes observer) =>
+        (observer.pushed.last as MaterialPageRoute<void>).builder(context);
+
+    const tabLabels = {
+      ForkTab.home: 'Accueil',
+      ForkTab.notebook: 'Carnet',
+      ForkTab.map: 'Carte',
+      ForkTab.profile: 'Profil',
+    };
+
+    for (final start in ForkTab.values) {
+      testWidgets('from ${start.name}: listens, the tab stays', (tester) async {
+        final observer = _Pushes();
+        await pump(tester, observer: observer);
+        if (start != ForkTab.home) {
+          await tester.tap(tab(tabLabels[start]!));
+          // The map keeps its tiles loading: no settling.
+          await tester.pump(const Duration(seconds: 1));
+        }
+        final count = observer.pushed.length;
+        await tester.tap(disc);
+        expect(observer.pushed.length, count + 1);
+        final screen = lastPushed(
+          tester.element(find.byType(ForkShell)),
+          observer,
+        );
+        expect(screen, isA<LiveScreen>());
+        expect((screen as LiveScreen).forceAutoStart, isTrue);
+        expect(selected(tester), start.index);
+      });
+    }
+
+    for (final state in [LiveState.active, LiveState.paused]) {
+      testWidgets('while ${state.name}: reopens the screen, no autostart', (
+        tester,
+      ) async {
+        final observer = _Pushes();
+        await pump(tester, liveState: state, observer: observer, settle: false);
+        final count = observer.pushed.length;
+        await tester.tap(disc);
+        expect(observer.pushed.length, count + 1);
+        final screen = lastPushed(
+          tester.element(find.byType(ForkShell)),
+          observer,
+        );
+        expect(screen, isA<LiveScreen>());
+        expect((screen as LiveScreen).forceAutoStart, isFalse);
+      });
+    }
+
+    Finder discBox() => find.descendant(
+      of: find.byType(ForkNavBar),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is SizedBox &&
+            w.width == BirdySizes.listenDisc &&
+            w.height == BirdySizes.listenDisc,
+      ),
+    );
+
+    testWidgets('overhangs the bar and takes the touch up there', (
+      tester,
+    ) async {
+      final observer = _Pushes();
+      await pump(tester, observer: observer);
+      final bar = tester.getRect(find.byType(ForkNavBar));
+      final rect = tester.getRect(discBox());
+      // The disc's outer top is the bar box's top, 22 dp above the surface.
+      expect(rect.top, bar.top);
+      expect(
+        bar.bottom - BirdySizes.navBar - bar.top,
+        BirdySizes.listenDiscLift,
+      );
+      // A tap in the overhanging part opens the listening.
+      final count = observer.pushed.length;
+      await tester.tapAt(Offset(rect.center.dx, bar.top + 12));
+      expect(observer.pushed.length, count + 1);
+    });
+
+    testWidgets('tap targets are at least 48 dp', (tester) async {
+      await pump(tester);
+      final bar = find.byType(ForkNavBar);
+      for (final label in ['Accueil', 'Carnet', 'Carte', 'Profil']) {
+        final inkWell = find.ancestor(
+          of: find.descendant(of: bar, matching: find.text(label)),
+          matching: find.byType(InkWell),
+        );
+        final size = tester.getSize(inkWell.first);
+        expect(
+          size.width,
+          greaterThanOrEqualTo(BirdySizes.target),
+          reason: label,
+        );
+        expect(
+          size.height,
+          greaterThanOrEqualTo(BirdySizes.target),
+          reason: label,
+        );
+      }
+      expect(
+        tester.getSize(discBox()).shortestSide,
+        greaterThanOrEqualTo(BirdySizes.target),
+      );
+    });
+
+    testWidgets('semantics order: Accueil, Carnet, Écouter, Carte, Profil', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester);
+      final labels = <String>[];
+      void visit(SemanticsNode node) {
+        final label = node.label;
+        if (const {
+          'Accueil',
+          'Carnet',
+          'Écouter',
+          'Carte',
+          'Profil',
+        }.contains(label)) {
+          labels.add(label);
+        }
+        node.visitChildren((child) {
+          visit(child);
+          return true;
+        });
+      }
+
+      visit(
+        tester.getSemantics(
+          find.bySemanticsLabel(AppLocalizationsFr().forkNavLabel),
+        ),
+      );
+      expect(labels, ['Accueil', 'Carnet', 'Écouter', 'Carte', 'Profil']);
+      handle.dispose();
+    });
+  });
+
+  testWidgets('the Profil tab has the menu button (Palmarès is in the sheet)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(tab('Profil'));
+    await tester.pumpAndSettle();
+    final menu = find.descendant(
+      of: find.byType(ProfileScreen),
+      matching: find.byTooltip('Menu'),
+    );
+    expect(menu, findsOneWidget);
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    expect(find.text(AppLocalizationsFr().forkMoreTitle), findsOneWidget);
+  });
 }
 
 const _heard = [
@@ -352,3 +531,12 @@ const _heard = [
     inQueue: 1,
   ),
 ];
+
+/// Records every route pushed on the navigator.
+class _Pushes extends NavigatorObserver {
+  final List<Route<dynamic>> pushed = [];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      pushed.add(route);
+}
