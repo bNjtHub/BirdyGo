@@ -88,6 +88,16 @@ class BundleTest(unittest.TestCase):
         self.assertEqual(payload["species"]["A a"], {
             "name": "Rougegorge familier", "summary": "Un petit oiseau."})
 
+    def test_nesting_ships_only_when_valid(self):
+        payload = sheets.bundle_payload({
+            "A a": sheet(fields={"summary": "x", "nesting": "4-7"}),
+            "B b": sheet(fields={"summary": "x", "nesting": "13-2"}),
+            "C c": sheet(fields={"summary": "x", "nesting": "11 - 2"}),
+        })
+        self.assertEqual(payload["species"]["A a"]["nesting"], "4-7")
+        self.assertNotIn("nesting", payload["species"]["B b"])
+        self.assertEqual(payload["species"]["C c"]["nesting"], "11-2")
+
     def test_custom_ids_are_valid(self):
         self.assertEqual(sheets.custom_id("Corvus corone/cornix"),
                          "Corvus_corone_cornix")

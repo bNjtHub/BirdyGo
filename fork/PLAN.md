@@ -288,6 +288,16 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       graphique 48 semaines existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
       sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
       par IA : elle peut contenir des erreurs. ») en français et en anglais.
+- [x] Fiche espèce, sons et saisons (PR « J7 Fiche espèce ») : « Mes sons » juste après « Entendu… »
+      (le meilleur son devient un lecteur mis en avant, grand bouton), « Ici en ce moment » en 48
+      barres hebdomadaires avec la semaine courante marquée, phrase « Arrive début mars · repart fin
+      septembre » (semaines au-dessus du seuil de la liste Explorer) ou « Présent toute l'année »,
+      bande « Nidification » sous la courbe quand la fiche a le champ `nesting` (absent : rien).
+- [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
+      (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
+- [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches
+      existantes) puis `verify`, `review`, `bundle` sur le PC, et commiter
+      `assets/fork/species_sheets_fr.json.gz`. Tant que ce n'est pas fait, aucune bande ne s'affiche.
 - Ne jamais donner au modèle des textes de la LPO, d'oiseaux.net ou d'eBird (droits réservés).
 
 Notes de réalisation : les fiches se chargent au démarrage (préchargement de l'accueil), 1 fichier gzip.
