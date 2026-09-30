@@ -897,6 +897,11 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 
 ## J7 : publication Android
 
+- [x] Quiz « Qui chante ? », réécoute et score (`feat/quiz-reecoute-score`) : le bon chant est rejoué après une
+      mauvaise réponse, le bouton de lecture garde sa place entre question et correction, le chemin de
+      10 points remplace « Chant n sur N » et la pastille de score, « Sons à retenir » sur l'écran de fin,
+      libellé « Oiseau mystère » retiré. Tests dans `test/fork/game/fine_ear_test.dart`.
+
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
       l'interrupteur de la carte Position ; écrit `privacyAllowMapProvider`.

@@ -602,10 +602,13 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   l'étape courante ; étapes à venir = points de 12 cerclés de 3 px de la couleur du fond (le trait ne
   les traverse jamais), étape courante = cercle de 30 bordé Martin-pêcheur avec son numéro et un halo
   pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
-  cercle de 20 avec une petite croix. Dessous, « Chant 3 sur 10 » et la pastille Loriot « 3 d'affilée ! ».
-  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : « Oiseau mystère », disque pointillé
-  de 116 qui flotte (±6 px, 3 s), bouton de lecture de 64 entre deux groupes de trois barres qui
-  s'animent seulement pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
+  cercle de 20 avec une petite croix. Ce chemin est le seul compteur : pas de « Chant n sur N » ni de
+  pastille de score. Son libellé accessible dit « Chant 4 sur 10, 3 bonnes réponses » (`forkQuizTrailLabel`).
+  Dessous, à droite, la pastille Loriot « 3 d'affilée ! » (la ligne garde sa hauteur sans elle).
+  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : pas de libellé « Oiseau mystère » (la
+  bulle « Écoute-moi ! / Qui suis-je ? » suffit), disque pointillé de 116 qui flotte (±6 px, 3 s), bouton
+  de lecture de 60 posé à cheval sur son coin bas droit, spectre de 27 barres qui s'animent seulement
+  pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
   2 × 2 de cartes de 136 dp (écart 10, rayon 24), icône de 76 sur son halo (elle rétrécit si le nom
   prend de la place), nom en Fraunces 17 équilibré sur ses lignes. La hauteur de la scène et des cartes
   s'adapte pour que les deux cartes du bas et « Touche l'oiseau qui chante » / « Continuer » restent
@@ -618,13 +621,19 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   (bordure 2,5) avec une coche et un pop, « +1 Oreille fine » s'envole (1,4 s) ; jingle et vibration
   légère. Mauvaise réponse : carte blanche, « Presque ! », « C'était le … », la carte choisie se
   balance (420 ms) et prend une croix Écorce, les autres passent à 40 %, la bonne en Lichen ; une
-  note douce, pas de confettis. « Réécouter » (48 dp) en haut à droite de la scène, jamais sur le texte.
+  note douce, pas de confettis, puis le bon chant est rejoué tout seul (`QuizMotion.replayAfterSoft`,
+  500 ms après la note ; jamais sur une bonne réponse). Le bouton de lecture ne bouge pas entre la
+  question et la correction : même `_BigPlayButton` de 60, même position (`_StageGeometry`, partagée),
+  mêmes états lecture / stop ; l'oiseau prend la place du disque, le texte passe dessous, la bordure de
+  la carte « Presque ! » est peinte par-dessus (`foregroundDecoration`) pour ne rien décaler.
   Bilan : carte héros blanche rayon 28 dont le halo Loriot (32 % → 0 sur 190 px) est la décoration
   même ; trois étoiles pleines (42/56/42, Loriot ou `line`) qui apparaissent l'une après l'autre, le
   score en 64, un mot et une phrase ; « Tes oiseaux du jour » en grille 5 × 2 (en couleur avec coche,
   grisés avec croix, en cascade de 50 ms) ; la carte Oreille fine dont la barre se remplit en 900 ms,
   « Nouvelle plume » si un palier est franchi ; pluie de confettis et fanfare dès la moitié de bonnes
-  réponses (`GameConfig.quizPartyShare`) ; « Terminer » (contour) et « Rejouer » côte à côte.
+  réponses (`GameConfig.quizPartyShare`) ; « Sons à retenir » (seulement s'il y a des ratés) : une ligne par
+  oiseau raté, son nom et un bouton lecture de 48 (même lecteur `speciesClipPlayerProvider`, un seul son à
+  la fois, arrêt en quittant l'écran) ; « Terminer » (contour) et « Rejouer » côte à côte.
   Mouvement : exception autorisée aux règles de retenue (voir « Animations »), animations réduites =
   tout est immobile et sans confettis.
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé

@@ -148,9 +148,6 @@ abstract final class BirdyQuizColors {
   static const Color knob = Color(0xFFFFFFFF);
   static const Color knobShadow = Color(0x4013233A);
 
-  /// Réécouter button on the bird's light tint (white at 60 %).
-  static const Color replayOnTint = Color(0x99FFFFFF);
-
   /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
   static const double mysteryBrightness = 2.2;
 
