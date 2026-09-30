@@ -113,7 +113,7 @@ class EncodingTest(unittest.TestCase):
 class SqlTest(unittest.TestCase):
     def test_sql_has_the_filters(self):
         sql = g.build_sql()
-        for needle in ("classkey = 212", "year >= 2010", "CC_BY_4_0", "CC0_1_0",
+        for needle in ("classkey = 212", '"year" >= 2010', 'MOD("month", 12)', "CC_BY_4_0", "CC0_1_0",
                        "hasgeospatialissues = FALSE", "GROUP BY specieskey"):
             self.assertIn(needle, sql)
         self.assertNotIn("_NC_", sql)

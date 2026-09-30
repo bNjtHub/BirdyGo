@@ -165,11 +165,12 @@ def cell_from_south(col, row_south, step=GRID_STEP):
 def build_sql(step=GRID_STEP):
     """The one SQL download: bird records of the map zone, counted per species,
     1-degree cell and season. GBIF does the heavy aggregation."""
-    seasons = "\n".join(
-        f"      WHEN month IN ({', '.join(str(m) for m in SEASON_MONTHS[name])})"
-        f" THEN {i}"
-        for i, name in enumerate(SEASONS)
-    )
+    # GBIF's SQL dialect rejects `IN` inside CASE and needs "year" / "month"
+    # quoted (reserved words); checked against /occurrence/download/request/
+    # validate. The arithmetic below maps Dec-Feb to 0, Mar-May to 1, etc.,
+    # which only holds for these meteorological seasons in this order.
+    for i, name in enumerate(SEASONS):
+        assert all((m % 12) // 3 == i for m in SEASON_MONTHS[name]), name
     licenses = ", ".join(f"'{x}'" for x in LICENSES)
     basis = ", ".join(f"'{x}'" for x in BASIS_OF_RECORD)
     max_uncertainty = int(step * METERS_PER_DEGREE)
@@ -177,16 +178,14 @@ def build_sql(step=GRID_STEP):
   specieskey,
   FLOOR((decimallongitude - ({LON_MIN})) / {step}) AS cx,
   FLOOR((decimallatitude - ({LAT_MIN})) / {step}) AS cy,
-  CASE
-{seasons}
-  END AS season,
+  FLOOR(MOD("month", 12) / 3) AS season,
   COUNT(*) AS n
 FROM occurrence
 WHERE classkey = {AVES_CLASS_KEY}
   AND specieskey IS NOT NULL
   AND occurrencestatus = 'PRESENT'
-  AND year >= {YEAR_MIN}
-  AND month IS NOT NULL
+  AND "year" >= {YEAR_MIN}
+  AND "month" IS NOT NULL
   AND basisofrecord IN ({basis})
   AND license IN ({licenses})
   AND hasgeospatialissues = FALSE
