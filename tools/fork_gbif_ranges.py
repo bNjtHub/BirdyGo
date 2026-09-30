@@ -102,7 +102,7 @@ GRID_STEP = 1.0
 YEAR_MIN = 2010
 # Only these licenses (GBIF SQL enum names). CC BY-NC is excluded: the app may
 # end up in a store. eBird's dataset is CC BY 4.0.
-LICENSES = ("CC0_1_0", "CC_BY_4_0")
+# Open licences only (CC0, CC BY; never NC): see row_is_open().
 LICENSE_LABEL = "CC BY 4.0"
 LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 BASIS_OF_RECORD = ("HUMAN_OBSERVATION", "OCCURRENCE")
