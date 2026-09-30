@@ -273,4 +273,40 @@ void main() {
       expect(find.text('1/6 découverts'), findsOneWidget);
     });
   });
+
+  for (final width in [320.0, 360.0, 412.0]) {
+    for (final scale in [1.0, 1.3, 2.0]) {
+      testWidgets('no overflow at ${width.toInt()} dp, text x$scale (J7)', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 2400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder:
+                (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+            home: Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: MeetSpeciesBlock(sheet: _all, onQuizTap: () {}),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('découverts'), findsOneWidget);
+      });
+    }
+  }
 }
