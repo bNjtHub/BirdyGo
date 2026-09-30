@@ -52,6 +52,7 @@ import os
 import re
 import struct
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -616,7 +617,8 @@ def iter_file_rows(path, step=GRID_STEP):
 FACETS_TSV = CACHE_DIR / "facets.tsv"
 FACETS_DONE = CACHE_DIR / "facets_done.txt"
 FACET_LIMIT = 5000  # more than the bird species of any cell
-FACET_WORKERS = 4   # parallel calls, polite to GBIF (6 got throttled)
+FACET_WORKERS = 2     # parallel calls (4 and 6 got throttled)
+FACET_INTERVAL = 0.3  # seconds between two calls, all threads together
 
 
 def _search_params(lat0, lon0, step, months=None):
@@ -637,20 +639,39 @@ def _search_params(lat0, lon0, step, months=None):
     return params
 
 
+_PACE_LOCK = threading.Lock()
+_NEXT_CALL = [0.0]
+
+
+def _pace():
+    """One call every FACET_INTERVAL seconds across all threads: GBIF
+    throttles a sustained burst, which then costs far more in back-offs."""
+    with _PACE_LOCK:
+        now = time.monotonic()
+        wait = _NEXT_CALL[0] - now
+        _NEXT_CALL[0] = max(now, _NEXT_CALL[0]) + FACET_INTERVAL
+    if wait > 0:
+        time.sleep(wait)
+
+
 def _search(params, retries=8):
     """GBIF throttles bursts (429 / 5xx / timeouts): back off, up to ~4 min."""
     url = f"{API}/occurrence/search?" + urllib.parse.urlencode(params)
+    last = None
     for attempt in range(retries):
+        _pace()
         try:
             return json.loads(_http_json(url))
         except urllib.error.HTTPError as error:
             if error.code < 500 and error.code != 429:
                 raise RuntimeError(f"GBIF search refused ({error.code}): {url}")
+            last = f"HTTP {error.code}"
             wait = int(error.headers.get("Retry-After") or 2 ** attempt)
-        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError):
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as error:
+            last = f"{type(error).__name__}: {error}"
             wait = 2 ** attempt
         time.sleep(min(wait, 60))
-    raise RuntimeError(f"GBIF search failed: {url}")
+    raise RuntimeError(f"GBIF search failed ({last}): {url}")
 
 
 def facet_cell(col, row_south, step=GRID_STEP):
