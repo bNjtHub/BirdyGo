@@ -120,6 +120,7 @@ distinguer.
 - anecdote : un fait étonnant et vrai.
 - hint : un indice de 12 mots au plus pour un jeu de devinettes, sans \
 nommer l'espèce ni son genre.
+- nesting : période de nidification en France, sous la forme « M-N » avec deux numéros de mois de 1 à 12 (début-fin, ex. « 4-7 » pour avril à juillet, « 11-2 » si elle passe le nouvel an). Rien si tu n'es pas sûr, ou si l'espèce ne niche pas en France.
 
 Règles :
 1. Seulement ce dont tu es sûr pour cette espèce. Sinon, laisse la section \
