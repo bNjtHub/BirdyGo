@@ -117,7 +117,7 @@ class _ListeningCard extends StatelessWidget {
             left: 0,
             right: 0,
             top: 0,
-            bottom: BirdyGlyph.disc44,
+            bottom: BirdyGlyph.disc44 + 2 * BirdySpace.s,
             child: Center(
               child: SizedBox(
                 // The disc sits in the middle; the same margin on every side
@@ -216,7 +216,7 @@ class _StageGeometry {
   double get boxHeight => disc + 2 * disc * overhangY;
 
   /// Vertical center of the disc.
-  double get centerY => (height - BirdyGlyph.disc44) / 2;
+  double get centerY => (height - BirdyGlyph.disc44) / 2 - BirdySpace.s;
 
   /// Bottom edge of the box holding the disc and the button.
   double get boxBottom => centerY + boxHeight / 2;

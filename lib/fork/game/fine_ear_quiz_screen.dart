@@ -546,23 +546,6 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: BirdySpace.s),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 32),
-          child: Row(
-            children: [
-              // The progress lives in the trail of the header (dots: right,
-              // missed, current, to come); only the streak pill is left here.
-              const Spacer(),
-              if (streak >= 2)
-                QuizPop(
-                  key: ValueKey('streak $streak'),
-                  duration: QuizMotion.pill,
-                  child: _StreakPill(label: l10n.forkQuizStreak(streak)),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: BirdySpace.m),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -595,25 +578,44 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ValueListenableBuilder<String?>(
-                      valueListenable: _player.playing,
-                      builder:
-                          (context, playing, _) => QuizStage(
-                            bird: _bird(
-                              answer.scientificName,
-                              answer.commonName,
+                    // The streak pill sits in the stage's top-left corner (the
+                    // progress itself is the trail of the header), so no band
+                    // stays empty above the stage.
+                    Stack(
+                      children: [
+                        ValueListenableBuilder<String?>(
+                          valueListenable: _player.playing,
+                          builder:
+                              (context, playing, _) => QuizStage(
+                                bird: _bird(
+                                  answer.scientificName,
+                                  answer.commonName,
+                                ),
+                                state:
+                                    !answered
+                                        ? QuizStageState.listening
+                                        : right
+                                        ? QuizStageState.right
+                                        : QuizStageState.wrong,
+                                playing: playing == answer.clipPath,
+                                onPlay: _togglePlay,
+                                cheer: _current % 4,
+                                height: stage,
+                              ),
+                        ),
+                        if (streak >= 2)
+                          Positioned(
+                            top: BirdySpace.m,
+                            left: BirdySpace.m,
+                            child: QuizPop(
+                              key: ValueKey('streak $streak'),
+                              duration: QuizMotion.pill,
+                              child: _StreakPill(
+                                label: l10n.forkQuizStreak(streak),
+                              ),
                             ),
-                            state:
-                                !answered
-                                    ? QuizStageState.listening
-                                    : right
-                                    ? QuizStageState.right
-                                    : QuizStageState.wrong,
-                            playing: playing == answer.clipPath,
-                            onPlay: _togglePlay,
-                            cheer: _current % 4,
-                            height: stage,
                           ),
+                      ],
                     ),
                     const SizedBox(height: BirdySpace.l),
                     QuizChoiceGrid(

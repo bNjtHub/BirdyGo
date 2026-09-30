@@ -566,7 +566,8 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
   cercle de 20 avec une petite croix. Ce chemin est le seul compteur : pas de « Chant n sur N » ni de
   pastille de score. Son libellé accessible dit « Chant 4 sur 10, 3 bonnes réponses » (`forkQuizTrailLabel`).
-  Dessous, à droite, la pastille Loriot « 3 d'affilée ! » (la ligne garde sa hauteur sans elle).
+  La pastille Loriot « 3 d'affilée ! » se pose dans le coin haut gauche de la scène (aucune bande vide
+  au-dessus : 16 dp entre la piste et la scène, disque à 16 dp du haut de la scène).
   Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : pas de libellé « Oiseau mystère » (la
   bulle « Écoute-moi ! / Qui suis-je ? » suffit), disque pointillé de 116 qui flotte (±6 px, 3 s), bouton
   de lecture de 60 posé à cheval sur son coin bas droit, spectre de 27 barres qui s'animent seulement

@@ -512,6 +512,17 @@ void main() {
       expect(tester.getSize(right).width, closeTo(second.width, .01));
     });
 
+    testWidgets('no empty band above the stage, disc close to its top', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final trail = tester.getRect(find.byType(QuizTrail));
+      final stage = tester.getRect(find.byType(QuizStage));
+      final disc = tester.getRect(find.byType(QuizMysteryDisc));
+      expect(stage.top - trail.bottom, lessThanOrEqualTo(BirdySpace.xl));
+      expect(disc.top - stage.top, lessThanOrEqualTo(BirdySpace.l + 2));
+    });
+
     testWidgets('the mystery card has no label, only the bubble', (
       tester,
     ) async {
