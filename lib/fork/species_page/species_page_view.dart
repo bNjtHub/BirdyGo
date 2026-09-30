@@ -21,6 +21,7 @@ import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import '../reliability/reliability_screen.dart';
+import '../species_sheet/species_sheet.dart';
 import 'section_title.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -355,6 +356,8 @@ class HereNowCard extends StatefulWidget {
     required this.year,
     required this.sentence,
     required this.currentMonth,
+    this.currentWeek,
+    this.nesting,
     this.rareNote,
   });
 
@@ -363,6 +366,14 @@ class HereNowCard extends StatefulWidget {
 
   /// 1 to 12, marked on the chart.
   final int currentMonth;
+
+  /// 1 to 48 (`GeoModel.dateTimeToWeek`), marked on the weekly chart. The
+  /// month is marked instead when the year has no weekly scores.
+  final int? currentWeek;
+
+  /// Nesting period from the species sheet, drawn as a band under the
+  /// chart. Null draws nothing.
+  final NestingPeriod? nesting;
 
   /// Why a detection is « Rare ici · à confirmer », shown when the species
   /// is unexpected here this week (J3b).
@@ -373,7 +384,8 @@ class HereNowCard extends StatefulWidget {
 }
 
 class _HereNowCardState extends State<HereNowCard> {
-  int? _selectedMonth;
+  /// Selected bar: a week (0 to 47) of the weekly chart, else a month.
+  int? _selected;
 
   @override
   Widget build(BuildContext context) {
@@ -381,19 +393,33 @@ class _HereNowCardState extends State<HereNowCard> {
     final c = BirdyColors.of(context);
     final language = Localizations.localeOf(context).languageCode;
     final months = widget.year.months;
-    final percents = [for (final b in widget.year.bars) (b * 100).round()];
+    final weekly = widget.year.weeks.isNotEmpty;
+    final barsUnit = weekly ? widget.year.weekBars : widget.year.bars;
+    final percents = [for (final b in barsUnit) (b * 100).round()];
+    final perLabel = weekly ? weeksPerYear ~/ 12 : 1;
     final scale = ActivityScale.kingfisher(c.surface1, hue: c.accent);
     final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
     final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
     final labels = {
       for (final m in crowded ? const [0, 3, 6, 9] : List.generate(12, (i) => i))
-        m: initials[m],
+        m * perLabel: initials[m],
     };
-    final selected = _selectedMonth;
+    final selected = _selected;
     final caption =
         selected == null
             ? peakMonthCaption(l10n, language, months)
-            : monthDetailCaption(l10n, language, selected + 1, percents[selected]);
+            : monthDetailCaption(
+              l10n,
+              language,
+              weekly ? monthOfWeek(selected) : selected + 1,
+              percents[selected],
+            );
+    final week = widget.currentWeek;
+    final highlight =
+        weekly && week != null
+            ? (week - 1).clamp(0, weeksPerYear - 1)
+            : (widget.currentMonth - 1) * perLabel;
+    final nesting = widget.nesting;
     return BirdyBlock(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -452,16 +478,27 @@ class _HereNowCardState extends State<HereNowCard> {
                     trackColor: c.line,
                     labels: labels,
                     labelStyle: BirdyText.axisLabel,
-                    highlightIndex: widget.currentMonth - 1,
+                    highlightIndex: highlight,
                     highlightColor: c.text1,
                     semanticLabel: seasonsChartSemanticLabel(
                       l10n,
                       language,
                       months,
+                      nesting: nesting,
                     ),
-                    onSelect:
-                        (index, _) => setState(() => _selectedMonth = index),
+                    onSelect: (index, _) => setState(() => _selected = index),
                   ),
+                  if (nesting != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    NestingBand(
+                      key: const ValueKey('fiche-nesting'),
+                      period: nesting,
+                      slotsPerMonth: perLabel,
+                      color: c.accent,
+                      trackColor: c.line,
+                      legend: nestingLegend(l10n, language, nesting),
+                    ),
+                  ],
                   if (caption != null) ...[
                     const SizedBox(height: BirdySpace.xs),
                     Text(
@@ -477,6 +514,61 @@ class _HereNowCardState extends State<HereNowCard> {
         ),
         ],
       ),
+    );
+  }
+}
+
+/// Nesting period drawn under the weekly presence chart (J7): a rounded
+/// strip spanning the nesting months, on the same width as the bars, with a
+/// legend. Wraps around the new year when the period does.
+class NestingBand extends StatelessWidget {
+  const NestingBand({
+    super.key,
+    required this.period,
+    required this.slotsPerMonth,
+    required this.color,
+    required this.trackColor,
+    required this.legend,
+  });
+
+  final NestingPeriod period;
+
+  /// Bars per month of the chart above (4 weeks).
+  final int slotsPerMonth;
+  final Color color;
+  final Color trackColor;
+  final String legend;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(BirdySizes.nestingBandHeight / 2),
+          child: SizedBox(
+            height: BirdySizes.nestingBandHeight,
+            child: Row(
+              children: [
+                for (var m = 1; m <= 12; m++)
+                  Expanded(
+                    flex: slotsPerMonth,
+                    child: ColoredBox(
+                      color: period.includes(m) ? color : trackColor,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: BirdySpace.xxs),
+        Text(
+          legend,
+          textAlign: TextAlign.center,
+          style: BirdyText.caption.copyWith(color: c.text2),
+        ),
+      ],
     );
   }
 }
@@ -515,7 +607,6 @@ class MySoundsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     return BirdyBlock(
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -534,43 +625,8 @@ class MySoundsBlock extends StatelessWidget {
               ),
           ],
         ),
-        for (final clip in clips)
-          Padding(
-            padding: const EdgeInsets.only(top: BirdySpace.s),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 56),
-              child: Row(
-                children: [
-                  ClipPlayButton(
-                    state:
-                        playing == clip.clipPath
-                            ? ClipPlayState.playing
-                            : ClipPlayState.idle,
-                    semanticLabel:
-                        playing == clip.clipPath
-                            ? l10n.forkReplayStop
-                            : l10n.forkReplay,
-                    onPressed: () => onPlay(clip),
-                  ),
-                  const SizedBox(width: BirdySpace.m),
-                  Expanded(
-                    child: Text(
-                      lineOf(clip),
-                      style: BirdyText.bodyCompact.copyWith(
-                        color: c.text1,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                  _FavoriteButton(
-                    favorite: favorites.contains(clip.key),
-                    onPressed:
-                        () => onFavorite(clip, !favorites.contains(clip.key)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        for (var i = 0; i < clips.length; i++)
+          _clipRow(context, clips[i], featured: i == 0),
         if (onMore != null && moreCount > clips.length)
           Align(
             alignment: Alignment.centerLeft,
@@ -581,6 +637,52 @@ class MySoundsBlock extends StatelessWidget {
           ),
       ],
     ),
+    );
+  }
+
+  /// One recording. The first one leads the page (J7): the big play button
+  /// of the cards where a replay is the main action, and a larger line.
+  Widget _clipRow(
+    BuildContext context,
+    IndexedDetection clip, {
+    required bool featured,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final isPlaying = playing == clip.clipPath;
+    return Padding(
+      padding: const EdgeInsets.only(top: BirdySpace.s),
+      child: ConstrainedBox(
+        key: featured ? const ValueKey('fiche-sounds-featured') : null,
+        constraints: BoxConstraints(
+          minHeight: featured ? BirdySizes.mainAction : 56,
+        ),
+        child: Row(
+          children: [
+            ClipPlayButton(
+              size: featured ? BirdySizes.mainAction : BirdySizes.target,
+              state: isPlaying ? ClipPlayState.playing : ClipPlayState.idle,
+              semanticLabel: isPlaying ? l10n.forkReplayStop : l10n.forkReplay,
+              onPressed: () => onPlay(clip),
+            ),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(
+              child: Text(
+                lineOf(clip),
+                style: (featured ? BirdyText.body : BirdyText.bodyCompact)
+                    .copyWith(
+                      color: c.text1,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+              ),
+            ),
+            _FavoriteButton(
+              favorite: favorites.contains(clip.key),
+              onPressed: () => onFavorite(clip, !favorites.contains(clip.key)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

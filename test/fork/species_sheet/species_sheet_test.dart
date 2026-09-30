@@ -38,6 +38,25 @@ void main() {
       expect(sheets['Turdus merula'], isNull);
     });
 
+    test('nesting period: optional, ignored when invalid (J7)', () {
+      SpeciesSheet sheet(Object? nesting) => SpeciesSheet.fromJson({
+        'name': 'x',
+        'summary': 'y',
+        if (nesting != null) 'nesting': nesting,
+      });
+      expect(sheet('4-7').nesting, const NestingPeriod(4, 7));
+      expect(sheet(' 11 - 2 ').nesting, const NestingPeriod(11, 2));
+      expect(sheet(null).nesting, isNull);
+      expect(sheet('13-2').nesting, isNull);
+      expect(sheet('0-3').nesting, isNull);
+      expect(sheet('avril').nesting, isNull);
+      expect(sheet(5).nesting, isNull);
+      expect(const NestingPeriod(11, 2).includes(12), isTrue);
+      expect(const NestingPeriod(11, 2).includes(2), isTrue);
+      expect(const NestingPeriod(11, 2).includes(5), isFalse);
+      expect(const NestingPeriod(4, 7).includes(8), isFalse);
+    });
+
     test('only for French species names', () {
       expect(sheetsApplyTo('fr'), isTrue);
       expect(sheetsApplyTo('fr-CA'), isTrue);

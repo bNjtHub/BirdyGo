@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../features/explore/explore_providers.dart';
+import '../../features/inference/geo_model.dart';
 import '../../features/explore/widgets/pick_wikipedia_url.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_providers.dart';
@@ -356,13 +357,8 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               ),
         ),
       ),
-      if (_year != null)
-        HereNowCard(
-          year: _year!,
-          sentence: presenceSentence(l10n, language, _year!, now: now),
-          currentMonth: now.month,
-          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
-        ),
+      // FORK-owned order (J7): the user's own sounds come right after the
+      // counters, before what the geo-model says about the year.
       if (showSounds)
         KeyedSubtree(
           key: const ValueKey('fiche-sounds'),
@@ -403,6 +399,15 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                   ),
                 ),
           ),
+        ),
+      if (_year != null)
+        HereNowCard(
+          year: _year!,
+          sentence: presenceSentence(l10n, language, _year!, now: now),
+          currentMonth: now.month,
+          currentWeek: GeoModel.dateTimeToWeek(now),
+          nesting: sheet?.nesting,
+          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
         MeetSpeciesBlock(sheet: sheet)
