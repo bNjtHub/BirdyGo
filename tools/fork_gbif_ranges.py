@@ -699,14 +699,12 @@ def _clean_facets():
     lines = FACETS_TSV.read_text(encoding="utf-8").splitlines()
     seen, keep = set(), []
     for line in lines[1:]:
-        key, cx, cy, season, _n = line.split("	")
+        key, cx, cy, season, _n = line.split("\t")
         if (int(cx), int(cy)) in done and (key, cx, cy, season) not in seen:
             seen.add((key, cx, cy, season))
             keep.append(line)
     if len(keep) != len(lines) - 1:
-        FACETS_TSV.write_text("
-".join(lines[:1] + keep) + "
-", encoding="utf-8")
+        FACETS_TSV.write_text("\n".join(lines[:1] + keep) + "\n", encoding="utf-8")
         print(f"Cleaned {len(lines) - 1 - len(keep)} rows of unfinished cells")
 
 
