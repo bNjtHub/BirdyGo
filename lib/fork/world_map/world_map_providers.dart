@@ -3,6 +3,7 @@
 /// species (Riverpod keeps the family alive, so it is the in-memory cache).
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,21 +39,28 @@ final worldMapPredictProvider = FutureProvider<GeoPredict?>((ref) async {
 
 /// The four seasons of one species, or null without a geo-model. Failures
 /// give null too: the block is then hidden.
-final speciesSeasonPresenceProvider =
-    FutureProvider.family<SeasonPresence?, String>((ref, scientificName) async {
-      try {
-        final predict = await ref.watch(worldMapPredictProvider.future);
-        if (predict == null) return null;
-        final cells = await ref.watch(landCellsProvider.future);
-        return await computeSeasonPresence(
-          scientificName: scientificName,
-          predict: predict,
-          cells: cells,
-        );
-      } catch (_) {
-        return null;
-      }
-    });
+final speciesSeasonPresenceProvider = FutureProvider.family<
+  SeasonPresence?,
+  String
+>((ref, scientificName) async {
+  try {
+    final predict = await ref.watch(worldMapPredictProvider.future);
+    if (predict == null) return null;
+    final cells = await ref.watch(landCellsProvider.future);
+    final watch = Stopwatch()..start(); // TEMP integ timing
+    final result = await computeSeasonPresence(
+      scientificName: scientificName,
+      predict: predict,
+      cells: cells,
+    );
+    debugPrint(
+      '[WorldMapTiming] $scientificName ${cells.length} cells ${watch.elapsedMilliseconds} ms',
+    );
+    return result;
+  } catch (_) {
+    return null;
+  }
+});
 
 /// Where the phone is, for the map's dot. Never asks for the location
 /// permission (same care as the species page's year chart); null when unknown.
