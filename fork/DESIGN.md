@@ -446,6 +446,21 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
   pour toi ».
+- « Dans le monde » (J7, `lib/fork/world_map/`), juste après « Ici en ce moment » : carte du monde de la
+  répartition saisonnière, recadrée Europe–Afrique–Asie de l'Ouest (−25° à 65° E, −35° à 70° N), terres
+  Natural Earth 110m (`line` sur le fond du bloc, océan = fond du bloc), sans tuiles, hors ligne. Puces de
+  saison (Hiver / Printemps / Été / Automne, saison courante d'abord, choisie en encre `BirdyChipColors.ink`).
+  **Une seule teinte de cellule : `accentText` du thème d'oiseau = « attendu ici »** (3:1 sur le fond et sur
+  les terres, testé dans les 4 thèmes clair et sombre). On n'emprunte pas `oriole` aux passages (il veut dire
+  rare / récompense) ni `sure` à l'été ou à la nidification (il veut dire confirmé) : la saison se lit sur
+  la puce. Les cellules attendues seulement dans une autre saison restent en fantôme (`accentText` à 30 %),
+  ce qui montre d'où vient l'oiseau et où il va. Point d'encre `text1` cerclé de blanc pour la position
+  connue (même source que la fiche, sans nouvelle demande de permission). Sous la carte : clé (Attendu /
+  Autres saisons / Toi), légende (« Été : nord de l'Europe · Hiver : Afrique de l'Ouest · ~6 200 km », ou
+  « Présent toute l'année dans cette zone »), « Nidification : avril à juillet » si la fiche IA la donne,
+  « Estimation du géomodèle BirdNET ». Squelette à la forme finale puis fondu ; bloc absent sans géomodèle.
+  Le libellé accessible dit la saison affichée et la légende (région vivante : le changement de saison
+  est annoncé).
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).
 - Colonne de 600 dp au plus en paysage et sur tablette.
 

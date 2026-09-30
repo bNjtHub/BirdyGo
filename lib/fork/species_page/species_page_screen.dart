@@ -36,6 +36,7 @@ import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
 import 'meet_species_block.dart';
+import '../world_map/world_map_section.dart'; // FORK: world map (J7)
 import 'section_title.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
@@ -406,6 +407,12 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           currentMonth: now.month,
           rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
         ),
+      // FORK: world map of the seasonal range (J7), hidden without a geo-model.
+      WorldMapSection(
+        scientificName: widget.scientificName,
+        currentMonth: now.month,
+        nesting: sheet?.nesting,
+      ),
       if (sheet != null && sheet.sections.isNotEmpty)
         MeetSpeciesBlock(sheet: sheet)
       else if (_description != null)
