@@ -626,8 +626,9 @@ def _search_params(lat0, lon0, step, months=None):
         ("year", f"{YEAR_MIN},*"),
         ("hasGeospatialIssue", "false"),
         ("occurrenceStatus", "PRESENT"),
-        ("decimalLatitude", f"{lat0},{lat0 + step - eps}"),
-        ("decimalLongitude", f"{lon0},{lon0 + step - eps}"),
+        # Fixed decimals: GBIF rejects scientific notation such as -1e-06.
+        ("decimalLatitude", f"{lat0:.6f},{lat0 + step - eps:.6f}"),
+        ("decimalLongitude", f"{lon0:.6f},{lon0 + step - eps:.6f}"),
         ("limit", 0),
     ]
     params += [("basisOfRecord", b) for b in BASIS_OF_RECORD]
