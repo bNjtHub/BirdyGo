@@ -10,9 +10,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _FakeTweet implements LogoTweetPlayer {
   int plays = 0;
+  int prepares = 0;
+  int prepareAtFirstPlay = -1;
 
   @override
-  Future<void> play() async => plays++;
+  Future<void> prepare() async => prepares++;
+
+  @override
+  Future<void> play() async {
+    if (plays == 0) prepareAtFirstPlay = prepares;
+    plays++;
+  }
 
   @override
   Future<void> dispose() async {}
@@ -72,5 +80,18 @@ void main() {
     await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     await tester.pump(const Duration(seconds: 5));
     expect(tweet.plays, 0);
+  });
+
+  testWidgets('the tweet is prepared before the first tap', (tester) async {
+    final (tweet, _) = await pump(tester);
+    expect(tweet.prepares, 1);
+    expect(tweet.plays, 0);
+    await tester.tap(find.byType(HomeLogoRow));
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
+    expect(tweet.plays, 1);
+    // The first tap played what was already prepared: no new loading.
+    expect(tweet.prepareAtFirstPlay, 1);
+    expect(tweet.prepares, 1);
+    await tester.pump(const Duration(seconds: 5));
   });
 }

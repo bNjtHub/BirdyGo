@@ -416,9 +416,10 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
   programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
   arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois et joue le cri BirdyGo
-  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part, muet pendant une écoute pour que
+  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part chargé dès l'apparition de l'accueil (sans jouer, pour que le premier appui parte sans retard), muet pendant une écoute pour que
   le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
+  Bande « Ta journée » : la zone tactile de 48 dp laisse déjà 11 dp autour des pastilles, donc aucun écart de bloc supplémentaire au-dessus ni en dessous. Série (7 points) : un trait de `BirdyStroke.regular` relie deux points voisins (accent entre deux jours qui comptent, `borderStrong` sinon).
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
   couleurs de la marque. Un double appui (J6h, `logo_flight.dart`) lui fait faire un clin d'œil au
   centre de l'écran : voir l'exception de la section Animations.
