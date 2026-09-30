@@ -161,7 +161,7 @@ void main() {
     )).visible, isFalse);
 
     await skipSteps(tester, false);
-    expect(find.text('Deux autorisations, et c\'est parti'), findsOneWidget);
+    expect(find.text('Trois questions, et c\'est parti'), findsOneWidget);
     expect(find.text('Passer'), findsOneWidget);
     expect(find.byKey(const ValueKey('onb-finish')), findsOneWidget);
     // « Passer » is hidden (kept for layout) on the last page.

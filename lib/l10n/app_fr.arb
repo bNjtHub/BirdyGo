@@ -1448,7 +1448,7 @@
   "forkOnbStepNumber": "Étape {n}",
   "forkOnbLevelsTitle": "Sûr, Probable, À vérifier",
   "forkOnbLevelsIntro": "BirdyGo te dit à quel point il est certain. Seuls les oiseaux sûrs ou confirmés comptent dans le jeu.",
-  "forkOnbPermsTitle": "Deux autorisations, et c'est parti",
+  "forkOnbPermsTitle": "Trois questions, et c'est parti",
   "forkOnbMicName": "Micro",
   "forkOnbMicWhy": "Pour entendre les oiseaux. Sans lui, BirdyGo ne peut pas écouter.",
   "forkOnbNeeded": "Nécessaire",
