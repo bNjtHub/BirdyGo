@@ -886,6 +886,10 @@ abstract final class BirdySizes {
   static const int quizEntrySegments = 10;
   static const double quizEntrySegmentHeight = 6;
 
+  /// The oriole « ? » disc in the entry row's title: under one heading line
+  /// (20 * 1.25 = 25), so the row does not grow.
+  static const double quizEntryMark = 24;
+
   /// « Plus » sheet (M): the compact rows of the utility block, the advanced
   /// tools' rows and indent, and the sheet's max height as a share of the
   /// screen. Group rows reuse [row] / [rowDisc], icons [BirdyGlyph.xxl].

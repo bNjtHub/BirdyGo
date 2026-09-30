@@ -113,7 +113,9 @@ class QuizEntryRow extends StatelessWidget {
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
                                 baseline: TextBaseline.alphabetic,
-                                child: QuizTitleMark(),
+                                child: QuizTitleMark(
+                                  size: BirdySizes.quizEntryMark,
+                                ),
                               ),
                             ],
                           ),

@@ -471,7 +471,10 @@ class _IntroBadgeCard extends StatelessWidget {
 /// The 40 dp oriole disc standing in for the title's own « ? », tilted
 /// like the mockup.
 class QuizTitleMark extends StatelessWidget {
-  const QuizTitleMark({super.key});
+  // FORK: optional size for the quiz entry row (default: the intro's disc).
+  const QuizTitleMark({super.key, this.size = BirdyGlyph.disc40});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -479,8 +482,8 @@ class QuizTitleMark extends StatelessWidget {
     return Transform.rotate(
       angle: -8 * math.pi / 180,
       child: Container(
-        width: BirdyGlyph.disc40,
-        height: BirdyGlyph.disc40,
+        width: size,
+        height: size,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: BirdyBrand.oriole,
@@ -488,7 +491,17 @@ class QuizTitleMark extends StatelessWidget {
         ),
         child: Text(
           '?',
-          style: BirdyText.display.copyWith(color: c.text1, height: 1),
+          style:
+              size == BirdyGlyph.disc40
+                  ? BirdyText.display.copyWith(color: c.text1, height: 1)
+                  : BirdyText.display.copyWith(
+                    color: c.text1,
+                    height: 1,
+                    // The glyph follows the disc.
+                    fontSize:
+                        BirdyText.display.fontSize! * size / BirdyGlyph.disc40,
+                    letterSpacing: 0,
+                  ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/birdy_typography.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
@@ -97,4 +98,54 @@ void main() {
     await _pump(tester, const QuizEntryRow(), reduced: true);
     expect(tester.hasRunningAnimations, isFalse);
   });
+
+  for (final scale in [1.0, 1.3]) {
+    testWidgets('title line is no taller than a heading at x$scale', (
+      tester,
+    ) async {
+      Future<double> height(Widget w) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: BirdyTheme.light(),
+            locale: const Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder:
+                (context, app) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: app!,
+                ),
+            home: Scaffold(body: Align(alignment: Alignment.topLeft, child: w)),
+          ),
+        );
+        return tester.getSize(find.byKey(const ValueKey('probe'))).height;
+      }
+
+      final plain = await height(
+        Text(
+          'Qui chante',
+          key: const ValueKey('probe'),
+          style: BirdyText.heading,
+        ),
+      );
+      final rich = await height(
+        Text.rich(
+          key: const ValueKey('probe'),
+          TextSpan(
+            style: BirdyText.heading,
+            children: const [
+              TextSpan(text: 'Qui chante'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: QuizTitleMark(size: BirdySizes.quizEntryMark),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(rich, lessThanOrEqualTo(plain));
+    });
+  }
 }
