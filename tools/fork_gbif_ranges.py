@@ -616,7 +616,7 @@ def iter_file_rows(path, step=GRID_STEP):
 FACETS_TSV = CACHE_DIR / "facets.tsv"
 FACETS_DONE = CACHE_DIR / "facets_done.txt"
 FACET_LIMIT = 5000  # more than the bird species of any cell
-FACET_WORKERS = 6   # parallel calls, polite to GBIF
+FACET_WORKERS = 4   # parallel calls, polite to GBIF (6 got throttled)
 
 
 def _search_params(lat0, lon0, step, months=None):
@@ -637,13 +637,19 @@ def _search_params(lat0, lon0, step, months=None):
     return params
 
 
-def _search(params, retries=5):
+def _search(params, retries=8):
+    """GBIF throttles bursts (429 / 5xx / timeouts): back off, up to ~4 min."""
     url = f"{API}/occurrence/search?" + urllib.parse.urlencode(params)
     for attempt in range(retries):
         try:
             return json.loads(_http_json(url))
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
-            time.sleep(2 ** attempt)
+        except urllib.error.HTTPError as error:
+            if error.code < 500 and error.code != 429:
+                raise RuntimeError(f"GBIF search refused ({error.code}): {url}")
+            wait = int(error.headers.get("Retry-After") or 2 ** attempt)
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError):
+            wait = 2 ** attempt
+        time.sleep(min(wait, 60))
     raise RuntimeError(f"GBIF search failed: {url}")
 
 
@@ -678,9 +684,18 @@ def cmd_facets(_args):
         if new_file:
             out.write("specieskey\tcx\tcy\tseason\tn\n")
         started = time.time()
-        for i, (cell, rows) in enumerate(
-            zip(todo, pool.map(lambda cr: facet_cell(*cr), todo)), 1
-        ):
+        def safe(cr):
+            try:
+                return facet_cell(*cr)
+            except RuntimeError as error:  # left undone: the next run retries it
+                print(f"  cell {cr} skipped: {error}")
+                return None
+
+        failed = 0
+        for i, (cell, rows) in enumerate(zip(todo, pool.map(safe, todo)), 1):
+            if rows is None:
+                failed += 1
+                continue
             for row in rows:
                 out.write("\t".join(str(v) for v in row) + "\n")
             mark.write(f"{cell[0]}:{cell[1]}\n")
@@ -689,6 +704,8 @@ def cmd_facets(_args):
                 mark.flush()
                 rate = i / max(time.time() - started, 1e-9)
                 print(f"  {i}/{len(todo)} cells, ~{(len(todo) - i) / rate / 60:.0f} min left")
+    if failed:
+        sys.exit(f"{failed} cells failed: run `facets` again to retry only them.")
     print(f"Done. Now: python tools/fork_gbif_ranges.py build --from-file {FACETS_TSV} --api")
 
 
