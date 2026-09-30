@@ -56,7 +56,11 @@ class QuizLogo extends StatelessWidget {
         end: Alignment.bottomCenter,
         colors: [BirdyBrand.wellTop, BirdyBrand.wellBottom],
       ),
-      border: Border.all(color: BirdyBrand.kingfisher, width: BirdyStroke.regular),
+      // The ring follows the bird theme picked on the Profil.
+      border: Border.all(
+        color: BirdyColors.of(context).accent,
+        width: BirdyStroke.regular,
+      ),
     ),
     child: SvgPicture.string(_svg(), width: size, height: size),
   );

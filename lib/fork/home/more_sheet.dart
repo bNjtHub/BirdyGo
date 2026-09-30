@@ -47,13 +47,18 @@ const double _tileMinHeight = 104;
 
 /// Opens the « Plus » sheet. Entries push onto the navigator that [context]
 /// belongs to, like the old menu did.
-Future<void> showMoreSheet(BuildContext context, WidgetRef ref) {
+Future<void> showMoreSheet(
+  BuildContext context,
+  WidgetRef ref, {
+  int toVerify = 0,
+}) {
   final navigator = Navigator.of(context);
   return showBirdySheet<void>(
     context: context,
     isScrollControlled: true,
     builder:
         (sheetContext) => MoreSheet(
+          toVerify: toVerify,
           onOpen: (screen) {
             Navigator.of(sheetContext).pop();
             navigator.push(MaterialPageRoute<void>(builder: (_) => screen));
@@ -86,7 +91,15 @@ class _Entry {
 /// Content of the « Plus » sheet. [onOpen] closes the sheet and opens a
 /// screen; [aruScreen] picks the ARU screen (setup, or the running one).
 class MoreSheet extends StatefulWidget {
-  const MoreSheet({super.key, required this.onOpen, required this.aruScreen});
+  const MoreSheet({
+    super.key,
+    required this.onOpen,
+    required this.aruScreen,
+    this.toVerify = 0,
+  });
+
+  /// Detections waiting in the review queue (Revue rapide's subtitle).
+  final int toVerify;
 
   final void Function(Widget screen) onOpen;
   final Widget Function() aruScreen;

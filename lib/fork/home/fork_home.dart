@@ -187,7 +187,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }
 
   // FORK: J6g-c, the menu is now the « Plus » sheet (more_sheet.dart).
-  void _showMenu() => showMoreSheet(context, ref);
+  void _showMenu() =>
+      showMoreSheet(context, ref, toVerify: _snapshot?.toVerify ?? 0);
 
   @override
   Widget build(BuildContext context) {

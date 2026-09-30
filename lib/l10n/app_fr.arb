@@ -1952,5 +1952,22 @@
   "forkLicensesMaps": "Fonds de carte",
   "forkLicensesMapsSub": "© OpenStreetMap contributors (ODbL) ; © IGN – Géoplateforme (Licence Ouverte Etalab 2.0)",
   "forkLicensesCode": "Licences du code",
-  "forkLicensesCodeSub": "Logiciels libres utilisés par l'app"
+  "forkLicensesCodeSub": "Logiciels libres utilisés par l'app",
+  "forkQuizEntryHook": "Encore {n} bonnes réponses pour ta première plume",
+  "forkQuizEntryHookNext": "Tu as ta première plume. Vise la deuxième !",
+  "forkQuizEntryHookTier": "{tier, select, two{Tu as deux plumes. Vise la troisième !} other{Tu as les trois plumes. Bravo, oreille fine !}}",
+  "forkMoreGroupPlay": "Jouer et progresser",
+  "forkMoreGroupMine": "Mes oiseaux",
+  "forkMoreGroupDiscover": "Découvrir",
+  "forkMoreQuizSub": "Le quiz avec tes propres chants",
+  "forkMoreRankingSub": "Tes oiseaux les plus entendus",
+  "forkMoreReviewSub": "{n} à vérifier",
+  "forkMoreReviewDone": "Tout est trié",
+  "forkMoreSoundsSub": "Tous tes enregistrements",
+  "forkMoreSessionsSub": "Tes écoutes passées",
+  "forkMoreGardenSub": "Qui vit près de chez toi",
+  "forkMoreExploreSub": "Toutes les espèces",
+  "@forkQuizEntryHook": {"description": "BirdyGo fork: home quiz entry (L).", "placeholders": {"n": {"type": "int"}}},
+  "@forkQuizEntryHookTier": {"description": "BirdyGo fork: home quiz entry (L).", "placeholders": {"tier": {"type": "String"}}},
+  "@forkMoreReviewSub": {"description": "BirdyGo fork: « Plus » menu (M).", "placeholders": {"n": {"type": "int"}}}
 }

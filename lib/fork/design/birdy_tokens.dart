@@ -870,6 +870,22 @@ abstract final class BirdySizes {
   static const double silhouetteMarkMin = 20;
   static const double quizSheetDisc = 72;
 
+  /// Home quiz entry (L): the progress bar toward the next Oreille fine
+  /// plume, [quizEntrySegments] segments of [quizEntrySegmentHeight].
+  static const int quizEntrySegments = 10;
+  static const double quizEntrySegmentHeight = 6;
+
+  /// « Plus » sheet (M): a titled group's row and its tinted disc, the
+  /// compact rows of the utility block, the advanced tools' indent, and the
+  /// sheet's max height as a share of the screen.
+  static const double moreRow = 72;
+  static const double moreDisc = 44;
+  static const double moreIcon = 22;
+  static const double moreCompactRow = 56;
+  static const double moreToolRow = 48;
+  static const double moreToolIndent = 34;
+  static const double moreSheetMaxShare = 0.9;
+
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
   /// check badge on the current one.
   static const double levelEmblem = 48;
