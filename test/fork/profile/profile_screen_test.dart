@@ -211,8 +211,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     // The quiz screen opened on top with its own big « Qui chante ? »
     // heading (the Profil's own quiz-entry row, still mounted underneath,
-    // keeps showing its smaller heading too).
-    expect(find.text('Qui chante ?'), findsNWidgets(2));
+    // keeps showing its smaller heading too, until the page transition ends
+    // and the route below goes offstage: J7's 220 ms transition ends first).
+    expect(find.text('Qui chante ?'), findsWidgets);
     expect(find.byType(FineEarQuizScreen), findsOneWidget);
   });
 

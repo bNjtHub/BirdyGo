@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_semantic_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/score_colors.dart';
+import 'birdy_page_transitions.dart';
 import 'birdy_theme_choice.dart';
 import 'birdy_tokens.dart';
 import 'birdy_typography.dart';
@@ -92,6 +93,7 @@ abstract final class BirdyTheme {
     return base.copyWith(
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
+      pageTransitionsTheme: BirdyPageTransitionsBuilder.theme,
       textTheme: textTheme,
       primaryTextTheme: base.primaryTextTheme.merge(BirdyText.textTheme),
       extensions: <ThemeExtension<dynamic>>[
