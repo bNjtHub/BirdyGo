@@ -496,7 +496,8 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   jour). Le fond et le filet du haut (1 px, `line`) ne couvrent que les 80 dp du bas (plus la zone
   sûre) ; les 22 dp au-dessus sont transparents et laissent passer les appuis vers la page, sauf sur
   le disque. Les pages s'arrêtent au fond de la barre (`Stack` du `ForkShell`), la barre flotte
-  dessus. Le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil garde toutes ses entrées ;
+  dessus. Clavier ouvert (champ de recherche d'une feuille) : la barre se cache et les pages
+  descendent jusqu'en bas. Le reste s'ouvre en plein écran par-dessus. Le menu de l'Accueil garde toutes ses entrées ;
   sur Profil, son bouton en haut à droite est le même menu (Palmarès est la première entrée).
 - Disque « Écouter » : 68 dp (`BirdySizes.listenDisc`), fond `accent`, liseré de 4 dp de la couleur
   de la barre (`listenDiscRim`), lueur `listenGlow`, haut du disque à 22 dp au-dessus de la barre

@@ -142,6 +142,19 @@ void main() {
   Finder tab(String label) =>
       find.descendant(of: find.byType(ForkNavBar), matching: find.text(label));
 
+  testWidgets('the bar hides while the keyboard is open', (tester) async {
+    await pump(tester);
+    expect(find.byType(ForkNavBar), findsOneWidget);
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+    await tester.pumpAndSettle();
+    expect(find.byType(ForkNavBar), findsNothing);
+
+    tester.view.resetViewInsets();
+    await tester.pumpAndSettle();
+    expect(find.byType(ForkNavBar), findsOneWidget);
+  });
+
   testWidgets('four tabs, Accueil first, the others built on first visit', (
     tester,
   ) async {

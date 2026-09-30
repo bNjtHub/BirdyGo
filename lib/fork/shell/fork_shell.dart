@@ -164,6 +164,9 @@ class _ForkShellState extends ConsumerState<ForkShell> {
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
+    // Keyboard open (a search field in a tab's sheet): the bar hides, as the
+    // Scaffold's own bar used to stay under the keyboard.
+    final showBar = MediaQuery.viewInsetsOf(context).bottom == 0;
     return PopScope(
       // Back from another tab returns to Accueil; back from Accueil leaves.
       canPop: _tab == ForkTab.home,
@@ -179,7 +182,7 @@ class _ForkShellState extends ConsumerState<ForkShell> {
               left: 0,
               right: 0,
               top: 0,
-              bottom: BirdySizes.navBar + safeBottom,
+              bottom: showBar ? BirdySizes.navBar + safeBottom : 0,
               // The pages' own screens must not add the safe inset a second
               // time (the Scaffold used to remove it under its bar).
               child: MediaQuery.removePadding(
@@ -215,16 +218,17 @@ class _ForkShellState extends ConsumerState<ForkShell> {
                 ),
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: ForkNavBar(
-                selected: _tab,
-                onSelect: _select,
-                onListen: _listen,
+            if (showBar)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: ForkNavBar(
+                  selected: _tab,
+                  onSelect: _select,
+                  onListen: _listen,
+                ),
               ),
-            ),
           ],
         ),
       ),
