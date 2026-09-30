@@ -294,6 +294,44 @@ void main() {
       expect(tapped?.scientificName, 'Turdus merula');
     });
 
+    testWidgets('the badge has a 48 dp touch target, layout unchanged', (
+      tester,
+    ) async {
+      var badgeTaps = 0;
+      var opened = 0;
+      final entry = _frame([_high], _high);
+      await tester.pumpWidget(
+        _app(
+          LiveTable(
+            entries: [entry],
+            badgeFor:
+                (e, {required compact}) =>
+                    const ReliabilityBadge(level: ReliabilityLevel.sure),
+            onBadgeTap: (e) => badgeTaps++,
+            onOpen: (e) => opened++,
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      final visual = tester.getRect(find.text('Sûr'));
+      final hit = find.byKey(const ValueKey('live-badge-hit'));
+      final box = tester.getRect(hit);
+      expect(box.height, lessThan(48)); // layout size is the badge's
+      // Touch 22 dp above and below the center, outside the visual badge.
+      for (final dy in [-22.0, 22.0]) {
+        await tester.tapAt(Offset(box.center.dx, box.center.dy + dy));
+        await tester.pump();
+      }
+      expect(badgeTaps, 2);
+      expect(opened, 0);
+      expect(visual.height, lessThan(48));
+      // Elsewhere on the row: it opens the species sheet.
+      await tester.tap(find.text('Turdus merula'));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(badgeTaps, 2);
+      expect(opened, 1);
+    });
+
     testWidgets('shows the best score, its time and the contacts', (
       tester,
     ) async {

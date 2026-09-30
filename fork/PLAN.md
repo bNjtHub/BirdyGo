@@ -878,8 +878,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Niveau d'une ligne = meilleur contact de la sortie (stable), barres « chante » selon le score
             courant, pastille « Confirmé » une fois, feuille des niveaux par espèce (meilleur score,
             heure, contacts). Le Bilan appliquait déjà cette règle.
-      - [ ] (Benjamin) Téléphone : écoute en clair à l'aube et au soleil, lisibilité du spectrogramme sombre
-            dans un écran clair, « Confirmé » sur un vrai chant.
+      - [ ] (Benjamin) Téléphone : écoute en clair au soleil, puits sombre, Confirmé sur un vrai chant
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;

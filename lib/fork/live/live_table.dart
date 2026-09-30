@@ -20,6 +20,7 @@ import '../../shared/utils/app_icons.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_pill.dart';
+import '../design/widgets/expanded_hit_area.dart';
 import '../reliability/reliability_config.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
@@ -287,7 +288,7 @@ class LiveTableRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final tint = SpeciesAccents.tintOf(entry.scientificName);
-    return SpeciesTile(
+    final tile = SpeciesTile(
       name: entry.commonName,
       compact: compact,
       onTap: onTap,
@@ -319,6 +320,8 @@ class LiveTableRow extends StatelessWidget {
       ),
       action: action,
     );
+    // J7: the badge gets a 48 dp target without growing the row.
+    return onBadgeTap == null ? tile : ExpandedHitRegion(child: tile);
   }
 }
 
@@ -339,7 +342,7 @@ extension on LiveTableRow {
                 child: badge,
               ),
             );
-    final Widget slot =
+    final Widget inner =
         reduced
             ? tappable
             : BirdyCrossFade(
@@ -347,6 +350,16 @@ extension on LiveTableRow {
                 key: ValueKey(showPill ? 'confirmed' : 'level'),
                 child: showPill ? const ConfirmedPill() : tappable,
               ),
+            );
+    // A 48 dp touch target around the badge, outside the layout: the row
+    // keeps its height (the tap must land inside the row).
+    final Widget slot =
+        onBadgeTap == null
+            ? inner
+            : ExpandedHitArea(
+              key: const ValueKey('live-badge-hit'),
+              minSize: BirdySizes.target,
+              child: inner,
             );
     if (!confirmed) return slot;
     return Semantics(
