@@ -7,12 +7,20 @@ import 'package:flutter/widgets.dart';
 import '../birdy_motion.dart';
 
 class Pressable extends StatefulWidget {
-  const Pressable({super.key, required this.child, this.enabled = true});
+  const Pressable({
+    super.key,
+    required this.child,
+    this.enabled = true,
+    this.scale = BirdyMotion.pressScale,
+  });
 
   final Widget child;
 
   /// Disabled buttons do not react.
   final bool enabled;
+
+  /// Scale while pressed; the « Écouter » disc goes deeper than the rest.
+  final double scale;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -33,7 +41,7 @@ class _PressableState extends State<Pressable> {
       onPointerUp: (_) => _set(false),
       onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
-        scale: active && _pressed ? BirdyMotion.pressScale : 1,
+        scale: active && _pressed ? widget.scale : 1,
         duration: BirdyMotion.press,
         curve: BirdyMotion.standard,
         child: widget.child,

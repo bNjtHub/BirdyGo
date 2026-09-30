@@ -213,7 +213,8 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                     BirdySpace.page,
                     BirdySpace.page,
                     BirdySpace.page,
-                    BirdySpace.page,
+                    // Clears the « Écouter » disc's overhang above the bar (J6j).
+                    BirdySpace.page + BirdySizes.listenDiscLift,
                   ),
                   sliver: SliverMainAxisGroup(slivers: slivers),
                 ),

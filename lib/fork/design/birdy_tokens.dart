@@ -594,6 +594,7 @@ abstract final class BirdyGlyph {
   static const double x3l = 24;
   static const double x4l = 26;
   static const double x5l = 28;
+  static const double x6l = 30;
 
   /// Round icons and avatars, by diameter.
   static const double disc36 = 36;
@@ -666,6 +667,16 @@ abstract final class BirdySizes {
   static const double liveControl = 64;
 
   static const double navBar = 80;
+
+  /// « Écouter » disc in the middle of the bar (J6j): its diameter, the rim
+  /// in the bar's color around it, and how far it overhangs the bar's top
+  /// edge.
+  static const double listenDisc = 68;
+  static const double listenDiscRim = 4;
+  static const double listenDiscLift = 22;
+
+  /// Fade at the bottom of a list that runs behind the bar (J6j).
+  static const double listFade = 28;
   static const double topBar = 56;
 
   /// Disc and icon of an alert block (volume alert, J6h).

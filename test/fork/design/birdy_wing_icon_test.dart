@@ -23,11 +23,11 @@ void main() {
 }
 
 void _wingAnimationTests() {
-  Widget host({bool reduced = false}) => MediaQuery(
+  Widget host({bool reduced = false, bool listening = false}) => MediaQuery(
     data: MediaQueryData(disableAnimations: reduced),
-    child: const Directionality(
+    child: Directionality(
       textDirection: TextDirection.ltr,
-      child: BirdyWingIcon(animated: true),
+      child: BirdyWingIcon(animated: true, listening: listening),
     ),
   );
 
@@ -55,9 +55,12 @@ void _wingAnimationTests() {
     await tester.pumpWidget(host());
     // Nothing ticks while resting.
     expect(tester.binding.hasScheduledFrame, isFalse);
+    // Exactly every 7 s, no jitter: nothing just before, the wave at 7 s.
     await tester.pump(
-      BirdyMotion.wingWaveInterval + BirdyMotion.wingWaveJitter,
+      BirdyMotion.wingWaveInterval - const Duration(milliseconds: 1),
     );
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pump(const Duration(milliseconds: 1));
     await tester.pump(BirdyMotion.wingWave ~/ 2);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump(BirdyMotion.wingWave);
@@ -69,9 +72,32 @@ void _wingAnimationTests() {
 
   testWidgets('no wave with reduced motion', (tester) async {
     await tester.pumpWidget(host(reduced: true));
-    await tester.pump(
-      BirdyMotion.wingWaveInterval + BirdyMotion.wingWaveJitter * 2,
+    await tester.pump(BirdyMotion.wingWaveInterval * 2);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('listening loops the level meter, stopped when reduced', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host(listening: true));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    // Back to idle: the loop stops.
+    await tester.pumpWidget(host());
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(host(listening: true, reduced: true));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('listening stops off screen (muted TickerMode)', (tester) async {
+    await tester.pumpWidget(
+      TickerMode(enabled: false, child: host(listening: true)),
     );
+    await tester.pump(const Duration(milliseconds: 300));
     expect(tester.binding.hasScheduledFrame, isFalse);
     await tester.pumpWidget(const SizedBox());
   });

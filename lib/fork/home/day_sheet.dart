@@ -1,6 +1,6 @@
 /// « Ta journée d'écoute » sheet (J6h): when the birds sing and where the
 /// sun is, with the moment touched in the strip highlighted. The one strong
-/// action, « Écouter », starts listening like the home button.
+/// action, « Écouter », starts listening like the bar's disc.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
