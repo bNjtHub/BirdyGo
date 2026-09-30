@@ -35,7 +35,12 @@ import '../design/widgets/entrance.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
+import '../game/fine_ear.dart';
+import '../game/game_config.dart';
 import '../game/game_loader.dart';
+import '../game/game_progress.dart';
+import '../game/quiz_entry_row.dart';
+import '../game/quiz_playable.dart';
 import '../game/status_celebration.dart';
 import '../game/streak.dart';
 import '../profile/profile_screen.dart';
@@ -393,6 +398,16 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final cards = <(String, Widget)>[
       if (statusEntry() case final entry?) entry,
       todayEntry(),
+      if (ref.watch(quizPlayableProvider).value ?? false)
+        (
+          'quiz',
+          QuizEntryRow(
+            progress: BadgeProgress(
+              kind: BadgeKind.fineEar,
+              value: ref.watch(fineEarStoreProvider).correct(),
+            ),
+          ),
+        ),
       if (game?.facts.challenge case final challenge?)
         (
           'challenge',
