@@ -796,9 +796,9 @@ class _StreakPill extends StatelessWidget {
   }
 }
 
-/// The line above the stage: « Chant 3 sur 10 » on the left, the score pill
-/// (check and « 2 bonnes ») and, from two in a row, the streak pill on the
-/// right. Read by the trail's own label, so silent here. The streak slot
+/// The line above the stage: « Chant 3 sur 10 » on the left, the streak
+/// pill (from two in a row, its room always reserved) then the score pill
+/// (check and « 2 bonnes »), glued to the right edge. Read by the trail's own label, so silent here. The streak slot
 /// keeps its room while hidden: the line never changes height.
 class _StatusLine extends StatelessWidget {
   const _StatusLine({
@@ -827,7 +827,9 @@ class _StatusLine extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: minHeight),
         child: Row(
           children: [
+            // 2 : 3, so the pills get room before they wrap.
             Expanded(
+              flex: 2,
               child: Text(
                 question,
                 style: BirdyText.labelCompact.copyWith(
@@ -838,15 +840,16 @@ class _StatusLine extends StatelessWidget {
             ),
             const SizedBox(width: BirdySpace.xs),
             // A Wrap: at 130 % text on a small phone the pills can be wider
-            // than the room left; the streak then goes under the score.
-            Flexible(
+            // than the room left; the score stays at the right edge and the streak
+            // (reserved room, then shown left of it) moves to the line above.
+            Expanded(
+              flex: 3,
               child: Wrap(
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: BirdySpace.xs,
                 runSpacing: BirdySpace.xs,
                 children: [
-                  _ScoreChip(right: right),
                   Visibility(
                     visible: showStreak,
                     maintainSize: true,
@@ -861,6 +864,7 @@ class _StatusLine extends StatelessWidget {
                             )
                             : pill,
                   ),
+                  _ScoreChip(right: right),
                 ],
               ),
             ),

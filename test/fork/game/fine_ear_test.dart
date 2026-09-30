@@ -572,6 +572,51 @@ void main() {
       expect(gap, lessThanOrEqualTo(BirdySpace.m));
     });
 
+    testWidgets('the score pill does not move when the streak appears', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      final without = tester.getRect(
+        find.textContaining(RegExp(r'^\d+ bonnes?$')),
+      );
+      expect(streakPill(), findsNothing);
+      await tapChoice(tester, french(playing()));
+      expect(streakPill(), findsOneWidget);
+      final withStreak = tester.getRect(
+        find.textContaining(RegExp(r'^\d+ bonnes?$')),
+      );
+      expect(withStreak.right, closeTo(without.right, .01));
+      expect(withStreak.top, closeTo(without.top, .01));
+      // The streak sits left of the score, or on the line above when the
+      // (wide) test font leaves no room.
+      final streak = tester.getRect(streakPill());
+      expect(
+        streak.right <= withStreak.left || streak.bottom <= withStreak.top,
+        isTrue,
+      );
+    });
+
+    testWidgets('reduced motion: the streak pill shows at once', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), reduced: true);
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      final choice = find.descendant(
+        of: find.byType(QuizChoiceCard),
+        matching: find.text(french(playing())),
+      );
+      await tester.tap(choice);
+      await tester.pump();
+      expect(streakPill(), findsOneWidget);
+      final opacity = tester.widget<Opacity>(
+        find.ancestor(of: streakPill(), matching: find.byType(Opacity)).first,
+      );
+      expect(opacity.opacity, 1);
+    });
+
     for (final size in const [Size(320, 568), Size(360, 640)]) {
       testWidgets(
         'the status line with a streak fits ${size.width} dp at 130 %',
