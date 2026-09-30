@@ -209,8 +209,8 @@ class _StageGeometry {
 
   final double height;
 
-  /// 112 px on the mockup's 212 px card; smaller on short screens.
-  double get disc => (height - 96).clamp(48.0, 112.0);
+  /// 116 px on the 212 px card (the top label is gone, so the disc grew); smaller on short screens.
+  double get disc => (height - 90).clamp(48.0, 116.0);
 
   double get boxWidth => disc + 2 * disc * overhangX;
   double get boxHeight => disc + 2 * disc * overhangY;

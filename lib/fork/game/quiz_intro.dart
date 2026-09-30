@@ -103,7 +103,7 @@ class QuizIntro extends StatelessWidget {
                               TextSpan(text: l10n.forkQuizTitleWord),
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
-                                child: SizedBox(width: BirdySpace.xxs),
+                                child: SizedBox(width: BirdySpace.xs),
                               ),
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
