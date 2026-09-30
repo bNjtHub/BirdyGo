@@ -1,13 +1,15 @@
-/// Wires `WorldMapBlock` to the geo-model (J7): a skeleton of the final shape
-/// while the four seasons are computed, then a cross-fade; nothing at all when
-/// the geo-model is not available.
+/// Wires `WorldMapBlock` to its data (J7): GBIF observations when the asset
+/// has the species, else the geo-model estimate. A skeleton of the final
+/// shape while it loads, then a cross-fade; nothing at all when neither is
+/// available.
 library;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../design/widgets/birdy_cross_fade.dart';
 import '../species_sheet/species_sheet.dart';
+import '../licenses/content_licenses_screen.dart';
 import 'world_map_block.dart';
 import 'world_map_providers.dart';
 
@@ -25,8 +27,9 @@ class WorldMapSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final presence = ref.watch(speciesSeasonPresenceProvider(scientificName));
+    final presence = ref.watch(worldMapDataProvider(scientificName));
     final outline = ref.watch(landOutlineProvider);
+    final meta = ref.watch(gbifMetaProvider).asData?.value;
     final user = ref.watch(worldMapUserPositionProvider).asData?.value;
     final Widget child;
     if (presence.hasError || outline.hasError) {
@@ -42,12 +45,22 @@ class WorldMapSection extends ConsumerWidget {
       child = WorldMapBlock(
         key: const ValueKey('world-map-real'),
         outline: outline.value!,
-        presence: presence.value!,
+        presence: presence.value!.presence,
+        source: presence.value!.source,
+        meta: meta,
+        onSourceTap: () => _openLicenses(context),
         currentMonth: currentMonth,
         user: user,
         nesting: nesting,
       );
     }
     return BirdyCrossFade(child: child);
+  }
+
+  /// The licenses page holds the GBIF attribution and the download's DOI.
+  void _openLicenses(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const ContentLicensesScreen()),
+    );
   }
 }

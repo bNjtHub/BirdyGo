@@ -15,6 +15,7 @@ import '../design/widgets/birdy_skeleton.dart';
 import '../species_page/section_title.dart';
 import '../species_page/species_page_text.dart';
 import '../species_sheet/species_sheet.dart';
+import 'gbif_ranges.dart';
 import 'land_outline.dart';
 import 'season_legend.dart';
 import 'season_presence.dart';
@@ -31,10 +32,23 @@ class WorldMapBlock extends StatefulWidget {
     required this.currentMonth,
     this.user,
     this.nesting,
+    this.source = WorldMapSource.geomodel,
+    this.meta,
+    this.onSourceTap,
   });
 
   final LandOutline outline;
   final SeasonPresence presence;
+
+  /// GBIF observations or the geo-model estimate: sets the key and the
+  /// mention under the map.
+  final WorldMapSource source;
+
+  /// Year of the GBIF extraction, for the mention.
+  final GbifMeta? meta;
+
+  /// Opens the page that credits GBIF and cites the download (DOI).
+  final VoidCallback? onSourceTap;
 
   /// 1 to 12: the season shown first.
   final int currentMonth;
@@ -156,7 +170,11 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
             ),
           ),
           const SizedBox(height: BirdySpace.s),
-          _Key(colors: colors, showYou: widget.user != null),
+          _Key(
+            colors: colors,
+            showYou: widget.user != null,
+            gbif: widget.source == WorldMapSource.gbif,
+          ),
           const SizedBox(height: BirdySpace.s),
           Text(legend, style: BirdyText.bodyCompact.copyWith(color: c.text1)),
           if (nesting != null) ...[
@@ -167,9 +185,10 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
             ),
           ],
           const SizedBox(height: BirdySpace.s),
-          Text(
-            l10n.forkWorldEstimate,
-            style: BirdyText.caption.copyWith(color: c.text2),
+          _SourceNote(
+            source: widget.source,
+            meta: widget.meta,
+            onTap: widget.onSourceTap,
           ),
         ],
       ),
@@ -179,10 +198,15 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
 
 /// Small key under the map: expected, other seasons, the user.
 class _Key extends StatelessWidget {
-  const _Key({required this.colors, required this.showYou});
+  const _Key({
+    required this.colors,
+    required this.showYou,
+    required this.gbif,
+  });
 
   final WorldMapColors colors;
   final bool showYou;
+  final bool gbif;
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +236,10 @@ class _Key extends StatelessWidget {
       spacing: BirdySpace.l,
       runSpacing: BirdySpace.xs,
       children: [
-        item(square(colors.present), l10n.forkWorldKeyPresent),
+        item(
+          square(colors.present),
+          gbif ? l10n.forkWorldKeyObserved : l10n.forkWorldKeyPresent,
+        ),
         item(square(colors.other), l10n.forkWorldKeyOther),
         if (showYou)
           item(
@@ -227,6 +254,54 @@ class _Key extends StatelessWidget {
             l10n.forkWorldKeyYou,
           ),
       ],
+    );
+  }
+}
+
+/// Mention under the map: the geo-model estimate, or the GBIF credit, which
+/// opens the licenses page (48 dp target).
+class _SourceNote extends StatelessWidget {
+  const _SourceNote({required this.source, required this.meta, this.onTap});
+
+  final WorldMapSource source;
+  final GbifMeta? meta;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    if (source == WorldMapSource.geomodel) {
+      return Text(
+        l10n.forkWorldEstimate,
+        style: BirdyText.caption.copyWith(color: c.text2),
+      );
+    }
+    final year = meta?.year;
+    final text =
+        year == null
+            ? l10n.forkLicensesGbifRow
+            : l10n.forkWorldSourceGbif('$year');
+    final label = Text(
+      text,
+      style: BirdyText.caption.copyWith(color: c.text2),
+    );
+    if (onTap == null) return label;
+    return Semantics(
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      label: text,
+      onTap: onTap,
+      child: InkWell(
+        key: const ValueKey('world-map-source'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(BirdyRadii.chip),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BirdySizes.target),
+          child: Align(alignment: AlignmentDirectional.centerStart, child: label),
+        ),
+      ),
     );
   }
 }

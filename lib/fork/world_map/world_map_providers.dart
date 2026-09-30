@@ -3,11 +3,13 @@
 /// species (Riverpod keeps the family alive, so it is the in-memory cache).
 library;
 
+import 'package:flutter/foundation.dart' show compute, kReleaseMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
+import 'gbif_ranges.dart';
 import 'land_outline.dart';
 import 'season_presence.dart';
 import 'world_grid.dart';
@@ -53,6 +55,66 @@ final speciesSeasonPresenceProvider =
         return null;
       }
     });
+
+/// Metadata of the GBIF asset, or null when it is missing or is the
+/// fictitious demo asset in a release build. Overridden by tests.
+final gbifMetaProvider = FutureProvider<GbifMeta?>((ref) async {
+  try {
+    final meta = GbifMeta.parse(
+      await rootBundle.loadString(WorldMapConfig.gbifMetaAsset),
+    );
+    return meta.usableIn(release: kReleaseMode) ? meta : null;
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Header and species index of the GBIF asset (a few KB of names; one
+/// species is decoded off the UI thread when it is asked for), or null when
+/// the asset is missing, unreadable or unusable here. Overridden by tests.
+final gbifIndexProvider = FutureProvider<GbifIndex?>((ref) async {
+  try {
+    if (await ref.watch(gbifMetaProvider.future) == null) return null;
+    final data = await rootBundle.load(WorldMapConfig.gbifAsset);
+    return GbifIndex.parse(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Decodes one GBIF species; overridden by tests that cannot spawn isolates.
+final gbifDecodeProvider = Provider<Future<SeasonPresence> Function(
+  GbifDecodeRequest,
+)>((ref) => (request) => compute(decodeGbifSpecies, request));
+
+/// What the map shows for one species: GBIF observations when the asset has
+/// the species (instant, nothing computed on the phone), else the geo-model
+/// estimate (the 5 degree fallback, computed in the background). Null hides
+/// the block.
+final worldMapDataProvider = FutureProvider.family<WorldMapData?, String>((
+  ref,
+  scientificName,
+) async {
+  final index = await ref.watch(gbifIndexProvider.future);
+  if (chooseWorldMapSource(index, scientificName) == WorldMapSource.gbif) {
+    try {
+      final presence = await ref.read(gbifDecodeProvider)(
+        GbifDecodeRequest(index!.blockOf(scientificName)!, index.grid),
+      );
+      return WorldMapData(presence, WorldMapSource.gbif);
+    } catch (_) {
+      // A damaged block: the geo-model still answers.
+    }
+  }
+  final presence = await ref.watch(
+    speciesSeasonPresenceProvider(scientificName).future,
+  );
+  return presence == null
+      ? null
+      : WorldMapData(presence, WorldMapSource.geomodel);
+});
 
 /// Where the phone is, for the map's dot. Never asks for the location
 /// permission (same care as the species page's year chart); null when unknown.

@@ -22,6 +22,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../map/base_layers.dart';
+import '../world_map/world_map_providers.dart';
 import 'licenses_model.dart';
 
 /// Widest column on tablets.
@@ -94,6 +95,7 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
                 const SizedBox(height: BirdySpace.block),
                 ..._photoBlocks(l10n, c, photos),
                 const SizedBox(height: BirdySpace.block),
+                ..._gbifBlock(context, l10n),
                 _otherBlock(context, l10n),
                 const SizedBox(height: BirdySpace.block),
               ],
@@ -216,6 +218,53 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           ),
       ],
     );
+  }
+
+  /// Credit of the GBIF observations behind the species world map, with the
+  /// citation (DOI) of the download. Nothing without the asset.
+  List<Widget> _gbifBlock(BuildContext context, AppLocalizations l10n) {
+    final meta = ref.watch(gbifMetaProvider).asData?.value;
+    if (meta == null) return const [];
+    final doiUrl = meta.doiUrl;
+    return [
+      BirdyListBlock(
+        key: const ValueKey('licenses-gbif'),
+        title: l10n.forkLicensesGbifTitle,
+        children: [
+          BirdyListRow(
+            icon: AppIcons.gavel,
+            title: l10n.forkLicensesGbifRow,
+            subtitle: l10n.forkLicensesGbifRowSub(meta.extractedAt),
+            trailing: Icon(
+              AppIcons.openInNew,
+              size: BirdyGlyph.xl,
+              color: BirdyColors.of(context).text2,
+            ),
+            onTap: () => openExternalUrl(context, meta.licenseUrl),
+          ),
+          BirdyListRow(
+            key: const ValueKey('licenses-gbif-doi'),
+            icon: AppIcons.menuBook,
+            title: l10n.forkLicensesGbifDoi,
+            subtitle:
+                meta.demo
+                    ? l10n.forkLicensesGbifDemo
+                    : (meta.citation ?? meta.doi ?? ''),
+            showChevron: false,
+            trailing:
+                doiUrl == null
+                    ? null
+                    : Icon(
+                      AppIcons.openInNew,
+                      size: BirdyGlyph.xl,
+                      color: BirdyColors.of(context).text2,
+                    ),
+            onTap: doiUrl == null ? null : () => openExternalUrl(context, doiUrl),
+          ),
+        ],
+      ),
+      const SizedBox(height: BirdySpace.block),
+    ];
   }
 
   Widget _otherBlock(BuildContext context, AppLocalizations l10n) {

@@ -38,8 +38,23 @@ abstract final class WorldMapConfig {
   /// phone.
   static const double aspect = 0.9;
 
-  /// Grid step, in degrees, of the geo-model queries. Also the size of a
-  /// drawn cell.
+  /// Asset of the GBIF observations (see tools/fork_gbif_ranges.py and
+  /// tools/fork_gbif/README.md) and its metadata (date, DOI, license).
+  static const String gbifAsset = 'assets/fork/world/ranges_gbif.bin';
+  static const String gbifMetaAsset = 'assets/fork/world/ranges_gbif.json';
+
+  /// Intensity levels of a GBIF cell (1 faint to this, the strongest). The
+  /// asset stores them in two bits.
+  static const int gbifLevels = 3;
+
+  /// Opacity of the present color for GBIF level 1, 2 and 3 (index = level -
+  /// 1). Same tint, so the map keeps one color meaning (DESIGN.md); the
+  /// strongest level is the full color. The geo-model fallback has a single
+  /// level, drawn as the strongest.
+  static const List<double> levelAlphas = [0.55, 0.78, 1.0];
+
+  /// Grid step, in degrees, of the geo-model queries (the fallback). Also the
+  /// size of a drawn geo-model cell; GBIF cells carry their own step.
   static const double gridStep = 5;
 
   /// Geo-model week (1 to 48, 4 per month) asked for each season: the second
@@ -66,6 +81,10 @@ abstract final class WorldMapConfig {
 
   /// Fraction of a cell left empty around it when drawn.
   static const double cellInset = 0.08;
+
+  /// Cells drawn smaller than this (dp, the smaller side) have no gap and no
+  /// rounded corners: fine GBIF cells join into areas instead of a hatching.
+  static const double cellGapMinSize = 12;
 
   /// Corner radius of a cell, as a fraction of its size.
   static const double cellRadius = 0.22;

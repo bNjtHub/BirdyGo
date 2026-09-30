@@ -19,9 +19,29 @@ typedef GeoPredict =
 
 /// Presence flags of one species on the land grid, one list per season.
 class SeasonPresence {
-  const SeasonPresence(this.cells, this.flags);
+  const SeasonPresence(
+    this.cells,
+    this.flags, {
+    this.step = WorldMapConfig.gridStep,
+    this.levels,
+  });
 
   final List<GridCell> cells;
+
+  /// Size of a cell, in degrees: 5 for the geo-model, the asset's step for
+  /// GBIF.
+  final double step;
+
+  /// GBIF intensity (1 to `WorldMapConfig.gbifLevels`) of each cell and
+  /// season, where [flags] is true. Null for the geo-model.
+  final Map<Season, List<int>>? levels;
+
+  /// Intensity of [cell] in [season] (0 when absent). The geo-model has one
+  /// level, the strongest.
+  int levelOf(Season season, int cell) {
+    if (!flags[season]![cell]) return 0;
+    return levels?[season]![cell] ?? WorldMapConfig.gbifLevels;
+  }
 
   /// For each season, one flag per cell of [cells].
   final Map<Season, List<bool>> flags;

@@ -4,6 +4,8 @@ import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/licenses/content_licenses_screen.dart';
 import 'package:birdnet_live/fork/licenses/licenses_model.dart';
+import 'package:birdnet_live/fork/world_map/gbif_ranges.dart';
+import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +67,11 @@ void main() {
     expect(groupByFamily(photos, query: 'zzz'), isEmpty);
   });
 
-  Future<void> pump(WidgetTester tester, {Set<String>? bundled}) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    Set<String>? bundled,
+    GbifMeta? gbif,
+  }) async {
     tester.view.physicalSize = const Size(780, 3000);
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
@@ -74,6 +80,7 @@ void main() {
         overrides: [
           taxonomyServiceProvider.overrideWith((ref) async => service),
           bundledImageIdsProvider.overrideWith((ref) async => bundled ?? ids),
+          gbifMetaProvider.overrideWith((ref) async => gbif),
         ],
         child: MaterialApp(
           theme: BirdyTheme.light(),
@@ -100,6 +107,38 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.byKey(const ValueKey('licenses-code')), findsOneWidget);
+  });
+
+  testWidgets('credits GBIF and cites the download when the asset is there', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      gbif: const GbifMeta(
+        demo: false,
+        extractedAt: '2026-10-05',
+        year: 2026,
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        doi: '10.15468/dl.abcdef',
+        doiUrl: 'https://doi.org/10.15468/dl.abcdef',
+        citation:
+            'GBIF.org (2026-10-05) GBIF Occurrence Download https://doi.org/10.15468/dl.abcdef',
+      ),
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('licenses-gbif')),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Observations GBIF (dont eBird)'), findsOneWidget);
+    expect(find.textContaining('CC BY 4.0, extraites le 2026-10-05'), findsOneWidget);
+    expect(find.textContaining('doi.org/10.15468/dl.abcdef'), findsOneWidget);
+  });
+
+  testWidgets('no GBIF block without the asset', (tester) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('licenses-gbif')), findsNothing);
   });
 
   testWidgets('search filters the list', (tester) async {

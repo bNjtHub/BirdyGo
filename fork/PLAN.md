@@ -302,6 +302,19 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       masqué sans géomodèle. Puces Hiver / Printemps / Été / Automne (saison courante, encre), légende
       régions d'été et d'hiver + distance, « Nidification : … » si la fiche IA la donne. Rien de natif :
       rien à faire côté iOS.
+- [x] Carte du monde, observations GBIF (PR « J7 Carte du monde : observations GBIF (plus précis) »,
+      empilée sur la carte des saisons) : la grille géomodèle à 5° est trop grossière. Nouvelle source :
+      observations GBIF (dont eBird, CC BY 4.0 ; CC BY-NC exclu) préparées sur le PC par
+      `tools/fork_gbif_ranges.py` (téléchargement SQL GBIF, agrégation côté GBIF, grille 1°, 4 saisons,
+      correction du biais d'observation par le taux de signalement, 3 niveaux d'intensité), livrées dans
+      `assets/fork/world/ranges_gbif.bin` (+ `.json` : date, DOI, licence), quelques Mo, RLE. L'app lit
+      l'asset (`lib/fork/world_map/gbif_ranges.dart`, décodage d'une espèce en `compute`) ; espèce absente
+      de l'asset : repli sur le géomodèle 5°. Mention et attribution sous la carte, citation du DOI dans
+      « Licences des contenus ». Mode d'emploi et choix : `tools/fork_gbif/README.md`. L'asset livré est
+      FICTIF (3 espèces, `"demo": true`, ignoré en release). Rien de natif : rien à faire côté iOS.
+- [ ] (Benjamin) Créer un compte GBIF, lancer `tools/fork_gbif_ranges.py request` puis `build`
+      (variables `GBIF_USER`, `GBIF_PWD`, `GBIF_EMAIL`), commiter `ranges_gbif.bin` et `ranges_gbif.json`
+      (remplacent l'asset fictif). Regarder la taille ; essayer `GRID_STEP = 0.5` si elle reste raisonnable.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches
