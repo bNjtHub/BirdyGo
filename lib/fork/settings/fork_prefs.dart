@@ -10,7 +10,9 @@ import '../../shared/providers/app_providers.dart';
 import '../design/birdy_theme_choice.dart';
 
 const String kFirstNamePref = 'fork_first_name_v1';
+/// Old two-way live theme (dark / light), read once to migrate.
 const String kLiveThemePref = 'fork_live_theme_v1';
+const String kLiveAlwaysDarkPref = 'fork_live_always_dark_v1';
 const String kBirdyBirdPref = 'fork_birdy_bird_v1';
 
 /// Longest first name kept.
@@ -50,31 +52,26 @@ final firstNameProvider = NotifierProvider<FirstNameSetting, String?>(
   FirstNameSetting.new,
 );
 
-/// Theme of the live screen: the dark well, or the light page.
-enum LiveTheme { dark, light }
-
-class LiveThemeSetting extends Notifier<LiveTheme> {
+/// « Écran d'écoute toujours sombre » (J7): off by default, the live screen
+/// follows the app theme (light or dark, and the chosen bird); on, it is
+/// always dark, as before J7. A user who had explicitly chosen the dark
+/// screen with the old two-way setting keeps it.
+class LiveAlwaysDarkSetting extends Notifier<bool> {
   @override
-  LiveTheme build() {
-    final stored = ref
-        .read(sharedPreferencesProvider)
-        .getString(kLiveThemePref);
-    return LiveTheme.values.firstWhere(
-      (t) => t.name == stored,
-      orElse: () => LiveTheme.dark,
-    );
+  bool build() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.getBool(kLiveAlwaysDarkPref) ??
+        prefs.getString(kLiveThemePref) == 'dark';
   }
 
-  Future<void> set(LiveTheme theme) async {
-    state = theme;
-    await ref
-        .read(sharedPreferencesProvider)
-        .setString(kLiveThemePref, theme.name);
+  Future<void> set(bool on) async {
+    state = on;
+    await ref.read(sharedPreferencesProvider).setBool(kLiveAlwaysDarkPref, on);
   }
 }
 
-final liveThemeProvider = NotifierProvider<LiveThemeSetting, LiveTheme>(
-  LiveThemeSetting.new,
+final liveAlwaysDarkProvider = NotifierProvider<LiveAlwaysDarkSetting, bool>(
+  LiveAlwaysDarkSetting.new,
 );
 
 const String kNewSpeciesNotifPref = 'fork_new_species_notif_v1';

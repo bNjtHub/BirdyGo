@@ -31,6 +31,8 @@ import '../design/species_accents.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_confetti.dart';
+import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/birdy_listening_logo.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/birdy_sparkles.dart';
@@ -62,6 +64,7 @@ class LiveMoments extends ConsumerStatefulWidget {
     required this.presenceOf,
     required this.presenceScoreOf,
     required this.clips,
+    this.clipsPending = false,
     this.imageFor,
     this.verifiedBefore,
     this.paused = false,
@@ -74,6 +77,11 @@ class LiveMoments extends ConsumerStatefulWidget {
   /// Raw geo-model score this week here (0–1), for the rare card.
   final double? Function(String scientificName) presenceScoreOf;
   final Map<String, String> clips;
+
+  /// Clips are being recorded: a species without a clip yet gets its play
+  /// button slot from the first frame (disabled), so the card does not
+  /// jump when the clip lands.
+  final bool clipsPending;
   final ImageProvider? Function(String scientificName)? imageFor;
 
   /// Species verified before this listening; loaded from the index when
@@ -359,6 +367,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
                                 ),
                                 clipPath:
                                     widget.clips[moment.entry.scientificName],
+                                clipPending: widget.clipsPending,
                                 controller: widget.controller,
                                 onClose: _advance,
                                 count: _count,
@@ -375,6 +384,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
                                 ),
                                 clipPath:
                                     widget.clips[moment.entry.scientificName],
+                                clipPending: widget.clipsPending,
                                 controller: widget.controller,
                                 presenceScore: widget.presenceScoreOf(
                                   moment.entry.scientificName,
@@ -434,6 +444,7 @@ class _FirstTimeCard extends StatelessWidget {
     required this.moment,
     required this.image,
     required this.clipPath,
+    required this.clipPending,
     required this.controller,
     required this.onClose,
     required this.count,
@@ -447,6 +458,7 @@ class _FirstTimeCard extends StatelessWidget {
   final LiveMoment moment;
   final ImageProvider? image;
   final String? clipPath;
+  final bool clipPending;
   final LiveController controller;
 
   /// « Espèce suivante » or « Continuer l'écoute »: on to the next moment.
@@ -584,6 +596,7 @@ class _FirstTimeCard extends StatelessWidget {
         // The buttons come with the card: tappable at once.
         _Buttons(
           clipPath: clipPath,
+          clipPending: clipPending,
           controller: controller,
           primary:
               hasNext ? l10n.forkMomentNextSpecies : l10n.forkMomentContinue,
@@ -767,6 +780,7 @@ class _RareCard extends StatelessWidget {
     required this.moment,
     required this.image,
     required this.clipPath,
+    required this.clipPending,
     required this.controller,
     required this.presenceScore,
     required this.answer,
@@ -780,6 +794,7 @@ class _RareCard extends StatelessWidget {
   final LiveMoment moment;
   final ImageProvider? image;
   final String? clipPath;
+  final bool clipPending;
   final LiveController controller;
   final double? presenceScore;
   final _RareAnswer? answer;
@@ -844,6 +859,7 @@ class _RareCard extends StatelessWidget {
           SizedBox(height: group),
           _ReplayLine(
             clipPath: clipPath,
+            clipPending: clipPending,
             controller: controller,
             title: l10n.forkMomentRareAskShort,
             caption: l10n.forkMomentRareListenFirst,
@@ -1027,12 +1043,14 @@ class _ChanceLine extends StatelessWidget {
 class _ReplayLine extends StatelessWidget {
   const _ReplayLine({
     required this.clipPath,
+    required this.clipPending,
     required this.controller,
     required this.title,
     required this.caption,
   });
 
   final String? clipPath;
+  final bool clipPending;
   final LiveController controller;
   final String title;
   final String caption;
@@ -1040,7 +1058,7 @@ class _ReplayLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    final hasClip = clipPath != null;
+    final hasClip = clipPath != null || clipPending;
     final texts = Column(
       crossAxisAlignment:
           hasClip ? CrossAxisAlignment.start : CrossAxisAlignment.center,
@@ -1060,9 +1078,9 @@ class _ReplayLine extends StatelessWidget {
     if (!hasClip) return texts;
     return Row(
       children: [
-        ReplayButton(
+        _ClipSlot(
           controller: controller,
-          clipPath: clipPath!,
+          clipPath: clipPath,
           size: BirdySizes.mainAction,
         ),
         const SizedBox(width: BirdySpace.m),
@@ -1072,9 +1090,54 @@ class _ReplayLine extends StatelessWidget {
   }
 }
 
+/// The play button of a card, with its final size from the first frame: a
+/// disabled one while the clip is being saved, the live one fading in place
+/// when it lands (nothing animates with reduced motion).
+class _ClipSlot extends StatelessWidget {
+  const _ClipSlot({
+    required this.controller,
+    required this.clipPath,
+    this.size = BirdySizes.target,
+  });
+
+  final LiveController controller;
+  final String? clipPath;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = clipPath;
+    final Widget button =
+        path == null
+            ? Opacity(
+              key: const ValueKey('clip-slot-pending'),
+              opacity: BirdyMotion.pendingOpacity,
+              child: ClipPlayButton(
+                size: size,
+                state: ClipPlayState.idle,
+                semanticLabel: AppLocalizations.of(context)!.forkReplayPending,
+              ),
+            )
+            : ReplayButton(
+              key: const ValueKey('clip-slot-ready'),
+              controller: controller,
+              clipPath: path,
+              size: size,
+            );
+    return SizedBox.square(
+      dimension: size,
+      child:
+          BirdyMotion.reduced(context)
+              ? button
+              : BirdyCrossFade(child: button),
+    );
+  }
+}
+
 class _Buttons extends StatelessWidget {
   const _Buttons({
     required this.clipPath,
+    required this.clipPending,
     required this.controller,
     required this.primary,
     required this.onPrimary,
@@ -1082,6 +1145,7 @@ class _Buttons extends StatelessWidget {
   });
 
   final String? clipPath;
+  final bool clipPending;
   final LiveController controller;
   final String primary;
   final VoidCallback onPrimary;
@@ -1092,8 +1156,8 @@ class _Buttons extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      if (clipPath != null) ...[
-        ReplayButton(controller: controller, clipPath: clipPath!),
+      if (clipPath != null || clipPending) ...[
+        _ClipSlot(controller: controller, clipPath: clipPath),
         const SizedBox(width: BirdySpace.s),
       ],
       Expanded(
