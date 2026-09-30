@@ -23,11 +23,10 @@
 // Built by `tools/build_species_bundle.py` from the taxonomy JSON.
 // =============================================================================
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
+
+import '../../fork/data/species_bundle_decode.dart'; // FORK: J7
 
 /// Provides offline species descriptions from bundled gzip JSON files.
 class SpeciesDescriptionService {
@@ -94,10 +93,10 @@ class SpeciesDescriptionService {
       final bytes = await rootBundle.load(
         'assets/species_data/descriptions_$locale.json.gz',
       );
-      final decompressed = gzip.decode(bytes.buffer.asUint8List());
-      final json =
-          jsonDecode(utf8.decode(decompressed)) as Map<String, dynamic>;
-      _cache[locale] = json.map((k, v) => MapEntry(k, v as String));
+      // FORK: gzip + JSON decoding off the UI thread (J7).
+      _cache[locale] = await decodeSpeciesBundleInBackground(
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+      );
       debugPrint(
         '[SpeciesDescriptionService] loaded $locale: '
         '${_cache[locale]!.length} descriptions',
