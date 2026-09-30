@@ -58,34 +58,13 @@ class StreakDots extends StatelessWidget {
       children: [
         // Connectors between neighbouring dots, behind the cells.
         Positioned.fill(
-          child: LayoutBuilder(
-            builder: (context, box) {
-              final cell = days.isEmpty ? 0.0 : box.maxWidth / days.length;
-              const reach = BirdySizes.dayDot / 2 + BirdySpace.tight;
-              final width = cell - 2 * reach;
-              if (width <= 0) return const SizedBox.shrink();
-              return Stack(
-                children: [
-                  for (var i = 0; i < days.length - 1; i++)
-                    Positioned(
-                      key: ValueKey('streak-connector-$i'),
-                      left: cell * (i + 0.5) + reach,
-                      top: (BirdySizes.dayDot - BirdyStroke.regular) / 2,
-                      width: width,
-                      height: BirdyStroke.regular,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color:
-                              _counts(days[i]) && _counts(days[i + 1])
-                                  ? c.accent
-                                  : c.borderStrong,
-                          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
+          child: _StreakConnectors(
+            count: days.length,
+            colorAt:
+                (i) =>
+                    _counts(days[i]) && _counts(days[i + 1])
+                        ? c.accent
+                        : c.borderStrong,
           ),
         ),
         _cells(c, weekday),
@@ -233,29 +212,80 @@ class StreakDotsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final weekday = DateFormat('EEEEE', localeName);
-    return Row(
+    return Stack(
       children: [
-        for (final day in days)
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                children: [
-                  BirdySkeleton.circle(size: BirdySizes.dayDot),
-                  const SizedBox(height: BirdySpace.xs),
-                  Text(
-                    weekday.format(day.date).toUpperCase(),
-                    style: BirdyText.caption.copyWith(
-                      color: c.orioleText,
-                      fontWeight:
-                          day.isToday ? FontWeight.w700 : FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        Positioned.fill(
+          child: _StreakConnectors(
+            count: days.length,
+            colorAt: (_) => c.borderStrong,
           ),
+        ),
+        Row(
+          children: [
+            for (final day in days)
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    children: [
+                      BirdySkeleton.circle(size: BirdySizes.dayDot),
+                      const SizedBox(height: BirdySpace.xs),
+                      Text(
+                        weekday.format(day.date).toUpperCase(),
+                        style: BirdyText.caption.copyWith(
+                          color: c.orioleText,
+                          fontWeight:
+                              day.isToday ? FontWeight.w700 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+/// Lines between neighbouring day dots, shared by [StreakDots] and its
+/// skeleton so the home and Profil blocks look the same while loading too.
+class _StreakConnectors extends StatelessWidget {
+  const _StreakConnectors({required this.count, required this.colorAt});
+
+  final int count;
+
+  /// Color of the connector between dot [i] and dot [i] + 1.
+  final Color Function(int i) colorAt;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final cell = count == 0 ? 0.0 : box.maxWidth / count;
+        const reach = BirdySizes.dayDot / 2 + BirdySpace.tight;
+        final width = cell - 2 * reach;
+        if (width <= 0) return const SizedBox.shrink();
+        return Stack(
+          children: [
+            for (var i = 0; i < count - 1; i++)
+              Positioned(
+                key: ValueKey('streak-connector-$i'),
+                left: cell * (i + 0.5) + reach,
+                top: (BirdySizes.dayDot - BirdyStroke.regular) / 2,
+                width: width,
+                height: BirdyStroke.regular,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorAt(i),
+                    borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
