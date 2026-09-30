@@ -108,7 +108,7 @@ class QuizIntro extends StatelessWidget {
                               const WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
                                 baseline: TextBaseline.alphabetic,
-                                child: _QuizTitleMark(),
+                                child: QuizTitleMark(), // FORK: shared with QuizEntryRow
                               ),
                             ],
                           ),
@@ -470,8 +470,8 @@ class _IntroBadgeCard extends StatelessWidget {
 
 /// The 40 dp oriole disc standing in for the title's own « ? », tilted
 /// like the mockup.
-class _QuizTitleMark extends StatelessWidget {
-  const _QuizTitleMark();
+class QuizTitleMark extends StatelessWidget {
+  const QuizTitleMark({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -4,14 +4,19 @@
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
 import 'fine_ear_quiz_screen.dart';
 import 'game_progress.dart';
+import 'quiz_fx.dart';
+import 'quiz_intro.dart' show QuizTitleMark;
 import 'quiz_logo.dart';
 
 class QuizEntryRow extends StatelessWidget {
@@ -89,15 +94,29 @@ class QuizEntryRow extends StatelessWidget {
               padding: const EdgeInsets.all(BirdySpace.l),
               child: Row(
                 children: [
-                  const ExcludeSemantics(child: QuizLogo()),
+                  const ExcludeSemantics(child: _LogoBounceOnce()),
                   const SizedBox(width: BirdySpace.l),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          l10n.forkQuizTitle,
-                          style: BirdyText.heading.copyWith(color: c.text1),
+                        // The intro's title: the word and the oriole « ? ».
+                        Text.rich(
+                          TextSpan(
+                            style: BirdyText.heading.copyWith(color: c.text1),
+                            children: [
+                              TextSpan(text: l10n.forkQuizTitleWord),
+                              const WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: SizedBox(width: BirdySpace.xxs),
+                              ),
+                              const WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                baseline: TextBaseline.alphabetic,
+                                child: QuizTitleMark(),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: BirdySpace.xs),
                         Text(
@@ -155,4 +174,64 @@ class _SegmentBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The logo with the intro's bob and tilt (qz-bounce), played once as the row
+/// appears, never in a loop; still under reduced motion.
+class _LogoBounceOnce extends StatefulWidget {
+  const _LogoBounceOnce();
+
+  @override
+  State<_LogoBounceOnce> createState() => _LogoBounceOnceState();
+}
+
+class _LogoBounceOnceState extends State<_LogoBounceOnce>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: QuizMotion.bounce,
+  );
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_started && !BirdyMotion.reduced(context)) {
+      _started = true;
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: AnimatedBuilder(
+      animation: _controller,
+      child: const QuizLogo(),
+      builder: (context, child) {
+        final t = _controller.value;
+        final dy = quizKeyframes(
+          t,
+          const [0, 0.5, 1],
+          const [0, -8, 0],
+          QuizMotion.bounceEase,
+        );
+        final deg = quizKeyframes(
+          t,
+          const [0, 0.5, 1],
+          const [0, 3, 0],
+          QuizMotion.bounceEase,
+        );
+        return Transform.translate(
+          offset: Offset(0, dy),
+          child: Transform.rotate(angle: deg * math.pi / 180, child: child),
+        );
+      },
+    ),
+  );
 }

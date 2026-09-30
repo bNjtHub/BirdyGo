@@ -1,3 +1,4 @@
+import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_screen.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
@@ -79,7 +80,9 @@ void main() {
     expect(find.text('Niveau 4 sur 8'), findsOneWidget);
     expect(find.text('24 espèces découvertes'), findsOneWidget);
     expect(
-      find.bySemanticsLabel(RegExp('Progression vers le prochain niveau : 27 %')),
+      find.bySemanticsLabel(
+        RegExp('Progression vers le prochain niveau : 27 %'),
+      ),
       findsOneWidget,
     );
     // Nothing picked: the info box defaults to the next level.
@@ -142,7 +145,11 @@ void main() {
         reason: 'an earned badge (TierDots) appeared after a locked one',
       );
     }
-    expect(sawLocked, isTrue, reason: 'no locked badge found to compare against');
+    expect(
+      sawLocked,
+      isTrue,
+      reason: 'no locked badge found to compare against',
+    );
   });
 
   testWidgets('the next-level segmented bar has one segment per species', (
@@ -155,35 +162,40 @@ void main() {
     expect(bars.first.count, 15);
   });
 
-  testWidgets('tapping a level emblem shows it, tapping again returns to next', (
-    tester,
-  ) async {
-    await pump(tester);
-    expect(find.text('Prochain niveau'), findsOneWidget);
-    expect(find.text('Oreille de chouette'), findsOneWidget);
+  testWidgets(
+    'tapping a level emblem shows it, tapping again returns to next',
+    (tester) async {
+      await pump(tester);
+      expect(find.text('Prochain niveau'), findsOneWidget);
+      expect(find.text('Oreille de chouette'), findsOneWidget);
 
-    // The current level (4, « Sentinelle des haies ») is reached: its
-    // emblem announces "ton niveau".
-    await tester.tap(
-      find.bySemanticsLabel(RegExp('Niveau 4, Sentinelle des haies.*ton niveau')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Ton niveau'), findsOneWidget);
-    expect(find.text('Dès 20 espèces'), findsOneWidget);
-    expect(
-      find.text('Tu reconnais maintenant les voix des haies et des jardins.'),
-      findsOneWidget,
-    );
-    expect(find.text('Prochain niveau'), findsNothing);
+      // The current level (4, « Sentinelle des haies ») is reached: its
+      // emblem announces "ton niveau".
+      await tester.tap(
+        find.bySemanticsLabel(
+          RegExp('Niveau 4, Sentinelle des haies.*ton niveau'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Ton niveau'), findsOneWidget);
+      expect(find.text('Dès 20 espèces'), findsOneWidget);
+      expect(
+        find.text('Tu reconnais maintenant les voix des haies et des jardins.'),
+        findsOneWidget,
+      );
+      expect(find.text('Prochain niveau'), findsNothing);
 
-    // Tapping it again clears the pick and returns to the next level.
-    await tester.tap(
-      find.bySemanticsLabel(RegExp('Niveau 4, Sentinelle des haies.*ton niveau')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Prochain niveau'), findsOneWidget);
-    expect(find.text('Ton niveau'), findsNothing);
-  });
+      // Tapping it again clears the pick and returns to the next level.
+      await tester.tap(
+        find.bySemanticsLabel(
+          RegExp('Niveau 4, Sentinelle des haies.*ton niveau'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Prochain niveau'), findsOneWidget);
+      expect(find.text('Ton niveau'), findsNothing);
+    },
+  );
 
   testWidgets('the plumes counter totals every badge tier', (tester) async {
     final handle = tester.ensureSemantics();
@@ -200,19 +212,16 @@ void main() {
 
   testWidgets('the quiz entry opens the quiz', (tester) async {
     await pump(tester);
-    await tester.scrollUntilVisible(find.text('Qui chante ?'), 300);
-    await tester.ensureVisible(find.text('Qui chante ?'));
+    await tester.scrollUntilVisible(find.byType(QuizEntryRow), 300);
+    await tester.ensureVisible(find.byType(QuizEntryRow));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Qui chante ?'));
+    await tester.tap(find.byType(QuizEntryRow));
     // The quiz screen loads its clips from a real index/model pipeline not
     // mocked here; just pump a few frames rather than pumpAndSettle (which
     // would time out waiting on that pipeline) to confirm the navigation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    // The quiz screen opened on top with its own big « Qui chante ? »
-    // heading (the Profil's own quiz-entry row, still mounted underneath,
-    // keeps showing its smaller heading too).
-    expect(find.text('Qui chante ?'), findsNWidgets(2));
+    expect(find.byType(QuizEntryRow), findsOneWidget);
     expect(find.byType(FineEarQuizScreen), findsOneWidget);
   });
 
@@ -251,7 +260,10 @@ void main() {
       tester,
       progress: GameProgress(
         GameFacts(
-          verifiedBirds: {for (var i = 0; i < GameConfig.statuses.last.from; i++) 'Species $i'},
+          verifiedBirds: {
+            for (var i = 0; i < GameConfig.statuses.last.from; i++)
+              'Species $i',
+          },
           dawnChoruses: 0,
           earlyStarts: 0,
           reviewed: 0,

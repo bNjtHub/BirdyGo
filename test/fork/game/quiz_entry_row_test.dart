@@ -3,6 +3,7 @@ import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
+import 'package:birdnet_live/fork/game/quiz_intro.dart' show QuizTitleMark;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,15 +11,21 @@ import 'package:flutter_test/flutter_test.dart';
 BadgeProgress _p(int value) =>
     BadgeProgress(kind: BadgeKind.fineEar, value: value);
 
-Future<void> _pump(WidgetTester tester, Widget row) => tester.pumpWidget(
-  MaterialApp(
-    theme: BirdyTheme.light(),
-    locale: const Locale('fr'),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(body: row),
-  ),
-);
+Future<void> _pump(WidgetTester tester, Widget row, {bool reduced = false}) =>
+    tester.pumpWidget(
+      MaterialApp(
+        builder:
+            (context, app) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
+              child: app!,
+            ),
+        theme: BirdyTheme.light(),
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: row),
+      ),
+    );
 
 void main() {
   final fr = lookupAppLocalizations(const Locale('fr'));
@@ -71,5 +78,23 @@ void main() {
     expect(find.text(fr.forkQuizEntrySubtitle), findsOneWidget);
     expect(find.byKey(const ValueKey('quiz-segment-off')), findsNothing);
     expect(find.byKey(const ValueKey('quiz-segment-on')), findsNothing);
+  });
+
+  testWidgets('title wears the yellow question mark', (tester) async {
+    await _pump(tester, const QuizEntryRow());
+    expect(find.byType(QuizTitleMark), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('logo bobs once, never in a loop', (tester) async {
+    await _pump(tester, const QuizEntryRow());
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle(); // would time out if it looped
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('reduced motion: no animation at all', (tester) async {
+    await _pump(tester, const QuizEntryRow(), reduced: true);
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }
