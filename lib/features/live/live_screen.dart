@@ -1054,8 +1054,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     // Dialogs and sheets take the theme of the context that opens them:
     // [themed] sits under [ListeningTheme], so they open dark too.
     return ListeningTheme(
-      // FORK: J6h « Écran clair »
-      light: ref.watch(liveThemeProvider) == LiveTheme.light,
+      // FORK: J7, the listening screen follows the app theme unless the
+      // user asked for it always dark
+      follow: !ref.watch(liveAlwaysDarkProvider),
       child: Builder(
         builder:
             (themed) => PopScope(
@@ -1173,6 +1174,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                             presenceScoreOf:
                                 (name) => commonness?[name]?.currentScore,
                             clips: clips,
+                            // FORK: play button slot from the first frame
+                            clipsPending: recordsClips,
                             // FORK: the countdown of a moment stops in pause (J6h)
                             paused: isPaused,
                             imageFor: (name) {
