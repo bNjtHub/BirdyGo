@@ -9,6 +9,41 @@ DateTime _d(int day, [int month = 9]) => DateTime(2026, month, day);
 Set<DateTime> _days(Iterable<int> days) => {for (final d in days) _d(d)};
 
 void main() {
+  group('first day', () {
+    Streak streakOf(List<(DateTime, DateTime?)> l) =>
+        computeStreak(listenedDays(l, now: _now), _now);
+
+    test('finished listening over the threshold: série 1', () {
+      final s = streakOf([
+        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 6)),
+      ]);
+      expect(s.current, 1);
+      expect(s.calendar.last.state, StreakDayState.listened);
+    });
+
+    test('running listening over the threshold: série 1', () {
+      expect(streakOf([(DateTime(2026, 9, 27, 11, 50), null)]).current, 1);
+    });
+
+    test('running listening under the threshold: 0, today open', () {
+      final s = streakOf([(DateTime(2026, 9, 27, 11, 58), null)]);
+      expect(s.current, 0);
+      expect(s.calendar.last.state, StreakDayState.open);
+    });
+
+    test('finished listening under the threshold: 0, today open', () {
+      final s = streakOf([
+        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 3)),
+      ]);
+      expect(s.current, 0);
+      expect(s.calendar.last.state, StreakDayState.open);
+    });
+
+    test('an old listening without end does not count', () {
+      expect(streakOf([(DateTime(2026, 9, 25, 9), null)]).current, 0);
+    });
+  });
+
   test('days in a row, today included', () {
     final streak = computeStreak(_days([24, 25, 26, 27]), _now);
     expect(streak.current, 4);

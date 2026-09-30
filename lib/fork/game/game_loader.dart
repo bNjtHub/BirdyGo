@@ -70,9 +70,10 @@ class GameLoader {
     };
     final listenings = await index.listenings();
     final now = _now();
+    // A running listening counts up to now.
     final listened = listenedDays([
       for (final l in listenings) (l.start, l.end),
-    ]);
+    ], now: now);
     final dawnIds = {
       for (final l in listenings)
         if (_isDawn(l.start)) l.id,
