@@ -1,4 +1,5 @@
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
 import 'package:birdnet_live/fork/design/species_accents.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart';
 import 'package:birdnet_live/fork/home/home_widgets.dart';
@@ -60,6 +61,35 @@ void main() {
       // Listened day dots (non-text, 3:1).
       expectAtLeast(c.orioleText, over(c.orioleContainer), 3, 'day dot');
     });
+  }
+
+  // « Plus » sheet (M): icon and text pairs of the group rows and the utility
+  // block, in the four bird themes, light and dark.
+  for (final bird in BirdyBird.values) {
+    for (final brightness in Brightness.values) {
+      final c = BirdyColors.forBird(bird, brightness);
+      final name = '${bird.name} ${brightness.name}';
+      Color over(Color color) => Color.alphaBlend(color, c.background);
+      test('$name: Plus sheet pairs', () {
+        expectAtLeast(
+          c.orioleText,
+          over(c.orioleContainer),
+          4.5,
+          'oriole disc',
+        );
+        expectAtLeast(
+          c.sure.foreground,
+          over(c.sure.background),
+          4.5,
+          'sure disc',
+        );
+        expectAtLeast(c.accentText, over(c.tonal), 4.5, 'tonal disc');
+        expectAtLeast(c.toCheck.foreground, c.surface1, 4.5, 'toCheck disc');
+        expectAtLeast(c.text2, c.background, 4.5, 'text2 on background');
+        expectAtLeast(c.text2, c.surface1, 4.5, 'text2 on surface1');
+        expectAtLeast(c.text1, c.background, 4.5, 'text1 on background');
+      });
+    }
   }
 
   test('replay icon keeps 3:1 on every species accent', () {

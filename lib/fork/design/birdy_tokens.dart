@@ -875,12 +875,9 @@ abstract final class BirdySizes {
   static const int quizEntrySegments = 10;
   static const double quizEntrySegmentHeight = 6;
 
-  /// « Plus » sheet (M): a titled group's row and its tinted disc, the
-  /// compact rows of the utility block, the advanced tools' indent, and the
-  /// sheet's max height as a share of the screen.
-  static const double moreRow = 72;
-  static const double moreDisc = 44;
-  static const double moreIcon = 22;
+  /// « Plus » sheet (M): the compact rows of the utility block, the advanced
+  /// tools' rows and indent, and the sheet's max height as a share of the
+  /// screen. Group rows reuse [row] / [rowDisc], icons [BirdyGlyph.xxl].
   static const double moreCompactRow = 56;
   static const double moreToolRow = 48;
   static const double moreToolIndent = 34;

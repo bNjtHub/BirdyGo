@@ -1,6 +1,5 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
-import 'package:birdnet_live/fork/design/widgets/birdy_block.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_list_block.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_list_row.dart';
 import 'package:birdnet_live/fork/design/widgets/dashed_border.dart';
@@ -13,8 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final fr = lookupAppLocalizations(const Locale('fr'));
 
-  Future<void> pumpSheet(WidgetTester tester, {bool dark = false}) async {
-    tester.view.physicalSize = const Size(780, 1688);
+  Future<void> pumpSheet(
+    WidgetTester tester, {
+    bool dark = false,
+    int toVerify = 12,
+  }) async {
+    tester.view.physicalSize = const Size(780, 2400);
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -26,6 +29,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: MoreSheet(
+              toVerify: toVerify,
               onOpen: (_) {},
               aruScreen: () => const SizedBox(),
             ),
@@ -36,121 +40,134 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> show(WidgetTester tester, Finder f) async {
-    await tester.scrollUntilVisible(
-      f,
-      100,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.pumpAndSettle();
-  }
-
   BirdyColors colors(WidgetTester tester) =>
       BirdyColors.of(tester.element(find.byType(MoreSheet)));
 
-  /// The circular 40 disc inside [tile].
-  Container discOf(WidgetTester tester, Finder tile) {
-    final discs = find.descendant(
-      of: tile,
-      matching: find.byWidgetPredicate(
-        (w) =>
-            w is Container &&
-            w.decoration is BoxDecoration &&
-            (w.decoration! as BoxDecoration).shape == BoxShape.circle,
-      ),
-    );
-    expect(discs, findsOneWidget);
-    return tester.widget<Container>(discs);
-  }
+  Finder row(String label) => find.byKey(ValueKey('more-row-$label'));
 
-  Finder tile(String label) => find.byKey(ValueKey('more-tile-$label'));
+  double top(WidgetTester tester, Finder f) => tester.getTopLeft(f).dy;
 
-  Finder dashedIn(Finder of) => find.descendant(
-    of: of,
-    matching: find.byWidgetPredicate(
-      (w) => w is CustomPaint && w.foregroundPainter is DashedBorderPainter,
-    ),
-  );
+  testWidgets('three groups in order, Carte absent', (tester) async {
+    await pumpSheet(tester);
+    final groups = [
+      for (final k in ['play', 'mine', 'discover'])
+        top(tester, find.byKey(ValueKey('more-group-$k'))),
+    ];
+    expect(groups, orderedEquals([...groups]..sort()));
+    expect(find.text(fr.forkMoreGroupPlay), findsOneWidget);
+    expect(find.text(fr.forkMoreGroupMine), findsOneWidget);
+    expect(find.text(fr.forkMoreGroupDiscover), findsOneWidget);
+    expect(find.text(fr.forkMap), findsNothing);
+    expect(find.byType(BirdyListBlock), findsNWidgets(3));
+    for (final l in [
+      fr.forkQuizTitle,
+      fr.forkRanking,
+      fr.forkQuickReview,
+      fr.forkSoundLibrary,
+      fr.sessionLibraryTitle,
+      fr.forkGardenTitle,
+      fr.exploreMode,
+    ]) {
+      expect(row(l), findsOneWidget, reason: l);
+      expect(
+        tester.getSize(row(l)).height,
+        greaterThanOrEqualTo(BirdySizes.row),
+      );
+    }
+  });
 
-  for (final dark in [false, true]) {
-    group(dark ? 'dark' : 'light', () {
-      testWidgets('tiles are Brume, only the disc is tinted', (tester) async {
-        await pumpSheet(tester, dark: dark);
-        final c = colors(tester);
-        final tints = <String, Color>{
-          fr.forkRanking: c.orioleContainer,
-          fr.forkMap: c.tonal,
-          fr.forkQuickReview: c.surface1,
-          fr.forkSoundLibrary: c.tonal,
-          fr.forkGardenTitle: c.sure.background,
-          fr.exploreMode: c.tonal,
-          fr.sessionLibraryTitle: c.tonal,
-          fr.helpTitle: c.surface1,
-        };
-        for (final e in tints.entries) {
-          await show(tester, tile(e.key));
-          final block = tester.widget<BirdyBlock>(tile(e.key));
-          expect(block.color, c.background, reason: e.key);
-          final disc = discOf(tester, tile(e.key));
-          expect((disc.decoration! as BoxDecoration).color, e.value);
-          expect(disc.constraints?.maxWidth, BirdySizes.blockIconDisc);
-        }
-      });
-
-      testWidgets('Revue rapide disc has the dashed toCheck outline', (
-        tester,
-      ) async {
-        await pumpSheet(tester, dark: dark);
-        await show(tester, tile(fr.forkQuickReview));
-        expect(dashedIn(tile(fr.forkQuickReview)), findsOneWidget);
-        await show(tester, tile(fr.forkMap));
-        expect(dashedIn(tile(fr.forkMap)), findsNothing);
-      });
-    });
-  }
-
-  testWidgets('Réglages and À propos share one Brume block, white discs', (
+  testWidgets('utility block: Réglages, Aide, À propos, Outils avancés last', (
     tester,
   ) async {
     await pumpSheet(tester);
-    final c = colors(tester);
-    await show(tester, find.byKey(const ValueKey('more-about')));
-    final block = find.byKey(const ValueKey('more-links'));
-    expect(tester.widget<BirdyListBlock>(block).color, c.background);
+    final keys = [
+      'more-settings',
+      'more-help',
+      'more-about',
+      'more-advanced-toggle',
+    ];
+    final ys = [for (final k in keys) top(tester, find.byKey(ValueKey(k)))];
+    expect(ys, orderedEquals([...ys]..sort()));
     expect(
-      find.descendant(of: block, matching: find.byType(BirdyListRow)),
-      findsNWidgets(2),
+      top(tester, find.byKey(const ValueKey('more-utility'))),
+      greaterThan(
+        top(tester, find.byKey(const ValueKey('more-group-discover'))),
+      ),
     );
-    for (final key in ['more-settings', 'more-about']) {
-      final row = tester.widget<BirdyListRow>(find.byKey(ValueKey(key)));
-      expect(row.discColor, c.surface1);
+    for (final k in keys) {
+      expect(
+        tester.getSize(find.byKey(ValueKey(k))).height,
+        greaterThanOrEqualTo(BirdySizes.moreCompactRow),
+      );
     }
-    expect(find.byType(BirdyListBlock), findsOneWidget);
   });
 
-  testWidgets('every tap target is at least 48', (tester) async {
+  testWidgets('Outils avancés expands in place and stays last', (tester) async {
     await pumpSheet(tester);
-    final targets = [
-      for (final l in [
-        fr.forkRanking,
-        fr.forkMap,
-        fr.forkQuickReview,
-        fr.forkSoundLibrary,
-        fr.forkGardenTitle,
-        fr.exploreMode,
-        fr.sessionLibraryTitle,
-        fr.helpTitle,
-      ])
-        tile(l),
-      find.byKey(const ValueKey('more-advanced-toggle')),
-      find.byKey(const ValueKey('more-settings')),
-      find.byKey(const ValueKey('more-about')),
-    ];
-    for (final t in targets) {
-      await show(tester, t);
-      final size = tester.getSize(t);
-      expect(size.height, greaterThanOrEqualTo(48));
-      expect(size.width, greaterThanOrEqualTo(48));
+    final toolKey = find.byKey(ValueKey('more-tool-${fr.aruMode}'));
+    expect(toolKey, findsNothing);
+    await tester.tap(find.byKey(const ValueKey('more-advanced-toggle')));
+    await tester.pumpAndSettle();
+    expect(toolKey, findsOneWidget);
+    expect(
+      top(tester, toolKey),
+      greaterThan(
+        top(tester, find.byKey(const ValueKey('more-advanced-toggle'))),
+      ),
+    );
+    for (final l in [
+      fr.pointCountMode,
+      fr.surveyMode,
+      fr.aruMode,
+      fr.forkPracticeMenu,
+      fr.fileAnalysisMode,
+    ]) {
+      expect(find.byKey(ValueKey('more-tool-$l')), findsOneWidget, reason: l);
     }
+    await tester.tap(find.byKey(const ValueKey('more-advanced-toggle')));
+    await tester.pumpAndSettle();
+    expect(toolKey, findsNothing);
   });
+
+  testWidgets('Revue rapide subtitle follows toVerify', (tester) async {
+    await pumpSheet(tester, toVerify: 12);
+    expect(find.text(fr.forkMoreReviewSub(12)), findsOneWidget);
+    await pumpSheet(tester, toVerify: 0);
+    expect(find.text(fr.forkMoreReviewDone), findsOneWidget);
+  });
+
+  for (final dark in [false, true]) {
+    testWidgets('discs are tinted (${dark ? 'dark' : 'light'})', (
+      tester,
+    ) async {
+      await pumpSheet(tester, dark: dark);
+      final c = colors(tester);
+      final tints = <String, Color>{
+        fr.forkQuizTitle: c.orioleContainer,
+        fr.forkRanking: c.orioleContainer,
+        fr.forkSoundLibrary: c.tonal,
+        fr.sessionLibraryTitle: c.tonal,
+        fr.forkGardenTitle: c.sure.background,
+        fr.exploreMode: c.tonal,
+      };
+      for (final e in tints.entries) {
+        expect(
+          tester.widget<BirdyListRow>(row(e.key)).discColor,
+          e.value,
+          reason: e.key,
+        );
+      }
+      // Revue rapide: white disc with the dashed toCheck outline.
+      expect(
+        find.descendant(
+          of: row(fr.forkQuickReview),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is CustomPaint && w.foregroundPainter is DashedBorderPainter,
+          ),
+        ),
+        findsOneWidget,
+      );
+    });
+  }
 }
