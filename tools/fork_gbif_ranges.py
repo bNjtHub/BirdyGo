@@ -387,7 +387,8 @@ def decode_asset(data):
     return header, species
 
 
-def metadata(doi, download_key, species_count, size, extracted, demo=False):
+def metadata(doi, download_key, species_count, size, extracted, demo=False,
+             source="download"):
     return {
         "demo": demo,
         "extractedAt": extracted,
@@ -401,9 +402,13 @@ def metadata(doi, download_key, species_count, size, extracted, demo=False):
         "doi": doi,
         "doiUrl": f"https://doi.org/{doi}" if doi else None,
         "downloadKey": download_key,
+        "source": source,
         "citation": (
             f"GBIF.org ({extracted}) GBIF Occurrence Download "
             f"https://doi.org/{doi}" if doi else
+            f"GBIF.org ({extracted}) GBIF occurrence search API, class Aves, "
+            f"{YEAR_MIN}-{extracted[:4]}, CC0 and CC BY 4.0 records"
+            if source == "api" else
             "FICTITIOUS DEMONSTRATION DATA. Not GBIF observations."
         ),
         "rates": {
@@ -601,6 +606,91 @@ def iter_file_rows(path, step=GRID_STEP):
                     yield (key, cell, season, 1)
 
 
+# ------------------------------------------------- search-API route ------
+# The SQL download came back empty twice (0004507-, 0004551-260928105237408)
+# although the same filters return ~283 M records on the search API. This
+# route asks the search API instead: one call per cell (records? skip the
+# empty ones), then one speciesKey facet per cell and season. Public, no
+# account. Results go line by line to FACETS_TSV (SQL layout), so a stopped
+# run resumes where it was; then `build --from-file FACETS_TSV --api`.
+FACETS_TSV = CACHE_DIR / "facets.tsv"
+FACETS_DONE = CACHE_DIR / "facets_done.txt"
+FACET_LIMIT = 5000  # more than the bird species of any cell
+FACET_WORKERS = 6   # parallel calls, polite to GBIF
+
+
+def _search_params(lat0, lon0, step, months=None):
+    eps = 1e-6  # half-open cells: no record counted twice on a border
+    params = [
+        ("classKey", AVES_CLASS_KEY),
+        ("year", f"{YEAR_MIN},*"),
+        ("hasGeospatialIssue", "false"),
+        ("occurrenceStatus", "PRESENT"),
+        ("decimalLatitude", f"{lat0},{lat0 + step - eps}"),
+        ("decimalLongitude", f"{lon0},{lon0 + step - eps}"),
+        ("limit", 0),
+    ]
+    params += [("basisOfRecord", b) for b in BASIS_OF_RECORD]
+    params += [("license", x) for x in ("CC0_1_0", "CC_BY_4_0")]
+    params += [("month", m) for m in (months or ())]
+    return params
+
+
+def _search(params, retries=5):
+    url = f"{API}/occurrence/search?" + urllib.parse.urlencode(params)
+    for attempt in range(retries):
+        try:
+            return json.loads(_http_json(url))
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            time.sleep(2 ** attempt)
+    raise RuntimeError(f"GBIF search failed: {url}")
+
+
+def facet_cell(col, row_south, step=GRID_STEP):
+    """Rows (specieskey, cx, cy, season, n) of one cell, [] when empty."""
+    lat0 = LAT_MIN + row_south * step
+    lon0 = LON_MIN + col * step
+    if _search(_search_params(lat0, lon0, step))["count"] == 0:
+        return []
+    rows = []
+    for season, name in enumerate(SEASONS):
+        params = _search_params(lat0, lon0, step, SEASON_MONTHS[name])
+        params += [("facet", "speciesKey"), ("facetLimit", FACET_LIMIT)]
+        for facet in _search(params).get("facets", []):
+            for entry in facet.get("counts", []):
+                rows.append((entry["name"], col, row_south, season, entry["count"]))
+    return rows
+
+
+def cmd_facets(_args):
+    from concurrent.futures import ThreadPoolExecutor
+
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cols, rows_n = grid_size()
+    done = set(FACETS_DONE.read_text().split()) if FACETS_DONE.exists() else set()
+    todo = [(c, r) for r in range(rows_n) for c in range(cols) if f"{c}:{r}" not in done]
+    print(f"{len(todo)} cells to ask ({len(done)} already done)")
+    new_file = not FACETS_TSV.exists()
+    with open(FACETS_TSV, "a", encoding="utf-8") as out, open(
+        FACETS_DONE, "a", encoding="utf-8"
+    ) as mark, ThreadPoolExecutor(FACET_WORKERS) as pool:
+        if new_file:
+            out.write("specieskey\tcx\tcy\tseason\tn\n")
+        started = time.time()
+        for i, (cell, rows) in enumerate(
+            zip(todo, pool.map(lambda cr: facet_cell(*cr), todo)), 1
+        ):
+            for row in rows:
+                out.write("\t".join(str(v) for v in row) + "\n")
+            mark.write(f"{cell[0]}:{cell[1]}\n")
+            if i % 200 == 0 or i == len(todo):
+                out.flush()
+                mark.flush()
+                rate = i / max(time.time() - started, 1e-9)
+                print(f"  {i}/{len(todo)} cells, ~{(len(todo) - i) / rate / 60:.0f} min left")
+    print(f"Done. Now: python tools/fork_gbif_ranges.py build --from-file {FACETS_TSV} --api")
+
+
 # ---------------------------------------------------------------- commands --
 def cmd_build(args):
     doi = args.doi
@@ -615,7 +705,8 @@ def cmd_build(args):
         doi = doi or info.get("doi")
         extracted = (info.get("created") or date.today().isoformat())[:10]
         path = fetch_zip(info)
-    if not doi:
+    source = "api" if getattr(args, "api", False) else "download"
+    if not doi and source != "api":
         sys.exit("The DOI is required (GBIF citation): pass --doi 10.15468/dl.xxxxx")
     species = read_bird_species()
     if args.limit:
@@ -635,7 +726,8 @@ def cmd_build(args):
     data = encode_asset(by_name)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     OUT_BIN.write_bytes(data)
-    meta = metadata(doi, download_key, len(by_name), len(data), extracted)
+    meta = metadata(doi, download_key, len(by_name), len(data), extracted,
+                    source=source)
     OUT_META.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{len(by_name)} species, {len(data) / 1e6:.2f} MB -> {OUT_BIN}")
     print("Commit both files in assets/fork/world/.")
@@ -709,9 +801,13 @@ def main(argv=None):
     build.add_argument("--doi", help="DOI of the GBIF download (required with --from-file)")
     build.add_argument("--date", help="extraction date YYYY-MM-DD (with --from-file)")
     build.add_argument("--limit", type=int, help="first N species only (tests)")
+    build.add_argument("--api", action="store_true", help="file made by `facets` (no DOI)")
     build.set_defaults(func=cmd_build)
     sub.add_parser("demo", help="write a tiny FICTITIOUS asset").set_defaults(func=cmd_demo)
     sub.add_parser("sql", help="print the SQL").set_defaults(func=cmd_sql)
+    sub.add_parser("facets", help="ask the public search API (no account)").set_defaults(
+        func=cmd_facets
+    )
     args = parser.parse_args(argv)
     args.func(args)
 
