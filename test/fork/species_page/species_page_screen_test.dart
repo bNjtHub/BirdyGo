@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/explore/widgets/species_info_overlay.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
-import 'package:birdnet_live/features/inference/geo_model.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
@@ -309,25 +308,6 @@ void main() {
     expect(tester.widget<ClipPlayButton>(featured).size, BirdySizes.mainAction);
   });
 
-  testWidgets('no nesting band without the field in the sheet (J7)', (
-    tester,
-  ) async {
-    await pump(tester);
-    expect(find.byKey(const ValueKey('fiche-nesting')), findsNothing);
-    expect(find.textContaining('Nidification'), findsNothing);
-  });
-
-  testWidgets('nesting band drawn from the sheet (J7)', (tester) async {
-    final withNesting = SpeciesSheet.fromJson({
-      'name': 'Rougegorge familier',
-      'summary': 'Le petit oiseau.',
-      'nesting': '4-7',
-    });
-    await pump(tester, sheets: SpeciesSheets({_robin: withNesting}));
-    expect(find.byKey(const ValueKey('fiche-nesting')), findsOneWidget);
-    expect(find.text('Nidification : avril à juillet'), findsOneWidget);
-  });
-
   testWidgets(
     'tapping an hour bar shows its own hour and count (J6f-b fix)',
     (tester) async {
@@ -372,21 +352,16 @@ void main() {
       expect(find.text('Surtout en mai'), findsOneWidget);
       final seasons = find.byType(ActivityBars).first;
       final chart = tester.widget<ActivityBars>(seasons);
-      // 48 weekly bars, all 12 month initials at 100 % text, the current
-      // week marked (J7).
-      expect(chart.values.length, 48);
+      // All 12 initials at 100 % text, the current month marked.
       expect(chart.labels.length, 12);
-      expect(
-        chart.highlightIndex,
-        GeoModel.dateTimeToWeek(DateTime.now()) - 1,
-      );
+      expect(chart.highlightIndex, DateTime.now().month - 1);
 
       // The page is taller since J6h: bring the chart on screen first.
       await tester.ensureVisible(seasons);
       await tester.pump();
       final rect = tester.getRect(seasons);
-      final slot = rect.width / 48;
-      await tester.tapAt(Offset(rect.left + slot * 10.5, rect.top + 5));
+      final slot = rect.width / 12;
+      await tester.tapAt(Offset(rect.left + slot * 2.5, rect.top + 5));
       await tester.pump();
 
       expect(find.text('Surtout en mai'), findsNothing);
@@ -395,11 +370,13 @@ void main() {
   );
 
   testWidgets(
-    'the seasons chart: 12 month labels at 130 % text (J6f-b fix, J7)',
+    'the seasons chart: quarterly labels at 130 % text (J6f-b fix)',
     (tester) async {
       await pump(tester, textScale: 1.3);
-      final chart = tester.widget<ActivityBars>(find.byType(ActivityBars).first);
-      expect(chart.labels.length, 12);
+      final chart = tester.widget<ActivityBars>(
+        find.byType(ActivityBars).first,
+      );
+      expect(chart.labels.length, 4);
     },
   );
 

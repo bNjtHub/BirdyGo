@@ -178,15 +178,11 @@ String monthDetailCaption(
 String seasonsChartSemanticLabel(
   AppLocalizations l10n,
   String languageCode,
-  List<double> months, {
-  NestingPeriod? nesting,
-}) {
+  List<double> months,
+) {
   final peak = peakMonthCaption(l10n, languageCode, months);
   final base = l10n.forkFichePresenceChart;
-  final head = peak == null ? base : '$base. $peak';
-  return nesting == null
-      ? head
-      : '$head. ${nestingLegend(l10n, languageCode, nesting)}';
+  return peak == null ? base : '$base. $peak';
 }
 
 String _capitalized(String text) =>

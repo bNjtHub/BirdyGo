@@ -21,7 +21,6 @@ import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import '../reliability/reliability_screen.dart';
-import '../species_sheet/species_sheet.dart';
 import 'section_title.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -356,8 +355,6 @@ class HereNowCard extends StatefulWidget {
     required this.year,
     required this.sentence,
     required this.currentMonth,
-    this.currentWeek,
-    this.nesting,
     this.rareNote,
   });
 
@@ -366,14 +363,6 @@ class HereNowCard extends StatefulWidget {
 
   /// 1 to 12, marked on the chart.
   final int currentMonth;
-
-  /// 1 to 48 (`GeoModel.dateTimeToWeek`), marked on the weekly chart. The
-  /// month is marked instead when the year has no weekly scores.
-  final int? currentWeek;
-
-  /// Nesting period from the species sheet, drawn as a band under the
-  /// chart. Null draws nothing.
-  final NestingPeriod? nesting;
 
   /// Why a detection is « Rare ici · à confirmer », shown when the species
   /// is unexpected here this week (J3b).
@@ -384,8 +373,7 @@ class HereNowCard extends StatefulWidget {
 }
 
 class _HereNowCardState extends State<HereNowCard> {
-  /// Selected bar: a week (0 to 47) of the weekly chart, else a month.
-  int? _selected;
+  int? _selectedMonth;
 
   @override
   Widget build(BuildContext context) {
@@ -393,164 +381,102 @@ class _HereNowCardState extends State<HereNowCard> {
     final c = BirdyColors.of(context);
     final language = Localizations.localeOf(context).languageCode;
     final months = widget.year.months;
-    final weekly = widget.year.weeks.isNotEmpty;
-    final barsUnit = weekly ? widget.year.weekBars : widget.year.bars;
-    final percents = [for (final b in barsUnit) (b * 100).round()];
-    final perLabel = weekly ? weeksPerYear ~/ 12 : 1;
+    final percents = [for (final b in widget.year.bars) (b * 100).round()];
     final scale = ActivityScale.kingfisher(c.surface1, hue: c.accent);
     final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
-    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.6;
+    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
     final labels = {
       for (final m in crowded ? const [0, 3, 6, 9] : List.generate(12, (i) => i))
-        m * perLabel: initials[m],
+        m: initials[m],
     };
-    final selected = _selected;
+    final selected = _selectedMonth;
     final caption =
         selected == null
             ? peakMonthCaption(l10n, language, months)
-            : monthDetailCaption(
-              l10n,
-              language,
-              weekly ? monthOfWeek(selected) : selected + 1,
-              percents[selected],
-            );
-    final week = widget.currentWeek;
-    final highlight =
-        weekly && week != null
-            ? (week - 1).clamp(0, weeksPerYear - 1)
-            : (widget.currentMonth - 1) * perLabel;
-    final nesting = widget.nesting;
+            : monthDetailCaption(l10n, language, selected + 1, percents[selected]);
     return BirdyBlock(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(icon: AppIcons.calendarToday, text: l10n.forkFicheHereNow),
           const SizedBox(height: BirdySpace.m),
-          Text(
-            widget.sentence,
-            style: BirdyText.bodyCompact.copyWith(color: c.text1),
-          ),
-          if (widget.rareNote != null) ...[
-            const SizedBox(height: BirdySpace.s),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: BirdySpace.xxs),
-                  child: Icon(
-                    AppIcons.diamond,
-                    size: BirdyGlyph.s,
-                    fill: 1,
-                    color: c.orioleText,
+          Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.sentence,
+                    style: BirdyText.bodyCompact.copyWith(color: c.text1),
                   ),
-                ),
-                const SizedBox(width: BirdySpace.xs),
-                Expanded(
-                  child: Text(
-                    widget.rareNote!,
-                    style: BirdyText.bodyCompact.copyWith(color: c.orioleText),
+                  if (widget.rareNote != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: BirdySpace.xxs),
+                          child: Icon(
+                            AppIcons.diamond,
+                            size: BirdyGlyph.s,
+                            fill: 1,
+                            color: c.orioleText,
+                          ),
+                        ),
+                        const SizedBox(width: BirdySpace.xs),
+                        Expanded(
+                          child: Text(
+                            widget.rareNote!,
+                            style: BirdyText.bodyCompact.copyWith(
+                              color: c.orioleText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: BirdySpace.m),
+            SizedBox(
+              width: BirdySizes.activityBarsWidth,
+              child: Column(
+                children: [
+                  ActivityBars(
+                    values: percents,
+                    // 36 px of bars plus the current month's dot strip.
+                    height: BirdySizes.activityBarsHeight,
+                    colorForValue: scale.of,
+                    trackColor: c.line,
+                    labels: labels,
+                    labelStyle: BirdyText.axisLabel,
+                    highlightIndex: widget.currentMonth - 1,
+                    highlightColor: c.text1,
+                    semanticLabel: seasonsChartSemanticLabel(
+                      l10n,
+                      language,
+                      months,
+                    ),
+                    onSelect:
+                        (index, _) => setState(() => _selectedMonth = index),
                   ),
-                ),
-              ],
+                  if (caption != null) ...[
+                    const SizedBox(height: BirdySpace.xs),
+                    Text(
+                      caption,
+                      textAlign: TextAlign.center,
+                      style: BirdyText.caption.copyWith(color: c.text2),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ],
-          const SizedBox(height: BirdySpace.m),
-          // Full width (J7 fix): 48 bars need the whole block, a 150 dp
-          // column beside the sentence made them 2 dp slivers.
-          ActivityBars(
-            values: percents,
-            height: BirdySizes.seasonsChartHeight,
-            colorForValue: scale.of,
-            trackColor: c.line,
-            labels: labels,
-            labelStyle: BirdyText.axisLabel,
-            highlightIndex: highlight,
-            highlightColor: c.text1,
-            semanticLabel: seasonsChartSemanticLabel(
-              l10n,
-              language,
-              months,
-              nesting: nesting,
-            ),
-            onSelect: (index, _) => setState(() => _selected = index),
-          ),
-          if (nesting != null) ...[
-            const SizedBox(height: BirdySpace.xs),
-            NestingBand(
-              key: const ValueKey('fiche-nesting'),
-              period: nesting,
-              slotsPerMonth: perLabel,
-              color: c.accent,
-              trackColor: c.line,
-              legend: nestingLegend(l10n, language, nesting),
-            ),
-          ],
-          if (caption != null) ...[
-            const SizedBox(height: BirdySpace.xs),
-            Text(
-              caption,
-              textAlign: TextAlign.center,
-              style: BirdyText.caption.copyWith(color: c.text2),
-            ),
-          ],
+        ),
         ],
       ),
-    );
-  }
-}
-
-/// Nesting period drawn under the weekly presence chart (J7): a rounded
-/// strip spanning the nesting months, on the same width as the bars, with a
-/// legend. Wraps around the new year when the period does.
-class NestingBand extends StatelessWidget {
-  const NestingBand({
-    super.key,
-    required this.period,
-    required this.slotsPerMonth,
-    required this.color,
-    required this.trackColor,
-    required this.legend,
-  });
-
-  final NestingPeriod period;
-
-  /// Bars per month of the chart above (4 weeks).
-  final int slotsPerMonth;
-  final Color color;
-  final Color trackColor;
-  final String legend;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(BirdySizes.nestingBandHeight / 2),
-          child: SizedBox(
-            height: BirdySizes.nestingBandHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var m = 1; m <= 12; m++)
-                  Expanded(
-                    flex: slotsPerMonth,
-                    child: ColoredBox(
-                      color: period.includes(m) ? color : trackColor,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: BirdySpace.xxs),
-        Text(
-          legend,
-          textAlign: TextAlign.center,
-          style: BirdyText.caption.copyWith(color: c.text2),
-        ),
-      ],
     );
   }
 }

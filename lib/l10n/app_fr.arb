@@ -1376,7 +1376,7 @@
   "forkFichePresentPart": "Présent une partie de l'année.",
   "forkFicheRare": "Rarement attendu ici.",
   "forkFicheNotNow": "Pas attendu ici en ce moment.",
-  "forkFichePresenceChart": "Présence attendue ici, semaine par semaine",
+  "forkFichePresenceChart": "Présence attendue ici, mois par mois",
   "forkFicheArrivesLeaves": "Arrive {arrive} · repart {leave}.",
   "forkFicheWeekEarly": "début {month}",
   "forkFicheWeekMid": "vers la mi-{month}",

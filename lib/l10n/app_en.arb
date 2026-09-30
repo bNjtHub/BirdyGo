@@ -5272,7 +5272,7 @@
   "@forkFicheRare": {"description": "BirdyGo fork: species page (J6c)."},
   "forkFicheNotNow": "Not expected here right now.",
   "@forkFicheNotNow": {"description": "BirdyGo fork: species page (J6c)."},
-  "forkFichePresenceChart": "Expected presence here, week by week",
+  "forkFichePresenceChart": "Expected presence here, month by month",
   "@forkFichePresenceChart": {"description": "BirdyGo fork: species page (J6c)."},
   "forkFicheArrivesLeaves": "Arrives {arrive} · leaves {leave}.",
   "@forkFicheArrivesLeaves": {"description": "BirdyGo fork: species page (J7), migrant arrival and departure.", "placeholders": {"arrive": {"type": "String"}, "leave": {"type": "String"}}},

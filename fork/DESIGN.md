@@ -435,14 +435,13 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
 - Blocs, dans cet ordre : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr
   (confirmée ou score Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Mes sons »
   (J7 : le meilleur son ouvre la liste avec le grand bouton `BirdySizes.mainAction` et une ligne en
-  `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » avec les 48 semaines
-  du géomodèle (barres `ActivityBars`, seuil de la liste Explorer, semaine courante marquée par le
-  point, une lettre par mois ; pleine largeur du bloc sous la phrase, jamais dans une colonne de 150 dp :
-  `BirdySizes.seasonsChartHeight`, au moins 4 dp par barre dès 320 dp, test à 320/360/412 dp et 130 %). Phrase : migrateur « Arrive début mars · repart fin septembre »
-  (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes), sédentaire
-  « Présent toute l'année. » ; le résumé Semantics ajoute le mois du pic et la nidification. Bande
-  « Nidification : avril à juillet » (`NestingBand`, `BirdySizes.nestingBandHeight`, couleur
-  d'accent) sous la courbe, seulement si la fiche IA a le champ `nesting` ; fiche IA
+  `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » : phrase et courbe compacte côte à côte
+  (12 barres mensuelles `ActivityBars` de 150 dp à droite, seuil de la liste Explorer, mois courant
+  marqué). La phrase vient des 48 semaines du géomodèle : migrateur « Arrive début mars · repart fin
+  septembre » (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes),
+  sédentaire « Présent toute l'année. » ; testé à 320/360/412 dp et 100/130/200 %. Pas de bande de
+  nidification sur cette carte : le champ `nesting` des fiches IA est lu (`NestingPeriod`) pour une
+  future carte du monde ; fiche IA
   (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
   activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
