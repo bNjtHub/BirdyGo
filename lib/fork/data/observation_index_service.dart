@@ -87,6 +87,10 @@ class ObservationIndexService extends ChangeNotifier
     }
   }
 
+  /// Tells listeners (home counters) that the index changed without a
+  /// session save, e.g. a « Je ne sais pas » answer.
+  void notifyQueueChanged() => notifyListeners();
+
   @override
   void sessionSaved(LiveSession session) =>
       _apply((index) => index.upsertSession(session));
