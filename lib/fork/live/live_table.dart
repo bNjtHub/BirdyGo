@@ -8,13 +8,19 @@
 /// - the table never empties while listening.
 library;
 
+import 'dart:async';
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
+import '../../shared/utils/app_icons.dart';
 import '../design/widgets/animated_count.dart';
+import '../design/widgets/birdy_cross_fade.dart';
+import '../design/widgets/birdy_pill.dart';
+import '../reliability/reliability_config.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/species_avatar.dart';
 import '../design/widgets/species_tile.dart';
@@ -28,6 +34,8 @@ class LiveTable extends StatefulWidget {
     this.compact = false,
     this.imageFor,
     this.badgeFor,
+    this.levelFor,
+    this.onBadgeTap,
     this.actionFor,
     this.onOpen,
     this.empty,
@@ -52,6 +60,13 @@ class LiveTable extends StatefulWidget {
   final Widget Function(LiveTableEntry entry, {required bool compact})?
   badgeFor;
 
+  /// Level of a row (J7, best contact of the outing): a row that goes from
+  /// another level to « Sûr » shows « Confirmé » once.
+  final ReliabilityLevel Function(LiveTableEntry entry)? levelFor;
+
+  /// The level badge of a row was tapped.
+  final void Function(LiveTableEntry entry)? onBadgeTap;
+
   /// Trailing action of a row (replay button).
   final Widget? Function(LiveTableEntry entry)? actionFor;
 
@@ -74,10 +89,62 @@ class _LiveTableState extends State<LiveTable> {
   /// Species that entered during this screen's life.
   final Set<String> _arrived = {};
 
+  /// Last level seen per species (J7).
+  final Map<String, ReliabilityLevel> _levels = {};
+
+  /// Species already confirmed during this outing, and those showing
+  /// « Confirmé » now.
+  final Set<String> _confirmedOnce = {};
+  final Set<String> _confirmedNow = {};
+  final Map<String, Timer> _timers = {};
+
+  @override
+  void dispose() {
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    super.dispose();
+  }
+
+  void _trackLevels() {
+    final levelFor = widget.levelFor;
+    if (levelFor == null) return;
+    if (widget.entries.isEmpty) {
+      _levels.clear();
+      _confirmedOnce.clear();
+      _confirmedNow.clear();
+      for (final timer in _timers.values) {
+        timer.cancel();
+      }
+      _timers.clear();
+      return;
+    }
+    for (final entry in widget.entries) {
+      final name = entry.scientificName;
+      final level = levelFor(entry);
+      final before = _levels[name];
+      _levels[name] = level;
+      if (before == null ||
+          before == ReliabilityLevel.sure ||
+          level != ReliabilityLevel.sure ||
+          !_confirmedOnce.add(name)) {
+        continue;
+      }
+      _confirmedNow.add(name);
+      _timers[name]?.cancel();
+      _timers[name] = Timer(BirdyMotion.confirmedShown, () {
+        _timers.remove(name);
+        if (!mounted) return;
+        setState(() => _confirmedNow.remove(name));
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _known = {for (final e in widget.entries) e.scientificName};
+    _trackLevels();
   }
 
   @override
@@ -92,6 +159,7 @@ class _LiveTableState extends State<LiveTable> {
       BirdyHaptics.light();
     }
     _known = names;
+    _trackLevels();
   }
 
   static const Key _emptyKey = ValueKey('live-table-empty');
@@ -153,6 +221,11 @@ class _LiveTableState extends State<LiveTable> {
                           entry,
                           compact: widget.compact,
                         ),
+                        confirmed: _confirmedNow.contains(entry.scientificName),
+                        onBadgeTap:
+                            widget.onBadgeTap == null
+                                ? null
+                                : () => widget.onBadgeTap!(entry),
                         action: widget.actionFor?.call(entry),
                         onTap:
                             widget.onOpen == null
@@ -188,6 +261,8 @@ class LiveTableRow extends StatelessWidget {
     this.compact = false,
     this.image,
     this.badge,
+    this.confirmed = false,
+    this.onBadgeTap,
     this.action,
     this.onTap,
   });
@@ -196,6 +271,14 @@ class LiveTableRow extends StatelessWidget {
   final bool compact;
   final ImageProvider? image;
   final Widget? badge;
+
+  /// The species just became « Sûr » (J7): a brief « Confirmé » takes the
+  /// place of the badge. With reduced motion only the badge changes, and a
+  /// screen reader announces it.
+  final bool confirmed;
+
+  /// Tap on the level badge (opens the levels sheet).
+  final VoidCallback? onBadgeTap;
   final Widget? action;
   final VoidCallback? onTap;
 
@@ -220,8 +303,13 @@ class LiveTableRow extends StatelessWidget {
         runSpacing: BirdySpace.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          SingingIndicator(singing: entry.singingVisual, color: tint.accent),
-          if (badge != null) badge!,
+          SingingIndicator(
+            singing: entry.singingVisual,
+            color: tint.accent,
+            // The bars follow the score of the current window (J7).
+            level: entry.record.confidence,
+          ),
+          if (badge != null) _badgeSlot(context, badge!),
         ],
       ),
       count: AnimatedCount(
@@ -230,6 +318,63 @@ class LiveTableRow extends StatelessWidget {
         semanticsLabel: l10n.forkLiveSessionCount(entry.sessionCount),
       ),
       action: action,
+    );
+  }
+}
+
+extension on LiveTableRow {
+  /// The level badge (tappable), or « Confirmé » for a moment (J7).
+  Widget _badgeSlot(BuildContext context, Widget badge) {
+    final l10n = AppLocalizations.of(context)!;
+    final reduced = BirdyMotion.reduced(context);
+    final showPill = confirmed && !reduced;
+    final Widget tappable =
+        onBadgeTap == null
+            ? badge
+            : Semantics(
+              button: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onBadgeTap,
+                child: badge,
+              ),
+            );
+    final Widget slot =
+        reduced
+            ? tappable
+            : BirdyCrossFade(
+              child: KeyedSubtree(
+                key: ValueKey(showPill ? 'confirmed' : 'level'),
+                child: showPill ? const ConfirmedPill() : tappable,
+              ),
+            );
+    if (!confirmed) return slot;
+    return Semantics(
+      liveRegion: true,
+      label: l10n.forkLiveConfirmedAnnounce(entry.commonName),
+      child: slot,
+    );
+  }
+}
+
+/// « Confirmé » with a check, in the « Sûr » colors (J7).
+class ConfirmedPill extends StatelessWidget {
+  const ConfirmedPill({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return BirdyPill(
+      key: const ValueKey('live-confirmed'),
+      label: l10n.forkLiveConfirmed,
+      foreground: c.sure.foreground,
+      background: c.sure.background,
+      leading: Icon(
+        AppIcons.checkRounded,
+        size: BirdyGlyph.s,
+        color: c.sure.foreground,
+      ),
     );
   }
 }
@@ -281,10 +426,14 @@ class SingingIndicator extends StatefulWidget {
     super.key,
     required this.singing,
     required this.color,
+    this.level = 1,
   });
 
   final bool singing;
   final Color color;
+
+  /// Score of the current window, 0 to 1: how tall the bars stand.
+  final double level;
 
   @override
   State<SingingIndicator> createState() => _SingingIndicatorState();
@@ -310,7 +459,7 @@ class _SingingIndicatorState extends State<SingingIndicator> {
     },
     child: TickerMode(
       enabled: _ticking,
-      child: SingingBars(color: widget.color),
+      child: SingingBars(color: widget.color, level: widget.level),
     ),
   );
 }
@@ -318,9 +467,13 @@ class _SingingIndicatorState extends State<SingingIndicator> {
 /// Three small bars that rise and fall while a species sings (SPEC.md 5.5
 /// « chante »). Still with reduced motion.
 class SingingBars extends StatefulWidget {
-  const SingingBars({super.key, required this.color});
+  const SingingBars({super.key, required this.color, this.level = 1});
 
   final Color color;
+
+  /// Score of the current window, 0 to 1 (J7): bars scale from
+  /// [BirdyMotion.singingBarsMinScale] of their height up to all of it.
+  final double level;
 
   @override
   State<SingingBars> createState() => _SingingBarsState();
@@ -354,20 +507,37 @@ class _SingingBarsState extends State<SingingBars>
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: RepaintBoundary(
-      child: CustomPaint(
-        size: const Size(13, 12),
-        painter: _BarsPainter(animation: _controller, color: widget.color),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: widget.level.clamp(0.0, 1.0)),
+        duration:
+            BirdyMotion.reduced(context) ? Duration.zero : BirdyMotion.enter,
+        curve: BirdyMotion.standard,
+        builder:
+            (context, level, _) => CustomPaint(
+              size: const Size(13, 12),
+              painter: _BarsPainter(
+                animation: _controller,
+                color: widget.color,
+                level: level,
+              ),
+            ),
       ),
     ),
   );
 }
 
 class _BarsPainter extends CustomPainter {
-  _BarsPainter({required this.animation, required this.color})
-    : super(repaint: animation);
+  _BarsPainter({
+    required this.animation,
+    required this.color,
+    required this.level,
+  }) : super(repaint: animation);
 
   final Animation<double> animation;
   final Color color;
+
+  /// Bar height scale from the score of the current window.
+  final double level;
 
   /// Phase of each bar, as a fraction of the period (0, 150, 300 ms).
   static const _phases = [0.0, 1 / 6, 1 / 3];
@@ -379,7 +549,13 @@ class _BarsPainter extends CustomPainter {
       final t = (animation.value + phase) % 1;
       // Up and down once per period, between 35 % and 100 % of the height.
       final wave = 1 - (2 * t - 1).abs();
-      final h = size.height * (0.35 + 0.65 * Curves.easeInOut.transform(wave));
+      final scale =
+          BirdyMotion.singingBarsMinScale +
+          (1 - BirdyMotion.singingBarsMinScale) * level;
+      final h =
+          size.height *
+          scale *
+          (0.35 + 0.65 * Curves.easeInOut.transform(wave));
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(i * 5.0, size.height - h, 3, h),
@@ -392,5 +568,5 @@ class _BarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BarsPainter old) =>
-      old.color != color || old.animation != animation;
+      old.color != color || old.animation != animation || old.level != level;
 }

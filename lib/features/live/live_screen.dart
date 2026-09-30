@@ -44,6 +44,8 @@ import '../../fork/live/live_listening_layout.dart'; // FORK: listening screen (
 import '../../fork/live/live_moments.dart'; // FORK: Live moments (J6e)
 import '../../fork/live/media_volume_banner.dart'; // FORK: media volume warning (J6h)
 import '../../fork/live/live_table_model.dart'; // FORK: listening screen (J6c)
+import '../../fork/live/live_level.dart'; // FORK: J7 level of the best contact
+import '../../fork/reliability/levels_sheet.dart'; // FORK: J7
 import '../../fork/live/live_candidates.dart'; // FORK: Analyse… (J6c-bis-b)
 import '../../fork/live/live_expected.dart'; // FORK: listening screen (J6f)
 import '../../fork/live/live_place.dart'; // FORK: listening screen (J6f)
@@ -1108,17 +1110,41 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                     );
                     return LiveReliabilityBadge(
                       // FORK: J6h rarity tag next to the badge
-                      level: reliabilityFor(
-                        score: entry.record.confidence,
-                        review: entry.record.reviewStatus,
-                        presence: presence,
-                      ),
+                      // FORK: J7, the level of the best contact of the outing
+                      level: liveLevelOf(entry, presence),
                       cause: liveRarityCause(commonness, entry.scientificName),
                       // FORK: « Rare ici · à confirmer » (J3b)
-                      score: entry.record.confidence,
+                      score: entry.bestScore,
                       compact: compact,
                     );
                   },
+                  // FORK: J7, « Confirmé » on the row that becomes Sure, and the
+                  // levels sheet from the badge
+                  levelFor:
+                      (entry) => liveLevelOf(
+                        entry,
+                        livePresence(commonness, entry.scientificName),
+                      ),
+                  onBadgeTap:
+                      (entry) => showLevelsSheet(
+                        themed,
+                        species: LevelsSpecies(
+                          name: entry.commonName,
+                          level: liveLevelOf(
+                            entry,
+                            livePresence(commonness, entry.scientificName),
+                          ),
+                          bestScore: entry.bestScore,
+                          bestAt: entry.bestAt,
+                          contacts: entry.sessionCount,
+                          unexpected:
+                              liveRarityCause(
+                                commonness,
+                                entry.scientificName,
+                              ) !=
+                              null,
+                        ),
+                      ),
                   actionFor:
                       (entry) => buildReplayTrailing(
                         controller: controller,
