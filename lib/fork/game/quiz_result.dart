@@ -143,10 +143,7 @@ class QuizResult extends StatelessWidget {
                   ),
                   onPressed: onAgain,
                   icon: const Icon(AppIcons.restartAlt, size: BirdyGlyph.xxl),
-                  label: Text(
-                    l10n.forkQuizAgain,
-                    textAlign: TextAlign.center,
-                  ),
+                  label: Text(l10n.forkQuizAgain, textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -182,7 +179,12 @@ class _ScoreCard extends StatelessWidget {
     return Container(
       key: const ValueKey('quiz-score-card'),
       clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.fromLTRB(BirdySpace.xl, BirdySpace.xl, BirdySpace.xl, BirdySpace.roomy),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xl,
+        BirdySpace.xl,
+        BirdySpace.xl,
+        BirdySpace.roomy,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
         gradient: RadialGradient(
@@ -208,9 +210,7 @@ class _ScoreCard extends StatelessWidget {
                       child: QuizTwinkleField(count: 4, seed: 21),
                     ),
                     if (party)
-                      const Positioned.fill(
-                        child: QuizStarBurstField(),
-                      ),
+                      const Positioned.fill(child: QuizStarBurstField()),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -225,7 +225,10 @@ class _ScoreCard extends StatelessWidget {
                               key: ValueKey('quiz-star-$i'),
                               size: i == 1 ? 56 : 42,
                               color: i < stars ? c.oriole : c.lineOpaque,
-                              rim: i < stars ? BirdyQuizColors.starRim : c.border,
+                              rim:
+                                  i < stars
+                                      ? BirdyQuizColors.starRim
+                                      : c.border,
                             ),
                           ),
                         ],
@@ -282,15 +285,22 @@ class _ScoreCard extends StatelessWidget {
 /// A 5-point star with its own rim stroke, earned (Loriot fill, a shaded
 /// gold rim) or not (the theme's line color both ways).
 class QuizRimStar extends StatelessWidget {
-  const QuizRimStar({super.key, required this.size, required this.color, required this.rim});
+  const QuizRimStar({
+    super.key,
+    required this.size,
+    required this.color,
+    required this.rim,
+  });
 
   final double size;
   final Color color;
   final Color rim;
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: Size.square(size), painter: _RimStarPainter(color, rim));
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size.square(size),
+    painter: _RimStarPainter(color, rim),
+  );
 }
 
 class _RimStarPainter extends CustomPainter {
@@ -394,7 +404,9 @@ class _MissedCardState extends ConsumerState<_MissedCard> {
                         missed: m,
                         playing: m.clipPath != null && playing == m.clipPath,
                         onPressed:
-                            m.clipPath == null ? null : () => _toggle(m.clipPath!),
+                            m.clipPath == null
+                                ? null
+                                : () => _toggle(m.clipPath!),
                       ),
                   ],
                 ),
@@ -426,7 +438,11 @@ class _MissedRow extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: BirdySizes.target),
       child: Row(
         children: [
-          QuizBirdArt(bird: missed.bird, size: BirdyGlyph.disc44, iconSize: BirdyGlyph.disc44),
+          QuizBirdArt(
+            bird: missed.bird,
+            size: BirdyGlyph.disc44,
+            iconSize: BirdyGlyph.disc44,
+          ),
           const SizedBox(width: BirdySpace.m),
           Expanded(
             child: Text(
@@ -453,12 +469,16 @@ class _MissedRow extends StatelessWidget {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
-                      key: ValueKey('quiz-missed-play ${missed.bird.scientificName}'),
+                      key: ValueKey(
+                        'quiz-missed-play ${missed.bird.scientificName}',
+                      ),
                       onTap: onPressed,
                       child: SizedBox.square(
                         dimension: BirdySizes.target,
                         child: Icon(
-                          playing ? AppIcons.quizStop : AppIcons.playArrowRounded,
+                          playing
+                              ? AppIcons.quizStop
+                              : AppIcons.playArrowRounded,
                           size: BirdyGlyph.x5l,
                           fill: 1,
                           color: c.accentText,
@@ -513,9 +533,7 @@ class _RecapCard extends StatelessWidget {
                 ),
               ),
               Text(
-                l10n.forkQuizFoundCount(
-                  results.where((r) => r).length,
-                ),
+                l10n.forkQuizFoundCount(results.where((r) => r).length),
                 style: BirdyText.caption.copyWith(
                   color: c.sure.foreground,
                   fontFeatures: const [FontFeature.tabularFigures()],
@@ -642,7 +660,11 @@ class _RecapBird extends StatelessWidget {
 /// Oreille fine after the round: the medal, « Nouvelle plume » when a tier
 /// was just reached, the bar filling up to the new count.
 class _MedalCard extends StatelessWidget {
-  const _MedalCard({required this.badge, required this.before, required this.right});
+  const _MedalCard({
+    required this.badge,
+    required this.before,
+    required this.right,
+  });
 
   final BadgeProgress badge;
   final BadgeProgress before;
@@ -683,7 +705,10 @@ class _MedalCard extends StatelessWidget {
             )
             : GameConfig.badgeMedals[badge.tier - 1].tone;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l, vertical: BirdySpace.comfy),
+      padding: const EdgeInsets.symmetric(
+        horizontal: BirdySpace.l,
+        vertical: BirdySpace.comfy,
+      ),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(BirdyRadii.card),

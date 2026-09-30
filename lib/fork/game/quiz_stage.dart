@@ -415,17 +415,26 @@ class _RevealCard extends StatelessWidget {
         Widget rise(Duration delay, Widget child) =>
             right ? QuizRise(delay: delay, child: child) : child;
 
-        final ringColor = right ? tint.cardBackground(c.brightness) : c.surface1;
+        final ringColor =
+            right ? tint.cardBackground(c.brightness) : c.surface1;
         return Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: right ? tint.cardBackground(c.brightness) : c.surface1,
             borderRadius: BorderRadius.circular(BirdyRadii.hero),
-            border:
-                right
-                    ? null
-                    : Border.all(color: c.lineOpaque, width: BirdyStroke.thin),
           ),
+          // Painted over, not around: the border must not push the content
+          // (the play button stays where it was during the question).
+          foregroundDecoration:
+              right
+                  ? null
+                  : BoxDecoration(
+                    borderRadius: BorderRadius.circular(BirdyRadii.hero),
+                    border: Border.all(
+                      color: c.lineOpaque,
+                      width: BirdyStroke.thin,
+                    ),
+                  ),
           child: Stack(
             children: [
               if (right)
@@ -524,7 +533,12 @@ class _EncouragePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(BirdySpace.s, BirdySpace.xs, BirdySpace.m, BirdySpace.xs),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.s,
+        BirdySpace.xs,
+        BirdySpace.m,
+        BirdySpace.xs,
+      ),
       decoration: BoxDecoration(
         color: c.tonal,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -532,7 +546,11 @@ class _EncouragePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(AppIcons.graphicEqRounded, size: BirdyGlyph.s, color: c.accentText),
+          Icon(
+            AppIcons.graphicEqRounded,
+            size: BirdyGlyph.s,
+            color: c.accentText,
+          ),
           const SizedBox(width: BirdySpace.xs),
           Flexible(
             child: Text(

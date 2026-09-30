@@ -745,7 +745,12 @@ class _StreakPill extends StatelessWidget {
     final c = BirdyColors.of(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 30),
-      padding: const EdgeInsets.fromLTRB(BirdySpace.xs, BirdySpace.xxs, BirdySpace.m, BirdySpace.xxs),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xs,
+        BirdySpace.xxs,
+        BirdySpace.m,
+        BirdySpace.xxs,
+      ),
       decoration: BoxDecoration(
         color: c.oriole,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
