@@ -54,9 +54,36 @@ class _BirdyEntranceState extends State<BirdyEntrance>
   );
   Timer? _timer;
 
+  bool _started = false;
+  Animation<double>? _routeAnimation;
+
+  /// Waits for the page transition to end (J7): an entrance playing under a
+  /// page that is still fading and sliding in would be a double animation.
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    // The route's own controller, read at once: its `animation` proxy still
+    // reports completed on the first frame of a push. (`controller` is
+    // protected, but only meant to stay out of subclasses' way here.)
+    // ignore: invalid_use_of_protected_member
+    final route = ModalRoute.of(context)?.controller;
+    if (route != null && route.status != AnimationStatus.completed) {
+      _routeAnimation = route..addStatusListener(_onRouteStatus);
+    } else {
+      _start();
+    }
+  }
+
+  void _onRouteStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) _start();
+  }
+
+  void _start() {
+    if (_started) return;
+    _started = true;
+    _routeAnimation?.removeStatusListener(_onRouteStatus);
+    _routeAnimation = null;
     if (widget.delay == Duration.zero) {
       _controller.forward();
     } else {
@@ -66,6 +93,7 @@ class _BirdyEntranceState extends State<BirdyEntrance>
 
   @override
   void dispose() {
+    _routeAnimation?.removeStatusListener(_onRouteStatus);
     _timer?.cancel();
     _controller.dispose();
     super.dispose();
