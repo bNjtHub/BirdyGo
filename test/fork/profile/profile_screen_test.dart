@@ -221,7 +221,9 @@ void main() {
     // would time out waiting on that pipeline) to confirm the navigation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(QuizEntryRow), findsOneWidget);
+    // The Profil's quiz row stays mounted under the quiz route (offstage
+    // once J7's page transition ends).
+    expect(find.byType(QuizEntryRow, skipOffstage: false), findsOneWidget);
     expect(find.byType(FineEarQuizScreen), findsOneWidget);
   });
 
