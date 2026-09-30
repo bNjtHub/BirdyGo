@@ -5,6 +5,7 @@
 library;
 
 import '../reliability/reliability_config.dart';
+import 'live_level.dart';
 import 'live_table_model.dart';
 
 enum LiveMomentKind { firstTime, rare }
@@ -88,13 +89,10 @@ class LiveMomentTracker {
         !isBird(name)) {
       return null;
     }
-    final record = entry.record;
+    // J7: the best contact of the outing, like the level of the row.
+    final record = entry.levelRecord;
     final presence = presenceOf(name);
-    final level = reliabilityFor(
-      score: record.confidence,
-      review: record.reviewStatus,
-      presence: presence,
-    );
+    final level = liveLevelOf(entry, presence);
     if (level == ReliabilityLevel.sure) {
       _handled.add(name);
       return LiveMoment(kind: LiveMomentKind.firstTime, entry: entry);

@@ -22,6 +22,15 @@ abstract final class BirdyMotion {
   static const Duration logoWing = Duration(milliseconds: 480);
   static const Duration singingBars = Duration(milliseconds: 900);
 
+  /// The « chante » bars follow the score of the current window (J7): the
+  /// tallest bar reaches this share of the height at a score of 0, all of
+  /// it at a score of 1.
+  static const double singingBarsMinScale = 0.5;
+
+  /// How long the « Confirmé » pill replaces the level badge of a row that
+  /// just became « Sûr » (J7).
+  static const Duration confirmedShown = Duration(milliseconds: 2500);
+
   /// An answered card leaving the quick review.
   static const Duration cardFly = Duration(milliseconds: 260);
 
@@ -272,6 +281,10 @@ abstract final class BirdyMotion {
 
   /// Maximum opacity of a bird-colored tint behind a celebration.
   static const double tintMaxOpacity = 0.15;
+
+  /// Opacity of a play button whose clip is still being saved (disabled,
+  /// same size as the live one).
+  static const double pendingOpacity = 0.4;
 
   /// Bottom sheet spring.
   static final SpringDescription sheetSpring =

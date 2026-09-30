@@ -33,19 +33,28 @@ void main() {
     expect(c.read(firstNameProvider), 'Lou');
   });
 
-  test(
-    'live theme: dark by default, persisted, unknown value falls back',
-    () async {
-      final c = await _container({});
-      expect(c.read(liveThemeProvider), LiveTheme.dark);
-      await c.read(liveThemeProvider.notifier).set(LiveTheme.light);
-      expect(c.read(liveThemeProvider), LiveTheme.light);
-      expect(
-        c.read(sharedPreferencesProvider).getString(kLiveThemePref),
-        'light',
-      );
-      final other = await _container({kLiveThemePref: 'nope'});
-      expect(other.read(liveThemeProvider), LiveTheme.dark);
-    },
-  );
+  test('always-dark listening screen: off by default, persisted', () async {
+    final c = await _container({});
+    expect(c.read(liveAlwaysDarkProvider), isFalse);
+    await c.read(liveAlwaysDarkProvider.notifier).set(true);
+    expect(c.read(liveAlwaysDarkProvider), isTrue);
+    expect(
+      c.read(sharedPreferencesProvider).getBool(kLiveAlwaysDarkPref),
+      isTrue,
+    );
+    final other = await _container({kLiveAlwaysDarkPref: true});
+    expect(other.read(liveAlwaysDarkProvider), isTrue);
+  });
+
+  test('always-dark migrates the old explicit dark choice only', () async {
+    final dark = await _container({kLiveThemePref: 'dark'});
+    expect(dark.read(liveAlwaysDarkProvider), isTrue);
+    final light = await _container({kLiveThemePref: 'light'});
+    expect(light.read(liveAlwaysDarkProvider), isFalse);
+    final both = await _container({
+      kLiveThemePref: 'dark',
+      kLiveAlwaysDarkPref: false,
+    });
+    expect(both.read(liveAlwaysDarkProvider), isFalse);
+  });
 }
