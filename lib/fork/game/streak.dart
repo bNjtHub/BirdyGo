@@ -64,9 +64,23 @@ DateTime _plusDays(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
 
 /// Days that count: at least [GameConfig.streakMinListening] of listening,
 /// each listening counted on the day it started.
-Set<DateTime> listenedDays(Iterable<(DateTime, DateTime?)> listenings) {
+///
+/// A listening without an end is still running (or was cut short): when
+/// [now] is given, it counts up to [now] as long as it started less than
+/// [GameConfig.streakOpenListeningMax] ago, so the first day is not shown as
+/// 0 while the first listening is still going on.
+Set<DateTime> listenedDays(
+  Iterable<(DateTime, DateTime?)> listenings, {
+  DateTime? now,
+}) {
   final perDay = <DateTime, Duration>{};
-  for (final (start, end) in listenings) {
+  for (final (start, rawEnd) in listenings) {
+    var end = rawEnd;
+    if (end == null && now != null) {
+      if (now.difference(start) <= GameConfig.streakOpenListeningMax) {
+        end = now;
+      }
+    }
     if (end == null || !end.isAfter(start)) continue;
     final day = _day(start.toLocal());
     perDay[day] = (perDay[day] ?? Duration.zero) + end.difference(start);
