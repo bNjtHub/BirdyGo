@@ -855,6 +855,13 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             de l'onboarding (`labelLarge`, `inputLarge`, `headingSmall`, `ctaIcon`, `inlineIcon`).
       - [ ] (Benjamin) Téléphone : premier lancement, 4 oiseaux, icône, clair/sombre.
       - [x] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
+    - Accueil et Plus (L, M) :
+      - [x] L : « Qui chante ? » sur l'Accueil (`QuizEntryRow` + `progress`, barre vers la prochaine
+            plume), affiché seulement si le quiz est jouable (`quizPlayableProvider`).
+      - [x] M : menu Plus en 3 groupes titrés, Carte retirée, bloc utilitaire avec Outils avancés
+            dépliable en dernier ; golden 4 thèmes.
+      - [x] Liseré du logo quiz à l'accent du thème d'oiseau choisi.
+      - [ ] (Benjamin) Téléphone : bloc quiz sur l'Accueil, menu Plus dans les 4 thèmes.
 
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
