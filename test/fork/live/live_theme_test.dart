@@ -1,5 +1,6 @@
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/live/listening_options.dart';
 import 'package:birdnet_live/fork/live/live_control_bar.dart';
@@ -31,13 +32,14 @@ LiveTableEntry _entry() => LiveTableEntry(
   singing: false,
 );
 
-Widget _live({required bool light}) => MaterialApp(
-  theme: BirdyTheme.dark(),
+Widget _live({bool light = false, bool? follow, ThemeData? theme}) => MaterialApp(
+  theme: theme ?? BirdyTheme.dark(),
   locale: const Locale('fr'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: ListeningTheme(
     light: light,
+    follow: follow ?? false,
     child: Builder(
       builder:
           (_) => Scaffold(
@@ -87,7 +89,7 @@ void _phone(WidgetTester tester) {
 }
 
 void main() {
-  group('light listening screen', () {
+  group('forced dark listening screen', () {
     testWidgets('dark by default: ink page, Brume « Arrêter »', (tester) async {
       _phone(tester);
       await tester.pumpWidget(_live(light: false));
@@ -138,8 +140,63 @@ void main() {
     });
   });
 
+  group('follow the app theme (J7)', () {
+    testWidgets('light app, follow: the listening screen is light', (
+      tester,
+    ) async {
+      _phone(tester);
+      await tester.pumpWidget(
+        _live(follow: true, theme: BirdyTheme.light(bird: BirdyBird.flamant)),
+      );
+      await _settle(tester);
+      final inside = tester.element(find.byType(LiveListeningLayout));
+      expect(BirdyColors.of(inside).isDark, isFalse);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == BirdyColors.light.background,
+        ),
+        findsWidgets,
+      );
+      expect(BirdyBrandColors.of(inside).bird, BirdyBird.flamant);
+    });
+
+    testWidgets('dark app, follow: the listening screen is dark', (
+      tester,
+    ) async {
+      _phone(tester);
+      await tester.pumpWidget(_live(follow: true));
+      await _settle(tester);
+      final inside = tester.element(find.byType(LiveListeningLayout));
+      expect(BirdyColors.of(inside).isDark, isTrue);
+    });
+
+    testWidgets('light app, always dark: the listening screen is dark', (
+      tester,
+    ) async {
+      _phone(tester);
+      await tester.pumpWidget(_live(theme: BirdyTheme.light()));
+      await _settle(tester);
+      final inside = tester.element(find.byType(LiveListeningLayout));
+      expect(BirdyColors.of(inside).isDark, isTrue);
+    });
+
+    testWidgets('the light live screen builds in the four bird themes', (
+      tester,
+    ) async {
+      _phone(tester);
+      for (final bird in BirdyBird.values) {
+        await tester.pumpWidget(
+          _live(follow: true, theme: BirdyTheme.light(bird: bird)),
+        );
+        await _settle(tester);
+        expect(tester.takeException(), isNull, reason: bird.name);
+        expect(find.text('Merle noir'), findsOneWidget);
+      }
+    });
+  });
+
   group('options sheet switch', () {
-    testWidgets('« Écran clair » is bound to liveThemeProvider', (
+    testWidgets('the always-dark switch is bound to liveAlwaysDarkProvider', (
       tester,
     ) async {
       SharedPreferences.setMockInitialValues({});
@@ -166,12 +223,12 @@ void main() {
       for (var i = 0; i < 6; i++) {
         await tester.pump(const Duration(milliseconds: 100));
       }
-      expect(find.text('Écran clair'), findsOneWidget);
-      expect(container.read(liveThemeProvider), LiveTheme.dark);
+      expect(find.text("Écran d'écoute toujours sombre"), findsOneWidget);
+      expect(container.read(liveAlwaysDarkProvider), isFalse);
       await tester.tap(find.byKey(const ValueKey('listening-options-light')));
       await tester.pump();
-      expect(container.read(liveThemeProvider), LiveTheme.light);
-      expect(prefs.getString(kLiveThemePref), 'light');
+      expect(container.read(liveAlwaysDarkProvider), isTrue);
+      expect(prefs.getBool(kLiveAlwaysDarkPref), isTrue);
     });
   });
 }
