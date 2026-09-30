@@ -690,10 +690,31 @@ def facet_cell(col, row_south, step=GRID_STEP):
     return rows
 
 
+def _clean_facets():
+    """After a hard stop, rows of a cell can be written without its done
+    mark: keep only marked cells (the others are asked again), no duplicate."""
+    if not (FACETS_TSV.exists() and FACETS_DONE.exists()):
+        return
+    done = {tuple(map(int, x.split(":"))) for x in FACETS_DONE.read_text().split()}
+    lines = FACETS_TSV.read_text(encoding="utf-8").splitlines()
+    seen, keep = set(), []
+    for line in lines[1:]:
+        key, cx, cy, season, _n = line.split("	")
+        if (int(cx), int(cy)) in done and (key, cx, cy, season) not in seen:
+            seen.add((key, cx, cy, season))
+            keep.append(line)
+    if len(keep) != len(lines) - 1:
+        FACETS_TSV.write_text("
+".join(lines[:1] + keep) + "
+", encoding="utf-8")
+        print(f"Cleaned {len(lines) - 1 - len(keep)} rows of unfinished cells")
+
+
 def cmd_facets(_args):
     from concurrent.futures import ThreadPoolExecutor
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    _clean_facets()
     cols, rows_n = grid_size()
     done = set(FACETS_DONE.read_text().split()) if FACETS_DONE.exists() else set()
     todo = [(c, r) for r in range(rows_n) for c in range(cols) if f"{c}:{r}" not in done]
