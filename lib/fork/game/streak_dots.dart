@@ -54,6 +54,50 @@ class StreakDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final weekday = DateFormat('EEEEE', localeName);
+    return Stack(
+      children: [
+        // Connectors between neighbouring dots, behind the cells.
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final cell = days.isEmpty ? 0.0 : box.maxWidth / days.length;
+              const reach = BirdySizes.dayDot / 2 + BirdySpace.tight;
+              final width = cell - 2 * reach;
+              if (width <= 0) return const SizedBox.shrink();
+              return Stack(
+                children: [
+                  for (var i = 0; i < days.length - 1; i++)
+                    Positioned(
+                      key: ValueKey('streak-connector-$i'),
+                      left: cell * (i + 0.5) + reach,
+                      top: (BirdySizes.dayDot - BirdyStroke.regular) / 2,
+                      width: width,
+                      height: BirdyStroke.regular,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color:
+                              _counts(days[i]) && _counts(days[i + 1])
+                                  ? c.accent
+                                  : c.borderStrong,
+                          borderRadius: BorderRadius.circular(BirdyRadii.pill),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+        _cells(c, weekday),
+      ],
+    );
+  }
+
+  /// A day that keeps the série going (listened or rest day).
+  static bool _counts(StreakDay day) =>
+      day.state == StreakDayState.listened || day.state == StreakDayState.rest;
+
+  Widget _cells(BirdyColors c, DateFormat weekday) {
     return Row(
       children: [
         for (final day in days)

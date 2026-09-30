@@ -68,6 +68,20 @@ void main() {
     expect(find.byKey(const ValueKey('day-today')), findsOneWidget);
   });
 
+  testWidgets('connectors link the 7 dots (6 segments)', (tester) async {
+    final streak = computeStreak(_days([24, 25, 26, 27]), _now);
+    final week = lastSevenDays(streak);
+    await tester.pumpWidget(app(StreakDots(days: week, localeName: 'fr')));
+    for (var i = 0; i < 6; i++) {
+      final finder = find.byKey(ValueKey('streak-connector-$i'));
+      expect(finder, findsOneWidget);
+      final size = tester.getSize(finder);
+      expect(size.width, greaterThan(0));
+      expect(size.height, greaterThan(0));
+    }
+    expect(find.byKey(const ValueKey('streak-connector-6')), findsNothing);
+  });
+
   testWidgets('dayLabel wraps each dot in its own semantics, else silent', (
     tester,
   ) async {

@@ -15,6 +15,10 @@ const String kLogoTweetAsset = 'assets/fork/sounds/birdygo_tweet.wav';
 
 /// Plays the tweet, one at a time.
 abstract interface class LogoTweetPlayer {
+  /// Loads the sound without playing it, so the first tap starts at once.
+  /// Safe to call many times: the source is set only once.
+  Future<void> prepare();
+
   Future<void> play();
 
   Future<void> dispose();
@@ -22,16 +26,27 @@ abstract interface class LogoTweetPlayer {
 
 class _JustAudioTweetPlayer implements LogoTweetPlayer {
   AudioPlayer? _player;
-  bool _loaded = false;
+  Future<void>? _loading;
+
+  @override
+  Future<void> prepare() {
+    return _loading ??= () async {
+      try {
+        final player = _player ??= AudioPlayer();
+        await player.setAsset(kLogoTweetAsset);
+      } catch (e) {
+        _loading = null;
+        debugPrint('[LogoTweet] $e');
+      }
+    }();
+  }
 
   @override
   Future<void> play() async {
     try {
-      final player = _player ??= AudioPlayer();
-      if (!_loaded) {
-        await player.setAsset(kLogoTweetAsset);
-        _loaded = true;
-      }
+      await prepare();
+      final player = _player;
+      if (player == null) return;
       await player.seek(Duration.zero);
       await player.play();
     } catch (e) {
@@ -44,7 +59,7 @@ class _JustAudioTweetPlayer implements LogoTweetPlayer {
   Future<void> dispose() async {
     final player = _player;
     _player = null;
-    _loaded = false;
+    _loading = null;
     await player?.dispose();
   }
 }
@@ -54,6 +69,14 @@ final logoTweetPlayerProvider = Provider<LogoTweetPlayer>((ref) {
   ref.onDispose(player.dispose);
   return player;
 });
+
+/// Loads the tweet ahead of the first tap (no sound), unless a listening
+/// runs.
+void prepareLogoTweet(WidgetRef ref) {
+  final live = ref.read(liveStateProvider);
+  if (live == LiveState.active || live == LiveState.paused) return;
+  ref.read(logoTweetPlayerProvider).prepare();
+}
 
 /// Plays the tweet unless a listening is running.
 void playLogoTweet(WidgetRef ref) {

@@ -880,6 +880,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 
 ## J7 : publication Android
 
+- [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
       de celle d'upstream.
