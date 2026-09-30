@@ -141,7 +141,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     onListen: _listen,
   );
 
-  void _open(Widget screen) => Navigator.of(
+  Future<void> _open(Widget screen) => Navigator.of(
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
@@ -475,7 +475,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       ToCheckBlock(
         key: const ValueKey('home-to-check-real'),
         count: toVerify,
-        onTap: () => _open(const QuickReviewScreen()),
+        // Refresh on return: the count must not wait for a listener event.
+        onTap: () => _open(const QuickReviewScreen()).then((_) => _reload()),
       ),
     );
   }

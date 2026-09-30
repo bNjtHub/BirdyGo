@@ -209,9 +209,13 @@ class _QuickReviewScreenState extends ConsumerState<QuickReviewScreen>
     final writer = ref.read(reviewWriterProvider);
     switch (answer) {
       case ReviewAnswer.itIs:
-        await writer.setStatus(detection, ReviewStatus.confirmed);
+        if (!await writer.setStatus(detection, ReviewStatus.confirmed)) {
+          await writer.skip(detection);
+        }
       case ReviewAnswer.itIsNot:
-        await writer.setStatus(detection, ReviewStatus.rejected);
+        if (!await writer.setStatus(detection, ReviewStatus.rejected)) {
+          await writer.skip(detection);
+        }
       case ReviewAnswer.dontKnow:
         await writer.skip(detection);
     }
