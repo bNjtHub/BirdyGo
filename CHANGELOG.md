@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Development and release builds now require Flutter 3.47 or later with Dart 3.13 or later.
+
 ### Added
 
 - Live Mode can keep listening with the screen off or while another app is open for a selectable 15–120 minute interval; a one-time return dialog explains the option. Point Count setup now makes its default background behavior explicit and can end a count early when the option is off; on Windows, a minimized window never pauses either mode.
