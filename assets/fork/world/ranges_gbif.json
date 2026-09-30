@@ -1,0 +1,24 @@
+{
+  "demo": true,
+  "extractedAt": "2026-09-30",
+  "year": 2026,
+  "yearMin": 2010,
+  "gridStep": 1.0,
+  "species": 3,
+  "bytes": 1202,
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "doi": null,
+  "doiUrl": null,
+  "downloadKey": null,
+  "citation": "FICTITIOUS DEMONSTRATION DATA. Not GBIF observations.",
+  "rates": {
+    "minCellTotal": 50,
+    "minSpeciesRecords": 2,
+    "levels": [
+      0.002,
+      0.01,
+      0.05
+    ]
+  }
+}
