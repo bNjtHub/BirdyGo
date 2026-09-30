@@ -283,6 +283,12 @@ void main() {
       return i < 6 ? 'Oiseau $i' : 'Common $scientificName';
     }
 
+    /// The streak pill when shown (a hidden copy keeps its room).
+    Finder streakPill() => find.descendant(
+      of: find.byType(QuizPop),
+      matching: find.textContaining("d'affilée"),
+    );
+
     Future<void> next(WidgetTester tester, {required bool last}) async {
       final button = find.text(last ? 'Voir mon score' : 'Continuer');
       await tester.ensureVisible(button);
@@ -407,10 +413,11 @@ void main() {
     testWidgets('two right answers in a row show the streak', (tester) async {
       await pump(tester, _species(4));
       await tapChoice(tester, french(playing()));
-      expect(find.textContaining("d'affilée"), findsNothing);
+      expect(streakPill(), findsNothing);
       await next(tester, last: false);
       await tapChoice(tester, french(playing()));
-      expect(find.text("2 d'affilée !"), findsOneWidget);
+      expect(streakPill(), findsOneWidget);
+      expect(find.text("2 d'affilée !"), findsWidgets);
     });
 
     testWidgets('a wrong answer names the bird and counts nothing', (
@@ -516,12 +523,71 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4));
-      final trail = tester.getRect(find.byType(QuizTrail));
+      final line = tester.getRect(
+        find.byKey(const ValueKey('quiz-status-line')),
+      );
       final stage = tester.getRect(find.byType(QuizStage));
       final disc = tester.getRect(find.byType(QuizMysteryDisc));
-      expect(stage.top - trail.bottom, lessThanOrEqualTo(BirdySpace.xl));
+      expect(stage.top - line.bottom, lessThanOrEqualTo(BirdySpace.m));
       expect(disc.top - stage.top, lessThanOrEqualTo(BirdySpace.l + 2));
     });
+
+    testWidgets('the status line: song counter and score pill with labels', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.text('0 bonne'), findsOneWidget);
+      await tapChoice(tester, french(playing()));
+      expect(find.text('1 bonne'), findsOneWidget);
+      await next(tester, last: false);
+      expect(find.text('Chant 2 sur 4'), findsOneWidget);
+      await tapChoice(tester, french(playing()));
+      expect(find.text('2 bonnes'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          "Chant 2 sur 4, 2 bonnes réponses, 2 d'affilée !",
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the status line keeps its height with or without the streak', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final row = find.byKey(const ValueKey('quiz-status-line'));
+      final before = tester.getSize(row).height;
+      final stageTop = tester.getTopLeft(find.byType(QuizStage)).dy;
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      await tapChoice(tester, french(playing()));
+      expect(streakPill(), findsOneWidget);
+      expect(tester.getSize(row).height, before);
+      expect(tester.getTopLeft(find.byType(QuizStage)).dy, stageTop);
+      // The gap between the line and the stage stays compact.
+      final gap =
+          tester.getTopLeft(find.byType(QuizStage)).dy -
+          tester.getBottomLeft(row).dy;
+      expect(gap, lessThanOrEqualTo(BirdySpace.m));
+    });
+
+    for (final size in const [Size(320, 568), Size(360, 640)]) {
+      testWidgets(
+        'the status line with a streak fits ${size.width} dp at 130 %',
+        (tester) async {
+          await pump(tester, _species(12), textScale: 1.3, size: size);
+          for (var i = 0; i < 3; i++) {
+            await tapChoice(tester, french(playing()));
+            expect(tester.takeException(), isNull);
+            await next(tester, last: false);
+          }
+          await tapChoice(tester, french(playing()));
+          expect(streakPill(), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
 
     testWidgets('the mystery card has no label, only the bubble', (
       tester,

@@ -1631,6 +1631,8 @@
   "forkQuizTitleWord": "Qui chante",
   "forkQuizEntrySubtitle": "Reconnais les oiseaux de tes enregistrements. Gagne le badge Oreille fine.",
   "forkQuizStart": "Lancer le quiz",
+  "forkQuizQuestion": "Chant {current} sur {total}",
+  "forkQuizScorePill": "{count, plural, =0{0 bonne} =1{1 bonne} other{{count} bonnes}}",
   "forkQuizTrailLabel": "Chant {current} sur {total}, {correct, plural, =0{aucune bonne réponse} =1{1 bonne réponse} other{{correct} bonnes réponses}}",
   "forkQuizMissedTitle": "Sons à retenir",
   "forkQuizPlayBird": "Écouter le chant de {name}",

@@ -24,6 +24,7 @@ class QuizTrail extends StatelessWidget {
     required this.birds,
     required this.results,
     required this.current,
+    this.streak = 0,
   });
 
   /// The bird of each question, in order.
@@ -34,6 +35,9 @@ class QuizTrail extends StatelessWidget {
 
   /// Question on screen.
   final int current;
+
+  /// Right answers in a row (read out from two).
+  final int streak;
 
   /// Fixed width of a step, and the trail's height.
   static const double slot = 24;
@@ -54,11 +58,9 @@ class QuizTrail extends StatelessWidget {
     final total = birds.length;
     final right = results.where((r) => r).length;
     return Semantics(
-      label: l10n.forkQuizTrailLabel(
-        math.min(current + 1, total),
-        total,
-        right,
-      ),
+      label:
+          l10n.forkQuizTrailLabel(math.min(current + 1, total), total, right) +
+          (streak >= 2 ? ', ${l10n.forkQuizStreak(streak)}' : ''),
       container: true,
       child: ExcludeSemantics(
         child: LayoutBuilder(
@@ -194,7 +196,10 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: c.surface1,
-              border: Border.all(color: c.accent, width: BirdyStroke.thick * scale),
+              border: Border.all(
+                color: c.accent,
+                width: BirdyStroke.thick * scale,
+              ),
             ),
             child: Text(
               '$number',
@@ -220,7 +225,10 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: tint.cardBackground(c.brightness),
-              border: Border.all(color: tint.accent, width: BirdyStroke.regular * scale),
+              border: Border.all(
+                color: tint.accent,
+                width: BirdyStroke.regular * scale,
+              ),
             ),
             child: QuizBirdArt(
               bird: bird,
@@ -241,9 +249,16 @@ class QuizStone extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: c.surface1,
-              border: Border.all(color: c.border, width: BirdyStroke.regular * scale),
+              border: Border.all(
+                color: c.border,
+                width: BirdyStroke.regular * scale,
+              ),
             ),
-            child: Icon(AppIcons.quizClose, size: BirdyGlyph.s * scale, color: c.text2),
+            child: Icon(
+              AppIcons.quizClose,
+              size: BirdyGlyph.s * scale,
+              color: c.text2,
+            ),
           ),
         );
     }

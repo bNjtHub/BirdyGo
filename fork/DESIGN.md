@@ -564,10 +564,14 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   l'étape courante ; étapes à venir = points de 12 cerclés de 3 px de la couleur du fond (le trait ne
   les traverse jamais), étape courante = cercle de 30 bordé Martin-pêcheur avec son numéro et un halo
   pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
-  cercle de 20 avec une petite croix. Ce chemin est le seul compteur : pas de « Chant n sur N » ni de
-  pastille de score. Son libellé accessible dit « Chant 4 sur 10, 3 bonnes réponses » (`forkQuizTrailLabel`).
-  La pastille Loriot « 3 d'affilée ! » se pose dans le coin haut gauche de la scène (aucune bande vide
-  au-dessus : 16 dp entre la piste et la scène, disque à 16 dp du haut de la scène).
+  cercle de 20 avec une petite croix (le tick seul ne suffisait pas : il faut aussi le texte).
+  Une ligne d'état (`_StatusLine`, 32 dp, 8 dp sous la piste et 8 dp au-dessus de la scène)
+  reprend la piste en texte : à gauche « Chant 3 sur 10 » (`text2`), à droite la pastille de score Sûr
+  (coche et « 2 bonnes », pluriel ICU `forkQuizScorePill`) puis, dès 2 de suite, la pastille Loriot
+  « 3 d'affilée ! » (pop, immobile en animations réduites). Un `Wrap` la range sous le score quand la place
+  manque (320 dp, 130 %) ; sa place reste réservée quand elle est cachée : la ligne ne change jamais de
+  hauteur. La ligne est muette : le libellé accessible de la piste dit tout, « Chant 3 sur 10, 2 bonnes
+  réponses, 2 d'affilée ! » (`forkQuizTrailLabel`).
   Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : pas de libellé « Oiseau mystère » (la
   bulle « Écoute-moi ! / Qui suis-je ? » suffit), disque pointillé de 116 qui flotte (±6 px, 3 s), bouton
   de lecture de 60 posé à cheval sur son coin bas droit, spectre de 27 barres qui s'animent seulement
