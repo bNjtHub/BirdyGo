@@ -349,7 +349,7 @@ void main() {
       find.bySemanticsLabel('12 détections à vérifier, 2 min de revue'),
       findsOneWidget,
     );
-    // Status, today, « Écouter ».
+    // Status, today (« Écouter » is the bar's disc, not this screen's).
     await scrollTo(tester, find.byKey(const ValueKey('home-status-block')));
     expect(
       find.bySemanticsLabel(RegExp('24 espèces découvertes')),
@@ -362,7 +362,7 @@ void main() {
     );
     await scrollTo(tester, find.bySemanticsLabel('Pic épeiche'));
     expect(find.bySemanticsLabel('Mésange charbonnière'), findsOneWidget);
-    expect(find.text('Écouter'), findsOneWidget);
+    expect(find.byType(ListenButton), findsNothing);
   });
 
   testWidgets('no position: no sunrise in the date line', (tester) async {
@@ -376,9 +376,17 @@ void main() {
     expect(find.text('142 au total'), findsOneWidget);
   });
 
-  testWidgets('« Écouter » starts listening at once', (tester) async {
-    final pushes = await pump(tester);
-    await tester.tap(find.text('Écouter'));
+  testWidgets('« Commencer à écouter » starts listening at once', (
+    tester,
+  ) async {
+    final pushes = await pump(
+      tester,
+      snapshot: _morning(withToday: false),
+      place: null,
+    );
+    final start = find.text('Commencer à écouter');
+    await scrollTo(tester, start);
+    await tester.tap(start);
     final screen = await pushedScreen(tester, pushes);
     expect(screen, isA<LiveScreen>());
     expect((screen as LiveScreen).forceAutoStart, isTrue);
@@ -440,7 +448,7 @@ void main() {
     expect(find.textContaining('Beaulieu'), findsNothing);
   });
 
-  testWidgets('first launch: nothing yet, « Écouter » still there', (
+  testWidgets('first launch: nothing yet, the invitation to listen', (
     tester,
   ) async {
     await pump(tester, snapshot: const HomeSnapshot(), withGame: false);
@@ -452,7 +460,7 @@ void main() {
     );
     expect(find.textContaining('Aucun oiseau'), findsOneWidget);
     expect(find.textContaining('Dernier oiseau entendu'), findsNothing);
-    expect(find.text('Écouter'), findsOneWidget);
+    expect(find.text('Commencer à écouter'), findsOneWidget);
   });
 
   // FORK: J6g-c, the menu is the « Plus » sheet (tiles, advanced tools).
@@ -517,12 +525,8 @@ void main() {
       await scrollTo(tester, find.byType(DailyGoalBlock));
       expect(tester.takeException(), isNull);
       expect(find.bySemanticsLabel(RegExp('^Bird 5 ')), findsOneWidget);
-      expect(find.text('Écouter'), findsOneWidget);
-      // « Écouter » stays on screen, within reach of the thumb.
-      expect(
-        tester.getBottomLeft(find.text('Écouter')).dy,
-        lessThan(size.height),
-      );
+      // « Écouter » is the bar's disc: no button on this screen.
+      expect(find.byType(ListenButton), findsNothing);
       // Scrolling to the end lays out every block.
       await tester.drag(find.byType(Scrollable).first, const Offset(0, -2000));
       await tester.pumpAndSettle();
@@ -548,54 +552,40 @@ void main() {
     expect(hero.left, BirdySpace.page);
   });
 
-  testWidgets('« Écouter » is a 72 dp pill pinned outside the scroll', (
-    tester,
-  ) async {
+  testWidgets('no « Écouter » button: the bar owns it (J6j)', (tester) async {
     await pump(tester, withGoal: true);
-    final button = find.ancestor(
-      of: find.text('Écouter'),
-      matching: find.byType(FilledButton),
-    );
-    expect(tester.getSize(button).height, BirdySizes.listen);
-    expect(
-      find.ancestor(of: button, matching: find.byType(Scrollable)),
-      findsNothing,
-    );
-    final before = tester.getTopLeft(button);
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -400));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(button), before);
-    // The only strong action of the screen.
-    expect(find.byType(FilledButton), findsOneWidget);
+    expect(find.byType(ListenButton), findsNothing);
+    expect(find.byType(FilledButton), findsNothing);
   });
 
   testWidgets(
-    'the « Écouter » glow has room: not clipped by the bottom bar (J6f)',
+    'the list reaches the bar: room for the disc, 28 dp fade (J6j)',
     (tester) async {
       await pump(tester, withGoal: true);
-      final button = find.byType(ListenButton);
-      // The Padding directly wrapping the button (nearest ancestor).
-      final padding =
-          tester
-              .widgetList<Padding>(
-                find.ancestor(of: button, matching: find.byType(Padding)),
-              )
-              .first;
-      // Centered: the same room above and below, and at least the glow's
-      // reach (offset + blur), or the bottom navigation bar covers it.
-      final glow = BirdyColors.light.listenGlow
-          .map((s) => s.offset.dy + s.blurRadius)
-          .reduce((a, b) => a > b ? a : b);
-      expect(glow, lessThanOrEqualTo(BirdyColors.listenGlowExtent));
-      final insets = padding.padding as EdgeInsets;
-      expect(insets.top, insets.bottom);
-      expect(insets.bottom, greaterThanOrEqualTo(BirdyColors.listenGlowExtent));
-      // No hard clip between the button and the screen: the glow can
-      // paint past the button's own box.
-      expect(
-        find.ancestor(of: button, matching: find.byType(ClipRect)),
-        findsNothing,
+      final list = tester.widget<ListView>(find.byType(ListView).first);
+      final insets = list.padding! as EdgeInsets;
+      expect(insets.bottom, BirdySpace.page + BirdySizes.listenDiscLift);
+      expect(insets.bottom, 38);
+      // The fade sits over the list's bottom and lets touches through.
+      final gradient = find.byWidgetPredicate(
+        (w) =>
+            w is DecoratedBox &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).gradient != null,
       );
+      final fade = find.ancestor(
+        of: gradient,
+        matching: find.byWidgetPredicate(
+          (w) => w is Positioned && w.height == BirdySizes.listFade,
+        ),
+      );
+      expect(fade, findsWidgets);
+      expect(
+        find.descendant(of: fade.first, matching: find.byType(IgnorePointer)),
+        findsWidgets,
+      );
+      final positioned = tester.widget<Positioned>(fade.first);
+      expect(positioned.bottom, 0);
     },
   );
 

@@ -32,7 +32,7 @@ import '../game/game_widgets.dart';
 import '../game/quiz_entry_row.dart';
 import '../game/streak.dart';
 import '../settings/fork_prefs.dart';
-import '../ranking/ranking_screen.dart';
+import '../home/more_sheet.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -60,7 +60,8 @@ class ProfileScreen extends ConsumerWidget {
                 BirdySpace.page,
                 BirdySpace.page,
                 BirdySpace.page,
-                BirdySpace.page,
+                // Clears the « Écouter » disc's overhang above the bar (J6j).
+                BirdySpace.page + BirdySizes.listenDiscLift,
               ),
               children: [
                 // Announced once, while the game progress is still loading.
@@ -71,15 +72,11 @@ class ProfileScreen extends ConsumerWidget {
                   child: BirdyTabHeader(
                     title: l10n.forkProfileTitle,
                     actions: [
+                      // « Palmarès » is the first entry of the menu.
                       BirdyIconButton(
-                        icon: AppIcons.leaderboard,
-                        semanticLabel: l10n.forkRanking,
-                        onPressed:
-                            () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const RankingScreen(),
-                              ),
-                            ),
+                        icon: AppIcons.menu,
+                        semanticLabel: l10n.forkHomeMenu,
+                        onPressed: () => showMoreSheet(context, ref),
                       ),
                     ],
                   ),

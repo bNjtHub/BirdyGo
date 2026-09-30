@@ -255,6 +255,10 @@ abstract final class BirdyMotion {
 
   static const double pressScale = 0.97;
 
+  /// « Écouter » disc of the bar (J6j): the one press deeper than
+  /// [pressScale], an explicit exception (DESIGN.md).
+  static const double listenDiscPressScale = 0.95;
+
   /// Starting scale of an element entering.
   static const double enterScale = 0.97;
 
@@ -284,15 +288,14 @@ abstract final class BirdyMotion {
   static const double listeningBarMin = 0.45;
   static const double listeningBarStagger = 0.18;
 
-  /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval] (plus or
-  /// minus up to [wingWaveJitter], so it never feels metronomic) the four
-  /// bars swell one after the other in [wingWave], then return exactly to
-  /// rest. A gentle level-meter hint, not a loop: at rest nothing ticks.
+  /// Wing icon wave on « Écouter » (J6h): every [wingWaveInterval], exactly
+  /// (J6j, no jitter), the four bars swell one after the other in
+  /// [wingWave], then return exactly to rest. A gentle level-meter hint, not
+  /// a loop: at rest nothing ticks.
   /// Each bar starts [wingWaveStagger] (share of the wave) after the
   /// previous one and grows by [wingWaveAmplitude] of its length at most.
   static const Duration wingWave = Duration(milliseconds: 900);
   static const Duration wingWaveInterval = Duration(seconds: 7);
-  static const Duration wingWaveJitter = Duration(milliseconds: 1500);
   static const Curve wingWaveCurve = Curves.easeInOut;
   static const double wingWaveStagger = 0.12;
   static const double wingWaveAmplitude = 0.22;

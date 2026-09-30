@@ -5,8 +5,11 @@
 /// upstream `HomeScreen`, which keeps its warm-up (model, taxonomy,
 /// geo-model, index). Blocks, told apart by their fill: greeting, last bird
 /// hero, goal / série / to-check grid, status, today's species, weekly
-/// challenge. « Écouter » is the one strong action, pinned above the bottom
-/// bar, and starts listening at once; the menu keeps every upstream entry.
+/// challenge. « Écouter » is the one strong action: since J6j it is the disc
+/// in the middle of the bottom bar (`ForkNavBar`), not a button of this
+/// screen, and starts listening at once; the list runs down to the bar, with
+/// room under the last block for the disc's overhang. The menu keeps every
+/// upstream entry.
 library;
 
 import 'dart:async';
@@ -128,7 +131,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         commonName: name,
       );
 
-  /// Straight into listening, like the « Écouter » button.
+  /// Straight into listening, like the « Écouter » disc of the bar.
   void _listen() => _open(const LiveScreen(forceAutoStart: true));
 
   void _openDaySheet(DayTimes times, DayMoment moment) => showDaySheet(
@@ -414,16 +417,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           ChallengeCard(challenge: challenge, onStart: _startChallenge),
         ),
     ];
-    final listen = Padding(
-      // Equal margins above and below, as wide as the button's glow
-      // (BirdyColors.listenGlowExtent): centered, and never cut by the bar.
-      padding: const EdgeInsets.all(BirdySpace.xl),
-      // Straight into listening: the live screen starts on arrival.
-      child: ListenButton(
-        onPressed: _listen,
-      ),
-    );
-
     return Scaffold(
       backgroundColor: c.background,
       body: SafeArea(
@@ -441,7 +434,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                         Expanded(
                           child: _blocks(cards, firstIndex: head.length),
                         ),
-                        listen,
                       ],
                     ),
                   ),
@@ -456,7 +448,6 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                     Expanded(
                       child: _blocks([...head, ...cards], topBar: topBar),
                     ),
-                    listen,
                   ],
                 ),
               ),
@@ -512,15 +503,20 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
 
   /// A scrolling column of [blocks]. The first
   /// [BirdyMotion.staggerMaxItems] rise once, 40 ms apart; the others, and
-  /// every block under reduced motion, appear still.
+  /// every block under reduced motion, appear still. The list reaches the
+  /// bottom bar: its last block clears the « Écouter » disc's overhang, and a
+  /// fade into the background softens the cut above the bar.
   Widget _blocks(
     List<(String, Widget)> blocks, {
     Widget? topBar,
     int firstIndex = 0,
   }) {
     final still = BirdyMotion.reduced(context);
-    return ListView(
-      padding: const EdgeInsets.all(BirdySpace.page),
+    final background = BirdyColors.of(context).background;
+    final list = ListView(
+      padding: const EdgeInsets.all(
+        BirdySpace.page,
+      ).copyWith(bottom: BirdySpace.page + BirdySizes.listenDiscLift),
       children: [
         if (topBar != null) topBar,
         for (final (i, (key, block)) in blocks.indexed)
@@ -537,6 +533,28 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
                       child: block,
                     ),
           ),
+      ],
+    );
+    return Stack(
+      children: [
+        Positioned.fill(child: list),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: BirdySizes.listFade,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [background.withValues(alpha: 0), background],
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

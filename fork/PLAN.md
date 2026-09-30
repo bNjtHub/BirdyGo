@@ -863,6 +863,20 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
       - [x] Liseré du logo quiz à l'accent du thème d'oiseau choisi.
       - [ ] (Benjamin) Téléphone : bloc quiz sur l'Accueil, menu Plus dans les 4 thèmes.
 
+- [x] J6j Barre du bas : « Écouter » devient un disque au centre de la barre (5 emplacements : Accueil,
+      Carnet, Écouter, Carte, Profil).
+      - [x] `ForkNavBar` (`lib/fork/shell/fork_nav_bar.dart`) : barre dessinée à la main, disque de 68 dp
+            qui dépasse de 22 dp, aile en vumètre pendant l'écoute, appui à 0,95, sémantique dans l'ordre.
+      - [x] `ForkShell` : pages au-dessus de la barre (`Stack`), le disque n'est pas un onglet ; il ouvre
+            l'écoute, ou rouvre l'écran d'une écoute en cours.
+      - [x] Accueil : plus de pilule « Écouter », marge basse de 38, fondu de 28 dp. Profil : le bouton
+            Palmarès devient le menu (Palmarès reste dans le menu). Marge basse de Carnet et Profil
+            alignée sur celle de l'Accueil.
+      - [x] Vague de l'aile toutes les 7 s pile (plus de variation).
+      - [x] Tests : goldens de la barre (4 oiseaux, clair et sombre), appuis, cibles de 48, ordre de la
+            sémantique, contrastes ; goldens de l'Accueil régénérés.
+      - [ ] (Benjamin) Téléphone : disque, écoute écran éteint, rouvrir l'écoute depuis la barre.
+
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
 - l'écoute démarre moins d'une seconde après l'appui sur « Écouter » (le nouvel accueil garde le
