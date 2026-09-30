@@ -253,7 +253,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                     children: [
                       Positioned(
                         right: -BirdySpace.s,
-                        bottom: -BirdySpace.s,
+                        top: -BirdySpace.s,
                         child: ExcludeSemantics(
                           child: Icon(
                             _iconOf(current),

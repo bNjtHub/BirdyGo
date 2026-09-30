@@ -395,13 +395,11 @@ void main() {
   );
 
   testWidgets(
-    'the seasons chart: quarterly labels at 130 % text (J6f-b fix)',
+    'the seasons chart: 12 month labels at 130 % text (J6f-b fix, J7)',
     (tester) async {
       await pump(tester, textScale: 1.3);
-      final chart = tester.widget<ActivityBars>(
-        find.byType(ActivityBars).first,
-      );
-      expect(chart.labels.length, 4);
+      final chart = tester.widget<ActivityBars>(find.byType(ActivityBars).first);
+      expect(chart.labels.length, 12);
     },
   );
 

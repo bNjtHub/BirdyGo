@@ -437,7 +437,8 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   (J7 : le meilleur son ouvre la liste avec le grand bouton `BirdySizes.mainAction` et une ligne en
   `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » avec les 48 semaines
   du géomodèle (barres `ActivityBars`, seuil de la liste Explorer, semaine courante marquée par le
-  point, une lettre par mois). Phrase : migrateur « Arrive début mars · repart fin septembre »
+  point, une lettre par mois ; pleine largeur du bloc sous la phrase, jamais dans une colonne de 150 dp :
+  `BirdySizes.seasonsChartHeight`, au moins 4 dp par barre dès 320 dp, test à 320/360/412 dp et 130 %). Phrase : migrateur « Arrive début mars · repart fin septembre »
   (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes), sédentaire
   « Présent toute l'année. » ; le résumé Semantics ajoute le mois du pic et la nidification. Bande
   « Nidification : avril à juillet » (`NestingBand`, `BirdySizes.nestingBandHeight`, couleur
@@ -913,6 +914,7 @@ Règles transverses :
     de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
+- **Fiche, carte de contenu de « Fais sa connaissance ».** Le filigrane de l'icône de la rubrique est en haut à droite de la carte (pas en bas).
 - **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des

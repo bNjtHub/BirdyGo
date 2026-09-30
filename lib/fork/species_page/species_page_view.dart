@@ -399,7 +399,7 @@ class _HereNowCardState extends State<HereNowCard> {
     final perLabel = weekly ? weeksPerYear ~/ 12 : 1;
     final scale = ActivityScale.kingfisher(c.surface1, hue: c.accent);
     final initials = DateFormat.MMMM(language).dateSymbols.NARROWMONTHS;
-    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.15;
+    final crowded = MediaQuery.textScalerOf(context).scale(1) > 1.6;
     final labels = {
       for (final m in crowded ? const [0, 3, 6, 9] : List.generate(12, (i) => i))
         m * perLabel: initials[m],
@@ -426,92 +426,73 @@ class _HereNowCardState extends State<HereNowCard> {
         children: [
           SectionTitle(icon: AppIcons.calendarToday, text: l10n.forkFicheHereNow),
           const SizedBox(height: BirdySpace.m),
-          Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.sentence,
-                    style: BirdyText.bodyCompact.copyWith(color: c.text1),
+          Text(
+            widget.sentence,
+            style: BirdyText.bodyCompact.copyWith(color: c.text1),
+          ),
+          if (widget.rareNote != null) ...[
+            const SizedBox(height: BirdySpace.s),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: BirdySpace.xxs),
+                  child: Icon(
+                    AppIcons.diamond,
+                    size: BirdyGlyph.s,
+                    fill: 1,
+                    color: c.orioleText,
                   ),
-                  if (widget.rareNote != null) ...[
-                    const SizedBox(height: BirdySpace.s),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: BirdySpace.xxs),
-                          child: Icon(
-                            AppIcons.diamond,
-                            size: BirdyGlyph.s,
-                            fill: 1,
-                            color: c.orioleText,
-                          ),
-                        ),
-                        const SizedBox(width: BirdySpace.xs),
-                        Expanded(
-                          child: Text(
-                            widget.rareNote!,
-                            style: BirdyText.bodyCompact.copyWith(
-                              color: c.orioleText,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: BirdySpace.m),
-            SizedBox(
-              width: BirdySizes.activityBarsWidth,
-              child: Column(
-                children: [
-                  ActivityBars(
-                    values: percents,
-                    // 36 px of bars plus the current month's dot strip.
-                    height: BirdySizes.activityBarsHeight,
-                    colorForValue: scale.of,
-                    trackColor: c.line,
-                    labels: labels,
-                    labelStyle: BirdyText.axisLabel,
-                    highlightIndex: highlight,
-                    highlightColor: c.text1,
-                    semanticLabel: seasonsChartSemanticLabel(
-                      l10n,
-                      language,
-                      months,
-                      nesting: nesting,
-                    ),
-                    onSelect: (index, _) => setState(() => _selected = index),
+                ),
+                const SizedBox(width: BirdySpace.xs),
+                Expanded(
+                  child: Text(
+                    widget.rareNote!,
+                    style: BirdyText.bodyCompact.copyWith(color: c.orioleText),
                   ),
-                  if (nesting != null) ...[
-                    const SizedBox(height: BirdySpace.xs),
-                    NestingBand(
-                      key: const ValueKey('fiche-nesting'),
-                      period: nesting,
-                      slotsPerMonth: perLabel,
-                      color: c.accent,
-                      trackColor: c.line,
-                      legend: nestingLegend(l10n, language, nesting),
-                    ),
-                  ],
-                  if (caption != null) ...[
-                    const SizedBox(height: BirdySpace.xs),
-                    Text(
-                      caption,
-                      textAlign: TextAlign.center,
-                      style: BirdyText.caption.copyWith(color: c.text2),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
           ],
-        ),
+          const SizedBox(height: BirdySpace.m),
+          // Full width (J7 fix): 48 bars need the whole block, a 150 dp
+          // column beside the sentence made them 2 dp slivers.
+          ActivityBars(
+            values: percents,
+            height: BirdySizes.seasonsChartHeight,
+            colorForValue: scale.of,
+            trackColor: c.line,
+            labels: labels,
+            labelStyle: BirdyText.axisLabel,
+            highlightIndex: highlight,
+            highlightColor: c.text1,
+            semanticLabel: seasonsChartSemanticLabel(
+              l10n,
+              language,
+              months,
+              nesting: nesting,
+            ),
+            onSelect: (index, _) => setState(() => _selected = index),
+          ),
+          if (nesting != null) ...[
+            const SizedBox(height: BirdySpace.xs),
+            NestingBand(
+              key: const ValueKey('fiche-nesting'),
+              period: nesting,
+              slotsPerMonth: perLabel,
+              color: c.accent,
+              trackColor: c.line,
+              legend: nestingLegend(l10n, language, nesting),
+            ),
+          ],
+          if (caption != null) ...[
+            const SizedBox(height: BirdySpace.xs),
+            Text(
+              caption,
+              textAlign: TextAlign.center,
+              style: BirdyText.caption.copyWith(color: c.text2),
+            ),
+          ],
         ],
       ),
     );
@@ -550,6 +531,7 @@ class NestingBand extends StatelessWidget {
           child: SizedBox(
             height: BirdySizes.nestingBandHeight,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (var m = 1; m <= 12; m++)
                   Expanded(

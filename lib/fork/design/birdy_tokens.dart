@@ -700,6 +700,9 @@ abstract final class BirdySizes {
   /// Activity bars of the species page: 24 monthly bars and the hourly ones.
   static const double activityBarsWidth = 150;
   static const double activityBarsHeight = 45;
+
+  /// Full-width weekly presence chart (bars plus the current-week dot).
+  static const double seasonsChartHeight = 72;
   static const double hourBarsHeight = 52;
 
   /// Nesting band under the weekly presence chart of the species page.
