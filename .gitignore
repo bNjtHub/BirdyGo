@@ -166,3 +166,6 @@ review_decisions.json
 
 # FORK: GBIF range extraction (tools/fork_gbif_ranges.py)
 tools/fork_gbif/cache/
+
+# FORK: GBIF extraction cache (tools/fork_gbif_ranges.py), regenerated on the PC
+tools/fork_gbif/cache/
