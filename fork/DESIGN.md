@@ -463,9 +463,16 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
 - En-tête : photo de J6b bord à bord (3:2) sur la teinte claire ou sombre de l'espèce
   (`SpeciesAccents`), rayon 28 en bas, nom en Fraunces 34, nom latin. Les icônes de J6d
   remplaceront la photo seulement aux petites tailles.
-- Blocs : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr (confirmée ou score
-  Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Ici en ce moment » avec les 12 mois
-  du géomodèle (un mois = sa meilleure semaine, seuil de la liste Explorer) ; « Mes sons » ; fiche IA
+- Blocs, dans cet ordre : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr
+  (confirmée ou score Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Mes sons »
+  (J7 : le meilleur son ouvre la liste avec le grand bouton `BirdySizes.mainAction` et une ligne en
+  `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » : phrase et courbe compacte côte à côte
+  (12 barres mensuelles `ActivityBars` de 150 dp à droite, seuil de la liste Explorer, mois courant
+  marqué). La phrase vient des 48 semaines du géomodèle : migrateur « Arrive début mars · repart fin
+  septembre » (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes),
+  sédentaire « Présent toute l'année. » ; testé à 320/360/412 dp et 100/130/200 %. Pas de bande de
+  nidification sur cette carte : le champ `nesting` des fiches IA est lu (`NestingPeriod`) pour une
+  future carte du monde ; fiche IA
   (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
   activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
@@ -937,6 +944,7 @@ Règles transverses :
     de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
+- **Fiche, carte de contenu de « Fais sa connaissance ».** Le filigrane de l'icône de la rubrique est en haut à droite de la carte (pas en bas).
 - **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des

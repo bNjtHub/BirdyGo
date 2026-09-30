@@ -41,6 +41,47 @@ void main() {
     fr = lookupAppLocalizations(const Locale('fr'));
   });
 
+  group('week span (J7)', () {
+    WeekSpan span(Iterable<int> weeks) => YearPresence.fromWeeks([
+      for (var w = 0; w < 48; w++) weeks.contains(w) ? 0.5 : 0.0,
+    ]).weekSpan;
+
+    test('all year, rare, one run, several runs', () {
+      expect(
+        span(List.generate(48, (w) => w)),
+        const WeekSpan(PresenceKind.allYear),
+      );
+      expect(span(const []), const WeekSpan(PresenceKind.rare));
+      expect(
+        span(List.generate(28, (w) => w + 8)),
+        const WeekSpan(PresenceKind.range, from: 8, to: 35),
+      );
+      expect(
+        span([46, 47, 0, 1]),
+        const WeekSpan(PresenceKind.range, from: 46, to: 1),
+      );
+      expect(span([2, 3, 20, 21]), const WeekSpan(PresenceKind.partOfYear));
+    });
+
+    test('week to month part', () {
+      expect(monthOfWeek(0), 1);
+      expect(monthOfWeek(47), 12);
+      expect(monthPartOfWeek(8), MonthPart.early);
+      expect(monthPartOfWeek(9), MonthPart.mid);
+      expect(monthPartOfWeek(10), MonthPart.mid);
+      expect(monthPartOfWeek(11), MonthPart.late);
+    });
+
+    test('weekly bars are relative to the best week', () {
+      final weeks = List<double>.filled(48, 0)
+        ..[3] = 0.2
+        ..[9] = 0.4;
+      final year = YearPresence.fromWeeks(weeks);
+      expect(year.weekBars[9], 1);
+      expect(year.weekBars[3], closeTo(0.5, 1e-9));
+    });
+  });
+
   group('YearPresence', () {
     test('a month takes its best week', () {
       final weeks =
@@ -92,20 +133,48 @@ void main() {
       );
     });
 
-    test('a season, and whether it is now', () {
+    test('a migrant: arrival and departure from the weeks (J7)', () {
       expect(
         sentence({3, 4, 5, 6, 7, 8, 9}, DateTime(2026, 6)),
-        'Présent de mars à septembre.',
+        'Arrive début mars · repart fin septembre.',
       );
       expect(
         sentence({3, 4, 5, 6, 7, 8, 9}, DateTime(2026, 12)),
-        'Présent de mars à septembre. Pas attendu ici en ce moment.',
+        'Arrive début mars · repart fin septembre. '
+        'Pas attendu ici en ce moment.',
       );
     });
 
-    test('elision before a vowel', () {
+    test('arrival mid month, across the new year', () {
+      // A wintering bird: weeks 41 to 47 then 0 to 9 (mid November to mid
+      // March).
+      final weeks = [
+        for (var w = 0; w < 48; w++) (w >= 41 || w <= 9) ? 0.5 : 0.0,
+      ];
       expect(
-        sentence({4, 5, 6, 7, 8}, DateTime(2026, 6)),
+        presenceSentence(
+          fr,
+          'fr',
+          YearPresence.fromWeeks(weeks),
+          now: DateTime(2026, 1),
+        ),
+        'Arrive vers la mi-novembre · repart vers la mi-mars.',
+      );
+    });
+
+    test('without weekly scores, the month sentence remains', () {
+      final months = [for (var m = 1; m <= 12; m++) m >= 3 && m <= 9 ? 0.5 : 0.0];
+      expect(
+        presenceSentence(fr, 'fr', YearPresence(months), now: DateTime(2026, 6)),
+        'Présent de mars à septembre.',
+      );
+      expect(
+        presenceSentence(
+          fr,
+          'fr',
+          YearPresence([for (var m = 1; m <= 12; m++) m >= 4 && m <= 8 ? 0.5 : 0.0]),
+          now: DateTime(2026, 6),
+        ),
         "Présent d'avril à août.",
       );
     });

@@ -10,13 +10,16 @@ import '../species_sheet/species_sheet.dart';
 /// Geo-model weeks per month (48 weeks, see `GeoModel.dateTimeToWeek`).
 const int _weeksPerMonth = 4;
 
+/// Geo-model weeks per year.
+const int weeksPerYear = 12 * _weeksPerMonth;
+
 /// The geo-model's year for one species at the phone's place.
 class YearPresence {
-  const YearPresence(this.months);
+  const YearPresence(this.months, {this.weeks = const []});
 
   /// Built from the 48 weekly scores: a month takes its best week.
   factory YearPresence.fromWeeks(List<double> weeks) {
-    if (weeks.length != 12 * _weeksPerMonth) {
+    if (weeks.length != weeksPerYear) {
       throw ArgumentError.value(weeks.length, 'weeks', 'expected 48');
     }
     return YearPresence([
@@ -24,7 +27,42 @@ class YearPresence {
         weeks
             .sublist(m * _weeksPerMonth, (m + 1) * _weeksPerMonth)
             .reduce((a, b) => a > b ? a : b),
-    ]);
+    ], weeks: List.unmodifiable(weeks));
+  }
+
+  /// The 48 weekly scores (J7), or empty when only months are known.
+  final List<double> weeks;
+
+  /// Whether week [index] (0 to 47) is expected here: same threshold as the
+  /// months.
+  bool presentInWeek(int index) =>
+      weeks[index] >= kAbundanceInclusionThreshold;
+
+  /// Weekly bar heights from 0 to 1, relative to the species' best week.
+  List<double> get weekBars {
+    final top = weeks.isEmpty ? 0.0 : weeks.reduce((a, b) => a > b ? a : b);
+    return [for (final w in weeks) top <= 0 ? 0.0 : w / top];
+  }
+
+  /// Arrival and departure read from the weeks (J7). Falls back to the
+  /// month-based [span] when the weekly scores are unknown.
+  WeekSpan get weekSpan {
+    if (weeks.isEmpty) return const WeekSpan(PresenceKind.partOfYear);
+    final present = [for (var w = 0; w < weeksPerYear; w++) presentInWeek(w)];
+    final count = present.where((p) => p).length;
+    if (count == weeksPerYear) return const WeekSpan(PresenceKind.allYear);
+    if (count == 0) return const WeekSpan(PresenceKind.rare);
+    final starts = [
+      for (var w = 0; w < weeksPerYear; w++)
+        if (present[w] && !present[(w + weeksPerYear - 1) % weeksPerYear]) w,
+    ];
+    if (starts.length != 1) return const WeekSpan(PresenceKind.partOfYear);
+    final from = starts.single;
+    return WeekSpan(
+      PresenceKind.range,
+      from: from,
+      to: (from + count - 1) % weeksPerYear,
+    );
   }
 
   /// Best weekly score of each month, January first.
@@ -60,6 +98,43 @@ class YearPresence {
 }
 
 enum PresenceKind { allYear, range, partOfYear, rare }
+
+/// Weeks (0 to 47) when the species arrives and leaves: [from] is the first
+/// present week and [to] the last one of a [PresenceKind.range], possibly
+/// across the new year.
+class WeekSpan {
+  const WeekSpan(this.kind, {this.from, this.to});
+
+  final PresenceKind kind;
+  final int? from;
+  final int? to;
+
+  @override
+  bool operator ==(Object other) =>
+      other is WeekSpan &&
+      other.kind == kind &&
+      other.from == from &&
+      other.to == to;
+
+  @override
+  int get hashCode => Object.hash(kind, from, to);
+
+  @override
+  String toString() => 'WeekSpan($kind, $from, $to)';
+}
+
+/// Part of a month a week falls in.
+enum MonthPart { early, mid, late }
+
+/// Month (1 to 12) of week [index] (0 to 47).
+int monthOfWeek(int index) => index ~/ _weeksPerMonth + 1;
+
+/// Early (first week), late (last week) or mid month (the two between).
+MonthPart monthPartOfWeek(int index) {
+  final inMonth = index % _weeksPerMonth;
+  if (inMonth == 0) return MonthPart.early;
+  return inMonth == _weeksPerMonth - 1 ? MonthPart.late : MonthPart.mid;
+}
 
 /// Months when the species is expected here.
 class PresenceSpan {

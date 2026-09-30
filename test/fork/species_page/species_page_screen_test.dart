@@ -9,6 +9,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/ranking/activity_bars.dart';
@@ -286,6 +288,24 @@ void main() {
     await pump(tester, home: const SizedBox());
     await pump(tester);
     expect(find.text(explanation), findsOneWidget);
+  });
+
+  testWidgets('sounds come right after the counters, before here and now '
+      '(J7)', (tester) async {
+    await pump(tester);
+    final heard = tester.getTopLeft(find.byKey(const ValueKey('fiche-heard')));
+    final sounds = tester.getTopLeft(
+      find.byKey(const ValueKey('fiche-sounds')),
+    );
+    final here = tester.getTopLeft(find.text('Ici en ce moment'));
+    expect(heard.dy, lessThan(sounds.dy));
+    expect(sounds.dy, lessThan(here.dy));
+    // The best recording leads with the big play button.
+    final featured = find.descendant(
+      of: find.byKey(const ValueKey('fiche-sounds-featured')),
+      matching: find.byType(ClipPlayButton),
+    );
+    expect(tester.widget<ClipPlayButton>(featured).size, BirdySizes.mainAction);
   });
 
   testWidgets(

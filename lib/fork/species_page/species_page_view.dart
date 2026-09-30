@@ -515,7 +515,6 @@ class MySoundsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
     return BirdyBlock(
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -534,43 +533,8 @@ class MySoundsBlock extends StatelessWidget {
               ),
           ],
         ),
-        for (final clip in clips)
-          Padding(
-            padding: const EdgeInsets.only(top: BirdySpace.s),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 56),
-              child: Row(
-                children: [
-                  ClipPlayButton(
-                    state:
-                        playing == clip.clipPath
-                            ? ClipPlayState.playing
-                            : ClipPlayState.idle,
-                    semanticLabel:
-                        playing == clip.clipPath
-                            ? l10n.forkReplayStop
-                            : l10n.forkReplay,
-                    onPressed: () => onPlay(clip),
-                  ),
-                  const SizedBox(width: BirdySpace.m),
-                  Expanded(
-                    child: Text(
-                      lineOf(clip),
-                      style: BirdyText.bodyCompact.copyWith(
-                        color: c.text1,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                  _FavoriteButton(
-                    favorite: favorites.contains(clip.key),
-                    onPressed:
-                        () => onFavorite(clip, !favorites.contains(clip.key)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        for (var i = 0; i < clips.length; i++)
+          _clipRow(context, clips[i], featured: i == 0),
         if (onMore != null && moreCount > clips.length)
           Align(
             alignment: Alignment.centerLeft,
@@ -581,6 +545,52 @@ class MySoundsBlock extends StatelessWidget {
           ),
       ],
     ),
+    );
+  }
+
+  /// One recording. The first one leads the page (J7): the big play button
+  /// of the cards where a replay is the main action, and a larger line.
+  Widget _clipRow(
+    BuildContext context,
+    IndexedDetection clip, {
+    required bool featured,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final isPlaying = playing == clip.clipPath;
+    return Padding(
+      padding: const EdgeInsets.only(top: BirdySpace.s),
+      child: ConstrainedBox(
+        key: featured ? const ValueKey('fiche-sounds-featured') : null,
+        constraints: BoxConstraints(
+          minHeight: featured ? BirdySizes.mainAction : 56,
+        ),
+        child: Row(
+          children: [
+            ClipPlayButton(
+              size: featured ? BirdySizes.mainAction : BirdySizes.target,
+              state: isPlaying ? ClipPlayState.playing : ClipPlayState.idle,
+              semanticLabel: isPlaying ? l10n.forkReplayStop : l10n.forkReplay,
+              onPressed: () => onPlay(clip),
+            ),
+            const SizedBox(width: BirdySpace.m),
+            Expanded(
+              child: Text(
+                lineOf(clip),
+                style: (featured ? BirdyText.body : BirdyText.bodyCompact)
+                    .copyWith(
+                      color: c.text1,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+              ),
+            ),
+            _FavoriteButton(
+              favorite: favorites.contains(clip.key),
+              onPressed: () => onFavorite(clip, !favorites.contains(clip.key)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
