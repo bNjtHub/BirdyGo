@@ -47,6 +47,9 @@ abstract final class QuizMotion {
   static const Duration flyUpDelay = Duration(milliseconds: 150);
   static const Duration nextRise = Duration(milliseconds: 250);
   static const Duration nextDelay = Duration(milliseconds: 200);
+
+  /// A wrong answer: the right song restarts after the soft note (0.35 s).
+  static const Duration replayAfterSoft = Duration(milliseconds: 500);
   static const Duration fill = Duration(milliseconds: 900);
   static const Duration fillDelay = Duration(milliseconds: 450);
   static const Duration star = Duration(milliseconds: 450);

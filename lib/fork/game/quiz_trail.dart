@@ -54,7 +54,11 @@ class QuizTrail extends StatelessWidget {
     final total = birds.length;
     final right = results.where((r) => r).length;
     return Semantics(
-      label: results.isEmpty ? null : l10n.forkQuizScore(right, results.length),
+      label: l10n.forkQuizTrailLabel(
+        math.min(current + 1, total),
+        total,
+        right,
+      ),
       container: true,
       child: ExcludeSemantics(
         child: LayoutBuilder(
