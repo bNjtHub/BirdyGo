@@ -405,9 +405,40 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   vers la fiche. « N détections à vérifier » (cachée à 0), vers la revue rapide. « Écouter » fixé en
   bas, au pouce.
 - Les chiffres se chargent après la première image et se remettent à jour quand l'index change.
-- Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
-  Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
-  fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
+- Menu (en haut à droite) : la feuille « Plus », voir « Menu Plus » plus bas. Rien d'upstream ne
+  disparaît.
+- « Qui chante ? » (L) : entre le bloc « Aujourd'hui » et le défi de la semaine, le lien du Profil
+  (`QuizEntryRow`, `lib/fork/game/quiz_entry_row.dart`, un seul widget pour Profil, fiche espèce et
+  Accueil) avec son paramètre `progress`. Bloc blanc (`surface1`, rayon 20, padding 16), logo quiz de
+  56 (`QuizLogo`, puits sombre, liseré à l'accent du thème d'oiseau choisi dans le Profil), titre en
+  heading, accroche en légende `text2` : « Encore {n} bonnes réponses pour ta première plume », puis
+  « Tu as ta première plume. Vise la deuxième ! », « Vise la troisième ! », et un bravo aux trois
+  plumes. Dessous, 10 segments de 6 (écart 3, rayon plein), remplis à l'accent, les autres en
+  `line` : la progression depuis le palier précédent d'Oreille fine vers le suivant, pleine au
+  dernier. Chevron, pression standard, un toucher ouvre le quiz (QuizIntro). Affiché seulement si le
+  quiz est jouable (`quizPlayableProvider`, même seuil que le quiz : au moins `quizChoices` espèces
+  vérifiées avec un clip), sinon absent, jamais grisé. Il entre en décalé avec les autres blocs.
+
+### Menu Plus (M)
+
+Feuille `lib/fork/home/more_sheet.dart`, titre « Plus » (26) et poignée, 90 % de l'écran au plus
+(`BirdySizes.moreSheetMaxShare`), défilement au-delà. Triée de l'important vers le technique :
+
+- Trois groupes titrés (légende 13 gras `text2`, retrait 4), chacun un bloc Brume (`background`,
+  rayon 20, padding horizontal 16) de lignes de liste standard (72, disque teinté de 44, icône 22,
+  libellé 17 gras, légende `text2`, chevron) séparées par un filet `line` :
+  - « Jouer et progresser » : Qui chante ? et Palmarès (Loriot, récompense).
+  - « Mes oiseaux » : Revue rapide (disque blanc au contour pointillé `toCheck`, « {n} à vérifier » ou
+    « Tout est trié »), Sonothèque, Mes sessions (`tonal`).
+  - « Découvrir » : Oiseaux des jardins (`sure`), Explorer (`tonal`).
+- La Carte n'y est plus : c'est un onglet.
+- Sous un filet `line` (marge 4), un bloc blanc bordé de `line`, rayon 20, lignes compactes de 56
+  (icône 22 `text2` sans disque, libellé 15 gras, chevron) : Réglages, Aide, À propos, puis Outils
+  avancés (libellé `text2`) en dernier, dépliable sur place (`expandMore` / `expandLess`) sur les 5
+  outils (Point d'écoute, Transect, ARU, Entraînement, Analyse de fichier) en lignes de 48, en
+  retrait de 34.
+- Golden dans les 4 thèmes, clair et sombre ; les paires de couleurs sont dans le test de contraste
+  de l'Accueil (4,5:1).
 - Paysage large : salutation et objectif du jour à gauche ; statut, tuiles, cartes et « Écouter » à
   droite. Colonne de 600 dp au plus sur tablette.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
