@@ -870,6 +870,17 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             sémantique, contrastes ; goldens de l'Accueil régénérés.
       - [ ] (Benjamin) Téléphone : disque, écoute écran éteint, rouvrir l'écoute depuis la barre.
 
+   J7 Écoute (thème clair, niveau stable), branche `feat/ecoute-theme-clair` :
+      - [x] L'écran d'écoute suit le thème de l'app par défaut ; réglage « Écran d'écoute toujours
+            sombre » (Réglages, feuille d'options de l'écoute), faux par défaut.
+      - [x] Contrastes du Live dans les 4 thèmes clair et sombre, goldens du Live (8).
+      - [x] Bouton play de la carte « première fois » (et de l'oiseau rare) réservé dès la première image.
+      - [x] Niveau d'une ligne = meilleur contact de la sortie (stable), barres « chante » selon le score
+            courant, pastille « Confirmé » une fois, feuille des niveaux par espèce (meilleur score,
+            heure, contacts). Le Bilan appliquait déjà cette règle.
+      - [ ] (Benjamin) Téléphone : écoute en clair à l'aube et au soleil, lisibilité du spectrogramme sombre
+            dans un écran clair, « Confirmé » sur un vrai chant.
+
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
 - l'écoute démarre moins d'une seconde après l'appui sur « Écouter » (le nouvel accueil garde le
