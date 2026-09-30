@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The Session Library back arrow and system back action now return directly to the main menu, even after starting several sessions from the library.
 - Ending a Point Count or Live Mode Session while returning from the background now keeps the screen open until saving finishes, refreshes the Session Library, and completes background notification stops reliably.
 - The Russian Stop label on the Survey screen and in Survey, ARU, Live Mode, and Point Count notifications now uses the correct imperative, “Остановить”.
 - Live Mode and Point Count Sessions now record their clip context, so Raven and CSV exports place detections at the right offset within each clip.
