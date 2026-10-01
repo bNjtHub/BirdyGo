@@ -4,6 +4,8 @@
 /// data (see `WorldMapSection`).
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -107,22 +109,52 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   /// Paths of the map, kept across rebuilds (tap, theme).
   final _sceneCache = WorldMapSceneCache();
 
-  /// Size the scene is being prebuilt for, so one build is scheduled per size.
-  Size? _pending;
+  /// What the cached raster / the build in flight was made for.
+  ({Size size, double ratio, WorldMapColors colors})? _pending;
+  ({Size size, double ratio, WorldMapColors colors}) _rasterKey =
+      (size: Size.zero, ratio: 0, colors: WorldMapColors.of(BirdyColors.light));
+  ui.Image? _image;
+  bool _hasImage = false;
 
-  /// Builds the paths outside paint(), in a task after the current frame, and
-  /// repaints once they are ready. Until then the map shows a skeleton. The
-  /// painter still builds them itself if the cache misses.
-  void _prebuild(Size size) {
-    if (_pending == size) return;
-    _pending = size;
+  /// Rasterizing failed (no engine support): draw vectors instead.
+  bool _rasterFailed = false;
+
+  /// Builds the paths, then rasterizes the static layer once, in a task after
+  /// the current frame, and repaints when ready. Until then the map shows a
+  /// skeleton. The painter still draws vectors if there is no image.
+  void _prebuild(Size size, double ratio, WorldMapColors colors) {
+    final key = (size: size, ratio: ratio, colors: colors);
+    if (_pending == key) return;
+    _pending = key;
     // Animation priority, not idle: an idle task is starved while any
     // animation runs (the skeleton's shimmer included).
-    SchedulerBinding.instance.scheduleTask<void>(() {
-      if (!mounted || _pending != size) return;
-      _sceneCache.get(widget.regions, widget.classes, _frame, size);
-      setState(() {});
+    SchedulerBinding.instance.scheduleTask<void>(() async {
+      if (!mounted || _pending != key) return;
+      final scene = _sceneCache.get(widget.regions, widget.classes, _frame, size);
+      try {
+        final image = await renderStaticLayer(scene, colors, size, ratio);
+        if (!mounted || _pending != key) {
+          image.dispose();
+          return;
+        }
+        setState(() {
+          _image?.dispose();
+          _image = image;
+          _hasImage = true;
+          _rasterKey = key;
+        });
+      } on Object {
+        if (!mounted || _pending != key) return;
+        setState(() => _rasterFailed = true);
+      }
     }, Priority.animation);
+  }
+
+  void _dropImage() {
+    _image?.dispose();
+    _image = null;
+    _hasImage = false;
+    _pending = null;
   }
 
   @override
@@ -133,7 +165,14 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
       _frame = frameOf(widget.regions, widget.classes);
       _legend = buildRangeLegend(widget.regions, widget.classes);
       _selected = null;
+      _dropImage();
     }
+  }
+
+  @override
+  void dispose() {
+    _image?.dispose();
+    super.dispose();
   }
 
   void _tap(Offset position, Size size) {
@@ -172,13 +211,24 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
                 child: LayoutBuilder(
                   builder: (context, box) {
                     final size = box.biggest;
-                    final ready = _sceneCache.has(
-                      widget.regions,
-                      widget.classes,
-                      _frame,
-                      size,
-                    );
-                    if (!ready) _prebuild(size);
+                    final ratio = MediaQuery.devicePixelRatioOf(context);
+                    final fresh =
+                        _hasImage &&
+                        _rasterKey == (size: size, ratio: ratio, colors: colors);
+                    if (!fresh && !_rasterFailed) {
+                      _prebuild(size, ratio, colors);
+                    }
+                    // A stale image (theme change) is not drawn: vectors take
+                    // over until the new one is ready.
+                    final ready =
+                        fresh ||
+                        (_sceneCache.has(
+                          widget.regions,
+                          widget.classes,
+                          _frame,
+                          size,
+                        ) &&
+                            (_hasImage || _rasterFailed));
                     return BirdyCrossFade(
                       child: !ready
                           ? KeyedSubtree(
@@ -202,6 +252,7 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
                                     colors: colors,
                                     user: widget.user,
                                     selected: _selected,
+                                    staticImage: fresh ? _image : null,
                                     cache: _sceneCache,
                                   ),
                                 ),

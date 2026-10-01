@@ -5,6 +5,7 @@
 library;
 
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,6 @@ class WorldMapColors {
     required this.ocean,
     required this.land,
     required this.classes,
-    required this.regionLine,
     required this.countryLine,
     required this.selected,
     required this.user,
@@ -38,7 +38,6 @@ class WorldMapColors {
       RangeClass.resident: c.rangeResident,
       RangeClass.passage: c.rangePassage,
     },
-    regionLine: c.surface1.withValues(alpha: WorldMapConfig.regionLineAlpha),
     countryLine: c.text2.withValues(alpha: WorldMapConfig.countryLineAlpha),
     selected: c.text1,
     user: c.text1,
@@ -52,9 +51,7 @@ class WorldMapColors {
   /// Fill of each class.
   final Map<RangeClass, Color> classes;
 
-  /// Hairline between regions (the block's fill, so it also separates two
-  /// colored neighbours) and the country borders.
-  final Color regionLine;
+  /// Country borders.
   final Color countryLine;
 
   /// Outline of the tapped region.
@@ -71,7 +68,6 @@ class WorldMapColors {
       other.classes[RangeClass.wintering] == classes[RangeClass.wintering] &&
       other.classes[RangeClass.resident] == classes[RangeClass.resident] &&
       other.classes[RangeClass.passage] == classes[RangeClass.passage] &&
-      other.regionLine == regionLine &&
       other.countryLine == countryLine &&
       other.selected == selected &&
       other.user == user &&
@@ -82,7 +78,6 @@ class WorldMapColors {
     ocean,
     land,
     Object.hashAll(classes.values),
-    regionLine,
     countryLine,
     selected,
     user,
@@ -220,6 +215,74 @@ class WorldMapSceneCache {
   }
 }
 
+/// Draws the static layer of the map: sea, land, the class fills and the
+/// country borders. Used both for the cached raster and as the vector
+/// fallback. Fill and a same-color thin stroke hide the seams between
+/// adjacent regions of a class, so they read as one zone.
+void paintStaticLayer(
+  Canvas canvas,
+  Size size,
+  WorldMapScene scene,
+  WorldMapColors colors,
+) {
+  canvas.drawRect(Offset.zero & size, Paint()..color = colors.ocean);
+  canvas.drawPath(
+    scene.land,
+    Paint()
+      ..style = PaintingStyle.fill
+      ..color = colors.land,
+  );
+  for (final c in RangeClass.values) {
+    final color = colors.classes[c]!;
+    final path = scene.byClass[c]!;
+    canvas
+      ..drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.fill
+          ..color = color,
+      )
+      ..drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = WorldMapConfig.seamWidth
+          ..strokeJoin = StrokeJoin.round
+          ..color = color,
+      );
+  }
+  canvas.drawPath(
+    scene.borders,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = WorldMapConfig.countryLineWidth
+      ..strokeJoin = StrokeJoin.round
+      ..color = colors.countryLine,
+  );
+}
+
+/// Rasterizes the static layer once, at [pixelRatio]; the caller owns the
+/// image and disposes it.
+Future<ui.Image> renderStaticLayer(
+  WorldMapScene scene,
+  WorldMapColors colors,
+  Size size,
+  double pixelRatio,
+) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder)..scale(pixelRatio);
+  paintStaticLayer(canvas, size, scene, colors);
+  final picture = recorder.endRecording();
+  try {
+    return await picture.toImage(
+      (size.width * pixelRatio).ceil(),
+      (size.height * pixelRatio).ceil(),
+    );
+  } finally {
+    picture.dispose();
+  }
+}
+
 class WorldMapPainter extends CustomPainter {
   WorldMapPainter({
     required this.regions,
@@ -228,6 +291,7 @@ class WorldMapPainter extends CustomPainter {
     required this.colors,
     this.user,
     this.selected,
+    this.staticImage,
     WorldMapSceneCache? cache,
   }) : cache = cache ?? WorldMapSceneCache();
 
@@ -242,40 +306,32 @@ class WorldMapPainter extends CustomPainter {
   /// Id of the tapped region.
   final String? selected;
 
+  /// The static layer, rasterized once (see [renderStaticLayer]). Without it
+  /// the layer is drawn as vectors. Owned by the caller.
+  final ui.Image? staticImage;
+
   /// Shared with the owner so a repaint (tap, theme) reuses the paths.
   final WorldMapSceneCache cache;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Offset.zero & size);
-    canvas.drawRect(Offset.zero & size, Paint()..color = colors.ocean);
-
-    final scene = cache.get(regions, classes, frame, size);
-    final projection = scene.projection;
-    final m = projection.matrix;
-    final fill = Paint()..style = PaintingStyle.fill;
-    canvas.drawPath(scene.land, fill..color = colors.land);
-    for (final c in RangeClass.values) {
-      canvas.drawPath(scene.byClass[c]!, fill..color = colors.classes[c]!);
-    }
-
-    canvas
-      ..drawPath(
-        scene.land,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = WorldMapConfig.regionLineWidth
-          ..strokeJoin = StrokeJoin.round
-          ..color = colors.regionLine,
-      )
-      ..drawPath(
-        scene.borders,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = WorldMapConfig.countryLineWidth
-          ..strokeJoin = StrokeJoin.round
-          ..color = colors.countryLine,
+    final MapProjection projection;
+    final image = staticImage;
+    if (image != null) {
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Offset.zero & size,
+        Paint()..filterQuality = FilterQuality.medium,
       );
+      projection = MapProjection(frame, size);
+    } else {
+      final scene = cache.get(regions, classes, frame, size);
+      paintStaticLayer(canvas, size, scene, colors);
+      projection = scene.projection;
+    }
+    final m = projection.matrix;
 
     final tapped = selected == null ? null : regions.byId(selected!);
     if (tapped != null) {
@@ -316,6 +372,7 @@ class WorldMapPainter extends CustomPainter {
       old.classes != classes ||
       old.frame != frame ||
       old.colors != colors ||
+      old.staticImage != staticImage ||
       old.user != user ||
       old.selected != selected;
 }

@@ -113,13 +113,11 @@ abstract final class WorldMapConfig {
   /// Width over height of the skeleton and of a map before it is framed.
   static const double aspect = 0.9;
 
-  /// Hairline between regions and the thicker line of country borders (dp).
-  static const double regionLineWidth = 0.5;
+  /// Stroke added to each class fill, in its own color, so the
+  /// anti-aliasing seams between adjacent regions of a class vanish and they
+  /// read as one zone (dp). Country borders are the only visible lines.
+  static const double seamWidth = 0.6;
   static const double countryLineWidth = 1.2;
-
-  /// Opacity of the hairline between regions (the block's fill token): soft
-  /// enough that small regions do not turn into lace.
-  static const double regionLineAlpha = 0.6;
 
   /// Opacity of the country borders (the `text2` token).
   static const double countryLineAlpha = 0.6;
