@@ -18,9 +18,6 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../ranking/activity_bars.dart';
-import '../reliability/reliability_badge.dart';
-import '../reliability/reliability_config.dart';
-import '../reliability/reliability_screen.dart';
 import 'section_title.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -39,9 +36,24 @@ class SpeciesPageHeader extends StatelessWidget {
     required this.onShare,
     this.onBack,
     this.inSheet = false,
+    this.summary,
+    this.heardLine,
+    this.heardLoading = false,
   });
 
   final String name;
+
+  /// One-sentence summary of the AI sheet, under the names; null without a
+  /// sheet (J7 order: « Qui est-ce ? »).
+  final String? summary;
+
+  /// « Entendu 12 fois… »: the user's own tally as one compact line under the
+  /// names. Null (and hidden) when the species was never heard.
+  final String? heardLine;
+
+  /// The index has not answered yet: a one-line skeleton holds the place of
+  /// [heardLine] from the first frame.
+  final bool heardLoading;
 
   /// Null when the user hides scientific names.
   final String? latin;
@@ -163,182 +175,38 @@ class SpeciesPageHeader extends StatelessWidget {
                         color: c.isDark ? c.text2 : BirdyBrand.bark,
                       ),
                     ),
+                  if (summary != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Text(
+                      summary!,
+                      style: BirdyText.bodyCompact.copyWith(color: ink),
+                    ),
+                  ],
+                  if (heardLoading) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    KeyedSubtree(
+                      key: const ValueKey('fiche-heard-skeleton'),
+                      child: BirdySkeleton.text(
+                        BirdyText.caption,
+                        placeholder: '000000000000000000000000000000',
+                      ),
+                    ),
+                  ] else if (heardLine != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Text(
+                      heardLine!,
+                      key: const ValueKey('fiche-heard'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: BirdyText.caption.copyWith(
+                        color: c.isDark ? c.text2 : BirdyBrand.bark,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// « Entendu 142 fois sur 38 jours… », then the level and the reviews.
-class HeardBlock extends StatelessWidget {
-  const HeardBlock({super.key, required this.record, required this.heard});
-
-  final SpeciesRecord record;
-
-  /// The sentence, null when never heard.
-  final String? heard;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final precision = precisionLine(l10n, record.confirmed, record.reviewed);
-    final tally = record.tally;
-    return BirdyBlock(
-      tone: BirdyBlockTone.sure,
-      radius: BirdyRadii.hero,
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (tally != null) ...[
-          Row(
-            children: [
-              Expanded(
-                child: _HeardTile(
-                  value: tally.contacts,
-                  label: l10n.forkSummaryContactsLabel(tally.contacts),
-                ),
-              ),
-              const SizedBox(width: BirdySpace.s),
-              Expanded(
-                child: _HeardTile(
-                  value: tally.days,
-                  label: l10n.forkRankingUnitDays(tally.days),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: BirdySpace.m),
-        ],
-        // Capped so its loading skeleton (HeardBlock.skeleton below) can
-        // reserve a fixed number of lines instead of however many contacts
-        // and days happen to wrap to.
-        Text(
-          heard ?? l10n.forkFicheNeverHeard,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: BirdyText.body.copyWith(color: c.text1),
-        ),
-        if (record.verified || precision != null) ...[
-          const SizedBox(height: BirdySpace.s),
-          Wrap(
-            spacing: BirdySpace.s,
-            runSpacing: BirdySpace.xs,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (record.verified)
-                const ReliabilityBadge(level: ReliabilityLevel.sure),
-              if (precision != null)
-                Text(
-                  precision,
-                  style: BirdyText.caption.copyWith(color: c.text2),
-                ),
-            ],
-          ),
-        ],
-      ],
-    ),
-    );
-  }
-
-  /// Same first line as the real block (capped at 2 lines), a placeholder
-  /// for the level badge and review count while [record] is still loading:
-  /// whether that second row will show at all depends on data not in yet,
-  /// so it is shown for real once the record lands, even if that means the
-  /// block settles a little shorter.
-  static Widget skeleton(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return BirdyBlock(
-      tone: BirdyBlockTone.sure,
-      radius: BirdyRadii.hero,
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            for (var i = 0; i < 2; i++) ...[
-              if (i > 0) const SizedBox(width: BirdySpace.s),
-              // Same height as the real tile at any text scale.
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(BirdySpace.m),
-                  child: _HeardTile._tileLine(
-                    context,
-                    BirdySkeleton.text(BirdyText.numberXL, placeholder: '00'),
-                    BirdySkeleton.text(BirdyText.caption, placeholder: '000'),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: BirdySpace.m),
-        BirdySkeleton.text(
-          BirdyText.body.copyWith(color: c.text1),
-          placeholder:
-              '00000000000000000000000000000000000000000000000000000000',
-          maxLines: 2,
-        ),
-        const SizedBox(height: BirdySpace.s),
-        Wrap(
-          spacing: BirdySpace.s,
-          runSpacing: BirdySpace.xs,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            BirdySkeleton.box(width: BirdySizes.skeletonTagM, height: BirdySizes.pill, radius: BirdyRadii.pill),
-            BirdySkeleton.text(
-              BirdyText.caption,
-              placeholder: '00000000000000',
-            ),
-          ],
-        ),
-      ],
-    ),
-    );
-  }
-}
-
-/// White tile of the hero: a number and its unit on one baseline.
-class _HeardTile extends StatelessWidget {
-  const _HeardTile({required this.value, required this.label});
-
-  final int value;
-  final String label;
-
-  /// Number and unit on one baseline; stacked with large text, where the
-  /// tile is too narrow for both on a line.
-  static Widget _tileLine(BuildContext context, Widget number, Widget unit) {
-    if (MediaQuery.textScalerOf(context).scale(1) > 1.15) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [number, const SizedBox(height: BirdySpace.xs), unit],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [number, const SizedBox(width: BirdySpace.s), Flexible(child: unit)],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.surface1,
-        borderRadius: BorderRadius.circular(BirdyRadii.inset),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(BirdySpace.m),
-        child: _tileLine(
-          context,
-          Text('$value', style: BirdyText.numberXL.copyWith(color: c.text1)),
-          Text(label, style: BirdyText.caption.copyWith(color: c.text2)),
         ),
       ),
     );
@@ -873,7 +741,15 @@ typedef SpeciesLink = ({String label, String iconAsset, String url});
 
 /// « En savoir plus sur cette espèce » and one chip per page.
 class LinksBlock extends StatelessWidget {
-  const LinksBlock({super.key, required this.links, required this.onOpen});
+  const LinksBlock({
+    super.key,
+    required this.links,
+    required this.onOpen,
+    this.showLabel = true,
+  });
+
+  /// False when a group title above already says it (J7 order).
+  final bool showLabel;
 
   final List<SpeciesLink> links;
   final ValueChanged<String> onOpen;
@@ -885,13 +761,15 @@ class LinksBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          // Short on purpose: on one line even at 130 % text (J6f-b fix).
-          l10n.forkFicheLearnMore,
-          maxLines: 1,
-          style: BirdyText.label.copyWith(color: c.text1),
-        ),
-        const SizedBox(height: BirdySpace.s),
+        if (showLabel) ...[
+          Text(
+            // Short on purpose: on one line even at 130 % text (J6f-b fix).
+            l10n.forkFicheLearnMore,
+            maxLines: 1,
+            style: BirdyText.label.copyWith(color: c.text1),
+          ),
+          const SizedBox(height: BirdySpace.s),
+        ],
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           // Cut at the edge on purpose (J6f-b fix): it tells the row
