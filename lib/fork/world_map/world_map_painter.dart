@@ -3,6 +3,7 @@
 /// No tiles, no network.
 library;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../design/birdy_tokens.dart';
@@ -24,6 +25,7 @@ class WorldMapColors {
     required this.ocean,
     required this.land,
     required this.present,
+    required this.levels,
     required this.other,
     required this.user,
     required this.userRing,
@@ -35,6 +37,10 @@ class WorldMapColors {
       ocean: c.surface1,
       land: land,
       present: c.accentText,
+      levels: [
+        for (final a in WorldMapConfig.levelAlphas)
+          Color.alphaBlend(c.accentText.withValues(alpha: a), land),
+      ],
       other: Color.alphaBlend(
         c.accentText.withValues(alpha: WorldMapConfig.ghostAlpha),
         land,
@@ -48,8 +54,12 @@ class WorldMapColors {
   final Color ocean;
   final Color land;
 
-  /// Expected in the chosen season.
+  /// Expected in the chosen season (the strongest level).
   final Color present;
+
+  /// Color of GBIF intensity level 1, 2, 3 (index = level - 1): the same tint
+  /// at growing opacity, blended over the land so cells stay opaque.
+  final List<Color> levels;
 
   /// Expected in another season only.
   final Color other;
@@ -62,12 +72,13 @@ class WorldMapColors {
       other.ocean == ocean &&
       other.land == land &&
       other.present == present &&
+      listEquals(other.levels, levels) &&
       other.other == this.other &&
       other.user == user &&
       other.userRing == userRing;
 
   @override
-  int get hashCode => Object.hash(ocean, land, present, other, user, userRing);
+  int get hashCode => Object.hash(ocean, land, present, Object.hashAll(levels), other, user, userRing);
 }
 
 class WorldMapPainter extends CustomPainter {
@@ -105,35 +116,47 @@ class WorldMapPainter extends CustomPainter {
       ..drawPath(outline.unitPath, Paint()..color = colors.land)
       ..restore();
 
-    final cellW = WorldMapConfig.gridStep / _lonSpan * size.width;
-    final cellH = WorldMapConfig.gridStep / _latSpan * size.height;
-    final inset = WorldMapConfig.cellInset;
+    final step = presence.step;
+    final cellW = step / _lonSpan * size.width;
+    final cellH = step / _latSpan * size.height;
+    final smallest = cellW < cellH ? cellW : cellH;
+    // Fine (GBIF) cells touch and join into areas; big ones keep a gap.
+    final tight = smallest < WorldMapConfig.cellGapMinSize;
+    final inset = tight ? 0.0 : WorldMapConfig.cellInset;
     final radius = Radius.circular(
-      WorldMapConfig.cellRadius * (cellW < cellH ? cellW : cellH),
+      tight ? 0 : WorldMapConfig.cellRadius * smallest,
     );
-    final here = Paint()..color = colors.present;
-    final elsewhere = Paint()..color = colors.other;
-    // Faint cells first (other seasons only), then the chosen season's.
-    for (var pass = 0; pass < 2; pass++) {
-      for (var i = 0; i < presence.cells.length; i++) {
-        final isHere = presence.isPresent(season, i);
-        final draw = pass == 0 ? !isHere && _inAnotherSeason(i) : isHere;
-        if (!draw) continue;
-        final centre = _project(
-          size,
-          presence.cells[i].latitude,
-          presence.cells[i].longitude,
-        );
-        final rect = Rect.fromCenter(
+    RRect cellRect(int i) {
+      final centre = _project(
+        size,
+        presence.cells[i].latitude,
+        presence.cells[i].longitude,
+      );
+      return RRect.fromRectAndRadius(
+        Rect.fromCenter(
           center: centre,
           width: cellW * (1 - inset),
           height: cellH * (1 - inset),
-        );
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(rect, radius),
-          pass == 0 ? elsewhere : here,
-        );
+        ),
+        radius,
+      );
+    }
+
+    // Faint cells first (other seasons only), then the chosen season's, one
+    // path per intensity level (a GBIF map can have thousands of cells).
+    final elsewhere = Path();
+    final here = [for (final _ in colors.levels) Path()];
+    for (var i = 0; i < presence.cells.length; i++) {
+      final level = presence.levelOf(season, i);
+      if (level > 0) {
+        here[level.clamp(1, here.length) - 1].addRRect(cellRect(i));
+      } else if (_inAnotherSeason(i)) {
+        elsewhere.addRRect(cellRect(i));
       }
+    }
+    canvas.drawPath(elsewhere, Paint()..color = colors.other);
+    for (var l = 0; l < here.length; l++) {
+      canvas.drawPath(here[l], Paint()..color = colors.levels[l]);
     }
 
     final u = user;

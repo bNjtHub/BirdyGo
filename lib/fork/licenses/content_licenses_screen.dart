@@ -22,6 +22,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../map/base_layers.dart';
+import '../world_map/world_map_config.dart';
 import 'licenses_model.dart';
 
 /// Widest column on tablets.
@@ -94,6 +95,7 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
                 const SizedBox(height: BirdySpace.block),
                 ..._photoBlocks(l10n, c, photos),
                 const SizedBox(height: BirdySpace.block),
+                ..._gbifBlock(context, l10n),
                 _otherBlock(context, l10n),
                 const SizedBox(height: BirdySpace.block),
               ],
@@ -216,6 +218,37 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           ),
       ],
     );
+  }
+
+  /// Credit of the GBIF observations behind the species world map: what is
+  /// filtered, that maps are made on demand, and the citation GBIF asks for.
+  List<Widget> _gbifBlock(BuildContext context, AppLocalizations l10n) {
+    final c = BirdyColors.of(context);
+    Widget open() => Icon(AppIcons.openInNew, size: BirdyGlyph.xl, color: c.text2);
+    return [
+      BirdyListBlock(
+        key: const ValueKey('licenses-gbif'),
+        title: l10n.forkLicensesGbifTitle,
+        children: [
+          BirdyListRow(
+            icon: AppIcons.gavel,
+            title: l10n.forkLicensesGbifRow,
+            subtitle: l10n.forkLicensesGbifRowSub('${WorldMapConfig.gbifFirstYear}'),
+            trailing: open(),
+            onTap: () => openExternalUrl(context, WorldMapConfig.gbifLicenseUrl),
+          ),
+          BirdyListRow(
+            key: const ValueKey('licenses-gbif-citation'),
+            icon: AppIcons.menuBook,
+            title: l10n.forkLicensesGbifCitationTitle,
+            subtitle: l10n.forkLicensesGbifCitation('${DateTime.now().year}'),
+            trailing: open(),
+            onTap: () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
+          ),
+        ],
+      ),
+      const SizedBox(height: BirdySpace.block),
+    ];
   }
 
   Widget _otherBlock(BuildContext context, AppLocalizations l10n) {

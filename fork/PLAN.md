@@ -303,6 +303,24 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       masqué sans géomodèle. Puces Hiver / Printemps / Été / Automne (saison courante, encre), légende
       régions d'été et d'hiver + distance, « Nidification : … » si la fiche IA la donne. Rien de natif :
       rien à faire côté iOS.
+- [x] Carte du monde, observations GBIF à la demande (PR « J7 Carte du monde : observations GBIF à la
+      demande », empilée sur la carte des saisons) : la grille géomodèle à 5° est trop grossière. L'extraction
+      en masse (téléchargement SQL, asset `ranges_gbif.bin`) est abandonnée : trop longue. À l'ouverture de la
+      fiche, avec le consentement « Carte en ligne » (`privacyAllowMapProvider`), l'app demande à GBIF la
+      carte de l'espèce affichée : `species/match` (taxonKey, mis en cache avec la carte) puis 4 tuiles PNG
+      par saison de l'API de cartes ad hoc (`/v2/map/occurrence/adhoc`, EPSG:4326, zoom 1, 16 requêtes,
+      4 en parallèle, ~1 s mesuré), filtrées sur CC0 / CC BY, observations humaines depuis 2010, mois de la
+      saison. Les carrés (cases de 0,70°) sont relus en cellules de la grille du painter (3 niveaux
+      d'intensité d'après la rampe de couleur de GBIF), donc légende, couleurs et contrastes sont ceux
+      du géomodèle. Cache disque `<cache>/gbif_maps/` par espèce (4 saisons), 90 jours, 20 Mo avec éviction
+      des moins récemment vues ; hors ligne, une carte périmée vaut mieux que rien. Sans consentement, hors
+      ligne sans cache ou erreur GBIF : carte du géomodèle (inchangée), plus la ligne « Carte précise :
+      activez la carte en ligne » (ouvre le dialogue de consentement, la carte GBIF se charge ensuite sur place) quand le consentement manque. Attribution sous la
+      carte (« Observations GBIF.org · CC BY 4.0 », liens GBIF et Licences des contenus), bloc GBIF et
+      citation dans « Licences des contenus ». Textes du consentement (dialogue, réglage) : le nom de
+      l'espèce est envoyé à GBIF, jamais la position. Constantes dans `world_map_config.dart`, code dans
+      `lib/fork/world_map/gbif_*.dart`. Légende : région dominante par saison, mois pour l'hémisphère sud ;
+      calcul géomodèle annulé quand on quitte la fiche ; pas d'espacement sans bloc. Section iOS : rien de natif (HTTP et dart:ui), rien à faire.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches

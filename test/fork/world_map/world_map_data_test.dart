@@ -188,6 +188,25 @@ void main() {
       expect(pauses, 2);
     });
 
+    test('stops between two cells once cancelled', () async {
+      var calls = 0;
+      var cancelled = false;
+      await expectLater(
+        computeSeasonPresence(
+          scientificName: _migrant,
+          predict: _fake(_migrant, (_, _, _) => true, onCall: () {
+            if (++calls == 8) cancelled = true;
+          }),
+          cells: cells,
+          pause: Duration.zero,
+          isCancelled: () => cancelled,
+        ),
+        throwsA(isA<WorldMapCancelled>()),
+      );
+      // The cell being worked on (4 seasons) finishes, then nothing more.
+      expect(calls, 8);
+    });
+
     test('season of a month', () {
       expect(Season.ofMonth(12), Season.winter);
       expect(Season.ofMonth(3), Season.spring);
@@ -246,6 +265,76 @@ void main() {
       expect(summerOnly.kind, LegendKind.seasons);
       expect(summerOnly.winter, isNull);
       expect(summerOnly.summer, isNotNull);
+    });
+
+    /// Cells of a block: [n] cells around ([lat], [lon]), one level.
+    SeasonPresence blocks(
+      Map<Season, List<({double lat, double lon, int n, int level})>> spec,
+    ) {
+      final all = <GridCell>[];
+      final flags = {for (final s in Season.values) s: <bool>[]};
+      final levels = {for (final s in Season.values) s: <int>[]};
+      for (final MapEntry(:key, :value) in spec.entries) {
+        for (final b in value) {
+          for (var i = 0; i < b.n; i++) {
+            all.add((latitude: b.lat + i * 0.01, longitude: b.lon));
+            for (final s in Season.values) {
+              flags[s]!.add(s == key);
+              levels[s]!.add(s == key ? b.level : 0);
+            }
+          }
+        }
+      }
+      return SeasonPresence(all, flags, step: 0.7, levels: levels);
+    }
+
+    test('two separate groups: the densest one, not a point between them', () {
+      // Winter: 100 cells in Europe (France), 10 in West Africa. The mean of
+      // all of them would fall in the Mediterranean / North Africa.
+      final presence = blocks({
+        Season.winter: [
+          (lat: 46, lon: 2, n: 100, level: 2),
+          (lat: 8, lon: -5, n: 10, level: 2),
+        ],
+        Season.summer: [(lat: 62, lon: 20, n: 50, level: 2)],
+      });
+      final legend = buildLegend(presence);
+      expect(legend.winter, WorldRegion.westernEurope);
+      expect(legend.summer, WorldRegion.northernEurope);
+      // France to Finland, not Dakar to Finland.
+      expect(legend.distanceKm, inInclusiveRange(1500, 2200));
+    });
+
+    test('the intensity decides: a few strong cells beat many faint ones', () {
+      final presence = blocks({
+        Season.winter: [
+          (lat: 46, lon: 2, n: 30, level: 1),
+          (lat: 8, lon: -5, n: 20, level: 3),
+        ],
+      });
+      expect(dominantCenter(presence, Season.winter)!.region,
+          WorldRegion.westAfrica);
+      expect(dominantCenter(presence, Season.summer), isNull);
+    });
+
+    test('a species of the southern hemisphere is told in months', () {
+      final presence = blocks({
+        Season.summer: [(lat: -25, lon: 25, n: 20, level: 2)],
+        Season.winter: [(lat: -5, lon: 35, n: 20, level: 2)],
+      });
+      final legend = buildLegend(presence);
+      expect(isSouthern(presence), isTrue);
+      expect(legend.southern, isTrue);
+      expect(legend.summer, WorldRegion.southernAfrica);
+      expect(legend.winter, WorldRegion.eastAfrica);
+      expect(
+        buildLegend(
+          blocks({
+            Season.summer: [(lat: 55, lon: 10, n: 5, level: 2)],
+          }),
+        ).southern,
+        isFalse,
+      );
     });
 
     test('regions and distance', () {

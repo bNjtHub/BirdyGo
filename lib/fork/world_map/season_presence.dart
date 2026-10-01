@@ -19,9 +19,29 @@ typedef GeoPredict =
 
 /// Presence flags of one species on the land grid, one list per season.
 class SeasonPresence {
-  const SeasonPresence(this.cells, this.flags);
+  const SeasonPresence(
+    this.cells,
+    this.flags, {
+    this.step = WorldMapConfig.gridStep,
+    this.levels,
+  });
 
   final List<GridCell> cells;
+
+  /// Size of a cell, in degrees: 5 for the geo-model, the asset's step for
+  /// GBIF.
+  final double step;
+
+  /// GBIF intensity (1 to `WorldMapConfig.gbifLevels`) of each cell and
+  /// season, where [flags] is true. Null for the geo-model.
+  final Map<Season, List<int>>? levels;
+
+  /// Intensity of [cell] in [season] (0 when absent). The geo-model has one
+  /// level, the strongest.
+  int levelOf(Season season, int cell) {
+    if (!flags[season]![cell]) return 0;
+    return levels?[season]![cell] ?? WorldMapConfig.gbifLevels;
+  }
 
   /// For each season, one flag per cell of [cells].
   final Map<Season, List<bool>> flags;
@@ -38,9 +58,17 @@ class SeasonPresence {
   bool get isEmpty => Season.values.every((s) => !flags[s]!.contains(true));
 }
 
+/// Thrown by [computeSeasonPresence] when its caller no longer wants the
+/// result (the page was left): the computation stops between two cells.
+class WorldMapCancelled implements Exception {
+  const WorldMapCancelled();
+}
+
 /// Computes the four seasons of [scientificName] on [cells]. Asynchronous and
 /// gentle with the UI thread: after every [batchSize] predictions it waits
-/// [pause], so frames keep flowing while the geo-model works.
+/// [pause], so frames keep flowing while the geo-model works. [isCancelled]
+/// is checked before every cell: when it says true the computation throws
+/// [WorldMapCancelled] instead of going on.
 Future<SeasonPresence> computeSeasonPresence({
   required String scientificName,
   required GeoPredict predict,
@@ -49,12 +77,14 @@ Future<SeasonPresence> computeSeasonPresence({
   Map<Season, int> weeks = WorldMapConfig.seasonWeeks,
   int batchSize = WorldMapConfig.batchSize,
   Duration pause = WorldMapConfig.batchPause,
+  bool Function()? isCancelled,
 }) async {
   final flags = {
     for (final s in Season.values) s: List<bool>.filled(cells.length, false),
   };
   var sinceLastPause = 0;
   for (var i = 0; i < cells.length; i++) {
+    if (isCancelled?.call() ?? false) throw const WorldMapCancelled();
     for (final season in Season.values) {
       final scores = await predict(
         latitude: cells[i].latitude,

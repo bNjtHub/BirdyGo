@@ -48,6 +48,7 @@ String legendText(
     case LegendKind.seasons:
       final summer = legend.summer;
       final winter = legend.winter;
+      if (legend.southern) return _monthsLegend(l10n, languageCode, legend);
       if (winter == null && summer != null) {
         return l10n.forkWorldLegendSummerOnly(regionName(l10n, summer));
       }
@@ -67,4 +68,31 @@ String legendText(
         NumberFormat.decimalPattern(languageCode).format(km),
       );
   }
+}
+
+/// The legend of a species of the southern hemisphere: months instead of
+/// seasons, since « summer » (June to August) is its winter.
+String _monthsLegend(
+  AppLocalizations l10n,
+  String languageCode,
+  SeasonLegend legend,
+) {
+  String region(WorldRegion? r) =>
+      r == null ? l10n.forkWorldLegendOutside : regionName(l10n, r);
+  final km = legend.distanceKm;
+  if (km == null) {
+    return l10n.forkWorldLegendMonthsPair(
+      l10n.forkWorldMonthsJunAug,
+      region(legend.summer),
+      l10n.forkWorldMonthsDecFeb,
+      region(legend.winter),
+    );
+  }
+  return l10n.forkWorldLegendMonthsPairDistance(
+    l10n.forkWorldMonthsJunAug,
+    region(legend.summer),
+    l10n.forkWorldMonthsDecFeb,
+    region(legend.winter),
+    NumberFormat.decimalPattern(languageCode).format(km),
+  );
 }
