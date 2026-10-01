@@ -189,6 +189,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Entrée d'un élément | 200 à 250 ms | `Cubic(0.23, 1, 0.32, 1)` |
 | Sortie | 150 ms | même courbe, toujours plus courte que l'entrée |
 | Déplacement à l'écran | 250 ms | `Cubic(0.77, 0, 0.175, 1)` |
+| Page qui s'ouvre (J7) | 220 ms à l'entrée, 150 ms au retour | `Cubic(0.23, 1, 0.32, 1)` : fondu et glissement de 8 px depuis la droite, la page dessous ne bouge pas ; animations réduites = fondu seul. `BirdyPageTransitionsBuilder`, posé sur le thème |
 | Feuille du bas | ressort | `SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85)` |
 | Carte de revue balayée | ressort interruptible | suit le doigt, repart avec la vitesse du geste |
 | Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
@@ -199,6 +200,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
 - Jamais d'apparition depuis une échelle 0 : partir de 0,95 avec une opacité 0.
+- Les entrées décalées (`BirdyEntrance`) attendent la fin de la transition de page (J7) : jamais deux animations en même temps.
 - Décalage entre les éléments d'une liste : 40 ms, sur 5 éléments au plus, sans bloquer les appuis.
 - Hero sur la photo entre une liste et la fiche espèce.
 - N'animer que la position, l'échelle et l'opacité. `RepaintBoundary` autour du spectrogramme.

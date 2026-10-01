@@ -221,7 +221,9 @@ void main() {
     // would time out waiting on that pipeline) to confirm the navigation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(QuizEntryRow), findsOneWidget);
+    // The Profil's own quiz-entry row stays mounted underneath, offstage or
+    // not depending on where the page transition is.
+    expect(find.byType(QuizEntryRow, skipOffstage: false), findsOneWidget);
     expect(find.byType(FineEarQuizScreen), findsOneWidget);
   });
 
