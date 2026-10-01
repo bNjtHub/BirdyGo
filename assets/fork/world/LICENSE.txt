@@ -1,0 +1,5 @@
+land_110m.bin: derived from Natural Earth 1:110m Physical Vectors, "Land"
+(ne_110m_land). Natural Earth data is in the public domain:
+https://www.naturalearthdata.com/about/terms-of-use/
+
+Built by tools/fork_land_110m.py (format described in that script).

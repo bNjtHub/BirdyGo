@@ -18,5 +18,10 @@ void registerForkFontLicenses() {
       final text = await rootBundle.loadString(entry.value);
       yield LicenseEntryWithLineBreaks([entry.key], text);
     }
+    // Natural Earth land outline of the species page world map (J7).
+    yield LicenseEntryWithLineBreaks(
+      ['Natural Earth (land 1:110m)'],
+      await rootBundle.loadString('assets/fork/world/LICENSE.txt'),
+    );
   });
 }

@@ -293,6 +293,16 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       courbe compacte de 12 mois, avec la phrase calculée sur 48 semaines (« Arrive début mars ·
       repart fin septembre » ou « Présent toute l'année »). Pas de bande de nidification sur la fiche :
       la nidification (champ `nesting`, `NestingPeriod`) est affichée par la carte du monde (« Niche d'avril à juillet »).
+      le champ `nesting` est lu (`NestingPeriod`) pour une future carte du monde.
+- [x] Fiche espèce, carte du monde des saisons (PR « J7 Fiche espèce : carte du monde », empilée sur celle
+      des sons et saisons) : bloc « Dans le monde » après « Ici en ce moment » (`lib/fork/world_map/`).
+      Contour des terres Natural Earth 1:110m (domaine public) converti par `tools/fork_land_110m.py` en
+      `assets/fork/world/land_110m.bin` (20 Ko), dessiné par `CustomPainter`, sans tuiles ni réseau.
+      Le géomodèle est interrogé sur une grille de 5° (cellules sur terre seulement, ~200) pour 4 semaines
+      représentatives, par lots avec pauses, en cache mémoire par espèce ; squelette puis fondu ; bloc
+      masqué sans géomodèle. Puces Hiver / Printemps / Été / Automne (saison courante, encre), légende
+      régions d'été et d'hiver + distance, « Nidification : … » si la fiche IA la donne. Rien de natif :
+      rien à faire côté iOS.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches

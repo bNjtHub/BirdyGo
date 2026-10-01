@@ -14,6 +14,7 @@ import 'package:birdnet_live/fork/design/widgets/clip_play_button.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/ranking/activity_bars.dart';
+import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
@@ -183,6 +184,8 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
+          // No geo-model in these tests: the world map block stays hidden.
+          worldMapPredictProvider.overrideWith((ref) async => null),
           taxonomyServiceProvider.overrideWith(
             (ref) async =>
                 TaxonomyService()..loadFromCsv(

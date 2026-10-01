@@ -120,6 +120,8 @@ flutter:
     # FORK: quiz species icons and sound effects (J6e).
     - assets/fork/species_icons/
     - assets/fork/sounds/
+    # FORK: Natural Earth land outline of the species page world map (J7).
+    - assets/fork/world/
     # FORK: OFL licenses of the bundled fonts (J6a).
     - assets/fonts/OFL-Nunito.txt
     - assets/fonts/OFL-Fraunces.txt
