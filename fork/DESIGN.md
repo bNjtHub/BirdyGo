@@ -471,7 +471,7 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   fiche déjà vue s'affiche hors ligne, même périmée. Repli, sans bruit : sans consentement, hors ligne sans
   cache ou erreur GBIF, on garde la carte du géomodèle à 5°, présentée comme une estimation ; sans
   consentement seulement, une ligne discrète « Carte précise : activez la carte en ligne » (cible 48 dp,
-  `accentText`) ouvre les Réglages, jamais de fenêtre. Attribution sous la carte : « Observations GBIF.org ·
+  `accentText`) ouvre directement le dialogue de consentement existant (« Autoriser » charge la carte GBIF sur place), jamais de fenêtre non sollicitée. Attribution sous la carte : « Observations GBIF.org ·
   CC BY 4.0 » (deux cibles de 48 dp : le site GBIF, puis « Licences des contenus » qui donne les filtres,
   la génération à la demande et la citation « GBIF.org (année) GBIF Occurrence Data »). Vie privée : seul le
   nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans consentement

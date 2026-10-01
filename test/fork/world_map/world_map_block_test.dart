@@ -369,6 +369,45 @@ void main() {
       expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
     });
 
+    testWidgets('the hint asks for the consent, then GBIF loads in place', (
+      tester,
+    ) async {
+      final grid = GbifGrid.forZone();
+      var asked = 0;
+      await pumpSection(
+        tester,
+        consent: false,
+        predict: _fake(),
+        gbif: _FakeGbif(() async {
+          asked++;
+          return GbifSpeciesMap(
+            taxonKey: 1,
+            fetchedAt: DateTime(2026),
+            cols: grid.cols,
+            rows: grid.rows,
+            levels: [
+              for (final _ in Season.values)
+                Uint8List(grid.cellCount)..fillRange(5000, 5400, 2),
+            ],
+          );
+        }),
+      );
+      await settle(tester);
+      expect(asked, 0);
+      final hint = find.byKey(const ValueKey('world-map-online-hint'));
+      await tester.ensureVisible(hint);
+      await tester.pump();
+      await tester.tap(hint);
+      await tester.pumpAndSettle();
+      expect(find.text('Autoriser'), findsOneWidget);
+      expect(asked, 0, reason: 'nothing is asked before the answer');
+      await tester.tap(find.text('Autoriser'));
+      await settle(tester);
+      expect(asked, 1);
+      expect(find.text('Observations GBIF.org'), findsOneWidget);
+      expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
+    });
+
     testWidgets('consent but GBIF fails: geo-model map, no hint', (
       tester,
     ) async {

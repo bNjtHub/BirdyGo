@@ -314,7 +314,7 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       du géomodèle. Cache disque `<cache>/gbif_maps/` par espèce (4 saisons), 90 jours, 20 Mo avec éviction
       des moins récemment vues ; hors ligne, une carte périmée vaut mieux que rien. Sans consentement, hors
       ligne sans cache ou erreur GBIF : carte du géomodèle (inchangée), plus la ligne « Carte précise :
-      activez la carte en ligne » (ouvre les Réglages) quand le consentement manque. Attribution sous la
+      activez la carte en ligne » (ouvre le dialogue de consentement, la carte GBIF se charge ensuite sur place) quand le consentement manque. Attribution sous la
       carte (« Observations GBIF.org · CC BY 4.0 », liens GBIF et Licences des contenus), bloc GBIF et
       citation dans « Licences des contenus ». Textes du consentement (dialogue, réglage) : le nom de
       l'espèce est envoyé à GBIF, jamais la position. Constantes dans `world_map_config.dart`, code dans

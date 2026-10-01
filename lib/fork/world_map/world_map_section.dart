@@ -9,10 +9,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../design/widgets/birdy_cross_fade.dart';
 import '../species_sheet/species_sheet.dart';
-import '../../features/settings/settings_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../licenses/content_licenses_screen.dart';
+import '../map/map_consent_dialog.dart';
 import 'world_map_block.dart';
 import 'world_map_config.dart';
 import 'world_map_providers.dart';
@@ -54,20 +54,13 @@ class WorldMapSection extends ConsumerWidget {
         onGbifTap: () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
         onLicenseTap: () => _openLicenses(context),
         onOnlineHintTap:
-            consent ? null : () => _openSettings(context),
+            consent ? null : () => requestMapTileConsent(context, ref),
         currentMonth: currentMonth,
         user: user,
         nesting: nesting,
       );
     }
     return BirdyCrossFade(child: child);
-  }
-
-  /// The online-map consent is in Settings, Privacy.
-  void _openSettings(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-    );
   }
 
   /// The licenses page holds the GBIF attribution and the citation.

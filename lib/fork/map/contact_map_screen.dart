@@ -35,6 +35,7 @@ import 'contact_map_data.dart';
 import 'contact_map_sheets.dart';
 import 'hex_grid.dart';
 import 'map_config.dart';
+import 'map_consent_dialog.dart';
 import 'map_loading.dart';
 import 'map_markers.dart';
 import 'place_bird_layer.dart';
@@ -243,29 +244,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
         .setString(kMapBaseLayerPref, layer.name);
   }
 
-  Future<void> _requestTileConsent(AppLocalizations l10n) async {
-    final agreed = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(l10n.mapTileConsentTitle),
-            content: Text(l10n.mapTileConsentBody),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(l10n.mapTileConsentCancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(l10n.mapTileConsentAllow),
-              ),
-            ],
-          ),
-    );
-    if (agreed == true) {
-      await ref.read(privacyAllowMapProvider.notifier).set(true);
-    }
-  }
+  Future<void> _requestTileConsent(AppLocalizations l10n) =>
+      requestMapTileConsent(context, ref); // FORK: shared dialog
 
   Future<void> _locate(AppLocalizations l10n) async {
     final messenger = ScaffoldMessenger.of(context);
