@@ -6474,5 +6474,11 @@
   "forkMoreGardenSub": "Who lives near you",
   "@forkMoreGardenSub": {"description": "BirdyGo fork: home quiz entry and « Plus » menu groups (L/M)."},
   "forkMoreExploreSub": "All species",
-  "@forkMoreExploreSub": {"description": "BirdyGo fork: home quiz entry and « Plus » menu groups (L/M)."}
+  "@forkMoreExploreSub": {"description": "BirdyGo fork: home quiz entry and « Plus » menu groups (L/M)."},
+  "forkWorldExpand": "Open the map full screen",
+  "@forkWorldExpand": {"description": "BirdyGo fork: button on the species page world map (J7)."},
+  "forkWorldMapHint": "Pinch to zoom, drag to move, double tap to zoom in",
+  "@forkWorldMapHint": {"description": "BirdyGo fork: full-screen world map usage hint for screen readers (J7)."},
+  "forkWorldZoomValue": "Zoom {factor}",
+  "@forkWorldZoomValue": {"description": "BirdyGo fork: full-screen world map zoom level, e.g. Zoom x2.5 (J7).", "placeholders": {"factor": {"type": "String"}}}
 }

@@ -13,16 +13,24 @@ import '../../shared/services/link_launcher.dart';
 import '../licenses/content_licenses_screen.dart';
 import 'world_map_block.dart';
 import 'world_map_config.dart';
+import 'world_map_fullscreen.dart';
+import 'world_map_data.dart';
 import 'world_map_providers.dart';
+import 'world_regions.dart';
 
 class WorldMapSection extends ConsumerStatefulWidget {
   const WorldMapSection({
     super.key,
     required this.scientificName,
+    this.speciesName,
     this.nesting,
   });
 
   final String scientificName;
+
+  /// Name shown in the title of the full-screen map (the scientific name when
+  /// unknown).
+  final String? speciesName;
   final NestingPeriod? nesting;
 
   @override
@@ -92,9 +100,44 @@ class _WorldMapSectionState extends ConsumerState<WorldMapSection> {
         onLicenseTap: () => _openLicenses(context),
         user: user,
         nesting: nesting,
+        onExpand:
+            () => _openFullscreen(
+              context,
+              regions.value!,
+              presence.value!,
+              user,
+              nesting,
+            ),
       );
     }
     return BirdyCrossFade(child: child);
+  }
+
+  /// The full-screen, zoomable map, on the app's standard route.
+  void _openFullscreen(
+    BuildContext context,
+    WorldRegions regions,
+    WorldMapData data,
+    GridCell? user,
+    NestingPeriod? nesting,
+  ) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder:
+            (_) => WorldMapFullscreen(
+              speciesName: widget.speciesName ?? widget.scientificName,
+              regions: regions,
+              classes: data.classes,
+              source: data.source,
+              generation: data.generation,
+              user: user,
+              nesting: nesting,
+              onGbifTap:
+                  () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
+              onLicenseTap: () => _openLicenses(context),
+            ),
+      ),
+    );
   }
 
   /// The licenses page holds the GBIF attribution and the citation.

@@ -283,6 +283,47 @@ Future<ui.Image> renderStaticLayer(
   }
 }
 
+/// Draws what sits on top of the static layer: the outline of the tapped
+/// region and the user's dot, with constant sizes in screen pixels. Shared by
+/// the inline map and the full-screen one.
+void paintMapOverlay(
+  Canvas canvas,
+  MapProjection projection, {
+  required WorldRegions regions,
+  required WorldMapColors colors,
+  String? selected,
+  GridCell? user,
+}) {
+  final frame = projection.frame;
+  final m = projection.matrix;
+  final tapped = selected == null ? null : regions.byId(selected);
+  if (tapped != null) {
+    canvas.drawPath(
+      tapped.path.transform(m),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = WorldMapConfig.selectedLineWidth
+        ..strokeJoin = StrokeJoin.round
+        ..color = colors.selected,
+    );
+  }
+  final u = user;
+  if (u != null &&
+      u.longitude >= frame.lon0 &&
+      u.longitude <= frame.lon1 &&
+      u.latitude >= frame.lat0 &&
+      u.latitude <= frame.lat1) {
+    final p = projection.project(u.latitude, u.longitude);
+    canvas
+      ..drawCircle(
+        p,
+        WorldMapConfig.userDot / 2 + WorldMapConfig.userDotRing,
+        Paint()..color = colors.userRing,
+      )
+      ..drawCircle(p, WorldMapConfig.userDot / 2, Paint()..color = colors.user);
+  }
+}
+
 class WorldMapPainter extends CustomPainter {
   WorldMapPainter({
     required this.regions,
@@ -331,39 +372,14 @@ class WorldMapPainter extends CustomPainter {
       paintStaticLayer(canvas, size, scene, colors);
       projection = scene.projection;
     }
-    final m = projection.matrix;
-
-    final tapped = selected == null ? null : regions.byId(selected!);
-    if (tapped != null) {
-      canvas.drawPath(
-        tapped.path.transform(m),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = WorldMapConfig.selectedLineWidth
-          ..strokeJoin = StrokeJoin.round
-          ..color = colors.selected,
-      );
-    }
-
-    final u = user;
-    if (u != null &&
-        u.longitude >= frame.lon0 &&
-        u.longitude <= frame.lon1 &&
-        u.latitude >= frame.lat0 &&
-        u.latitude <= frame.lat1) {
-      final p = projection.project(u.latitude, u.longitude);
-      canvas
-        ..drawCircle(
-          p,
-          WorldMapConfig.userDot / 2 + WorldMapConfig.userDotRing,
-          Paint()..color = colors.userRing,
-        )
-        ..drawCircle(
-          p,
-          WorldMapConfig.userDot / 2,
-          Paint()..color = colors.user,
-        );
-    }
+    paintMapOverlay(
+      canvas,
+      projection,
+      regions: regions,
+      colors: colors,
+      selected: selected,
+      user: user,
+    );
   }
 
   @override

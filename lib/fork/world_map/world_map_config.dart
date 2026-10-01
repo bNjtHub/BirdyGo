@@ -131,4 +131,16 @@ abstract final class WorldMapConfig {
 
   /// Legend key swatch, in dp.
   static const double keySwatch = 14;
+
+  // ---- Full-screen map ----
+
+  /// Zoom limits, relative to the species' range frame (1 = framed range).
+  static const double minScale = 1;
+  static const double maxScale = 8;
+
+  /// Factor of a double tap (or of a zoom action of the screen reader).
+  static const double doubleTapZoom = 2;
+
+  /// Expand button on the inline map: 48 dp target around this visible disc.
+  static const double expandDisc = 36;
 }
