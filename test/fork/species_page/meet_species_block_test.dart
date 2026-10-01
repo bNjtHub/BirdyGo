@@ -1,11 +1,10 @@
-/// « Fais sa connaissance » (J6h): Suivant/Revoir, read checks and hidden
-/// sections.
+/// « Fais sa connaissance » (J6h, J7 order): Suivant/Revoir, read checks,
+/// hidden sections, and the sections that moved out of the discs.
 library;
 
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
 import 'package:birdnet_live/fork/species_page/meet_species_block.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -22,9 +21,7 @@ Future<void> _pump(WidgetTester tester, SpeciesSheet sheet) async {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: SingleChildScrollView(
-          child: MeetSpeciesBlock(sheet: sheet, onQuizTap: () {}),
-        ),
+        body: SingleChildScrollView(child: MeetSpeciesBlock(sheet: sheet)),
       ),
     ),
   );
@@ -43,11 +40,11 @@ const _all = SpeciesSheet(
 );
 
 void main() {
-  testWidgets('starts on the first section, 1/5 discovered', (tester) async {
+  testWidgets('starts on the first section, 1/3 discovered', (tester) async {
     await _pump(tester, _all);
-    expect(find.text('Comment le reconnaître'), findsOneWidget);
-    expect(find.text('Phrases flûtées.'), findsOneWidget);
-    expect(find.text('1/5 découverts'), findsOneWidget);
+    expect(find.text('Sa taille'), findsOneWidget);
+    expect(find.text('Vingt-cinq centimètres.'), findsOneWidget);
+    expect(find.text('1/3 découverts'), findsOneWidget);
     expect(find.text('Suivant'), findsOneWidget);
   });
 
@@ -55,23 +52,18 @@ void main() {
     tester,
   ) async {
     await _pump(tester, _all);
-    for (final hook in [
-      'Sa taille',
-      'Ce qu\'il fait',
-      'Où il passe l\'année',
-      'Le savais-tu ?',
-    ]) {
+    for (final hook in ['Ce qu\'il fait', 'Le savais-tu ?']) {
       await tester.tap(find.byKey(const ValueKey('meet-next')));
       await tester.pumpAndSettle();
       expect(find.text(hook), findsOneWidget);
     }
     expect(find.text('Revoir'), findsOneWidget);
     expect(find.text('Suivant'), findsNothing);
-    expect(find.text('5/5 découverts'), findsOneWidget);
+    expect(find.text('3/3 découverts'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('meet-next')));
     await tester.pumpAndSettle();
-    expect(find.text('Comment le reconnaître'), findsOneWidget);
+    expect(find.text('Sa taille'), findsOneWidget);
     expect(find.text('Suivant'), findsOneWidget);
   });
 
@@ -79,14 +71,14 @@ void main() {
     tester,
   ) async {
     await _pump(tester, _all);
-    expect(find.byKey(const ValueKey('meet-read-size')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('meet-disc-migration')));
+    expect(find.byKey(const ValueKey('meet-read-anecdote')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('meet-disc-anecdote')));
     await tester.pumpAndSettle();
-    expect(find.text('Où il passe l\'année'), findsOneWidget);
-    expect(find.byKey(const ValueKey('meet-read-by_ear')), findsOneWidget);
-    expect(find.byKey(const ValueKey('meet-read-migration')), findsOneWidget);
-    expect(find.byKey(const ValueKey('meet-read-size')), findsNothing);
-    expect(find.text('2/5 découverts'), findsOneWidget);
+    expect(find.text('Le savais-tu ?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-read-size')), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-read-anecdote')), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-read-behaviour')), findsNothing);
+    expect(find.text('2/3 découverts'), findsOneWidget);
   });
 
   testWidgets('sections without content are hidden, count is N/available', (
@@ -97,25 +89,94 @@ void main() {
       const SpeciesSheet(
         name: 'x',
         sections: {
-          SheetSection.byEar: 'A.',
+          SheetSection.size: 'A.',
           SheetSection.anecdote: 'B.',
-          SheetSection.confusions: 'Not one of the five.',
+          SheetSection.confusions: 'Not one of the discs.',
         },
       ),
     );
-    expect(find.byKey(const ValueKey('meet-disc-by_ear')), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-disc-size')), findsOneWidget);
     expect(find.byKey(const ValueKey('meet-disc-anecdote')), findsOneWidget);
-    expect(find.byKey(const ValueKey('meet-disc-size')), findsNothing);
-    expect(find.byKey(const ValueKey('meet-disc-migration')), findsNothing);
+    expect(find.byKey(const ValueKey('meet-disc-behaviour')), findsNothing);
     expect(find.text('1/2 découverts'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('meet-next')));
     await tester.pumpAndSettle();
     expect(find.text('Revoir'), findsOneWidget);
   });
 
-  testWidgets('shows the quiz link', (tester) async {
+  testWidgets('no quiz link, no summary, no by-ear or migration disc (J7)', (
+    tester,
+  ) async {
     await _pump(tester, _all);
-    expect(find.byType(QuizEntryRow), findsOneWidget);
+    expect(find.text('Qui chante ?'), findsNothing);
+    expect(find.textContaining('Teste ton oreille'), findsNothing);
+    expect(find.text('Un chanteur du soir.'), findsNothing);
+    expect(find.byKey(const ValueKey('meet-disc-by_ear')), findsNothing);
+    expect(find.byKey(const ValueKey('meet-disc-migration')), findsNothing);
+    expect(find.text('Phrases flûtées.'), findsNothing);
+    expect(find.text('Reste toute l\'année.'), findsNothing);
+    expect(meetAvailable(_all), [
+      SheetSection.size,
+      SheetSection.behaviour,
+      SheetSection.anecdote,
+    ]);
+  });
+
+  testWidgets('one section left: a plain tonal block, no disc grid', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const SpeciesSheet(
+        name: 'x',
+        sections: {
+          SheetSection.byEar: 'Phrases flûtées.',
+          SheetSection.size: 'Vingt-cinq centimètres.',
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey('meet-plain-size')), findsOneWidget);
+    expect(find.text('Vingt-cinq centimètres.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-disc-size')), findsNothing);
+    expect(find.byKey(const ValueKey('meet-next')), findsNothing);
+    expect(find.textContaining('découverts'), findsNothing);
+    expect(find.text('Phrases flûtées.'), findsNothing);
+  });
+
+  testWidgets('two sections: the grid stays, with two discs', (tester) async {
+    await _pump(
+      tester,
+      const SpeciesSheet(
+        name: 'x',
+        sections: {SheetSection.size: 'A.', SheetSection.enemies: 'B.'},
+      ),
+    );
+    expect(find.byKey(const ValueKey('meet-disc-size')), findsOneWidget);
+    expect(find.byKey(const ValueKey('meet-disc-enemies')), findsOneWidget);
+    expect(find.text('1/2 découverts'), findsOneWidget);
+  });
+
+  test('meetHasContent: discs or extras only', () {
+    expect(meetHasContent(_all), isTrue);
+    expect(
+      meetHasContent(
+        const SpeciesSheet(
+          name: 'x',
+          sections: {
+            SheetSection.summary: 'S.',
+            SheetSection.byEar: 'E.',
+            SheetSection.migration: 'M.',
+          },
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      meetHasContent(
+        const SpeciesSheet(name: 'x', sections: {SheetSection.whyHere: 'W.'}),
+      ),
+      isTrue,
+    );
   });
 
   testWidgets('whyHere and confusions stay visible as their own blocks', (
@@ -126,7 +187,8 @@ void main() {
       const SpeciesSheet(
         name: 'Merle noir',
         sections: {
-          SheetSection.byEar: 'Phrases flûtées.',
+          SheetSection.size: 'Vingt-cinq centimètres.',
+          SheetSection.anecdote: 'Il chante.',
           SheetSection.whyHere: 'Il aime les jardins.',
           SheetSection.confusions: 'Le merle à plastron.',
         },
@@ -139,8 +201,8 @@ void main() {
     expect(find.text('Confusions possibles'), findsOneWidget);
   });
 
-  group('six sections (Ennemis)', () {
-    const six = SpeciesSheet(
+  group('four sections (Ennemis)', () {
+    const four = SpeciesSheet(
       name: 'Merle noir',
       sections: {
         SheetSection.byEar: 'Phrases flûtées.',
@@ -151,52 +213,43 @@ void main() {
         SheetSection.anecdote: 'Il chante dès la fin de l\'hiver.',
       },
     );
-    const keys = [
-      'by_ear',
-      'size',
-      'behaviour',
-      'migration',
-      'enemies',
-      'anecdote',
-    ];
+    const keys = ['size', 'behaviour', 'enemies', 'anecdote'];
 
-    test('order of the six sections', () {
-      expect(meetAvailable(six), [
-        SheetSection.byEar,
+    test('order of the four sections', () {
+      expect(meetAvailable(four), [
         SheetSection.size,
         SheetSection.behaviour,
-        SheetSection.migration,
         SheetSection.enemies,
         SheetSection.anecdote,
       ]);
     });
 
-    testWidgets('six discs, Habitudes label, counter 1/6', (tester) async {
-      await _pump(tester, six);
+    testWidgets('four discs, Habitudes label, counter 1/4', (tester) async {
+      await _pump(tester, four);
       for (final k in keys) {
         expect(find.byKey(ValueKey('meet-disc-$k')), findsOneWidget);
       }
       expect(find.text('Habitudes'), findsOneWidget);
       expect(find.text('Comportement'), findsNothing);
       expect(find.text('Ennemis'), findsOneWidget);
-      expect(find.text('1/6 découverts'), findsOneWidget);
+      expect(find.text('1/4 découverts'), findsOneWidget);
     });
 
     testWidgets('Ennemis shows its kicker and text', (tester) async {
-      await _pump(tester, six);
+      await _pump(tester, four);
       await tester.tap(find.byKey(const ValueKey('meet-disc-enemies')));
       await tester.pumpAndSettle();
       expect(find.text('Qui le chasse'), findsOneWidget);
       expect(find.text('L\'épervier et le chat.'), findsOneWidget);
-      expect(find.text('2/6 découverts'), findsOneWidget);
+      expect(find.text('2/4 découverts'), findsOneWidget);
     });
 
-    testWidgets('Ennemis is hidden without text, counter is n/5', (
+    testWidgets('Ennemis is hidden without text, counter is n/3', (
       tester,
     ) async {
       await _pump(tester, _all);
       expect(find.byKey(const ValueKey('meet-disc-enemies')), findsNothing);
-      expect(find.text('1/5 découverts'), findsOneWidget);
+      expect(find.text('1/3 découverts'), findsOneWidget);
     });
 
     for (final scale in [1.0, 1.3]) {
@@ -219,9 +272,7 @@ void main() {
                   child: child!,
                 ),
             home: Scaffold(
-              body: SingleChildScrollView(
-                child: MeetSpeciesBlock(sheet: six, onQuizTap: () {}),
-              ),
+              body: SingleChildScrollView(child: MeetSpeciesBlock(sheet: four)),
             ),
           ),
         );
@@ -265,13 +316,13 @@ void main() {
       expect(count, greaterThanOrEqualTo(80));
     });
 
-    testWidgets('shows six sections for a species with enemies', (
+    testWidgets('shows four sections for a species with enemies', (
       tester,
     ) async {
       final sheet = sheets['Accipiter nisus']!;
       expect(meetAvailable(sheet), kMeetSections);
       await _pump(tester, sheet);
-      expect(find.text('1/6 découverts'), findsOneWidget);
+      expect(find.text('1/4 découverts'), findsOneWidget);
     });
   });
 
@@ -299,7 +350,7 @@ void main() {
               body: Padding(
                 padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
-                  child: MeetSpeciesBlock(sheet: _all, onQuizTap: () {}),
+                  child: MeetSpeciesBlock(sheet: _all),
                 ),
               ),
             ),

@@ -193,18 +193,24 @@ void main() {
     loader.resolve();
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getRect(find.byKey(const ValueKey('fiche-heard'))),
-      heard,
-      reason: 'counters block',
+    // The heard line (J7) keeps its place; it may wrap to a second line at
+    // large text, which is the only thing allowed to move what is below.
+    final loadedHeard = tester.getRect(
+      find.byKey(const ValueKey('fiche-heard')),
     );
-    // The recordings list keeps its top; its bottom can settle once the
-    // real recording count (2, not however many the skeleton reserved)
-    // lands.
+    expect(loadedHeard.topLeft, heard.topLeft, reason: 'heard line');
+    expect(loadedHeard.width, heard.width, reason: 'heard line width');
+    // The recordings list keeps its top (give or take the heard line's own
+    // height change); its bottom can settle once the real recording count
+    // (2, not however many the skeleton reserved) lands.
     final loadedSounds = tester.getRect(
       find.byKey(const ValueKey('fiche-sounds')),
     );
-    expect(loadedSounds.top, sounds.top, reason: 'sounds block top');
+    expect(
+      loadedSounds.top - sounds.top,
+      loadedHeard.height - heard.height,
+      reason: 'sounds block top',
+    );
     expect(loadedSounds.left, sounds.left, reason: 'sounds block left');
     expect(loadedSounds.right, sounds.right, reason: 'sounds block right');
     expect(find.text('Rougegorge familier'), findsOneWidget);

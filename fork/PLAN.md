@@ -327,6 +327,7 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       index nom vers offset) : affichage immédiat et hors ligne. Espèce absente ou fichier manquant : repli sur
       le géomodèle comme avant. Crédit « Observations GBIF.org (année) · CC BY 4.0 ». Le fichier
       `gadm1_to_regions.json.gz` n'est plus lu par l'app (à supprimer des assets). Rien de natif côté iOS.
+- [x] Fiche espèce, nouvel ordre (PR « J7 Fiche espèce : nouvel ordre des blocs, quiz retiré », empilée sur #130) : six groupes dans l'ordre des questions : Qui est-ce ? (photo, nom, résumé de la fiche IA, ligne « Entendu… »), Son chant (Mes sons puis « À l'oreille »), Fais sa connaissance (disques taille, habitudes, ennemis, anecdote ; moins de 2 disques : blocs simples), Où et quand le voir (courbe de l'année, carte du monde, migration), Mes rencontres, Pour aller plus loin ; lien du quiz retiré de la fiche.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches
