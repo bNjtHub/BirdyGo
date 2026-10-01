@@ -110,6 +110,21 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
   bool _confirmedOnly = false;
   bool _birdsOnly = true;
 
+  // Perf: the query runs when its inputs change, not at every rebuild
+  // (taxonomy load, theme, setState of a filter that does not touch it).
+  int _indexVersion = 0;
+  Object? _loadedFor;
+  Future<(List<SpeciesTally>, Set<String>)>? _data;
+
+  Future<(List<SpeciesTally>, Set<String>)> _dataFuture() {
+    final key = (_period, _order, _confirmedOnly, _indexVersion);
+    if (_loadedFor != key) {
+      _loadedFor = key;
+      _data = _load();
+    }
+    return _data!;
+  }
+
   Future<(List<SpeciesTally>, Set<String>)> _load() async {
     final index = await ref.read(observationIndexServiceProvider).ensureReady();
     final range = periodRange(_period, DateTime.now());
@@ -157,7 +172,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     final c = BirdyColors.of(context);
     final language = Localizations.localeOf(context).languageCode;
     // Rebuild when the index changes (a session was saved).
-    ref.watch(observationIndexServiceProvider);
+    ref.listen(observationIndexServiceProvider, (_, _) {
+      if (mounted) setState(() => _indexVersion++);
+    });
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final now = DateTime.now();
@@ -169,7 +186,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: FutureBuilder(
-              future: _load(),
+              future: _dataFuture(),
               builder: (context, snapshot) {
                 final data = snapshot.data;
                 final tallies =
