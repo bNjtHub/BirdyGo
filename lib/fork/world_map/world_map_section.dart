@@ -13,7 +13,6 @@ import '../../features/settings/settings_screen.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../licenses/content_licenses_screen.dart';
-import 'gbif_map.dart';
 import 'world_map_block.dart';
 import 'world_map_config.dart';
 import 'world_map_providers.dart';

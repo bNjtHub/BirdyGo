@@ -14,7 +14,6 @@ import 'package:http/http.dart' as http;
 import '../../core/constants/app_constants.dart';
 import 'gbif_cache.dart';
 import 'gbif_map.dart';
-import 'season_presence.dart';
 import 'world_map_config.dart';
 
 /// GBIF has no usable map for the species, or it did not answer.

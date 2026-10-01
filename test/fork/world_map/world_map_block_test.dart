@@ -14,7 +14,9 @@ import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
-import 'package:birdnet_live/fork/world_map/gbif_ranges.dart';
+import 'package:birdnet_live/fork/world_map/gbif_cache.dart';
+import 'package:birdnet_live/fork/world_map/gbif_map.dart';
+import 'package:birdnet_live/fork/world_map/gbif_service.dart';
 import 'package:birdnet_live/fork/world_map/land_outline.dart';
 import 'package:birdnet_live/fork/world_map/season_presence.dart';
 import 'package:birdnet_live/fork/world_map/world_grid.dart';
@@ -24,9 +26,12 @@ import 'package:birdnet_live/fork/world_map/world_map_painter.dart';
 import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
 import 'package:birdnet_live/fork/world_map/world_map_section.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/fonts.dart';
 
@@ -37,23 +42,50 @@ const _species = 'Hirundo rustica';
 /// geo-model cells keep 3:1 (WCAG 1.4.11).
 const double _faintestMinContrast = 1.5;
 
-const _meta = GbifMeta(
-  demo: false,
-  extractedAt: '2026-10-05',
-  year: 2026,
-  license: 'CC BY 4.0',
-  licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-  doi: '10.15468/dl.abcdef',
-  doiUrl: 'https://doi.org/10.15468/dl.abcdef',
-);
-
+/// A synthetic GBIF map: a migrant seen in the north in summer (stronger
+/// towards the south of the band) and in the tropics in winter.
 SeasonPresence _gbifPresence() {
-  final index = GbifIndex.parse(
-    File(WorldMapConfig.gbifAsset).readAsBytesSync(),
-  );
-  return decodeGbifSpecies(
-    GbifDecodeRequest(index.blockOf(_species)!, index.grid),
-  );
+  final grid = GbifGrid.forZone();
+  final levels = {
+    for (final s in Season.values) s: Uint8List(grid.cellCount),
+  };
+  for (var cell = 0; cell < grid.cellCount; cell++) {
+    final c = grid.centerOf(cell);
+    if (c.latitude >= 50 && c.latitude <= 68 && c.longitude >= -10 && c.longitude <= 40) {
+      levels[Season.summer]![cell] = c.latitude < 56 ? 3 : (c.latitude < 62 ? 2 : 1);
+    }
+    if (c.latitude >= 0 && c.latitude <= 15 && c.longitude >= -15 && c.longitude <= 10) {
+      levels[Season.winter]![cell] = 3;
+    }
+  }
+  return GbifSpeciesMap(
+    taxonKey: 1,
+    fetchedAt: DateTime(2026),
+    cols: grid.cols,
+    rows: grid.rows,
+    levels: [for (final s in Season.values) levels[s]!],
+  ).toPresence(grid);
+}
+
+/// A service that answers from memory (no disk, no network).
+class _FakeGbif extends GbifMapService {
+  _FakeGbif(this._result)
+    : super(
+        client: MockClient((_) async => throw StateError('no network')),
+        cache: GbifMapCache(directory: () async => throw StateError('no disk')),
+      );
+
+  final Future<GbifSpeciesMap> Function() _result;
+
+  @override
+  Future<GbifSpeciesMap> load(String scientificName) => _result();
+}
+
+Future<SharedPreferences> _prefs({required bool consent}) async {
+  SharedPreferences.setMockInitialValues({
+    if (consent) 'privacy_allow_map': true,
+  });
+  return SharedPreferences.getInstance();
 }
 
 LandOutline _outline() => LandOutline.parse(
@@ -117,7 +149,9 @@ Future<void> _pumpBlock(
   int month = 7,
   NestingPeriod? nesting,
   WorldMapSource source = WorldMapSource.geomodel,
-  VoidCallback? onSourceTap,
+  VoidCallback? onGbifTap,
+  VoidCallback? onLicenseTap,
+  VoidCallback? onOnlineHintTap,
 }) async {
   tester.view.physicalSize = Size(width, 700);
   tester.view.devicePixelRatio = 1;
@@ -131,8 +165,9 @@ Future<void> _pumpBlock(
         user: (latitude: 48.85, longitude: 2.35),
         nesting: nesting,
         source: source,
-        meta: source == WorldMapSource.gbif ? _meta : null,
-        onSourceTap: onSourceTap,
+        onGbifTap: onGbifTap,
+        onLicenseTap: onLicenseTap,
+        onOnlineHintTap: onOnlineHintTap,
       ),
       dark: dark,
       scale: scale,
@@ -206,33 +241,21 @@ void main() {
   });
 
   group('section', () {
-    testWidgets('hidden when the geo-model is not available', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            gbifIndexProvider.overrideWith((ref) async => null),
-            worldMapPredictProvider.overrideWith((ref) async => null),
-            worldMapUserPositionProvider.overrideWith((ref) async => null),
-          ],
-          child: _app(
-            const WorldMapSection(scientificName: _species, currentMonth: 7),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(WorldMapBlock), findsNothing);
-      expect(find.text('Dans le monde'), findsNothing);
-    });
-
-    testWidgets('skeleton first, then the block', (tester) async {
+    Future<void> pumpSection(
+      WidgetTester tester, {
+      required bool consent,
+      GeoPredict? predict,
+      GbifMapService? gbif,
+    }) async {
+      final prefs = await _prefs(consent: consent);
       final outline = _outline();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
             landOutlineProvider.overrideWith((ref) async => outline),
-            gbifIndexProvider.overrideWith((ref) async => null),
-            gbifMetaProvider.overrideWith((ref) async => null),
-            worldMapPredictProvider.overrideWith((ref) async => _fake()),
+            worldMapPredictProvider.overrideWith((ref) async => predict),
+            if (gbif != null) gbifMapServiceProvider.overrideWithValue(gbif),
             worldMapUserPositionProvider.overrideWith(
               (ref) async => (latitude: 48.85, longitude: 2.35),
             ),
@@ -242,15 +265,96 @@ void main() {
           ),
         ),
       );
-      expect(find.text('Dans le monde'), findsOneWidget, reason: 'skeleton');
-      expect(find.byType(WorldMapBlock), findsNothing);
-      // The provider pauses between batches: advance the fake clock.
+    }
+
+    Future<void> settle(WidgetTester tester) async {
+      // The geo-model provider pauses between batches: advance the fake clock.
       for (var i = 0; i < 400; i++) {
         if (find.byType(WorldMapBlock).evaluate().isNotEmpty) break;
         await tester.pump(const Duration(milliseconds: 20));
       }
       await tester.pumpAndSettle();
+    }
+
+    testWidgets('hidden when the geo-model is not available', (tester) async {
+      await pumpSection(tester, consent: false);
+      await tester.pumpAndSettle();
+      expect(find.byType(WorldMapBlock), findsNothing);
+      expect(find.text('Dans le monde'), findsNothing);
+    });
+
+    testWidgets('no consent: geo-model map, a hint, never a request', (
+      tester,
+    ) async {
+      var asked = false;
+      await pumpSection(
+        tester,
+        consent: false,
+        predict: _fake(),
+        gbif: _FakeGbif(() async {
+          asked = true;
+          return GbifSpeciesMap(
+            taxonKey: 1,
+            fetchedAt: DateTime(2026),
+            cols: 0,
+            rows: 0,
+            levels: const [],
+          );
+        }),
+      );
+      expect(find.text('Dans le monde'), findsOneWidget, reason: 'skeleton');
+      expect(find.byType(WorldMapBlock), findsNothing);
+      await settle(tester);
       expect(find.byType(WorldMapBlock), findsOneWidget);
+      expect(find.text('Estimation du géomodèle BirdNET'), findsOneWidget);
+      expect(
+        find.text('Carte précise : activez la carte en ligne'),
+        findsOneWidget,
+      );
+      expect(asked, isFalse);
+    });
+
+    testWidgets('consent and GBIF answering: GBIF map and its credit', (
+      tester,
+    ) async {
+      final grid = GbifGrid.forZone();
+      await pumpSection(
+        tester,
+        consent: true,
+        predict: _fake(),
+        gbif: _FakeGbif(
+          () async => GbifSpeciesMap(
+            taxonKey: 1,
+            fetchedAt: DateTime(2026),
+            cols: grid.cols,
+            rows: grid.rows,
+            levels: [
+              for (final s in Season.values)
+                Uint8List(grid.cellCount)..fillRange(5000, 5400, 2),
+            ],
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(find.text('Observations GBIF.org'), findsOneWidget);
+      expect(find.text('CC BY 4.0'), findsOneWidget);
+      expect(find.text('Estimation du géomodèle BirdNET'), findsNothing);
+      expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
+    });
+
+    testWidgets('consent but GBIF fails: geo-model map, no hint', (
+      tester,
+    ) async {
+      await pumpSection(
+        tester,
+        consent: true,
+        predict: _fake(),
+        gbif: _FakeGbif(() async => throw GbifUnavailable('offline')),
+      );
+      await settle(tester);
+      expect(find.text('Estimation du géomodèle BirdNET'), findsOneWidget);
+      expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
+      expect(find.textContaining('GBIF'), findsNothing);
     });
   });
 
@@ -283,34 +387,54 @@ void main() {
 
     setUpAll(() => gbif = _gbifPresence());
 
-    testWidgets('mention, key and legend, with the DOI page one tap away', (
-      tester,
-    ) async {
-      var taps = 0;
+    testWidgets('credit with two links, key and legend', (tester) async {
+      var gbifTaps = 0;
+      var licenseTaps = 0;
       await _pumpBlock(
         tester,
         presence: gbif,
         source: WorldMapSource.gbif,
         nesting: const NestingPeriod(4, 7),
-        onSourceTap: () => taps++,
+        onGbifTap: () => gbifTaps++,
+        onLicenseTap: () => licenseTaps++,
       );
-      expect(
-        find.text('Observations GBIF (dont eBird), CC BY 4.0 · 2026'),
-        findsOneWidget,
-      );
+      expect(find.text('Observations GBIF.org'), findsOneWidget);
+      expect(find.text('CC BY 4.0'), findsOneWidget);
       expect(find.text('Estimation du géomodèle BirdNET'), findsNothing);
       expect(find.text('Observé (plus foncé : plus souvent)'), findsOneWidget);
       expect(find.textContaining('Été : '), findsWidgets);
       expect(find.textContaining('km'), findsWidgets);
       expect(find.text('Nidification : avril à juillet'), findsOneWidget);
-      final target = tester.getSize(
-        find.byKey(const ValueKey('world-map-source')),
+      for (final key in ['world-map-source', 'world-map-license']) {
+        final target = tester.getSize(find.byKey(ValueKey(key)));
+        expect(target.height, greaterThanOrEqualTo(BirdySizes.target));
+        await tester.ensureVisible(find.byKey(ValueKey(key)));
+        await tester.pump();
+        await tester.tap(find.byKey(ValueKey(key)));
+      }
+      expect(gbifTaps, 1);
+      expect(licenseTaps, 1);
+    });
+
+    testWidgets('the geo-model hint opens the setting', (tester) async {
+      var taps = 0;
+      await _pumpBlock(
+        tester,
+        presence: presence,
+        onOnlineHintTap: () => taps++,
       );
-      expect(target.height, greaterThanOrEqualTo(BirdySizes.target));
-      await tester.ensureVisible(find.byKey(const ValueKey('world-map-source')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('world-map-online-hint')),
+      );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('world-map-source')));
+      await tester.tap(find.byKey(const ValueKey('world-map-online-hint')));
       expect(taps, 1);
+      expect(
+        tester
+            .getSize(find.byKey(const ValueKey('world-map-online-hint')))
+            .height,
+        greaterThanOrEqualTo(BirdySizes.target),
+      );
     });
 
     testWidgets('the geo-model fallback keeps its own mention', (tester) async {
@@ -417,7 +541,8 @@ void main() {
             scale: scale,
             source: WorldMapSource.gbif,
             nesting: const NestingPeriod(4, 7),
-            onSourceTap: () {},
+            onGbifTap: () {},
+            onLicenseTap: () {},
           );
           expect(tester.takeException(), isNull);
         });
@@ -434,7 +559,8 @@ void main() {
             presence: gbif,
             dark: dark,
             source: WorldMapSource.gbif,
-            onSourceTap: () {},
+            onGbifTap: () {},
+            onLicenseTap: () {},
           );
           await expectLater(
             find.byType(MaterialApp),

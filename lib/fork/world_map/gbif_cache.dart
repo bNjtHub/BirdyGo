@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'gbif_map.dart';
-import 'season_presence.dart';
 import 'world_map_config.dart';
 
 /// A cached map and whether it is still within its validity.
