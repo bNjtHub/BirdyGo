@@ -1,15 +1,21 @@
-/// Providers of the species page world map (J7). Everything is computed once
-/// per app run: the outline and the land grid once, the four seasons once per
-/// species (Riverpod keeps the family alive, so it is the in-memory cache).
+/// Providers of the species page world map (J7). The outline and the land grid
+/// are computed once per app run, the geo-model's four seasons once per
+/// species (Riverpod keeps the family alive); GBIF maps live in a disk cache.
 library;
 
-import 'package:flutter/foundation.dart' show compute, kReleaseMode;
+import 'dart:io' show Directory;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
-import 'gbif_ranges.dart';
+import 'gbif_cache.dart';
+import 'gbif_map.dart';
+import 'gbif_service.dart';
 import 'land_outline.dart';
 import 'season_presence.dart';
 import 'world_grid.dart';
@@ -56,65 +62,56 @@ final speciesSeasonPresenceProvider =
       }
     });
 
-/// Metadata of the GBIF asset, or null when it is missing or is the
-/// fictitious demo asset in a release build. Overridden by tests.
-final gbifMetaProvider = FutureProvider<GbifMeta?>((ref) async {
-  try {
-    final meta = GbifMeta.parse(
-      await rootBundle.loadString(WorldMapConfig.gbifMetaAsset),
-    );
-    return meta.usableIn(release: kReleaseMode) ? meta : null;
-  } catch (_) {
-    return null;
-  }
+/// HTTP client of the GBIF requests. Overridden by tests with a fake.
+final gbifHttpClientProvider = Provider<http.Client>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return client;
 });
 
-/// Header and species index of the GBIF asset (a few KB of names; one
-/// species is decoded off the UI thread when it is asked for), or null when
-/// the asset is missing, unreadable or unusable here. Overridden by tests.
-final gbifIndexProvider = FutureProvider<GbifIndex?>((ref) async {
-  try {
-    if (await ref.watch(gbifMetaProvider.future) == null) return null;
-    final data = await rootBundle.load(WorldMapConfig.gbifAsset);
-    return GbifIndex.parse(
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-    );
-  } catch (_) {
-    return null;
-  }
-});
-
-/// Decodes one GBIF species; overridden by tests that cannot spawn isolates.
-final gbifDecodeProvider = Provider<Future<SeasonPresence> Function(
-  GbifDecodeRequest,
-)>((ref) => (request) => compute(decodeGbifSpecies, request));
-
-/// What the map shows for one species: GBIF observations when the asset has
-/// the species (instant, nothing computed on the phone), else the geo-model
-/// estimate (the 5 degree fallback, computed in the background). Null hides
-/// the block.
-final worldMapDataProvider = FutureProvider.family<WorldMapData?, String>((
-  ref,
-  scientificName,
-) async {
-  final index = await ref.watch(gbifIndexProvider.future);
-  if (chooseWorldMapSource(index, scientificName) == WorldMapSource.gbif) {
-    try {
-      final presence = await ref.read(gbifDecodeProvider)(
-        GbifDecodeRequest(index!.blockOf(scientificName)!, index.grid),
-      );
-      return WorldMapData(presence, WorldMapSource.gbif);
-    } catch (_) {
-      // A damaged block: the geo-model still answers.
-    }
-  }
-  final presence = await ref.watch(
-    speciesSeasonPresenceProvider(scientificName).future,
+/// The GBIF map service: nothing is asked of GBIF except through it, and it
+/// is only reached with the online-map consent (see [worldMapDataProvider]).
+final gbifMapServiceProvider = Provider<GbifMapService>((ref) {
+  return GbifMapService(
+    client: ref.watch(gbifHttpClientProvider),
+    cache: GbifMapCache(
+      directory:
+          () async => Directory(
+            p.join(
+              (await getApplicationCacheDirectory()).path,
+              WorldMapConfig.gbifCacheDirName,
+            ),
+          ),
+    ),
   );
-  return presence == null
-      ? null
-      : WorldMapData(presence, WorldMapSource.geomodel);
 });
+
+/// What the map shows for one species: with the online-map consent, the GBIF
+/// observations (disk cache first, then GBIF); otherwise, offline, or on any
+/// GBIF error, the geo-model estimate (the 5 degree fallback, computed in the
+/// background). Null hides the block. Not kept alive, so a species whose
+/// request failed is asked again next time its page opens.
+final worldMapDataProvider = FutureProvider.autoDispose
+    .family<WorldMapData?, String>((ref, scientificName) async {
+      if (ref.watch(privacyAllowMapProvider)) {
+        final service = ref.read(gbifMapServiceProvider);
+        try {
+          final map = await service.load(scientificName);
+          return WorldMapData(
+            map.toPresence(service.grid),
+            WorldMapSource.gbif,
+          );
+        } catch (_) {
+          // Offline, unknown species, GBIF error: the geo-model still answers.
+        }
+      }
+      final presence = await ref.watch(
+        speciesSeasonPresenceProvider(scientificName).future,
+      );
+      return presence == null
+          ? null
+          : WorldMapData(presence, WorldMapSource.geomodel);
+    });
 
 /// Where the phone is, for the map's dot. Never asks for the location
 /// permission (same care as the species page's year chart); null when unknown.

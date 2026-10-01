@@ -186,8 +186,6 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           // No geo-model in these tests: the world map block stays hidden.
           worldMapPredictProvider.overrideWith((ref) async => null),
-          gbifIndexProvider.overrideWith((ref) async => null),
-          gbifMetaProvider.overrideWith((ref) async => null),
           taxonomyServiceProvider.overrideWith(
             (ref) async =>
                 TaxonomyService()..loadFromCsv(

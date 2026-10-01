@@ -1749,7 +1749,7 @@
   "@mapTileConsentTitle": {
     "description": "Title for the map tile consent dialog"
   },
-  "mapTileConsentBody": "Loading the map connects to OpenStreetMap tile servers. Your IP address and approximate location will be visible to the tile server. This also enables place-name lookup, which you can turn off separately in Settings.\n\nDo you agree to load map tiles?",
+  "mapTileConsentBody": "Loading the map connects to OpenStreetMap tile servers. Your IP address and approximate location will be visible to the tile server. This also enables place-name lookup, which you can turn off separately in Settings.\n\nSpecies maps on the species pages are requested from GBIF.org: the species name is sent, never your position.\n\nDo you agree to load map tiles?",
   "@mapTileConsentBody": {
     "description": "Body text for the map tile consent dialog"
   },
@@ -3763,11 +3763,11 @@
   "@settingsPrivacyAllowMap": {
     "description": "Privacy toggle for OpenStreetMap tile downloads"
   },
-  "settingsPrivacyAllowMapSubtitle": "Downloads map images from OpenStreetMap.",
+  "settingsPrivacyAllowMapSubtitle": "Downloads map images from OpenStreetMap and species maps from GBIF.",
   "@settingsPrivacyAllowMapSubtitle": {
     "description": "Subtitle naming the third-party service for map tiles"
   },
-  "settingsHelpPrivacyAllowMap": "When enabled, map widgets in the app fetch raster tiles from the public OpenStreetMap servers. Coordinates around your location are sent with each tile request. Disable to keep map screens blank.",
+  "settingsHelpPrivacyAllowMap": "When enabled, map widgets in the app fetch raster tiles from the public OpenStreetMap servers. Coordinates around your location are sent with each tile request. The species pages also ask GBIF.org for the observation map of the species being viewed: only the species name is sent, never your position. Disable to keep map screens blank.",
   "@settingsHelpPrivacyAllowMap": {
     "description": "Long-form help for the OSM tile privacy toggle"
   },
@@ -5318,8 +5318,12 @@
   "@forkWorldKeyOther": {"description": "BirdyGo fork: species page world map (J7)."},
   "forkWorldKeyYou": "You",
   "@forkWorldKeyYou": {"description": "BirdyGo fork: species page world map (J7)."},
-  "forkWorldSourceGbif": "GBIF observations (incl. eBird), CC BY 4.0 · {year}",
-  "@forkWorldSourceGbif": {"description": "BirdyGo fork: species page world map from GBIF (J7).", "placeholders": {"year": {"type": "String"}}},
+  "forkWorldSourceGbif": "Observations GBIF.org",
+  "@forkWorldSourceGbif": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
+  "forkWorldSourceLicense": "CC BY 4.0",
+  "@forkWorldSourceLicense": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
+  "forkWorldOnlineHint": "Precise map: turn on the online map",
+  "@forkWorldOnlineHint": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
   "forkWorldKeyObserved": "Seen (darker: more often)",
   "@forkWorldKeyObserved": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
   "forkWorldMapLabel": "World map, {season}: {legend}",
@@ -6409,14 +6413,14 @@
   "@forkLicensesOtherTitle": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
   "forkLicensesGbifTitle": "Bird observations (GBIF)",
   "@forkLicensesGbifTitle": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
-  "forkLicensesGbifRow": "GBIF observations (incl. eBird)",
+  "forkLicensesGbifRow": "GBIF.org observations",
   "@forkLicensesGbifRow": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
-  "forkLicensesGbifRowSub": "CC BY 4.0, extracted {date}",
-  "@forkLicensesGbifRowSub": {"description": "BirdyGo fork: species page world map from GBIF (J7).", "placeholders": {"date": {"type": "String"}}},
-  "forkLicensesGbifDoi": "Citation of the download",
-  "@forkLicensesGbifDoi": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
-  "forkLicensesGbifDemo": "Fictitious demonstration data, not GBIF observations",
-  "@forkLicensesGbifDemo": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
+  "forkLicensesGbifRowSub": "Only CC0 and CC BY 4.0 records, human observations since {year}. Maps are generated on demand through the GBIF API.",
+  "@forkLicensesGbifRowSub": {"description": "BirdyGo fork: species page world map from GBIF (J7).", "placeholders": {"year": {"type": "String"}}},
+  "forkLicensesGbifCitationTitle": "Citation",
+  "@forkLicensesGbifCitationTitle": {"description": "BirdyGo fork: species page world map from GBIF (J7)."},
+  "forkLicensesGbifCitation": "GBIF.org ({year}) GBIF Occurrence Data, https://www.gbif.org",
+  "@forkLicensesGbifCitation": {"description": "BirdyGo fork: species page world map from GBIF (J7).", "placeholders": {"year": {"type": "String"}}},
   "forkLicensesFonts": "Fonts",
   "@forkLicensesFonts": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
   "forkLicensesFontsSub": "Fraunces, Atkinson Hyperlegible Next and Nunito, under the SIL OFL 1.1 license",

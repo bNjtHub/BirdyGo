@@ -15,7 +15,7 @@ import '../design/widgets/birdy_skeleton.dart';
 import '../species_page/section_title.dart';
 import '../species_page/species_page_text.dart';
 import '../species_sheet/species_sheet.dart';
-import 'gbif_ranges.dart';
+import 'gbif_map.dart';
 import 'land_outline.dart';
 import 'season_legend.dart';
 import 'season_presence.dart';
@@ -33,8 +33,9 @@ class WorldMapBlock extends StatefulWidget {
     this.user,
     this.nesting,
     this.source = WorldMapSource.geomodel,
-    this.meta,
-    this.onSourceTap,
+    this.onGbifTap,
+    this.onLicenseTap,
+    this.onOnlineHintTap,
   });
 
   final LandOutline outline;
@@ -44,11 +45,13 @@ class WorldMapBlock extends StatefulWidget {
   /// mention under the map.
   final WorldMapSource source;
 
-  /// Year of the GBIF extraction, for the mention.
-  final GbifMeta? meta;
+  /// Open GBIF's site, and the licenses page that cites it.
+  final VoidCallback? onGbifTap;
+  final VoidCallback? onLicenseTap;
 
-  /// Opens the page that credits GBIF and cites the download (DOI).
-  final VoidCallback? onSourceTap;
+  /// Shown under the geo-model map when the online map is off: opens the
+  /// setting. Null hides the line.
+  final VoidCallback? onOnlineHintTap;
 
   /// 1 to 12: the season shown first.
   final int currentMonth;
@@ -187,8 +190,9 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
           const SizedBox(height: BirdySpace.s),
           _SourceNote(
             source: widget.source,
-            meta: widget.meta,
-            onTap: widget.onSourceTap,
+            onGbifTap: widget.onGbifTap,
+            onLicenseTap: widget.onLicenseTap,
+            onOnlineHintTap: widget.onOnlineHintTap,
           ),
         ],
       ),
@@ -258,48 +262,97 @@ class _Key extends StatelessWidget {
   }
 }
 
-/// Mention under the map: the geo-model estimate, or the GBIF credit, which
-/// opens the licenses page (48 dp target).
+/// Mention under the map: the geo-model estimate (with, when the online map
+/// is off, a line that opens the setting), or the GBIF credit with two
+/// links: GBIF's site and the licenses page (48 dp targets).
 class _SourceNote extends StatelessWidget {
-  const _SourceNote({required this.source, required this.meta, this.onTap});
+  const _SourceNote({
+    required this.source,
+    this.onGbifTap,
+    this.onLicenseTap,
+    this.onOnlineHintTap,
+  });
 
   final WorldMapSource source;
-  final GbifMeta? meta;
-  final VoidCallback? onTap;
+  final VoidCallback? onGbifTap;
+  final VoidCallback? onLicenseTap;
+  final VoidCallback? onOnlineHintTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
+    final caption = BirdyText.caption.copyWith(color: c.text2);
     if (source == WorldMapSource.geomodel) {
-      return Text(
-        l10n.forkWorldEstimate,
-        style: BirdyText.caption.copyWith(color: c.text2),
+      final hint = onOnlineHintTap;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.forkWorldEstimate, style: caption),
+          if (hint != null)
+            _LinkTarget(
+              key: const ValueKey('world-map-online-hint'),
+              label: l10n.forkWorldOnlineHint,
+              style: BirdyText.caption.copyWith(color: c.accentText),
+              onTap: hint,
+            ),
+        ],
       );
     }
-    final year = meta?.year;
-    final text =
-        year == null
-            ? l10n.forkLicensesGbifRow
-            : l10n.forkWorldSourceGbif('$year');
-    final label = Text(
-      text,
-      style: BirdyText.caption.copyWith(color: c.text2),
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _LinkTarget(
+          key: const ValueKey('world-map-source'),
+          label: l10n.forkWorldSourceGbif,
+          style: caption,
+          onTap: onGbifTap,
+        ),
+        Text(' · ', style: caption),
+        _LinkTarget(
+          key: const ValueKey('world-map-license'),
+          label: l10n.forkWorldSourceLicense,
+          style: caption,
+          onTap: onLicenseTap,
+        ),
+      ],
     );
-    if (onTap == null) return label;
+  }
+}
+
+/// A line of text that is a button, at least 48 dp tall.
+class _LinkTarget extends StatelessWidget {
+  const _LinkTarget({
+    super.key,
+    required this.label,
+    required this.style,
+    this.onTap,
+  });
+
+  final String label;
+  final TextStyle style;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(label, style: style);
+    if (onTap == null) return text;
     return Semantics(
       button: true,
       container: true,
       excludeSemantics: true,
-      label: text,
+      label: label,
       onTap: onTap,
       child: InkWell(
-        key: const ValueKey('world-map-source'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(BirdyRadii.chip),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: BirdySizes.target),
-          child: Align(alignment: AlignmentDirectional.centerStart, child: label),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            widthFactor: 1,
+            child: text,
+          ),
         ),
       ),
     );

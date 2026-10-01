@@ -22,7 +22,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../map/base_layers.dart';
-import '../world_map/world_map_providers.dart';
+import '../world_map/world_map_config.dart';
 import 'licenses_model.dart';
 
 /// Widest column on tablets.
@@ -220,12 +220,11 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
     );
   }
 
-  /// Credit of the GBIF observations behind the species world map, with the
-  /// citation (DOI) of the download. Nothing without the asset.
+  /// Credit of the GBIF observations behind the species world map: what is
+  /// filtered, that maps are made on demand, and the citation GBIF asks for.
   List<Widget> _gbifBlock(BuildContext context, AppLocalizations l10n) {
-    final meta = ref.watch(gbifMetaProvider).asData?.value;
-    if (meta == null) return const [];
-    final doiUrl = meta.doiUrl;
+    final c = BirdyColors.of(context);
+    Widget open() => Icon(AppIcons.openInNew, size: BirdyGlyph.xl, color: c.text2);
     return [
       BirdyListBlock(
         key: const ValueKey('licenses-gbif'),
@@ -234,32 +233,17 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           BirdyListRow(
             icon: AppIcons.gavel,
             title: l10n.forkLicensesGbifRow,
-            subtitle: l10n.forkLicensesGbifRowSub(meta.extractedAt),
-            trailing: Icon(
-              AppIcons.openInNew,
-              size: BirdyGlyph.xl,
-              color: BirdyColors.of(context).text2,
-            ),
-            onTap: () => openExternalUrl(context, meta.licenseUrl),
+            subtitle: l10n.forkLicensesGbifRowSub('${WorldMapConfig.gbifFirstYear}'),
+            trailing: open(),
+            onTap: () => openExternalUrl(context, WorldMapConfig.gbifLicenseUrl),
           ),
           BirdyListRow(
-            key: const ValueKey('licenses-gbif-doi'),
+            key: const ValueKey('licenses-gbif-citation'),
             icon: AppIcons.menuBook,
-            title: l10n.forkLicensesGbifDoi,
-            subtitle:
-                meta.demo
-                    ? l10n.forkLicensesGbifDemo
-                    : (meta.citation ?? meta.doi ?? ''),
-            showChevron: false,
-            trailing:
-                doiUrl == null
-                    ? null
-                    : Icon(
-                      AppIcons.openInNew,
-                      size: BirdyGlyph.xl,
-                      color: BirdyColors.of(context).text2,
-                    ),
-            onTap: doiUrl == null ? null : () => openExternalUrl(context, doiUrl),
+            title: l10n.forkLicensesGbifCitationTitle,
+            subtitle: l10n.forkLicensesGbifCitation('${DateTime.now().year}'),
+            trailing: open(),
+            onTap: () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
           ),
         ],
       ),
