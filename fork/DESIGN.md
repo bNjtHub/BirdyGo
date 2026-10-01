@@ -147,24 +147,28 @@ haut avec un ressort ; une espèce déjà là remonte en tête de liste (déplac
 compteur de session (×3) fait un petit rebond, à côté de son total toutes sorties confondues. La
 liste ne s'efface jamais pendant l'écoute.
 
-Fiche espèce
+Fiche espèce (7 blocs, un titre par bloc)
 ```
 ┌─────────────────────────────┐
-│ photo principale (45 %)      │
+│ photo (3:2)                  │
 │ Pic épeiche                  │
 │ Dendrocopos major            │
-│ Entendu 23 fois sur 9 jours, │
-│ la dernière fois hier 7 h 42 │
-│ 11 bonnes sur 12 vérifiées   │
-│ Mes enregistrements          │
-│ ▶ 0,93   12 mars   ★         │
-│ ▶ 0,88   2 avril             │
-│ Activité par heure ▂▅█▃▁     │
-│ mini-carte                   │
-│ description                  │
-│ Photo : auteur, licence      │
+│ [Dans ton carnet] [Migrateur]│
+│ résumé de la fiche IA        │
+│ ┌ Entendu 23 fois, dernière  │
+│ │ fois hier · Sûr · 11/12  ┐ │
+├─────────────────────────────┤
+│ 1 Son chant      [Référence] │
+│   « À l'oreille », ▶ 0,93 ★  │
+│ 2 Fais sa connaissance (3×2) │
+│ 3 Quand le voir ▂▅█▃ + migr. │
+│ 4 Carte du monde             │
+│ 5 Activité par heure + carte │
+│ 6 Pour aller plus loin       │
 └─────────────────────────────┘
 ```
+Jamais entendu : sous l'en-tête, un bloc au contour pointillé « Pas encore dans ton carnet » avec le
+bouton « Écouter pour le trouver » ; pas d'encart « Entendu », pas de bloc d'activité.
 
 Palmarès : la première espèce en grande carte photo, puis une liste compacte avec rang, vignette,
 nom, barre proportionnelle et compteur.
@@ -504,20 +508,33 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
 - En-tête : photo de J6b bord à bord (3:2) sur la teinte claire ou sombre de l'espèce
   (`SpeciesAccents`), rayon 28 en bas, nom en Fraunces 34, nom latin. Les icônes de J6d
   remplaceront la photo seulement aux petites tailles.
-- Blocs, dans cet ordre : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr
-  (confirmée ou score Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Mes sons »
-  (J7 : le meilleur son ouvre la liste avec le grand bouton `BirdySizes.mainAction` et une ligne en
-  `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » : phrase et courbe compacte côte à côte
-  (12 barres mensuelles `ActivityBars` de 150 dp à droite, seuil de la liste Explorer, mois courant
-  marqué). La phrase vient des 48 semaines du géomodèle : migrateur « Arrive début mars · repart fin
+- **Sept blocs, un titre par bloc** (J7). Plus de titres de groupe : une seule liste, 10 dp entre les blocs,
+  chaque bloc a son `SectionTitle` (disque à la teinte de l'espèce). Ordre : en-tête ; Son chant ;
+  Fais sa connaissance ; Quand le voir ; carte du monde ; (si entendu) activité par heure et mini-carte ;
+  Pour aller plus loin, puis l'envoi Faune-France et le rappel « Garde le son pour toi ».
+- En-tête : sous le nom latin, des étiquettes de 28 dp (`SpeciesTag`) : « Dans ton carnet » (`sure`) ou
+  « À découvrir » (contour pointillé `toCheck`) ; « Migrateur » ou « Toute l'année » (présence des 48 semaines
+  du géomodèle : toutes présentes = toute l'année, aucune = pas d'étiquette, sinon migrateur) ; « Rare ici »
+  (`orioleContainer`, même règle que le badge « Rare ici · à confirmer ») ou, à défaut, « Peu commun ici »
+  (palier `ExploreTier.scarce` de `ReliabilityConfig.uncommonTiers`, la règle du demi-disque du carnet,
+  `isUncommonHere`). Puis le résumé, puis l'encart « Entendu N fois, dernière fois … » (icône oreille
+  `sure.foreground`, `ReliabilityBadge` Sûr et « N bonnes sur M vérifiées »), absent si jamais entendu, un
+  squelette d'une ligne pendant le chargement. Fonds : `BirdyColors.headerChip` (75 %) et `headerInset`
+  (70 %), blanc en clair, `surface1` en sombre ; contrastes testés dans les 4 thèmes.
+- Son chant : bouton tonal « Référence » à droite du titre, texte « À l'oreille », puis les sons (le
+  meilleur ouvre la liste avec le grand bouton `BirdySizes.mainAction`, les autres en taille normale) et
+  « Voir les N enregistrements ».
+- Fais sa connaissance : six disques en grille 3 × 2 : Taille (`sure`), Habitudes (`tonal`), Pourquoi ici
+  (`tonal`, repère), Ennemis (`probable`), Confusions (`probable`, flèches), Anecdote (`oriole`).
+- Quand le voir : phrase et courbe de 12 mois côte à côte (150 dp, mois courant marqué) ; sous un filet,
+  le texte de migration de la fiche IA avec une icône avion. La phrase vient des 48 semaines du géomodèle :
+  migrateur « Arrive début mars · repart fin
   septembre » (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes),
   sédentaire « Présent toute l'année. » ; testé à 320/360/412 dp et 100/130/200 %. Pas de bande de
   nidification sur cette carte : la nidification (champ `nesting` des fiches IA, `NestingPeriod`)
-  est affichée par la carte du monde (« Niche d'avril à juillet ») ; fiche IA
-  (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
-  activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
-  sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
-  pour toi ».
+  est affichée par la carte du monde (« Niche d'avril à juillet »). Sans fiche IA : description upstream.
+- Pour aller plus loin : un bloc, pastilles de 48 dp (eBird, iNaturalist, Wikipédia), fond `BirdyBrand.mist`
+  en clair et `surface2` en sombre.
 - « Dans le monde » (J7, `lib/fork/world_map/`), juste après « Ici en ce moment » : carte du monde de la
   répartition de l'espèce **par régions administratives, comme un guide d'oiseaux**, une seule carte (plus de
   puces de saison), recadrée automatiquement sur l'aire de l'espèce (régions isolées ignorées pour le cadrage,
@@ -1044,7 +1061,7 @@ Règles transverses :
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
 - **Fiche, carte de contenu de « Fais sa connaissance ».** Le filigrane de l'icône de la rubrique est en haut à droite de la carte (pas en bas).
-- **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
+- **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : Taille (`sure`), Habitudes (`tonal`), Pourquoi ici (`tonal`), Ennemis (patte, `probable`, accroche « Qui le chasse »), Confusions (`probable`), Anecdote (`oriole`) ; « À l'oreille » est dans Son chant et la migration dans Quand le voir. Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
   boutons « Écouter » et « Commencer à écouter » (écart icône/texte : +`BirdySpace.wingLabelGap`). Sur ces

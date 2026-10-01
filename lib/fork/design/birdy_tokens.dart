@@ -330,6 +330,20 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
 
   bool get isDark => brightness == Brightness.dark;
 
+  /// Fill of the tag pills in the species page header (J7): white at 75 %
+  /// on the light tint, the card surface at 75 % on the dark tint.
+  Color get headerChip =>
+      (isDark ? surface1 : BirdyBrand.white).withValues(
+        alpha: BirdyAlpha.headerChip,
+      );
+
+  /// Fill of the heard inset in the species page header (J7): same idea at
+  /// 70 %.
+  Color get headerInset =>
+      (isDark ? surface1 : BirdyBrand.white).withValues(
+        alpha: BirdyAlpha.headerInset,
+      );
+
   /// Colors of a reliability level.
   LevelColors level(ReliabilityLevel level) => switch (level) {
     ReliabilityLevel.sure => sure,
@@ -1011,6 +1025,12 @@ abstract final class ListeningModeColors {
 /// Opacities of layered block details (J6f). Colors themselves come from
 /// [BirdyColors] or the species tint.
 abstract final class BirdyAlpha {
+  /// Tag pills of the species page header (J7).
+  static const double headerChip = 0.75;
+
+  /// Heard inset of the species page header (J7).
+  static const double headerInset = 0.70;
+
   /// Decorative disc of the species accent behind the hero bird.
   static const double heroDisc = 0.18;
 

@@ -72,21 +72,3 @@ class SectionTitle extends StatelessWidget {
     );
   }
 }
-
-/// Title of a group of blocks on the species page (J7 order): the same disc
-/// and 20 heading as a block title, read as a heading by screen readers.
-class SpeciesGroupTitle extends StatelessWidget {
-  const SpeciesGroupTitle({super.key, required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    header: true,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.xs),
-      child: SectionTitle(icon: icon, text: text),
-    ),
-  );
-}

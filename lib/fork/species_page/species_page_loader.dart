@@ -109,6 +109,31 @@ class SpeciesPageLoader {
     }
   }
 
+  /// Whether [scientificName] is « peu commun » where the phone is, during
+  /// the week of [now] (`isUncommonHere`, the notebook's half-disc rule).
+  /// False when unknown.
+  Future<bool> uncommonNow(
+    String scientificName, {
+    required DateTime now,
+  }) async {
+    try {
+      final all = await _yearScores();
+      final labels = await _audioLabels?.call();
+      if (all == null || labels == null) return false;
+      final week = GeoModel.dateTimeToWeek(now.toLocal());
+      return isUncommonHere(
+        {
+          for (final MapEntry(:key, :value) in all.entries)
+            if (value.length >= week) key: value[week - 1],
+        },
+        audioLabels: labels,
+        scientificName: scientificName,
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Newest session with a confirmed, positioned contact of
   /// [scientificName]: what « Envoyer à Faune-France » sends from the
   /// species page (J6g-e). Null when there is none, or without the index.
