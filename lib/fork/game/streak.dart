@@ -64,23 +64,9 @@ DateTime _plusDays(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
 
 /// Days that count: at least [GameConfig.streakMinListening] of listening,
 /// each listening counted on the day it started.
-///
-/// A listening without an end is still running (or was cut short): when
-/// [now] is given, it counts up to [now] as long as it started less than
-/// [GameConfig.streakOpenListeningMax] ago, so the first day is not shown as
-/// 0 while the first listening is still going on.
-Set<DateTime> listenedDays(
-  Iterable<(DateTime, DateTime?)> listenings, {
-  DateTime? now,
-}) {
+Set<DateTime> listenedDays(Iterable<(DateTime, DateTime?)> listenings) {
   final perDay = <DateTime, Duration>{};
-  for (final (start, rawEnd) in listenings) {
-    var end = rawEnd;
-    if (end == null && now != null) {
-      if (now.difference(start) <= GameConfig.streakOpenListeningMax) {
-        end = now;
-      }
-    }
+  for (final (start, end) in listenings) {
     if (end == null || !end.isAfter(start)) continue;
     final day = _day(start.toLocal());
     perDay[day] = (perDay[day] ?? Duration.zero) + end.difference(start);
@@ -90,6 +76,17 @@ Set<DateTime> listenedDays(
       if (entry.value >= GameConfig.streakMinListening) entry.key,
   };
 }
+
+/// Where a listening stops counting. An ended one stops at its [end]; one
+/// that is the running listening ([active]) counts up to [now]; an orphan
+/// without end (app killed) counts up to the last time it is known to have
+/// been alive ([lastSeen]: its last detection), or not at all.
+DateTime? listeningEnd({
+  required DateTime? end,
+  required DateTime? lastSeen,
+  required bool active,
+  required DateTime now,
+}) => end ?? (active ? now : lastSeen);
 
 /// The série on [now], from the [listened] days.
 Streak computeStreak(Set<DateTime> listened, DateTime now) {

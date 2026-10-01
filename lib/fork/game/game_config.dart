@@ -265,10 +265,6 @@ abstract final class GameConfig {
   /// A day counts in the série with this much listening.
   static const Duration streakMinListening = Duration(minutes: 5);
 
-  /// A listening still without an end counts up to now if it started less
-  /// than this long ago (older ones are taken as cut short and ignored).
-  static const Duration streakOpenListeningMax = Duration(hours: 6);
-
   /// One rest day allowed per this many days (SPEC.md 7.4).
   static const int streakRestEvery = 7;
 

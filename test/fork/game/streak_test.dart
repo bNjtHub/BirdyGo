@@ -10,37 +10,71 @@ Set<DateTime> _days(Iterable<int> days) => {for (final d in days) _d(d)};
 
 void main() {
   group('first day', () {
-    Streak streakOf(List<(DateTime, DateTime?)> l) =>
-        computeStreak(listenedDays(l, now: _now), _now);
+    Streak streakOf(List<(DateTime, DateTime?, DateTime?, bool)> l) =>
+        computeStreak(
+          listenedDays([
+            for (final (start, end, seen, active) in l)
+              (
+                start,
+                listeningEnd(
+                  end: end,
+                  lastSeen: seen,
+                  active: active,
+                  now: _now,
+                ),
+              ),
+          ]),
+          _now,
+        );
 
     test('finished listening over the threshold: série 1', () {
       final s = streakOf([
-        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 6)),
+        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 6), null, false),
       ]);
       expect(s.current, 1);
       expect(s.calendar.last.state, StreakDayState.listened);
     });
 
-    test('running listening over the threshold: série 1', () {
-      expect(streakOf([(DateTime(2026, 9, 27, 11, 50), null)]).current, 1);
+    test('active listening over the threshold: série 1', () {
+      expect(
+        streakOf([(DateTime(2026, 9, 27, 11, 50), null, null, true)]).current,
+        1,
+      );
     });
 
-    test('running listening under the threshold: 0, today open', () {
-      final s = streakOf([(DateTime(2026, 9, 27, 11, 58), null)]);
+    test('active listening under the threshold: 0, today open', () {
+      final s = streakOf([(DateTime(2026, 9, 27, 11, 58), null, null, true)]);
       expect(s.current, 0);
       expect(s.calendar.last.state, StreakDayState.open);
     });
 
     test('finished listening under the threshold: 0, today open', () {
       final s = streakOf([
-        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 3)),
+        (DateTime(2026, 9, 27, 9), DateTime(2026, 9, 27, 9, 3), null, false),
       ]);
       expect(s.current, 0);
       expect(s.calendar.last.state, StreakDayState.open);
     });
 
-    test('an old listening without end does not count', () {
-      expect(streakOf([(DateTime(2026, 9, 25, 9), null)]).current, 0);
+    test('orphan without end is not inflated up to now', () {
+      final s = streakOf([
+        (DateTime(2026, 9, 27, 7), null, DateTime(2026, 9, 27, 7, 1), false),
+      ]);
+      expect(s.current, 0);
+    });
+
+    test('orphan without end and without detection counts for nothing', () {
+      expect(
+        streakOf([(DateTime(2026, 9, 27, 7), null, null, false)]).current,
+        0,
+      );
+    });
+
+    test('orphan counts up to its last detection', () {
+      final s = streakOf([
+        (DateTime(2026, 9, 27, 7), null, DateTime(2026, 9, 27, 7, 8), false),
+      ]);
+      expect(s.current, 1);
     });
   });
 
