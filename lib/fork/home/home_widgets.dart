@@ -31,11 +31,23 @@ import 'singing_logo.dart';
 
 /// Singing mark and name, small, alone above the header (Accueil only; the
 /// menu button now sits in [BirdyTabHeader]'s action row).
-class HomeLogoRow extends ConsumerWidget {
+class HomeLogoRow extends ConsumerStatefulWidget {
   const HomeLogoRow({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeLogoRow> createState() => _HomeLogoRowState();
+}
+
+class _HomeLogoRowState extends ConsumerState<HomeLogoRow> {
+  @override
+  void initState() {
+    super.initState();
+    // Load the tweet now (silent) so the first tap plays without delay.
+    prepareLogoTweet(ref);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return SingingLogo(
       // A tap sings the phrase and plays the BirdyGo tweet.

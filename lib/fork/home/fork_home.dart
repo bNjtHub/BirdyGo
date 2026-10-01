@@ -523,7 +523,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           Padding(
             key: ValueKey('home-$key'),
             padding: EdgeInsets.only(
-              top: i == 0 && topBar == null ? 0 : BirdySpace.block,
+              // FORK: the day strip's 48 dp tap area already leaves 11 dp
+              // around its 26 dp pills, so it takes no extra block gap.
+              top:
+                  (i == 0 && topBar == null) ||
+                          key == 'day' ||
+                          (i > 0 && blocks[i - 1].$1 == 'day')
+                      ? 0
+                      : BirdySpace.block,
             ),
             child:
                 still || firstIndex + i >= BirdyMotion.staggerMaxItems
