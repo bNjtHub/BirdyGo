@@ -56,7 +56,7 @@ class DailyGoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    final goal = ref.watch(dailyGoalProvider).goal;
+    final goal = ref.watch(dailyGoalProvider.select((s) => s.goal));
     final completed =
         goal == null ? null : ref.watch(dailyGoalProgressProvider);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
