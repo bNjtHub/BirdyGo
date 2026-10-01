@@ -5,7 +5,6 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
 import 'package:birdnet_live/fork/species_page/meet_species_block.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
