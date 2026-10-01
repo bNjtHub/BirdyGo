@@ -17,6 +17,7 @@ import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
+import '../design/widgets/dashed_border.dart';
 import '../ranking/activity_bars.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
@@ -43,10 +44,14 @@ class SpeciesPageHeader extends StatelessWidget {
     this.heardLoading = false,
     this.verified = false,
     this.precision,
+    this.tags = const [],
   });
 
+  /// Tag pills under the latin name (J7), in this order.
+  final List<SpeciesTag> tags;
+
   /// The reliability badge and the « 37 bonnes sur 38 vérifiées » line that
-  /// used to sit in the counters block, kept under the heard line.
+  /// sit in the heard inset, under the heard line.
   final bool verified;
   final String? precision;
 
@@ -56,12 +61,12 @@ class SpeciesPageHeader extends StatelessWidget {
   /// sheet (J7 order: « Qui est-ce ? »).
   final String? summary;
 
-  /// « Entendu 12 fois… »: the user's own tally as one compact line under the
-  /// names. Null (and hidden) when the species was never heard.
+  /// « Entendu 12 fois, dernière fois hier à 7 h 42 »: the user's own tally,
+  /// first line of the heard inset. Null (and hidden) when never heard.
   final String? heardLine;
 
-  /// The index has not answered yet: a one-line skeleton holds the place of
-  /// [heardLine] from the first frame.
+  /// The index has not answered yet: a one-line skeleton inset holds the
+  /// place of [heardLine] from the first frame.
   final bool heardLoading;
 
   /// Null when the user hides scientific names.
@@ -80,32 +85,12 @@ class SpeciesPageHeader extends StatelessWidget {
   /// back arrow for a close X.
   final bool inSheet;
 
-  /// Placeholder of the heard line: one line (the compact case), then the
-  /// level badge and review count. Whether that last row shows, and whether
-  /// the sentence wraps to a second line, depends on data not in yet, so the
-  /// block may settle a little taller or shorter once the record lands.
-  static Widget _heardSkeleton() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      BirdySkeleton.text(
-        BirdyText.caption,
-        placeholder: '000000000000000000000000000000',
-      ),
-      const SizedBox(height: BirdySpace.s),
-      Wrap(
-        spacing: BirdySpace.s,
-        runSpacing: BirdySpace.xs,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          BirdySkeleton.box(
-            width: BirdySizes.skeletonTagM,
-            height: BirdySizes.pill,
-            radius: BirdyRadii.pill,
-          ),
-          BirdySkeleton.text(BirdyText.caption, placeholder: '00000000000000'),
-        ],
-      ),
-    ],
+  /// Placeholder of the heard inset: one line. Whether the level row shows
+  /// under it depends on data not in yet, so the inset may settle a little
+  /// taller once the record lands.
+  static Widget _heardSkeleton() => BirdySkeleton.text(
+    BirdyText.labelCompact,
+    placeholder: '000000000000000000000000000000',
   );
 
   @override
@@ -212,6 +197,15 @@ class SpeciesPageHeader extends StatelessWidget {
                         color: c.isDark ? c.text2 : BirdyBrand.bark,
                       ),
                     ),
+                  if (tags.isNotEmpty) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Wrap(
+                      key: const ValueKey('fiche-tags'),
+                      spacing: BirdySpace.xs + 2,
+                      runSpacing: BirdySpace.xs + 2,
+                      children: [for (final tag in tags) _TagPill(tag: tag)],
+                    ),
+                  ],
                   if (summary != null) ...[
                     const SizedBox(height: BirdySpace.s),
                     Text(
@@ -219,58 +213,16 @@ class SpeciesPageHeader extends StatelessWidget {
                       style: BirdyText.bodyCompact.copyWith(color: ink),
                     ),
                   ],
-                  // The heard line (J7): in place from the first frame as a
-                  // skeleton that reserves two lines and the level row, like
-                  // the counters block it replaces; gone when never heard.
+                  // The heard inset (J7): in place from the first frame as a
+                  // one-line skeleton; gone when never heard.
                   if (heardLoading || heardLine != null) ...[
-                    const SizedBox(height: BirdySpace.s),
-                    SizedBox(
+                    const SizedBox(height: BirdySpace.m),
+                    _HeardInset(
                       key: const ValueKey('fiche-heard'),
-                      width: double.infinity,
-                      child:
-                          heardLoading
-                              ? KeyedSubtree(
-                                key: const ValueKey('fiche-heard-skeleton'),
-                                child: _heardSkeleton(),
-                              )
-                              : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    heardLine!,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: BirdyText.caption.copyWith(
-                                      color: c.isDark ? c.text2 : BirdyBrand.bark,
-                                    ),
-                                  ),
-                                  if (verified || precision != null) ...[
-                                    const SizedBox(height: BirdySpace.s),
-                                    Wrap(
-                                      spacing: BirdySpace.s,
-                                      runSpacing: BirdySpace.xs,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children: [
-                                        if (verified)
-                                          const ReliabilityBadge(
-                                            level: ReliabilityLevel.sure,
-                                          ),
-                                        if (precision != null)
-                                          Text(
-                                            precision!,
-                                            style: BirdyText.caption.copyWith(
-                                              color:
-                                                  c.isDark
-                                                      ? c.text2
-                                                      : BirdyBrand.bark,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
+                      line: heardLine,
+                      loading: heardLoading,
+                      verified: verified,
+                      precision: precision,
                     ),
                   ],
                 ],
@@ -279,6 +231,180 @@ class SpeciesPageHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// What a tag pill of the header says (J7).
+enum SpeciesTag { inBook, toDiscover, migrant, allYear, rare, uncommon }
+
+/// Height of a tag pill.
+const double _kTagHeight = 28;
+
+class _TagPill extends StatelessWidget {
+  const _TagPill({required this.tag});
+
+  final SpeciesTag tag;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final ink = c.isDark ? c.text1 : BirdyBrand.ink;
+    final (label, icon, fill, fore, text) = switch (tag) {
+      SpeciesTag.inBook => (
+        l10n.forkFicheTagInBook,
+        AppIcons.menuBook,
+        c.sure.background,
+        c.sure.foreground,
+        c.sure.foreground,
+      ),
+      SpeciesTag.toDiscover => (
+        l10n.forkFicheTagToDiscover,
+        AppIcons.hearing,
+        c.headerChip,
+        c.toCheck.foreground,
+        ink,
+      ),
+      SpeciesTag.migrant => (
+        l10n.forkFicheTagMigrant,
+        AppIcons.flight,
+        c.headerChip,
+        ink,
+        ink,
+      ),
+      SpeciesTag.allYear => (
+        l10n.forkFicheTagAllYear,
+        AppIcons.home,
+        c.headerChip,
+        ink,
+        ink,
+      ),
+      SpeciesTag.rare => (
+        l10n.forkFicheTagRare,
+        AppIcons.diamond,
+        c.orioleContainer,
+        c.orioleText,
+        c.orioleText,
+      ),
+      SpeciesTag.uncommon => (
+        l10n.forkFicheTagUncommon,
+        AppIcons.visibility,
+        c.headerChip,
+        ink,
+        ink,
+      ),
+    };
+    final pill = Container(
+      height: _kTagHeight,
+      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.s + 2),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(BirdyRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: BirdyGlyph.s, color: fore),
+          const SizedBox(width: BirdySpace.xs),
+          Text(label, maxLines: 1, style: BirdyText.badge.copyWith(color: text)),
+        ],
+      ),
+    );
+    if (tag != SpeciesTag.toDiscover) return pill;
+    // Dashed outline: not in the notebook yet (same mark as « À vérifier »).
+    return CustomPaint(
+      foregroundPainter: DashedBorderPainter(
+        color: c.toCheck.foreground,
+        radius: _kTagHeight / 2,
+      ),
+      child: pill,
+    );
+  }
+}
+
+/// « Entendu 12 fois, dernière fois hier » with the reliability badge and
+/// the precision line, in a translucent inset of the header.
+class _HeardInset extends StatelessWidget {
+  const _HeardInset({
+    super.key,
+    required this.line,
+    required this.loading,
+    required this.verified,
+    required this.precision,
+  });
+
+  final String? line;
+  final bool loading;
+  final bool verified;
+  final String? precision;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    final ink = c.isDark ? c.text1 : BirdyBrand.ink;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BirdySpace.m,
+        vertical: BirdySpace.s + 2,
+      ),
+      decoration: BoxDecoration(
+        color: c.headerInset,
+        borderRadius: BorderRadius.circular(BirdyRadii.inset),
+      ),
+      child:
+          loading
+              ? KeyedSubtree(
+                key: const ValueKey('fiche-heard-skeleton'),
+                child: SpeciesPageHeader._heardSkeleton(),
+              )
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: BirdySpace.xxs),
+                        child: Icon(
+                          AppIcons.hearing,
+                          size: BirdyGlyph.l,
+                          color: c.sure.foreground,
+                        ),
+                      ),
+                      const SizedBox(width: BirdySpace.s),
+                      Expanded(
+                        child: Text(
+                          line!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: BirdyText.labelCompact.copyWith(color: ink),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (verified || precision != null) ...[
+                    const SizedBox(height: BirdySpace.s),
+                    Wrap(
+                      spacing: BirdySpace.s,
+                      runSpacing: BirdySpace.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (verified)
+                          const ReliabilityBadge(level: ReliabilityLevel.sure),
+                        if (precision != null)
+                          Text(
+                            precision!,
+                            style: BirdyText.caption.copyWith(
+                              color: c.isDark ? c.text2 : BirdyBrand.bark,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
     );
   }
 }
@@ -294,6 +420,7 @@ class HereNowCard extends StatefulWidget {
     required this.sentence,
     required this.currentMonth,
     this.rareNote,
+    this.migration,
   });
 
   final YearPresence year;
@@ -305,6 +432,9 @@ class HereNowCard extends StatefulWidget {
   /// Why a detection is « Rare ici · à confirmer », shown when the species
   /// is unexpected here this week (J3b).
   final String? rareNote;
+
+  /// Migration text of the AI sheet (J7): under the chart, after a rule.
+  final String? migration;
 
   @override
   State<HereNowCard> createState() => _HereNowCardState();
@@ -336,7 +466,10 @@ class _HereNowCardState extends State<HereNowCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionTitle(icon: AppIcons.calendarToday, text: l10n.forkFicheHereNow),
+          SectionTitle(
+            icon: AppIcons.calendarToday,
+            text: l10n.forkFicheWhenToSee,
+          ),
           const SizedBox(height: BirdySpace.m),
           Row(
           children: [
@@ -413,15 +546,47 @@ class _HereNowCardState extends State<HereNowCard> {
             ),
           ],
         ),
+          if (widget.migration != null) ...[
+            const SizedBox(height: BirdySpace.m),
+            Divider(
+              key: const ValueKey('fiche-migration-rule'),
+              height: BirdyStroke.hairline,
+              thickness: BirdyStroke.hairline,
+              color: c.line,
+            ),
+            const SizedBox(height: BirdySpace.m),
+            Row(
+              key: const ValueKey('fiche-migration'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: BirdySpace.xxs),
+                  child: Icon(
+                    AppIcons.flight,
+                    size: BirdyGlyph.l,
+                    color: c.accentText,
+                  ),
+                ),
+                const SizedBox(width: BirdySpace.s),
+                Expanded(
+                  child: Text(
+                    widget.migration!,
+                    style: BirdyText.bodyCompact.copyWith(color: c.text1),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// « Mes sons »: the reference song and the best recordings.
-class MySoundsBlock extends StatelessWidget {
-  const MySoundsBlock({
+/// « Son chant » (J7): the reference song, the « À l'oreille » text and the
+/// best recordings, in one block.
+class SongBlock extends StatelessWidget {
+  const SongBlock({
     super.key,
     required this.clips,
     required this.favorites,
@@ -432,7 +597,11 @@ class MySoundsBlock extends StatelessWidget {
     this.onReference,
     this.moreCount = 0,
     this.onMore,
+    this.byEar,
   });
+
+  /// « À l'oreille » text of the AI sheet, under the title.
+  final String? byEar;
 
   final List<IndexedDetection> clips;
   final Set<String> favorites;
@@ -460,17 +629,30 @@ class MySoundsBlock extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheMySounds),
+              child: SectionTitle(
+                icon: AppIcons.hearing,
+                text: l10n.forkFicheGroupSong,
+              ),
             ),
             if (onReference != null)
               FilledButton.icon(
                 style: BirdyButtonStyles.tonal(context),
                 onPressed: onReference,
                 icon: const Icon(AppIcons.openInNew, size: BirdyGlyph.l),
-                label: Text(l10n.forkFicheReference),
+                label: Text(l10n.forkFicheReferenceShort),
               ),
           ],
         ),
+        if (byEar != null) ...[
+          const SizedBox(height: BirdySpace.s),
+          Text(
+            byEar!,
+            key: const ValueKey('fiche-by-ear'),
+            style: BirdyText.bodyCompact.copyWith(
+              color: BirdyColors.of(context).text1,
+            ),
+          ),
+        ],
         for (var i = 0; i < clips.length; i++)
           _clipRow(context, clips[i], featured: i == 0),
         if (onMore != null && moreCount > clips.length)
@@ -541,7 +723,7 @@ class MySoundsBlock extends StatelessWidget {
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheMySounds),
+        SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheGroupSong),
         for (var i = 0; i < rows; i++)
           Padding(
             padding: const EdgeInsets.only(top: BirdySpace.s),
@@ -809,7 +991,34 @@ class SpeciesPageFooter extends StatelessWidget {
 /// An external page about the species (eBird, iNaturalist, Wikipédia).
 typedef SpeciesLink = ({String label, String iconAsset, String url});
 
-/// « En savoir plus sur cette espèce » and one chip per page.
+/// « Pour aller plus loin » (J7): one block, one title, the links as
+/// 48 dp pills.
+class GoFurtherBlock extends StatelessWidget {
+  const GoFurtherBlock({super.key, required this.links, required this.onOpen});
+
+  final List<SpeciesLink> links;
+  final ValueChanged<String> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BirdyBlock(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionTitle(
+            icon: AppIcons.public,
+            text: l10n.forkFicheGroupGoFurther,
+          ),
+          const SizedBox(height: BirdySpace.m),
+          LinksBlock(links: links, onOpen: onOpen, showLabel: false),
+        ],
+      ),
+    );
+  }
+}
+
+/// One pill per page (eBird, iNaturalist, Wikipédia), 48 dp high.
 class LinksBlock extends StatelessWidget {
   const LinksBlock({
     super.key,
@@ -818,7 +1027,7 @@ class LinksBlock extends StatelessWidget {
     this.showLabel = true,
   });
 
-  /// False when a group title above already says it (J7 order).
+  /// False when a block title above already says it (J7).
   final bool showLabel;
 
   final List<SpeciesLink> links;
@@ -828,6 +1037,8 @@ class LinksBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
+    // Mist on light; the raised surface on dark (Mist would glare there).
+    final fill = c.isDark ? c.surface2 : BirdyBrand.mist;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -840,35 +1051,58 @@ class LinksBlock extends StatelessWidget {
           ),
           const SizedBox(height: BirdySpace.s),
         ],
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          // Cut at the edge on purpose (J6f-b fix): it tells the row
-          // scrolls, same treatment as the sheet chips above.
-          clipBehavior: Clip.none,
-          child: Row(
-            children: [
-              for (final link in links) ...[
-                if (link != links.first) const SizedBox(width: BirdySpace.s),
-                ActionChip(
-                  avatar: Image.asset(
-                    link.iconAsset,
-                    width: BirdySpace.roomy,
-                    height: BirdySpace.roomy,
-                    errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+        Wrap(
+          spacing: BirdySpace.s,
+          runSpacing: BirdySpace.s,
+          children: [
+            for (final link in links)
+              Material(
+                color: fill,
+                shape: const StadiumBorder(),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => onOpen(link.url),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: BirdySizes.target,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BirdySpace.m,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            link.iconAsset,
+                            width: BirdySpace.roomy,
+                            height: BirdySpace.roomy,
+                            errorBuilder:
+                                (_, _, _) => const Icon(AppIcons.public),
+                          ),
+                          const SizedBox(width: BirdySpace.s),
+                          Text(
+                            link.label,
+                            maxLines: 1,
+                            style: BirdyText.label.copyWith(
+                              color: c.text1,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: BirdySpace.xs),
+                          Icon(
+                            AppIcons.openInNew,
+                            size: BirdyGlyph.s,
+                            color: c.text2,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(link.label, maxLines: 1),
-                      const SizedBox(width: BirdySpace.xs),
-                      Icon(AppIcons.openInNew, size: BirdyGlyph.s, color: c.text2),
-                    ],
-                  ),
-                  onPressed: () => onOpen(link.url),
                 ),
-              ],
-            ],
-          ),
+              ),
+          ],
         ),
       ],
     );

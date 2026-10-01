@@ -159,6 +159,31 @@ Map<String, GeoPresence> presenceFromWeekScores(
   };
 }
 
+/// Whether [scientificName] is « peu commun » here this week: expected
+/// (over the inclusion threshold) but in one of
+/// [ReliabilityConfig.uncommonTiers] on the same tier scale as
+/// [presenceFromWeekScores] and the notebook's half disc (J7 species page
+/// tag). False for an unexpected species (that one is « Rare ici »).
+bool isUncommonHere(
+  Map<String, double> weekScores, {
+  required Set<String> audioLabels,
+  required String scientificName,
+}) {
+  final score = weekScores[scientificName];
+  if (score == null || score < kAbundanceInclusionThreshold) return false;
+  final population = [
+    for (final entry in weekScores.entries)
+      if (audioLabels.contains(entry.key) &&
+          entry.value >= kAbundanceInclusionThreshold)
+        entry.value,
+  ];
+  if (population.isEmpty) return false;
+  final scale = ExploreTierScale.fromScores(population);
+  final tier = scale.tierFor(score);
+  return !ReliabilityConfig.rareTiers.contains(tier) &&
+      ReliabilityConfig.uncommonTiers.contains(tier);
+}
+
 /// Presence of a species missing from a non-empty presence map: the
 /// geo-model does not expect it here at all.
 const GeoPresence kAbsentHere = GeoPresence(unexpected: true);

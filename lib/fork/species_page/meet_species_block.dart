@@ -1,7 +1,7 @@
-/// « Fais sa connaissance » (J6h): the species sheet as round discs (size,
-/// behaviour, enemies, anecdote since the J7 order), one content card under
-/// them. « À l'oreille » and the migration text moved to their own groups of
-/// the page. Replaces the old chip row. State is ephemeral: it resets each
+/// « Fais sa connaissance » (J6h): the species sheet as six round discs
+/// (size, behaviour, why here, enemies, look-alikes, anecdote; J7 7-block
+/// page), one content card under them. « À l'oreille » lives in the song
+/// block and the migration text in « Quand le voir ». Replaces the old chip row. State is ephemeral: it resets each
 /// time the page opens.
 library;
 
@@ -18,11 +18,13 @@ import '../species_sheet/species_sheet.dart';
 import '../species_sheet/species_sheet_section.dart' show sheetSectionTitle;
 import 'section_title.dart';
 
-/// The four disc sections, in display order (a subset of [SheetSection]).
+/// The six disc sections, in display order (a subset of [SheetSection]).
 const List<SheetSection> kMeetSections = [
   SheetSection.size,
   SheetSection.behaviour,
+  SheetSection.whyHere,
   SheetSection.enemies,
+  SheetSection.confusions,
   SheetSection.anecdote,
 ];
 
@@ -36,9 +38,7 @@ List<SheetSection> meetAvailable(SpeciesSheet sheet) => [
 ];
 
 /// Whether [MeetSpeciesBlock] would show anything for [sheet].
-bool meetHasContent(SpeciesSheet sheet) =>
-    meetAvailable(sheet).isNotEmpty ||
-    kMeetExtras.any((s) => sheet.sections[s] != null);
+bool meetHasContent(SpeciesSheet sheet) => meetAvailable(sheet).isNotEmpty;
 
 /// Text scale above which the title and the counter stack.
 const double _kMeetStackedTextScale = 1.6;
@@ -53,49 +53,42 @@ enum _Tone { tonal, sure, probable, oriole }
 const Map<SheetSection, _Tone> _tones = {
   SheetSection.size: _Tone.sure,
   SheetSection.behaviour: _Tone.tonal,
+  SheetSection.whyHere: _Tone.tonal,
   SheetSection.enemies: _Tone.probable,
+  SheetSection.confusions: _Tone.probable,
   SheetSection.anecdote: _Tone.oriole,
 };
 
 IconData _iconOf(SheetSection s) => switch (s) {
   SheetSection.size => AppIcons.straighten,
   SheetSection.behaviour => AppIcons.visibility,
+  SheetSection.whyHere => AppIcons.locationOn,
   SheetSection.enemies => AppIcons.pets,
+  SheetSection.confusions => AppIcons.swapHoriz,
   _ => AppIcons.lightbulbOutline,
 };
 
 String _labelOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   SheetSection.size => l10n.forkMeetSize,
   SheetSection.behaviour => l10n.forkSheetHabits,
+  SheetSection.whyHere => l10n.forkMeetWhyHere,
   SheetSection.enemies => l10n.forkSheetEnemies,
+  SheetSection.confusions => l10n.forkMeetConfusions,
   _ => l10n.forkMeetAnecdote,
 };
 
 String _hookOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   SheetSection.size => l10n.forkMeetHookSize,
   SheetSection.behaviour => l10n.forkMeetHookBehaviour,
+  SheetSection.whyHere => l10n.forkMeetHookWhyHere,
   SheetSection.enemies => l10n.forkSheetEnemiesKicker,
+  SheetSection.confusions => l10n.forkMeetHookConfusions,
   _ => l10n.forkMeetHookAnecdote,
 };
 
-/// Sections outside the five discs, shown as their own tinted blocks so
-/// nothing of the sheet is lost (J6h fix).
-const List<SheetSection> kMeetExtras = [
-  SheetSection.whyHere,
-  SheetSection.confusions,
-];
-
-IconData _extraIcon(SheetSection s) => switch (s) {
-  SheetSection.whyHere => AppIcons.locationOn,
-  SheetSection.confusions => AppIcons.swapHoriz,
-  SheetSection.byEar => AppIcons.hearing,
-  SheetSection.migration => AppIcons.flight,
-  _ => _iconOf(s),
-};
-
 /// A section of the sheet as a tonal block: species-tint icon disc, 20
-/// title, then the text. Also used by the species page for « À l'oreille »
-/// and the migration text, which sit in their own groups (J7 order).
+/// title, then the text. Only the fallback of [MeetSpeciesBlock] when fewer
+/// than [kMeetMinDiscs] sections have content.
 class SheetTextBlock extends StatelessWidget {
   const SheetTextBlock({super.key, required this.section, required this.text});
 
@@ -112,7 +105,7 @@ class SheetTextBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(
-            icon: _extraIcon(section),
+            icon: _iconOf(section),
             text: sheetSectionTitle(l10n, section),
           ),
           const SizedBox(height: BirdySpace.m),
@@ -122,19 +115,6 @@ class SheetTextBlock extends StatelessWidget {
     );
   }
 }
-
-/// The extra sections of [sheet] that have content, each with a gap above.
-List<Widget> _extraBlocks(SpeciesSheet sheet) => [
-  for (final s in kMeetExtras)
-    if (sheet.sections[s] != null) ...[
-      const SizedBox(height: BirdySpace.block),
-      SheetTextBlock(
-        key: ValueKey('meet-extra-${s.key}'),
-        section: s,
-        text: sheet.sections[s]!,
-      ),
-    ],
-];
 
 /// Fill and foreground of a tone on the current theme.
 ({Color fill, Color fore}) _colors(BirdyColors c, _Tone t) => switch (t) {
@@ -163,7 +143,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
     final c = BirdyColors.of(context);
     final sections = meetAvailable(widget.sheet);
     // A grid of discs needs at least two: fewer, the sections are shown as
-    // plain tonal blocks like the extras below.
+    // plain tonal blocks.
     if (sections.length < kMeetMinDiscs) {
       final blocks = <Widget>[
         for (final s in sections)
@@ -172,13 +152,6 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
             section: s,
             text: widget.sheet.sections[s]!,
           ),
-        for (final s in kMeetExtras)
-          if (widget.sheet.sections[s] != null)
-            SheetTextBlock(
-              key: ValueKey('meet-extra-${s.key}'),
-              section: s,
-              text: widget.sheet.sections[s]!,
-            ),
       ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -236,7 +209,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                   ],
                 ),
               const SizedBox(height: BirdySpace.l),
-              // 3 columns: four sections make a 3 + 1 grid.
+              // 3 columns: six sections make a 3 x 2 grid.
               for (var r = 0; r < sections.length; r += _kMeetColumns)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +328,6 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
             ],
           ),
         ),
-        ..._extraBlocks(widget.sheet),
       ],
     );
   }
