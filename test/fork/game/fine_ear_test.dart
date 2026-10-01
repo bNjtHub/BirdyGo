@@ -480,6 +480,44 @@ void main() {
       expect(player.played, hasLength(2));
     });
 
+    testWidgets('the user stopping the song cancels the automatic replay', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      await tester.tap(
+        find.descendant(
+          of: find.byType(QuizChoiceCard),
+          matching: find.text(french(wrong)),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      // The user plays the clip and stops it again before the timer fires.
+      await tester.tap(find.byTooltip("Écouter l'extrait").first);
+      await tester.pump();
+      await tester.tap(find.byTooltip("Arrêter l'extrait").first);
+      await settle(tester, seconds: 1.5);
+      expect(player.played, hasLength(2)); // the user's, no automatic one
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('the stop sheet cancels the automatic replay', (tester) async {
+      await pump(tester, _species(4));
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      await tester.tap(
+        find.descendant(
+          of: find.byType(QuizChoiceCard),
+          matching: find.text(french(wrong)),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byTooltip('Quitter le quiz'));
+      await settle(tester, seconds: 1.5);
+      expect(find.text('Arrêter la partie ?'), findsOneWidget);
+      expect(player.played, hasLength(1));
+      expect(player.playing.value, isNull);
+    });
+
     testWidgets('the play button keeps its place and size in the reveal', (
       tester,
     ) async {

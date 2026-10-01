@@ -163,6 +163,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   /// answers so far are already counted for the badge.
   Future<void> _confirmStop() async {
     if (_phase != _Phase.question) return;
+    _replayTimer?.cancel(); // never restart the song under the sheet
     final stop = await showQuizStopSheet(
       context,
       right: _results.where((r) => r).length,
@@ -184,6 +185,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   }
 
   void _togglePlay() {
+    _replayTimer?.cancel(); // the user took the player: no automatic replay
     final path = _question?.answer.clipPath;
     if (path == null) return;
     if (_player.playing.value != path) ensureAudible(context, ref);
@@ -241,7 +243,11 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       final round = _current;
       _replayTimer?.cancel();
       _replayTimer = Timer(QuizMotion.replayAfterSoft, () {
-        if (mounted && _phase == _Phase.question && _current == round) {
+        // Nothing playing and no touch on the player since the answer.
+        if (mounted &&
+            _phase == _Phase.question &&
+            _current == round &&
+            _player.playing.value == null) {
           _playCurrent();
         }
       });
