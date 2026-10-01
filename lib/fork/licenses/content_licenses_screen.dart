@@ -11,6 +11,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
@@ -241,9 +242,13 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
             key: const ValueKey('licenses-gbif-citation'),
             icon: AppIcons.menuBook,
             title: l10n.forkLicensesGbifCitationTitle,
-            subtitle: l10n.forkLicensesGbifCitation('${DateTime.now().year}'),
+            subtitle: l10n.forkLicensesGbifCitation(
+              DateFormat.yMMMMd(Localizations.localeOf(context).toString())
+                  .format(WorldMapConfig.gbifDownloadDate),
+              WorldMapConfig.gbifDownloadUrl,
+            ),
             trailing: open(),
-            onTap: () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
+            onTap: () => openExternalUrl(context, WorldMapConfig.gbifDownloadUrl),
           ),
         ],
       ),
