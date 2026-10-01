@@ -210,11 +210,12 @@ LiveSession _singleDetectionSession({
   // Document-only exports still need the source clip reference.
   final exportDetection = _copyDetection(
     detection,
-    audioClipPath:
-        audioIsFullDetectionSpan
-            ? null
-            : audioFile?.path ?? detection.audioClipPath,
+    audioClipPath: audioIsFullDetectionSpan
+        ? null
+        : audioFile?.path ?? detection.audioClipPath,
   );
+  final hasDetectionLocation =
+      detection.latitude != null && detection.longitude != null;
 
   return LiveSession(
     id: source?.id ?? 'detection-${detection.timestamp.microsecondsSinceEpoch}',
@@ -229,8 +230,18 @@ LiveSession _singleDetectionSession({
     recordingPath:
         audioFile != null && audioIsFullDetectionSpan ? audioFile.path : null,
     settings: settings,
-    latitude: detection.latitude ?? source?.latitude,
-    longitude: detection.longitude ?? source?.longitude,
+    latitude: hasDetectionLocation ? detection.latitude : source?.latitude,
+    longitude: hasDetectionLocation ? detection.longitude : source?.longitude,
+    altitude: hasDetectionLocation ? detection.altitude : source?.altitude,
+    altitudeAccuracy: hasDetectionLocation
+        ? detection.altitudeAccuracy
+        : source?.altitudeAccuracy,
+    altitudeReference: hasDetectionLocation
+        ? detection.altitudeReference
+        : source?.altitudeReference,
+    locationFixTime: hasDetectionLocation
+        ? detection.locationFixTime
+        : source?.locationFixTime,
     locationName: source?.locationName,
     observerName: source?.observerName,
     weather: source?.weather,
@@ -252,6 +263,10 @@ DetectionRecord _copyDetection(
   evidence: source.evidence,
   latitude: source.latitude,
   longitude: source.longitude,
+  altitude: source.altitude,
+  altitudeAccuracy: source.altitudeAccuracy,
+  altitudeReference: source.altitudeReference,
+  locationFixTime: source.locationFixTime,
   reviewStatus: source.reviewStatus,
   reviewedAt: source.reviewedAt,
   note: source.note,
@@ -727,6 +742,13 @@ String _buildBody(DetectionRecord d) {
   if (d.latitude != null && d.longitude != null) {
     lines.add(
       'geo:${d.latitude!.toStringAsFixed(4)},${d.longitude!.toStringAsFixed(4)}',
+    );
+  }
+  if (d.altitude != null) {
+    lines.add(
+      'altitudeMeters=${d.altitude};reference=${d.altitudeReference?.name ?? 'unknown'}'
+      '${d.altitudeAccuracy != null ? ';accuracyMeters=${d.altitudeAccuracy}' : ''}'
+      '${d.locationFixTime != null ? ';fixTime=${d.locationFixTime!.toUtc().toIso8601String()}' : ''}',
     );
   }
   // Heard / seen, when the user recorded it on a manual entry. Plain

@@ -12,6 +12,7 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/features/recording/audio_decoder.dart';
 import 'package:birdnet_live/features/recording/flac_encoder.dart';
 import 'package:birdnet_live/features/recording/wav_writer.dart';
+import 'package:birdnet_live/shared/models/altitude_reference.dart';
 import 'package:birdnet_live/shared/services/taxonomy_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
@@ -78,6 +79,62 @@ final _prefix =
     'BirdNET_Live_${DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.utc(2025, 6, 15, 8, 0, 0).toLocal())}';
 
 void main() {
+  test('altitude survives persistence and every tabular/JSON export', () {
+    final start = DateTime.utc(2025, 6, 15, 8);
+    final session =
+        _makeSession(
+            detections: [
+              DetectionRecord(
+                scientificName: 'Turdus merula',
+                commonName: 'Eurasian Blackbird',
+                confidence: 0.9,
+                timestamp: start.add(const Duration(seconds: 10)),
+                latitude: 52.52,
+                longitude: 13.405,
+                altitude: 42.25,
+                altitudeAccuracy: 7.5,
+                altitudeReference: AltitudeReference.meanSeaLevel,
+                locationFixTime: start,
+              ),
+            ],
+          )
+          ..latitude = 52.52
+          ..longitude = 13.405
+          ..altitude = 42.25
+          ..altitudeAccuracy = 7.5
+          ..altitudeReference = AltitudeReference.meanSeaLevel
+          ..locationFixTime = start;
+
+    final restored = LiveSession.fromJson(session.toJson());
+    expect(restored.altitude, 42.25);
+    expect(restored.detections.single.altitude, 42.25);
+    expect(
+      restored.detections.single.altitudeReference,
+      AltitudeReference.meanSeaLevel,
+    );
+    expect(restored.locationFixTime, start);
+    expect(restored.detections.single.locationFixTime, start);
+
+    final csv = buildCsvExport(session);
+    final raven = buildRavenSelectionTable(session);
+    final json = jsonDecode(buildJsonExport(session)) as Map<String, dynamic>;
+    // Tabular exports add exactly one column; reference and uncertainty
+    // live in JSON and GPX.
+    expect(csv, contains(',Latitude,Longitude,Altitude (m)'));
+    expect(csv, contains('52.520000,13.405000,42.3'));
+    expect(csv, isNot(contains('Altitude Reference')));
+    expect(csv, isNot(contains('Session')));
+    expect(raven, contains('\tLatitude\tLongitude\tAltitude (m)'));
+    expect(raven, contains('52.520000\t13.405000\t42.3'));
+    expect(raven, isNot(contains('Altitude Reference')));
+    expect(json['altitude'], 42.25);
+    expect((json['detections'] as List).single['altitude'], 42.25);
+    expect(json['locationFixTime'], start.toIso8601String());
+    expect(
+      (json['detections'] as List).single['locationFixTime'],
+      start.toIso8601String(),
+    );
+  });
   test('common names are localized consistently in every export format', () {
     final start = DateTime.utc(2025, 6, 15, 8);
     final session = _makeSession(

@@ -34,6 +34,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/constants/app_constants.dart';
+import '../../shared/models/altitude_reference.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../live/live_session.dart';
 import '../recording/audio_decoder.dart';
@@ -228,6 +229,7 @@ String buildRavenSelectionTable(
   final hasCoords = session.detections.any(
     (d) => d.latitude != null && d.longitude != null,
   );
+  final hasAltitude = session.detections.any((d) => d.altitude != null);
   final hasNotes = session.detections.any((d) => d.hasNote);
   final hasEvidence = session.detections.any((d) => d.evidence != null);
   // Prefer the per-session value, but allow callers to override (e.g. legacy
@@ -247,6 +249,7 @@ String buildRavenSelectionTable(
     '\tSurvey Time (UTC)'
     '\tReview Status\tReviewed At (UTC)'
     '${hasCoords ? '\tLatitude\tLongitude' : ''}'
+    '${hasAltitude ? '\tAltitude (m)' : ''}'
     '${hasEvidence ? '\tEvidence' : ''}'
     '${hasNotes ? '\tNote' : ''}',
   );
@@ -299,11 +302,13 @@ String buildRavenSelectionTable(
     final reviewSuffix =
         '\t${d.reviewStatus.name}'
         '\t${d.reviewedAt?.toUtc().toIso8601String() ?? ''}';
-    final coordSuffix =
-        hasCoords
-            ? '\t${d.latitude?.toStringAsFixed(6) ?? ''}'
-                '\t${d.longitude?.toStringAsFixed(6) ?? ''}'
-            : '';
+    final coordSuffix = hasCoords
+        ? '\t${d.latitude?.toStringAsFixed(6) ?? ''}'
+              '\t${d.longitude?.toStringAsFixed(6) ?? ''}'
+        : '';
+    final altitudeSuffix = hasAltitude
+        ? '\t${d.altitude?.toStringAsFixed(1) ?? ''}'
+        : '';
     final evidenceSuffix = hasEvidence ? '\t${_evidenceField(d)}' : '';
     // Raven selection tables are tab-separated, so collapse any embedded
     // tabs/newlines from a free-form note to spaces to keep one row per
@@ -329,6 +334,7 @@ String buildRavenSelectionTable(
       '$surveyTimeSuffix'
       '$reviewSuffix'
       '$coordSuffix'
+      '$altitudeSuffix'
       '$evidenceSuffix'
       '$noteSuffix',
     );
@@ -364,6 +370,7 @@ String buildCsvExport(
   final hasCoords = session.detections.any(
     (d) => d.latitude != null && d.longitude != null,
   );
+  final hasAltitude = session.detections.any((d) => d.altitude != null);
   final hasNotes = session.detections.any((d) => d.hasNote);
   final hasMemos = session.detections.any((d) => d.hasVoiceMemo);
   final hasEvidence = session.detections.any((d) => d.evidence != null);
@@ -385,6 +392,7 @@ String buildCsvExport(
     ',$surveyTimeHeader'
     ',Review Status,Reviewed At (UTC)'
     '${hasCoords ? ',Latitude,Longitude' : ''}'
+    '${hasAltitude ? ',Altitude (m)' : ''}'
     '${hasEvidence ? ',Evidence' : ''}'
     '${hasNotes ? ',Note' : ''}'
     '${hasMemos ? ',Voice Memo' : ''}',
@@ -447,11 +455,13 @@ String buildCsvExport(
     final reviewRef =
         ',${d.reviewStatus.name}'
         ',${d.reviewedAt?.toUtc().toIso8601String() ?? ''}';
-    final coordRef =
-        hasCoords
-            ? ',${d.latitude?.toStringAsFixed(6) ?? ''}'
-                ',${d.longitude?.toStringAsFixed(6) ?? ''}'
-            : '';
+    final coordRef = hasCoords
+        ? ',${d.latitude?.toStringAsFixed(6) ?? ''}'
+              ',${d.longitude?.toStringAsFixed(6) ?? ''}'
+        : '';
+    final altitudeRef = hasAltitude
+        ? ',${d.altitude?.toStringAsFixed(1) ?? ''}'
+        : '';
     final evidenceRef = hasEvidence ? ',${_evidenceField(d)}' : '';
     final noteRef = hasNotes ? ',${_csvField(d.note ?? '')}' : '';
     final memoRef =
@@ -470,6 +480,7 @@ String buildCsvExport(
       '$surveyTimeRef'
       '$reviewRef'
       '$coordRef'
+      '$altitudeRef'
       '$evidenceRef'
       '$noteRef'
       '$memoRef',
@@ -663,6 +674,13 @@ Map<String, dynamic> _commonSessionExportMetadata(LiveSession session) {
       'observerName': session.observerName,
     if (session.latitude != null) 'latitude': session.latitude,
     if (session.longitude != null) 'longitude': session.longitude,
+    if (session.altitude != null) 'altitude': session.altitude,
+    if (session.altitudeAccuracy != null)
+      'altitudeAccuracy': session.altitudeAccuracy,
+    if (session.altitudeReference != null)
+      'altitudeReference': session.altitudeReference!.name,
+    if (session.locationFixTime != null)
+      'locationFixTime': session.locationFixTime!.toUtc().toIso8601String(),
     if (session.locationName != null && session.locationName!.isNotEmpty)
       'locationName': session.locationName,
     if (session.stopReason != null) 'stopReason': session.stopReason!.name,
@@ -766,6 +784,13 @@ String buildJsonExport(
       'transectId': session.transectId,
     if (session.latitude != null) 'latitude': session.latitude,
     if (session.longitude != null) 'longitude': session.longitude,
+    if (session.altitude != null) 'altitude': session.altitude,
+    if (session.altitudeAccuracy != null)
+      'altitudeAccuracy': session.altitudeAccuracy,
+    if (session.altitudeReference != null)
+      'altitudeReference': session.altitudeReference!.name,
+    if (session.locationFixTime != null)
+      'locationFixTime': session.locationFixTime!.toUtc().toIso8601String(),
     if (session.locationName != null) 'locationName': session.locationName,
     if (session.distanceMeters != null)
       'distanceMeters': session.distanceMeters,
@@ -787,37 +812,42 @@ String buildJsonExport(
     if (session.segments.isNotEmpty)
       'segments': session.segments.map((s) => s.toJson()).toList(),
     if (session.aruMetadata != null) 'aru': session.aruMetadata!.toJson(),
-    'detections':
-        session.detections.map((d) {
-          // Gap-removed offset into the recorded audio (see
-          // absoluteToRelative), rebased onto the trimmed extent when the
-          // session was trimmed; keeps resumed sessions aligned.
-          final beginSec = session.trimmedRelative(d.timestamp);
-          return {
-            'timestamp': d.timestamp.toUtc().toIso8601String(),
-            'beginTimeSec': num.parse(beginSec.toStringAsFixed(3)),
-            'commonName': _localizedCommon(
-              d,
-              taxonomy: taxonomy,
-              speciesLocale: speciesLocale,
-            ),
-            'scientificName': _displaySci(d, taxonomy: taxonomy),
-            'confidence': num.parse(d.confidence.toStringAsFixed(4)),
-            if (d.latitude != null) 'latitude': d.latitude,
-            if (d.longitude != null) 'longitude': d.longitude,
-            if (d.source != DetectionSource.auto) 'source': d.source.name,
-            if (d.evidence != null) 'evidence': d.evidence!.name,
-            // Always emitted so the schema is stable, and three-valued so an
-            // untouched detection reads as 'unreviewed' rather than claiming
-            // a reviewer judged the identification wrong.
-            'reviewStatus': d.reviewStatus.name,
-            if (d.reviewedAt != null)
-              'reviewedAt': d.reviewedAt!.toUtc().toIso8601String(),
-            if (d.hasNote) 'note': d.note,
-            if (d.hasVoiceMemo)
-              'voiceMemo': 'memos/${p.basename(d.voiceMemoPath!)}',
-          };
-        }).toList(),
+    'detections': session.detections.map((d) {
+      // Gap-removed offset into the recorded audio (see
+      // absoluteToRelative), rebased onto the trimmed extent when the
+      // session was trimmed; keeps resumed sessions aligned.
+      final beginSec = session.trimmedRelative(d.timestamp);
+      return {
+        'timestamp': d.timestamp.toUtc().toIso8601String(),
+        'beginTimeSec': num.parse(beginSec.toStringAsFixed(3)),
+        'commonName': _localizedCommon(
+          d,
+          taxonomy: taxonomy,
+          speciesLocale: speciesLocale,
+        ),
+        'scientificName': _displaySci(d, taxonomy: taxonomy),
+        'confidence': num.parse(d.confidence.toStringAsFixed(4)),
+        if (d.latitude != null) 'latitude': d.latitude,
+        if (d.longitude != null) 'longitude': d.longitude,
+        if (d.altitude != null) 'altitude': d.altitude,
+        if (d.altitudeAccuracy != null) 'altitudeAccuracy': d.altitudeAccuracy,
+        if (d.altitudeReference != null)
+          'altitudeReference': d.altitudeReference!.name,
+        if (d.locationFixTime != null)
+          'locationFixTime': d.locationFixTime!.toUtc().toIso8601String(),
+        if (d.source != DetectionSource.auto) 'source': d.source.name,
+        if (d.evidence != null) 'evidence': d.evidence!.name,
+        // Always emitted so the schema is stable, and three-valued so an
+        // untouched detection reads as 'unreviewed' rather than claiming
+        // a reviewer judged the identification wrong.
+        'reviewStatus': d.reviewStatus.name,
+        if (d.reviewedAt != null)
+          'reviewedAt': d.reviewedAt!.toUtc().toIso8601String(),
+        if (d.hasNote) 'note': d.note,
+        if (d.hasVoiceMemo)
+          'voiceMemo': 'memos/${p.basename(d.voiceMemoPath!)}',
+      };
+    }).toList(),
     if (session.annotations.isNotEmpty)
       'annotations':
           session.annotations.map((annotation) {
@@ -1489,6 +1519,9 @@ String buildGpxExport(
   buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
   buf.writeln('<gpx version="1.1" creator="BirdNET Live"');
   buf.writeln('  xmlns="http://www.topografix.com/GPX/1/1"');
+  buf.writeln(
+    '  xmlns:birdnet="https://birdnet-team.github.io/birdnet-live-app/gpx"',
+  );
   buf.writeln('  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"');
   buf.writeln(
     '  xsi:schemaLocation="http://www.topografix.com/GPX/1/1 '
@@ -1497,13 +1530,20 @@ String buildGpxExport(
 
   // Metadata.
   buf.writeln('  <metadata>');
+  // GPX 1.1 fixes the child order: name, desc, author, ..., time, ...,
+  // extensions. Strict validators reject anything else.
   buf.writeln('    <name>${_xmlEscape(session.displayName)}</name>');
-  buf.writeln(
-    '    <time>${session.startTime.toUtc().toIso8601String()}</time>',
-  );
   if (session.observerName != null && session.observerName!.isNotEmpty) {
     buf.writeln(
       '    <author><name>${_xmlEscape(session.observerName!)}</name></author>',
+    );
+  }
+  buf.writeln(
+    '    <time>${session.startTime.toUtc().toIso8601String()}</time>',
+  );
+  if (session.altitude != null) {
+    buf.writeln(
+      '    <extensions>${_gpxAltitudeExtension(session.altitude!, session.altitudeReference, session.altitudeAccuracy, session.locationFixTime)}</extensions>',
     );
   }
   buf.writeln('  </metadata>');
@@ -1512,6 +1552,9 @@ String buildGpxExport(
   for (final d in session.detections) {
     if (d.latitude == null || d.longitude == null) continue;
     buf.writeln('  <wpt lat="${d.latitude}" lon="${d.longitude}">');
+    if (d.altitude != null) {
+      buf.writeln('    <ele>${d.altitude!.toStringAsFixed(1)}</ele>');
+    }
     buf.writeln('    <time>${d.timestamp.toUtc().toIso8601String()}</time>');
     final commonName = _localizedCommon(
       d,
@@ -1519,9 +1562,6 @@ String buildGpxExport(
       speciesLocale: speciesLocale,
     );
     buf.writeln('    <name>${_xmlEscape(commonName)}</name>');
-    buf.writeln(
-      '    <desc>${_xmlEscape(_displaySci(d, taxonomy: taxonomy))} (${(d.confidence * 100).toStringAsFixed(1)}%)</desc>',
-    );
     if (d.isReviewed) {
       // GPX <sym> is a free-form symbol hint; downstream tools (QGIS,
       // GPSBabel, Garmin BaseCamp) treat unknown values as a tag rather
@@ -1531,12 +1571,22 @@ String buildGpxExport(
       // waypoints get neither tag — absence is the honest encoding of
       // "nobody has judged this".
       final verb = d.isConfirmed ? 'Confirmed' : 'Rejected';
-      buf.writeln('    <sym>${d.reviewStatus.name}</sym>');
       if (d.reviewedAt != null) {
         buf.writeln(
           '    <cmt>$verb at ${d.reviewedAt!.toUtc().toIso8601String()}</cmt>',
         );
       }
+    }
+    buf.writeln(
+      '    <desc>${_xmlEscape(_displaySci(d, taxonomy: taxonomy))} (${(d.confidence * 100).toStringAsFixed(1)}%)</desc>',
+    );
+    if (d.isReviewed) {
+      buf.writeln('    <sym>${d.reviewStatus.name}</sym>');
+    }
+    if (d.altitude != null) {
+      buf.writeln(
+        '    <extensions>${_gpxAltitudeExtension(d.altitude!, d.altitudeReference, d.altitudeAccuracy, d.locationFixTime)}</extensions>',
+      );
     }
     buf.writeln('  </wpt>');
   }
@@ -1553,6 +1603,11 @@ String buildGpxExport(
         buf.write('<ele>${pt.altitude!.toStringAsFixed(1)}</ele>');
       }
       buf.write('<time>${pt.timestamp.toUtc().toIso8601String()}</time>');
+      if (pt.altitude != null) {
+        buf.write(
+          '<extensions>${_gpxAltitudeExtension(pt.altitude!, pt.altitudeReference, pt.altitudeAccuracy, pt.timestamp)}</extensions>',
+        );
+      }
       buf.writeln('</trkpt>');
     }
     buf.writeln('    </trkseg>');
@@ -1562,6 +1617,17 @@ String buildGpxExport(
   buf.writeln('</gpx>');
   return buf.toString();
 }
+
+String _gpxAltitudeExtension(
+  double altitude,
+  AltitudeReference? reference,
+  double? accuracy,
+  DateTime? fixTime,
+) =>
+    '<birdnet:altitude reference="${reference?.name ?? 'unknown'}"'
+    '${accuracy != null ? ' accuracyMeters="$accuracy"' : ''}'
+    '${fixTime != null ? ' fixTime="${fixTime.toUtc().toIso8601String()}"' : ''}>'
+    '$altitude</birdnet:altitude>';
 
 /// XML-safe escaping for attribute and text content.
 String _xmlEscape(String input) {

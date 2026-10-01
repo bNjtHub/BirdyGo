@@ -1169,6 +1169,10 @@ String _buildDataPayload(
       'conf': d.confidence,
       'lat': d.latitude,
       'lon': d.longitude,
+      'alt': d.altitude,
+      'altRef': d.altitudeReference?.name,
+      'altAccuracy': d.altitudeAccuracy,
+      'fixTime': d.locationFixTime?.toUtc().toIso8601String(),
       'clip': clipName != null ? Uri.encodeComponent(clipName) : null,
       'img':
           'https://birdnet.cornell.edu/taxonomy/api/image/$encodedSci?size=thumb',
@@ -1176,6 +1180,15 @@ String _buildDataPayload(
   }
 
   final track = session.gpsTrack.map((p) => [p.latitude, p.longitude]).toList();
+  final trackAltitude = [
+    for (final point in session.gpsTrack)
+      {
+        'alt': point.altitude,
+        'altRef': point.altitudeReference?.name,
+        'altAccuracy': point.altitudeAccuracy,
+        'fixTime': point.timestamp.toUtc().toIso8601String(),
+      },
+  ];
   final center = _sessionCenter(session);
 
   final timeline = _buildTimelinePayload(session);
@@ -1183,6 +1196,13 @@ String _buildDataPayload(
   return jsonEncode({
     'detections': dets,
     'track': track,
+    'trackAltitude': trackAltitude,
+    'sessionAltitude': session.altitude,
+    'sessionAltitudeReference': session.altitudeReference?.name,
+    'sessionAltitudeAccuracy': session.altitudeAccuracy,
+    'sessionLocationFixTime': session.locationFixTime
+        ?.toUtc()
+        .toIso8601String(),
     if (center != null) 'center': [center.$1, center.$2],
     if (timeline != null) 'timeline': timeline,
   });
@@ -1569,7 +1589,8 @@ String _buildMetadataRows(LiveSession session) {
     rows.add((
       'Coordinates',
       '${session.latitude!.toStringAsFixed(4)}, '
-          '${session.longitude!.toStringAsFixed(4)}',
+          '${session.longitude!.toStringAsFixed(4)}'
+          '${session.altitude != null ? ', ${session.altitude!.toStringAsFixed(1)} m' : ''}',
     ));
   }
   if (session.observerName != null && session.observerName!.isNotEmpty) {
