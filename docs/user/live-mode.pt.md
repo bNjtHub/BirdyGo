@@ -73,3 +73,5 @@ A gravação é controlada nas [Configurações](settings.md).
 - **Desativado** desativa a gravação.
 
 Ao parar o Modo Live, o BirdNET Live salva a Session e abre o [Resumo da Session](session-review.md).
+
+Quando o salvamento automático de Sessions está ativado, o Modo Live também salva uma Session parcial no início, a cada 30 segundos e quando o aplicativo vai para segundo plano. Após uma falha ou queda de energia, o último salvamento fica disponível na Biblioteca de Sessions. Alterações posteriores a esse salvamento podem ser perdidas. Desativar o salvamento automático também desativa esses salvamentos intermediários.

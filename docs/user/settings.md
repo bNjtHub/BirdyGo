@@ -235,6 +235,8 @@ Android shows a persistent notification with an Open and Stop action while eithe
 
 When enabled (the default), a completed Live or Point Count session is added to your library automatically the moment it finishes. When disabled, a finished session opens in review marked as **unsaved**: the save icon is highlighted and you must tap it to keep the session. Leaving review without saving discards the session and its recordings. This suits quick listening sessions where you only want to keep the occasional noteworthy result instead of accumulating every short recording. Survey and ARU deployments always save automatically — a long unattended run is too costly to lose by forgetting to tap Save — so this toggle does not apply there.
 
+While automatic saving is enabled, Live Mode and Point Count also save a partial Session at the start, every 30 seconds, and when the app leaves the foreground. This limits data loss after a crash or power loss. With the setting disabled, these partial checkpoints are not kept. Survey and ARU save checkpoints independently of this setting.
+
 ## Playback
 
 ### Playback overlay in review

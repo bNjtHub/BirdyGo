@@ -217,6 +217,8 @@ Ce réglage concerne l'ouverture du mode Live depuis l'application. Le [widget Q
 
 Une fois activé (valeur par défaut), une session Live ou Point Count terminée est ajoutée automatiquement à votre bibliothèque dès qu'elle prend fin. Une fois désactivé, une session terminée s'ouvre dans le résumé avec la mention **non enregistrée** : l'icône d'enregistrement est mise en évidence et vous devez appuyer dessus pour conserver la session. Quitter le résumé sans enregistrer supprime la session et ses enregistrements. Cela convient aux écoutes rapides où vous ne souhaitez conserver qu'un résultat notable de temps en temps plutôt que d'accumuler chaque court enregistrement. Les déploiements Survey et ARU s'enregistrent toujours automatiquement — une longue session sans surveillance est trop précieuse pour être perdue faute d'avoir appuyé sur Enregistrer — ce commutateur ne s'y applique donc pas.
 
+Tant que l'enregistrement automatique est activé, le mode Live et Point Count enregistrent aussi une session partielle au démarrage, toutes les 30 secondes et lorsque l'application quitte le premier plan. Cela limite la perte de données après un plantage ou une coupure de courant. Lorsque le réglage est désactivé, ces sauvegardes intermédiaires ne sont pas conservées. Survey et ARU enregistrent leurs sauvegardes intermédiaires indépendamment de ce réglage.
+
 ## Lecture
 
 ### Superposition de lecture dans le résumé

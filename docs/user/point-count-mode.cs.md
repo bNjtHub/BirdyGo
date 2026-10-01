@@ -54,3 +54,5 @@ Obrazovka připravenosti shrnuje zvolenou dobu trvání a umožní začít pomoc
 ## Po sčítání
 
 Když point count skončí, BirdNET Live session uloží a otevře [Přehled Session](session-review.md).
+
+Při zapnutém automatickém ukládání se rozpracované sčítání ukládá také při spuštění, každých 30 sekund a když aplikace opustí popředí. Po pádu aplikace nebo výpadku napájení najdete poslední uložené částečné sčítání v Knihovně Sessions.

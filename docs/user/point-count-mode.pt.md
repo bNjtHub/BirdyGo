@@ -54,3 +54,5 @@ A tela do Point Count ao vivo concentra-se em um painel cronometrado.
 ## Após a contagem
 
 Quando o Point Count termina, o BirdNET Live salva a Session e abre o [Resumo da Session](session-review.md).
+
+Com o salvamento automático ativado, uma contagem não concluída também é salva no início, a cada 30 segundos e quando o aplicativo sai do primeiro plano. Após uma falha ou queda de energia, a última contagem parcial fica disponível na Biblioteca de Sessions.
