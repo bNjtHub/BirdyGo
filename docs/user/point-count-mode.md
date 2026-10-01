@@ -91,3 +91,6 @@ With **Continue with screen off** on in Point Count setup, the count continues w
 When the point count ends, BirdNET Live opens [Session Review](session-review.md).
 It saves the Session automatically when that setting is enabled; otherwise,
 save it from review if you want to keep it.
+With automatic saving enabled, an unfinished count is also saved at the start,
+every 30 seconds, and when the app leaves the foreground. After a crash or
+power loss, the latest partial count is available in Session Library.

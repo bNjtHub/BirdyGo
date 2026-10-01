@@ -145,7 +145,7 @@ The notification — title, recent detections, and stats footer — is fully tra
 
 Species alerts (when enabled) appear on a separate Android notification channel so you can mute alerts independently of the silent ongoing recording notification. The alert icon matches the foreground notification icon (a monochrome bird), and alert bodies show only the *reason* — *"First detection of this survey"*, *"On your watchlist"*, *"Detected at this location with under 4% likelihood"* — leaving the species name in the bold notification title where Android renders it largest.
 
-When you **resume** an unfinished survey from Session Library, the alert pipeline is re-armed from your *current* notification preferences — not whatever you had configured the day you started the survey. Toggle alerts off (or change the mode, watchlist, or throttling) before tapping Resume and the resumed survey will respect the new settings immediately.
+A Survey that was not recorded with full audio, including one recovered after a crash, can be continued from its Session Review with **Continue Survey**. When you **resume** one, the alert pipeline is re-armed from your *current* notification preferences — not whatever you had configured the day you started the survey. Toggle alerts off (or change the mode, watchlist, or throttling) before tapping Resume and the resumed survey will respect the new settings immediately.
 
 ## Reviewing on the Map
 
@@ -154,3 +154,7 @@ The fullscreen Survey map view (the :material-fullscreen: button in Session Revi
 ## After Stopping
 
 BirdNET Live saves the finished survey and opens [Session Review](session-review.md).
+The active Survey is saved at the start, every 30 seconds, and when the app
+leaves the foreground. After a crash or power loss, the latest partial Survey
+appears in Session Library as an ended Session. Recording does not restart.
+Observations since the last checkpoint may be missing.

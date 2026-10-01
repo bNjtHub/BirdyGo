@@ -1,7 +1,7 @@
 # ARU Mode
 
 !!! note "Early implementation"
-    ARU Mode currently creates a recoverable scheduled deployment session, records scheduled cycles, runs live inference during active cycles, saves retained detection clips when that recording mode is selected, and shows Android foreground notification controls. iOS background behavior still needs field validation.
+    ARU Mode saves scheduled deployment checkpoints, records scheduled cycles, runs live inference during active cycles, saves retained detection clips when that recording mode is selected, and shows Android foreground notification controls. iOS background behavior still needs field validation.
 
 ARU (Autonomous Recording Unit) Mode is the fixed-location workflow for scheduled acoustic deployments.
 
@@ -35,7 +35,7 @@ limit. The repeat interval uses :material-repeat:, the low-battery controls use
 Session grouping use :material-flask-outline: and :material-bookshelf:.
 Tap the :material-help: button beside a setup control for its explanation.
 
-Starting a deployment immediately saves a `SessionType.aru` session with ARU schedule metadata so cycle state can be recovered later.
+Starting a deployment immediately saves a `SessionType.aru` session with ARU schedule metadata. Recording cycles are also checkpointed every 30 seconds, including cycles with no detections. After a crash or power loss, the latest partial deployment appears in Session Library as an ended Session; recording does not restart. Work since its last checkpoint may be lost.
 
 JSON and ZIP exports include ARU deployment metadata. ZIP exports bundle saved per-cycle recording files under `aru_cycles/`.
 

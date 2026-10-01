@@ -1,7 +1,7 @@
 # Modalità ARU
 
 !!! note "Implementazione iniziale"
-    La modalità ARU attualmente crea una Session di distribuzione programmata e recuperabile, registra i cicli pianificati, esegue l'inferenza live durante i cicli attivi, salva i clip di rilevazione conservati quando è selezionata quella modalità di registrazione e mostra i controlli di notifica in primo piano su Android. Il comportamento in background su iOS deve ancora essere validato sul campo.
+    La modalità ARU attualmente salva checkpoint della distribuzione programmata, registra i cicli pianificati, esegue l'inferenza live durante i cicli attivi, salva i clip di rilevazione conservati quando è selezionata quella modalità di registrazione e mostra i controlli di notifica in primo piano su Android. Il comportamento in background su iOS deve ancora essere validato sul campo.
 
 La modalità ARU (Autonomous Recording Unit) è il flusso di lavoro per distribuzioni acustiche programmate in una posizione fissa.
 
@@ -24,7 +24,7 @@ La modalità ARU (Autonomous Recording Unit) è il flusso di lavoro per distribu
     - **Raggruppamento Session**: configura se salvare ogni ciclo come una Session separata (consigliato per tempi di caricamento più rapidi e visualizzazione modulare) o combinare tutti i cicli in un'unica Session a segmenti multipli.
 - **Pronto**: verifica il programma, la stima del consumo di memoria audio e i vincoli legati al sole, quindi avvia la distribuzione.
 
-All'avvio viene salvata subito una Session `SessionType.aru` con metadati del programma ARU, così lo stato dei cicli potrà essere recuperato in seguito.
+All'avvio viene salvata subito una Session `SessionType.aru` con metadati del programma ARU. Inoltre i cicli di registrazione vengono salvati ogni 30 secondi, anche quelli senza rilevazioni. Dopo un arresto anomalo o un'interruzione di corrente, l'ultima distribuzione parziale compare nella Libreria Sessions come Session terminata; la registrazione non riparte. Quanto registrato dopo l'ultimo salvataggio può andare perso.
 
 Le esportazioni JSON e ZIP includono i metadati della distribuzione ARU. Le esportazioni ZIP raggruppano i file di registrazione salvati per ciclo sotto `aru_cycles/`.
 

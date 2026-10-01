@@ -22,6 +22,7 @@ import '../audio/audio_providers.dart';
 import '../explore/explore_providers.dart';
 import '../explore/widgets/species_info_overlay.dart';
 import '../history/session_library_screen.dart';
+import '../history/session_checkpoint_writer.dart';
 import '../history/session_review_screen.dart';
 import '../inference/advanced_pooling_params.dart';
 import '../recording/recording_service.dart';
@@ -110,6 +111,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
   bool _finalizing = false;
   bool _stopDialogOpen = false;
   Timer? _sessionTimer;
+  SessionCheckpointWriter? _checkpointWriter;
   bool _durationWarningShown = false;
   bool _backgroundTipOpen = false;
   final AudioBackgroundNotificationService _backgroundService =
@@ -462,6 +464,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
       _isStarting = false;
       _onControllerStateChanged();
+      _checkpointWriter = SessionCheckpointWriter(
+        repository: repo,
+        session: () => controller.session,
+        shouldSave: () => ref.read(saveSessionAutomaticallyProvider),
+      )..start();
       if (_appBackgrounded) {
         await _pauseSessionForBackground();
         return;
@@ -504,6 +511,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     WidgetsBinding.instance.removeObserver(this);
     FlutterForegroundTask.removeTaskDataCallback(_onNotificationData);
     _sessionTimer?.cancel();
+    _checkpointWriter?.dispose();
     _backgroundLimitTimer?.cancel();
     _backgroundDeadline = null;
     if (!_finalizing) unawaited(_backgroundService.stop());
@@ -534,6 +542,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     // Listen widget or an ARU notification action relaunches an app that is
     // already in the foreground — and must not tear down a live recording.
     if (state == AppLifecycleState.paused) {
+      if (_checkpointWriter != null) {
+        unawaited(_checkpointWriter!.saveNow());
+      }
       if (!_appBackgrounded) ++_backgroundEpisode;
       _appBackgrounded = true;
       final backgroundedAt = DateTime.now();
@@ -679,6 +690,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     final captureNotifier = ref.read(captureStateProvider.notifier);
     await captureNotifier.stop();
     await controller.pauseSession();
+    if (_checkpointWriter != null) {
+      await _checkpointWriter!.saveNow();
+    }
     _onControllerStateChanged();
   }
 
@@ -891,6 +905,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     var serviceStopped = false;
 
     try {
+      await _checkpointWriter?.stop();
+      _checkpointWriter = null;
       try {
         await WakelockService.disable();
       } catch (error, stack) {
@@ -950,6 +966,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             container.invalidate(sessionListProvider);
           }
         }
+      }
+
+      if (!autoSave) {
+        await repo.deleteMetadataOnly(session.id);
       }
 
       // Release the old service before review permits a new session to start.

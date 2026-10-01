@@ -44,6 +44,7 @@ import '../audio/audio_providers.dart';
 import '../explore/explore_providers.dart';
 import '../explore/widgets/species_info_overlay.dart';
 import '../history/session_library_screen.dart';
+import '../history/session_checkpoint_writer.dart';
 import '../history/session_review_screen.dart';
 import '../inference/advanced_pooling_params.dart';
 import '../recording/recording_service.dart';
@@ -124,6 +125,7 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
 
   /// Periodic timer that ticks every second to update the countdown.
   Timer? _countdownTimer;
+  SessionCheckpointWriter? _checkpointWriter;
   DateTime? _countEndTime;
   int _lastNotifiedRemainingMinutes = -1;
   bool _appBackgrounded = false;
@@ -299,6 +301,18 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
 
     _started = true;
     _onControllerStateChanged();
+    _checkpointWriter = SessionCheckpointWriter(
+      repository: repo,
+      session: () => controller.session,
+      shouldSave: () => ref.read(saveSessionAutomaticallyProvider),
+      prepare: (session) {
+        session.type = SessionType.pointCount;
+        session.customName = widget.customName;
+        session.observerName = widget.observerName;
+        session.latitude ??= widget.latitude;
+        session.longitude ??= widget.longitude;
+      },
+    )..start();
 
     // Use wall time so a suspended UI timer cannot extend the count.
     _countEndTime = DateTime.now().add(
@@ -463,6 +477,8 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
     var serviceStopped = false;
 
     try {
+      await _checkpointWriter?.stop();
+      _checkpointWriter = null;
       try {
         await WakelockService.disable();
       } catch (error, stack) {
@@ -531,6 +547,10 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         }
       }
 
+      if (!autoSave) {
+        await repo.deleteMetadataOnly(session.id);
+      }
+
       // Release the old service before review permits a new session to start.
       await _backgroundService.stop();
       serviceStopped = true;
@@ -588,6 +608,9 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
+      if (_checkpointWriter != null) {
+        unawaited(_checkpointWriter!.saveNow());
+      }
       if (!_spectrogramPaused) {
         _spectrogramPaused = true;
         setState(() {});
@@ -632,6 +655,7 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
     WidgetsBinding.instance.removeObserver(this);
     FlutterForegroundTask.removeTaskDataCallback(_onNotificationData);
     _countdownTimer?.cancel();
+    _checkpointWriter?.dispose();
     if (!_finalizing) unawaited(_backgroundService.stop());
     _remainingNotifier.dispose();
 

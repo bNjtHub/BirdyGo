@@ -892,6 +892,7 @@ class _SurveyLiveScreenState extends ConsumerState<SurveyLiveScreen>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
       _wasBackgrounded = true;
+      unawaited(controller.checkpoint());
     } else if (state == AppLifecycleState.resumed) {
       _wasBackgrounded = false;
     }

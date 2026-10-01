@@ -76,7 +76,6 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
   bool _testCycleEnabled = true;
   bool _eachCycleIsSession = true;
   bool _starting = false;
-  bool _recovering = false;
 
   @override
   void initState() {
@@ -97,7 +96,7 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _restoreActiveDeployment();
+      _showActiveDeployment();
     });
   }
 
@@ -247,50 +246,16 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
           ? _effectiveLowBatteryResume(_lowBatteryResume, _lowBatteryStop)
           : null;
 
-  Future<void> _restoreActiveDeployment() async {
-    if (_recovering) return;
-    _recovering = true;
-    try {
-      final inMemorySession = ref.read(aruSessionProvider);
-      final inMemoryState = ref.read(aruStateProvider);
-      if (inMemorySession != null &&
-          inMemoryState != AruControllerState.completed &&
-          inMemoryState != AruControllerState.idle) {
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (_) => const AruActiveScreen()),
-        );
-        return;
-      }
-
-      final repo = ref.read(sessionRepositoryProvider);
-      final sessions = await repo.listAll();
-      final restorable =
-          sessions
-              .where(
-                (session) =>
-                    session.type == SessionType.aru &&
-                    session.endTime == null &&
-                    session.aruMetadata != null,
-              )
-              .toList()
-            ..sort((a, b) => b.startTime.compareTo(a.startTime));
-      final pendingSession = restorable.firstOrNull;
-      if (pendingSession == null) return;
-
-      final controller = ref.read(aruControllerProvider);
-      await controller.restoreDeployment(pendingSession);
-      ref.read(aruStateProvider.notifier).state = controller.state;
-      ref.read(aruSessionProvider.notifier).state = controller.session;
-
-      if (!mounted || controller.state == AruControllerState.completed) {
-        return;
-      }
+  void _showActiveDeployment() {
+    final inMemorySession = ref.read(aruSessionProvider);
+    final inMemoryState = ref.read(aruStateProvider);
+    if (inMemorySession != null &&
+        inMemoryState != AruControllerState.completed &&
+        inMemoryState != AruControllerState.idle &&
+        mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(builder: (_) => const AruActiveScreen()),
       );
-    } finally {
-      _recovering = false;
     }
   }
 

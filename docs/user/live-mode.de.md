@@ -73,3 +73,5 @@ Die Aufnahme wird in den [Einstellungen](settings.md) gesteuert.
 - **Aus** deaktiviert die Aufnahme.
 
 Wenn Sie den Live-Modus beenden, speichert BirdNET Live die Session und öffnet die [Session-Übersicht](session-review.md).
+
+Wenn das automatische Speichern von Sessions aktiviert ist, sichert der Live-Modus außerdem beim Start, alle 30 Sekunden und beim Wechsel der App in den Hintergrund eine Teil-Session. Nach einem Absturz oder Stromausfall steht der zuletzt gesicherte Stand in der Session-Bibliothek bereit. Änderungen seit dieser Sicherung können verloren gehen. Wenn Sie das automatische Speichern ausschalten, entfallen auch diese Zwischenstände.
