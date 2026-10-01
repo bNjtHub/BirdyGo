@@ -122,7 +122,12 @@ class SpeciesPage extends ConsumerStatefulWidget {
     required this.scientificName,
     required this.commonName,
     this.scrollController,
+    this.clock,
   });
+
+  /// The page's clock, for the date-dependent lines (heard line, current
+  /// month); the real time when null. Tests pass a fixed one.
+  final DateTime Function()? clock;
 
   final String scientificName;
 
@@ -276,6 +281,8 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     _push(running ? const LiveScreen() : const LiveScreen(forceAutoStart: true));
   }
 
+  DateTime _now() => widget.clock?.call() ?? DateTime.now();
+
   String get _name =>
       _detail?.commonNameForLocale(ref.read(effectiveSpeciesLocaleProvider)) ??
       widget.commonName;
@@ -289,7 +296,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       contacts: tally.contacts,
       days: tally.days,
       last: tally.last,
-      now: DateTime.now(),
+      now: _now(),
     );
   }
 
@@ -299,7 +306,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     if (tally == null) return null;
     return l10n.forkFicheHeardShort(
       tally.contacts,
-      lastHeardWhen(l10n, language, tally.last, now: DateTime.now()),
+      lastHeardWhen(l10n, language, tally.last, now: _now()),
     );
   }
 
@@ -384,7 +391,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final record = _record;
     final heard = _heard(l10n, language);
     final heardShort = _heardShort(l10n, language);
-    final now = DateTime.now();
+    final now = _now();
     final detail = _detail;
     final referenceUrl = detail?.ebirdListenUrl;
     final inSheet = widget.scrollController != null;
