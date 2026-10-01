@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:birdnet_live/fork/world_map/range_class.dart';
 import 'package:birdnet_live/fork/world_map/season_presence.dart';
 import 'package:birdnet_live/fork/world_map/world_map_data.dart';
+import 'package:birdnet_live/fork/world_map/world_grid.dart';
 import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
 import 'package:birdnet_live/fork/world_map/world_ranges.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,6 +94,7 @@ void main() {
       final c = ProviderContainer(
         overrides: [
           worldRegionsProvider.overrideWith((ref) async => regions),
+          landCellsProvider.overrideWith((ref) async => landCells(regions)),
           worldRangesProvider.overrideWith((ref) async => ranges),
           worldMapPredictProvider.overrideWith((ref) async => predict),
         ],

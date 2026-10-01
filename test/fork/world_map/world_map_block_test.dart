@@ -276,6 +276,7 @@ void main() {
         ProviderScope(
           overrides: [
             worldRegionsProvider.overrideWith((ref) async => regions),
+            landCellsProvider.overrideWith((ref) async => landCells(regions)),
             worldRangesProvider.overrideWith((ref) async => ranges),
             worldMapPredictProvider.overrideWith((ref) async => predict),
             worldMapUserPositionProvider.overrideWith(
@@ -340,6 +341,7 @@ void main() {
         final c = ProviderContainer(
           overrides: [
             worldRegionsProvider.overrideWith((ref) async => regions),
+            landCellsProvider.overrideWith((ref) async => landCells(regions)),
             worldRangesProvider.overrideWith((ref) async => ranges),
             worldMapPredictProvider.overrideWith((ref) async => predict),
           ],

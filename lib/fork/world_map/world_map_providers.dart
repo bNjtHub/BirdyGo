@@ -18,10 +18,21 @@ import 'world_map_data.dart';
 import 'world_ranges.dart';
 import 'world_regions.dart';
 
-/// The administrative regions and country borders of the bundled asset.
-final worldRegionsProvider = FutureProvider<WorldRegions>((ref) async {
+WorldRegions _parseRegions(Uint8List gz) => WorldRegions.fromGzip(gz);
+
+List<GridCell> _landCellsOf(Uint8List gz) =>
+    landCells(WorldRegions.fromGzip(gz));
+
+Future<Uint8List> _loadRegionsBytes() async {
   final data = await rootBundle.load(WorldMapConfig.regionsAsset);
-  return WorldRegions.fromGzip(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+  return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+}
+
+/// The administrative regions and country borders of the bundled asset. The
+/// gunzip and the parsing run in a background isolate (no jank on arrival);
+/// the paths are built lazily, on first paint, only for the regions drawn.
+final worldRegionsProvider = FutureProvider<WorldRegions>((ref) async {
+  return compute(_parseRegions, await _loadRegionsBytes());
 });
 
 WorldRanges? _parseRanges(Uint8List gz) => WorldRanges.fromGzip(gz);
@@ -43,8 +54,9 @@ final worldRangesProvider = FutureProvider<WorldRanges?>((ref) async {
 
 /// Grid cells on land (the point-in-polygon test runs once).
 final landCellsProvider = FutureProvider<List<GridCell>>((ref) async {
-  final regions = await ref.watch(worldRegionsProvider.future);
-  return landCells(regions);
+  // Runs in an isolate (own parse of the asset) so the main isolate
+  // never does the ~2400 point-in-polygon scans.
+  return compute(_landCellsOf, await _loadRegionsBytes());
 });
 
 /// The geo-model's `predict`, or null when the model is not available.
