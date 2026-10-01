@@ -459,18 +459,23 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   Autres saisons / Toi), légende (« Été : nord de l'Europe · Hiver : Afrique de l'Ouest · ~6 200 km », ou
   « Présent toute l'année dans cette zone »), « Nidification : avril à juillet » si la fiche IA la donne,
   « Estimation du géomodèle BirdNET ». Squelette à la forme finale puis fondu ; bloc absent sans géomodèle.
-  **Source GBIF (J7, PR empilée)** : quand l'espèce est dans `assets/fork/world/ranges_gbif.bin` (observations
-  réelles GBIF dont eBird, grille de 1°, préparée sur le PC par `tools/fork_gbif_ranges.py`), la carte montre
-  ces cellules, sans aucun calcul sur le téléphone (décodage d'une espèce en `compute`, instantané). Sinon
-  repli sur le géomodèle à 5° : une estimation grossière mais déjà présentée comme telle, donc on la garde
-  plutôt que de masquer le bloc. Mêmes règles de couleur : une seule teinte (`accentText`), l'intensité
-  (taux de signalement en 3 niveaux) est l'opacité 55 / 78 / 100 % ; les niveaux 2 et 3 gardent 3:1, le
-  niveau 1 (repère de densité sur une cellule déjà visible) reste à 1,5:1 au moins (test). Cellules plus
-  petites que 12 dp : sans marge ni coins arrondis, elles se joignent en aires. Clé « Observé (plus foncé :
-  plus souvent) » au lieu de « Attendu ». Mention sous la carte « Observations GBIF (dont eBird), CC BY 4.0 ·
-  <année> » (cible 48 dp) qui ouvre « Licences des contenus », où le bloc « Observations d'oiseaux (GBIF) »
-  donne la licence et la citation du téléchargement (DOI, obligatoire). L'asset fictif de démonstration
-  (`"demo": true`) n'est jamais utilisé dans un build de release.
+  **Source GBIF à la demande (J7, PR empilée)** : avec le consentement « Carte en ligne » (même garde que
+  OSM, désactivé par défaut), la fiche demande à GBIF.org la carte de l'espèce affichée (observations
+  humaines CC0 / CC BY depuis 2010, 4 saisons, tuiles PNG d'~0,7°, 16 requêtes, ~1 s) et la montre à la
+  place du géomodèle. Les carrés sont relus en cellules sur la même projection et le même cadrage que le
+  fond de terres ; la teinte est la même (`accentText`), l'intensité (3 niveaux selon le nombre
+  d'observations) est l'opacité 55 / 78 / 100 % ; les niveaux 2 et 3 gardent 3:1, le niveau 1 (repère de
+  densité sur une cellule déjà visible) reste à 1,5:1 au moins (test). Cellules plus petites que 12 dp :
+  sans marge ni coins arrondis, elles se joignent en aires. Clé « Observé (plus foncé : plus souvent) » au
+  lieu de « Attendu ». Cache disque par espèce (90 jours, 20 Mo, éviction des moins récemment vues) : une
+  fiche déjà vue s'affiche hors ligne, même périmée. Repli, sans bruit : sans consentement, hors ligne sans
+  cache ou erreur GBIF, on garde la carte du géomodèle à 5°, présentée comme une estimation ; sans
+  consentement seulement, une ligne discrète « Carte précise : activez la carte en ligne » (cible 48 dp,
+  `accentText`) ouvre les Réglages, jamais de fenêtre. Attribution sous la carte : « Observations GBIF.org ·
+  CC BY 4.0 » (deux cibles de 48 dp : le site GBIF, puis « Licences des contenus » qui donne les filtres,
+  la génération à la demande et la citation « GBIF.org (année) GBIF Occurrence Data »). Vie privée : seul le
+  nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans consentement
+  (testé), et le texte du consentement le dit.
   Le libellé accessible dit la saison affichée et la légende (région vivante : le changement de saison
   est annoncé).
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).

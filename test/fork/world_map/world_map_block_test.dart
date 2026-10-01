@@ -329,7 +329,7 @@ void main() {
             cols: grid.cols,
             rows: grid.rows,
             levels: [
-              for (final s in Season.values)
+              for (final _ in Season.values)
                 Uint8List(grid.cellCount)..fillRange(5000, 5400, 2),
             ],
           ),
