@@ -129,4 +129,67 @@ void main() {
     expect(other.fontWeight, isNot(FontWeight.w800));
     expect(other.color, isNot(mark));
   });
+
+  group('dimUnselected', () {
+    const bar = Color(0xFF2255AA);
+    final dimmed = bar.withValues(alpha: ActivityBars.dimmedOpacity);
+
+    Widget bars({required bool dim, int? selected}) => ActivityBars(
+      values: const [1, 2, 3],
+      labels: const {},
+      semanticLabel: 'test',
+      color: bar,
+      selectedIndex: selected,
+      dimUnselected: dim,
+    );
+
+    testWidgets('fades the other bars to the dimmed opacity', (tester) async {
+      await pump(tester, bars(dim: true));
+      await pump(tester, bars(dim: true, selected: 1));
+      await tester.pumpAndSettle();
+      final chart = find.descendant(
+        of: find.byType(ActivityBars),
+        matching: find.byType(CustomPaint),
+      );
+      expect(
+        tester.renderObject(chart.first),
+        paints
+          ..rrect(color: dimmed)
+          ..rrect(color: bar)
+          ..rrect(color: dimmed),
+      );
+    });
+
+    testWidgets('full opacity without a selection', (tester) async {
+      await pump(tester, bars(dim: true));
+      await tester.pumpAndSettle();
+      final chart = find.descendant(
+        of: find.byType(ActivityBars),
+        matching: find.byType(CustomPaint),
+      );
+      expect(
+        tester.renderObject(chart.first),
+        paints
+          ..rrect(color: bar)
+          ..rrect(color: bar)
+          ..rrect(color: bar),
+      );
+    });
+
+    testWidgets('off by default: a selection changes nothing', (tester) async {
+      await pump(tester, bars(dim: false, selected: 1));
+      await tester.pumpAndSettle();
+      final chart = find.descendant(
+        of: find.byType(ActivityBars),
+        matching: find.byType(CustomPaint),
+      );
+      expect(
+        tester.renderObject(chart.first),
+        paints
+          ..rrect(color: bar)
+          ..rrect(color: bar)
+          ..rrect(color: bar),
+      );
+    });
+  });
 }
