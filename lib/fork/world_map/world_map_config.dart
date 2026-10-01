@@ -26,8 +26,9 @@ abstract final class WorldMapConfig {
   /// (gzip, see the script's header for the format).
   static const String regionsAsset = 'assets/fork/world/regions_admin1.bin.gz';
 
-  /// Join table: GADM level-1 id -> Natural Earth region ids (gzip JSON).
-  static const String gadmJoinAsset = 'assets/fork/world/gadm1_to_regions.json.gz';
+  /// Precomputed GBIF ranges: class of each region per species (gzip, format
+  /// in world_ranges.dart).
+  static const String rangesAsset = 'assets/fork/world/ranges.bin.gz';
 
   /// Units per degree of the regions asset's integer coordinates.
   static const double regionsScale = 100;
@@ -59,99 +60,19 @@ abstract final class WorldMapConfig {
   /// this latitude at most), so the far north is not squeezed to a sliver.
   static const double maxProjectionLatitude = 60;
 
-  // ---- GBIF observations, asked on demand for the species being viewed ----
+  // ---- GBIF credit (the ranges are precomputed, see tools/) ----
 
-  /// GBIF API and website (the credit under the map links to the site).
-  static const String gbifApiHost = 'api.gbif.org';
+  /// GBIF website (the credit under the map links to it).
   static const String gbifSiteUrl = 'https://www.gbif.org';
 
-  /// Species match: finds the GBIF taxon key of a scientific name. Birds only,
-  /// so a homonym in another group is not picked.
-  static const String gbifMatchPath = '/v1/species/match';
-  static const String gbifMatchClass = 'Aves';
-
-  /// Match types accepted as « this is the species ».
-  static const Set<String> gbifMatchTypes = {'EXACT', 'FUZZY'};
-
-  /// Occurrence search, counted per GADM level-1 region (a facet: no record is
-  /// downloaded, only one count per region).
-  static const String gbifSearchPath = '/v1/occurrence/search';
-  static const String gbifFacet = 'gadmLevel1Gid';
-
-  /// Most regions a facet answer holds (there are about 3 600 GADM level-1
-  /// regions on Earth, 1 800 of them in the map area).
-  static const int gbifFacetLimit = 5000;
-
-  /// GBIF key of the class Aves: the « all birds » counts are the observation
-  /// effort of each region.
-  static const int gbifBirdsClassKey = 212;
-
-  /// Open licenses only (CC0 and CC BY, never the NonCommercial ones) and
-  /// human observations only; records from this year on.
-  static const List<String> gbifLicenses = ['CC0_1_0', 'CC_BY_4_0'];
-  static const String gbifBasisOfRecord = 'HUMAN_OBSERVATION';
-  static const String gbifOccurrenceStatus = 'PRESENT';
+  /// First year of the observations behind the bundled ranges (shown on the
+  /// licenses page).
   static const int gbifFirstYear = 2010;
-
-  /// Calendar months of each season (the winter one spans two years; the
-  /// year filter is on the observation date, so it is fine).
-  static const Map<Season, List<int>> gbifSeasonMonths = {
-    Season.winter: [12, 1, 2],
-    Season.spring: [3, 4, 5],
-    Season.summer: [6, 7, 8],
-    Season.autumn: [9, 10, 11],
-  };
-
-  /// Requests in flight at once (GBIF is polite-use: two at most).
-  static const int gbifMaxParallel = 2;
-
-  /// Time limits: species match, then one facet count (slower, GBIF
-  /// aggregates millions of records).
-  static const Duration gbifMatchTimeout = Duration(seconds: 6);
-  static const Duration gbifFacetTimeout = Duration(seconds: 25);
-
-  /// A request answered 429 or 5xx is asked again after these pauses (so the
-  /// number of retries is the list length); other errors are not retried.
-  static const List<Duration> gbifRetryDelays = [
-    Duration(seconds: 1),
-    Duration(seconds: 3),
-    Duration(seconds: 8),
-  ];
-
-  /// Disk cache: folder under the app cache directory; how long a species'
-  /// counts stay fresh; how long the all-birds effort does (it changes
-  /// slowly, and costs 4 requests shared by every species); the size above
-  /// which the least recently shown files are deleted.
-  static const String gbifCacheDirName = 'gbif_ranges';
-  static const Duration gbifCacheMaxAge = Duration(days: 90);
-  static const Duration gbifEffortMaxAge = Duration(days: 180);
-  static const int gbifCacheMaxBytes = 20 * 1024 * 1024;
-
-  /// Cache file name of the all-birds effort (no species file can have it:
-  /// species names have a letter in them).
-  static const String gbifEffortCacheName = '0_all_birds';
 
   /// Citation required by GBIF for the maps' data: the year is the current
   /// one when the page is read.
   static const String gbifLicenseUrl =
       'https://creativecommons.org/licenses/by/4.0/';
-
-  // ---- Presence by region (thresholds of the classification) ----
-
-  /// A region counts in a season when all birds were recorded there at least
-  /// [minEffort] times (below that, a rate means nothing), the species at
-  /// least [minSpeciesRecords] times, and its reporting rate (species over all
-  /// birds) is at least [minRate].
-  static const int minEffort = 200;
-  static const int minSpeciesRecords = 5;
-  static const double minRate = 0.003;
-
-  /// Relative criterion against the noise of little-watched regions: a rate
-  /// must also reach this fraction of the species' median rate over the
-  /// regions and seasons that passed the thresholds above. At 0.1 a common
-  /// bird's stray records are dropped while a scarce winter visitor, whose
-  /// rate is a few times below its breeding rate, stays.
-  static const double relativeRate = 0.1;
 
   // ---- Fallback: the geo-model, on a coarse grid ----
 

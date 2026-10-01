@@ -15,11 +15,11 @@ import '../design/widgets/birdy_skeleton.dart';
 import '../species_page/section_title.dart';
 import '../species_page/species_page_text.dart';
 import '../species_sheet/species_sheet.dart';
-import 'gbif_ranges.dart';
 import 'range_class.dart';
 import 'range_frame.dart';
 import 'range_legend.dart';
 import 'world_map_config.dart';
+import 'world_map_data.dart';
 import 'world_map_painter.dart';
 import 'world_map_text.dart';
 import 'world_regions.dart';
@@ -32,9 +32,9 @@ class WorldMapBlock extends StatefulWidget {
     this.user,
     this.nesting,
     this.source = WorldMapSource.geomodel,
+    this.generation,
     this.onGbifTap,
     this.onLicenseTap,
-    this.onOnlineHintTap,
   });
 
   final WorldRegions regions;
@@ -46,13 +46,12 @@ class WorldMapBlock extends StatefulWidget {
   /// map.
   final WorldMapSource source;
 
+  /// Generation date (yyyymmdd) of the GBIF data, for the credit.
+  final int? generation;
+
   /// Open GBIF's site, and the licenses page that cites it.
   final VoidCallback? onGbifTap;
   final VoidCallback? onLicenseTap;
-
-  /// Shown under the geo-model map when the online map is off: opens the
-  /// setting. Null hides the line.
-  final VoidCallback? onOnlineHintTap;
 
   /// Where the user is, when known.
   final GridCell? user;
@@ -197,9 +196,9 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
           const SizedBox(height: BirdySpace.s),
           _SourceNote(
             source: widget.source,
+            generation: widget.generation,
             onGbifTap: widget.onGbifTap,
             onLicenseTap: widget.onLicenseTap,
-            onOnlineHintTap: widget.onOnlineHintTap,
           ),
         ],
       ),
@@ -262,21 +261,20 @@ class _Key extends StatelessWidget {
   }
 }
 
-/// Mention under the map: the geo-model estimate (with, when the online map
-/// is off, a line that opens the setting), or the GBIF credit with two
+/// Mention under the map: the geo-model estimate, or the GBIF credit with two
 /// links: GBIF's site and the licenses page (48 dp targets).
 class _SourceNote extends StatelessWidget {
   const _SourceNote({
     required this.source,
+    this.generation,
     this.onGbifTap,
     this.onLicenseTap,
-    this.onOnlineHintTap,
   });
 
   final WorldMapSource source;
+  final int? generation;
   final VoidCallback? onGbifTap;
   final VoidCallback? onLicenseTap;
-  final VoidCallback? onOnlineHintTap;
 
   @override
   Widget build(BuildContext context) {
@@ -284,27 +282,16 @@ class _SourceNote extends StatelessWidget {
     final c = BirdyColors.of(context);
     final caption = BirdyText.caption.copyWith(color: c.text2);
     if (source == WorldMapSource.geomodel) {
-      final hint = onOnlineHintTap;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.forkWorldEstimate, style: caption),
-          if (hint != null)
-            _LinkTarget(
-              key: const ValueKey('world-map-online-hint'),
-              label: l10n.forkWorldOnlineHint,
-              style: BirdyText.caption.copyWith(color: c.accentText),
-              onTap: hint,
-            ),
-        ],
-      );
+      return Text(l10n.forkWorldEstimate, style: caption);
     }
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _LinkTarget(
           key: const ValueKey('world-map-source'),
-          label: l10n.forkWorldSourceGbif,
+          label: generation == null
+              ? l10n.forkLicensesGbifRow
+              : l10n.forkWorldSourceGbif('${generation! ~/ 10000}'),
           style: caption,
           onTap: onGbifTap,
         ),

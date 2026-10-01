@@ -319,6 +319,13 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       contour des terres. Attribution, consentement et ligne « Carte précise » inchangés. Code dans
       `lib/fork/world_map/` (`world_regions`, `range_class`, `range_frame`, `range_legend`, `gbif_*`).
       Section iOS : rien de natif (HTTP, dart:io, dart:ui), rien à faire.
+- [x] Carte du monde précalculée (PR #130) : les appels GBIF au runtime, leur cache disque, le consentement
+      « Carte en ligne » et la ligne « Carte précise » de cette carte sont retirés (`gbif_service`, `gbif_cache`,
+      `gbif_ranges`, `classifyGadm`, `GadmJoin`, seuils d'effort). Les classes par région viennent de
+      `assets/fork/world/ranges.bin.gz` (format `BGR1`, lu une fois dans un isolate par `world_ranges.dart`,
+      index nom vers offset) : affichage immédiat et hors ligne. Espèce absente ou fichier manquant : repli sur
+      le géomodèle comme avant. Crédit « Observations GBIF.org (année) · CC BY 4.0 ». Le fichier
+      `gadm1_to_regions.json.gz` n'est plus lu par l'app (à supprimer des assets). Rien de natif côté iOS.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches

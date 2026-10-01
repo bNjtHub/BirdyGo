@@ -1,7 +1,6 @@
 /// Administrative regions of the world map (J7): the Natural Earth admin-1
 /// polygons of the map area and the country borders, read from the compact
-/// asset made by tools/fork_world_regions.py, plus the join table GADM
-/// level-1 id -> region ids (GBIF counts observations per GADM region).
+/// asset made by tools/fork_world_regions.py.
 ///
 /// Pure data and `dart:ui` paths; no Flutter binding needed.
 library;
@@ -254,21 +253,4 @@ class _Reader {
     }
     return out;
   }
-}
-
-/// GADM level-1 id -> ids of the regions it covers (a key join: the app
-/// carries no GADM geometry).
-class GadmJoin {
-  const GadmJoin(this.regionsOf);
-
-  /// Parses the gzip asset [gz].
-  factory GadmJoin.fromGzip(Uint8List gz) {
-    final json = jsonDecode(utf8.decode(gzip.decode(gz))) as Map<String, dynamic>;
-    return GadmJoin({
-      for (final e in json.entries)
-        e.key: [for (final id in e.value as List<dynamic>) id as String],
-    });
-  }
-
-  final Map<String, List<String>> regionsOf;
 }

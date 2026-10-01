@@ -1,26 +1,21 @@
-/// Providers of the species page world map (J7). The regions and the land grid
-/// are computed once per app run, the geo-model's four seasons once per
-/// species (Riverpod keeps the family alive); GBIF counts live in a disk
-/// cache.
+/// Providers of the species page world map (J7). The regions, the bundled
+/// GBIF ranges and the land grid are computed once per app run, the
+/// geo-model's four seasons once per species (Riverpod keeps the family
+/// alive).
 library;
 
-import 'dart:io' show Directory;
-
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
-import 'gbif_cache.dart';
-import 'gbif_ranges.dart';
-import 'gbif_service.dart';
 import 'range_class.dart';
 import 'season_presence.dart';
 import 'world_grid.dart';
 import 'world_map_config.dart';
+import 'world_map_data.dart';
+import 'world_ranges.dart';
 import 'world_regions.dart';
 
 /// The administrative regions and country borders of the bundled asset.
@@ -29,10 +24,21 @@ final worldRegionsProvider = FutureProvider<WorldRegions>((ref) async {
   return WorldRegions.fromGzip(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
 });
 
-/// GADM level-1 id to region ids (a key join; no GADM geometry).
-final gadmJoinProvider = FutureProvider<GadmJoin>((ref) async {
-  final data = await rootBundle.load(WorldMapConfig.gadmJoinAsset);
-  return GadmJoin.fromGzip(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+WorldRanges? _parseRanges(Uint8List gz) => WorldRanges.fromGzip(gz);
+
+/// The bundled GBIF ranges, parsed once in a background isolate; null when the
+/// asset is missing or unreadable (the geo-model then answers for every
+/// species). Overridden by tests with a fake.
+final worldRangesProvider = FutureProvider<WorldRanges?>((ref) async {
+  try {
+    final data = await rootBundle.load(WorldMapConfig.rangesAsset);
+    return await compute(
+      _parseRanges,
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+  } catch (_) {
+    return null;
+  }
 });
 
 /// Grid cells on land (the point-in-polygon test runs once).
@@ -77,54 +83,26 @@ final speciesSeasonPresenceProvider = FutureProvider.autoDispose
       }
     });
 
-/// HTTP client of the GBIF requests. Overridden by tests with a fake.
-final gbifHttpClientProvider = Provider<http.Client>((ref) {
-  final client = http.Client();
-  ref.onDispose(client.close);
-  return client;
-});
-
-/// The GBIF service: nothing is asked of GBIF except through it, and it is
-/// only reached with the online-map consent (see [worldMapDataProvider]).
-final gbifRangeServiceProvider = Provider<GbifRangeService>((ref) {
-  return GbifRangeService(
-    client: ref.watch(gbifHttpClientProvider),
-    cache: GbifCountsCache(
-      directory:
-          () async => Directory(
-            p.join(
-              (await getApplicationCacheDirectory()).path,
-              WorldMapConfig.gbifCacheDirName,
-            ),
-          ),
-    ),
-  );
-});
-
-/// What the map shows for one species: with the online-map consent, the GBIF
-/// observations (disk cache first, then GBIF) classified by region; otherwise,
-/// offline, on any GBIF error, or when GBIF has too little on the species,
-/// the geo-model estimate (the 5 degree fallback, computed in the
-/// background). Null hides the block. Not kept alive, so a species whose
-/// request failed is asked again next time its page opens.
+/// What the map shows for one species: the bundled GBIF range when the
+/// species is in it (instant, offline), otherwise the geo-model estimate (the
+/// 5 degree fallback, computed in the background). Null hides the block.
 final worldMapDataProvider = FutureProvider.autoDispose
     .family<WorldMapData?, String>((ref, scientificName) async {
       final regions = await ref.watch(worldRegionsProvider.future);
-      if (ref.watch(privacyAllowMapProvider)) {
-        try {
-          final join = await ref.watch(gadmJoinProvider.future);
-          final range = await ref
-              .read(gbifRangeServiceProvider)
-              .load(scientificName);
-          final classes = classesOnRegions(
-            classifyGadm(range.species, range.effort),
-            join,
+      final ranges = await ref.watch(worldRangesProvider.future);
+      final entries = ranges?.entriesOf(scientificName);
+      if (ranges != null && entries != null) {
+        final classes = <String, RangeClass>{
+          for (final e in entries.entries)
+            if (e.key < regions.regions.length)
+              regions.regions[e.key].id: e.value,
+        };
+        if (classes.isNotEmpty) {
+          return WorldMapData(
+            classes,
+            WorldMapSource.gbif,
+            generation: ranges.generation,
           );
-          if (classes.isNotEmpty) {
-            return WorldMapData(classes, WorldMapSource.gbif);
-          }
-        } catch (_) {
-          // Offline, unknown species, GBIF error: the geo-model still answers.
         }
       }
       final presence = await ref.watch(

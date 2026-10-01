@@ -1,6 +1,6 @@
 /// How a species uses a region (J7 world map): the four classes of the map
-/// and how they come from the observation counts of GBIF (or, as a fallback,
-/// from the geo-model's four seasons). Pure logic.
+/// and how the fallback gets them from the geo-model's four seasons (the GBIF
+/// classes come precomputed, see world_ranges.dart). Pure logic.
 library;
 
 import 'dart:math' as math;
@@ -24,9 +24,6 @@ enum RangeClass {
   passage,
 }
 
-/// Counts of observations per GADM level-1 id, for each season.
-typedef SeasonCounts = Map<Season, Map<String, int>>;
-
 /// The class of a region present in the given seasons, or null when absent.
 RangeClass? classOfSeasons({
   required bool summer,
@@ -38,75 +35,6 @@ RangeClass? classOfSeasons({
   if (winter) return RangeClass.wintering;
   if (passage) return RangeClass.passage;
   return null;
-}
-
-/// Class of each GADM level-1 region, from the species' [species] counts and
-/// the all-birds [effort] counts (same filters, same seasons).
-///
-/// A region is present in a season when [minEffort], [minSpeciesRecords] and
-/// [minRate] are met (the rate is species over all birds, so a region with
-/// many observers does not look richer than one with few), and, against the
-/// noise of little-watched regions, when its rate also reaches
-/// [relativeRate] times the median rate of the regions and seasons that
-/// passed the first test.
-Map<String, RangeClass> classifyGadm(
-  SeasonCounts species,
-  SeasonCounts effort, {
-  int minEffort = WorldMapConfig.minEffort,
-  int minSpeciesRecords = WorldMapConfig.minSpeciesRecords,
-  double minRate = WorldMapConfig.minRate,
-  double relativeRate = WorldMapConfig.relativeRate,
-}) {
-  final rates = <Season, Map<String, double>>{};
-  final all = <double>[];
-  for (final season in Season.values) {
-    final seen = rates[season] = {};
-    final birds = effort[season] ?? const {};
-    for (final e in (species[season] ?? const <String, int>{}).entries) {
-      final total = birds[e.key] ?? 0;
-      if (total < minEffort || e.value < minSpeciesRecords) continue;
-      final rate = e.value / total;
-      if (rate < minRate) continue;
-      seen[e.key] = rate;
-      all.add(rate);
-    }
-  }
-  if (all.isEmpty) return const {};
-  all.sort();
-  final mid = all.length ~/ 2;
-  final median = all.length.isOdd ? all[mid] : (all[mid - 1] + all[mid]) / 2;
-  final floor = relativeRate * median;
-  bool present(Season s, String gid) {
-    final rate = rates[s]![gid];
-    return rate != null && rate >= floor;
-  }
-
-  final out = <String, RangeClass>{};
-  for (final gid in {for (final m in rates.values) ...m.keys}) {
-    final c = classOfSeasons(
-      summer: present(Season.summer, gid),
-      winter: present(Season.winter, gid),
-      passage: present(Season.spring, gid) || present(Season.autumn, gid),
-    );
-    if (c != null) out[gid] = c;
-  }
-  return out;
-}
-
-/// Class of each map region from the class of its GADM region ([join]: GADM
-/// id to region ids). Regions of a GADM id the species is absent from stay
-/// out.
-Map<String, RangeClass> classesOnRegions(
-  Map<String, RangeClass> byGadm,
-  GadmJoin join,
-) {
-  final out = <String, RangeClass>{};
-  for (final e in byGadm.entries) {
-    for (final id in join.regionsOf[e.key] ?? const <String>[]) {
-      out[id] = e.value;
-    }
-  }
-  return out;
 }
 
 /// Fallback: the classes of the regions from the geo-model's presence on its

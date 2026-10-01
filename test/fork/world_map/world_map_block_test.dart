@@ -1,11 +1,10 @@
 /// `WorldMapBlock` and `WorldMapSection` (J7): the four colors and their key,
-/// the summary, taps on a region, GBIF or geo-model data by consent, no
+/// the summary, taps on a region, bundled GBIF range or geo-model data, no
 /// overflow, contrast of the four colors, goldens (Windows only, like the
 /// other fork goldens; regenerate with
 /// `flutter test --update-goldens test/fork/world_map`).
 library;
 
-import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
 
@@ -14,27 +13,21 @@ import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/design/species_tint.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
-import 'package:birdnet_live/fork/world_map/gbif_cache.dart';
-import 'package:birdnet_live/fork/world_map/gbif_ranges.dart';
-import 'package:birdnet_live/fork/world_map/gbif_service.dart';
 import 'package:birdnet_live/fork/world_map/range_class.dart';
 import 'package:birdnet_live/fork/world_map/range_frame.dart';
 import 'package:birdnet_live/fork/world_map/season_presence.dart';
 import 'package:birdnet_live/fork/world_map/world_grid.dart';
 import 'package:birdnet_live/fork/world_map/world_map_block.dart';
-import 'package:birdnet_live/fork/world_map/world_map_config.dart';
+import 'package:birdnet_live/fork/world_map/world_map_data.dart';
 import 'package:birdnet_live/fork/world_map/world_map_painter.dart';
 import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
 import 'package:birdnet_live/fork/world_map/world_map_section.dart';
+import 'package:birdnet_live/fork/world_map/world_ranges.dart';
 import 'package:birdnet_live/fork/world_map/world_regions.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
-import 'package:birdnet_live/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/fonts.dart';
 import 'world_map_test_data.dart';
@@ -63,41 +56,6 @@ double _deltaE(Color a, Color b) {
 
 /// The four colors told apart by hue: at least this far apart (CIE76).
 const double _minDeltaE = 30;
-
-/// A client answering the GBIF facet requests from the prototype's counts.
-http.Client _gbifClient(void Function() onRequest) => MockClient((request) async {
-  onRequest();
-  if (request.url.path == WorldMapConfig.gbifMatchPath) {
-    return http.Response(jsonEncode({'usageKey': 1, 'matchType': 'EXACT'}), 200);
-  }
-  final q = request.url.queryParametersAll;
-  final months = q['month']!.map(int.parse).toSet();
-  final season = Season.values.firstWhere(
-    (s) => WorldMapConfig.gbifSeasonMonths[s]!.toSet().containsAll(months),
-  );
-  final counts = fixtureCounts(_species);
-  final map =
-      q.containsKey('taxonKey') ? counts.species[season]! : counts.effort[season]!;
-  return http.Response(
-    jsonEncode({
-      'facets': [
-        {
-          'counts': [
-            for (final e in map.entries) {'name': e.key, 'count': e.value},
-          ],
-        },
-      ],
-    }),
-    200,
-  );
-});
-
-Future<SharedPreferences> _prefs({required bool consent}) async {
-  SharedPreferences.setMockInitialValues({
-    if (consent) 'privacy_allow_map': true,
-  });
-  return SharedPreferences.getInstance();
-}
 
 bool _swallowPresence(double lat, double lon, int week) {
   if (week >= 22 && week <= 30) return lat >= 55 && lon >= -10 && lon <= 40;
@@ -145,7 +103,7 @@ void main() {
   setUpAll(() async {
     await loadAppFonts(icons: true);
     regions = realRegions();
-    classes = fixtureClasses(_species);
+    classes = fixtureClasses(regions, _species);
   });
 
   Future<void> pumpBlock(
@@ -156,9 +114,9 @@ void main() {
     Map<String, RangeClass>? classesOverride,
     NestingPeriod? nesting,
     WorldMapSource source = WorldMapSource.gbif,
+    int? generation = 20261001,
     VoidCallback? onGbifTap,
     VoidCallback? onLicenseTap,
-    VoidCallback? onOnlineHintTap,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -171,9 +129,9 @@ void main() {
           user: (latitude: 48.85, longitude: 2.35),
           nesting: nesting,
           source: source,
+          generation: generation,
           onGbifTap: onGbifTap,
           onLicenseTap: onLicenseTap,
-          onOnlineHintTap: onOnlineHintTap,
         ),
         dark: dark,
         scale: scale,
@@ -205,7 +163,7 @@ void main() {
       expect(find.textContaining('Hivernage : '), findsOneWidget);
       expect(find.textContaining('km'), findsOneWidget);
       expect(find.text('Nidification : avril à juillet'), findsOneWidget);
-      expect(find.text('Observations GBIF.org'), findsOneWidget);
+      expect(find.text('Observations GBIF.org (2026)'), findsOneWidget);
       expect(find.text('CC BY 4.0'), findsOneWidget);
       expect(find.text('Estimation du géomodèle BirdNET'), findsNothing);
       for (final key in ['world-map-source', 'world-map-license']) {
@@ -255,23 +213,17 @@ void main() {
       expect(find.text('Aucune présence estimée dans la zone affichée'), findsOneWidget);
     });
 
-    testWidgets('the geo-model mention, and the hint opens the setting', (
-      tester,
-    ) async {
-      var taps = 0;
-      await pumpBlock(
-        tester,
-        source: WorldMapSource.geomodel,
-        onOnlineHintTap: () => taps++,
-      );
+    testWidgets('the geo-model mention, no GBIF credit', (tester) async {
+      await pumpBlock(tester, source: WorldMapSource.geomodel);
       expect(find.text('Estimation du géomodèle BirdNET'), findsOneWidget);
       expect(find.textContaining('GBIF'), findsNothing);
-      final hint = find.byKey(const ValueKey('world-map-online-hint'));
-      await tester.ensureVisible(hint);
-      await tester.pump();
-      await tester.tap(hint);
-      expect(taps, 1);
-      expect(tester.getSize(hint).height, greaterThanOrEqualTo(BirdySizes.target));
+    });
+
+    testWidgets('without a generation date the credit has no year', (
+      tester,
+    ) async {
+      await pumpBlock(tester, generation: null);
+      expect(find.text('Observations GBIF.org'), findsOneWidget);
     });
 
     test('the painter repaints only for what changed', () {
@@ -315,30 +267,17 @@ void main() {
   });
 
   group('section', () {
-    late int requests;
-
     Future<void> pumpSection(
       WidgetTester tester, {
-      required bool consent,
+      WorldRanges? ranges,
       GeoPredict? predict,
-      http.Client? client,
     }) async {
-      final prefs = await _prefs(consent: consent);
-      final join = realJoin();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            sharedPreferencesProvider.overrideWithValue(prefs),
             worldRegionsProvider.overrideWith((ref) async => regions),
-            gadmJoinProvider.overrideWith((ref) async => join),
+            worldRangesProvider.overrideWith((ref) async => ranges),
             worldMapPredictProvider.overrideWith((ref) async => predict),
-            gbifRangeServiceProvider.overrideWithValue(
-              GbifRangeService(
-                client: client ?? _gbifClient(() => requests++),
-                cache: GbifCountsCache(directory: () async => throw StateError('no disk')),
-                delay: (_) async {},
-              ),
-            ),
             worldMapUserPositionProvider.overrideWith(
               (ref) async => (latitude: 48.85, longitude: 2.35),
             ),
@@ -357,79 +296,51 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    setUp(() => requests = 0);
-
-    testWidgets('hidden when there is no geo-model and no consent', (tester) async {
-      await pumpSection(tester, consent: false);
+    testWidgets('hidden when there is no range and no geo-model', (tester) async {
+      await pumpSection(tester);
       await tester.pumpAndSettle();
       expect(find.byType(WorldMapBlock), findsNothing);
       expect(find.text('Dans le monde'), findsNothing);
-      expect(requests, 0);
     });
 
-    testWidgets('no consent: geo-model map, a hint, never a request', (
+    testWidgets('a bundled range: the map at once, its credit, no geo-model', (
       tester,
     ) async {
-      await pumpSection(tester, consent: false, predict: _fakeGeo());
-      expect(find.text('Dans le monde'), findsOneWidget, reason: 'skeleton');
-      expect(find.byType(WorldMapBlock), findsNothing);
+      await pumpSection(tester, ranges: fixtureRanges(regions));
+      await tester.pumpAndSettle();
+      expect(find.byType(WorldMapBlock), findsOneWidget);
+      expect(find.text('Observations GBIF.org (2026)'), findsOneWidget);
+      expect(find.text('Estimation du géomodèle BirdNET'), findsNothing);
+      expect(find.textContaining('Hivernage : '), findsOneWidget);
+    });
+
+    testWidgets('a species missing from the ranges: the geo-model map', (
+      tester,
+    ) async {
+      await pumpSection(
+        tester,
+        ranges: WorldRanges.parse(writeRanges({'Other species': {}})),
+        predict: _fakeGeo(),
+      );
       await settle(tester);
       expect(find.byType(WorldMapBlock), findsOneWidget);
       expect(find.text('Estimation du géomodèle BirdNET'), findsOneWidget);
-      expect(find.text('Carte précise : activez la carte en ligne'), findsOneWidget);
+      expect(find.textContaining('GBIF'), findsNothing);
       expect(find.textContaining('Nidification : '), findsOneWidget);
-      expect(requests, 0);
     });
 
-    testWidgets('consent: GBIF map, its credit, no hint', (tester) async {
-      await pumpSection(tester, consent: true, predict: _fakeGeo());
-      await settle(tester);
-      expect(find.text('Observations GBIF.org'), findsOneWidget);
-      expect(find.text('Estimation du géomodèle BirdNET'), findsNothing);
-      expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
-      expect(find.textContaining('Hivernage : '), findsOneWidget);
-      expect(requests, 9, reason: 'match + 4 species + 4 effort');
-    });
-
-    testWidgets('the hint asks for the consent, then GBIF loads in place', (
-      tester,
-    ) async {
-      await pumpSection(tester, consent: false, predict: _fakeGeo());
-      await settle(tester);
-      expect(requests, 0);
-      final hint = find.byKey(const ValueKey('world-map-online-hint'));
-      await tester.ensureVisible(hint);
-      await tester.pump();
-      await tester.tap(hint);
-      await tester.pumpAndSettle();
-      expect(find.text('Autoriser'), findsOneWidget);
-      expect(requests, 0, reason: 'nothing is asked before the answer');
-      await tester.tap(find.text('Autoriser'));
-      await settle(tester);
-      expect(requests, 9);
-      expect(find.text('Observations GBIF.org'), findsOneWidget);
-    });
-
-    testWidgets('consent but GBIF fails: geo-model map, no hint', (tester) async {
-      await pumpSection(
-        tester,
-        consent: true,
-        predict: _fakeGeo(),
-        client: MockClient((_) async => http.Response('', 404)),
-      );
+    testWidgets('no ranges asset: the geo-model map', (tester) async {
+      await pumpSection(tester, predict: _fakeGeo());
       await settle(tester);
       expect(find.text('Estimation du géomodèle BirdNET'), findsOneWidget);
-      expect(find.text('Carte précise : activez la carte en ligne'), findsNothing);
-      expect(find.textContaining('GBIF'), findsNothing);
     });
 
     test('the page shows the block only when there is a map to draw', () async {
-      Future<ProviderContainer> container({GeoPredict? predict}) async {
-        final prefs = await _prefs(consent: false);
+      ProviderContainer container({GeoPredict? predict, WorldRanges? ranges}) {
         final c = ProviderContainer(
           overrides: [
-            sharedPreferencesProvider.overrideWithValue(prefs),
             worldRegionsProvider.overrideWith((ref) async => regions),
+            worldRangesProvider.overrideWith((ref) async => ranges),
             worldMapPredictProvider.overrideWith((ref) async => predict),
           ],
         );
@@ -437,16 +348,21 @@ void main() {
         return c;
       }
 
-      final none = await container();
+      final none = container();
       final sub1 = none.listen(worldMapVisibleProvider(_species), (_, _) {});
       expect(sub1.read(), isTrue, reason: 'loading: the skeleton is shown');
       await none.read(worldMapDataProvider(_species).future);
-      expect(sub1.read(), isFalse, reason: 'no geo-model: no block, no gap');
+      expect(sub1.read(), isFalse, reason: 'no data: no block, no gap');
 
-      final some = await container(predict: _fakeGeo());
+      final some = container(predict: _fakeGeo());
       final sub2 = some.listen(worldMapVisibleProvider(_species), (_, _) {});
       await some.read(worldMapDataProvider(_species).future);
       expect(sub2.read(), isTrue);
+
+      final ranged = container(ranges: fixtureRanges(regions));
+      final sub3 = ranged.listen(worldMapVisibleProvider(_species), (_, _) {});
+      await ranged.read(worldMapDataProvider(_species).future);
+      expect(sub3.read(), isTrue);
     });
   });
 
@@ -538,7 +454,6 @@ void main() {
           dark: dark,
           classesOverride: classesFromPresence(presence, regions),
           source: WorldMapSource.geomodel,
-          onOnlineHintTap: () {},
         );
         await expectLater(
           find.byType(MaterialApp),

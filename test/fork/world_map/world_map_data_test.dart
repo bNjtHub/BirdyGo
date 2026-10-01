@@ -1,6 +1,4 @@
-/// World map data (J7): the region assets, the join GADM -> regions, the
-/// classification of the observation counts (with counts of the prototype),
-/// the fallback from the geo-model, framing, the legend, and the four seasons
+/// World map data (J7): the region assets, the fallback from the geo-model, framing, the legend, and the four seasons
 /// with a fake geo-model.
 library;
 
@@ -47,25 +45,16 @@ bool _migrantPresence(double lat, double lon, int week) {
   return false;
 }
 
-/// Counts of one region id, the same in every season given.
-SeasonCounts _counts(Map<Season, Map<String, int>> by) => {
-  for (final s in Season.values) s: by[s] ?? const {},
-};
-
 void main() {
   late WorldRegions regions;
-  late GadmJoin join;
 
   setUpAll(() {
     regions = realRegions();
-    join = realJoin();
   });
 
   group('region assets', () {
     test('are small and hold the regions of the area', () {
-      final size =
-          File(WorldMapConfig.regionsAsset).lengthSync() +
-          File(WorldMapConfig.gadmJoinAsset).lengthSync();
+      final size = File(WorldMapConfig.regionsAsset).lengthSync();
       expect(size, lessThan(500 * 1024));
       expect(regions.regions.length, greaterThan(2500));
       expect(regions.borders, isNotEmpty);
@@ -111,134 +100,6 @@ void main() {
       final r = regions.regionAt(2.35, 48.85)!;
       expect(identical(r.path, r.path), isTrue);
       expect(identical(regions.landPath, regions.landPath), isTrue);
-    });
-
-    test('the join is keys only and points at real regions', () {
-      expect(join.regionsOf.length, greaterThan(1500));
-      final seen = <String>{};
-      for (final e in join.regionsOf.entries) {
-        expect(e.key, matches(RegExp(r'^[A-Z]{3}[0-9.]*_[0-9]+$')));
-        for (final id in e.value) {
-          expect(regions.byId(id), isNotNull, reason: id);
-          expect(seen.add(id), isTrue, reason: '$id joined twice');
-        }
-      }
-      // Most regions of the area are reachable from GBIF counts.
-      expect(seen.length, greaterThan(regions.regions.length * 0.9));
-    });
-
-    test('joins a GADM region onto its map regions', () {
-      final fake = GadmJoin({
-        'FRA.1_1': ['A', 'B'],
-      });
-      final out = classesOnRegions({
-        'FRA.1_1': RangeClass.breeding,
-        'XXX.1_1': RangeClass.resident,
-      }, fake);
-      expect(out, {'A': RangeClass.breeding, 'B': RangeClass.breeding});
-    });
-  });
-
-  group('classification of the counts', () {
-    test('a migrant: nesting in Europe, wintering in Africa, none between', () {
-      final c = fixtureClasses('Apus apus');
-      expect(c[regions.regionAt(2.35, 48.85)!.id], RangeClass.breeding);
-      expect(c[regions.regionAt(10, 62)!.id], RangeClass.breeding);
-      final africa = [
-        for (final e in c.entries)
-          if (regions.byId(e.key)!.centroid.latitude < 5 &&
-              regions.byId(e.key)!.centroid.longitude > -20 &&
-              regions.byId(e.key)!.centroid.longitude < 50)
-            e.value,
-      ];
-      // The relative criterion must not erase the African winter.
-      expect(
-        africa.where((v) => v == RangeClass.wintering).length,
-        greaterThan(15),
-      );
-      expect(africa.where((v) => v == RangeClass.breeding).length, lessThan(5));
-    });
-
-    test('a resident stays all year', () {
-      final c = fixtureClasses('Turdus merula');
-      expect(c[regions.regionAt(2.35, 48.85)!.id], RangeClass.resident);
-      expect(c[regions.regionAt(20, 64)!.id], RangeClass.resident);
-      final residents = c.values.where((v) => v == RangeClass.resident).length;
-      expect(residents, greaterThan(c.length * 0.5));
-    });
-
-    test('summer and winter make a resident, one of them alone the rest', () {
-      final effort = _counts({
-        for (final s in Season.values) s: {'a': 1000, 'b': 1000, 'c': 1000, 'd': 1000, 'e': 1000},
-      });
-      final species = _counts({
-        Season.summer: {'a': 50, 'b': 50, 'e': 50},
-        Season.winter: {'a': 50, 'c': 50},
-        Season.autumn: {'d': 50},
-      });
-      expect(classifyGadm(species, effort), {
-        'a': RangeClass.resident,
-        'b': RangeClass.breeding,
-        'c': RangeClass.wintering,
-        'd': RangeClass.passage,
-        'e': RangeClass.breeding,
-      });
-    });
-
-    test('noise: little effort, few records, a very low rate', () {
-      final effort = _counts({
-        Season.summer: {
-          'ok': 1000,
-          'lowEffort': 199,
-          'fewRecords': 1000,
-          'lowRate': 100000,
-        },
-      });
-      final species = _counts({
-        Season.summer: {
-          'ok': 10,
-          'lowEffort': 100,
-          'fewRecords': 4,
-          'lowRate': 200, // 0.2 %
-        },
-      });
-      expect(classifyGadm(species, effort), {'ok': RangeClass.breeding});
-      // Exactly at the thresholds counts.
-      expect(
-        classifyGadm(
-          _counts({Season.summer: {'x': 5}}),
-          _counts({Season.summer: {'x': 200}}),
-          minRate: 0.0,
-        ),
-        {'x': RangeClass.breeding},
-      );
-      expect(classifyGadm(const {}, const {}), isEmpty);
-    });
-
-    test('the relative rate drops the stray records of a common bird', () {
-      // Median rate 10 %: the floor is 1 %. 'stray' has 0.5 % (above the
-      // absolute 0.3 %), 'rare' has 2 % and stays.
-      final effort = _counts({
-        Season.summer: {
-          for (var i = 0; i < 9; i++) 'core$i': 10000,
-          'stray': 10000,
-          'rare': 10000,
-        },
-      });
-      final species = _counts({
-        Season.summer: {
-          for (var i = 0; i < 9; i++) 'core$i': 1000,
-          'stray': 50,
-          'rare': 200,
-        },
-      });
-      final out = classifyGadm(species, effort);
-      expect(out.containsKey('stray'), isFalse);
-      expect(out.containsKey('rare'), isTrue);
-      expect(
-        classifyGadm(species, effort, relativeRate: 0).containsKey('stray'),
-        isTrue,
-      );
     });
   });
 
@@ -295,7 +156,7 @@ void main() {
 
     test('never leaves the map area', () {
       for (final sci in ['Apus apus', 'Turdus merula']) {
-        final f = frameOf(regions, fixtureClasses(sci));
+        final f = frameOf(regions, fixtureClasses(regions, sci));
         expect(f.lon0, greaterThanOrEqualTo(WorldMapConfig.lonMin));
         expect(f.lon1, lessThanOrEqualTo(WorldMapConfig.lonMax));
         expect(f.lat0, greaterThanOrEqualTo(WorldMapConfig.latMin));
@@ -306,7 +167,7 @@ void main() {
 
   group('legend', () {
     test('a migrant: nesting and wintering areas, and the distance', () {
-      final l = buildRangeLegend(regions, fixtureClasses('Apus apus'));
+      final l = buildRangeLegend(regions, fixtureClasses(regions, 'Apus apus'));
       expect(l.regions[RangeClass.breeding], isNotNull);
       expect(l.regions[RangeClass.wintering], isNotNull);
       expect(
@@ -323,7 +184,7 @@ void main() {
     });
 
     test('a resident: told by its main region, no migration distance', () {
-      final l = buildRangeLegend(regions, fixtureClasses('Turdus merula'));
+      final l = buildRangeLegend(regions, fixtureClasses(regions, 'Turdus merula'));
       expect(l.regions[RangeClass.resident], isNotNull);
       expect(l.distanceKm, isNull);
     });
