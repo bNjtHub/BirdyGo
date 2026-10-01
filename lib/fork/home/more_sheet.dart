@@ -46,7 +46,7 @@ import '../sound_library/sound_library_screen.dart';
 Future<void> showMoreSheet(
   BuildContext context,
   WidgetRef ref, {
-  int toVerify = 0,
+  int? toVerify,
 }) {
   final navigator = Navigator.of(context);
   return showBirdySheet<void>(
@@ -105,8 +105,9 @@ class MoreSheet extends StatefulWidget {
     this.toVerify = 0,
   });
 
-  /// Detections waiting in the review queue (Revue rapide's subtitle).
-  final int toVerify;
+  /// Detections waiting in the review queue (Revue rapide's subtitle); null
+  /// while the Accueil has not loaded: no subtitle, never a false « sorted ».
+  final int? toVerify;
 
   final void Function(Widget screen) onOpen;
   final Widget Function() aruScreen;
@@ -144,8 +145,10 @@ class _MoreSheetState extends State<MoreSheet> {
         l10n.forkQuickReview,
         () => const QuickReviewScreen(),
         subtitle:
-            widget.toVerify > 0
-                ? l10n.forkMoreReviewSub(widget.toVerify)
+            widget.toVerify == null
+                ? null
+                : widget.toVerify! > 0
+                ? l10n.forkMoreReviewSub(widget.toVerify!)
                 : l10n.forkMoreReviewDone,
         tone: BirdyBlockTone.toCheck,
       ),

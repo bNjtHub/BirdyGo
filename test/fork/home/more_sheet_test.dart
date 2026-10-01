@@ -15,7 +15,7 @@ void main() {
   Future<void> pumpSheet(
     WidgetTester tester, {
     bool dark = false,
-    int toVerify = 12,
+    int? toVerify = 12,
   }) async {
     tester.view.physicalSize = const Size(780, 2400);
     tester.view.devicePixelRatio = 2;
@@ -134,6 +134,40 @@ void main() {
     expect(find.text(fr.forkMoreReviewSub(12)), findsOneWidget);
     await pumpSheet(tester, toVerify: 0);
     expect(find.text(fr.forkMoreReviewDone), findsOneWidget);
+  });
+
+  testWidgets('Revue rapide before the Accueil loads: no « sorted »', (
+    tester,
+  ) async {
+    await pumpSheet(tester, toVerify: null);
+    expect(find.text(fr.forkMoreReviewDone), findsNothing);
+    expect(find.textContaining('à vérifier'), findsNothing);
+    final unknown = tester.getSize(find.text(fr.forkQuickReview)).height;
+    expect(unknown, greaterThan(0));
+    final rowH =
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text(fr.forkQuickReview),
+                    matching: find.byType(InkWell),
+                  )
+                  .first,
+            )
+            .height;
+    await pumpSheet(tester, toVerify: 12);
+    final loadedH =
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text(fr.forkQuickReview),
+                    matching: find.byType(InkWell),
+                  )
+                  .first,
+            )
+            .height;
+    expect(rowH, loadedH);
   });
 
   for (final dark in [false, true]) {
