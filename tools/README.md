@@ -51,3 +51,12 @@ whole list (2 workers); use `--species-file` to do the priority species first.
 
 Data: GBIF.org occurrence data (CC0 / CC BY 4.0 records only), attribution
 "GBIF.org". Natural Earth is public domain.
+
+<!-- FORK: species sheets (fork/PLAN.md, Version anglaise) -->
+## Species sheets (BirdyGo)
+
+`tools/fork_species_sheets.py` builds the bundled AI sheets. `bundle` and `status`
+take `--lang fr|en` (default `fr`): `fr` reads `tools/fork_sheets/fr.jsonl` and writes
+`assets/fork/species_sheets_fr.json.gz`; `en` reads `tools/fork_sheets/en.jsonl`
+(a translation of the French sheets, same facts and flags) and writes
+`assets/fork/species_sheets_en.json.gz` (`"language": "en"`). Same shippable rules.

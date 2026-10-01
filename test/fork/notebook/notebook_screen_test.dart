@@ -126,6 +126,8 @@ void main() {
     List<HeardSpecies> heard = _heard,
     bool dark = false,
     double textScale = 1,
+    String lang = 'fr',
+    String hint = 'Chante très fort pour sa petite taille.',
   }) async {
     SharedPreferences.setMockInitialValues(stored);
     prefs = await SharedPreferences.getInstance();
@@ -145,22 +147,22 @@ void main() {
             (ref) async => TaxonomyService(),
           ),
           speciesSheetsProvider.overrideWith(
-            (ref) async => const SpeciesSheets({
+            (ref) async => SpeciesSheets({
               'Troglodytes troglodytes': SpeciesSheet(
                 name: 'Troglodyte mignon',
                 sections: {},
-                hint: 'Chante très fort pour sa petite taille.',
+                hint: hint,
               ),
             }),
           ),
-          effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
+          effectiveSpeciesLocaleProvider.overrideWith((ref) => lang),
           observationIndexServiceProvider.overrideWith(
             (ref) => _PendingIndex(prefs),
           ),
         ],
         child: MaterialApp(
           theme: dark ? BirdyTheme.dark() : BirdyTheme.light(),
-          locale: const Locale('fr'),
+          locale: Locale(lang),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           navigatorObservers: [pushes],
@@ -222,6 +224,15 @@ void main() {
     expect(find.byType(BirdyGoSilhouetteIcon), findsNWidgets(2));
     // The mystery card shows the « ? » (the 16 px hero one stays plain).
     expect(find.text('?'), findsOneWidget);
+  });
+
+  testWidgets('the mystery hint comes from the English bundle in English', (
+    tester,
+  ) async {
+    await pump(tester, lang: 'en', hint: 'Sings very loudly for its size.');
+    await tester.pumpAndSettle();
+    expect(find.text('Sings very loudly for its size.'), findsOneWidget);
+    expect(find.text('Chante très fort pour sa petite taille.'), findsNothing);
   });
 
   testWidgets('« Nouveau » stays until the card is opened', (tester) async {

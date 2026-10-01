@@ -1077,3 +1077,10 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même
   bruit de fond), dont le coût du mode Ville en `--profile`.
+
+## Version anglaise
+
+- [x] Fiches espèces en anglais : `tools/fork_sheets/en.jsonl` (traduction des fiches françaises),
+      `python tools/fork_species_sheets.py bundle --lang en` → `assets/fork/species_sheets_en.json.gz`.
+      `speciesSheetsProvider` choisit le paquet selon `effectiveSpeciesLocaleProvider` (fr, en ;
+      les autres langues gardent la description upstream, sans fiche).

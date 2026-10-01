@@ -1,4 +1,4 @@
-/// French species sheets written by AI and bundled with the app
+/// French and English species sheets written by AI and bundled with the app
 /// (fork/PLAN.md J4b). Built by tools/fork_species_sheets.py.
 library;
 
@@ -11,8 +11,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/providers/settings_providers.dart';
 
-/// Bundled sheets, gzip-compressed JSON.
+/// Bundled French sheets, gzip-compressed JSON.
 const speciesSheetsAsset = 'assets/fork/species_sheets_fr.json.gz';
+
+/// Bundled English sheets (translation of the French ones).
+const speciesSheetsAssetEn = 'assets/fork/species_sheets_en.json.gz';
+
+/// Bundle for [speciesLocale]: English for 'en*', French otherwise.
+String speciesSheetsAssetFor(String speciesLocale) =>
+    speciesLocale.toLowerCase().startsWith('en')
+        ? speciesSheetsAssetEn
+        : speciesSheetsAsset;
 
 /// Sections of a sheet, in display order, with their JSON keys.
 enum SheetSection {
@@ -122,16 +131,25 @@ class SpeciesSheets {
   int get length => _sheets.length;
 }
 
-/// The sheets are in French: shown only when species names are.
-bool sheetsApplyTo(String speciesLocale) =>
-    speciesLocale.toLowerCase().startsWith('fr');
+/// Sheets exist in French and English only: shown when species names are in
+/// one of them. Other languages keep the upstream description (a sheet in
+/// another language than the species names would be confusing).
+bool sheetsApplyTo(String speciesLocale) {
+  final locale = speciesLocale.toLowerCase();
+  return locale.startsWith('fr') || locale.startsWith('en');
+}
 
 SpeciesSheets _parseSheets(Uint8List bytes) => SpeciesSheets.fromGzip(bytes);
 
-/// Loads the bundle once; an unreadable bundle means no sheets.
+/// Loads the bundle of the species language (reloaded when it changes); an
+/// unreadable bundle means no sheets.
 final speciesSheetsProvider = FutureProvider<SpeciesSheets>((ref) async {
+  final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
+  // Other languages show no sheet: do not inflate a bundle for nothing.
+  if (!sheetsApplyTo(speciesLocale)) return SpeciesSheets.empty;
+  final asset = speciesSheetsAssetFor(speciesLocale);
   try {
-    final data = await rootBundle.load(speciesSheetsAsset);
+    final data = await rootBundle.load(asset);
     // Inflating and parsing the whole bundle is heavy: off the UI isolate.
     return await compute(_parseSheets, data.buffer.asUint8List());
   } catch (e) {
