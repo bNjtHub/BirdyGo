@@ -5444,8 +5444,6 @@
   "@forkOnbGranted": {"description": "BirdyGo fork: onboarding (J6g-a). Permissions page, permission granted."},
   "forkOnbOpenSettings": "Open settings",
   "@forkOnbOpenSettings": {"description": "BirdyGo fork: onboarding (J6g-a). Permissions page, opens the phone settings."},
-  "forkOnbMapSwitch": "Show the online map",
-  "@forkOnbMapSwitch": {"description": "BirdyGo fork: onboarding (J6g-a). Permissions page, map tiles switch label."},
   "forkOnbMapName": "Online map",
   "@forkOnbMapName": {"description": "BirdyGo fork: onboarding. Permissions page, online map question."},
   "forkOnbMapWhy": "Map backgrounds come from OpenStreetMap and IGN over the internet. Show the online map? You can change this later in Settings.",
