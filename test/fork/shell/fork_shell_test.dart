@@ -456,11 +456,17 @@ void main() {
       await pump(tester);
       final bar = find.byType(ForkNavBar);
       for (final label in ['Accueil', 'Carnet', 'Carte', 'Profil']) {
-        final inkWell = find.ancestor(
+        // The tab's own hit region (no ink since J7, a press scale).
+        final target = find.ancestor(
           of: find.descendant(of: bar, matching: find.text(label)),
-          matching: find.byType(InkWell),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is GestureDetector &&
+                w.behavior == HitTestBehavior.opaque &&
+                w.onTap != null,
+          ),
         );
-        final size = tester.getSize(inkWell.first);
+        final size = tester.getSize(target.first);
         expect(
           size.width,
           greaterThanOrEqualTo(BirdySizes.target),
