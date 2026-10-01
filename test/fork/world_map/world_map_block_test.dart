@@ -137,7 +137,12 @@ void main() {
         scale: scale,
       ),
     );
+    // The scene is built in a task after the first frame, then cross-fades in.
     await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
   }
 
   group('the block', () {

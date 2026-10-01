@@ -15,7 +15,7 @@ import 'world_map_block.dart';
 import 'world_map_config.dart';
 import 'world_map_providers.dart';
 
-class WorldMapSection extends ConsumerWidget {
+class WorldMapSection extends ConsumerStatefulWidget {
   const WorldMapSection({
     super.key,
     required this.scientificName,
@@ -26,14 +26,55 @@ class WorldMapSection extends ConsumerWidget {
   final NestingPeriod? nesting;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorldMapSection> createState() => _WorldMapSectionState();
+}
+
+class _WorldMapSectionState extends ConsumerState<WorldMapSection> {
+  /// The page's route transition is over (or there is none): only then is the
+  /// real map built, so its paths are not computed while the page slides in.
+  bool _settled = true;
+  Animation<double>? _animation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animation = ModalRoute.of(context)?.animation;
+    if (identical(animation, _animation)) return;
+    _animation?.removeStatusListener(_onStatus);
+    _animation = animation;
+    if (animation == null || animation.isCompleted) {
+      _settled = true;
+    } else {
+      _settled = false;
+      animation.addStatusListener(_onStatus);
+    }
+  }
+
+  void _onStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_settled && mounted) {
+      setState(() => _settled = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animation?.removeStatusListener(_onStatus);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scientificName = widget.scientificName;
+    final nesting = widget.nesting;
     final presence = ref.watch(worldMapDataProvider(scientificName));
     final regions = ref.watch(worldRegionsProvider);
     final user = ref.watch(worldMapUserPositionProvider).asData?.value;
     final Widget child;
     if (presence.hasError || regions.hasError) {
       child = const SizedBox.shrink(key: ValueKey('world-map-hidden'));
-    } else if (presence.isLoading || regions.isLoading) {
+    } else if (presence.isLoading ||
+        regions.isLoading ||
+        (!_settled && presence.value != null && regions.value != null)) {
       child = KeyedSubtree(
         key: const ValueKey('world-map-skeleton'),
         child: WorldMapBlock.skeleton(context),

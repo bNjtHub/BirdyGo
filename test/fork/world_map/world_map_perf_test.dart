@@ -14,17 +14,32 @@ void main() {
     final frame = frameOf(regions, classes);
     final cache = WorldMapSceneCache();
     const size = Size(360, 240);
-    final sw = Stopwatch()..start();
+    expect(cache.has(regions, classes, frame, size), isFalse);
     final scene = cache.get(regions, classes, frame, size);
-    final build = sw.elapsedMilliseconds;
-    sw.reset();
-    final again = cache.get(regions, classes, frame, size);
-    expect(identical(scene, again), isTrue);
-    // ignore: avoid_print
-    print('scene build: $build ms, cached get: ${sw.elapsedMicroseconds} us');
+    expect(cache.has(regions, classes, frame, size), isTrue);
+    expect(identical(scene, cache.get(regions, classes, frame, size)), isTrue);
     expect(
       cache.get(regions, classes, kWorldFrame, size),
       isNot(same(scene)),
     );
+  });
+
+  test('a widespread species (every region resident) builds its scene', () {
+    final regions = realRegions();
+    final classes = {for (final r in regions.regions) r.id: RangeClass.resident};
+    final frame = frameOf(regions, classes);
+    final cache = WorldMapSceneCache();
+    const size = Size(360, 240);
+    final sw = Stopwatch()..start();
+    final scene = cache.get(regions, classes, frame, size);
+    final build = sw.elapsedMilliseconds;
+    sw.reset();
+    cache.get(regions, classes, frame, size);
+    // ignore: avoid_print
+    print(
+      'wide scene (${regions.regions.length} regions): build $build ms, '
+      'cached get ${sw.elapsedMicroseconds} us',
+    );
+    expect(scene.byClass[RangeClass.resident], isNotNull);
   });
 }

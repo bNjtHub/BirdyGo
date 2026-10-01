@@ -200,6 +200,14 @@ class WorldMapScene {
 class WorldMapSceneCache {
   WorldMapScene? _scene;
 
+  /// Whether [get] would answer from the cache, without building.
+  bool has(
+    WorldRegions regions,
+    Map<String, RangeClass> classes,
+    MapFrame frame,
+    Size size,
+  ) => _scene?.matches(regions, classes, frame, size) ?? false;
+
   WorldMapScene get(
     WorldRegions regions,
     Map<String, RangeClass> classes,

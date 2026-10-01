@@ -6,11 +6,13 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
+import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../species_page/section_title.dart';
 import '../species_page/species_page_text.dart';
@@ -105,6 +107,24 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   /// Paths of the map, kept across rebuilds (tap, theme).
   final _sceneCache = WorldMapSceneCache();
 
+  /// Size the scene is being prebuilt for, so one build is scheduled per size.
+  Size? _pending;
+
+  /// Builds the paths outside paint(), in a task after the current frame, and
+  /// repaints once they are ready. Until then the map shows a skeleton. The
+  /// painter still builds them itself if the cache misses.
+  void _prebuild(Size size) {
+    if (_pending == size) return;
+    _pending = size;
+    // Animation priority, not idle: an idle task is starved while any
+    // animation runs (the skeleton's shimmer included).
+    SchedulerBinding.instance.scheduleTask<void>(() {
+      if (!mounted || _pending != size) return;
+      _sceneCache.get(widget.regions, widget.classes, _frame, size);
+      setState(() {});
+    }, Priority.animation);
+  }
+
   @override
   void didUpdateWidget(WorldMapBlock old) {
     super.didUpdateWidget(old);
@@ -150,24 +170,45 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
               child: AspectRatio(
                 aspectRatio: frameAspect(_frame),
                 child: LayoutBuilder(
-                  builder: (context, box) => GestureDetector(
-                    key: const ValueKey('world-map-canvas'),
-                    behavior: HitTestBehavior.opaque,
-                    onTapUp: (d) => _tap(d.localPosition, box.biggest),
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        painter: WorldMapPainter(
-                          regions: widget.regions,
-                          classes: widget.classes,
-                          frame: _frame,
-                          colors: colors,
-                          user: widget.user,
-                          selected: _selected,
-                          cache: _sceneCache,
-                        ),
-                      ),
-                    ),
-                  ),
+                  builder: (context, box) {
+                    final size = box.biggest;
+                    final ready = _sceneCache.has(
+                      widget.regions,
+                      widget.classes,
+                      _frame,
+                      size,
+                    );
+                    if (!ready) _prebuild(size);
+                    return BirdyCrossFade(
+                      child: !ready
+                          ? KeyedSubtree(
+                              key: const ValueKey('world-map-canvas-pending'),
+                              child: BirdySkeleton.box(
+                                width: double.infinity,
+                                height: double.infinity,
+                                radius: BirdyRadii.chip,
+                              ),
+                            )
+                          : GestureDetector(
+                              key: const ValueKey('world-map-canvas'),
+                              behavior: HitTestBehavior.opaque,
+                              onTapUp: (d) => _tap(d.localPosition, size),
+                              child: RepaintBoundary(
+                                child: CustomPaint(
+                                  painter: WorldMapPainter(
+                                    regions: widget.regions,
+                                    classes: widget.classes,
+                                    frame: _frame,
+                                    colors: colors,
+                                    user: widget.user,
+                                    selected: _selected,
+                                    cache: _sceneCache,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    );
+                  },
                 ),
               ),
             ),
