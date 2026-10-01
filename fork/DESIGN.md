@@ -476,6 +476,10 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   la génération à la demande et la citation « GBIF.org (année) GBIF Occurrence Data »). Vie privée : seul le
   nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans consentement
   (testé), et le texte du consentement le dit.
+  Légende : pour chaque saison, la région qui compte le plus de cellules (pondérées par l'intensité) et son
+  centre, jamais la moyenne de groupes séparés ; la distance va d'une région dominante à l'autre. Espèce du
+  seul hémisphère sud : la légende dit les mois (« juin à août : … · décembre à février : … ») au lieu d'été
+  et d'hiver ; les puces gardent les saisons du calendrier nord. Pas de bloc ni d'espacement sans carte.
   Le libellé accessible dit la saison affichée et la légende (région vivante : le changement de saison
   est annoncé).
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).

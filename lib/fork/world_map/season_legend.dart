@@ -136,7 +136,9 @@ WorldRegion regionOf(
   return WorldRegion.other;
 }
 
-/// Mean position of [cells], or null when there are none.
+/// Mean position of [cells], or null when there are none. Several separate
+/// groups would average to a point between them: for a season use
+/// [dominantCenter] instead.
 GridCell? centerOf(List<GridCell> cells) {
   if (cells.isEmpty) return null;
   var lat = 0.0, lon = 0.0;
@@ -162,6 +164,59 @@ double distanceKm(GridCell a, GridCell b) {
   return 2 * _earthRadiusKm * math.asin(math.sqrt(h.toDouble()));
 }
 
+/// The densest region of [season]: the region holding the most weight (a
+/// cell weighs its intensity level, so a GBIF map follows where the species is
+/// seen most), and the weighted mean position of that region's cells. A
+/// species seen in two far groups (Europe and West Africa) is thus placed in
+/// one of them, not between them. Ties go to the first region of
+/// [WorldRegion]. Null when [season] has no cell.
+({WorldRegion region, GridCell center})? dominantCenter(
+  SeasonPresence presence,
+  Season season,
+) {
+  final weight = <WorldRegion, double>{};
+  final lat = <WorldRegion, double>{};
+  final lon = <WorldRegion, double>{};
+  for (var i = 0; i < presence.cells.length; i++) {
+    final level = presence.levelOf(season, i);
+    if (level == 0) continue;
+    final c = presence.cells[i];
+    final r = regionOf(c.latitude, c.longitude);
+    weight[r] = (weight[r] ?? 0) + level;
+    lat[r] = (lat[r] ?? 0) + c.latitude * level;
+    lon[r] = (lon[r] ?? 0) + c.longitude * level;
+  }
+  WorldRegion? best;
+  for (final r in WorldRegion.values) {
+    if (weight[r] != null && (best == null || weight[r]! > weight[best]!)) {
+      best = r;
+    }
+  }
+  if (best == null) return null;
+  return (
+    region: best,
+    center: (
+      latitude: lat[best]! / weight[best]!,
+      longitude: lon[best]! / weight[best]!,
+    ),
+  );
+}
+
+/// Whether the species lives mostly south of the equator (weighted mean
+/// latitude of every season's cells): « summer » and « winter » of the
+/// chips, northern calendar seasons, would then mislead.
+bool isSouthern(SeasonPresence presence) {
+  var sum = 0.0, weight = 0;
+  for (final season in Season.values) {
+    for (var i = 0; i < presence.cells.length; i++) {
+      final level = presence.levelOf(season, i);
+      sum += presence.cells[i].latitude * level;
+      weight += level;
+    }
+  }
+  return weight > 0 && sum / weight < 0;
+}
+
 enum LegendKind {
   /// Nowhere on the map, in any season.
   none,
@@ -177,9 +232,19 @@ enum LegendKind {
 }
 
 class SeasonLegend {
-  const SeasonLegend(this.kind, {this.summer, this.winter, this.distanceKm});
+  const SeasonLegend(
+    this.kind, {
+    this.summer,
+    this.winter,
+    this.distanceKm,
+    this.southern = false,
+  });
 
   final LegendKind kind;
+
+  /// The species lives mostly in the southern hemisphere: the words say the
+  /// months (June to August, December to February), not summer and winter.
+  final bool southern;
 
   /// Region of the summer / winter cells; null when none of that season is on
   /// the map.
@@ -196,36 +261,36 @@ class SeasonLegend {
       other.kind == kind &&
       other.summer == summer &&
       other.winter == winter &&
+      other.southern == southern &&
       other.distanceKm == distanceKm;
 
   @override
-  int get hashCode => Object.hash(kind, summer, winter, distanceKm);
+  int get hashCode => Object.hash(kind, summer, winter, distanceKm, southern);
 
   @override
-  String toString() => 'SeasonLegend($kind, $summer, $winter, $distanceKm)';
+  String toString() => 'SeasonLegend($kind, $summer, $winter, $distanceKm, southern: $southern)';
 }
 
-/// The legend of [presence].
+/// The legend of [presence]: the densest region of the summer and of the
+/// winter, and the distance between them.
 SeasonLegend buildLegend(SeasonPresence presence) {
-  final summerCells = presence.cellsOf(Season.summer);
-  final winterCells = presence.cellsOf(Season.winter);
-  final summer = centerOf(summerCells);
-  final winter = centerOf(winterCells);
+  final summer = dominantCenter(presence, Season.summer);
+  final winter = dominantCenter(presence, Season.winter);
   if (summer == null && winter == null) {
     return SeasonLegend(
       presence.isEmpty ? LegendKind.none : LegendKind.passage,
     );
   }
-  WorldRegion? region(GridCell? c) =>
-      c == null ? null : regionOf(c.latitude, c.longitude);
+  final southern = isSouthern(presence);
   if (summer == null || winter == null) {
     return SeasonLegend(
       LegendKind.seasons,
-      summer: region(summer),
-      winter: region(winter),
+      summer: summer?.region,
+      winter: winter?.region,
+      southern: southern,
     );
   }
-  final km = distanceKm(summer, winter);
+  final km = distanceKm(summer.center, winter.center);
   if (km < WorldMapConfig.migrationMinKm) {
     final allYear = Season.values.every(
       (s) => presence.flags[s]!.contains(true),
@@ -233,14 +298,16 @@ SeasonLegend buildLegend(SeasonPresence presence) {
     if (allYear) return const SeasonLegend(LegendKind.allYear);
     return SeasonLegend(
       LegendKind.seasons,
-      summer: region(summer),
-      winter: region(winter),
+      summer: summer.region,
+      winter: winter.region,
+      southern: southern,
     );
   }
   return SeasonLegend(
     LegendKind.seasons,
-    summer: region(summer),
-    winter: region(winter),
+    summer: summer.region,
+    winter: winter.region,
+    southern: southern,
     distanceKm:
         (km / WorldMapConfig.distanceRoundKm).round() *
         WorldMapConfig.distanceRoundKm.round(),

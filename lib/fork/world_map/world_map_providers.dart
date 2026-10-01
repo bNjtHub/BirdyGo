@@ -45,18 +45,25 @@ final worldMapPredictProvider = FutureProvider<GeoPredict?>((ref) async {
 });
 
 /// The four seasons of one species, or null without a geo-model. Failures
-/// give null too: the block is then hidden.
-final speciesSeasonPresenceProvider =
-    FutureProvider.family<SeasonPresence?, String>((ref, scientificName) async {
+/// give null too: the block is then hidden. While computing, the provider
+/// lives as long as someone watches it: leaving the page cancels the work
+/// (checked between cells). A finished result is kept for the app run.
+final speciesSeasonPresenceProvider = FutureProvider.autoDispose
+    .family<SeasonPresence?, String>((ref, scientificName) async {
+      var cancelled = false;
+      ref.onDispose(() => cancelled = true);
       try {
         final predict = await ref.watch(worldMapPredictProvider.future);
         if (predict == null) return null;
         final cells = await ref.watch(landCellsProvider.future);
-        return await computeSeasonPresence(
+        final presence = await computeSeasonPresence(
           scientificName: scientificName,
           predict: predict,
           cells: cells,
+          isCancelled: () => cancelled,
         );
+        ref.keepAlive();
+        return presence;
       } catch (_) {
         return null;
       }
@@ -112,6 +119,20 @@ final worldMapDataProvider = FutureProvider.autoDispose
           ? null
           : WorldMapData(presence, WorldMapSource.geomodel);
     });
+
+/// Whether the species page has a world map block to show: yes while it
+/// loads (the skeleton), no once it is known there is nothing to draw, so
+/// the page adds neither the block nor its spacing.
+final worldMapVisibleProvider = Provider.autoDispose.family<bool, String>((
+  ref,
+  scientificName,
+) {
+  final data = ref.watch(worldMapDataProvider(scientificName));
+  final outline = ref.watch(landOutlineProvider);
+  if (data.hasError || outline.hasError) return false;
+  if (data.isLoading || outline.isLoading) return true;
+  return data.value != null && outline.value != null;
+});
 
 /// Where the phone is, for the map's dot. Never asks for the location
 /// permission (same care as the species page's year chart); null when unknown.

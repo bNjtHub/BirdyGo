@@ -318,7 +318,8 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       carte (« Observations GBIF.org · CC BY 4.0 », liens GBIF et Licences des contenus), bloc GBIF et
       citation dans « Licences des contenus ». Textes du consentement (dialogue, réglage) : le nom de
       l'espèce est envoyé à GBIF, jamais la position. Constantes dans `world_map_config.dart`, code dans
-      `lib/fork/world_map/gbif_*.dart`. Section iOS : rien de natif (HTTP et dart:ui), rien à faire.
+      `lib/fork/world_map/gbif_*.dart`. Légende : région dominante par saison, mois pour l'hémisphère sud ;
+      calcul géomodèle annulé quand on quitte la fiche ; pas d'espacement sans bloc. Section iOS : rien de natif (HTTP et dart:ui), rien à faire.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches

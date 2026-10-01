@@ -283,6 +283,33 @@ void main() {
       expect(find.text('Dans le monde'), findsNothing);
     });
 
+    test('the page shows the block only when there is a map to draw', () async {
+      Future<ProviderContainer> container({GeoPredict? predict}) async {
+        final prefs = await _prefs(consent: false);
+        final outline = _outline();
+        final c = ProviderContainer(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            landOutlineProvider.overrideWith((ref) async => outline),
+            worldMapPredictProvider.overrideWith((ref) async => predict),
+          ],
+        );
+        addTearDown(c.dispose);
+        return c;
+      }
+
+      final none = await container();
+      final sub1 = none.listen(worldMapVisibleProvider(_species), (_, _) {});
+      expect(sub1.read(), isTrue, reason: 'loading: the skeleton is shown');
+      await none.read(worldMapDataProvider(_species).future);
+      expect(sub1.read(), isFalse, reason: 'no geo-model: no block, no gap');
+
+      final some = await container(predict: _fake());
+      final sub2 = some.listen(worldMapVisibleProvider(_species), (_, _) {});
+      await some.read(worldMapDataProvider(_species).future);
+      expect(sub2.read(), isTrue);
+    });
+
     testWidgets('no consent: geo-model map, a hint, never a request', (
       tester,
     ) async {
@@ -414,6 +441,29 @@ void main() {
       }
       expect(gbifTaps, 1);
       expect(licenseTaps, 1);
+    });
+
+    testWidgets('a southern species is told in months, not seasons', (
+      tester,
+    ) async {
+      final cells = [
+        (latitude: -25.0, longitude: 25.0),
+        (latitude: -5.0, longitude: 35.0),
+      ];
+      final south = SeasonPresence(
+        cells,
+        {
+          for (final s in Season.values)
+            s: [s == Season.summer, s == Season.winter],
+        },
+      );
+      await _pumpBlock(tester, presence: south);
+      expect(
+        find.textContaining('juin à août : sud de l'),
+        findsWidgets,
+      );
+      expect(find.textContaining('décembre à février : '), findsWidgets);
+      expect(find.textContaining('Été : '), findsNothing);
     });
 
     testWidgets('the geo-model hint opens the setting', (tester) async {
