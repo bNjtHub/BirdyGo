@@ -440,8 +440,8 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   marqué). La phrase vient des 48 semaines du géomodèle : migrateur « Arrive début mars · repart fin
   septembre » (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes),
   sédentaire « Présent toute l'année. » ; testé à 320/360/412 dp et 100/130/200 %. Pas de bande de
-  nidification sur cette carte : le champ `nesting` des fiches IA est lu (`NestingPeriod`) pour une
-  future carte du monde ; fiche IA
+  nidification sur cette carte : la nidification (champ `nesting` des fiches IA, `NestingPeriod`)
+  est affichée par la carte du monde (« Niche d'avril à juillet ») ; fiche IA
   (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
   activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
