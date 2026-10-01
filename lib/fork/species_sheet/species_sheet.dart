@@ -80,11 +80,14 @@ class SpeciesSheets {
 bool sheetsApplyTo(String speciesLocale) =>
     speciesLocale.toLowerCase().startsWith('fr');
 
+SpeciesSheets _parseSheets(Uint8List bytes) => SpeciesSheets.fromGzip(bytes);
+
 /// Loads the bundle once; an unreadable bundle means no sheets.
 final speciesSheetsProvider = FutureProvider<SpeciesSheets>((ref) async {
   try {
     final data = await rootBundle.load(speciesSheetsAsset);
-    return SpeciesSheets.fromGzip(data.buffer.asUint8List());
+    // Inflating and parsing the whole bundle is heavy: off the UI isolate.
+    return await compute(_parseSheets, data.buffer.asUint8List());
   } catch (e) {
     debugPrint('[SpeciesSheets] not loaded: $e');
     return SpeciesSheets.empty;

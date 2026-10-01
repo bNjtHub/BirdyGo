@@ -530,7 +530,7 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: BirdySpace.xs),
-                                _ClipLevel(clip: clip),
+                                _ClipLevel(key: ValueKey(clip.key), clip: clip),
                               ],
                             ),
                           ),
@@ -573,22 +573,31 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
 }
 
 /// Reliability badge of a clip, at its own place and week (J3).
-class _ClipLevel extends ConsumerWidget {
-  const _ClipLevel({required this.clip});
+class _ClipLevel extends ConsumerStatefulWidget {
+  const _ClipLevel({super.key, required this.clip});
 
   final IndexedDetection clip;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ClipLevel> createState() => _ClipLevelState();
+}
+
+class _ClipLevelState extends ConsumerState<_ClipLevel> {
+  // Asked once per row, not on every rebuild of the list.
+  late final Future<GeoPresence?> _presence = ref
+      .read(geoPresenceServiceProvider)
+      .presenceAt(
+        widget.clip.scientificName,
+        latitude: widget.clip.latitude,
+        longitude: widget.clip.longitude,
+        time: widget.clip.start,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final clip = widget.clip;
     return FutureBuilder<GeoPresence?>(
-      future: ref
-          .read(geoPresenceServiceProvider)
-          .presenceAt(
-            clip.scientificName,
-            latitude: clip.latitude,
-            longitude: clip.longitude,
-            time: clip.start,
-          ),
+      future: _presence,
       builder:
           (context, snapshot) => ReliabilityBadge(
             level: reliabilityFor(
