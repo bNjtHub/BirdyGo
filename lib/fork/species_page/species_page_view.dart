@@ -197,13 +197,23 @@ class SpeciesPageHeader extends StatelessWidget {
                         color: c.isDark ? c.text2 : BirdyBrand.bark,
                       ),
                     ),
-                  if (tags.isNotEmpty) ...[
+                  // The row is reserved from the first frame (one skeleton pill
+                  // until the record says « Dans ton carnet » or not).
+                  if (tags.isNotEmpty || heardLoading) ...[
                     const SizedBox(height: BirdySpace.s),
                     Wrap(
                       key: const ValueKey('fiche-tags'),
                       spacing: BirdySpace.xs + 2,
                       runSpacing: BirdySpace.xs + 2,
-                      children: [for (final tag in tags) _TagPill(tag: tag)],
+                      children: [
+                        for (final tag in tags) _TagPill(tag: tag),
+                        if (heardLoading && tags.isEmpty)
+                          BirdySkeleton.box(
+                            width: BirdySizes.skeletonTagM,
+                            height: _kTagHeight,
+                            radius: BirdyRadii.pill,
+                          ),
+                      ],
                     ),
                   ],
                   if (summary != null) ...[
@@ -307,7 +317,15 @@ class _TagPill extends StatelessWidget {
         children: [
           Icon(icon, size: BirdyGlyph.s, color: fore),
           const SizedBox(width: BirdySpace.xs),
-          Text(label, maxLines: 1, style: BirdyText.badge.copyWith(color: text)),
+          // Shrinks with an ellipsis rather than overflowing at large text.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: BirdyText.badge.copyWith(color: text),
+            ),
+          ),
         ],
       ),
     );
@@ -525,6 +543,8 @@ class _HereNowCardState extends State<HereNowCard> {
                     labelStyle: BirdyText.axisLabel,
                     highlightIndex: widget.currentMonth - 1,
                     highlightColor: c.text1,
+                    selectedIndex: selected,
+                    dimUnselected: true,
                     semanticLabel: seasonsChartSemanticLabel(
                       l10n,
                       language,
@@ -960,6 +980,8 @@ class _HourActivityCardState extends State<_HourActivityCard> {
             trackColor: c.line,
             labels: const {0: '0 h', 6: '6 h', 12: '12 h', 18: '18 h'},
             labelStyle: BirdyText.axisLabel,
+            selectedIndex: selected,
+            dimUnselected: true,
             semanticLabel: activityByHourSemanticLabel(l10n, widget.hours),
             onSelect: (index, _) => setState(() => _selectedHour = index),
           ),
@@ -1051,60 +1073,74 @@ class LinksBlock extends StatelessWidget {
           ),
           const SizedBox(height: BirdySpace.s),
         ],
-        Wrap(
-          spacing: BirdySpace.s,
-          runSpacing: BirdySpace.s,
-          children: [
-            for (final link in links)
-              Material(
-                color: fill,
-                shape: const StadiumBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () => onOpen(link.url),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: BirdySizes.target,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: BirdySpace.m,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            link.iconAsset,
-                            width: BirdySpace.roomy,
-                            height: BirdySpace.roomy,
-                            errorBuilder:
-                                (_, _, _) => const Icon(AppIcons.public),
-                          ),
-                          const SizedBox(width: BirdySpace.s),
-                          Text(
-                            link.label,
-                            maxLines: 1,
-                            style: BirdyText.label.copyWith(
-                              color: c.text1,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(width: BirdySpace.xs),
-                          Icon(
-                            AppIcons.openInNew,
-                            size: BirdyGlyph.s,
-                            color: c.text2,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          // Cut at the edge on purpose (J6f-b fix): it tells the row scrolls.
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (final link in links) ...[
+                if (link != links.first) const SizedBox(width: BirdySpace.s),
+                _LinkPill(link: link, fill: fill, onOpen: onOpen),
+              ],
+            ],
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _LinkPill extends StatelessWidget {
+  const _LinkPill({
+    required this.link,
+    required this.fill,
+    required this.onOpen,
+  });
+
+  final SpeciesLink link;
+  final Color fill;
+  final ValueChanged<String> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = BirdyColors.of(context);
+    return Material(
+      color: fill,
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => onOpen(link.url),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BirdySizes.target),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: BirdySpace.m),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  link.iconAsset,
+                  width: BirdySpace.roomy,
+                  height: BirdySpace.roomy,
+                  errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+                ),
+                const SizedBox(width: BirdySpace.s),
+                Text(
+                  link.label,
+                  maxLines: 1,
+                  style: BirdyText.label.copyWith(
+                    color: c.text1,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: BirdySpace.xs),
+                Icon(AppIcons.openInNew, size: BirdyGlyph.s, color: c.text2),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

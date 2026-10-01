@@ -5,9 +5,11 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/species_page/meet_species_block.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -36,6 +38,18 @@ const _all = SpeciesSheet(
     SheetSection.behaviour: 'Fouille le sol.',
     SheetSection.migration: 'Reste toute l\'année.',
     SheetSection.anecdote: 'Il chante dès la fin de l\'hiver.',
+  },
+);
+
+const _sixSheet = SpeciesSheet(
+  name: 'Merle noir',
+  sections: {
+    SheetSection.size: 'Vingt-cinq centimètres.',
+    SheetSection.behaviour: 'Fouille le sol.',
+    SheetSection.whyHere: 'Il aime les jardins.',
+    SheetSection.enemies: 'Le chat.',
+    SheetSection.confusions: 'Le merle à plastron.',
+    SheetSection.anecdote: 'Il chante.',
   },
 );
 
@@ -91,7 +105,7 @@ void main() {
         sections: {
           SheetSection.size: 'A.',
           SheetSection.anecdote: 'B.',
-          SheetSection.confusions: 'Not one of the discs.',
+          SheetSection.byEar: 'Not one of the discs.',
         },
       ),
     );
@@ -156,7 +170,7 @@ void main() {
     expect(find.text('1/2 découverts'), findsOneWidget);
   });
 
-  test('meetHasContent: discs or extras only', () {
+  test('meetHasContent: discs only', () {
     expect(meetHasContent(_all), isTrue);
     expect(
       meetHasContent(
@@ -179,26 +193,69 @@ void main() {
     );
   });
 
-  testWidgets('whyHere and confusions stay visible as their own blocks', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      const SpeciesSheet(
-        name: 'Merle noir',
-        sections: {
-          SheetSection.size: 'Vingt-cinq centimètres.',
-          SheetSection.anecdote: 'Il chante.',
-          SheetSection.whyHere: 'Il aime les jardins.',
-          SheetSection.confusions: 'Le merle à plastron.',
-        },
-      ),
+  group('six sections (J7 7-block page)', () {
+    const six = SpeciesSheet(
+      name: 'Merle noir',
+      sections: {
+        SheetSection.size: 'Vingt-cinq centimètres.',
+        SheetSection.behaviour: 'Fouille le sol.',
+        SheetSection.whyHere: 'Il aime les jardins.',
+        SheetSection.enemies: 'Le chat.',
+        SheetSection.confusions: 'Le merle à plastron.',
+        SheetSection.anecdote: 'Il chante.',
+      },
     );
-    expect(find.byKey(const ValueKey('meet-extra-why_here')), findsOneWidget);
-    expect(find.text('Il aime les jardins.'), findsOneWidget);
-    expect(find.text('Le merle à plastron.'), findsOneWidget);
-    expect(find.text('Pourquoi il est là'), findsOneWidget);
-    expect(find.text('Confusions possibles'), findsOneWidget);
+
+    testWidgets('six discs in a 3 x 2 grid, no extra blocks', (tester) async {
+      await _pump(tester, six);
+      expect(meetAvailable(six), kMeetSections);
+      for (final s in kMeetSections) {
+        expect(find.byKey(ValueKey('meet-disc-${s.key}')), findsOneWidget);
+      }
+      expect(find.text('1/6 découverts'), findsOneWidget);
+      expect(find.byKey(const ValueKey('meet-extra-why_here')), findsNothing);
+      // Two rows of three: size, behaviour, whyHere then enemies...
+      final top = tester.getTopLeft(find.byKey(const ValueKey('meet-disc-size')));
+      final third = tester.getTopLeft(
+        find.byKey(const ValueKey('meet-disc-why_here')),
+      );
+      final fourth = tester.getTopLeft(
+        find.byKey(const ValueKey('meet-disc-enemies')),
+      );
+      expect(third.dy, top.dy);
+      expect(fourth.dy, greaterThan(top.dy));
+    });
+
+    testWidgets('whyHere and confusions: label, hook, text, icon, tone', (
+      tester,
+    ) async {
+      await _pump(tester, six);
+      final c = BirdyColors.of(
+        tester.element(find.byKey(const ValueKey('meet-disc-why_here'))),
+      );
+      Icon discIcon(String key) => tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(ValueKey('meet-disc-$key')),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(discIcon('why_here').icon, AppIcons.locationOn);
+      expect(discIcon('why_here').color, c.accentText);
+      expect(discIcon('confusions').icon, AppIcons.swapHoriz);
+      expect(discIcon('confusions').color, c.probable.foreground);
+      expect(find.text('Pourquoi ici'), findsOneWidget);
+      expect(find.text('Confusions'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('meet-disc-why_here')));
+      await tester.pumpAndSettle();
+      expect(find.text('Pourquoi il est ici'), findsOneWidget);
+      expect(find.text('Il aime les jardins.'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('meet-disc-confusions')));
+      await tester.pumpAndSettle();
+      expect(find.text('Ne le confonds pas'), findsOneWidget);
+      expect(find.text('Le merle à plastron.'), findsOneWidget);
+    });
   });
 
   group('four sections (Ennemis)', () {
@@ -316,13 +373,11 @@ void main() {
       expect(count, greaterThanOrEqualTo(80));
     });
 
-    testWidgets('shows four sections for a species with enemies', (
-      tester,
-    ) async {
+    testWidgets('shows every section of a full sheet', (tester) async {
       final sheet = sheets['Accipiter nisus']!;
       expect(meetAvailable(sheet), kMeetSections);
       await _pump(tester, sheet);
-      expect(find.text('1/4 découverts'), findsOneWidget);
+      expect(find.text('1/6 découverts'), findsOneWidget);
     });
   });
 
@@ -350,7 +405,7 @@ void main() {
               body: Padding(
                 padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
-                  child: MeetSpeciesBlock(sheet: _all),
+                  child: MeetSpeciesBlock(sheet: _sixSheet),
                 ),
               ),
             ),

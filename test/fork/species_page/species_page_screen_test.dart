@@ -5,8 +5,12 @@ import 'package:birdnet_live/features/explore/widgets/species_info_overlay.dart'
 import 'package:birdnet_live/features/history/session_repository.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
+import 'package:birdnet_live/features/live/live_screen.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
+import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
+import 'package:birdnet_live/fork/species_page/meet_species_block.dart';
+import 'package:birdnet_live/fork/species_page/species_page_view.dart';
 import 'package:birdnet_live/fork/lpo/lpo_send_screen.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_tokens.dart';
@@ -42,6 +46,7 @@ class _FakeLoader implements SpeciesPageLoader {
   final SpeciesRecord recordValue;
   final YearPresence? year;
   bool unexpected = false;
+  bool uncommon = false;
   String? lpoSession;
   final favoriteCalls = <(String, bool)>[];
 
@@ -56,6 +61,12 @@ class _FakeLoader implements SpeciesPageLoader {
     String scientificName, {
     required DateTime now,
   }) async => unexpected;
+
+  @override
+  Future<bool> uncommonNow(
+    String scientificName, {
+    required DateTime now,
+  }) async => uncommon;
 
   @override
   Future<String?> lastConfirmedSession(String scientificName) async =>
@@ -249,13 +260,15 @@ void main() {
     expect(find.text('Rougegorge familier'), findsOneWidget);
     expect(find.text(_robin), findsOneWidget);
     expect(
-      find.textContaining('Entendu 142 fois sur 38 jours'),
+      find.textContaining('Entendu 142 fois, dernière fois'),
       findsOneWidget,
     );
     expect(find.text('37 bonnes sur 38 vérifiées'), findsOneWidget);
-    expect(find.text('Ici en ce moment'), findsOneWidget);
+    expect(find.text('Quand le voir'), findsOneWidget);
+    expect(find.text('Ici en ce moment'), findsNothing);
     expect(find.text("Présent toute l'année."), findsOneWidget);
-    expect(find.text('Mes sons'), findsOneWidget);
+    expect(find.text('Son chant'), findsOneWidget);
+    expect(find.text('Mes sons'), findsNothing);
     expect(find.text('Voir les 9 enregistrements'), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.summary]!), findsOneWidget);
     expect(find.text('Activité par heure'), findsOneWidget);
@@ -282,13 +295,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(_sheet.sections[SheetSection.anecdote]!), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.size]!), findsNothing);
-    // « À l'oreille » and the migration text are in their own groups, not in
-    // the discs (J7 order); the quiz link is gone from the page.
+    // « À l'oreille » is in the song block and the migration text in
+    // « Quand le voir », not in the discs; the quiz link is gone.
     expect(find.byKey(const ValueKey('meet-disc-by_ear')), findsNothing);
     expect(find.byKey(const ValueKey('meet-disc-migration')), findsNothing);
     expect(find.text(_sheet.sections[SheetSection.byEar]!), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.migration]!), findsOneWidget);
     expect(find.textContaining('Teste ton oreille'), findsNothing);
+    expect(find.byType(QuizEntryRow), findsNothing);
+    expect(find.text('Mes rencontres'), findsNothing);
+    expect(find.text('Où et quand le voir'), findsNothing);
+  });
+
+  testWidgets('by ear sits in the song block, migration in the when block', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(
+      find.descendant(
+        of: find.byType(SongBlock),
+        matching: find.text(_sheet.sections[SheetSection.byEar]!),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(HereNowCard),
+        matching: find.text(_sheet.sections[SheetSection.migration]!),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('fiche-migration')), findsOneWidget);
   });
 
   testWidgets('unexpected here: the page explains « Rare ici »', (
@@ -306,9 +343,7 @@ void main() {
     expect(find.text(explanation), findsOneWidget);
   });
 
-  testWidgets('groups follow the order people ask questions (J7)', (
-    tester,
-  ) async {
+  testWidgets('seven blocks, one title each, in order (J7)', (tester) async {
     await pump(tester);
     double top(Finder f) {
       expect(f, findsOneWidget);
@@ -317,23 +352,65 @@ void main() {
 
     final order = [
       top(find.text('Rougegorge familier')),
+      top(find.byKey(const ValueKey('fiche-tags'))),
       top(find.text(_sheet.sections[SheetSection.summary]!)),
       top(find.byKey(const ValueKey('fiche-heard'))),
-      top(find.text('Son chant')),
       top(find.byKey(const ValueKey('fiche-sounds'))),
-      top(find.byKey(const ValueKey('fiche-by-ear'))),
       top(find.text('Fais sa connaissance')),
-      top(find.text('Où et quand le voir')),
-      top(find.text('Ici en ce moment')),
-      top(find.byKey(const ValueKey('fiche-migration'))),
-      top(find.text('Mes rencontres')),
+      top(find.text('Quand le voir')),
       top(find.byKey(const ValueKey('fiche-activity'))),
-      top(find.text('Pour aller plus loin')),
+      top(find.byKey(const ValueKey('fiche-go-further'))),
       top(find.text('Wikipedia')),
     ];
     for (var i = 1; i < order.length; i++) {
       expect(order[i], greaterThan(order[i - 1]), reason: 'item $i');
     }
+    // Blocks are 10 apart, same gap everywhere.
+    final sounds = tester.getRect(find.byKey(const ValueKey('fiche-sounds')));
+    final meet = tester.getRect(find.byType(MeetSpeciesBlock));
+    expect(meet.top - sounds.bottom, BirdySpace.block);
+  });
+
+  testWidgets('tags: in notebook, year-round, then rare or uncommon here', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.text('Dans ton carnet'), findsOneWidget);
+    expect(find.text("Toute l'année"), findsOneWidget);
+    expect(find.text('Migrateur'), findsNothing);
+    expect(find.text('Rare ici'), findsNothing);
+    expect(find.text('Peu commun ici'), findsNothing);
+    expect(find.text('À découvrir'), findsNothing);
+  });
+
+  testWidgets('tags: migrant and rare here', (tester) async {
+    loader =
+        _FakeLoader(
+            recordValue: _heard(),
+            year: YearPresence.fromWeeks([
+              for (var w = 0; w < 48; w++) (w >= 8 && w <= 35) ? 0.6 : 0.0,
+            ]),
+          )
+          ..unexpected = true
+          ..uncommon = true;
+    await pump(tester);
+    expect(find.text('Migrateur'), findsOneWidget);
+    expect(find.text("Toute l'année"), findsNothing);
+    // Rare wins over uncommon.
+    expect(find.text('Rare ici'), findsOneWidget);
+    expect(find.text('Peu commun ici'), findsNothing);
+  });
+
+  testWidgets('tags: uncommon here', (tester) async {
+    loader =
+        _FakeLoader(
+            recordValue: _heard(),
+            year: YearPresence.fromWeeks(List.filled(48, 0.5)),
+          )
+          ..uncommon = true;
+    await pump(tester);
+    expect(find.text('Peu commun ici'), findsOneWidget);
+    expect(find.text('Rare ici'), findsNothing);
   });
 
   testWidgets('the heard line sits in the header, sounds come before here and '
@@ -343,7 +420,7 @@ void main() {
     final sounds = tester.getTopLeft(
       find.byKey(const ValueKey('fiche-sounds')),
     );
-    final here = tester.getTopLeft(find.text('Ici en ce moment'));
+    final here = tester.getTopLeft(find.text('Quand le voir'));
     expect(heard.dy, lessThan(sounds.dy));
     expect(sounds.dy, lessThan(here.dy));
     // The best recording leads with the big play button.
@@ -466,13 +543,71 @@ void main() {
   ) async {
     loader = _FakeLoader(recordValue: SpeciesRecord.empty);
     await pump(tester, sheets: SpeciesSheets.empty);
-    // J7: never heard, no line under the name at all.
-    expect(find.text("Tu ne l'as pas encore entendu."), findsNothing);
+    // J7: the dashed invitation comes first, right under the header, and
+    // there is no heard inset.
+    final block = find.byKey(const ValueKey('fiche-never-heard'));
+    expect(block, findsOneWidget);
+    expect(find.text('Pas encore dans ton carnet'), findsOneWidget);
+    expect(find.text("Tu ne l'as pas encore entendu."), findsOneWidget);
+    expect(find.text('Écouter pour le trouver'), findsOneWidget);
     expect(find.byKey(const ValueKey('fiche-heard')), findsNothing);
+    expect(find.text('À découvrir'), findsOneWidget);
+    expect(find.text('Dans ton carnet'), findsNothing);
+    expect(
+      tester.getTopLeft(block).dy,
+      lessThan(tester.getTopLeft(find.text('Description upstream.')).dy),
+    );
     expect(find.text('Description upstream.'), findsOneWidget);
-    expect(find.text('Mes sons'), findsNothing);
-    expect(find.text('Ici en ce moment'), findsNothing);
+    expect(find.text('Son chant'), findsNothing);
     expect(find.text('Activité par heure'), findsNothing);
+  });
+
+  testWidgets('never heard: the listen button starts a listening', (
+    tester,
+  ) async {
+    loader = _FakeLoader(recordValue: SpeciesRecord.empty);
+    await pump(tester, sheets: SpeciesSheets.empty);
+    final button = find.text('Écouter pour le trouver');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final live = tester.widget<LiveScreen>(find.byType(LiveScreen));
+    expect(live.forceAutoStart, isTrue);
+  });
+
+  testWidgets('never heard in a sheet over a listening: closes the sheet', (
+    tester,
+  ) async {
+    loader = _FakeLoader(recordValue: SpeciesRecord.empty);
+    await pump(
+      tester,
+      sheets: SpeciesSheets.empty,
+      liveState: LiveState.active,
+      home: Consumer(
+        builder:
+            (context, ref, _) => Scaffold(
+              body: TextButton(
+                onPressed:
+                    () => showSpeciesPage(
+                      context,
+                      ref,
+                      scientificName: _robin,
+                      commonName: 'Rougegorge familier',
+                    ),
+                child: const Text('open'),
+              ),
+            ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final button = find.text('Écouter pour le trouver');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPage), findsNothing);
+    expect(find.byType(LiveScreen), findsNothing);
   });
 
   testWidgets(

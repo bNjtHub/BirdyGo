@@ -13,6 +13,7 @@ import 'package:birdnet_live/fork/ranking/activity_bars.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
 import 'package:birdnet_live/fork/species_page/species_page_view.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,6 +33,7 @@ Future<void> _pump(
   double textScale = 1,
   bool dark = false,
   String? rareNote,
+  String? migration,
 }) async {
   tester.view.physicalSize = Size(width, 420);
   tester.view.devicePixelRatio = 1;
@@ -63,6 +65,7 @@ Future<void> _pump(
                     sentence: 'Arrive début mars · repart fin septembre.',
                     currentMonth: 5,
                     rareNote: rareNote,
+                    migration: migration,
                   ),
                 ),
               ),
@@ -98,6 +101,20 @@ void main() {
     }
   }
 
+  testWidgets('title « Quand le voir »; migration only when given (J7)', (
+    tester,
+  ) async {
+    await _pump(tester, width: 412);
+    expect(find.text('Quand le voir'), findsOneWidget);
+    expect(find.text('Ici en ce moment'), findsNothing);
+    expect(find.byKey(const ValueKey('fiche-migration')), findsNothing);
+
+    await _pump(tester, width: 412, migration: 'Hiverne en Afrique.');
+    expect(find.byKey(const ValueKey('fiche-migration')), findsOneWidget);
+    expect(find.text('Hiverne en Afrique.'), findsOneWidget);
+    expect(find.byIcon(AppIcons.flight), findsOneWidget);
+  });
+
   testWidgets('tap on a bar shows its month', (tester) async {
     await _pump(tester, width: 412);
     final rect = tester.getRect(find.byType(ActivityBars));
@@ -111,7 +128,12 @@ void main() {
     testWidgets(
       'golden $mode',
       (tester) async {
-        await _pump(tester, width: 412, dark: dark);
+        await _pump(
+          tester,
+          width: 412,
+          dark: dark,
+          migration: 'Migrateur partiel : il passe l’hiver au sud.',
+        );
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('here_now_card_$mode.png'),

@@ -84,4 +84,73 @@ void main() {
       expect(tester.getTopLeft(find.text('Wikipedia')).dx, lessThan(220));
     });
   });
+
+  group('SongBlock', () {
+    testWidgets('title, short reference button, by ear text (J7)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        SongBlock(
+          byEar: 'Un filet de notes perlées.',
+          clips: const [],
+          favorites: const {},
+          playing: null,
+          lineOf: (_) => '',
+          onPlay: (_) {},
+          onFavorite: (_, _) {},
+          onReference: () {},
+        ),
+        width: 360,
+      );
+      expect(find.text('Son chant'), findsOneWidget);
+      expect(find.text('Référence'), findsOneWidget);
+      expect(find.text('Chant de référence'), findsNothing);
+      expect(find.text('Un filet de notes perlées.'), findsOneWidget);
+    });
+
+    testWidgets('no reference, no by ear: only the title', (tester) async {
+      await _pump(
+        tester,
+        SongBlock(
+          clips: const [],
+          favorites: const {},
+          playing: null,
+          lineOf: (_) => '',
+          onPlay: (_) {},
+          onFavorite: (_, _) {},
+        ),
+        width: 360,
+      );
+      expect(find.text('Son chant'), findsOneWidget);
+      expect(find.text('Référence'), findsNothing);
+    });
+  });
+
+  group('GoFurtherBlock', () {
+    testWidgets('one title, 48 dp pills', (tester) async {
+      await _pump(
+        tester,
+        GoFurtherBlock(
+          links: const [
+            (label: 'eBird', iconAsset: 'assets/images/icon-ebird.png', url: 'a'),
+            (
+              label: 'Wikipedia',
+              iconAsset: 'assets/images/icon-wikipedia.png',
+              url: 'c',
+            ),
+          ],
+          onOpen: (_) {},
+        ),
+        width: 360,
+      );
+      expect(find.text('Pour aller plus loin'), findsOneWidget);
+      expect(find.text('En savoir plus sur cette espèce'), findsNothing);
+      final pill = find.ancestor(
+        of: find.text('eBird'),
+        matching: find.byType(InkWell),
+      );
+      expect(tester.getSize(pill.first).height, greaterThanOrEqualTo(48));
+    });
+  });
 }

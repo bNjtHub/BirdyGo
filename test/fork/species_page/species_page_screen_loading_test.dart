@@ -94,6 +94,10 @@ class _DelayedLoader implements SpeciesPageLoader {
       false;
 
   @override
+  Future<bool> uncommonNow(String scientificName, {required DateTime now}) async =>
+      false;
+
+  @override
   Future<String?> lastConfirmedSession(String scientificName) async => null;
 
   @override
