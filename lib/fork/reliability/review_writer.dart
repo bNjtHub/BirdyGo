@@ -2,6 +2,7 @@
 /// the session hooks then update the observation index (J3).
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/history/session_repository.dart';
@@ -16,13 +17,19 @@ class ReviewWriter {
     required SessionRepository repository,
     required Future<ObservationIndex> Function() index,
     DateTime Function()? now,
+    VoidCallback? onQueueChanged,
   }) : _repository = repository,
        _index = index,
+       _onQueueChanged = onQueueChanged,
        _now = now ?? DateTime.now;
 
   final SessionRepository _repository;
   final Future<ObservationIndex> Function() _index;
   final DateTime Function() _now;
+
+  /// Called once a skip is stored: it changes the queue without any session
+  /// save, so the index hooks stay silent and the counters would stay stale.
+  final VoidCallback? _onQueueChanged;
 
   /// Sets the review status of [detection] in its session and saves it.
   /// Returns false when the session or the detection no longer exists.
@@ -41,8 +48,10 @@ class ReviewWriter {
   }
 
   /// "Je ne sais pas": the detection stays unreviewed but leaves the queue.
-  Future<void> skip(IndexedDetection detection) async =>
-      (await _index()).markSkipped(detection.key);
+  Future<void> skip(IndexedDetection detection) async {
+    await (await _index()).markSkipped(detection.key);
+    _onQueueChanged?.call();
+  }
 
   static DetectionRecord? _find(LiveSession session, IndexedDetection d) {
     final list = session.detections;
@@ -62,5 +71,7 @@ final reviewWriterProvider = Provider<ReviewWriter>((ref) {
   return ReviewWriter(
     repository: ref.read(sessionRepositoryProvider),
     index: () => ref.read(observationIndexServiceProvider).ensureReady(),
+    onQueueChanged:
+        () => ref.read(observationIndexServiceProvider).notifyQueueChanged(),
   );
 });
