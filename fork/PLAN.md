@@ -1077,3 +1077,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même
   bruit de fond), dont le coût du mode Ville en `--profile`.
+
+## Version anglaise
+
+- Carte des contacts : vue vide centrée sur la dernière position connue (sans demander la permission) ou sur le monde ; couches IGN proposées seulement si la région est FR ou l'interface en français, repli sur OSM (`lib/fork/map/map_region.dart`).
