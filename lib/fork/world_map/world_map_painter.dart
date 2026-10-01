@@ -120,6 +120,98 @@ class MapProjection {
         ..[15] = 1;
 }
 
+/// The paths of one map at one size, built once: only the regions and borders
+/// that touch the frame, already in pixels. Painting then is just a handful
+/// of `drawPath` calls instead of transforming ~3000 regions every frame.
+/// Slack around the frame, in degrees, so strokes straddling its edge are kept.
+const double _pad = 1;
+
+class WorldMapScene {
+  WorldMapScene(this.regions, this.classes, this.frame, this.size)
+    : projection = MapProjection(frame, size) {
+    final m = projection.matrix;
+    bool inFrame(Rect b) =>
+        b.right >= frame.lon0 - _pad &&
+        b.left <= frame.lon1 + _pad &&
+        b.bottom >= frame.lat0 - _pad &&
+        b.top <= frame.lat1 + _pad;
+    final rawLand = Path()..fillType = PathFillType.evenOdd;
+    for (final r in regions.regions) {
+      if (r.rings.isEmpty || !inFrame(r.bounds)) continue;
+      rawLand.addPath(r.path, Offset.zero);
+    }
+    // Same transform as the full path had, on the subset: same pixels.
+    land = rawLand.transform(m);
+    for (final c in RangeClass.values) {
+      byClass[c] = Path()..fillType = PathFillType.evenOdd;
+    }
+    for (final e in classes.entries) {
+      final region = regions.byId(e.key);
+      if (region == null || region.rings.isEmpty || !inFrame(region.bounds)) {
+        continue;
+      }
+      byClass[e.value]!.addPath(region.path, Offset.zero, matrix4: m);
+    }
+    final rawBorders = Path()..fillType = PathFillType.evenOdd;
+    for (final ring in regions.borders) {
+      final n = ring.length ~/ 2;
+      var minX = double.infinity, maxX = -double.infinity;
+      var minY = double.infinity, maxY = -double.infinity;
+      for (var i = 0; i < n; i++) {
+        final x = ring[i * 2], y = ring[i * 2 + 1];
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+      if (n == 0 ||
+          maxX < frame.lon0 - _pad ||
+          minX > frame.lon1 + _pad ||
+          maxY < frame.lat0 - _pad ||
+          minY > frame.lat1 + _pad) {
+        continue;
+      }
+      for (var i = 0; i < n; i++) {
+        final x = ring[i * 2].toDouble(), y = -ring[i * 2 + 1].toDouble();
+        i == 0 ? rawBorders.moveTo(x, y) : rawBorders.lineTo(x, y);
+      }
+    }
+    borders = rawBorders.transform(m);
+  }
+
+  final WorldRegions regions;
+  final Map<String, RangeClass> classes;
+  final MapFrame frame;
+  final Size size;
+  final MapProjection projection;
+  late final Path land;
+  late final Path borders;
+  final Map<RangeClass, Path> byClass = {};
+
+  bool matches(
+    WorldRegions r,
+    Map<String, RangeClass> c,
+    MapFrame f,
+    Size s,
+  ) => identical(r, regions) && identical(c, classes) && f == frame && s == size;
+}
+
+/// Keeps the last [WorldMapScene] across the painters a widget creates.
+class WorldMapSceneCache {
+  WorldMapScene? _scene;
+
+  WorldMapScene get(
+    WorldRegions regions,
+    Map<String, RangeClass> classes,
+    MapFrame frame,
+    Size size,
+  ) {
+    final s = _scene;
+    if (s != null && s.matches(regions, classes, frame, size)) return s;
+    return _scene = WorldMapScene(regions, classes, frame, size);
+  }
+}
+
 class WorldMapPainter extends CustomPainter {
   WorldMapPainter({
     required this.regions,
@@ -128,7 +220,8 @@ class WorldMapPainter extends CustomPainter {
     required this.colors,
     this.user,
     this.selected,
-  });
+    WorldMapSceneCache? cache,
+  }) : cache = cache ?? WorldMapSceneCache();
 
   final WorldRegions regions;
 
@@ -141,32 +234,26 @@ class WorldMapPainter extends CustomPainter {
   /// Id of the tapped region.
   final String? selected;
 
+  /// Shared with the owner so a repaint (tap, theme) reuses the paths.
+  final WorldMapSceneCache cache;
+
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, Paint()..color = colors.ocean);
 
-    final projection = MapProjection(frame, size);
+    final scene = cache.get(regions, classes, frame, size);
+    final projection = scene.projection;
     final m = projection.matrix;
     final fill = Paint()..style = PaintingStyle.fill;
-    canvas.drawPath(regions.landPath.transform(m), fill..color = colors.land);
-
-    final byClass = {
-      for (final c in RangeClass.values)
-        c: Path()..fillType = PathFillType.evenOdd,
-    };
-    for (final e in classes.entries) {
-      final region = regions.byId(e.key);
-      if (region == null) continue;
-      byClass[e.value]!.addPath(region.path, Offset.zero, matrix4: m);
-    }
+    canvas.drawPath(scene.land, fill..color = colors.land);
     for (final c in RangeClass.values) {
-      canvas.drawPath(byClass[c]!, fill..color = colors.classes[c]!);
+      canvas.drawPath(scene.byClass[c]!, fill..color = colors.classes[c]!);
     }
 
     canvas
       ..drawPath(
-        regions.landPath.transform(m),
+        scene.land,
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = WorldMapConfig.regionLineWidth
@@ -174,7 +261,7 @@ class WorldMapPainter extends CustomPainter {
           ..color = colors.regionLine,
       )
       ..drawPath(
-        regions.bordersPath.transform(m),
+        scene.borders,
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = WorldMapConfig.countryLineWidth

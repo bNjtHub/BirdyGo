@@ -102,6 +102,9 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   /// Id of the tapped region.
   String? _selected;
 
+  /// Paths of the map, kept across rebuilds (tap, theme).
+  final _sceneCache = WorldMapSceneCache();
+
   @override
   void didUpdateWidget(WorldMapBlock old) {
     super.didUpdateWidget(old);
@@ -160,6 +163,7 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
                           colors: colors,
                           user: widget.user,
                           selected: _selected,
+                          cache: _sceneCache,
                         ),
                       ),
                     ),
