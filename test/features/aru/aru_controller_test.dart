@@ -959,8 +959,9 @@ void main() {
         final detections = controller.session!.detections;
         expect(detections, hasLength(2));
         for (final detection in detections) {
-          final expectedTimestamp =
-              detection.timestamp.toUtc().millisecondsSinceEpoch;
+          final expectedTimestamp = detection.timestamp
+              .toUtc()
+              .millisecondsSinceEpoch;
           if (detection.audioClipPath == null) continue;
           expect(detection.audioClipPath, contains('$expectedTimestamp'));
         }
@@ -976,104 +977,99 @@ void main() {
       },
     );
 
-    test(
-      'smart clip sampling spreads each species across ARU cycles in one session',
-      () async {
-        final controller = AruController(
-          saveSession: (session) async {},
-          saveDetectionClips: clipSaver((record) {
-            final timestamp = record.timestamp.toUtc().millisecondsSinceEpoch;
-            final species = record.scientificName.replaceAll(' ', '_');
-            return '/recordings/clip_${timestamp}_$species.flac';
-          }),
-          now: () => start.subtract(const Duration(minutes: 5)),
-        );
+    test('smart clip sampling spreads each species across ARU cycles in one session', () async {
+      final controller = AruController(
+        saveSession: (session) async {},
+        saveDetectionClips: clipSaver((record) {
+          final timestamp = record.timestamp.toUtc().millisecondsSinceEpoch;
+          final species = record.scientificName.replaceAll(' ', '_');
+          return '/recordings/clip_${timestamp}_$species.flac';
+        }),
+        now: () => start.subtract(const Duration(minutes: 5)),
+      );
 
-        await controller.startDeployment(
-          sessionId: 'aru-1',
-          settings: settings,
-          metadata: metadata(
-            maxCycles: 3,
-            recordingMode: RecordingMode.detectionsOnly.name,
-            samplingMode: SamplingMode.smart.name,
-            topNPerSpecies: 2,
-          ),
-        );
+      await controller.startDeployment(
+        sessionId: 'aru-1',
+        settings: settings,
+        metadata: metadata(
+          maxCycles: 3,
+          recordingMode: RecordingMode.detectionsOnly.name,
+          samplingMode: SamplingMode.smart.name,
+          topNPerSpecies: 2,
+        ),
+      );
 
-        await controller.evaluate(now: start.add(const Duration(minutes: 1)));
-        final cycle0Low = start.add(const Duration(minutes: 2));
-        final cycle0Mid = start.add(const Duration(minutes: 3));
-        await controller.syncDetections([
-          DetectionRecord(
-            scientificName: 'Turdus merula',
-            commonName: 'Eurasian Blackbird',
-            confidence: 0.4,
-            timestamp: cycle0Low,
-            endTimestamp: cycle0Low.add(const Duration(seconds: 20)),
-          ),
-          DetectionRecord(
-            scientificName: 'Turdus merula',
-            commonName: 'Eurasian Blackbird',
-            confidence: 0.5,
-            timestamp: cycle0Mid,
-            endTimestamp: cycle0Mid.add(const Duration(seconds: 20)),
-          ),
-        ]);
+      await controller.evaluate(now: start.add(const Duration(minutes: 1)));
+      final cycle0Low = start.add(const Duration(minutes: 2));
+      final cycle0Mid = start.add(const Duration(minutes: 3));
+      await controller.syncDetections([
+        DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Eurasian Blackbird',
+          confidence: 0.4,
+          timestamp: cycle0Low,
+          endTimestamp: cycle0Low.add(const Duration(seconds: 20)),
+        ),
+        DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Eurasian Blackbird',
+          confidence: 0.5,
+          timestamp: cycle0Mid,
+          endTimestamp: cycle0Mid.add(const Duration(seconds: 20)),
+        ),
+      ]);
 
-        await controller.evaluate(now: start.add(const Duration(minutes: 30)));
-        await controller.evaluate(
-          now: start.add(const Duration(hours: 1, minutes: 1)),
-        );
-        final cycle1 = start.add(const Duration(hours: 1, minutes: 2));
-        await controller.syncDetections([
-          DetectionRecord(
-            scientificName: 'Turdus merula',
-            commonName: 'Eurasian Blackbird',
-            confidence: 0.6,
-            timestamp: cycle1,
-            endTimestamp: cycle1.add(const Duration(seconds: 20)),
-          ),
-          DetectionRecord(
-            scientificName: 'Erithacus rubecula',
-            commonName: 'European Robin',
-            confidence: 0.3,
-            timestamp: cycle1.add(const Duration(minutes: 1)),
-            endTimestamp: cycle1.add(const Duration(minutes: 1, seconds: 20)),
-          ),
-        ]);
+      await controller.evaluate(now: start.add(const Duration(minutes: 30)));
+      await controller.evaluate(
+        now: start.add(const Duration(hours: 1, minutes: 1)),
+      );
+      final cycle1 = start.add(const Duration(hours: 1, minutes: 2));
+      await controller.syncDetections([
+        DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Eurasian Blackbird',
+          confidence: 0.6,
+          timestamp: cycle1,
+          endTimestamp: cycle1.add(const Duration(seconds: 20)),
+        ),
+        DetectionRecord(
+          scientificName: 'Erithacus rubecula',
+          commonName: 'European Robin',
+          confidence: 0.3,
+          timestamp: cycle1.add(const Duration(minutes: 1)),
+          endTimestamp: cycle1.add(const Duration(minutes: 1, seconds: 20)),
+        ),
+      ]);
 
-        final detections = controller.session!.detections;
-        final retainedBlackbirds =
-            detections
-                .where(
-                  (detection) =>
-                      detection.scientificName == 'Turdus merula' &&
-                      detection.audioClipPath != null,
-                )
-                .toList();
-        final retainedRobin =
-            detections
-                .where(
-                  (detection) =>
-                      detection.scientificName == 'Erithacus rubecula' &&
-                      detection.audioClipPath != null,
-                )
-                .toList();
+      final detections = controller.session!.detections;
+      final retainedBlackbirds = detections
+          .where(
+            (detection) =>
+                detection.scientificName == 'Turdus merula' &&
+                detection.audioClipPath != null,
+          )
+          .toList();
+      final retainedRobin = detections
+          .where(
+            (detection) =>
+                detection.scientificName == 'Erithacus rubecula' &&
+                detection.audioClipPath != null,
+          )
+          .toList();
 
-        expect(retainedBlackbirds, hasLength(2));
-        expect(
-          retainedBlackbirds.map((detection) => detection.timestamp),
-          containsAll([cycle0Mid, cycle1]),
-        );
-        expect(
-          detections
-              .singleWhere((detection) => detection.timestamp == cycle0Low)
-              .audioClipPath,
-          isNull,
-        );
-        expect(retainedRobin, hasLength(1));
-      },
-    );
+      expect(retainedBlackbirds, hasLength(2));
+      expect(
+        retainedBlackbirds.map((detection) => detection.timestamp),
+        containsAll([cycle0Mid, cycle1]),
+      );
+      expect(
+        detections
+            .singleWhere((detection) => detection.timestamp == cycle0Low)
+            .audioClipPath,
+        isNull,
+      );
+      expect(retainedRobin, hasLength(1));
+    });
 
     test('saves a separate session per cycle and keeps no aggregate when '
         'eachCycleIsSession is true', () async {
@@ -1116,10 +1112,12 @@ void main() {
 
       // Only the per-cycle sessions remain; the aggregate (full-audio mode
       // included) is discarded so it never lingers in the library.
-      final cycleSessions =
-          store.values.where((s) => s.id.contains('_cycle_')).toList();
-      final aggregateSessions =
-          store.values.where((s) => !s.id.contains('_cycle_')).toList();
+      final cycleSessions = store.values
+          .where((s) => s.id.contains('_cycle_'))
+          .toList();
+      final aggregateSessions = store.values
+          .where((s) => !s.id.contains('_cycle_'))
+          .toList();
       expect(aggregateSessions, isEmpty);
       expect(cycleSessions, hasLength(3));
       expect(cycleSessions.first.id, 'aru-1_cycle_0');
@@ -1184,10 +1182,12 @@ void main() {
         await controller.evaluate(now: start.add(const Duration(minutes: 30)));
         await controller.evaluate(now: start.add(const Duration(hours: 2)));
 
-        final cycleSessions =
-            store.values.where((s) => s.id.contains('_cycle_')).toList();
-        final aggregateSessions =
-            store.values.where((s) => !s.id.contains('_cycle_')).toList();
+        final cycleSessions = store.values
+            .where((s) => s.id.contains('_cycle_'))
+            .toList();
+        final aggregateSessions = store.values
+            .where((s) => !s.id.contains('_cycle_'))
+            .toList();
         expect(cycleSessions, hasLength(1));
         expect(cycleSessions.single.id, 'aru-1_cycle_0');
         expect(cycleSessions.single.detections, hasLength(1));
@@ -1228,8 +1228,9 @@ void main() {
         // not started, so no per-cycle session exists yet).
         await controller.stop(now: start.subtract(const Duration(minutes: 1)));
 
-        final cycleSessions =
-            saved.where((s) => s.id.contains('_cycle_')).toList();
+        final cycleSessions = saved
+            .where((s) => s.id.contains('_cycle_'))
+            .toList();
         expect(cycleSessions, isEmpty);
         expect(discarded, ['aru-1']);
         // The aggregate was discarded, so review must not open it.
@@ -1267,8 +1268,9 @@ void main() {
         now: start.add(const Duration(hours: 1, minutes: 30)),
       );
 
-      final cycleSessions =
-          saved.where((s) => s.id.contains('_cycle_')).toList();
+      final cycleSessions = saved
+          .where((s) => s.id.contains('_cycle_'))
+          .toList();
       expect(cycleSessions, hasLength(2));
       expect(cycleSessions.first.id, 'aru-1_cycle_0');
       expect(cycleSessions.first.customName, 'test - Test Run');
@@ -1294,8 +1296,9 @@ void main() {
         await controller.evaluate(now: start.add(const Duration(minutes: 5)));
         await controller.evaluate(now: start.add(const Duration(minutes: 30)));
 
-        final cycleSessions =
-            saved.where((s) => s.id.contains('_cycle_')).toList();
+        final cycleSessions = saved
+            .where((s) => s.id.contains('_cycle_'))
+            .toList();
         expect(cycleSessions, isEmpty);
       },
     );

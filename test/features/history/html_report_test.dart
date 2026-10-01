@@ -89,14 +89,12 @@ void main() {
     });
 
     test('explains background stop reasons in the report', () {
-      final live =
-          _sessionWithDetections()
-            ..type = SessionType.live
-            ..stopReason = SessionStopReason.backgroundLimit;
-      final count =
-          _sessionWithDetections()
-            ..type = SessionType.pointCount
-            ..stopReason = SessionStopReason.backgrounded;
+      final live = _sessionWithDetections()
+        ..type = SessionType.live
+        ..stopReason = SessionStopReason.backgroundLimit;
+      final count = _sessionWithDetections()
+        ..type = SessionType.pointCount
+        ..stopReason = SessionStopReason.backgrounded;
 
       expect(buildHtmlReport(live), contains('Background time limit reached'));
       expect(buildHtmlReport(count), contains('App went to background'));

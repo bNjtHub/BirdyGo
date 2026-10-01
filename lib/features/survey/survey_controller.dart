@@ -360,12 +360,11 @@ class SurveyController {
       final labelsCsv = await rootBundle.loadString(labelsAssetPath);
 
       final blacklistFile = _config!.scoreBlacklistFile;
-      final scoreBlacklistJson =
-          blacklistFile == null
-              ? null
-              : await rootBundle.loadString(
-                '${AppConstants.modelAssetsDir}/$blacklistFile',
-              );
+      final scoreBlacklistJson = blacklistFile == null
+          ? null
+          : await rootBundle.loadString(
+              '${AppConstants.modelAssetsDir}/$blacklistFile',
+            );
 
       await _isolate.start(
         modelFilePath: modelFilePath,
@@ -1070,10 +1069,9 @@ class SurveyController {
       commonName: commonName,
       confidence: 1.0,
       timestamp: DateTime.now(),
-      source:
-          userSpecified
-              ? DetectionSource.userSpecified
-              : DetectionSource.manual,
+      source: userSpecified
+          ? DetectionSource.userSpecified
+          : DetectionSource.manual,
       evidence: evidence,
       latitude: gpsPoint?.latitude ?? _session!.latitude,
       longitude: gpsPoint?.longitude ?? _session!.longitude,
@@ -1204,10 +1202,9 @@ class SurveyController {
       _triggerAutoStop(
         'Maximum survey duration reached',
         reasonCode: SessionStopReason.maxDuration,
-        value:
-            _maxEndTime!
-                .difference(_session?.startTime ?? _maxEndTime!)
-                .inHours,
+        value: _maxEndTime!
+            .difference(_session?.startTime ?? _maxEndTime!)
+            .inHours,
       );
       return;
     }
@@ -1259,12 +1256,11 @@ class SurveyController {
       );
 
       final geoNames = _geoModelSpeciesNames;
-      final filteredDetections =
-          geoNames == null
-              ? speciesFiltered
-              : speciesFiltered
-                  .where((d) => geoNames.contains(d.species.scientificName))
-                  .toList();
+      final filteredDetections = geoNames == null
+          ? speciesFiltered
+          : speciesFiltered
+                .where((d) => geoNames.contains(d.species.scientificName))
+                .toList();
 
       // Update live detection list.
       _currentLiveDetections = [
@@ -1483,11 +1479,11 @@ class SurveyController {
       }
     }
 
-    final ranked =
-        bestByName.values.toList()..sort((a, b) {
-          final byHeard = lastHeard(b).compareTo(lastHeard(a));
-          return byHeard != 0 ? byHeard : b.timestamp.compareTo(a.timestamp);
-        });
+    final ranked = bestByName.values.toList()
+      ..sort((a, b) {
+        final byHeard = lastHeard(b).compareTo(lastHeard(a));
+        return byHeard != 0 ? byHeard : b.timestamp.compareTo(a.timestamp);
+      });
     _recentForNotification = List<DetectionRecord>.unmodifiable(ranked.take(3));
   }
 
@@ -1514,11 +1510,10 @@ class SurveyController {
             '\uD83D\uDCCD $km km';
 
     // Heads-up status when the microphone is held by another app.
-    final micWarning =
-        _micContested
-            ? (s?.micContested ??
-                '\u26A0 Microphone in use by another app — audio paused')
-            : null;
+    final micWarning = _micContested
+        ? (s?.micContested ??
+              '\u26A0 Microphone in use by another app — audio paused')
+        : null;
 
     // Render up to 3 most-recent *unique* species (so a chatty bird
     // doesn't fill the whole list). The buffer is maintained on the

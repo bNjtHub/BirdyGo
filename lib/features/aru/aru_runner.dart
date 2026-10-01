@@ -451,14 +451,13 @@ class AruRunner {
     AruControllerState state,
     LiveSession session,
   ) {
-    final status =
-        _batteryPaused
-            ? l10n.aruBatteryPaused
-            : switch (state) {
-              AruControllerState.recording => l10n.aruActiveRecording,
-              AruControllerState.completed => l10n.aruActiveCompleted,
-              _ => l10n.aruActiveWaiting,
-            };
+    final status = _batteryPaused
+        ? l10n.aruBatteryPaused
+        : switch (state) {
+            AruControllerState.recording => l10n.aruActiveRecording,
+            AruControllerState.completed => l10n.aruActiveCompleted,
+            _ => l10n.aruActiveWaiting,
+          };
     final snapshot = _scheduleSnapshot(session);
     final current = snapshot?.currentWindow;
     final next = snapshot?.nextWindow;
@@ -482,8 +481,10 @@ class AruRunner {
   String _notificationStats(AppLocalizations l10n, LiveSession session) {
     final cycles = _completedCycleCount(session);
     final detections = session.detections.length;
-    final species =
-        session.detections.map((d) => d.scientificName).toSet().length;
+    final species = session.detections
+        .map((d) => d.scientificName)
+        .toSet()
+        .length;
     return l10n.aruNotificationStats(cycles, species, detections);
   }
 
@@ -546,9 +547,8 @@ class AruRunner {
 AruScheduleSnapshot? _scheduleSnapshot(LiveSession session) {
   final metadata = session.aruMetadata;
   if (metadata == null) return null;
-  return AruScheduleCalculator(
-    metadata.toScheduleConfig(),
-  ).snapshotAt(DateTime.now());
+  return AruScheduleCalculator(metadata.toScheduleConfig())
+      .snapshotAt(DateTime.now());
 }
 
 int _completedCycleCount(LiveSession session) {

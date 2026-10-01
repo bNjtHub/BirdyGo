@@ -865,12 +865,11 @@ void main() {
         includeAudio: true,
       );
       expect(path, isNotNull);
-      final lines =
-          File(path!)
-              .readAsStringSync()
-              .split('\n')
-              .where((row) => row.isNotEmpty)
-              .toList();
+      final lines = File(path!)
+          .readAsStringSync()
+          .split('\n')
+          .where((row) => row.isNotEmpty)
+          .toList();
       expect(lines, hasLength(1));
       expect(lines.single, startsWith('Selection\t'));
     });
@@ -1034,19 +1033,17 @@ void main() {
           final table = document('.selections.txt');
           if (previousTable != null) expect(table, previousTable);
           previousTable = table;
-          final rows =
-              table
-                  .split('\n')
-                  .where((row) => row.isNotEmpty)
-                  .map((row) => row.split('\t'))
-                  .toList();
+          final rows = table
+              .split('\n')
+              .where((row) => row.isNotEmpty)
+              .map((row) => row.split('\t'))
+              .toList();
           final header = rows.removeAt(0);
           expect(rows.length, retained.length);
-          final audioNames =
-              archive
-                  .where((f) => f.name.endsWith('.wav'))
-                  .map((f) => f.name)
-                  .toList();
+          final audioNames = archive
+              .where((f) => f.name.endsWith('.wav'))
+              .map((f) => f.name)
+              .toList();
           expect(rows.map((row) => row[7]).toList(), audioNames);
           expect(header[11], 'Survey Time (UTC)');
           for (var i = 0; i < rows.length; i++) {
@@ -1072,10 +1069,10 @@ void main() {
           if (retained.length == 10) {
             expect(rows.last.sublist(3, 5), ['46.000', '49.000']);
           }
-          final csv =
-              document(
-                '.csv',
-              ).split('\n').where((row) => row.isNotEmpty).toList();
+          final csv = document('.csv')
+              .split('\n')
+              .where((row) => row.isNotEmpty)
+              .toList();
           expect(csv.length, 11);
           expect(
             csv.first,
@@ -1747,9 +1744,9 @@ void main() {
       final metaFile = archive.firstWhere(
         (f) => f.name.endsWith('.metadata.json'),
       );
-      final meta =
-          jsonDecode(String.fromCharCodes(metaFile.content as List<int>))
-              as Map<String, dynamic>;
+      final meta = jsonDecode(
+        String.fromCharCodes(metaFile.content as List<int>),
+      ) as Map<String, dynamic>;
       expect(
         (meta['aruCycleAudioFiles'] as Map<String, dynamic>)['0'],
         startsWith('aru_cycles/'),
@@ -1787,9 +1784,9 @@ void main() {
       final metaFile = archive.firstWhere(
         (f) => f.name.endsWith('.metadata.json'),
       );
-      final meta =
-          jsonDecode(String.fromCharCodes(metaFile.content as List<int>))
-              as Map<String, dynamic>;
+      final meta = jsonDecode(
+        String.fromCharCodes(metaFile.content as List<int>),
+      ) as Map<String, dynamic>;
       final sessionMeta = meta['session'] as Map<String, dynamic>;
       expect(sessionMeta['type'], 'aru');
       expect(sessionMeta['displayName'], session.displayName);
@@ -2340,12 +2337,11 @@ void main() {
         [session],
         formats: const {'json'},
         includeAudio: false,
-        metadataProvider:
-            (session) async => buildExportMetadata(
-              session: session,
-              device: 'Pixel 10',
-              os: 'Android 17',
-            ),
+        metadataProvider: (session) async => buildExportMetadata(
+          session: session,
+          device: 'Pixel 10',
+          os: 'Android 17',
+        ),
       );
 
       final outer = ZipDecoder().decodeBytes(
@@ -2355,9 +2351,9 @@ void main() {
       final metadataFile = inner.singleWhere(
         (file) => file.name.endsWith('.metadata.json'),
       );
-      final metadata =
-          jsonDecode(utf8.decode(metadataFile.content as List<int>))
-              as Map<String, dynamic>;
+      final metadata = jsonDecode(
+        utf8.decode(metadataFile.content as List<int>),
+      ) as Map<String, dynamic>;
       expect(metadata['device'], 'Pixel 10');
       expect(metadata['os'], 'Android 17');
     });
@@ -2502,11 +2498,9 @@ void main() {
       expect(map['trimmedDurationSec'], closeTo(30.0, 0.001));
 
       final detections = map['detections'] as List<dynamic>;
-      final blackbird =
-          detections.firstWhere(
-                (d) => (d as Map)['scientificName'] == 'Turdus merula',
-              )
-              as Map<String, dynamic>;
+      final blackbird = detections.firstWhere(
+        (d) => (d as Map)['scientificName'] == 'Turdus merula',
+      ) as Map<String, dynamic>;
       expect(blackbird['beginTimeSec'], closeTo(20.0, 0.001));
 
       final annotations = map['annotations'] as List<dynamic>;
@@ -2562,12 +2556,11 @@ void main() {
       )..createSync(recursive: true);
       // The audio-only share path returns its staged file to the share sheet
       // and can't delete it; the next export is what reclaims the space.
-      final stale =
-          File(p.join(staging.path, 'sweep_test_stale.wav'))
-            ..writeAsBytesSync(List<int>.filled(2048, 1))
-            ..setLastModifiedSync(
-              DateTime.now().subtract(const Duration(hours: 6)),
-            );
+      final stale = File(p.join(staging.path, 'sweep_test_stale.wav'))
+        ..writeAsBytesSync(List<int>.filled(2048, 1))
+        ..setLastModifiedSync(
+          DateTime.now().subtract(const Duration(hours: 6)),
+        );
       final recent = File(p.join(staging.path, 'sweep_test_recent.wav'))
         ..writeAsBytesSync(List<int>.filled(2048, 1));
       addTearDown(() {

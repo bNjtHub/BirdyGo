@@ -225,16 +225,15 @@ class FileAnalysisController {
   /// count so smaller devices do not oversubscribe their CPUs.
   static const int _androidOfflineInferenceThreads = 5;
 
-  static int? get _offlineInferenceThreads =>
-      Platform.isAndroid
-          ? math.max(
-            1,
-            math.min(
-              _androidOfflineInferenceThreads,
-              Platform.numberOfProcessors,
-            ),
-          )
-          : null;
+  static int? get _offlineInferenceThreads => Platform.isAndroid
+      ? math.max(
+          1,
+          math.min(
+            _androidOfflineInferenceThreads,
+            Platform.numberOfProcessors,
+          ),
+        )
+      : null;
 
   // ── Internal state ────────────────────────────────────────────────────
 
@@ -291,12 +290,11 @@ class FileAnalysisController {
       final labelsCsv = await rootBundle.loadString(labelsAssetPath);
 
       final blacklistFile = _config!.scoreBlacklistFile;
-      final scoreBlacklistJson =
-          blacklistFile == null
-              ? null
-              : await rootBundle.loadString(
-                '${AppConstants.modelAssetsDir}/$blacklistFile',
-              );
+      final scoreBlacklistJson = blacklistFile == null
+          ? null
+          : await rootBundle.loadString(
+              '${AppConstants.modelAssetsDir}/$blacklistFile',
+            );
 
       await _isolate.start(
         modelFilePath: modelFilePath,
@@ -344,10 +342,9 @@ class FileAnalysisController {
     // expand to hundreds of megabytes once decoded, so the file picker step
     // must stay lightweight.
     final canDart = await AudioDecoder.canDecodeDart(path);
-    final metadata =
-        canDart
-            ? await AudioDecoder.inspectFile(path)
-            : await NativeAudioDecoder.inspectFile(path, format);
+    final metadata = canDart
+        ? await AudioDecoder.inspectFile(path)
+        : await NativeAudioDecoder.inspectFile(path, format);
 
     return AudioFileInfo(
       path: path,
@@ -432,8 +429,7 @@ class FileAnalysisController {
         );
         if (metadata.sampleRate <= 0 || metadata.totalSamples <= 0) {
           _state = FileAnalysisState.error;
-          _errorMessage =
-              'This audio file could not be inspected safely. Try converting it to WAV or FLAC before analysis.';
+          _errorMessage = 'This audio file could not be inspected safely. Try converting it to WAV or FLAC before analysis.';
           _notifyListeners();
           return null;
         }
@@ -456,9 +452,10 @@ class FileAnalysisController {
       // windows always touch and the whole file is examined. Clamping keeps a
       // caller-supplied overlap of 1.0 (or above) from producing a zero step
       // and an unbounded window loop.
-      final stepSamples = (sourceWindowSamples * (1.0 - overlap))
-          .round()
-          .clamp(1, sourceWindowSamples);
+      final stepSamples = (sourceWindowSamples * (1.0 - overlap)).round().clamp(
+        1,
+        sourceWindowSamples,
+      );
       final totalSamples = sourceTotalSamples;
 
       if (sourceTotalSamples == 0) {
@@ -582,13 +579,11 @@ class FileAnalysisController {
 
         // Restrict to geo-model species intersection.
         if (geoModelSpeciesNames != null) {
-          filtered =
-              filtered
-                  .where(
-                    (d) =>
-                        geoModelSpeciesNames.contains(d.species.scientificName),
-                  )
-                  .toList();
+          filtered = filtered
+              .where(
+                (d) => geoModelSpeciesNames.contains(d.species.scientificName),
+              )
+              .toList();
         }
 
         final windowEnd = windowTimestamp.add(
@@ -698,10 +693,9 @@ class FileAnalysisController {
               debugPrint('[FileAnalysis] canceled at window $w/$totalWindows');
               return false;
             }
-            final modelChunk =
-                sourceChunk.sampleRate != modelSampleRate
-                    ? sourceChunk.resampleTo(modelSampleRate)
-                    : sourceChunk;
+            final modelChunk = sourceChunk.sampleRate != modelSampleRate
+                ? sourceChunk.resampleTo(modelSampleRate)
+                : sourceChunk;
             final audioChunk = modelChunk.readFloat32(0, modelWindowSamples);
             await enqueueWindow(w, startSample, audioChunk);
             return !_cancelRequested;
@@ -848,10 +842,9 @@ class FileAnalysisController {
             }
             consecutiveEmptyChunks = 0;
 
-            final modelChunk =
-                decoded.sampleRate != modelSampleRate
-                    ? decoded.resampleTo(modelSampleRate)
-                    : decoded;
+            final modelChunk = decoded.sampleRate != modelSampleRate
+                ? decoded.resampleTo(modelSampleRate)
+                : decoded;
             for (var w = plan.firstWindow; w < plan.endWindow; w++) {
               if (_cancelRequested) {
                 debugPrint(

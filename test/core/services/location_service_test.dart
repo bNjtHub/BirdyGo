@@ -86,9 +86,8 @@ void main() {
       );
       debugDefaultTargetPlatformOverride = TargetPlatform.windows;
       expect(
-        AppLocation.fromPosition(
-          fix(altitude: 0, altitudeAccuracy: 0),
-        ).altitude,
+        AppLocation.fromPosition(fix(altitude: 0, altitudeAccuracy: 0))
+            .altitude,
         isNull,
       );
       expect(
@@ -142,8 +141,8 @@ void main() {
   group('LocationService with GPS disabled', () {
     LocationService build() => LocationService(
       gpsEnabled: () => false,
-      manualLocation:
-          () => const AppLocation(latitude: 48.137, longitude: 11.576),
+      manualLocation: () =>
+          const AppLocation(latitude: 48.137, longitude: 11.576),
     );
 
     test('getCurrentLocation returns the manual coordinates', () async {

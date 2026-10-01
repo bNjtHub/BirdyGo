@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'models/detection.dart';
 import '../live/live_session.dart';
 
-typedef DetectionRecordFactory =
-    DetectionRecord Function(Detection detection, DateTime timestamp);
+typedef DetectionRecordFactory = DetectionRecord Function(
+  Detection detection,
+  DateTime timestamp,
+);
 
 /// A newly-created or confidence-updated continuous detection.
 class DetectionRecordChange {
@@ -270,10 +272,8 @@ class DetectionAccumulator {
     return index;
   }
 
-  (String, int) _keyOf(DetectionRecord record) => (
-    record.scientificName,
-    record.timestamp.microsecondsSinceEpoch,
-  );
+  (String, int) _keyOf(DetectionRecord record) =>
+      (record.scientificName, record.timestamp.microsecondsSinceEpoch);
 
   DateTime _clampTimestamp(DateTime timestamp) =>
       timestamp.isBefore(sessionStart) ? sessionStart : timestamp;
@@ -306,10 +306,12 @@ DetectionRecord copyDetectionRecord(
   DateTime? clipTimestamp,
   bool withoutClip = false,
 }) {
-  final nextClipPath =
-      withoutClip ? null : audioClipPath ?? existing.audioClipPath;
-  final nextClipTimestamp =
-      nextClipPath == null ? null : (clipTimestamp ?? existing.clipTimestamp);
+  final nextClipPath = withoutClip
+      ? null
+      : audioClipPath ?? existing.audioClipPath;
+  final nextClipTimestamp = nextClipPath == null
+      ? null
+      : (clipTimestamp ?? existing.clipTimestamp);
   return DetectionRecord(
     scientificName: existing.scientificName,
     commonName: existing.commonName,

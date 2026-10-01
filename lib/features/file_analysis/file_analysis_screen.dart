@@ -138,24 +138,23 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder:
-          (_) => AppHelpBottomSheet(
-            title: l10n.fileAnalysisHelpTitle,
-            sections: [
-              AppHelpSection(
-                icon: AppIcons.audioFileRounded,
-                body: l10n.fileAnalysisHelpSteps,
-              ),
-              AppHelpSection(
-                icon: AppIcons.locationOnRounded,
-                body: l10n.fileAnalysisHelpLocation,
-              ),
-              AppHelpSection(
-                icon: AppIcons.playArrowRounded,
-                body: l10n.fileAnalysisHelpAnalyze,
-              ),
-            ],
+      builder: (_) => AppHelpBottomSheet(
+        title: l10n.fileAnalysisHelpTitle,
+        sections: [
+          AppHelpSection(
+            icon: AppIcons.audioFileRounded,
+            body: l10n.fileAnalysisHelpSteps,
           ),
+          AppHelpSection(
+            icon: AppIcons.locationOnRounded,
+            body: l10n.fileAnalysisHelpLocation,
+          ),
+          AppHelpSection(
+            icon: AppIcons.playArrowRounded,
+            body: l10n.fileAnalysisHelpAnalyze,
+          ),
+        ],
+      ),
     );
   }
 
@@ -603,14 +602,13 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
         title: l10n.fileAnalysisMode,
         step: _currentStep,
         totalSteps: 4,
-        leading:
-            isAnalyzing
-                ? IconButton(
-                  icon: const Icon(AppIcons.close),
-                  tooltip: l10n.tooltipCancelAnalysis,
-                  onPressed: _confirmCancel,
-                )
-                : null,
+        leading: isAnalyzing
+            ? IconButton(
+                icon: const Icon(AppIcons.close),
+                tooltip: l10n.tooltipCancelAnalysis,
+                onPressed: _confirmCancel,
+              )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(AppIcons.helpOutlineRounded, size: 20),
@@ -622,10 +620,9 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder:
-                      (_) => const SettingsScreen(
-                        settingsContext: SettingsContext.fileAnalysis,
-                      ),
+                  builder: (_) => const SettingsScreen(
+                    settingsContext: SettingsContext.fileAnalysis,
+                  ),
                 ),
               );
             },
@@ -634,13 +631,13 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
         ],
         showFooter: !isAnalyzing && analysisState != FileAnalysisState.complete,
         onBack: _currentStep > 0 ? () => _goToStep(_currentStep - 1) : null,
-        onNext:
-            _currentStep == 3
-                ? _startAnalysis
-                : (_canProceed ? () => _goToStep(_currentStep + 1) : null),
+        onNext: _currentStep == 3
+            ? _startAnalysis
+            : (_canProceed ? () => _goToStep(_currentStep + 1) : null),
         backLabel: l10n.fileAnalysisBack,
-        nextLabel:
-            _currentStep == 3 ? l10n.fileAnalysisStart : l10n.fileAnalysisNext,
+        nextLabel: _currentStep == 3
+            ? l10n.fileAnalysisStart
+            : l10n.fileAnalysisNext,
         nextIcon: _currentStep == 3 ? AppIcons.playArrow : null,
         child: PageView(
           controller: _pageController,
@@ -694,14 +691,14 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
               sensitivity: _sensitivity,
               confidenceThreshold: _confidenceThreshold,
               speciesFilterMode: _speciesFilterMode,
-              onWindowDurationChanged:
-                  (v) => setState(() => _windowDuration = v),
+              onWindowDurationChanged: (v) =>
+                  setState(() => _windowDuration = v),
               onOverlapChanged: (v) => setState(() => _overlap = v),
               onSensitivityChanged: (v) => setState(() => _sensitivity = v),
-              onConfidenceChanged:
-                  (v) => setState(() => _confidenceThreshold = v),
-              onFilterModeChanged:
-                  (v) => setState(() => _speciesFilterMode = v),
+              onConfidenceChanged: (v) =>
+                  setState(() => _confidenceThreshold = v),
+              onFilterModeChanged: (v) =>
+                  setState(() => _speciesFilterMode = v),
             ),
             _AnalysisStep(
               state: analysisState,
@@ -983,10 +980,9 @@ class _LocationStep extends StatelessWidget {
         children: [
           SettingHelpTitle(
             title: l10n.fileAnalysisLocationTitle,
-            helpBody:
-                choice == _LocationChoice.manual
-                    ? l10n.settingsHelpManualCoordinates
-                    : l10n.fileAnalysisLocationSubtitle,
+            helpBody: choice == _LocationChoice.manual
+                ? l10n.settingsHelpManualCoordinates
+                : l10n.fileAnalysisLocationSubtitle,
             style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -1102,11 +1098,10 @@ class _LocationStep extends StatelessWidget {
               onPressed: () async {
                 final result = await Navigator.of(context).push<LatLng>(
                   MaterialPageRoute<LatLng>(
-                    builder:
-                        (_) => MapPickerScreen(
-                          initialLat: double.tryParse(latController.text),
-                          initialLon: double.tryParse(lonController.text),
-                        ),
+                    builder: (_) => MapPickerScreen(
+                      initialLat: double.tryParse(latController.text),
+                      initialLon: double.tryParse(lonController.text),
+                    ),
                   ),
                 );
                 if (result != null) {
@@ -1160,10 +1155,9 @@ class _DatePickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
-    final label =
-        selectedDate != null
-            ? '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}'
-            : l10n.fileAnalysisDateToday;
+    final label = selectedDate != null
+        ? '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}'
+        : l10n.fileAnalysisDateToday;
 
     return Row(
       children: [
@@ -1230,8 +1224,9 @@ class _ParametersStep extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     const windowDurationValues = [1, 3, 5, 7, 10, 15];
     final windowDurationIndex = windowDurationValues.indexOf(windowDuration);
-    final effectiveWindowDurationIndex =
-        windowDurationIndex >= 0 ? windowDurationIndex : 1;
+    final effectiveWindowDurationIndex = windowDurationIndex >= 0
+        ? windowDurationIndex
+        : 1;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -1263,9 +1258,8 @@ class _ParametersStep extends StatelessWidget {
               max: (windowDurationValues.length - 1).toDouble(),
               divisions: windowDurationValues.length - 1,
               label: '${windowDurationValues[effectiveWindowDurationIndex]}s',
-              onChanged:
-                  (v) =>
-                      onWindowDurationChanged(windowDurationValues[v.round()]),
+              onChanged: (v) =>
+                  onWindowDurationChanged(windowDurationValues[v.round()]),
             ),
           ),
 
@@ -1579,9 +1573,9 @@ class _AnalysisStepState extends State<_AnalysisStep> {
               child: Text(
                 progress.totalWindows > 0
                     ? l10n.fileAnalysisProgressWindows(
-                      progress.currentWindow,
-                      progress.totalWindows,
-                    )
+                        progress.currentWindow,
+                        progress.totalWindows,
+                      )
                     : l10n.fileAnalysisReading,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,

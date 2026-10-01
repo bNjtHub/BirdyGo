@@ -348,8 +348,9 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
   void _refreshCountdown() {
     if (!mounted || _finalizing || _countEndTime == null) return;
     final remaining = _countEndTime!.difference(DateTime.now());
-    _remainingNotifier.value =
-        remaining > Duration.zero ? remaining : Duration.zero;
+    _remainingNotifier.value = remaining > Duration.zero
+        ? remaining
+        : Duration.zero;
     if (_backgroundReady && remaining > Duration.zero) {
       final minutesLeft = (remaining.inSeconds + 59) ~/ 60;
       if (minutesLeft != _lastNotifiedRemainingMinutes) {
@@ -402,12 +403,11 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
 
           final l10n = AppLocalizations.of(context)!;
           final remaining = _countEndTime?.difference(DateTime.now());
-          final minutesLeft =
-              remaining == null
-                  ? widget.durationMinutes
-                  : ((remaining.inSeconds + 59) ~/ 60)
-                      .clamp(1, widget.durationMinutes)
-                      .toInt();
+          final minutesLeft = remaining == null
+              ? widget.durationMinutes
+              : ((remaining.inSeconds + 59) ~/ 60)
+                    .clamp(1, widget.durationMinutes)
+                    .toInt();
           _backgroundReady = await _backgroundService.start(l10n, minutesLeft);
           if (!mounted || _finalizing) return;
           if (!widget.continueWithScreenOff) {
@@ -600,8 +600,8 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         );
         navigator.push(
           MaterialPageRoute<void>(
-            builder:
-                (_) => SessionReviewScreen(session: session, autoSaved: saved),
+            builder: (_) =>
+                SessionReviewScreen(session: session, autoSaved: saved),
           ),
         );
       }
@@ -698,41 +698,35 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
     final captureState = ref.watch(captureStateProvider);
     final isCapturing = captureState == CaptureState.capturing;
     final isActive = liveState == LiveState.active;
-    final currentDetections =
-        isActive
-            ? ref.watch(sessionDetectionsProvider)
-            : const <DetectionRecord>[];
-    final allDetections =
-        isActive
-            ? ref.watch(allSessionDetectionsProvider)
-            : const <DetectionRecord>[];
+    final currentDetections = isActive
+        ? ref.watch(sessionDetectionsProvider)
+        : const <DetectionRecord>[];
+    final allDetections = isActive
+        ? ref.watch(allSessionDetectionsProvider)
+        : const <DetectionRecord>[];
     final showAllDetectedSpecies = ref.watch(showAllDetectedSpeciesProvider);
     final detectedSpeciesSortMode = ref.watch(detectedSpeciesSortModeProvider);
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
-    final detections =
-        isActive
-            ? buildLiveDetectionDisplayList(
-              currentDetections: currentDetections,
-              sessionDetections: allDetections,
-              showAllDetectedSpecies: showAllDetectedSpecies,
-              sortMode: detectedSpeciesSortMode,
-              localizedCommonName:
-                  (detection) =>
-                      taxonomy
-                          ?.lookup(detection.scientificName)
-                          ?.commonNameForLocale(speciesLocale) ??
-                      detection.commonName,
-            )
-            : const <DetectionRecord>[];
-    final activeDetections =
-        showAllDetectedSpecies
-            ? (Set<DetectionRecord>.identity()..addAll(currentDetections))
-            : null;
-    final speciesDetectionCounts =
-        showAllDetectedSpecies
-            ? buildSpeciesDetectionCounts(allDetections)
-            : null;
+    final detections = isActive
+        ? buildLiveDetectionDisplayList(
+            currentDetections: currentDetections,
+            sessionDetections: allDetections,
+            showAllDetectedSpecies: showAllDetectedSpecies,
+            sortMode: detectedSpeciesSortMode,
+            localizedCommonName: (detection) =>
+                taxonomy
+                    ?.lookup(detection.scientificName)
+                    ?.commonNameForLocale(speciesLocale) ??
+                detection.commonName,
+          )
+        : const <DetectionRecord>[];
+    final activeDetections = showAllDetectedSpecies
+        ? (Set<DetectionRecord>.identity()..addAll(currentDetections))
+        : null;
+    final speciesDetectionCounts = showAllDetectedSpecies
+        ? buildSpeciesDetectionCounts(allDetections)
+        : null;
 
     // Hot-apply tunable settings to the running point count: changes
     // made on the Settings screen mid-count are pushed straight to the
@@ -815,26 +809,23 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
 
     final statusBar = ValueListenableBuilder<Duration>(
       valueListenable: _remainingNotifier,
-      builder:
-          (context, remaining, _) => _CountdownStatusBar(
-            remaining: remaining,
-            totalDuration: Duration(minutes: widget.durationMinutes),
-            liveState: liveState,
-            onStop:
-                _finalizing
-                    ? null
-                    : _started
-                    ? _confirmStopEarly
-                    : () => Navigator.of(context).pop(),
-          ),
+      builder: (context, remaining, _) => _CountdownStatusBar(
+        remaining: remaining,
+        totalDuration: Duration(minutes: widget.durationMinutes),
+        liveState: liveState,
+        onStop: _finalizing
+            ? null
+            : _started
+            ? _confirmStopEarly
+            : () => Navigator.of(context).pop(),
+      ),
     );
     final progressBar = ValueListenableBuilder<Duration>(
       valueListenable: _remainingNotifier,
-      builder:
-          (context, remaining, _) => _CountdownProgressBar(
-            remaining: remaining,
-            totalDuration: Duration(minutes: widget.durationMinutes),
-          ),
+      builder: (context, remaining, _) => _CountdownProgressBar(
+        remaining: remaining,
+        totalDuration: Duration(minutes: widget.durationMinutes),
+      ),
     );
     final spectrogram = Container(
       color: theme.colorScheme.surfaceContainerLowest,
@@ -879,7 +870,10 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
                 Expanded(
                   flex: 1,
                   child: Column(
-                    children: [Expanded(child: spectrogram), sessionInfo],
+                    children: [
+                      Expanded(child: spectrogram),
+                      sessionInfo,
+                    ],
                   ),
                 ),
                 Expanded(flex: 1, child: detectionList),
@@ -950,53 +944,50 @@ class _CountdownStatusBar extends StatelessWidget {
           // Countdown timer (center).
           Expanded(
             child: Center(
-              child:
-                  isLoading
-                      ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: theme.colorScheme.onSurface.withAlpha(153),
-                            ),
+              child: isLoading
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.onSurface.withAlpha(153),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.statusLoadingModel,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withAlpha(153),
-                            ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.statusLoadingModel,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(153),
                           ),
-                        ],
-                      )
-                      : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            AppIcons.timerRounded,
-                            size: 18,
-                            color:
-                                remaining.inSeconds <= 30
-                                    ? theme.colorScheme.error
-                                    : theme.colorScheme.primary,
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          AppIcons.timerRounded,
+                          size: 18,
+                          color: remaining.inSeconds <= 30
+                              ? theme.colorScheme.error
+                              : theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.pointCountTimeRemaining(minutes, seconds),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'monospace',
+                            color: remaining.inSeconds <= 30
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.primary,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            l10n.pointCountTimeRemaining(minutes, seconds),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'monospace',
-                              color:
-                                  remaining.inSeconds <= 30
-                                      ? theme.colorScheme.error
-                                      : theme.colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
             ),
           ),
 
@@ -1024,10 +1015,9 @@ class _CountdownStatusBar extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder:
-                      (_) => const SettingsScreen(
-                        settingsContext: SettingsContext.pointCount,
-                      ),
+                  builder: (_) => const SettingsScreen(
+                    settingsContext: SettingsContext.pointCount,
+                  ),
                 ),
               );
             },
@@ -1046,24 +1036,23 @@ void _showPointCountLiveHelp(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder:
-        (_) => AppHelpBottomSheet(
-          title: l10n.pointCountLiveHelpTitle,
-          sections: [
-            AppHelpSection(
-              icon: AppIcons.timerRounded,
-              body: l10n.pointCountLiveHelpTimer,
-            ),
-            AppHelpSection(
-              icon: AppIcons.infoOutline,
-              body: l10n.pointCountLiveHelpDetections,
-            ),
-            AppHelpSection(
-              icon: AppIcons.stopRounded,
-              body: l10n.pointCountLiveHelpFinish,
-            ),
-          ],
+    builder: (_) => AppHelpBottomSheet(
+      title: l10n.pointCountLiveHelpTitle,
+      sections: [
+        AppHelpSection(
+          icon: AppIcons.timerRounded,
+          body: l10n.pointCountLiveHelpTimer,
         ),
+        AppHelpSection(
+          icon: AppIcons.infoOutline,
+          body: l10n.pointCountLiveHelpDetections,
+        ),
+        AppHelpSection(
+          icon: AppIcons.stopRounded,
+          body: l10n.pointCountLiveHelpFinish,
+        ),
+      ],
+    ),
   );
 }
 
@@ -1084,10 +1073,9 @@ class _CountdownProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final elapsed = totalDuration - remaining;
-    final progress =
-        totalDuration.inSeconds > 0
-            ? (elapsed.inSeconds / totalDuration.inSeconds).clamp(0.0, 1.0)
-            : 0.0;
+    final progress = totalDuration.inSeconds > 0
+        ? (elapsed.inSeconds / totalDuration.inSeconds).clamp(0.0, 1.0)
+        : 0.0;
 
     return LinearProgressIndicator(
       value: progress,
@@ -1130,11 +1118,10 @@ class _PointCountInfoBar extends StatelessWidget {
     }
 
     final totalDetections = controller.sessionDetections.length;
-    final totalUnique =
-        controller.sessionDetections
-            .map((d) => d.scientificName)
-            .toSet()
-            .length;
+    final totalUnique = controller.sessionDetections
+        .map((d) => d.scientificName)
+        .toSet()
+        .length;
 
     final parts = <String>[];
     if (currentDetectionCount > 0) {

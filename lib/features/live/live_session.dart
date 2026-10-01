@@ -229,14 +229,14 @@ class SessionSettings {
       ignoreMammals: json['ignoreMammals'] as bool?,
       ignoreAmphibians: json['ignoreAmphibians'] as bool?,
       ignoreInsects: json['ignoreInsects'] as bool?,
-      ignoreCommonGeoScoreCutoff:
-          (json['ignoreCommonGeoScoreCutoff'] as num?)?.toDouble(),
+      ignoreCommonGeoScoreCutoff: (json['ignoreCommonGeoScoreCutoff'] as num?)
+          ?.toDouble(),
       poolingMode: json['poolingMode'] as String?,
       poolingWindows: (json['poolingWindows'] as num?)?.toInt(),
       poolingMaxAgeSeconds: (json['poolingMaxAgeSeconds'] as num?)?.toDouble(),
       poolingAlpha: (json['poolingAlpha'] as num?)?.toDouble(),
-      poolingMinSupportWindows:
-          (json['poolingMinSupportWindows'] as num?)?.toInt(),
+      poolingMinSupportWindows: (json['poolingMinSupportWindows'] as num?)
+          ?.toInt(),
       poolingSupportThresholdFraction:
           (json['poolingSupportThresholdFraction'] as num?)?.toDouble(),
       poolingSupportThresholdFloor:
@@ -663,15 +663,13 @@ class DetectionRecord {
       commonName: json['commonName'] as String,
       confidence: (json['confidence'] as num).toDouble(),
       timestamp: DateTime.parse(json['timestamp'] as String),
-      endTimestamp:
-          json['endTimestamp'] != null
-              ? DateTime.parse(json['endTimestamp'] as String)
-              : null,
+      endTimestamp: json['endTimestamp'] != null
+          ? DateTime.parse(json['endTimestamp'] as String)
+          : null,
       audioClipPath: audioClipPath,
-      clipTimestamp:
-          audioClipPath != null && json['clipTimestamp'] != null
-              ? DateTime.parse(json['clipTimestamp'] as String)
-              : null,
+      clipTimestamp: audioClipPath != null && json['clipTimestamp'] != null
+          ? DateTime.parse(json['clipTimestamp'] as String)
+          : null,
       source: switch (json['source'] as String?) {
         'manual' => DetectionSource.manual,
         'manualGlobal' => DetectionSource.manualGlobal,
@@ -693,12 +691,11 @@ class DetectionRecord {
       // `confirmedAt`, where a non-null value meant confirmed. Prefer the
       // explicit status when present and fall back to that legacy shape so
       // older sessions keep their confirmations.
-      reviewStatus:
-          json['reviewStatus'] != null
-              ? ReviewStatus.fromName(json['reviewStatus'] as String?)
-              : (json['confirmedAt'] != null
-                  ? ReviewStatus.confirmed
-                  : ReviewStatus.unreviewed),
+      reviewStatus: json['reviewStatus'] != null
+          ? ReviewStatus.fromName(json['reviewStatus'] as String?)
+          : (json['confirmedAt'] != null
+                ? ReviewStatus.confirmed
+                : ReviewStatus.unreviewed),
       reviewedAt: switch (json['reviewedAt'] ?? json['confirmedAt']) {
         final String stamp => DateTime.parse(stamp),
         _ => null,
@@ -874,14 +871,12 @@ class AruCycleMetadata {
       index: (json['index'] as num).toInt(),
       plannedStart: DateTime.parse(json['plannedStart'] as String),
       plannedEnd: DateTime.parse(json['plannedEnd'] as String),
-      actualStart:
-          json['actualStart'] != null
-              ? DateTime.parse(json['actualStart'] as String)
-              : null,
-      actualEnd:
-          json['actualEnd'] != null
-              ? DateTime.parse(json['actualEnd'] as String)
-              : null,
+      actualStart: json['actualStart'] != null
+          ? DateTime.parse(json['actualStart'] as String)
+          : null,
+      actualEnd: json['actualEnd'] != null
+          ? DateTime.parse(json['actualEnd'] as String)
+          : null,
       status: AruCycleStatus.values.firstWhere(
         (s) => s.name == (json['status'] as String?),
         orElse: () => AruCycleStatus.scheduled,
@@ -984,14 +979,13 @@ class AruDeploymentMetadata {
       scheduleStart: DateTime.parse(json['scheduleStart'] as String),
       cycleDurationSeconds: (json['cycleDurationSeconds'] as num).toInt(),
       repeatIntervalSeconds: (json['repeatIntervalSeconds'] as num).toInt(),
-      scheduleEnd:
-          json['scheduleEnd'] != null
-              ? DateTime.parse(json['scheduleEnd'] as String)
-              : null,
+      scheduleEnd: json['scheduleEnd'] != null
+          ? DateTime.parse(json['scheduleEnd'] as String)
+          : null,
       maxCycles: (json['maxCycles'] as num?)?.toInt(),
       lowBatteryStopPercent: (json['lowBatteryStopPercent'] as num?)?.toInt(),
-      lowBatteryResumePercent:
-          (json['lowBatteryResumePercent'] as num?)?.toInt(),
+      lowBatteryResumePercent: (json['lowBatteryResumePercent'] as num?)
+          ?.toInt(),
       dielPattern: AruDielPattern.values.firstWhere(
         (p) => p.name == (json['dielPattern'] as String?),
         orElse: () => AruDielPattern.anyTime,
@@ -1269,12 +1263,11 @@ class LiveSession {
     // wall-clock span, then extend to cover any detection that ends later.
     final recorded = _recordedDurationSeconds?.toDouble();
     final end = endTime;
-    var expected =
-        recorded != null && recorded > 0
-            ? recorded
-            : end == null
-            ? 0.0
-            : end.difference(startTime).inMicroseconds / 1e6;
+    var expected = recorded != null && recorded > 0
+        ? recorded
+        : end == null
+        ? 0.0
+        : end.difference(startTime).inMicroseconds / 1e6;
     for (final detection in detections) {
       final eventEnd = detection.endTimestamp ?? detection.timestamp;
       final rel = absoluteToRelative(eventEnd);
@@ -1364,10 +1357,9 @@ class LiveSession {
       ),
       sessionNumber: json['sessionNumber'] as int?,
       startTime: DateTime.parse(json['startTime'] as String),
-      endTime:
-          json['endTime'] != null
-              ? DateTime.parse(json['endTime'] as String)
-              : null,
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
       detections:
           (json['detections'] as List<dynamic>?)
               ?.map((d) => DetectionRecord.fromJson(d as Map<String, dynamic>))
@@ -1406,27 +1398,23 @@ class LiveSession {
       distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
       transectId: json['transectId'] as String?,
       observerName: json['observerName'] as String?,
-      stopReason:
-          json['stopReason'] != null
-              ? SessionStopReason.values.firstWhere(
-                (r) => r.name == (json['stopReason'] as String),
-                orElse: () => SessionStopReason.manual,
-              )
-              : null,
+      stopReason: json['stopReason'] != null
+          ? SessionStopReason.values.firstWhere(
+              (r) => r.name == (json['stopReason'] as String),
+              orElse: () => SessionStopReason.manual,
+            )
+          : null,
       stopReasonValue: json['stopReasonValue'] as num?,
-      recordedDurationSeconds:
-          (json['recordedDurationSeconds'] as num?)?.toInt(),
+      recordedDurationSeconds: (json['recordedDurationSeconds'] as num?)
+          ?.toInt(),
       segments:
           (json['segments'] as List<dynamic>?)
               ?.map((s) => SessionSegment.fromJson(s as Map<String, dynamic>))
               .toList() ??
           [],
-      aruMetadata:
-          json['aru'] != null
-              ? AruDeploymentMetadata.fromJson(
-                json['aru'] as Map<String, dynamic>,
-              )
-              : null,
+      aruMetadata: json['aru'] != null
+          ? AruDeploymentMetadata.fromJson(json['aru'] as Map<String, dynamic>)
+          : null,
     )..weather = WeatherSnapshot.fromJson(json['weather']);
   }
 
@@ -1555,10 +1543,9 @@ class LiveSession {
 
     // A session with no segments has the trivial timeline `ts - startTime`;
     // model it as one synthetic segment so both shapes share the walk below.
-    final source =
-        segments.isNotEmpty
-            ? List<SessionSegment>.of(segments)
-            : [SessionSegment(startTime: startTime, endTime: endTime)];
+    final source = segments.isNotEmpty
+        ? List<SessionSegment>.of(segments)
+        : [SessionSegment(startTime: startTime, endTime: endTime)];
 
     // The recorder can flush a small tail beyond the session clock. The
     // caller passes the end of the audio that was actually written, so extend
@@ -1568,9 +1555,9 @@ class LiveSession {
     var sourceSeconds = 0.0;
     for (final segment in source) {
       final length =
-          _effectiveSegmentEnd(
-            segment,
-          ).difference(segment.startTime).inMicroseconds /
+          _effectiveSegmentEnd(segment)
+              .difference(segment.startTime)
+              .inMicroseconds /
           1e6;
       if (length > 0) sourceSeconds += length;
     }
@@ -1581,9 +1568,8 @@ class LiveSession {
         clockTailSeconds <= maxRecorderClockTailSeconds) {
       final lastIndex = source.length - 1;
       final last = source[lastIndex];
-      final extendedEnd = _effectiveSegmentEnd(
-        last,
-      ).add(Duration(microseconds: (clockTailSeconds * 1e6).round()));
+      final extendedEnd = _effectiveSegmentEnd(last)
+          .add(Duration(microseconds: (clockTailSeconds * 1e6).round()));
       source[lastIndex] = SessionSegment(
         startTime: last.startTime,
         endTime: extendedEnd,
@@ -1646,10 +1632,9 @@ class LiveSession {
       for (final detection in detections)
         if (() {
           final detectionStart = sourceRelative(detection.timestamp);
-          final detectionEnd =
-              detection.endTimestamp == null
-                  ? detectionStart + windowSec
-                  : sourceRelative(detection.endTimestamp!);
+          final detectionEnd = detection.endTimestamp == null
+              ? detectionStart + windowSec
+              : sourceRelative(detection.endTimestamp!);
           return detectionEnd > start && detectionStart < end;
         }())
           detection,
@@ -1672,8 +1657,9 @@ class LiveSession {
       // Keep retained markers aligned with the shorter file. Markers whose
       // audio was removed become session-global so their note or voice memo
       // is preserved without pointing at an unrelated sample.
-      final rebasedOffset =
-          offset >= start && offset < end ? offset - start : null;
+      final rebasedOffset = offset >= start && offset < end
+          ? offset - start
+          : null;
       annotations[i] = SessionAnnotation(
         text: annotation.text,
         createdAt: annotation.createdAt,
@@ -1771,10 +1757,9 @@ class SessionSegment {
   factory SessionSegment.fromJson(Map<String, dynamic> json) {
     return SessionSegment(
       startTime: DateTime.parse(json['startTime'] as String),
-      endTime:
-          json['endTime'] != null
-              ? DateTime.parse(json['endTime'] as String)
-              : null,
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
     );
   }
 

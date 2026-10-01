@@ -340,12 +340,11 @@ class LiveController {
       debugPrint('[LiveController] labels loaded (${labelsCsv.length} chars)');
 
       final blacklistFile = _config!.scoreBlacklistFile;
-      final scoreBlacklistJson =
-          blacklistFile == null
-              ? null
-              : await rootBundle.loadString(
-                '${AppConstants.modelAssetsDir}/$blacklistFile',
-              );
+      final scoreBlacklistJson = blacklistFile == null
+          ? null
+          : await rootBundle.loadString(
+              '${AppConstants.modelAssetsDir}/$blacklistFile',
+            );
 
       // Start isolate with file path (not bytes).
       await _isolate.start(
@@ -467,10 +466,9 @@ class LiveController {
         gainLinear: gainLinear,
         highPassHz: highPassHz,
         recordingMode: recordingMode.name,
-        clipContextSeconds:
-            recordingMode == RecordingMode.detectionsOnly
-                ? recordingService.clipContextSeconds
-                : 0,
+        clipContextSeconds: recordingMode == RecordingMode.detectionsOnly
+            ? recordingService.clipContextSeconds
+            : 0,
         recordingFormat: recordingFormat,
         targetDurationSeconds: targetDurationSeconds,
       ),
@@ -843,12 +841,11 @@ class LiveController {
       // Restrict to the intersection of both models: only keep detections
       // for species the geo-model also knows, regardless of filter mode.
       final geoNames = _geoModelSpeciesNames;
-      final filteredDetections =
-          geoNames == null
-              ? speciesFiltered
-              : speciesFiltered
-                  .where((d) => geoNames.contains(d.species.scientificName))
-                  .toList();
+      final filteredDetections = geoNames == null
+          ? speciesFiltered
+          : speciesFiltered
+                .where((d) => geoNames.contains(d.species.scientificName))
+                .toList();
 
       // Update the live detection list (replaced each cycle, like the PWA).
       // Each species appears at most once with its current score.

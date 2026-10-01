@@ -777,63 +777,54 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       var selectedMinutes = ref.read(liveBackgroundMaxMinutesProvider);
       await showDialog<void>(
         context: context,
-        builder:
-            (dialogContext) => StatefulBuilder(
-              builder:
-                  (dialogContext, setDialogState) => AlertDialog(
-                    scrollable: true,
-                    title: Text(l10n.liveBackgroundTipTitle),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.liveBackgroundTipBody),
-                        const SizedBox(height: 20),
-                        Text(
-                          l10n.settingsLiveBackgroundMaxTime,
-                          style: Theme.of(dialogContext).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final minutes
-                                in liveBackgroundMaxMinuteOptions)
-                              ChoiceChip(
-                                label: Text(
-                                  l10n.pointCountDurationMinutes(minutes),
-                                ),
-                                selected: selectedMinutes == minutes,
-                                onSelected:
-                                    (_) => setDialogState(
-                                      () => selectedMinutes = minutes,
-                                    ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: Text(l10n.liveBackgroundTipNotNow),
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, setDialogState) => AlertDialog(
+            scrollable: true,
+            title: Text(l10n.liveBackgroundTipTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.liveBackgroundTipBody),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.settingsLiveBackgroundMaxTime,
+                  style: Theme.of(dialogContext).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final minutes in liveBackgroundMaxMinuteOptions)
+                      ChoiceChip(
+                        label: Text(l10n.pointCountDurationMinutes(minutes)),
+                        selected: selectedMinutes == minutes,
+                        onSelected: (_) =>
+                            setDialogState(() => selectedMinutes = minutes),
                       ),
-                      FilledButton(
-                        onPressed: () {
-                          ref
-                              .read(liveBackgroundMaxMinutesProvider.notifier)
-                              .set(selectedMinutes);
-                          ref
-                              .read(liveBackgroundEnabledProvider.notifier)
-                              .set(true);
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: Text(l10n.liveBackgroundTipEnable),
-                      ),
-                    ],
-                  ),
+                  ],
+                ),
+              ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.liveBackgroundTipNotNow),
+              ),
+              FilledButton(
+                onPressed: () {
+                  ref
+                      .read(liveBackgroundMaxMinutesProvider.notifier)
+                      .set(selectedMinutes);
+                  ref.read(liveBackgroundEnabledProvider.notifier).set(true);
+                  Navigator.of(dialogContext).pop();
+                },
+                child: Text(l10n.liveBackgroundTipEnable),
+              ),
+            ],
+          ),
+        ),
       );
       await prefs.setBool(PrefKeys.liveBackgroundTipShown, true);
     } finally {
@@ -866,21 +857,20 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     final shouldContinue = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text(l10n.sessionDurationWarningTitle),
-            content: Text(l10n.sessionDurationWarningMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text(l10n.sessionStopConfirm),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: Text(l10n.sessionContinue),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.sessionDurationWarningTitle),
+        content: Text(l10n.sessionDurationWarningMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.sessionStopConfirm),
           ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.sessionContinue),
+          ),
+        ],
+      ),
     );
     if (!mounted) return;
     if (shouldContinue != true) {
@@ -1010,8 +1000,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         );
         navigator.push(
           MaterialPageRoute<void>(
-            builder:
-                (_) => SessionReviewScreen(session: session, autoSaved: saved),
+            builder: (_) =>
+                SessionReviewScreen(session: session, autoSaved: saved),
           ),
         );
       }
@@ -1044,41 +1034,35 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
     ref.listen<int>(liveBackgroundMaxMinutesProvider, (_, _) {
       unawaited(_syncBackgroundSupport());
     });
-    final currentDetections =
-        (isActive || isPaused)
-            ? ref.watch(sessionDetectionsProvider)
-            : const <DetectionRecord>[];
-    final allDetections =
-        (isActive || isPaused)
-            ? ref.watch(allSessionDetectionsProvider)
-            : const <DetectionRecord>[];
+    final currentDetections = (isActive || isPaused)
+        ? ref.watch(sessionDetectionsProvider)
+        : const <DetectionRecord>[];
+    final allDetections = (isActive || isPaused)
+        ? ref.watch(allSessionDetectionsProvider)
+        : const <DetectionRecord>[];
     final showAllDetectedSpecies = ref.watch(showAllDetectedSpeciesProvider);
     final detectedSpeciesSortMode = ref.watch(detectedSpeciesSortModeProvider);
     final speciesLocale = ref.watch(effectiveSpeciesLocaleProvider);
     final taxonomy = ref.watch(taxonomyServiceProvider).value;
-    final detections =
-        (isActive || isPaused)
-            ? buildLiveDetectionDisplayList(
-              currentDetections: currentDetections,
-              sessionDetections: allDetections,
-              showAllDetectedSpecies: showAllDetectedSpecies,
-              sortMode: detectedSpeciesSortMode,
-              localizedCommonName:
-                  (detection) =>
-                      taxonomy
-                          ?.lookup(detection.scientificName)
-                          ?.commonNameForLocale(speciesLocale) ??
-                      detection.commonName,
-            )
-            : const <DetectionRecord>[];
-    final activeDetections =
-        showAllDetectedSpecies
-            ? (Set<DetectionRecord>.identity()..addAll(currentDetections))
-            : null;
-    final speciesDetectionCounts =
-        showAllDetectedSpecies
-            ? buildSpeciesDetectionCounts(allDetections)
-            : null;
+    final detections = (isActive || isPaused)
+        ? buildLiveDetectionDisplayList(
+            currentDetections: currentDetections,
+            sessionDetections: allDetections,
+            showAllDetectedSpecies: showAllDetectedSpecies,
+            sortMode: detectedSpeciesSortMode,
+            localizedCommonName: (detection) =>
+                taxonomy
+                    ?.lookup(detection.scientificName)
+                    ?.commonNameForLocale(speciesLocale) ??
+                detection.commonName,
+          )
+        : const <DetectionRecord>[];
+    final activeDetections = showAllDetectedSpecies
+        ? (Set<DetectionRecord>.identity()..addAll(currentDetections))
+        : null;
+    final speciesDetectionCounts = showAllDetectedSpecies
+        ? buildSpeciesDetectionCounts(allDetections)
+        : null;
 
     // Hot-apply tunable settings to the running session: when the user
     // tweaks the confidence threshold or pooling window count from the
@@ -1174,10 +1158,9 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         MediaQuery.of(context).orientation == Orientation.landscape;
 
     final statusBar = _CompactStatusBar(liveState: liveState, ref: ref);
-    final errorBanner =
-        liveState == LiveState.error
-            ? _StatusBanner(liveState: liveState, ref: ref)
-            : null;
+    final errorBanner = liveState == LiveState.error
+        ? _StatusBanner(liveState: liveState, ref: ref)
+        : null;
     final spectrogram = Container(
       color: theme.colorScheme.surfaceContainerLowest,
       child: _LiveSpectrogram(isCapturing: isCapturing),
@@ -1221,7 +1204,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
                 Expanded(
                   flex: 1,
                   child: Column(
-                    children: [Expanded(child: spectrogram), sessionInfo],
+                    children: [
+                      Expanded(child: spectrogram),
+                      sessionInfo,
+                    ],
                   ),
                 ),
                 // Right: detection list
@@ -1340,10 +1326,9 @@ class _CompactStatusBar extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder:
-                      (_) => const SettingsScreen(
-                        settingsContext: SettingsContext.live,
-                      ),
+                  builder: (_) => const SettingsScreen(
+                    settingsContext: SettingsContext.live,
+                  ),
                 ),
               );
             },
@@ -1362,28 +1347,24 @@ void _showLiveHelp(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder:
-        (_) => AppHelpBottomSheet(
-          title: l10n.liveScreenHelpTitle,
-          sections: [
-            AppHelpSection(
-              icon: AppIcons.mic,
-              body: l10n.liveScreenHelpOverview,
-            ),
-            AppHelpSection(
-              icon: AppIcons.helpOutlineRounded,
-              body: l10n.liveScreenHelpControls,
-            ),
-            AppHelpSection(
-              icon: AppIcons.infoOutline,
-              body: l10n.liveScreenHelpInfoBar,
-            ),
-            AppHelpSection(
-              icon: AppIcons.libraryMusic,
-              body: l10n.liveScreenHelpDetections,
-            ),
-          ],
+    builder: (_) => AppHelpBottomSheet(
+      title: l10n.liveScreenHelpTitle,
+      sections: [
+        AppHelpSection(icon: AppIcons.mic, body: l10n.liveScreenHelpOverview),
+        AppHelpSection(
+          icon: AppIcons.helpOutlineRounded,
+          body: l10n.liveScreenHelpControls,
         ),
+        AppHelpSection(
+          icon: AppIcons.infoOutline,
+          body: l10n.liveScreenHelpInfoBar,
+        ),
+        AppHelpSection(
+          icon: AppIcons.libraryMusic,
+          body: l10n.liveScreenHelpDetections,
+        ),
+      ],
+    ),
   );
 }
 
@@ -1443,25 +1424,23 @@ class _CaptureButton extends StatelessWidget {
           shadowColor: bgColor.withAlpha(120),
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap:
-                isLoading
-                    ? null
-                    : () {
-                      HapticFeedback.lightImpact();
-                      onPressed();
-                    },
-            child:
-                isLoading
-                    ? Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    )
-                    : ExcludeSemantics(
-                      child: Icon(icon, color: iconColor, size: 28),
+            onTap: isLoading
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    onPressed();
+                  },
+            child: isLoading
+                ? Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: theme.colorScheme.onPrimary,
                     ),
+                  )
+                : ExcludeSemantics(
+                    child: Icon(icon, color: iconColor, size: 28),
+                  ),
           ),
         ),
       ),
@@ -1553,11 +1532,10 @@ class _SessionInfoBar extends ConsumerWidget {
     final totalDetections = controller.sessionDetections.length;
 
     // Unique species across the entire session (cumulative).
-    final totalUnique =
-        controller.sessionDetections
-            .map((d) => d.scientificName)
-            .toSet()
-            .length;
+    final totalUnique = controller.sessionDetections
+        .map((d) => d.scientificName)
+        .toSet()
+        .length;
 
     // Duration of the active session.
     int durationSec = 0;
@@ -1575,10 +1553,9 @@ class _SessionInfoBar extends ConsumerWidget {
         // so this matches the size reported by the session library card.
         // Falls back to 0 (omitted) when recording is off or the directory
         // doesn't exist yet.
-        future:
-            recordingMode == 'off'
-                ? Future.value(0)
-                : _readRecordingBytes(controller.recordingService.sessionDir),
+        future: recordingMode == 'off'
+            ? Future.value(0)
+            : _readRecordingBytes(controller.recordingService.sessionDir),
         builder: (context, snap) {
           final bytes = snap.data ?? 0;
           final List<String> parts = [];

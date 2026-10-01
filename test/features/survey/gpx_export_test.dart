@@ -176,45 +176,48 @@ void main() {
       expect(gpx, contains('</trk>'));
     });
 
-    test('exports waypoint and track height with reference and uncertainty', () {
-      final ts = DateTime.utc(2025, 7, 1, 8);
-      final session = _makeSurveySession(
-        detections: [
-          DetectionRecord(
-            scientificName: 'Turdus merula',
-            commonName: 'Eurasian Blackbird',
-            confidence: 0.9,
-            timestamp: ts,
-            latitude: 52.52,
-            longitude: 13.405,
-            altitude: 34.5,
-            altitudeAccuracy: 6,
-            altitudeReference: AltitudeReference.meanSeaLevel,
-            locationFixTime: ts,
-          ),
-        ],
-        gpsTrack: [
-          GpsPoint(
-            latitude: 52.52,
-            longitude: 13.405,
-            timestamp: ts,
-            altitude: 34.5,
-            altitudeAccuracy: 6,
-            altitudeReference: AltitudeReference.meanSeaLevel,
-          ),
-        ],
-      )..altitude = 34.5;
+    test(
+      'exports waypoint and track height with reference and uncertainty',
+      () {
+        final ts = DateTime.utc(2025, 7, 1, 8);
+        final session = _makeSurveySession(
+          detections: [
+            DetectionRecord(
+              scientificName: 'Turdus merula',
+              commonName: 'Eurasian Blackbird',
+              confidence: 0.9,
+              timestamp: ts,
+              latitude: 52.52,
+              longitude: 13.405,
+              altitude: 34.5,
+              altitudeAccuracy: 6,
+              altitudeReference: AltitudeReference.meanSeaLevel,
+              locationFixTime: ts,
+            ),
+          ],
+          gpsTrack: [
+            GpsPoint(
+              latitude: 52.52,
+              longitude: 13.405,
+              timestamp: ts,
+              altitude: 34.5,
+              altitudeAccuracy: 6,
+              altitudeReference: AltitudeReference.meanSeaLevel,
+            ),
+          ],
+        )..altitude = 34.5;
 
-      final gpx = buildGpxExport(session);
-      expect(gpx, contains('<wpt lat="52.52" lon="13.405">'));
-      expect(gpx, contains('<ele>34.5</ele>'));
-      expect(
-        gpx,
-        contains(
-          '<birdnet:altitude reference="meanSeaLevel" accuracyMeters="6.0" fixTime="2025-07-01T08:00:00.000Z">34.5</birdnet:altitude>',
-        ),
-      );
-    });
+        final gpx = buildGpxExport(session);
+        expect(gpx, contains('<wpt lat="52.52" lon="13.405">'));
+        expect(gpx, contains('<ele>34.5</ele>'));
+        expect(
+          gpx,
+          contains(
+            '<birdnet:altitude reference="meanSeaLevel" accuracyMeters="6.0" fixTime="2025-07-01T08:00:00.000Z">34.5</birdnet:altitude>',
+          ),
+        );
+      },
+    );
 
     test('no track element when gpsTrack is empty', () {
       final session = _makeSurveySession(gpsTrack: []);
