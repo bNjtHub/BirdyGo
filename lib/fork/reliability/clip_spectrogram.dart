@@ -2,9 +2,11 @@
 library;
 
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../design/birdy_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +15,30 @@ import '../../features/history/services/spectrogram_renderer.dart';
 import '../../features/recording/audio_decoder.dart';
 import '../../features/recording/native_audio_decoder.dart';
 import '../../shared/providers/settings_providers.dart';
+
+/// Decodes [path] and renders it off the UI isolate (the FFT of a whole clip
+/// would otherwise block a frame on every review card). Top level so the
+/// isolate closure captures only plain values, never the State.
+Future<SpectrogramPixels?> _renderClip(String path, String colorMapName) {
+  final token = RootIsolateToken.instance;
+  return Isolate.run(() async {
+    if (token != null) {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    }
+    final audio =
+        await AudioDecoder.canDecodeDart(path)
+            ? await AudioDecoder.decodeFile(path)
+            : await NativeAudioDecoder.decodeFile(path);
+    return renderSpectrogram(
+      audio,
+      targetSampleRate: AppConstants.sampleRate,
+      fftSize: 1024,
+      hop: 256,
+      maxDisplayBins: 256,
+      colorMapName: colorMapName,
+    );
+  });
+}
 
 /// Decodes [path] and draws its spectrogram; a neutral box meanwhile.
 class ClipSpectrogram extends ConsumerStatefulWidget {
@@ -37,17 +63,9 @@ class _ClipSpectrogramState extends ConsumerState<ClipSpectrogram> {
   Future<void> _render() async {
     try {
       if (!File(widget.path).existsSync()) return;
-      final audio =
-          await AudioDecoder.canDecodeDart(widget.path)
-              ? await AudioDecoder.decodeFile(widget.path)
-              : await NativeAudioDecoder.decodeFile(widget.path);
-      final pixels = renderSpectrogram(
-        audio,
-        targetSampleRate: AppConstants.sampleRate,
-        fftSize: 1024,
-        hop: 256,
-        maxDisplayBins: 256,
-        colorMapName: ref.read(colorMapProvider),
+      final pixels = await _renderClip(
+        widget.path,
+        ref.read(colorMapProvider),
       );
       if (pixels == null || !mounted) return;
       ui.decodeImageFromPixels(

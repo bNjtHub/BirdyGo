@@ -38,12 +38,6 @@ class YearPresence {
   bool presentInWeek(int index) =>
       weeks[index] >= kAbundanceInclusionThreshold;
 
-  /// Weekly bar heights from 0 to 1, relative to the species' best week.
-  List<double> get weekBars {
-    final top = weeks.isEmpty ? 0.0 : weeks.reduce((a, b) => a > b ? a : b);
-    return [for (final w in weeks) top <= 0 ? 0.0 : w / top];
-  }
-
   /// Arrival and departure read from the weeks (J7). Falls back to the
   /// month-based [span] when the weekly scores are unknown.
   WeekSpan get weekSpan {

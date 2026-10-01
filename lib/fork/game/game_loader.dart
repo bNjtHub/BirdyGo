@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/aru/aru_schedule.dart';
 import '../../features/explore/explore_providers.dart';
+import '../../features/live/live_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../data/observation_index.dart';
@@ -33,8 +34,10 @@ class GameLoader {
     weeklyScores,
     DateTime? Function(DateTime now)? challengeStartedAt,
     int Function()? fineEarCorrect,
+    String? Function()? activeSessionId,
     DateTime Function()? now,
   }) : _index = index,
+       _activeSessionId = activeSessionId ?? (() => null),
        _fineEarCorrect = fineEarCorrect ?? (() => 0),
        _challengeStartedAt = challengeStartedAt ?? ((_) => null),
        _presence = presence,
@@ -50,6 +53,7 @@ class GameLoader {
   final Future<Map<String, List<double>>?> Function(GamePosition) _weeklyScores;
   final DateTime? Function(DateTime now) _challengeStartedAt;
   final int Function() _fineEarCorrect;
+  final String? Function() _activeSessionId;
   final DateTime Function() _now;
 
   /// The facts; an index that cannot open gives an empty game.
@@ -70,8 +74,20 @@ class GameLoader {
     };
     final listenings = await index.listenings();
     final now = _now();
+    // Only the running listening counts up to now; an orphan without end
+    // counts up to its last detection.
+    final activeId = _activeSessionId();
     final listened = listenedDays([
-      for (final l in listenings) (l.start, l.end),
+      for (final l in listenings)
+        (
+          l.start,
+          listeningEnd(
+            end: l.end,
+            lastSeen: l.lastSeen,
+            active: l.id == activeId,
+            now: now,
+          ),
+        ),
     ]);
     final dawnIds = {
       for (final l in listenings)
@@ -240,6 +256,10 @@ final gameLoaderProvider = Provider<GameLoader>(
     },
     challengeStartedAt: ref.read(challengeStoreProvider).startedAt,
     fineEarCorrect: ref.read(fineEarStoreProvider).correct,
+    activeSessionId: () {
+      final session = ref.read(currentSessionProvider);
+      return session != null && session.isActive ? session.id : null;
+    },
     weeklyScores: (position) async {
       final model = await ref.read(geoModelProvider.future);
       return model.predictAllWeeks(

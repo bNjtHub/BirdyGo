@@ -38,7 +38,12 @@ import '../design/widgets/entrance.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../game/challenge_card.dart';
 import '../game/challenges.dart';
+import '../game/fine_ear.dart';
+import '../game/game_config.dart';
 import '../game/game_loader.dart';
+import '../game/game_progress.dart';
+import '../game/quiz_entry_row.dart';
+import '../game/quiz_playable.dart';
 import '../game/status_celebration.dart';
 import '../game/streak.dart';
 import '../profile/profile_screen.dart';
@@ -141,7 +146,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     onListen: _listen,
   );
 
-  void _open(Widget screen) => Navigator.of(
+  Future<void> _open(Widget screen) => Navigator.of(
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => screen));
 
@@ -190,7 +195,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
   }
 
   // FORK: J6g-c, the menu is now the « Plus » sheet (more_sheet.dart).
-  void _showMenu() => showMoreSheet(context, ref);
+  void _showMenu() =>
+      showMoreSheet(context, ref, toVerify: _snapshot?.toVerify); // FORK: null until loaded
 
   @override
   Widget build(BuildContext context) {
@@ -395,6 +401,16 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
     final cards = <(String, Widget)>[
       if (statusEntry() case final entry?) entry,
       todayEntry(),
+      if (ref.watch(quizPlayableProvider).value ?? false)
+        (
+          'quiz',
+          QuizEntryRow(
+            progress: BadgeProgress(
+              kind: BadgeKind.fineEar,
+              value: ref.watch(fineEarStoreProvider).correct(),
+            ),
+          ),
+        ),
       if (game?.facts.challenge case final challenge?)
         (
           'challenge',
@@ -475,7 +491,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       ToCheckBlock(
         key: const ValueKey('home-to-check-real'),
         count: toVerify,
-        onTap: () => _open(const QuickReviewScreen()),
+        // Refresh on return: the count must not wait for a listener event.
+        onTap: () => _open(const QuickReviewScreen()).then((_) => _reload()),
       ),
     );
   }
@@ -507,7 +524,14 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
           Padding(
             key: ValueKey('home-$key'),
             padding: EdgeInsets.only(
-              top: i == 0 && topBar == null ? 0 : BirdySpace.block,
+              // FORK: the day strip's 48 dp tap area already leaves 11 dp
+              // around its 26 dp pills, so it takes no extra block gap.
+              top:
+                  (i == 0 && topBar == null) ||
+                          key == 'day' ||
+                          (i > 0 && blocks[i - 1].$1 == 'day')
+                      ? 0
+                      : BirdySpace.block,
             ),
             child:
                 still || firstIndex + i >= BirdyMotion.staggerMaxItems

@@ -18,7 +18,9 @@ class LiveTableEntry {
     required this.record,
     required this.singing,
     bool? singingVisual,
-  }) : singingVisual = singingVisual ?? singing;
+    DetectionRecord? levelRecord,
+  }) : singingVisual = singingVisual ?? singing,
+       levelRecord = levelRecord ?? record;
 
   final String scientificName;
 
@@ -34,9 +36,20 @@ class LiveTableEntry {
   /// Start of the newest contact: the table is sorted on it.
   final DateTime lastHeard;
 
-  /// Record that gives the reliability: the running one while the species
-  /// sings, else the newest.
+  /// The running record while the species sings, else the newest. Its score
+  /// moves with every window: it drives the « chante » bars, not the level.
   final DetectionRecord record;
+
+  /// Record that gives the level (J7): the best contact of the outing, so
+  /// the level never goes down while the species sings on. A confirmed
+  /// record wins, else the highest score (the earliest on a tie).
+  final DetectionRecord levelRecord;
+
+  /// Best score of the outing.
+  double get bestScore => levelRecord.confidence;
+
+  /// Start of the best contact.
+  DateTime get bestAt => levelRecord.timestamp;
 
   /// The species is in the current inference results.
   final bool singing;
@@ -78,6 +91,13 @@ List<LiveTableEntry> buildLiveTable({
 }) {
   final counts = <String, int>{};
   final newest = <String, DetectionRecord>{};
+  final best = <String, DetectionRecord>{};
+  void keepBest(DetectionRecord record) {
+    final name = record.scientificName;
+    final seen = best[name];
+    if (seen == null || betterContact(record, seen)) best[name] = record;
+  }
+
   void add(DetectionRecord record) {
     final name = record.scientificName;
     final seen = newest[name];
@@ -89,6 +109,7 @@ List<LiveTableEntry> buildLiveTable({
   for (final record in sessionDetections) {
     counts.update(record.scientificName, (n) => n + 1, ifAbsent: () => 1);
     add(record);
+    keepBest(record);
   }
   // Current detections get a new timestamp every cycle: they only stand in
   // for a species the session does not hold yet, so rows do not reorder
@@ -96,6 +117,7 @@ List<LiveTableEntry> buildLiveTable({
   final current = <String, DetectionRecord>{};
   for (final record in currentDetections) {
     current[record.scientificName] = record;
+    keepBest(record);
     if (!counts.containsKey(record.scientificName)) {
       counts[record.scientificName] = 1;
       add(record);
@@ -111,6 +133,7 @@ List<LiveTableEntry> buildLiveTable({
         total: totals[name] ?? counts[name]!,
         lastHeard: last.timestamp,
         record: current[name] ?? last,
+        levelRecord: best[name],
         singing: current.containsKey(name),
         singingVisual:
             current.containsKey(name) &&
@@ -122,6 +145,16 @@ List<LiveTableEntry> buildLiveTable({
     return byTime != 0 ? byTime : a.scientificName.compareTo(b.scientificName);
   });
   return entries;
+}
+
+/// [a] is a better contact than [b] for the level of a species: a confirmed
+/// one first, then the higher score; on a tie the earlier one is kept, so
+/// the best contact does not change while a species sings on.
+bool betterContact(DetectionRecord a, DetectionRecord b) {
+  final aSure = a.reviewStatus == ReviewStatus.confirmed;
+  final bSure = b.reviewStatus == ReviewStatus.confirmed;
+  if (aSure != bSure) return aSure;
+  return a.confidence > b.confidence;
 }
 
 /// Detections to show as singing: none while [paused] or [replaying] a clip,

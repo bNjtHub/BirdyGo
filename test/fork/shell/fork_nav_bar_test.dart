@@ -107,6 +107,28 @@ void main() {
     expect(taps, ['page']);
   });
 
+  testWidgets('a tab presses without an ink splash, and still selects', (
+    tester,
+  ) async {
+    final taps = (await pumpBar(tester)).taps;
+    final bar = find.byType(ForkNavBar);
+    expect(
+      find.descendant(of: bar, matching: find.byType(InkWell)),
+      findsNothing,
+    );
+    final tab = find.descendant(of: bar, matching: find.text('Carnet'));
+    final gesture = await tester.startGesture(tester.getCenter(tab));
+    await tester.pump(const Duration(milliseconds: 50));
+    // No ink ripple is painted on a Material under the tab.
+    expect(
+      find.descendant(of: bar, matching: find.byType(InkResponse)),
+      findsNothing,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(taps, contains('notebook'));
+  });
+
   testWidgets('idle: the wing rests, nothing ticks', (tester) async {
     await pumpBar(tester);
     // Idle: nothing ticks once the first frames are over.

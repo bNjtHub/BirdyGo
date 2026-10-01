@@ -7,6 +7,7 @@ import '../design/birdy_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../data/observation_index.dart' show SpeciesTally;
 import '../data/observation_index_service.dart';
 import 'activity_bars.dart';
 import 'ranking_logic.dart';
@@ -43,26 +44,50 @@ String lastHeardWhen(
 
 /// Sentence plus hour and month charts for one species; empty if never
 /// heard.
-class SpeciesActivitySection extends ConsumerWidget {
+class SpeciesActivitySection extends ConsumerStatefulWidget {
   const SpeciesActivitySection({super.key, required this.scientificName});
 
   final String scientificName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SpeciesActivitySection> createState() =>
+      _SpeciesActivitySectionState();
+}
+
+class _SpeciesActivitySectionState
+    extends ConsumerState<SpeciesActivitySection> {
+  // Perf: the three queries run once per species and index change, not at
+  // every rebuild of the parent.
+  Future<(SpeciesTally?, List<int>, List<int>)>? _data;
+  String? _loadedFor;
+
+  Future<(SpeciesTally?, List<int>, List<int>)> _load() {
+    final name = widget.scientificName;
+    final service = ref.read(observationIndexServiceProvider);
+    return service.ensureReady().then(
+      (index) async => (
+        await index.speciesTally(name),
+        await index.activityByHour(scientificName: name),
+        await index.activityByMonth(scientificName: name),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scientificName = widget.scientificName;
+    ref.listen(observationIndexServiceProvider, (_, _) {
+      if (mounted) setState(() => _loadedFor = null);
+    });
+    if (_loadedFor != scientificName) {
+      _loadedFor = scientificName;
+      _data = _load();
+    }
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final language = Localizations.localeOf(context).languageCode;
-    final service = ref.watch(observationIndexServiceProvider);
-    final data = service.ensureReady().then(
-      (index) async => (
-        await index.speciesTally(scientificName),
-        await index.activityByHour(scientificName: scientificName),
-        await index.activityByMonth(scientificName: scientificName),
-      ),
-    );
     return FutureBuilder(
-      future: data,
+      future: _data,
       builder: (context, snapshot) {
         final value = snapshot.data;
         final tally = value?.$1;

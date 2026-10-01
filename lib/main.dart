@@ -76,12 +76,15 @@ Future<Widget> _initializeApp({
 }) async {
   // Initialize foreground task communication for survey background service.
   FlutterForegroundTask.initCommunicationPort();
-  await SurveyNotificationService.init();
-  await AruNotificationService.init();
-
-  // Edge-to-edge: set once at startup so the system bars stay transparent
-  // on every screen without triggering flicker on rebuilds.
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // FORK: perf, the three independent platform setups overlap instead of
+  // queueing their channel round trips.
+  await Future.wait<void>([
+    SurveyNotificationService.init(),
+    AruNotificationService.init(),
+    // Edge-to-edge: set once at startup so the system bars stay transparent
+    // on every screen without triggering flicker on rebuilds.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
+  ]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

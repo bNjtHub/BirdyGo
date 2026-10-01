@@ -73,6 +73,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   late final Random _random = widget.random ?? Random();
   late final SpeciesClipPlayer _player = ref.read(speciesClipPlayerProvider);
+  Timer? _replayTimer;
   Map<String, IndexedDetection>? _clips;
   List<QuizQuestion> _questions = const [];
   _Phase _phase = _Phase.intro;
@@ -115,6 +116,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
 
   @override
   void dispose() {
+    _replayTimer?.cancel();
     _burst.dispose();
     _rain.dispose();
     super.dispose();
@@ -161,6 +163,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   /// answers so far are already counted for the badge.
   Future<void> _confirmStop() async {
     if (_phase != _Phase.question) return;
+    _replayTimer?.cancel(); // never restart the song under the sheet
     final stop = await showQuizStopSheet(
       context,
       right: _results.where((r) => r).length,
@@ -182,6 +185,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   }
 
   void _togglePlay() {
+    _replayTimer?.cancel(); // the user took the player: no automatic replay
     final path = _question?.answer.clipPath;
     if (path == null) return;
     if (_player.playing.value != path) ensureAudible(context, ref);
@@ -234,10 +238,24 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       await ref.read(fineEarStoreProvider).addCorrect();
     } else {
       playQuizSound(ref, QuizSound.soft);
+      // The right song plays again once the soft note has died away, so the
+      // ear links the sound to the bird just revealed.
+      final round = _current;
+      _replayTimer?.cancel();
+      _replayTimer = Timer(QuizMotion.replayAfterSoft, () {
+        // Nothing playing and no touch on the player since the answer.
+        if (mounted &&
+            _phase == _Phase.question &&
+            _current == round &&
+            _player.playing.value == null) {
+          _playCurrent();
+        }
+      });
     }
   }
 
   void _next() {
+    _replayTimer?.cancel();
     if (_current + 1 >= _questions.length) {
       unawaited(_player.stop());
       final right = _results.where((r) => r).length;
@@ -268,6 +286,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   }
 
   void _leave() {
+    _replayTimer?.cancel();
     unawaited(_player.stop());
     if (_scored) ref.invalidate(gameProgressProvider);
   }
@@ -512,6 +531,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
               ],
               results: _results,
               current: _current,
+              streak: quizStreak(_results),
             ),
           ),
         ],
@@ -533,45 +553,12 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: BirdySpace.s),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 32),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.forkQuizQuestion(_current + 1, _questions.length),
-                  style: BirdyText.labelCompact.copyWith(
-                    color: c.text2,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ),
-              const SizedBox(width: BirdySpace.xs),
-              // A Wrap, not a Row: at 130 % text on a small phone, the
-              // streak pill and the score chip together can be wider than
-              // the space left; they wrap to a second line instead of
-              // overflowing.
-              Flexible(
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: BirdySpace.xs,
-                  runSpacing: 4,
-                  children: [
-                    if (streak >= 2)
-                      QuizPop(
-                        key: ValueKey('streak $streak'),
-                        duration: QuizMotion.pill,
-                        child: _StreakPill(label: l10n.forkQuizStreak(streak)),
-                      ),
-                    _ScoreChip(right: _results.where((r) => r).length),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        _StatusLine(
+          question: l10n.forkQuizQuestion(_current + 1, _questions.length),
+          right: _results.where((r) => r).length,
+          streak: streak,
         ),
-        const SizedBox(height: BirdySpace.m),
+        const SizedBox(height: BirdySpace.s),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -715,6 +702,11 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
     );
   }
 
+  QuizMissed _missed(IndexedDetection answer) => QuizMissed(
+    bird: _bird(answer.scientificName, answer.commonName),
+    clipPath: answer.clipPath,
+  );
+
   Widget _result() {
     final store = ref.read(fineEarStoreProvider);
     return QuizResult(
@@ -723,6 +715,10 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           _bird(q.answer.scientificName, q.answer.commonName),
       ],
       results: _results,
+      missed: [
+        for (var i = 0; i < _results.length; i++)
+          if (!_results[i]) _missed(_questions[i].answer),
+      ],
       badge: fineEarBadge(store.correct()),
       before: fineEarBadge(_startCorrect),
       party: _party,
@@ -745,7 +741,12 @@ class _StreakPill extends StatelessWidget {
     final c = BirdyColors.of(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 30),
-      padding: const EdgeInsets.fromLTRB(BirdySpace.xs, BirdySpace.xxs, BirdySpace.m, BirdySpace.xxs),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xs,
+        BirdySpace.xxs,
+        BirdySpace.m,
+        BirdySpace.xxs,
+      ),
       decoration: BoxDecoration(
         color: c.oriole,
         borderRadius: BorderRadius.circular(BirdyRadii.pill),
@@ -801,8 +802,86 @@ class _StreakPill extends StatelessWidget {
   }
 }
 
-/// The always-visible score chip: right answers so far (Quiz v2 mockup,
-/// J6f-e), Sûr green.
+/// The line above the stage: « Chant 3 sur 10 » on the left, the streak
+/// pill (from two in a row, its room always reserved) then the score pill
+/// (check and « 2 bonnes »), glued to the right edge. Read by the trail's own label, so silent here. The streak slot
+/// keeps its room while hidden: the line never changes height.
+class _StatusLine extends StatelessWidget {
+  const _StatusLine({
+    required this.question,
+    required this.right,
+    required this.streak,
+  });
+
+  final String question;
+  final int right;
+  final int streak;
+
+  static const double minHeight = 32;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final showStreak = streak >= 2;
+    final pill = _StreakPill(
+      label: l10n.forkQuizStreak(showStreak ? streak : 2),
+    );
+    return ExcludeSemantics(
+      child: ConstrainedBox(
+        key: const ValueKey('quiz-status-line'),
+        constraints: const BoxConstraints(minHeight: minHeight),
+        child: Row(
+          children: [
+            // 2 : 3, so the pills get room before they wrap.
+            Expanded(
+              flex: 2,
+              child: Text(
+                question,
+                style: BirdyText.labelCompact.copyWith(
+                  color: c.text2,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            const SizedBox(width: BirdySpace.xs),
+            // A Wrap: at 130 % text on a small phone the pills can be wider
+            // than the room left; the score stays at the right edge and the streak
+            // (reserved room, then shown left of it) moves to the line above.
+            Expanded(
+              flex: 3,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: BirdySpace.xs,
+                runSpacing: BirdySpace.xs,
+                children: [
+                  Visibility(
+                    visible: showStreak,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child:
+                        showStreak
+                            ? QuizPop(
+                              key: ValueKey('streak $streak'),
+                              duration: QuizMotion.pill,
+                              child: pill,
+                            )
+                            : pill,
+                  ),
+                  _ScoreChip(right: right),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Right answers so far: a check and « 2 bonnes », Sûr green.
 class _ScoreChip extends StatelessWidget {
   const _ScoreChip({required this.right});
 
@@ -812,31 +891,35 @@ class _ScoreChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
-    return Semantics(
-      label: l10n.forkQuizRightSoFar(right),
-      excludeSemantics: true,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 30),
-        padding: const EdgeInsets.fromLTRB(BirdySpace.cozy, 0, BirdySpace.m, 0),
-        decoration: BoxDecoration(
-          color: c.sure.background,
-          borderRadius: BorderRadius.circular(BirdyRadii.pill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(AppIcons.quizCheck, size: BirdyGlyph.m, color: c.sure.foreground),
-            const SizedBox(width: BirdySpace.xs),
-            Text(
-              '$right',
+    return Container(
+      constraints: const BoxConstraints(minHeight: 30),
+      padding: const EdgeInsets.fromLTRB(BirdySpace.cozy, 0, BirdySpace.m, 0),
+      decoration: BoxDecoration(
+        color: c.sure.background,
+        borderRadius: BorderRadius.circular(BirdyRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            AppIcons.quizCheck,
+            size: BirdyGlyph.m,
+            color: c.sure.foreground,
+          ),
+          const SizedBox(width: BirdySpace.xs),
+          Flexible(
+            child: Text(
+              l10n.forkQuizScorePill(right),
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: BirdyText.badge.copyWith(
                 color: c.sure.foreground,
                 fontWeight: FontWeight.w800,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

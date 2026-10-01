@@ -285,13 +285,14 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       espèces de la région (environ 10 à 20 $ pour 300 espèces).
 - [x] Écran : la fiche prend la place du bloc description de `SpeciesInfoOverlay` par un point
       d'accroche marqué FORK ; code dans `lib/fork/species_sheet/`. « Ici en ce moment » reste le
-      graphique 48 semaines existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
+      graphique de présence existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
       sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
       par IA : elle peut contenir des erreurs. ») en français et en anglais.
 - [x] Fiche espèce, sons et saisons (PR « J7 Fiche espèce ») : « Mes sons » juste après « Entendu… »
       (le meilleur son devient un lecteur mis en avant, grand bouton), « Ici en ce moment » garde sa
       courbe compacte de 12 mois, avec la phrase calculée sur 48 semaines (« Arrive début mars ·
       repart fin septembre » ou « Présent toute l'année »). Pas de bande de nidification sur la fiche :
+      la nidification (champ `nesting`, `NestingPeriod`) est affichée par la carte du monde (« Niche d'avril à juillet »).
       le champ `nesting` est lu (`NestingPeriod`) pour une future carte du monde.
 - [x] Fiche espèce, carte du monde des saisons (PR « J7 Fiche espèce : carte du monde », empilée sur celle
       des sons et saisons) : bloc « Dans le monde » après « Ici en ce moment » (`lib/fork/world_map/`).
@@ -331,7 +332,7 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches
       existantes) puis `verify`, `review`, `bundle` sur le PC, et commiter
-      `assets/fork/species_sheets_fr.json.gz`. Utile pour la future carte du monde.
+      `assets/fork/species_sheets_fr.json.gz`. Nécessaire pour que la carte du monde affiche « Niche d'avril à juillet ».
 - Ne jamais donner au modèle des textes de la LPO, d'oiseaux.net ou d'eBird (droits réservés).
 
 Notes de réalisation : les fiches se chargent au démarrage (préchargement de l'accueil), 1 fichier gzip.
@@ -899,6 +900,13 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             de l'onboarding (`labelLarge`, `inputLarge`, `headingSmall`, `ctaIcon`, `inlineIcon`).
       - [ ] (Benjamin) Téléphone : premier lancement, 4 oiseaux, icône, clair/sombre.
       - [x] Régénérer les fiches avec Ennemis (PC, API) : voir la rubrique Ennemis de J6h.
+    - Accueil et Plus (L, M) :
+      - [x] L : « Qui chante ? » sur l'Accueil (`QuizEntryRow` + `progress`, barre vers la prochaine
+            plume), affiché seulement si le quiz est jouable (`quizPlayableProvider`).
+      - [x] M : menu Plus en 3 groupes titrés, Carte retirée, bloc utilitaire avec Outils avancés
+            dépliable en dernier ; golden 4 thèmes.
+      - [x] Liseré du logo quiz à l'accent du thème d'oiseau choisi.
+      - [ ] (Benjamin) Téléphone : bloc quiz sur l'Accueil, menu Plus dans les 4 thèmes.
 
 - [x] J6j Barre du bas : « Écouter » devient un disque au centre de la barre (5 emplacements : Accueil,
       Carnet, Écouter, Carte, Profil).
@@ -914,6 +922,16 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
             sémantique, contrastes ; goldens de l'Accueil régénérés.
       - [ ] (Benjamin) Téléphone : disque, écoute écran éteint, rouvrir l'écoute depuis la barre.
 
+   J7 Écoute (thème clair, niveau stable), branche `feat/ecoute-theme-clair` :
+      - [x] L'écran d'écoute suit le thème de l'app par défaut ; réglage « Écran d'écoute toujours
+            sombre » (Réglages, feuille d'options de l'écoute), faux par défaut.
+      - [x] Contrastes du Live dans les 4 thèmes clair et sombre, goldens du Live (8).
+      - [x] Bouton play de la carte « première fois » (et de l'oiseau rare) réservé dès la première image.
+      - [x] Niveau d'une ligne = meilleur contact de la sortie (stable), barres « chante » selon le score
+            courant, pastille « Confirmé » une fois, feuille des niveaux par espèce (meilleur score,
+            heure, contacts). Le Bilan appliquait déjà cette règle.
+      - [ ] (Benjamin) Téléphone : écoute en clair au soleil, puits sombre, Confirmé sur un vrai chant
+
 Fini quand, mesuré en mode profile sur le Xiaomi :
 - 60 images par seconde partout, 120 quand l'écran le permet, aucune image perdue au défilement ;
 - l'écoute démarre moins d'une seconde après l'appui sur « Écouter » (le nouvel accueil garde le
@@ -924,7 +942,15 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 
 ## J7 : publication Android
 
+- [x] Quiz « Qui chante ? », réécoute et score (`feat/quiz-reecoute-score`) : le bon chant est rejoué après une
+      mauvaise réponse, le bouton de lecture garde sa place entre question et correction, le chemin de
+      10 points remplace « Chant n sur N » et la pastille de score, « Sons à retenir » sur l'écran de fin,
+      libellé « Oiseau mystère » retiré. Tests dans `test/fork/game/fine_ear_test.dart`.
+
+- [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
+- [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
+      l'interrupteur de la carte Position ; écrit `privacyAllowMapProvider`.
 - [x] Carte du monde plein écran (PR #130) : bouton d'agrandissement sur la carte de la fiche, page zoomable (pincer, glisser, double appui ×2, zoom 1 à 8) recadrée sur l'aire de l'espèce ; la couche statique est refaite à la résolution de l'écran à la fin du geste (`lib/fork/world_map/world_map_fullscreen.dart`, `world_map_viewport.dart`).
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
       de celle d'upstream.
@@ -989,6 +1015,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Transition de page (J7) : iOS et macOS gardent `CupertinoPageTransitionsBuilder` (glisser-retour du bord) ; Android garde `PredictiveBackPageTransitionsBuilder` (aperçu du retour prédictif, `enableOnBackInvokedCallback` activé). La transition du fork (`BirdyPageTransitionsBuilder`) ne sert que pour les autres plateformes. À vérifier sur iPhone.
 - Notification de nouvelle espèce (J6h) : `NotificationsGateway` demande déjà l'autorisation iOS (`requestPermissions`) ; sans `UIBackgroundModes: audio` (ci-dessous) l'écoute s'arrête en arrière-plan, donc pas de notification. À tester.
 - Photo dans la notification (J6h) : Android utilise `largeIcon` + `BigPictureStyleInformation` (octets PNG, `lib/fork/notifications/notification_images.dart`). Côté iOS : écrire le PNG dans le dossier temporaire et le joindre via `DarwinNotificationDetails(attachments: [DarwinNotificationAttachment(path)])`.
 - Localisation écran éteint (J7) : Android n'utilise plus `ACCESS_BACKGROUND_LOCATION`. Côté iOS il

@@ -187,7 +187,7 @@ final dailyGoalProvider = NotifierProvider<DailyGoalController, DailyGoalState>(
 /// Saved sessions only: index saves/deletes/reviews automatically refresh it.
 /// Read failures remain errors, so the UI does not claim zero progress.
 final dailyGoalProgressProvider = FutureProvider<Set<String>>((ref) async {
-  final goal = ref.watch(dailyGoalProvider).goal;
+  final goal = ref.watch(dailyGoalProvider.select((s) => s.goal));
   if (goal == null) return const {};
   final service = ref.watch(observationIndexServiceProvider);
   final index = await service.ensureReady();

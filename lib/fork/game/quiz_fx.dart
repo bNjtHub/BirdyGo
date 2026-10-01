@@ -47,6 +47,9 @@ abstract final class QuizMotion {
   static const Duration flyUpDelay = Duration(milliseconds: 150);
   static const Duration nextRise = Duration(milliseconds: 250);
   static const Duration nextDelay = Duration(milliseconds: 200);
+
+  /// A wrong answer: the right song restarts after the soft note (0.35 s).
+  static const Duration replayAfterSoft = Duration(milliseconds: 500);
   static const Duration fill = Duration(milliseconds: 900);
   static const Duration fillDelay = Duration(milliseconds: 450);
   static const Duration star = Duration(milliseconds: 450);
@@ -101,6 +104,7 @@ class QuizBounce extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => QuizLoop(
+    isolate: true,
     period: QuizMotion.bounce,
     delay: delay,
     child: child,
@@ -155,12 +159,17 @@ class QuizLoop extends StatefulWidget {
     this.delay = Duration.zero,
     this.running = true,
     this.stillValue = 0,
+    this.isolate = false,
     this.child,
   });
 
   final Duration period;
   final Duration delay;
   final bool running;
+
+  /// Repaints in its own layer: for a lone, continuously animating widget,
+  /// so the rest of the screen is not repainted every frame.
+  final bool isolate;
   final double stillValue;
   final ValueWidgetBuilder<double> builder;
   final Widget? child;
@@ -216,11 +225,12 @@ class _QuizLoopState extends State<QuizLoop>
     if (_reduced || !_started) {
       return widget.builder(context, widget.stillValue, widget.child);
     }
-    return AnimatedBuilder(
+    final animated = AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => widget.builder(context, _phase, child),
       child: widget.child,
     );
+    return widget.isolate ? RepaintBoundary(child: animated) : animated;
   }
 }
 
@@ -463,6 +473,7 @@ class QuizFloat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => QuizLoop(
+    isolate: true,
     period: period,
     delay: delay,
     child: child,
@@ -494,6 +505,7 @@ class QuizWiggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => QuizLoop(
+    isolate: true,
     period: QuizMotion.wiggle,
     child: child,
     builder: (context, t, child) {
@@ -527,6 +539,7 @@ class QuizRing extends StatelessWidget {
     if (!running) return const SizedBox.shrink();
     return IgnorePointer(
       child: QuizLoop(
+        isolate: true,
         period: QuizMotion.ring,
         delay: delay,
         builder: (context, t, child) {
@@ -638,7 +651,8 @@ class QuizBars extends StatelessWidget {
   final bool dimmed;
 
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: ExcludeSemantics(
     child: Opacity(
       opacity: dimmed ? 0.45 : 1,
       child: SizedBox(
@@ -661,6 +675,7 @@ class QuizBars extends StatelessWidget {
         ),
       ),
     ),
+    ),
   );
 }
 
@@ -674,6 +689,7 @@ class QuizPulse extends StatelessWidget {
   Widget build(BuildContext context) {
     if (BirdyMotion.reduced(context)) return child;
     return QuizLoop(
+      isolate: true,
       period: QuizMotion.pulse,
       child: child,
       builder: (context, t, child) {
@@ -709,6 +725,7 @@ class QuizRays extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: QuizLoop(
+    isolate: true,
       period: QuizMotion.spin,
       child: CustomPaint(size: Size.square(size), painter: _RaysPainter(color)),
       builder:

@@ -148,9 +148,6 @@ abstract final class BirdyQuizColors {
   static const Color knob = Color(0xFFFFFFFF);
   static const Color knobShadow = Color(0x4013233A);
 
-  /// Réécouter button on the bird's light tint (white at 60 %).
-  static const Color replayOnTint = Color(0x99FFFFFF);
-
   /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
   static const double mysteryBrightness = 2.2;
 
@@ -910,6 +907,23 @@ abstract final class BirdySizes {
   static const double silhouetteWingMin = 32;
   static const double silhouetteMarkMin = 20;
   static const double quizSheetDisc = 72;
+
+  /// Home quiz entry (L): the progress bar toward the next Oreille fine
+  /// plume, [quizEntrySegments] segments of [quizEntrySegmentHeight].
+  static const int quizEntrySegments = 10;
+  static const double quizEntrySegmentHeight = 6;
+
+  /// The oriole « ? » disc in the entry row's title: under one heading line
+  /// (20 * 1.25 = 25), so the row does not grow.
+  static const double quizEntryMark = 24;
+
+  /// « Plus » sheet (M): the compact rows of the utility block, the advanced
+  /// tools' rows and indent, and the sheet's max height as a share of the
+  /// screen. Group rows reuse [row] / [rowDisc], icons [BirdyGlyph.xxl].
+  static const double moreCompactRow = 56;
+  static const double moreToolRow = 48;
+  static const double moreToolIndent = 34;
+  static const double moreSheetMaxShare = 0.9;
 
   /// Level ladder (J6f, Profil « Mon niveau »): emblem, cell and the small
   /// check badge on the current one.

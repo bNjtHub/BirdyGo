@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_semantic_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/score_colors.dart';
+import 'birdy_page_transitions.dart';
 import 'birdy_theme_choice.dart';
 import 'birdy_tokens.dart';
 import 'birdy_typography.dart';
@@ -92,6 +93,7 @@ abstract final class BirdyTheme {
     return base.copyWith(
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
+      pageTransitionsTheme: BirdyPageTransitionsBuilder.theme,
       textTheme: textTheme,
       primaryTextTheme: base.primaryTextTheme.merge(BirdyText.textTheme),
       extensions: <ThemeExtension<dynamic>>[
@@ -237,15 +239,26 @@ abstract final class BirdyTheme {
 /// Keeps an already matching theme, and the upstream high-contrast palette
 /// when the user chose it.
 class ListeningTheme extends StatelessWidget {
-  const ListeningTheme({super.key, required this.child, this.light = false});
+  const ListeningTheme({
+    super.key,
+    required this.child,
+    this.light = false,
+    this.follow = false,
+  });
 
   final Widget child;
+
+  /// J7: keep the theme of the app (light or dark, chosen bird included);
+  /// nothing is forced. Off when the user asked for the listening screen
+  /// always dark.
+  final bool follow;
 
   /// The user chose the light listening screen (`liveThemeProvider`).
   final bool light;
 
   @override
   Widget build(BuildContext context) {
+    if (follow) return child;
     final current = Theme.of(context);
     final wanted = light ? Brightness.light : Brightness.dark;
     if (current.brightness == wanted) return child;

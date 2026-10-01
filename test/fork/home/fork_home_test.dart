@@ -18,7 +18,12 @@ import 'package:birdnet_live/fork/design/widgets/birdy_headers.dart';
 import 'package:birdnet_live/fork/design/widgets/birdygo_wordmark.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
+import 'package:birdnet_live/fork/game/challenge_card.dart';
+import 'package:birdnet_live/fork/game/challenges.dart';
+import 'package:birdnet_live/fork/game/game_config.dart' show ChallengeKind;
 import 'package:birdnet_live/fork/game/game_progress.dart';
+import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
+import 'package:birdnet_live/fork/game/quiz_playable.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart' show StatusRing;
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
@@ -193,6 +198,7 @@ void main() {
     bool reducedMotion = false,
     bool settle = true,
     SessionRepository? repository,
+    bool? quizPlayable,
   }) async {
     if (withGoal) {
       await DailyGoalStore(prefs).save(
@@ -239,6 +245,8 @@ void main() {
           dailyGoalProgressProvider.overrideWith(
             (ref) async => {for (var i = 0; i < 5; i++) 'Species $i'},
           ),
+          if (quizPlayable != null)
+            quizPlayableProvider.overrideWith((ref) async => quizPlayable),
           if (withGame)
             gameProgressProvider.overrideWith((ref) async => game ?? _game()),
         ],
@@ -473,7 +481,6 @@ void main() {
     for (final label in [
       fr.sessionLibraryTitle,
       fr.forkRanking,
-      fr.forkMap,
       fr.forkQuickReview,
       fr.forkSoundLibrary,
       fr.forkGardenTitle,
@@ -699,5 +706,48 @@ void main() {
     expect(find.byType(StatusRing), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('home-status-block')));
     expect(await pushedScreen(tester, pushes), isA<ProfileScreen>());
+  });
+
+  // FORK: Tâche L, the « Qui chante ? » block sits between Aujourd'hui and
+  // the weekly challenge, only when the quiz is playable.
+  group('quiz entry', () {
+    testWidgets('present, between the today block and the challenge', (
+      tester,
+    ) async {
+      final game = GameProgress(
+        GameFacts(
+          verifiedBirds: {for (var i = 0; i < 24; i++) 'Species $i'},
+          dawnChoruses: 0,
+          earlyStarts: 0,
+          reviewed: 0,
+          migrants: const {},
+          streak: _streak(),
+          challenge: WeeklyChallenge(
+            kind: ChallengeKind.values.first,
+            target: 3,
+            startedAt: null,
+            value: 0,
+            ends: DateTime.now().add(const Duration(days: 3)),
+          ),
+        ),
+      );
+      await pump(
+        tester,
+        quizPlayable: true,
+        game: game,
+        size: const Size(390, 3000),
+      );
+      final today =
+          tester.getTopLeft(find.byKey(const ValueKey('home-today-real'))).dy;
+      final quiz = tester.getTopLeft(find.byType(QuizEntryRow)).dy;
+      final challenge = tester.getTopLeft(find.byType(ChallengeCard)).dy;
+      expect(today, lessThan(quiz));
+      expect(quiz, lessThan(challenge));
+    });
+
+    testWidgets('absent when the quiz is not playable', (tester) async {
+      await pump(tester, quizPlayable: false, size: const Size(390, 3000));
+      expect(find.byType(QuizEntryRow), findsNothing);
+    });
   });
 }

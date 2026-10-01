@@ -10,7 +10,6 @@ import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/game/quiz_sfx.dart';
 import 'package:birdnet_live/fork/garden/garden_count_screen.dart';
 import 'package:birdnet_live/fork/home/more_sheet.dart';
-import 'package:birdnet_live/fork/map/contact_map_screen.dart';
 import 'package:birdnet_live/fork/map/sensitive_species.dart';
 import 'package:birdnet_live/fork/ranking/ranking_screen.dart';
 import 'package:birdnet_live/fork/reliability/quick_review_screen.dart';
@@ -113,15 +112,15 @@ void main() {
   }
 
   group('Plus sheet', () {
-    testWidgets('shows the everyday tiles and a collapsed advanced section', (
+    testWidgets('shows the everyday rows and a collapsed advanced section', (
       tester,
     ) async {
       await pump(tester, home: host());
       await openSheet(tester);
       expect(find.text(fr.forkMoreTitle), findsOneWidget);
       for (final label in [
+        fr.forkQuizTitle,
         fr.forkRanking,
-        fr.forkMap,
         fr.forkQuickReview,
         fr.forkSoundLibrary,
         fr.forkGardenTitle,
@@ -157,7 +156,6 @@ void main() {
 
     for (final (label, type) in <(String, Type)>[
       (fr.forkRanking, RankingScreen),
-      (fr.forkMap, ContactMapScreen),
       (fr.forkQuickReview, QuickReviewScreen),
       (fr.forkSoundLibrary, SoundLibraryScreen),
       (fr.forkGardenTitle, GardenCountScreen),
@@ -182,7 +180,7 @@ void main() {
       testWidgets('advanced $label opens $type', (tester) async {
         final pushes = await pump(tester, home: host());
         await openSheet(tester);
-        await scrollTo(tester, find.byKey(const ValueKey('more-advanced')));
+        await scrollTo(tester, find.byKey(const ValueKey('more-advanced-toggle')));
         await tester.tap(find.byKey(const ValueKey('more-advanced-toggle')));
         await tester.pumpAndSettle();
         await scrollTo(tester, find.text(label));
@@ -234,7 +232,7 @@ void main() {
           tester.getSize(find.byKey(const ValueKey('more-settings'))).height,
           greaterThanOrEqualTo(48),
         );
-        final tile = find.byKey(ValueKey('more-tile-${fr.forkRanking}'));
+        final tile = find.byKey(ValueKey('more-row-${fr.forkRanking}'));
         await scrollTo(tester, tile);
         expect(tester.takeException(), isNull);
         expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));

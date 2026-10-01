@@ -71,15 +71,6 @@ void main() {
       expect(monthPartOfWeek(10), MonthPart.mid);
       expect(monthPartOfWeek(11), MonthPart.late);
     });
-
-    test('weekly bars are relative to the best week', () {
-      final weeks = List<double>.filled(48, 0)
-        ..[3] = 0.2
-        ..[9] = 0.4;
-      final year = YearPresence.fromWeeks(weeks);
-      expect(year.weekBars[9], 1);
-      expect(year.weekBars[3], closeTo(0.5, 1e-9));
-    });
   });
 
   group('YearPresence', () {
