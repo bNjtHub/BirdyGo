@@ -299,6 +299,7 @@ void main() {
       final node = tester.getSemantics(
         find.bySemanticsLabel(RegExp('Carte du monde de la répartition')),
       );
+      expect(node.value, contains("×1.0"));
       tester.semantics.performAction(
         find.semantics.byLabel(RegExp("Carte du monde de la répartition")),
         ui.SemanticsAction.increase,
