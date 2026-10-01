@@ -11,6 +11,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/services/wakelock_service.dart';
+import '../../core/services/location_service.dart';
 
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
@@ -421,11 +422,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
 
       double? startLat;
       double? startLon;
+      AppLocation? startLocation;
       try {
         final loc = ref.read(currentLocationProvider).value;
         if (loc != null) {
           startLat = loc.latitude;
           startLon = loc.longitude;
+          startLocation = loc;
         }
       } catch (_) {}
 
@@ -451,6 +454,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
         highPassHz: ref.read(highPassFilterProvider).toDouble(),
         latitude: startLat,
         longitude: startLon,
+        startLocation: startLocation,
       );
 
       if (!mounted) {
@@ -937,6 +941,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
       }
       session.latitude ??= cachedLocation?.latitude;
       session.longitude ??= cachedLocation?.longitude;
+      if (session.latitude == cachedLocation?.latitude &&
+          session.longitude == cachedLocation?.longitude) {
+        session.altitude ??= cachedLocation?.altitude;
+        session.altitudeAccuracy ??= cachedLocation?.altitudeAccuracy;
+        session.altitudeReference ??= cachedLocation?.altitudeReference;
+        session.locationFixTime ??= cachedLocation?.timestamp;
+      }
 
       try {
         session.sessionNumber = await repo.nextSessionNumber(session.type);

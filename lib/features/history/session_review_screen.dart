@@ -97,6 +97,7 @@ import 'widgets/clip_player_sheet.dart';
 import 'widgets/detection_actions.dart';
 import 'widgets/voice_memo_overlay.dart';
 import '../settings/settings_screen.dart';
+import '../survey/survey_gps_tracker.dart';
 import '../survey/survey_live_screen.dart';
 import '../survey/widgets/survey_map_widget.dart';
 import '../../core/services/reverse_geocoding_service.dart';
@@ -2637,6 +2638,24 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                       ? DetectionSource.userSpecified
                       : DetectionSource.manualGlobal,
               evidence: result.evidence,
+              latitude: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.latitude,
+              longitude: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.longitude,
+              altitude: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.altitude,
+              altitudeAccuracy: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.altitudeAccuracy,
+              altitudeReference: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.altitudeReference,
+              locationFixTime: widget.session.type == SessionType.survey
+                  ? null
+                  : widget.session.locationFixTime,
             ),
           );
           break;
@@ -2647,6 +2666,13 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
           // survey collapses its stopped gap, and a destructive trim leaves
           // the audio starting later than the session did.
           final ts = widget.session.relativeToAbsolute(centerSec);
+          // Surveys interpolate along their track; other sessions (and
+          // surveys run without GPS) use their fixed coordinates.
+          final point = SurveyGpsTracker.positionAt(
+            widget.session.gpsTrack,
+            ts,
+          );
+          final session = widget.session;
           _detections.add(
             DetectionRecord(
               scientificName: result.scientificName,
@@ -2656,11 +2682,23 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
               endTimestamp: ts.add(
                 Duration(seconds: widget.session.settings.windowDuration),
               ),
-              source:
-                  result.userSpecified
-                      ? DetectionSource.userSpecified
-                      : DetectionSource.manual,
+              source: result.userSpecified
+                  ? DetectionSource.userSpecified
+                  : DetectionSource.manual,
               evidence: result.evidence,
+              latitude: point?.latitude ?? session.latitude,
+              longitude: point?.longitude ?? session.longitude,
+              altitude: point != null ? point.altitude : session.altitude,
+              altitudeAccuracy: point != null
+                  ? point.altitudeAccuracy
+                  : session.altitudeAccuracy,
+              altitudeReference: point != null
+                  ? point.altitudeReference
+                  : session.altitudeReference,
+              // An interpolated position has no single fix behind it.
+              locationFixTime: point != null
+                  ? (point.measured ? point.timestamp : null)
+                  : session.locationFixTime,
             ),
           );
           break;
@@ -2688,6 +2726,10 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                 voiceMemoPath: result.replaceRecord!.voiceMemoPath,
                 latitude: result.replaceRecord!.latitude,
                 longitude: result.replaceRecord!.longitude,
+                altitude: result.replaceRecord!.altitude,
+                altitudeAccuracy: result.replaceRecord!.altitudeAccuracy,
+                altitudeReference: result.replaceRecord!.altitudeReference,
+                locationFixTime: result.replaceRecord!.locationFixTime,
               );
             }
           }
@@ -4012,6 +4054,10 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
             voiceMemoPath: result.replaceRecord!.voiceMemoPath,
             latitude: result.replaceRecord!.latitude,
             longitude: result.replaceRecord!.longitude,
+            altitude: result.replaceRecord!.altitude,
+            altitudeAccuracy: result.replaceRecord!.altitudeAccuracy,
+            altitudeReference: result.replaceRecord!.altitudeReference,
+            locationFixTime: result.replaceRecord!.locationFixTime,
           );
         }
       }

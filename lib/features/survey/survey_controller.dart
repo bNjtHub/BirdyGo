@@ -38,6 +38,7 @@ import 'survey_alert_coordinator.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/asset_pack_service.dart';
 import '../../core/services/memory_monitor.dart';
+import '../../core/services/location_service.dart';
 import '../announcements/announcements_controller.dart'
     show AnnouncementDetection;
 import '../audio/ring_buffer.dart';
@@ -406,6 +407,7 @@ class SurveyController {
     String? customName,
     double? startLatitude,
     double? startLongitude,
+    AppLocation? startLocation,
     bool backgroundGps = true,
     bool foregroundGps = false,
     int autoStopBattery = 0,
@@ -485,6 +487,13 @@ class SurveyController {
       if (startLatitude != null && startLongitude != null) {
         _session!.latitude = startLatitude;
         _session!.longitude = startLongitude;
+        if (startLocation?.latitude == startLatitude &&
+            startLocation?.longitude == startLongitude) {
+          _session!.altitude = startLocation?.altitude;
+          _session!.altitudeAccuracy = startLocation?.altitudeAccuracy;
+          _session!.altitudeReference = startLocation?.altitudeReference;
+          _session!.locationFixTime = startLocation?.timestamp;
+        }
       }
 
       _sessionDetections.clear();
@@ -932,6 +941,10 @@ class SurveyController {
         final last = track.last;
         _session!.latitude = last.latitude;
         _session!.longitude = last.longitude;
+        _session!.altitude = last.altitude;
+        _session!.altitudeAccuracy = last.altitudeAccuracy;
+        _session!.altitudeReference = last.altitudeReference;
+        _session!.locationFixTime = last.timestamp;
       }
     }
 
@@ -1064,6 +1077,18 @@ class SurveyController {
       evidence: evidence,
       latitude: gpsPoint?.latitude ?? _session!.latitude,
       longitude: gpsPoint?.longitude ?? _session!.longitude,
+      altitude: gpsPoint == null
+          ? (_useGps ? null : _session!.altitude)
+          : gpsPoint.altitude,
+      altitudeAccuracy: gpsPoint == null
+          ? (_useGps ? null : _session!.altitudeAccuracy)
+          : gpsPoint.altitudeAccuracy,
+      altitudeReference: gpsPoint == null
+          ? (_useGps ? null : _session!.altitudeReference)
+          : gpsPoint.altitudeReference,
+      locationFixTime: gpsPoint == null
+          ? (_useGps ? null : _session!.locationFixTime)
+          : gpsPoint.timestamp,
     );
     _session!.addDetection(record);
     _sessionDetections.insert(0, record);
@@ -1254,18 +1279,33 @@ class SurveyController {
         final detectionLatitude = gpsPoint?.latitude ?? session.latitude;
         final detectionLongitude = gpsPoint?.longitude ?? session.longitude;
 
+        final detectionAltitude = gpsPoint == null
+            ? (_useGps ? null : session.altitude)
+            : gpsPoint.altitude;
+        final detectionAltitudeAccuracy = gpsPoint == null
+            ? (_useGps ? null : session.altitudeAccuracy)
+            : gpsPoint.altitudeAccuracy;
+        final detectionAltitudeReference = gpsPoint == null
+            ? (_useGps ? null : session.altitudeReference)
+            : gpsPoint.altitudeReference;
+
         final cycle = _accumulator!.processCycle(
           detections: filteredDetections,
           windowEnd: windowEnd,
-          createRecord:
-              (detection, timestamp) => DetectionRecord(
-                scientificName: detection.species.scientificName,
-                commonName: detection.species.commonName,
-                confidence: detection.confidence,
-                timestamp: timestamp,
-                latitude: detectionLatitude,
-                longitude: detectionLongitude,
-              ),
+          createRecord: (detection, timestamp) => DetectionRecord(
+            scientificName: detection.species.scientificName,
+            commonName: detection.species.commonName,
+            confidence: detection.confidence,
+            timestamp: timestamp,
+            latitude: detectionLatitude,
+            longitude: detectionLongitude,
+            altitude: detectionAltitude,
+            altitudeAccuracy: detectionAltitudeAccuracy,
+            altitudeReference: detectionAltitudeReference,
+            locationFixTime: gpsPoint == null
+                ? (_useGps ? null : session.locationFixTime)
+                : gpsPoint.timestamp,
+          ),
         );
         for (final closed in cycle.closedRecords) {
           _clipWriter.forget(closed);

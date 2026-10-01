@@ -28,6 +28,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/score_colors.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/quick_action_service.dart';
 import '../../shared/utils/app_icons.dart';
@@ -73,6 +74,7 @@ class SurveyLiveScreen extends ConsumerStatefulWidget {
     this.observerName,
     this.startLatitude,
     this.startLongitude,
+    this.startLocation,
     this.backgroundGps = true,
     this.resumeSession,
   });
@@ -82,6 +84,7 @@ class SurveyLiveScreen extends ConsumerStatefulWidget {
   final String? observerName;
   final double? startLatitude;
   final double? startLongitude;
+  final AppLocation? startLocation;
   final bool backgroundGps;
 
   /// If non-null, resume this unfinished session instead of starting fresh.
@@ -717,6 +720,7 @@ class _SurveyLiveScreenState extends ConsumerState<SurveyLiveScreen>
           customName: widget.customName,
           startLatitude: widget.startLatitude,
           startLongitude: widget.startLongitude,
+          startLocation: widget.startLocation,
           backgroundGps: widget.backgroundGps,
           foregroundGps: _foregroundGpsStream,
           autoStopBattery: autoStopBattery,

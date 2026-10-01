@@ -34,6 +34,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import '../../core/services/wakelock_service.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/audio_background_notification.dart';
 import '../../shared/services/quick_action_service.dart';
@@ -65,6 +66,7 @@ class PointCountLiveScreen extends ConsumerStatefulWidget {
     required this.continueWithScreenOff,
     this.latitude,
     this.longitude,
+    this.startLocation,
     this.customName,
     this.observerName,
     this.windowDurationOverride,
@@ -88,6 +90,7 @@ class PointCountLiveScreen extends ConsumerStatefulWidget {
 
   /// Optional longitude chosen during setup (GPS or manual).
   final double? longitude;
+  final AppLocation? startLocation;
 
   /// Optional user-chosen name for the count (e.g., "Pond Stop 1").
   final String? customName;
@@ -259,12 +262,14 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
 
     double? startLat = widget.latitude;
     double? startLon = widget.longitude;
+    AppLocation? startLocation = widget.startLocation;
     if (startLat == null || startLon == null) {
       try {
         final loc = ref.read(currentLocationProvider).value;
         if (loc != null) {
           startLat = loc.latitude;
           startLon = loc.longitude;
+          startLocation = loc;
         }
       } catch (_) {}
     }
@@ -289,6 +294,8 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
       targetDurationSeconds: widget.durationMinutes * 60,
       latitude: startLat,
       longitude: startLon,
+      startLocation: startLocation,
+      fixedLocationForDetections: true,
     );
 
     if (!mounted) {
@@ -311,6 +318,13 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
         session.observerName = widget.observerName;
         session.latitude ??= widget.latitude;
         session.longitude ??= widget.longitude;
+        if (session.latitude == widget.startLocation?.latitude &&
+            session.longitude == widget.startLocation?.longitude) {
+          session.altitude ??= widget.startLocation?.altitude;
+          session.altitudeAccuracy ??= widget.startLocation?.altitudeAccuracy;
+          session.altitudeReference ??= widget.startLocation?.altitudeReference;
+          session.locationFixTime ??= widget.startLocation?.timestamp;
+        }
       },
     )..start();
 
@@ -514,6 +528,14 @@ class _PointCountLiveScreenState extends ConsumerState<PointCountLiveScreen>
       session.longitude ??= longitude;
       session.latitude ??= cachedLocation?.latitude;
       session.longitude ??= cachedLocation?.longitude;
+      final location = widget.startLocation ?? cachedLocation;
+      if (session.latitude == location?.latitude &&
+          session.longitude == location?.longitude) {
+        session.altitude ??= location?.altitude;
+        session.altitudeAccuracy ??= location?.altitudeAccuracy;
+        session.altitudeReference ??= location?.altitudeReference;
+        session.locationFixTime ??= location?.timestamp;
+      }
 
       try {
         session.sessionNumber = await repo.nextSessionNumber(session.type);

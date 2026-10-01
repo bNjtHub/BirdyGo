@@ -41,6 +41,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/asset_pack_service.dart';
 import '../../core/services/memory_monitor.dart';
+import '../../core/services/location_service.dart';
 import '../audio/ring_buffer.dart';
 import '../announcements/announcements_controller.dart'
     show AnnouncementDetection;
@@ -160,6 +161,7 @@ class LiveController {
 
   /// Whether per-detection audio clips should be saved.
   bool _saveDetectionClips = false;
+  bool _fixedLocationForDetections = false;
 
   /// Live-tunable confidence threshold (0–100 scale). Captured at
   /// session start; updated by [setConfidenceThreshold] without
@@ -418,17 +420,29 @@ class LiveController {
     int? targetDurationSeconds,
     double? latitude,
     double? longitude,
+    AppLocation? startLocation,
+    bool fixedLocationForDetections = false,
     bool clearRingBuffer = true,
   }) async {
     if (_state != LiveState.ready) return;
 
     final sessionId = DateTime.now().toIso8601String().replaceAll(':', '-');
+    // Height is only meaningful with the coordinates of the same fix.
+    final startFix =
+        startLocation?.latitude == latitude &&
+            startLocation?.longitude == longitude
+        ? startLocation
+        : null;
 
     _session = LiveSession(
       id: sessionId,
       startTime: DateTime.now(),
       latitude: latitude,
       longitude: longitude,
+      altitude: startFix?.altitude,
+      altitudeAccuracy: startFix?.altitudeAccuracy,
+      altitudeReference: startFix?.altitudeReference,
+      locationFixTime: startFix?.timestamp,
       settings: SessionSettings(
         windowDuration: windowDuration,
         confidenceThreshold: confidenceThreshold,
@@ -462,6 +476,7 @@ class LiveController {
       ),
     );
     final startingSession = _session!;
+    _fixedLocationForDetections = fixedLocationForDetections;
 
     _sessionDetections.clear();
     _latestDetections = const [];
@@ -845,6 +860,20 @@ class LiveController {
         final cycle = _accumulator!.processCycle(
           detections: filteredDetections,
           windowEnd: audioReadAt,
+          createRecord: _fixedLocationForDetections
+              ? (detection, timestamp) => DetectionRecord(
+                  scientificName: detection.species.scientificName,
+                  commonName: detection.species.commonName,
+                  confidence: detection.confidence,
+                  timestamp: timestamp,
+                  latitude: _session!.latitude,
+                  longitude: _session!.longitude,
+                  altitude: _session!.altitude,
+                  altitudeAccuracy: _session!.altitudeAccuracy,
+                  altitudeReference: _session!.altitudeReference,
+                  locationFixTime: _session!.locationFixTime,
+                )
+              : null,
         );
         for (final closed in cycle.closedRecords) {
           _clipWriter.forget(closed);

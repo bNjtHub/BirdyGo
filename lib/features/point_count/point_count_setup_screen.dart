@@ -27,6 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../shared/providers/settings_providers.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/services/audio_background_notification.dart';
 import '../../shared/utils/locale_time_format.dart';
 import '../../shared/widgets/app_help_bottom_sheet.dart';
@@ -71,6 +72,7 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
   _LocationChoice _locationChoice = _LocationChoice.gps;
   double? _latitude;
   double? _longitude;
+  AppLocation? _gpsLocation;
   bool _gpsFetching = false;
   int _gpsAttempts = 0;
   int _gpsRequestSerial = 0;
@@ -173,6 +175,7 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
         setState(() {
           _latitude = location.latitude;
           _longitude = location.longitude;
+          _gpsLocation = location;
           _gpsFetching = false;
         });
         if (service.lastFetchUsedCachedFallback) {
@@ -260,21 +263,26 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder:
-            (_) => PointCountLiveScreen(
-              durationMinutes: durationMin,
-              continueWithScreenOff: continueWithScreenOff,
-              latitude: lat,
-              longitude: lon,
-              customName: name.isEmpty ? null : name,
-              observerName: observer.isEmpty ? null : observer,
-              windowDurationOverride: _windowDuration,
-              inferenceRateOverride: _inferenceRate,
-              confidenceThresholdOverride: _confidenceThreshold,
-              speciesFilterModeOverride: _speciesFilterMode,
-              sensitivityOverride: _sensitivity,
-              recordingMode: ref.read(pointCountRecordingModeProvider),
-            ),
+        builder: (_) => PointCountLiveScreen(
+          durationMinutes: durationMin,
+          continueWithScreenOff: continueWithScreenOff,
+          latitude: lat,
+          longitude: lon,
+          startLocation:
+              _locationChoice == _LocationChoice.gps &&
+                  _gpsLocation?.latitude == lat &&
+                  _gpsLocation?.longitude == lon
+              ? _gpsLocation
+              : null,
+          customName: name.isEmpty ? null : name,
+          observerName: observer.isEmpty ? null : observer,
+          windowDurationOverride: _windowDuration,
+          inferenceRateOverride: _inferenceRate,
+          confidenceThresholdOverride: _confidenceThreshold,
+          speciesFilterModeOverride: _speciesFilterMode,
+          sensitivityOverride: _sensitivity,
+          recordingMode: ref.read(pointCountRecordingModeProvider),
+        ),
       ),
     );
   }
@@ -369,6 +377,7 @@ class _PointCountSetupScreenState extends ConsumerState<PointCountSetupScreen>
               setState(() {
                 _latitude = lat;
                 _longitude = lon;
+                _gpsLocation = null;
               });
             },
           ),

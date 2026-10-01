@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../audio/audio_providers.dart';
+import '../../core/services/location_service.dart';
 import '../audio/widgets/audio_source_tile.dart';
 import '../../shared/utils/locale_time_format.dart';
 import '../explore/explore_providers.dart';
@@ -57,6 +58,7 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
   _LocationChoice _locationChoice = _LocationChoice.gps;
   double? _latitude;
   double? _longitude;
+  AppLocation? _gpsLocation;
   bool _gpsFetching = false;
   int _gpsAttempts = 0;
   int _gpsRequestSerial = 0;
@@ -174,6 +176,7 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
         setState(() {
           _latitude = location.latitude;
           _longitude = location.longitude;
+          _gpsLocation = location;
           _gpsFetching = false;
         });
         if (service.lastFetchUsedCachedFallback) {
@@ -268,8 +271,15 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
 
     final now = DateTime.now();
     final latitude = _locationChoice == _LocationChoice.skip ? null : _latitude;
-    final longitude =
-        _locationChoice == _LocationChoice.skip ? null : _longitude;
+    final longitude = _locationChoice == _LocationChoice.skip
+        ? null
+        : _longitude;
+    final gpsLocation =
+        _locationChoice == _LocationChoice.gps &&
+            _gpsLocation?.latitude == latitude &&
+            _gpsLocation?.longitude == longitude
+        ? _gpsLocation
+        : null;
     final observer = _observerController.text.trim();
     if (observer.isNotEmpty) {
       await ref.read(lastObserverProvider.notifier).set(observer);
@@ -301,6 +311,10 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
       dielPattern: _dielPattern,
       latitude: latitude,
       longitude: longitude,
+      altitude: gpsLocation?.altitude,
+      altitudeAccuracy: gpsLocation?.altitudeAccuracy,
+      altitudeReference: gpsLocation?.altitudeReference,
+      locationFixTime: gpsLocation?.timestamp,
       recordingMode: finalRecordingMode.name,
       recordingFormat: ref.read(recordingFormatProvider),
       samplingMode:
@@ -361,6 +375,10 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
         observerName: observer.isEmpty ? null : observer,
         latitude: latitude,
         longitude: longitude,
+        altitude: gpsLocation?.altitude,
+        altitudeAccuracy: gpsLocation?.altitudeAccuracy,
+        altitudeReference: gpsLocation?.altitudeReference,
+        locationFixTime: gpsLocation?.timestamp,
         sessionNumber: sessionNumber,
       );
       ref.read(aruStateProvider.notifier).state = controller.state;
@@ -461,6 +479,7 @@ class _AruSetupScreenState extends ConsumerState<AruSetupScreen> {
               setState(() {
                 _latitude = lat;
                 _longitude = lon;
+                _gpsLocation = null;
                 _latController.text = lat.toStringAsFixed(6);
                 _lonController.text = lon.toStringAsFixed(6);
               });

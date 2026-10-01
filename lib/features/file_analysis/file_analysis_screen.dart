@@ -37,6 +37,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/services/reverse_geocoding_service.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/quick_action_service.dart';
 import '../../shared/services/shared_media_service.dart';
@@ -111,8 +112,10 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
   _LocationChoice _locationChoice = _LocationChoice.gps;
   double? _latitude;
   double? _longitude;
+  AppLocation? _gpsLocation;
   String? _locationName;
   bool _isFetchingLocation = false;
+  int _gpsRequestSerial = 0;
   final _latController = TextEditingController();
   final _lonController = TextEditingController();
   DateTime? _recordingDate;
@@ -340,23 +343,38 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
   // ── Location ──────────────────────────────────────────────────────────
 
   Future<void> _fetchGpsLocation() async {
+    final requestSerial = ++_gpsRequestSerial;
     setState(() => _isFetchingLocation = true);
     try {
       final location = await ref.read(currentLocationProvider.future);
-      if (location != null && mounted) {
+      if (!mounted ||
+          requestSerial != _gpsRequestSerial ||
+          _locationChoice != _LocationChoice.gps) {
+        return;
+      }
+      if (location != null) {
         _latitude = location.latitude;
         _longitude = location.longitude;
+        _gpsLocation = location;
         // Reverse geocode for display name.
-        _locationName = await reverseGeocode(
+        final locationName = await reverseGeocode(
           latitude: location.latitude,
           longitude: location.longitude,
           localeName: ref.read(effectiveAppLocaleProvider),
         );
+        if (!mounted ||
+            requestSerial != _gpsRequestSerial ||
+            _locationChoice != _LocationChoice.gps) {
+          return;
+        }
+        _locationName = locationName;
       }
     } catch (_) {
       // Location unavailable.
     }
-    if (mounted) setState(() => _isFetchingLocation = false);
+    if (mounted && requestSerial == _gpsRequestSerial) {
+      setState(() => _isFetchingLocation = false);
+    }
   }
 
   void _parseManualLocation() {
@@ -365,6 +383,7 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
     if (lat != null && lon != null) {
       _latitude = lat.clamp(-90.0, 90.0);
       _longitude = lon.clamp(-180.0, 180.0);
+      _gpsLocation = null;
       _locationName = null;
     }
   }
@@ -499,6 +518,12 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
       geoModelSpeciesNames: geoSpeciesNames,
       latitude: _latitude,
       longitude: _longitude,
+      location:
+          _locationChoice == _LocationChoice.gps &&
+              _gpsLocation?.latitude == _latitude &&
+              _gpsLocation?.longitude == _longitude
+          ? _gpsLocation
+          : null,
       locationName: _locationName,
       recordingDate: _recordingDate,
     );
@@ -637,7 +662,19 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
               lonController: _lonController,
               recordingDate: _recordingDate,
               onChoiceChanged: (c) {
-                setState(() => _locationChoice = c);
+                setState(() {
+                  _locationChoice = c;
+                  if (c != _LocationChoice.gps) {
+                    _gpsRequestSerial++;
+                    _isFetchingLocation = false;
+                  }
+                  if (c == _LocationChoice.skip) {
+                    _latitude = null;
+                    _longitude = null;
+                    _gpsLocation = null;
+                    _locationName = null;
+                  }
+                });
                 if (c == _LocationChoice.gps) _fetchGpsLocation();
               },
               onFetchGps: _fetchGpsLocation,
@@ -646,6 +683,7 @@ class _FileAnalysisScreenState extends ConsumerState<FileAnalysisScreen> {
                 setState(() {
                   _latitude = lat;
                   _longitude = lon;
+                  _gpsLocation = null;
                   _locationName = null;
                 });
               },

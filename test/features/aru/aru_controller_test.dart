@@ -2,6 +2,7 @@ import 'package:birdnet_live/features/aru/aru_controller.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/features/recording/recording_service.dart';
 import 'package:birdnet_live/features/survey/detection_sampler.dart';
+import 'package:birdnet_live/shared/models/altitude_reference.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Adapts a per-record clip stub to the batched saver the controller expects.
@@ -55,6 +56,74 @@ void main() {
   }
 
   group('AruController', () {
+    test(
+      'sync keeps height metadata paired with its coordinate source',
+      () async {
+        final controller = AruController(
+          saveSession: (session) async {},
+          now: () => start,
+        );
+        await controller.startDeployment(
+          sessionId: 'aru-location',
+          settings: settings,
+          metadata: metadata(),
+          latitude: 52.52,
+          longitude: 13.405,
+          altitude: 34.5,
+          altitudeAccuracy: 5,
+          altitudeReference: AltitudeReference.meanSeaLevel,
+          locationFixTime: start,
+        );
+
+        final differentLocation = DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Blackbird',
+          confidence: 0.9,
+          timestamp: start.add(const Duration(seconds: 10)),
+          latitude: 53,
+          longitude: 14,
+        );
+        final interpolatedLocation = DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Blackbird',
+          confidence: 0.9,
+          timestamp: start.add(const Duration(seconds: 20)),
+          latitude: 52.52,
+          longitude: 13.405,
+          altitude: 42,
+          altitudeReference: AltitudeReference.unknown,
+        );
+        final untagged = DetectionRecord(
+          scientificName: 'Turdus merula',
+          commonName: 'Blackbird',
+          confidence: 0.9,
+          timestamp: start.add(const Duration(seconds: 30)),
+        );
+        await controller.syncDetections([
+          differentLocation,
+          interpolatedLocation,
+          untagged,
+        ]);
+
+        final detections = controller.session!.detections;
+        expect(detections[0].latitude, 53);
+        expect(detections[0].altitude, isNull);
+        expect(detections[0].altitudeAccuracy, isNull);
+        expect(detections[0].altitudeReference, isNull);
+        expect(detections[0].locationFixTime, isNull);
+        expect(detections[1].altitude, 42);
+        expect(detections[1].altitudeAccuracy, isNull);
+        expect(detections[1].altitudeReference, AltitudeReference.unknown);
+        expect(detections[1].locationFixTime, isNull);
+        expect(detections[2].latitude, 52.52);
+        expect(detections[2].longitude, 13.405);
+        expect(detections[2].altitude, 34.5);
+        expect(detections[2].altitudeAccuracy, 5);
+        expect(detections[2].altitudeReference, AltitudeReference.meanSeaLevel);
+        expect(detections[2].locationFixTime, start);
+      },
+    );
+
     test('starts a deployment and persists initial waiting state', () async {
       final saved = <LiveSession>[];
       final controller = AruController(

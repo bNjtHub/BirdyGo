@@ -3,6 +3,7 @@
 // =============================================================================
 
 import '../live/live_session.dart';
+import '../../shared/models/altitude_reference.dart';
 import '../recording/recording_service.dart';
 import '../survey/detection_sampler.dart';
 import 'aru_detection_sampler.dart';
@@ -121,6 +122,10 @@ class AruController {
     String? observerName,
     double? latitude,
     double? longitude,
+    double? altitude,
+    double? altitudeAccuracy,
+    AltitudeReference? altitudeReference,
+    DateTime? locationFixTime,
     int? sessionNumber,
   }) async {
     if (_state != AruControllerState.idle &&
@@ -146,6 +151,10 @@ class AruController {
         observerName: observerName,
         latitude: latitude,
         longitude: longitude,
+        altitude: altitude,
+        altitudeAccuracy: altitudeAccuracy,
+        altitudeReference: altitudeReference,
+        locationFixTime: locationFixTime,
         aruMetadata: metadata,
         sessionNumber: sessionNumber,
       );
@@ -343,6 +352,11 @@ class AruController {
   ) async {
     final record = pair.record;
     final existing = pair.existing;
+    final locationRecord = record.latitude != null && record.longitude != null
+        ? record
+        : existing?.latitude != null && existing?.longitude != null
+        ? existing
+        : null;
     var audioClipPath = existing?.audioClipPath ?? record.audioClipPath;
     var clipTimestamp = existing?.clipTimestamp ?? record.clipTimestamp;
     final clipKey = _detectionClipKey(record);
@@ -376,8 +390,20 @@ class AruController {
       audioClipPath: audioClipPath,
       clipTimestamp: audioClipPath == null ? null : clipTimestamp,
       source: record.source,
-      latitude: record.latitude ?? existing?.latitude,
-      longitude: record.longitude ?? existing?.longitude,
+      latitude: locationRecord?.latitude ?? _session?.latitude,
+      longitude: locationRecord?.longitude ?? _session?.longitude,
+      altitude: locationRecord != null
+          ? locationRecord.altitude
+          : _session?.altitude,
+      altitudeAccuracy: locationRecord != null
+          ? locationRecord.altitudeAccuracy
+          : _session?.altitudeAccuracy,
+      altitudeReference: locationRecord != null
+          ? locationRecord.altitudeReference
+          : _session?.altitudeReference,
+      locationFixTime: locationRecord != null
+          ? locationRecord.locationFixTime
+          : _session?.locationFixTime,
       // A reviewer decision on the record already in the session wins over
       // whatever the incoming record carries; fall back to the incoming one
       // only when the existing record is still unreviewed.
@@ -423,6 +449,10 @@ class AruController {
         a.clipTimestamp == b.clipTimestamp &&
         a.latitude == b.latitude &&
         a.longitude == b.longitude &&
+        a.altitude == b.altitude &&
+        a.altitudeAccuracy == b.altitudeAccuracy &&
+        a.altitudeReference == b.altitudeReference &&
+        a.locationFixTime == b.locationFixTime &&
         a.reviewStatus == b.reviewStatus &&
         a.reviewedAt == b.reviewedAt &&
         a.note == b.note &&
@@ -658,6 +688,10 @@ class AruController {
         observerName: session.observerName,
         latitude: session.latitude,
         longitude: session.longitude,
+        altitude: session.altitude,
+        altitudeAccuracy: session.altitudeAccuracy,
+        altitudeReference: session.altitudeReference,
+        locationFixTime: session.locationFixTime,
         recordingPath: stoppedPath ?? existing?.recordingPath,
         detections: cycleDetections,
         aruMetadata: _cycleDeploymentMetadata(
@@ -778,6 +812,10 @@ class AruController {
       dielPattern: metadata.dielPattern,
       latitude: metadata.latitude,
       longitude: metadata.longitude,
+      altitude: metadata.altitude,
+      altitudeAccuracy: metadata.altitudeAccuracy,
+      altitudeReference: metadata.altitudeReference,
+      locationFixTime: metadata.locationFixTime,
       recordingMode: metadata.recordingMode,
       recordingFormat: metadata.recordingFormat,
       samplingMode: metadata.samplingMode,

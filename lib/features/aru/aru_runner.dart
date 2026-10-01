@@ -23,6 +23,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/locale_time_format.dart';
 import '../explore/explore_providers.dart';
@@ -339,6 +340,17 @@ class AruRunner {
         highPassHz: session.settings.highPassHz,
         latitude: session.latitude,
         longitude: session.longitude,
+        startLocation: session.latitude != null && session.longitude != null
+            ? AppLocation(
+                latitude: session.latitude!,
+                longitude: session.longitude!,
+                altitude: session.altitude,
+                altitudeAccuracy: session.altitudeAccuracy,
+                altitudeReference: session.altitudeReference,
+                timestamp: session.locationFixTime,
+              )
+            : null,
+        fixedLocationForDetections: true,
         clearRingBuffer: false,
       );
       _aruInferenceActive = controller.state == LiveState.active;

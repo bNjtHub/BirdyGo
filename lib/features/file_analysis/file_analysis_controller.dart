@@ -38,6 +38,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/services/asset_pack_service.dart';
+import '../../core/services/location_service.dart';
 import '../inference/advanced_pooling_params.dart';
 import '../inference/detection_accumulator.dart';
 import '../inference/inference_isolate.dart';
@@ -394,6 +395,7 @@ class FileAnalysisController {
     Set<String>? geoModelSpeciesNames,
     double? latitude,
     double? longitude,
+    AppLocation? location,
     String? locationName,
     DateTime? recordingDate,
   }) async {
@@ -487,6 +489,11 @@ class FileAnalysisController {
       // 3. Create session.
       final sessionId = DateTime.now().toIso8601String().replaceAll(':', '-');
       final fileStartTime = recordingDate ?? DateTime.now();
+      // Height is only meaningful with the coordinates of the same fix.
+      final fix =
+          location?.latitude == latitude && location?.longitude == longitude
+          ? location
+          : null;
       final session = LiveSession(
         id: sessionId,
         startTime: fileStartTime,
@@ -515,6 +522,10 @@ class FileAnalysisController {
         ),
         latitude: latitude,
         longitude: longitude,
+        altitude: fix?.altitude,
+        altitudeAccuracy: fix?.altitudeAccuracy,
+        altitudeReference: fix?.altitudeReference,
+        locationFixTime: fix?.timestamp,
         locationName: locationName,
       );
 
@@ -586,6 +597,18 @@ class FileAnalysisController {
         final cycle = accumulator.processCycle(
           detections: filtered,
           windowEnd: windowEnd,
+          createRecord: (detection, timestamp) => DetectionRecord(
+            scientificName: detection.species.scientificName,
+            commonName: detection.species.commonName,
+            confidence: detection.confidence,
+            timestamp: timestamp,
+            latitude: session.latitude,
+            longitude: session.longitude,
+            altitude: session.altitude,
+            altitudeAccuracy: session.altitudeAccuracy,
+            altitudeReference: session.altitudeReference,
+            locationFixTime: session.locationFixTime,
+          ),
         );
         for (final change in cycle.changes) {
           if (change.isNew) speciesSet.add(change.record.scientificName);

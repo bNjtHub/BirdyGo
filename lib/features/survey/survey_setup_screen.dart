@@ -27,6 +27,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_semantic_colors.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/models/taxonomy_species.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/taxonomy_service.dart';
@@ -73,6 +74,7 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
   _LocationChoice _locationChoice = _LocationChoice.gps;
   double? _latitude;
   double? _longitude;
+  AppLocation? _gpsLocation;
   bool _gpsFetching = false;
   bool _hasBackgroundGps = false;
   bool _awaitingSettingsReturn = false;
@@ -170,6 +172,7 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
         setState(() {
           _latitude = location.latitude;
           _longitude = location.longitude;
+          _gpsLocation = location;
           _gpsFetching = false;
         });
         if (service.lastFetchUsedCachedFallback) {
@@ -314,18 +317,22 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder:
-            (_) => SurveyLiveScreen(
-              customName:
-                  _nameController.text.trim().isEmpty
-                      ? null
-                      : _nameController.text.trim(),
-              transectId: transect.isEmpty ? null : transect,
-              observerName: observer.isEmpty ? null : observer,
-              startLatitude: lat,
-              startLongitude: lon,
-              backgroundGps: _hasBackgroundGps,
-            ),
+        builder: (_) => SurveyLiveScreen(
+          customName: _nameController.text.trim().isEmpty
+              ? null
+              : _nameController.text.trim(),
+          transectId: transect.isEmpty ? null : transect,
+          observerName: observer.isEmpty ? null : observer,
+          startLatitude: lat,
+          startLongitude: lon,
+          startLocation:
+              _locationChoice == _LocationChoice.gps &&
+                  _gpsLocation?.latitude == lat &&
+                  _gpsLocation?.longitude == lon
+              ? _gpsLocation
+              : null,
+          backgroundGps: _hasBackgroundGps,
+        ),
       ),
     );
   }
@@ -422,6 +429,7 @@ class _SurveySetupScreenState extends ConsumerState<SurveySetupScreen>
               setState(() {
                 _latitude = lat;
                 _longitude = lon;
+                _gpsLocation = null;
               });
             },
           ),
