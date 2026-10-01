@@ -283,6 +283,12 @@ void main() {
       return i < 6 ? 'Oiseau $i' : 'Common $scientificName';
     }
 
+    /// The streak pill when shown (a hidden copy keeps its room).
+    Finder streakPill() => find.descendant(
+      of: find.byType(QuizPop),
+      matching: find.textContaining("d'affilée"),
+    );
+
     Future<void> next(WidgetTester tester, {required bool last}) async {
       final button = find.text(last ? 'Voir mon score' : 'Continuer');
       await tester.ensureVisible(button);
@@ -316,7 +322,7 @@ void main() {
 
       await tester.tap(find.text("C'est parti !"));
       await settle(tester);
-      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 1 sur 4,')), findsOneWidget);
       expect(player.played, hasLength(1));
       expect(find.byType(QuizTrail), findsOneWidget);
     });
@@ -356,7 +362,7 @@ void main() {
     ) async {
       await pump(tester, _species(4));
       final stage = find.byType(QuizStage);
-      expect(find.text('Oiseau mystère'), findsOneWidget);
+      expect(find.text('Oiseau mystère'), findsNothing);
       expect(
         find.descendant(of: stage, matching: find.byType(SpeciesAvatar)),
         findsNothing,
@@ -364,11 +370,10 @@ void main() {
       final answer = playing();
       expect(
         find.descendant(of: stage, matching: find.textContaining('Oiseau ')),
-        findsOneWidget, // « Oiseau mystère » only
+        findsNothing, // the bubble only
       );
 
       await tapChoice(tester, french(answer));
-      expect(find.text('Oiseau mystère'), findsNothing);
       expect(
         find.descendant(of: stage, matching: find.byType(SpeciesAvatar)),
         findsOneWidget,
@@ -386,7 +391,7 @@ void main() {
       tester,
     ) async {
       await pump(tester, _species(4));
-      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 1 sur 4,')), findsOneWidget);
       expect(player.played, hasLength(1));
       expect(find.text("Touche l'oiseau qui chante"), findsOneWidget);
 
@@ -395,23 +400,24 @@ void main() {
       expect(find.text('+1 Oreille fine'), findsOneWidget);
       expect(prefs.getInt(kFineEarCorrectPref), 1);
       expect(
-        find.bySemanticsLabel('1 bonne réponse sur 1'),
+        find.bySemanticsLabel('Chant 1 sur 4, 1 bonne réponse'),
         findsOneWidget, // the trail
       );
 
       await next(tester, last: false);
-      expect(find.text('Chant 2 sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 2 sur 4,')), findsOneWidget);
       expect(player.played, hasLength(2));
-      expect(find.text('Oiseau mystère'), findsOneWidget);
+      expect(find.text('Oiseau mystère'), findsNothing);
     });
 
     testWidgets('two right answers in a row show the streak', (tester) async {
       await pump(tester, _species(4));
       await tapChoice(tester, french(playing()));
-      expect(find.textContaining("d'affilée"), findsNothing);
+      expect(streakPill(), findsNothing);
       await next(tester, last: false);
       await tapChoice(tester, french(playing()));
-      expect(find.text("2 d'affilée !"), findsOneWidget);
+      expect(streakPill(), findsOneWidget);
+      expect(find.text("2 d'affilée !"), findsWidgets);
     });
 
     testWidgets('a wrong answer names the bird and counts nothing', (
@@ -438,15 +444,316 @@ void main() {
       expect(find.text('Réécoute-le, tu le retiendras'), findsOneWidget);
     });
 
-    testWidgets('the score chip counts right answers as they add up', (
+    testWidgets('a wrong answer replays the right song after the soft note', (
       tester,
     ) async {
       await pump(tester, _species(4));
-      expect(find.bySemanticsLabel('Aucune bonne réponse'), findsOneWidget);
-      expect(find.text('0'), findsOneWidget);
+      final answer = playing();
+      final wrong = _species(4).keys.firstWhere((s) => s != answer);
+      expect(player.played, hasLength(1));
+      await tapChoice(tester, french(wrong)); // settles 3 s
+      expect(sfx.played, [QuizSound.soft]);
+      expect(player.played, hasLength(2));
+      expect(playing(), answer);
+      expect(player.playing.value, player.played.last);
+    });
+
+    testWidgets('a right answer never replays the song', (tester) async {
+      await pump(tester, _species(4));
       await tapChoice(tester, french(playing()));
-      expect(find.bySemanticsLabel('1 bonne réponse'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
+      expect(player.played, hasLength(1));
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('the replay waits for the soft note to end', (tester) async {
+      await pump(tester, _species(4));
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      final choice = find.descendant(
+        of: find.byType(QuizChoiceCard),
+        matching: find.text(french(wrong)),
+      );
+      await tester.tap(choice);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(sfx.played, [QuizSound.soft]);
+      expect(player.played, hasLength(1)); // not yet
+      await settle(tester, seconds: 1);
+      expect(player.played, hasLength(2));
+    });
+
+    testWidgets('the user stopping the song cancels the automatic replay', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      await tester.tap(
+        find.descendant(
+          of: find.byType(QuizChoiceCard),
+          matching: find.text(french(wrong)),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      // The user plays the clip and stops it again before the timer fires.
+      await tester.tap(find.byTooltip("Écouter l'extrait").first);
+      await tester.pump();
+      await tester.tap(find.byTooltip("Arrêter l'extrait").first);
+      await settle(tester, seconds: 1.5);
+      expect(player.played, hasLength(2)); // the user's, no automatic one
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('the stop sheet cancels the automatic replay', (tester) async {
+      await pump(tester, _species(4));
+      final wrong = _species(4).keys.firstWhere((s) => s != playing());
+      await tester.tap(
+        find.descendant(
+          of: find.byType(QuizChoiceCard),
+          matching: find.text(french(wrong)),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byTooltip('Quitter le quiz'));
+      await settle(tester, seconds: 1.5);
+      expect(find.text('Arrêter la partie ?'), findsOneWidget);
+      expect(player.played, hasLength(1));
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('the play button keeps its place and size in the reveal', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final button = find.descendant(
+        of: find.byType(QuizStage),
+        matching: find.byTooltip("Arrêter l'extrait"),
+      );
+      final question = tester.getRect(button);
+      await tapChoice(
+        tester,
+        french(_species(4).keys.firstWhere((s) => s != playing())),
+      );
+      final wrong = tester.getRect(button);
+      expect(
+        wrong.center,
+        offsetMoreOrLessEquals(question.center, epsilon: .01),
+      );
+      expect(wrong.width, closeTo(question.width, .01));
+      expect(wrong.height, closeTo(question.height, .01));
+      // A right answer: the same spot again on the next question.
+      await next(tester, last: false);
+      final again = find.descendant(
+        of: find.byType(QuizStage),
+        matching: find.byTooltip("Arrêter l'extrait"),
+      );
+      final second = tester.getRect(again);
+      await tapChoice(tester, french(playing()));
+      final right = find.descendant(
+        of: find.byType(QuizStage),
+        matching: find.byTooltip("Écouter l'extrait"),
+      );
+      expect(
+        tester.getCenter(right),
+        offsetMoreOrLessEquals(second.center, epsilon: .01),
+      );
+      expect(tester.getSize(right).width, closeTo(second.width, .01));
+    });
+
+    testWidgets('no empty band above the stage, disc close to its top', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final line = tester.getRect(
+        find.byKey(const ValueKey('quiz-status-line')),
+      );
+      final stage = tester.getRect(find.byType(QuizStage));
+      final disc = tester.getRect(find.byType(QuizMysteryDisc));
+      expect(stage.top - line.bottom, lessThanOrEqualTo(BirdySpace.m));
+      expect(disc.top - stage.top, lessThanOrEqualTo(BirdySpace.l + 2));
+    });
+
+    testWidgets('the status line: song counter and score pill with labels', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.text('0 bonne'), findsOneWidget);
+      await tapChoice(tester, french(playing()));
+      expect(find.text('1 bonne'), findsOneWidget);
+      await next(tester, last: false);
+      expect(find.text('Chant 2 sur 4'), findsOneWidget);
+      await tapChoice(tester, french(playing()));
+      expect(find.text('2 bonnes'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          "Chant 2 sur 4, 2 bonnes réponses, 2 d'affilée !",
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the status line keeps its height with or without the streak', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final row = find.byKey(const ValueKey('quiz-status-line'));
+      final before = tester.getSize(row).height;
+      final stageTop = tester.getTopLeft(find.byType(QuizStage)).dy;
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      await tapChoice(tester, french(playing()));
+      expect(streakPill(), findsOneWidget);
+      expect(tester.getSize(row).height, before);
+      expect(tester.getTopLeft(find.byType(QuizStage)).dy, stageTop);
+      // The gap between the line and the stage stays compact.
+      final gap =
+          tester.getTopLeft(find.byType(QuizStage)).dy -
+          tester.getBottomLeft(row).dy;
+      expect(gap, lessThanOrEqualTo(BirdySpace.m));
+    });
+
+    testWidgets('the score pill does not move when the streak appears', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      final without = tester.getRect(
+        find.textContaining(RegExp(r'^\d+ bonnes?$')),
+      );
+      expect(streakPill(), findsNothing);
+      await tapChoice(tester, french(playing()));
+      expect(streakPill(), findsOneWidget);
+      final withStreak = tester.getRect(
+        find.textContaining(RegExp(r'^\d+ bonnes?$')),
+      );
+      expect(withStreak.right, closeTo(without.right, .01));
+      expect(withStreak.top, closeTo(without.top, .01));
+      // The streak sits left of the score, or on the line above when the
+      // (wide) test font leaves no room.
+      final streak = tester.getRect(streakPill());
+      expect(
+        streak.right <= withStreak.left || streak.bottom <= withStreak.top,
+        isTrue,
+      );
+    });
+
+    testWidgets('reduced motion: the streak pill shows at once', (
+      tester,
+    ) async {
+      await pump(tester, _species(4), reduced: true);
+      await tapChoice(tester, french(playing()));
+      await next(tester, last: false);
+      final choice = find.descendant(
+        of: find.byType(QuizChoiceCard),
+        matching: find.text(french(playing())),
+      );
+      await tester.tap(choice);
+      await tester.pump();
+      expect(streakPill(), findsOneWidget);
+      final opacity = tester.widget<Opacity>(
+        find.ancestor(of: streakPill(), matching: find.byType(Opacity)).first,
+      );
+      expect(opacity.opacity, 1);
+    });
+
+    for (final size in const [Size(320, 568), Size(360, 640)]) {
+      testWidgets(
+        'the status line with a streak fits ${size.width} dp at 130 %',
+        (tester) async {
+          await pump(tester, _species(12), textScale: 1.3, size: size);
+          for (var i = 0; i < 3; i++) {
+            await tapChoice(tester, french(playing()));
+            expect(tester.takeException(), isNull);
+            await next(tester, last: false);
+          }
+          await tapChoice(tester, french(playing()));
+          expect(streakPill(), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    testWidgets('the mystery card has no label, only the bubble', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      expect(find.text('Oiseau mystère'), findsNothing);
+      expect(find.text('Qui suis-je ?'), findsOneWidget);
+    });
+
+    testWidgets('the end lists the missed birds, each with its clip', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      final missed = <String>[];
+      for (var i = 0; i < 4; i++) {
+        final answer = playing();
+        if (i.isEven) {
+          await tapChoice(tester, french(answer));
+        } else {
+          missed.add(answer);
+          final wrong = _species(4).keys.firstWhere((s) => s != answer);
+          await tapChoice(tester, french(wrong));
+        }
+        await next(tester, last: i == 3);
+      }
+      expect(find.text('Sons à retenir'), findsOneWidget);
+      final card = find.byKey(const ValueKey('quiz-missed-card'));
+      await tester.ensureVisible(card);
+      await tester.pump();
+      for (final name in missed) {
+        expect(
+          find.descendant(of: card, matching: find.text(french(name))),
+          findsOneWidget,
+        );
+      }
+      final before = player.played.length;
+      final play = find.byKey(ValueKey('quiz-missed-play ${missed.first}'));
+      await tester.tap(play);
+      await tester.pump();
+      expect(player.played, hasLength(before + 1));
+      expect(player.played.last, contains(missed.first));
+      // One sound at a time: another row takes over, a second tap stops.
+      await tester.tap(find.byKey(ValueKey('quiz-missed-play ${missed.last}')));
+      await tester.pump();
+      expect(player.playing.value, contains(missed.last));
+      await tester.tap(find.byKey(ValueKey('quiz-missed-play ${missed.last}')));
+      await tester.pump();
+      expect(player.playing.value, isNull);
+      // Leaving the screen stops the sound.
+      await tester.tap(play);
+      await tester.pump();
+      expect(player.playing.value, isNotNull);
+      await tester.pumpWidget(const SizedBox());
+      expect(player.playing.value, isNull);
+    });
+
+    testWidgets('a perfect round has no « Sons à retenir »', (tester) async {
+      await pump(tester, _species(4));
+      for (var i = 0; i < 4; i++) {
+        await tapChoice(tester, french(playing()));
+        await next(tester, last: i == 3);
+      }
+      expect(find.text('Sons à retenir'), findsNothing);
+    });
+
+    testWidgets('the trail says the song and the right answers so far', (
+      tester,
+    ) async {
+      await pump(tester, _species(4));
+      expect(
+        find.bySemanticsLabel('Chant 1 sur 4, aucune bonne réponse'),
+        findsOneWidget,
+      );
+      await tapChoice(tester, french(playing()));
+      expect(
+        find.bySemanticsLabel('Chant 1 sur 4, 1 bonne réponse'),
+        findsOneWidget,
+      );
+      await next(tester, last: false);
+      expect(
+        find.bySemanticsLabel('Chant 2 sur 4, 1 bonne réponse'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('the stage bubble switches text with playback', (tester) async {
@@ -496,7 +803,7 @@ void main() {
       );
       await settle(tester);
       expect(find.text('Arrêter la partie ?'), findsNothing);
-      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 1 sur 4,')), findsOneWidget);
     });
 
     testWidgets('the sheet counts the right answers so far', (tester) async {
@@ -585,7 +892,7 @@ void main() {
 
       await tester.tap(find.text('Rejouer'));
       await settle(tester);
-      expect(find.text('Chant 1 sur 4'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 1 sur 4,')), findsOneWidget);
       expect(player.played, hasLength(5));
     });
 
@@ -648,7 +955,7 @@ void main() {
         textScale: 1.3,
         size: const Size(320, 568),
       );
-      expect(find.text('Chant 1 sur 10'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^Chant 1 sur 10,')), findsOneWidget);
       for (var i = 0; i < 10; i++) {
         await tapChoice(tester, french(playing()));
         expect(tester.takeException(), isNull);
@@ -929,7 +1236,10 @@ void main() {
       for (var i = 3; i < 10; i++) {
         expect(stateOf(i), QuizStoneState.upcoming);
       }
-      expect(find.bySemanticsLabel('1 bonne réponse sur 2'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Chant 3 sur 10, 1 bonne réponse'),
+        findsOneWidget,
+      );
       expect(tester.getSize(disc(0)), const Size(26, 26));
       expect(tester.getSize(disc(1)), const Size(20, 20));
       expect(tester.getSize(disc(2)), const Size(30, 30));
