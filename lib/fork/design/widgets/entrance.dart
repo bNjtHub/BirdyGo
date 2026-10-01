@@ -54,9 +54,46 @@ class _BirdyEntranceState extends State<BirdyEntrance>
   );
   Timer? _timer;
 
+  bool _started = false;
+  Animation<double>? _routeAnimation;
+  Timer? _capTimer;
+
+  /// Waits for the page transition to end (J7): an entrance playing under a
+  /// page that is still fading and sliding in would be a double animation.
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    // Reduced motion: the page only fades, nothing to wait for.
+    if (BirdyMotion.reduced(context)) {
+      _start();
+      return;
+    }
+    // The route's own controller, read at once: its `animation` proxy still
+    // reports completed on the first frame of a push. (`controller` is
+    // protected, but only meant to stay out of subclasses' way here.)
+    // ignore: invalid_use_of_protected_member
+    final route = ModalRoute.of(context)?.controller;
+    if (route != null && route.status != AnimationStatus.completed) {
+      _routeAnimation = route..addStatusListener(_onRouteStatus);
+      // A longer system transition (Android's 450 ms) must not slow the
+      // opening: wait for the fork's own page duration at most.
+      _capTimer = Timer(BirdyMotion.enter, _start);
+    } else {
+      _start();
+    }
+  }
+
+  void _onRouteStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) _start();
+  }
+
+  void _start() {
+    if (_started) return;
+    _started = true;
+    _capTimer?.cancel();
+    _routeAnimation?.removeStatusListener(_onRouteStatus);
+    _routeAnimation = null;
     if (widget.delay == Duration.zero) {
       _controller.forward();
     } else {
@@ -66,6 +103,8 @@ class _BirdyEntranceState extends State<BirdyEntrance>
 
   @override
   void dispose() {
+    _routeAnimation?.removeStatusListener(_onRouteStatus);
+    _capTimer?.cancel();
     _timer?.cancel();
     _controller.dispose();
     super.dispose();

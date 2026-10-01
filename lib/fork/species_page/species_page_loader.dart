@@ -40,18 +40,20 @@ class SpeciesPageLoader {
     final tally = await index.speciesTally(scientificName);
     if (tally == null) return SpeciesRecord.empty;
 
-    final precision = await index.speciesPrecision(scientificName);
-    final verified = await index.verifiedSpecies(
-      minScore: ReliabilityConfig.sureMinScore,
-    );
-    final favorites = await index.favoriteKeys();
-    final clips = await index.clipsForSpecies(scientificName);
+    // Independent index queries, queued together.
+    final (precision, verified, favorites, clips, points, hours) = await (
+      index.speciesPrecision(scientificName),
+      index.verifiedSpecies(minScore: ReliabilityConfig.sureMinScore),
+      index.favoriteKeys(),
+      index.clipsForSpecies(scientificName),
+      index.mapPoints(scientificName: scientificName),
+      index.activityByHour(scientificName: scientificName),
+    ).wait;
     final shown = pageClips(
       clips,
       favorites,
       limit: SpeciesPageConfig.clipsShown,
     );
-    final points = await index.mapPoints(scientificName: scientificName);
     return SpeciesRecord(
       tally: tally,
       confirmed: precision.confirmed,
@@ -63,7 +65,7 @@ class SpeciesPageLoader {
         for (final c in shown)
           if (favorites.contains(c.key)) c.key,
       },
-      hours: await index.activityByHour(scientificName: scientificName),
+      hours: hours,
       spots: distinctSpots(
         points,
         limit: SpeciesPageConfig.mapSpots,

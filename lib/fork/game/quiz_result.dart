@@ -5,17 +5,21 @@
 /// bar filling up; then « Terminer » and « Rejouer ».
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../audio_output/volume_guard.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_pill.dart';
 import '../design/widgets/pressable.dart';
+import '../species_page/species_clip_player.dart';
 import 'fine_ear.dart';
 import 'fine_ear_quiz_widgets.dart';
 import 'game_config.dart';
@@ -25,11 +29,20 @@ import 'game_widgets.dart';
 import 'quiz_decor.dart';
 import 'quiz_fx.dart';
 
+/// A missed bird of the round and the clip to hear again.
+class QuizMissed {
+  const QuizMissed({required this.bird, required this.clipPath});
+
+  final QuizBird bird;
+  final String? clipPath;
+}
+
 class QuizResult extends StatelessWidget {
   const QuizResult({
     super.key,
     required this.birds,
     required this.results,
+    this.missed = const [],
     required this.badge,
     required this.before,
     this.party = false,
@@ -42,6 +55,9 @@ class QuizResult extends StatelessWidget {
 
   /// Each answer, right or not.
   final List<bool> results;
+
+  /// The birds missed this round, with their clips (« Sons à retenir »).
+  final List<QuizMissed> missed;
 
   /// Oreille fine, this round's answers included.
   final BadgeProgress badge;
@@ -81,6 +97,13 @@ class QuizResult extends StatelessWidget {
                   delay: QuizMotion.cardStep,
                   child: _RecapCard(birds: birds, results: results),
                 ),
+                if (missed.isNotEmpty) ...[
+                  const SizedBox(height: BirdySpace.m),
+                  QuizRise(
+                    delay: QuizMotion.cardStep * 1.5,
+                    child: _MissedCard(missed: missed),
+                  ),
+                ],
                 const SizedBox(height: BirdySpace.m),
                 QuizRise(
                   delay: QuizMotion.cardStep * 2,
@@ -120,10 +143,7 @@ class QuizResult extends StatelessWidget {
                   ),
                   onPressed: onAgain,
                   icon: const Icon(AppIcons.restartAlt, size: BirdyGlyph.xxl),
-                  label: Text(
-                    l10n.forkQuizAgain,
-                    textAlign: TextAlign.center,
-                  ),
+                  label: Text(l10n.forkQuizAgain, textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -159,7 +179,12 @@ class _ScoreCard extends StatelessWidget {
     return Container(
       key: const ValueKey('quiz-score-card'),
       clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.fromLTRB(BirdySpace.xl, BirdySpace.xl, BirdySpace.xl, BirdySpace.roomy),
+      padding: const EdgeInsets.fromLTRB(
+        BirdySpace.xl,
+        BirdySpace.xl,
+        BirdySpace.xl,
+        BirdySpace.roomy,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(BirdyRadii.hero),
         gradient: RadialGradient(
@@ -185,9 +210,7 @@ class _ScoreCard extends StatelessWidget {
                       child: QuizTwinkleField(count: 4, seed: 21),
                     ),
                     if (party)
-                      const Positioned.fill(
-                        child: QuizStarBurstField(),
-                      ),
+                      const Positioned.fill(child: QuizStarBurstField()),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -202,7 +225,10 @@ class _ScoreCard extends StatelessWidget {
                               key: ValueKey('quiz-star-$i'),
                               size: i == 1 ? 56 : 42,
                               color: i < stars ? c.oriole : c.lineOpaque,
-                              rim: i < stars ? BirdyQuizColors.starRim : c.border,
+                              rim:
+                                  i < stars
+                                      ? BirdyQuizColors.starRim
+                                      : c.border,
                             ),
                           ),
                         ],
@@ -259,15 +285,22 @@ class _ScoreCard extends StatelessWidget {
 /// A 5-point star with its own rim stroke, earned (Loriot fill, a shaded
 /// gold rim) or not (the theme's line color both ways).
 class QuizRimStar extends StatelessWidget {
-  const QuizRimStar({super.key, required this.size, required this.color, required this.rim});
+  const QuizRimStar({
+    super.key,
+    required this.size,
+    required this.color,
+    required this.rim,
+  });
 
   final double size;
   final Color color;
   final Color rim;
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(size: Size.square(size), painter: _RimStarPainter(color, rim));
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size.square(size),
+    painter: _RimStarPainter(color, rim),
+  );
 }
 
 class _RimStarPainter extends CustomPainter {
@@ -310,6 +343,158 @@ class _RimStarPainter extends CustomPainter {
 }
 
 /// The round's birds, five per row, popping in 50 ms apart.
+/// « Sons à retenir »: one row per missed bird, its name and a play button
+/// on the shared clip player (one sound at a time, stopped on leaving).
+class _MissedCard extends ConsumerStatefulWidget {
+  const _MissedCard({required this.missed});
+
+  final List<QuizMissed> missed;
+
+  @override
+  ConsumerState<_MissedCard> createState() => _MissedCardState();
+}
+
+class _MissedCardState extends ConsumerState<_MissedCard> {
+  late final SpeciesClipPlayer _player = ref.read(speciesClipPlayerProvider);
+
+  @override
+  void dispose() {
+    unawaited(_player.stop());
+    super.dispose();
+  }
+
+  void _toggle(String path) {
+    if (_player.playing.value == path) {
+      unawaited(_player.stop());
+    } else {
+      ensureAudible(context, ref);
+      unawaited(_player.play(path));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Container(
+      key: const ValueKey('quiz-missed-card'),
+      padding: const EdgeInsets.all(BirdySpace.l),
+      decoration: BoxDecoration(
+        color: c.surface1,
+        borderRadius: BorderRadius.circular(BirdyRadii.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              l10n.forkQuizMissedTitle,
+              style: BirdyText.species.copyWith(color: c.text1),
+            ),
+          ),
+          const SizedBox(height: BirdySpace.xs),
+          ValueListenableBuilder<String?>(
+            valueListenable: _player.playing,
+            builder:
+                (context, playing, _) => Column(
+                  children: [
+                    for (final m in widget.missed)
+                      _MissedRow(
+                        missed: m,
+                        playing: m.clipPath != null && playing == m.clipPath,
+                        onPressed:
+                            m.clipPath == null
+                                ? null
+                                : () => _toggle(m.clipPath!),
+                      ),
+                  ],
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MissedRow extends StatelessWidget {
+  const _MissedRow({
+    required this.missed,
+    required this.playing,
+    required this.onPressed,
+  });
+
+  final QuizMissed missed;
+  final bool playing;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    final name = missed.bird.name;
+    final label = playing ? l10n.forkQuizStop : l10n.forkQuizPlayBird(name);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: BirdySizes.target),
+      child: Row(
+        children: [
+          QuizBirdArt(
+            bird: missed.bird,
+            size: BirdyGlyph.disc44,
+            iconSize: BirdyGlyph.disc44,
+          ),
+          const SizedBox(width: BirdySpace.m),
+          Expanded(
+            child: Text(
+              name,
+              style: BirdyText.species.copyWith(color: c.text1),
+            ),
+          ),
+          if (onPressed != null)
+            Tooltip(
+              message: label,
+              child: Semantics(
+                button: true,
+                label: label,
+                excludeSemantics: true,
+                onTap: onPressed,
+                child: Pressable(
+                  child: Material(
+                    color: c.surface1,
+                    shape: CircleBorder(
+                      side: BorderSide(
+                        color: c.accentText,
+                        width: BirdyStroke.regular,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      key: ValueKey(
+                        'quiz-missed-play ${missed.bird.scientificName}',
+                      ),
+                      onTap: onPressed,
+                      child: SizedBox.square(
+                        dimension: BirdySizes.target,
+                        child: Icon(
+                          playing
+                              ? AppIcons.quizStop
+                              : AppIcons.playArrowRounded,
+                          size: BirdyGlyph.x5l,
+                          fill: 1,
+                          color: c.accentText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RecapCard extends StatelessWidget {
   const _RecapCard({required this.birds, required this.results});
 
@@ -348,9 +533,7 @@ class _RecapCard extends StatelessWidget {
                 ),
               ),
               Text(
-                l10n.forkQuizFoundCount(
-                  results.where((r) => r).length,
-                ),
+                l10n.forkQuizFoundCount(results.where((r) => r).length),
                 style: BirdyText.caption.copyWith(
                   color: c.sure.foreground,
                   fontFeatures: const [FontFeature.tabularFigures()],
@@ -477,7 +660,11 @@ class _RecapBird extends StatelessWidget {
 /// Oreille fine after the round: the medal, « Nouvelle plume » when a tier
 /// was just reached, the bar filling up to the new count.
 class _MedalCard extends StatelessWidget {
-  const _MedalCard({required this.badge, required this.before, required this.right});
+  const _MedalCard({
+    required this.badge,
+    required this.before,
+    required this.right,
+  });
 
   final BadgeProgress badge;
   final BadgeProgress before;
@@ -518,7 +705,10 @@ class _MedalCard extends StatelessWidget {
             )
             : GameConfig.badgeMedals[badge.tier - 1].tone;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: BirdySpace.l, vertical: BirdySpace.comfy),
+      padding: const EdgeInsets.symmetric(
+        horizontal: BirdySpace.l,
+        vertical: BirdySpace.comfy,
+      ),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(BirdyRadii.card),

@@ -432,16 +432,17 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
               ),
             ),
             Expanded(
-              child: ListView(
+              child: ListView.builder(
                 padding: EdgeInsets.fromLTRB(
                   BirdySpace.page,
                   BirdySpace.xs,
                   BirdySpace.page,
                   BirdySpace.l + birdySheetBottomInset(context),
                 ),
-                children: [
-                  if (query.isEmpty)
-                    Padding(
+                itemCount: shown.length + (query.isEmpty ? 1 : 0),
+                itemBuilder: (context, i) {
+                  if (query.isEmpty && i == 0) {
+                    return Padding(
                       padding: const EdgeInsets.only(bottom: BirdySpace.s),
                       child: Semantics(
                         button: true,
@@ -493,9 +494,10 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                           ),
                         ),
                       ),
-                    ),
-                  for (final e in shown)
-                    Padding(
+                    );
+                  }
+                  final e = shown[i - (query.isEmpty ? 1 : 0)];
+                    return Padding(
                       padding: const EdgeInsets.only(bottom: BirdySpace.s),
                       child: MapSpeciesRow(
                         scientificName: e.tally.scientificName,
@@ -507,8 +509,8 @@ class _SpeciesPickerState extends ConsumerState<_SpeciesPicker> {
                               SpeciesChoice(e.tally.scientificName, e.name),
                             ),
                       ),
-                    ),
-                ],
+                    );
+                },
               ),
             ),
           ],

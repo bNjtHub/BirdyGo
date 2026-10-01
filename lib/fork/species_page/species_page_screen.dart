@@ -36,6 +36,8 @@ import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
 import 'meet_species_block.dart';
+import '../world_map/world_map_providers.dart'; // FORK: world map (J7)
+import '../world_map/world_map_section.dart'; // FORK: world map (J7)
 import 'section_title.dart';
 import 'species_clip_player.dart';
 import 'species_mini_map.dart';
@@ -356,13 +358,8 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               ),
         ),
       ),
-      if (_year != null)
-        HereNowCard(
-          year: _year!,
-          sentence: presenceSentence(l10n, language, _year!, now: now),
-          currentMonth: now.month,
-          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
-        ),
+      // FORK-owned order (J7): the user's own sounds come right after the
+      // counters, before what the geo-model says about the year.
       if (showSounds)
         KeyedSubtree(
           key: const ValueKey('fiche-sounds'),
@@ -403,6 +400,21 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
                   ),
                 ),
           ),
+        ),
+      if (_year != null)
+        HereNowCard(
+          year: _year!,
+          sentence: presenceSentence(l10n, language, _year!, now: now),
+          currentMonth: now.month,
+          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
+        ),
+      // FORK: world map of the seasonal range (J7), hidden without a geo-model.
+      // FORK: no block, and no spacing, when there is no map to draw.
+      if (ref.watch(worldMapVisibleProvider(widget.scientificName)))
+        WorldMapSection(
+          scientificName: widget.scientificName,
+          speciesName: widget.commonName, // FORK: title of the full-screen map
+          nesting: sheet?.nesting,
         ),
       if (sheet != null && sheet.sections.isNotEmpty)
         MeetSpeciesBlock(sheet: sheet)

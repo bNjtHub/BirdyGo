@@ -16,6 +16,11 @@ abstract final class ReliabilityConfig {
   /// Minimum score for "Sûr", when the species is plausible here.
   static const double sureMinScore = 0.80;
 
+  /// How long the play button of a celebration card waits for the clip of a
+  /// species that stopped singing (J7). After that the clip is taken as
+  /// never coming (write failure, no clip) and the slot leaves the card.
+  static const Duration clipWaitGrace = Duration(seconds: 6);
+
   /// Minimum score for "Probable".
   static const double probableMinScore = 0.55;
 

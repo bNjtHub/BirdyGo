@@ -31,9 +31,51 @@ enum SheetSection {
   final String key;
 }
 
+/// Nesting period of a species, in calendar months (1 to 12). [to] may be
+/// before [from] when the period crosses the new year.
+class NestingPeriod {
+  const NestingPeriod(this.from, this.to);
+
+  /// Parses the bundle's « M-N » text (e.g. « 4-7 »); null when missing or
+  /// invalid, so a bad value never shows a wrong band.
+  static NestingPeriod? tryParse(Object? raw) {
+    if (raw is! String) return null;
+    final match = RegExp(
+      r'^\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*$',
+    ).firstMatch(raw);
+    if (match == null) return null;
+    final from = int.parse(match.group(1)!);
+    final to = int.parse(match.group(2)!);
+    if (from < 1 || from > 12 || to < 1 || to > 12) return null;
+    return NestingPeriod(from, to);
+  }
+
+  final int from;
+  final int to;
+
+  /// Whether [month] (1 to 12) is in the period.
+  bool includes(int month) =>
+      from <= to ? month >= from && month <= to : month >= from || month <= to;
+
+  @override
+  bool operator ==(Object other) =>
+      other is NestingPeriod && other.from == from && other.to == to;
+
+  @override
+  int get hashCode => Object.hash(from, to);
+
+  @override
+  String toString() => 'NestingPeriod($from-$to)';
+}
+
 /// One species sheet. Only non-empty sections are kept.
 class SpeciesSheet {
-  const SpeciesSheet({required this.name, required this.sections, this.hint});
+  const SpeciesSheet({
+    required this.name,
+    required this.sections,
+    this.hint,
+    this.nesting,
+  });
 
   factory SpeciesSheet.fromJson(Map<String, dynamic> json) => SpeciesSheet(
     name: json['name'] as String? ?? '',
@@ -43,6 +85,7 @@ class SpeciesSheet {
           section: (json[section.key] as String).trim(),
     },
     hint: json['hint'] as String?,
+    nesting: NestingPeriod.tryParse(json['nesting']),
   );
 
   final String name;
@@ -50,6 +93,9 @@ class SpeciesSheet {
 
   /// Short clue for the game notebook (J6e), not shown on the sheet.
   final String? hint;
+
+  /// Optional nesting period, drawn on the species page's seasons chart.
+  final NestingPeriod? nesting;
 }
 
 /// Every bundled sheet, by scientific name.
@@ -80,11 +126,14 @@ class SpeciesSheets {
 bool sheetsApplyTo(String speciesLocale) =>
     speciesLocale.toLowerCase().startsWith('fr');
 
+SpeciesSheets _parseSheets(Uint8List bytes) => SpeciesSheets.fromGzip(bytes);
+
 /// Loads the bundle once; an unreadable bundle means no sheets.
 final speciesSheetsProvider = FutureProvider<SpeciesSheets>((ref) async {
   try {
     final data = await rootBundle.load(speciesSheetsAsset);
-    return SpeciesSheets.fromGzip(data.buffer.asUint8List());
+    // Inflating and parsing the whole bundle is heavy: off the UI isolate.
+    return await compute(_parseSheets, data.buffer.asUint8List());
   } catch (e) {
     debugPrint('[SpeciesSheets] not loaded: $e');
     return SpeciesSheets.empty;

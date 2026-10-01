@@ -54,6 +54,24 @@ class StreakDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final weekday = DateFormat('EEEEE', localeName);
+    return Stack(
+      children: [
+        // Connectors between neighbouring dots, behind the cells.
+        Positioned.fill(
+          // orioleText: the one line color that keeps 3:1 on the Loriot
+          // block, where borderStrong nearly vanished.
+          child: _StreakConnectors(
+            days: days,
+            localeName: localeName,
+            color: c.orioleText,
+          ),
+        ),
+        _cells(c, weekday),
+      ],
+    );
+  }
+
+  Widget _cells(BirdyColors c, DateFormat weekday) {
     return Row(
       children: [
         for (final day in days)
@@ -189,29 +207,154 @@ class StreakDotsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final weekday = DateFormat('EEEEE', localeName);
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: _StreakConnectors(
+            days: days,
+            localeName: localeName,
+            color: c.orioleText,
+          ),
+        ),
+        Row(
+          children: [
+            for (final day in days)
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    children: [
+                      BirdySkeleton.circle(size: BirdySizes.dayDot),
+                      const SizedBox(height: BirdySpace.xs),
+                      Text(
+                        weekday.format(day.date).toUpperCase(),
+                        style: BirdyText.caption.copyWith(
+                          color: c.orioleText,
+                          fontWeight:
+                              day.isToday ? FontWeight.w700 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Lines between neighbouring day dots, shared by [StreakDots] and its
+/// skeleton so the home and Profil blocks look the same while loading too.
+///
+/// Each cell is the exact twin of the dot cell (same equal width, same
+/// [FittedBox] over an invisible copy of the dot and letter column), so the
+/// line stays centered on the dot at any text scale. The line overreaches
+/// the column on both sides and the cell clips it to its own width: the
+/// neighbours' halves meet at the cell border, edge to edge, whatever the
+/// cell width (no LayoutBuilder: the home block sits in an IntrinsicHeight).
+/// Each connector is two halves, one ending cell [i], one starting cell
+/// [i] + 1, keyed `streak-connector-<i>-end` and `streak-connector-<i>-start`
+/// (the clipping cells are keyed `streak-connector-cell-<i>`).
+class _StreakConnectors extends StatelessWidget {
+  const _StreakConnectors({
+    required this.days,
+    required this.localeName,
+    required this.color,
+  });
+
+  final List<StreakDay> days;
+  final String localeName;
+  final Color color;
+
+  /// How far a line may reach past its column before the cell clips it.
+  static const double _overreach = 400;
+
+  Widget _half(String? key) => Expanded(
+    child:
+        key == null
+            ? const SizedBox.shrink()
+            : DecoratedBox(
+              key: ValueKey(key),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(BirdyRadii.pill),
+              ),
+            ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final weekday = DateFormat('EEEEE', localeName);
+    final last = days.length - 1;
     return Row(
       children: [
-        for (final day in days)
+        for (final (i, day) in days.indexed)
           Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                children: [
-                  BirdySkeleton.circle(size: BirdySizes.dayDot),
-                  const SizedBox(height: BirdySpace.xs),
-                  Text(
-                    weekday.format(day.date).toUpperCase(),
-                    style: BirdyText.caption.copyWith(
-                      color: c.orioleText,
-                      fontWeight:
-                          day.isToday ? FontWeight.w700 : FontWeight.w400,
+            child: ClipRect(
+              key: ValueKey('streak-connector-cell-$i'),
+              clipper: const _CellClipper(),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Invisible twin of the dot cell: same size, same scale.
+                    Column(
+                      children: [
+                        const SizedBox(
+                          width: BirdySizes.dayDot,
+                          height: BirdySizes.dayDot,
+                        ),
+                        const SizedBox(height: BirdySpace.xs),
+                        Text(
+                          weekday.format(day.date).toUpperCase(),
+                          style: BirdyText.caption.copyWith(
+                            color: Colors.transparent,
+                            fontWeight:
+                                day.isToday ? FontWeight.w700 : FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    Positioned(
+                      left: -_overreach,
+                      right: -_overreach,
+                      top: (BirdySizes.dayDot - BirdyStroke.regular) / 2,
+                      height: BirdyStroke.regular,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _half(i > 0 ? 'streak-connector-${i - 1}-start' : null),
+                          const SizedBox(width: BirdySizes.dayDot),
+                          _half(i < last ? 'streak-connector-$i-end' : null),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
       ],
     );
   }
+}
+
+/// Clips a connector cell to its own width only (lines may not leak into
+/// the neighbours' cells); height is left open.
+class _CellClipper extends CustomClipper<Rect> {
+  const _CellClipper();
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTRB(
+    0,
+    -BirdySpace.xxxl,
+    size.width,
+    size.height + BirdySpace.xxxl,
+  );
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }

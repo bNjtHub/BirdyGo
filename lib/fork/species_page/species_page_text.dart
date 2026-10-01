@@ -5,7 +5,9 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../data/observation_index.dart';
+import '../../features/inference/geo_model.dart';
 import '../ranking/species_activity_section.dart';
+import '../species_sheet/species_sheet.dart';
 import 'species_page_model.dart';
 
 /// « Présent de mars à septembre. Pas attendu ici en ce moment. »
@@ -15,6 +17,25 @@ String presenceSentence(
   YearPresence year, {
   required DateTime now,
 }) {
+  if (year.weeks.isNotEmpty) {
+    final weekSpan = year.weekSpan;
+    final head = switch (weekSpan.kind) {
+      PresenceKind.allYear => l10n.forkFichePresentAllYear,
+      PresenceKind.rare => l10n.forkFicheRare,
+      PresenceKind.partOfYear => l10n.forkFichePresentPart,
+      PresenceKind.range => l10n.forkFicheArrivesLeaves(
+        weekPhrase(l10n, languageCode, weekSpan.from!),
+        weekPhrase(l10n, languageCode, weekSpan.to!),
+      ),
+    };
+    final absentNow =
+        (weekSpan.kind == PresenceKind.range ||
+            weekSpan.kind == PresenceKind.partOfYear) &&
+        !year.presentInWeek(
+          (GeoModel.dateTimeToWeek(now) - 1).clamp(0, weeksPerYear - 1),
+        );
+    return absentNow ? '$head ${l10n.forkFicheNotNow}' : head;
+  }
   final span = year.span;
   final head = switch (span.kind) {
     PresenceKind.allYear => l10n.forkFichePresentAllYear,
@@ -31,6 +52,27 @@ String presenceSentence(
       !year.presentIn(now.month);
   return absentNow ? '$head ${l10n.forkFicheNotNow}' : head;
 }
+
+/// « début mars », « vers la mi-mars », « fin mars » for week [index]
+/// (0 to 47) of the geo-model year.
+String weekPhrase(AppLocalizations l10n, String languageCode, int index) {
+  final month = _monthName(languageCode, monthOfWeek(index));
+  return switch (monthPartOfWeek(index)) {
+    MonthPart.early => l10n.forkFicheWeekEarly(month),
+    MonthPart.mid => l10n.forkFicheWeekMid(month),
+    MonthPart.late => l10n.forkFicheWeekLate(month),
+  };
+}
+
+/// « Nidification : avril à juillet ».
+String nestingLegend(
+  AppLocalizations l10n,
+  String languageCode,
+  NestingPeriod period,
+) => l10n.forkFicheNestingRange(
+  _monthName(languageCode, period.from),
+  _monthName(languageCode, period.to),
+);
 
 String _monthName(String languageCode, int month) =>
     DateFormat.MMMM(languageCode).format(DateTime(2026, month));

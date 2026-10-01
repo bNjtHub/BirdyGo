@@ -170,11 +170,15 @@ class IndexedListening {
     required this.end,
     required this.latitude,
     required this.longitude,
+    this.lastSeen,
   });
 
   final String id;
   final DateTime start;
   final DateTime? end;
+
+  /// Latest known sign of life (last detection), for a listening without end.
+  final DateTime? lastSeen;
   final double? latitude;
   final double? longitude;
 }
@@ -800,7 +804,9 @@ class ObservationIndex {
   /// starts, dawn chorus).
   Future<List<IndexedListening>> listenings() async {
     final rows = await _db.rawQuery(
-      'SELECT id, start_ms, end_ms, latitude, longitude FROM sessions',
+      'SELECT id, start_ms, end_ms, latitude, longitude, '
+      '(SELECT MAX(COALESCE(d.end_ms, d.start_ms)) FROM detections d '
+      'WHERE d.session_id = sessions.id) AS last_seen_ms FROM sessions',
     );
     return [
       for (final row in rows)
@@ -819,6 +825,13 @@ class ObservationIndex {
           },
           latitude: row['latitude'] as double?,
           longitude: row['longitude'] as double?,
+          lastSeen: switch (row['last_seen_ms']) {
+            final int ms => DateTime.fromMillisecondsSinceEpoch(
+              ms,
+              isUtc: true,
+            ),
+            _ => null,
+          },
         ),
     ];
   }

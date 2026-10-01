@@ -44,7 +44,9 @@ Couleur d'espèce : chaque espèce a sa teinte, tirée de sa photo ou de son ic�
 ligne dans le tableau en direct et ses célébrations. Couleur de statut : chaque statut du jeu a la
 sienne (fixée en J6e). Le texte posé sur ces couleurs garde un contraste AA.
 
-L'écoute s'ouvre en thème sombre par défaut : on l'utilise souvent à l'aube, et l'écran OLED consomme moins.
+L'écoute suit le thème de l'app (clair ou sombre, et l'oiseau choisi) ; le réglage « Écran d'écoute
+toujours sombre » (Réglages, bloc Thème, et feuille d'options de l'écoute) la garde sombre : on l'utilise
+souvent à l'aube, et l'écran OLED consomme moins.
 Les rampes de score et les palettes du spectrogramme d'upstream ne changent pas.
 Élévation par teinte de surface (Material 3), pas la même ombre grise sous chaque carte.
 
@@ -187,6 +189,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 | Entrée d'un élément | 200 à 250 ms | `Cubic(0.23, 1, 0.32, 1)` |
 | Sortie | 150 ms | même courbe, toujours plus courte que l'entrée |
 | Déplacement à l'écran | 250 ms | `Cubic(0.77, 0, 0.175, 1)` |
+| Page qui s'ouvre (J7) | 220 ms à l'entrée, 150 ms au retour | `Cubic(0.23, 1, 0.32, 1)` : fondu et glissement de 8 px depuis la droite, la page dessous ne bouge pas ; animations réduites = fondu seul. `BirdyPageTransitionsBuilder`, posé sur le thème |
 | Feuille du bas | ressort | `SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85)` |
 | Carte de revue balayée | ressort interruptible | suit le doigt, repart avec la vitesse du geste |
 | Compteur qui augmente | 180 ms | le chiffre grossit à peine (échelle 1,08 puis 1), la ligne ne bouge pas |
@@ -197,6 +200,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
 
 - Jamais `Curves.easeIn` pour l'interface, il donne une impression de lenteur.
 - Jamais d'apparition depuis une échelle 0 : partir de 0,95 avec une opacité 0.
+- Les entrées décalées (`BirdyEntrance`) attendent la fin de la transition de page (J7) : jamais deux animations en même temps.
 - Décalage entre les éléments d'une liste : 40 ms, sur 5 éléments au plus, sans bloquer les appuis.
 - Hero sur la photo entre une liste et la fiche espèce.
 - N'animer que la position, l'échelle et l'opacité. `RepaintBoundary` autour du spectrogramme.
@@ -323,7 +327,43 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   et palette de repli stable, jusqu'aux icônes de J6d.
 - Écarts assumés avec la maquette : pas de halo ni d'onde sur la ligne réentendue (un seul effet à la
   fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
-  et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
+  et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) ont le thème de l'écran
+  d'écoute (J7 : celui de l'app, sombre si « toujours sombre »).
+
+### Écoute en thème clair, niveau stable, « Confirmé » (J7)
+
+- **Thème.** `LiveScreen` enveloppe l'écran dans `ListeningTheme(follow: !liveAlwaysDark)` : par défaut
+  rien n'est forcé, l'écoute prend le thème de l'app et l'oiseau choisi ; `liveAlwaysDarkProvider`
+  (`fork_live_always_dark_v1`, faux par défaut, repris de l'ancien choix explicite « sombre » de
+  `fork_live_theme_v1`) rend le comportement d'avant (sombre forcé). Réglage : ligne à interrupteur
+  « Écran d'écoute toujours sombre » dans le bloc Thème des Réglages, même interrupteur dans la feuille
+  d'options de l'écoute. Le puits du spectrogramme reste sombre dans les deux cas (sa palette et son
+  dégradé `wellTop`/`wellBottom` ne dépendent pas du fond) ; ses repères et noms utilisent les jetons
+  sombres. Contrastes vérifiés dans les 4 thèmes clair et sombre (`test/fork/live/live_contrast_test.dart`) ;
+  goldens du Live dans `test/fork/goldens/live_*.png`. Limite : la bordure Loriot des cartes de moment
+  (décorative, la carte a sa propre surface) reste à moins de 3:1 sur le fond clair.
+- **Bouton play de la première fois.** La carte « Première rencontre » et la carte d'un oiseau rare
+  réservent le bouton dès la première image (`_ClipSlot`), à sa taille et sa place finales : grisé
+  (`BirdyMotion.pendingOpacity`) tant que l'extrait n'est pas enregistré, puis le bouton actif apparaît
+  au même endroit en fondu (`BirdyCrossFade`, rien sous animations réduites). Rien n'est réservé quand
+  l'enregistrement des extraits est éteint. La lecture garde le mécanisme de J2 (`ReplayButton` :
+  inférence suspendue pendant la lecture, plus 0,5 s).
+- **Niveau du tableau.** Le niveau d'une ligne est celui du meilleur contact de la sortie
+  (`LiveTableEntry.levelRecord`, `liveLevelOf` : `reliabilityFor` avec les seuils de `ReliabilityConfig` ;
+  un contact confirmé gagne, sinon le meilleur score, à égalité le plus ancien). Il ne redescend pas
+  pendant la sortie. `record` reste l'extrait en cours. Le Bilan de fin de sortie applique la même
+  règle (`ListeningSummary.of` garde le meilleur niveau des contacts). Les moments (première rencontre,
+  oiseau rare) lisent aussi `levelRecord`.
+- **Barres « chante ».** Leur hauteur suit le score de l'extrait en cours (de
+  `BirdyMotion.singingBarsMinScale` à 1 de la hauteur, lissé sur `BirdyMotion.enter`, sans transition
+  sous animations réduites) ; le badge de niveau reste fixe.
+- **« Confirmé ».** Quand une ligne passe d'un autre niveau à « Sûr » pendant l'écoute, une pastille
+  « Confirmé » avec coche (couleurs de « Sûr ») remplace le badge 2,5 s (`BirdyMotion.confirmedShown`)
+  en fondu, une seule fois par espèce et par sortie. Animations réduites : seul le badge change. Dans
+  les deux cas, `Semantics(liveRegion)` annonce « <espèce> : confirmé ».
+- **Feuille des niveaux.** Toucher le badge d'une ligne ouvre `LevelsSheet` avec, en tête, le niveau de
+  l'espèce, son meilleur score, l'heure du meilleur contact et le nombre de contacts de la sortie
+  (`LevelsSpecies`). Sans espèce (bouton « i » des options), la feuille est celle d'avant.
 
 ## Mise en œuvre (J6c-bis-b, Live : « Analyse… » et fin rapide)
 
@@ -378,9 +418,10 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   le ticker ne tourne que pendant une phrase (`RepaintBoundary` autour du dessin), et rien n'est
   programmé quand l'accueil est caché (autre onglet, écran ouvert par-dessus, application en
   arrière-plan). Un appui sur l'oiseau ou le nom le fait chanter une fois et joue le cri BirdyGo
-  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part, muet pendant une écoute pour que
+  (`assets/fork/sounds/birdygo_tweet.wav`, 1,6 s, lecteur à part chargé dès l'apparition de l'accueil (sans jouer, pour que le premier appui parte sans retard), muet pendant une écoute pour que
   le micro ne l'entende pas ; joué même sous animations réduites) (pas annoncé au lecteur
   d'écran : ce n'est pas une commande). Animations réduites : la marque immobile, jamais animée.
+  Bande « Ta journée » : la zone tactile de 48 dp laisse déjà 11 dp autour des pastilles, donc aucun écart de bloc supplémentaire au-dessus ni en dessous. Série (7 points) : un trait de `BirdyStroke.regular` relie deux points voisins (accent entre deux jours qui comptent, `borderStrong` sinon).
   L'ancien `BirdyGoLogo` (aile dessinée une fois) n'est plus affiché ; son peintre garde les
   couleurs de la marque. Un double appui (J6h, `logo_flight.dart`) lui fait faire un clin d'œil au
   centre de l'écran : voir l'exception de la section Animations.
@@ -414,13 +455,44 @@ On suit SPEC.md 9.1, plus récente que le croquis « Accueil » ci-dessus.
   vers la fiche. « N détections à vérifier » (cachée à 0), vers la revue rapide. « Écouter » est au
   milieu de la barre du bas, au pouce.
 - Les chiffres se chargent après la première image et se remettent à jour quand l'index change.
-- Menu (en haut à droite) en attendant la barre de navigation de J6e : Sessions, Palmarès, Carte,
-  Revue rapide, Sonothèque, Oiseaux des jardins, Explorer ; Point d'écoute, Transect, ARU, Analyse de
-  fichier ; Réglages, Aide, À propos. Rien d'upstream ne disparaît.
+- Menu (en haut à droite) : la feuille « Plus », voir « Menu Plus » plus bas. Rien d'upstream ne
+  disparaît.
+- « Qui chante ? » (L) : entre le bloc « Aujourd'hui » et le défi de la semaine, le lien du Profil
+  (`QuizEntryRow`, `lib/fork/game/quiz_entry_row.dart`, un seul widget pour Profil, fiche espèce et
+  Accueil) avec son paramètre `progress`. Bloc blanc (`surface1`, rayon 20, padding 16), logo quiz de
+  56 (`QuizLogo`, puits sombre, liseré à l'accent du thème d'oiseau choisi dans le Profil), titre en
+  heading, accroche en légende `text2` : « Encore {n} bonnes réponses pour ta première plume », puis
+  « Tu as ta première plume. Vise la deuxième ! », « Vise la troisième ! », et un bravo aux trois
+  plumes. Dessous, 10 segments de 6 (écart 3, rayon plein), remplis à l'accent, les autres en
+  `line` : la progression depuis le palier précédent d'Oreille fine vers le suivant, pleine au
+  dernier. Chevron, pression standard, un toucher ouvre le quiz (QuizIntro). Affiché seulement si le
+  quiz est jouable (`quizPlayableProvider`, même seuil que le quiz : au moins `quizChoices` espèces
+  vérifiées avec un clip), sinon absent, jamais grisé. Il entre en décalé avec les autres blocs.
 - Paysage large : salutation et objectif du jour à gauche ; statut, tuiles et cartes à droite (chaque
   colonne a sa marge basse et son fondu). Colonne de 600 dp au plus sur tablette.
 - Viennent avec le jeu (J6e) : pastille de série, carte de statut, défi de la semaine, barre de
   navigation (Accueil, Carnet, Carte, Profil).
+
+### Menu Plus (M)
+
+Feuille `lib/fork/home/more_sheet.dart`, titre « Plus » (26) et poignée, 90 % de l'écran au plus
+(`BirdySizes.moreSheetMaxShare`), défilement au-delà. Triée de l'important vers le technique :
+
+- Trois groupes titrés (légende 13 gras `text2`, retrait 4), chacun un bloc Brume (`background`,
+  rayon 20, padding horizontal 16) de lignes de liste standard (72, disque teinté de 44, icône 22,
+  libellé 17 gras, légende `text2`, chevron) séparées par un filet `line` :
+  - « Jouer et progresser » : Qui chante ? et Palmarès (Loriot, récompense).
+  - « Mes oiseaux » : Revue rapide (disque blanc au contour pointillé `toCheck`, « {n} à vérifier » ou
+    « Tout est trié »), Sonothèque, Mes sessions (`tonal`).
+  - « Découvrir » : Oiseaux des jardins (`sure`), Explorer (`tonal`).
+- La Carte n'y est plus : c'est un onglet.
+- Sous un filet `line` (marge 4), un bloc blanc bordé de `line`, rayon 20, lignes compactes de 56
+  (icône 22 `text2` sans disque, libellé 15 gras, chevron) : Réglages, Aide, À propos, puis Outils
+  avancés (libellé `text2`) en dernier, dépliable sur place (`expandMore` / `expandLess`) sur les 5
+  outils (Point d'écoute, Transect, ARU, Entraînement, Analyse de fichier) en lignes de 48, en
+  retrait de 34.
+- Golden dans les 4 thèmes, clair et sombre ; les paires de couleurs sont dans le test de contraste
+  de l'Accueil (4,5:1).
 
 ## Mise en œuvre (J6c, Fiche espèce)
 
@@ -432,13 +504,64 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
 - En-tête : photo de J6b bord à bord (3:2) sur la teinte claire ou sombre de l'espèce
   (`SpeciesAccents`), rayon 28 en bas, nom en Fraunces 34, nom latin. Les icônes de J6d
   remplaceront la photo seulement aux petites tailles.
-- Blocs : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr (confirmée ou score
-  Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Ici en ce moment » avec les 12 mois
-  du géomodèle (un mois = sa meilleure semaine, seuil de la liste Explorer) ; « Mes sons » ; fiche IA
+- Blocs, dans cet ordre : phrase « Entendu… » (ou « Tu ne l'as pas encore entendu. »), badge Sûr
+  (confirmée ou score Sûr, même règle que le Bilan) et « N bonnes sur M vérifiées » ; « Mes sons »
+  (J7 : le meilleur son ouvre la liste avec le grand bouton `BirdySizes.mainAction` et une ligne en
+  `BirdyText.body`, les autres restent en taille normale) ; « Ici en ce moment » : phrase et courbe compacte côte à côte
+  (12 barres mensuelles `ActivityBars` de 150 dp à droite, seuil de la liste Explorer, mois courant
+  marqué). La phrase vient des 48 semaines du géomodèle : migrateur « Arrive début mars · repart fin
+  septembre » (début, vers la mi-, fin du mois de la première et de la dernière semaine présentes),
+  sédentaire « Présent toute l'année. » ; testé à 320/360/412 dp et 100/130/200 %. Pas de bande de
+  nidification sur cette carte : la nidification (champ `nesting` des fiches IA, `NestingPeriod`)
+  est affichée par la carte du monde (« Niche d'avril à juillet ») ; fiche IA
   (résumé en tête, puces SPEC.md 5.10, paragraphe en fondu court) ou description upstream ;
   activité par heure (couleur `deep` de l'espèce) et mini-carte non interactive, côte à côte, l'une
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
   pour toi ».
+- « Dans le monde » (J7, `lib/fork/world_map/`), juste après « Ici en ce moment » : carte du monde de la
+  répartition de l'espèce **par régions administratives, comme un guide d'oiseaux**, une seule carte (plus de
+  puces de saison), recadrée automatiquement sur l'aire de l'espèce (régions isolées ignorées pour le cadrage,
+  marge, étendue et proportions bornées, jamais hors de la zone −25° à 65° E, −35° à 72° N). Océan = fond du
+  bloc, terres `line` sur ce fond, régions Natural Earth admin-1 (domaine public) coloriées en entier, suivant
+  leurs frontières, trait fin entre régions (fond du bloc à 60 %), trait plus marqué pour les pays. Sans
+  tuiles pour le fond, hors ligne.
+  **Quatre couleurs, quatre jetons sémantiques** de `BirdyColors` (`rangeBreeding`, `rangeWintering`,
+  `rangeResident`, `rangePassage`, les mêmes pour tous les thèmes d'oiseau, comme `sure` ou `oriole`) :
+  Nidification (été seulement) orange, Hivernage (hiver seulement) bleu, Toute l'année (été et hiver) vert,
+  De passage (printemps ou automne seulement) jaune. Clair : #C25A00, #2B6CB0, #2F7D4F, #8A7A00 ; sombre :
+  #F08A3E, #6FA8E8, #5CBF86, #EBD34B. Chacune garde 3:1 sur les terres, l'océan et le fond du bloc dans les
+  4 thèmes clair et sombre (test). Quatre couleurs ne peuvent pas toutes différer de 3:1 entre elles en
+  luminance : elles se distinguent par la teinte (écart de couleur CIE76 d'au moins 30, testé) et par le
+  trait fin entre régions. Point `text1` cerclé du fond du bloc pour la position connue.
+  **Données** : avec le consentement « Carte en ligne » (même garde que OSM, désactivé par défaut), la fiche
+  demande à GBIF.org, par région GADM niveau 1, le nombre d'observations humaines CC0 / CC BY depuis 2010 de
+  l'espèce, une requête de comptage (facette `gadmLevel1Gid`, aucun enregistrement téléchargé) par saison, et
+  le même comptage pour tous les oiseaux (l'effort d'observation, une fois pour toutes les espèces, gardé 180
+  jours). Une région compte pour une saison si l'effort est d'au moins 200, l'espèce d'au moins 5 et son taux
+  (espèce / oiseaux) d'au moins 0,3 %, et d'au moins 10 % du taux médian de l'espèce sur les régions qui ont
+  passé ce test (contre le bruit des zones peu observées, sans effacer l'hivernage africain). Toute l'année =
+  été et hiver, Nidification = été sans hiver, Hivernage = hiver sans été, De passage = seulement printemps ou
+  automne. La région GADM est reportée sur les régions de la carte par une table de jointure par clés
+  (`gadm1_to_regions.json.gz`) : aucune géométrie GADM n'est embarquée, seulement ses identifiants ; GADM n'est
+  pas redistribué. Limite : « été » et « hiver » sont ceux du calendrier nord (juin à août, décembre à
+  février) ; une espèce australe qui niche en décembre apparaîtra en Hivernage.
+  Légende sous la carte : 4 pastilles et libellés (toujours les quatre), phrase de synthèse « Nidification :
+  nord de l'Europe · Hivernage : Afrique de l'Ouest · ~6 200 km » (région dominante par aire pour chaque classe,
+  une classe de moins de 10 % de l'aire de l'espèce n'est pas citée ; distance entre nidification et hivernage
+  seulement si elle dépasse 1 000 km), « Nidification : avril à juillet » si la fiche IA la donne. Un appui sur
+  une région coloriée affiche son nom et sa classe sous la carte (un deuxième appui ou un appui ailleurs
+  l'efface). Libellé accessible : la phrase de synthèse. Squelette à la forme finale puis fondu.
+  Attribution sous la carte : « Observations GBIF.org · CC BY 4.0 » (deux cibles de 48 dp : le site GBIF, puis
+  « Licences des contenus » qui donne les filtres et la citation « GBIF.org (année) GBIF Occurrence Data »).
+  Vie privée : seul le nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans
+  consentement (testé).
+  **Repli** (sans consentement, hors ligne sans cache, erreur GBIF, ou GBIF trop pauvre pour l'espèce) : le
+  géomodèle sur sa grille de 5° (mêmes 4 semaines), ramené au même style : chaque région prend la classe de la
+  cellule qui contient son centroïde (pas de calcul de plus, ce qui garde le coût du géomodèle d'avant ; la
+  carte est plus en blocs), présentée comme « Estimation du géomodèle BirdNET », avec, sans consentement
+  seulement, la ligne discrète « Carte précise : activez la carte en ligne » (cible 48 dp, `accentText`) qui
+  ouvre le dialogue de consentement existant (« Autoriser » charge la carte GBIF sur place). Pas de bloc ni
+  d'espacement sans carte.
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).
 - Colonne de 600 dp au plus en paysage et sur tablette.
 
@@ -564,10 +687,18 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   l'étape courante ; étapes à venir = points de 12 cerclés de 3 px de la couleur du fond (le trait ne
   les traverse jamais), étape courante = cercle de 30 bordé Martin-pêcheur avec son numéro et un halo
   pulsé, bonne réponse = cercle de 26 sur la teinte claire avec l'icône de l'oiseau (pop), mauvaise =
-  cercle de 20 avec une petite croix. Dessous, « Chant 3 sur 10 » et la pastille Loriot « 3 d'affilée ! ».
-  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : « Oiseau mystère », disque pointillé
-  de 116 qui flotte (±6 px, 3 s), bouton de lecture de 64 entre deux groupes de trois barres qui
-  s'animent seulement pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
+  cercle de 20 avec une petite croix (le tick seul ne suffisait pas : il faut aussi le texte).
+  Une ligne d'état (`_StatusLine`, 32 dp, 8 dp sous la piste et 8 dp au-dessus de la scène)
+  reprend la piste en texte : à gauche « Chant 3 sur 10 » (`text2`), à droite la pastille de score Sûr
+  (coche et « 2 bonnes », pluriel ICU `forkQuizScorePill`) puis, dès 2 de suite, la pastille Loriot
+  « 3 d'affilée ! » (pop, immobile en animations réduites). Un `Wrap` la range sous le score quand la place
+  manque (320 dp, 130 %) ; sa place reste réservée quand elle est cachée : la ligne ne change jamais de
+  hauteur. La ligne est muette : le libellé accessible de la piste dit tout, « Chant 3 sur 10, 2 bonnes
+  réponses, 2 d'affilée ! » (`forkQuizTrailLabel`).
+  Scène d'écoute de 212 dp (moins sur petit écran, 128 au moins) : pas de libellé « Oiseau mystère » (la
+  bulle « Écoute-moi ! / Qui suis-je ? » suffit), disque pointillé de 116 qui flotte (±6 px, 3 s), bouton
+  de lecture de 60 posé à cheval sur son coin bas droit, spectre de 27 barres qui s'animent seulement
+  pendant la lecture (900 ms, décalées), figées à 45 % sinon. Réponses en grille
   2 × 2 de cartes de 136 dp (écart 10, rayon 24), icône de 76 sur son halo (elle rétrécit si le nom
   prend de la place), nom en Fraunces 17 équilibré sur ses lignes. La hauteur de la scène et des cartes
   s'adapte pour que les deux cartes du bas et « Touche l'oiseau qui chante » / « Continuer » restent
@@ -580,13 +711,19 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   (bordure 2,5) avec une coche et un pop, « +1 Oreille fine » s'envole (1,4 s) ; jingle et vibration
   légère. Mauvaise réponse : carte blanche, « Presque ! », « C'était le … », la carte choisie se
   balance (420 ms) et prend une croix Écorce, les autres passent à 40 %, la bonne en Lichen ; une
-  note douce, pas de confettis. « Réécouter » (48 dp) en haut à droite de la scène, jamais sur le texte.
+  note douce, pas de confettis, puis le bon chant est rejoué tout seul (`QuizMotion.replayAfterSoft`,
+  500 ms après la note ; jamais sur une bonne réponse). Le bouton de lecture ne bouge pas entre la
+  question et la correction : même `_BigPlayButton` de 60, même position (`_StageGeometry`, partagée),
+  mêmes états lecture / stop ; l'oiseau prend la place du disque, le texte passe dessous, la bordure de
+  la carte « Presque ! » est peinte par-dessus (`foregroundDecoration`) pour ne rien décaler.
   Bilan : carte héros blanche rayon 28 dont le halo Loriot (32 % → 0 sur 190 px) est la décoration
   même ; trois étoiles pleines (42/56/42, Loriot ou `line`) qui apparaissent l'une après l'autre, le
   score en 64, un mot et une phrase ; « Tes oiseaux du jour » en grille 5 × 2 (en couleur avec coche,
   grisés avec croix, en cascade de 50 ms) ; la carte Oreille fine dont la barre se remplit en 900 ms,
   « Nouvelle plume » si un palier est franchi ; pluie de confettis et fanfare dès la moitié de bonnes
-  réponses (`GameConfig.quizPartyShare`) ; « Terminer » (contour) et « Rejouer » côte à côte.
+  réponses (`GameConfig.quizPartyShare`) ; « Sons à retenir » (seulement s'il y a des ratés) : une ligne par
+  oiseau raté, son nom et un bouton lecture de 48 (même lecteur `speciesClipPlayerProvider`, un seul son à
+  la fois, arrêt en quittant l'écran) ; « Terminer » (contour) et « Rejouer » côte à côte.
   Mouvement : exception autorisée aux règles de retenue (voir « Animations »), animations réduites =
   tout est immobile et sans confettis.
 - Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
@@ -906,6 +1043,7 @@ Règles transverses :
     de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
+- **Fiche, carte de contenu de « Fais sa connaissance ».** Le filigrane de l'icône de la rubrique est en haut à droite de la carte (pas en bas).
 - **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : À l'oreille (`tonal`), Taille (`sure`), Habitudes (`tonal`), Migration (`sure`), Ennemis (patte, `probable.background` / `probable.foreground`, accroche « Qui le chasse »), Anecdote (`oriole`). Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
   #8CD3D9), épaisseur 30/512, bouts ronds, ombre douce (0,1 px, flou 2, #0B3C46 à 45 %). Icône des
@@ -946,4 +1084,12 @@ Références : `fork/handoff/maquettes/DemoPrenom.dc.html`, `DemoTheme.dc.html`,
 - **Composants partagés.** `SingingThemeLogo` (disque + chant), `BirdyBirdPicker` / `BirdyBirdCard` /
   `BirdyIconPreview`, `BirdyBirdLabels` (nom, pluriel, fait). Aucun disque ni carte écrits à la main
   ailleurs : même emblème partout.
+- **Autorisations, carte en ligne.** Après Micro (« Nécessaire ») et Position (« Facultatif »), une
+  troisième carte `onb-map` (même composant, ton tonal, icône `AppIcons.mapSheet`, tag « Facultatif »)
+  demande « Carte en ligne » : les fonds viennent d'OpenStreetMap et de l'IGN par Internet, modifiable
+  dans Réglages. Deux boutons pleine largeur de 48 : « Oui, afficher la carte » (tonal) et « Non merci »
+  (texte). Rien n'est choisi d'office ; le bouton choisi prend une coche, le Oui passe en accent
+  (`accent` / `onAccent`), le Non en fond tonal. Le choix écrit `privacyAllowMapProvider` tout de suite et
+  reste modifiable ; sans choix, « Non » (valeur par défaut) et on continue. Le dialogue de consentement de
+  la carte reste la voie de rattrapage. Plus d'interrupteur dans la carte Position.
 - **Animations réduites.** Ni chant, ni pop, ni fondu ; l'accueil de l'oiseau ne dure pas.

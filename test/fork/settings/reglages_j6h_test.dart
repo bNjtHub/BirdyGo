@@ -92,22 +92,21 @@ void main() {
       expect(find.text(fr.forkThemeAuto), findsOneWidget);
     });
 
-    testWidgets('live theme chips write liveThemeProvider', (tester) async {
+    testWidgets('always-dark switch writes liveAlwaysDarkProvider', (
+      tester,
+    ) async {
       await pump(tester);
-      expect(container.read(liveThemeProvider), LiveTheme.dark);
-      final light = find.byKey(const ValueKey('live-theme-light'));
-      await tester.ensureVisible(light);
+      expect(container.read(liveAlwaysDarkProvider), isFalse);
+      final row = find.byKey(const ValueKey('settings-live-always-dark'));
+      await tester.ensureVisible(row);
       await tester.pumpAndSettle();
-      await tester.tap(light);
+      expect(find.text(fr.forkLiveAlwaysDark), findsOneWidget);
+      await tester.tap(row);
       await tester.pump();
-      expect(container.read(liveThemeProvider), LiveTheme.light);
-      final dark = find.byKey(const ValueKey('live-theme-dark'));
-      await tester.ensureVisible(dark);
-      await tester.pumpAndSettle();
-      await tester.tap(dark);
+      expect(container.read(liveAlwaysDarkProvider), isTrue);
+      await tester.tap(row);
       await tester.pump();
-      expect(container.read(liveThemeProvider), LiveTheme.dark);
-      expect(find.text(fr.forkLiveThemeCaption), findsOneWidget);
+      expect(container.read(liveAlwaysDarkProvider), isFalse);
     });
   });
 }

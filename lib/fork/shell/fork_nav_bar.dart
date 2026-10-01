@@ -138,11 +138,12 @@ class _NavTab extends StatelessWidget {
         // Only the bar's own part takes the touch, not the strip above it.
         child: Padding(
           padding: const EdgeInsets.only(top: BirdySizes.listenDiscLift),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              onTap: onTap,
-              customBorder: const StadiumBorder(),
+          // A press scale like the listen disc, no ink: an ink splash over
+          // the whole tab drew a grey oval across the pill and the label.
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Pressable(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: BirdySizes.target),
                 child: Column(

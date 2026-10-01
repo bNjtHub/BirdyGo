@@ -15,6 +15,8 @@ import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/world_map/world_map_providers.dart';
+import 'package:birdnet_live/fork/world_map/world_regions.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/fork/species_page/species_page_loader.dart';
 import 'package:birdnet_live/fork/species_page/species_page_model.dart';
@@ -147,6 +149,10 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
+          // No geo-model in these tests: the world map block stays hidden.
+          worldMapPredictProvider.overrideWith((ref) async => null),
+          worldRangesProvider.overrideWith((ref) async => null),
+          worldRegionsProvider.overrideWith((ref) async => WorldRegions(const [], const [])),
           taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
           effectiveSpeciesLocaleProvider.overrideWithValue('fr'),
           speciesSheetsProvider.overrideWith((ref) async => SpeciesSheets({})),

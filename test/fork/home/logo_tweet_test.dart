@@ -10,6 +10,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _FakeTweet implements LogoTweetPlayer {
   int plays = 0;
+  int prepares = 0;
+  int prepareAtFirstPlay = -1;
+
+  @override
+  Future<void> prepare() async => prepares++;
+
+  @override
+  Future<void> play() async {
+    if (plays == 0) prepareAtFirstPlay = prepares;
+    plays++;
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _FlakyAudio implements TweetAudio {
+  int setAssets = 0;
+  int plays = 0;
+
+  @override
+  Future<void> setAsset(String asset) async => setAssets++;
+
+  @override
+  Future<void> seekToStart() async {}
 
   @override
   Future<void> play() async => plays++;
@@ -19,6 +44,27 @@ class _FakeTweet implements LogoTweetPlayer {
 }
 
 void main() {
+  test('a failing engine constructor is retried on the next prepare', () async {
+    var created = 0;
+    final audio = _FlakyAudio();
+    final player = JustAudioTweetPlayer(
+      createAudio: () {
+        created++;
+        if (created == 1) throw StateError('no engine yet');
+        return audio;
+      },
+    );
+    await player.prepare();
+    expect(audio.setAssets, 0);
+    await player.prepare();
+    expect(created, 2);
+    expect(audio.setAssets, 1);
+    // Prepared: a play loads nothing more.
+    await player.play();
+    expect(audio.setAssets, 1);
+    expect(audio.plays, 1);
+  });
+
   Future<(_FakeTweet, ProviderContainer)> pump(
     WidgetTester tester, {
     bool reduced = false,
@@ -72,5 +118,18 @@ void main() {
     await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     await tester.pump(const Duration(seconds: 5));
     expect(tweet.plays, 0);
+  });
+
+  testWidgets('the tweet is prepared before the first tap', (tester) async {
+    final (tweet, _) = await pump(tester);
+    expect(tweet.prepares, 1);
+    expect(tweet.plays, 0);
+    await tester.tap(find.byType(HomeLogoRow));
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
+    expect(tweet.plays, 1);
+    // The first tap played what was already prepared: no new loading.
+    expect(tweet.prepareAtFirstPlay, 1);
+    expect(tweet.prepares, 1);
+    await tester.pump(const Duration(seconds: 5));
   });
 }
