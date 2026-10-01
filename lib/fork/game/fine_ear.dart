@@ -110,12 +110,19 @@ Future<Map<String, IndexedDetection>> loadQuizClips(
   ObservationIndex index,
   Set<String> verified, {
   bool Function(String path)? fileExists,
-}) async => {
-  for (final name in verified)
-    if (quizClip(await index.clipsForSpecies(name), fileExists: fileExists)
-        case final clip?)
-      name: clip,
-};
+}) async {
+  // Queries are queued together rather than one round trip per species;
+  // the result keeps the order of [verified].
+  final names = verified.toList();
+  final clipLists = await Future.wait([
+    for (final name in names) index.clipsForSpecies(name),
+  ]);
+  return {
+    for (var i = 0; i < names.length; i++)
+      if (quizClip(clipLists[i], fileExists: fileExists) case final clip?)
+        names[i]: clip,
+  };
+}
 
 /// Stars (0 to 3) of a round with [right] answers out of [total]: one per
 /// share of [GameConfig.quizStarShares] reached.

@@ -245,7 +245,8 @@ class _StageSpectrum extends StatelessWidget {
   static const _count = 27;
 
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: ExcludeSemantics(
     child: Opacity(
       opacity: playing ? 1 : 0.4,
       child: Row(
@@ -267,6 +268,7 @@ class _StageSpectrum extends StatelessWidget {
           ],
         ],
       ),
+    ),
     ),
   );
 }

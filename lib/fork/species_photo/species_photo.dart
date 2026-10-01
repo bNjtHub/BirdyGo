@@ -57,6 +57,8 @@ class SpeciesPhoto extends ConsumerWidget {
               species?.assetImagePath ?? _placeholder,
               fit: BoxFit.cover,
               gaplessPlayback: true,
+              // Decoded at display size, never upscaled.
+              cacheWidth: cacheWidth,
               errorBuilder:
                   (_, _, _) => Image.asset(_placeholder, fit: BoxFit.contain),
             ),
