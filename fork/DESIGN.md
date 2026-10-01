@@ -447,41 +447,49 @@ constante `kForkSpeciesPage`) ; la feuille upstream reste dans son fichier. On s
   sous l'autre avec le texte agrandi ; liens eBird, iNaturalist, Wikipédia ; rappel « Garde le son
   pour toi ».
 - « Dans le monde » (J7, `lib/fork/world_map/`), juste après « Ici en ce moment » : carte du monde de la
-  répartition saisonnière, recadrée Europe–Afrique–Asie de l'Ouest (−25° à 65° E, −35° à 70° N), terres
-  Natural Earth 110m (`line` sur le fond du bloc, océan = fond du bloc), sans tuiles, hors ligne. Puces de
-  saison (Hiver / Printemps / Été / Automne, saison courante d'abord, choisie en encre `BirdyChipColors.ink`).
-  **Une seule teinte de cellule : `accentText` du thème d'oiseau = « attendu ici »** (3:1 sur le fond et sur
-  les terres, testé dans les 4 thèmes clair et sombre). On n'emprunte pas `oriole` aux passages (il veut dire
-  rare / récompense) ni `sure` à l'été ou à la nidification (il veut dire confirmé) : la saison se lit sur
-  la puce. Les cellules attendues seulement dans une autre saison restent en fantôme (`accentText` à 30 %),
-  ce qui montre d'où vient l'oiseau et où il va. Point d'encre `text1` cerclé de blanc pour la position
-  connue (même source que la fiche, sans nouvelle demande de permission). Sous la carte : clé (Attendu /
-  Autres saisons / Toi), légende (« Été : nord de l'Europe · Hiver : Afrique de l'Ouest · ~6 200 km », ou
-  « Présent toute l'année dans cette zone »), « Nidification : avril à juillet » si la fiche IA la donne,
-  « Estimation du géomodèle BirdNET ». Squelette à la forme finale puis fondu ; bloc absent sans géomodèle.
-  **Source GBIF à la demande (J7, PR empilée)** : avec le consentement « Carte en ligne » (même garde que
-  OSM, désactivé par défaut), la fiche demande à GBIF.org la carte de l'espèce affichée (observations
-  humaines CC0 / CC BY depuis 2010, 4 saisons, tuiles PNG d'~0,7°, 16 requêtes, ~1 s) et la montre à la
-  place du géomodèle. Les carrés sont relus en cellules sur la même projection et le même cadrage que le
-  fond de terres ; la teinte est la même (`accentText`), l'intensité (3 niveaux selon le nombre
-  d'observations) est l'opacité 55 / 78 / 100 % ; les niveaux 2 et 3 gardent 3:1, le niveau 1 (repère de
-  densité sur une cellule déjà visible) reste à 1,5:1 au moins (test). Cellules plus petites que 12 dp :
-  sans marge ni coins arrondis, elles se joignent en aires. Clé « Observé (plus foncé : plus souvent) » au
-  lieu de « Attendu ». Cache disque par espèce (90 jours, 20 Mo, éviction des moins récemment vues) : une
-  fiche déjà vue s'affiche hors ligne, même périmée. Repli, sans bruit : sans consentement, hors ligne sans
-  cache ou erreur GBIF, on garde la carte du géomodèle à 5°, présentée comme une estimation ; sans
-  consentement seulement, une ligne discrète « Carte précise : activez la carte en ligne » (cible 48 dp,
-  `accentText`) ouvre directement le dialogue de consentement existant (« Autoriser » charge la carte GBIF sur place), jamais de fenêtre non sollicitée. Attribution sous la carte : « Observations GBIF.org ·
-  CC BY 4.0 » (deux cibles de 48 dp : le site GBIF, puis « Licences des contenus » qui donne les filtres,
-  la génération à la demande et la citation « GBIF.org (année) GBIF Occurrence Data »). Vie privée : seul le
-  nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans consentement
-  (testé), et le texte du consentement le dit.
-  Légende : pour chaque saison, la région qui compte le plus de cellules (pondérées par l'intensité) et son
-  centre, jamais la moyenne de groupes séparés ; la distance va d'une région dominante à l'autre. Espèce du
-  seul hémisphère sud : la légende dit les mois (« juin à août : … · décembre à février : … ») au lieu d'été
-  et d'hiver ; les puces gardent les saisons du calendrier nord. Pas de bloc ni d'espacement sans carte.
-  Le libellé accessible dit la saison affichée et la légende (région vivante : le changement de saison
-  est annoncé).
+  répartition de l'espèce **par régions administratives, comme un guide d'oiseaux**, une seule carte (plus de
+  puces de saison), recadrée automatiquement sur l'aire de l'espèce (régions isolées ignorées pour le cadrage,
+  marge, étendue et proportions bornées, jamais hors de la zone −25° à 65° E, −35° à 72° N). Océan = fond du
+  bloc, terres `line` sur ce fond, régions Natural Earth admin-1 (domaine public) coloriées en entier, suivant
+  leurs frontières, trait fin entre régions (fond du bloc à 60 %), trait plus marqué pour les pays. Sans
+  tuiles pour le fond, hors ligne.
+  **Quatre couleurs, quatre jetons sémantiques** de `BirdyColors` (`rangeBreeding`, `rangeWintering`,
+  `rangeResident`, `rangePassage`, les mêmes pour tous les thèmes d'oiseau, comme `sure` ou `oriole`) :
+  Nidification (été seulement) orange, Hivernage (hiver seulement) bleu, Toute l'année (été et hiver) vert,
+  De passage (printemps ou automne seulement) jaune. Clair : #C25A00, #2B6CB0, #2F7D4F, #8A7A00 ; sombre :
+  #F08A3E, #6FA8E8, #5CBF86, #EBD34B. Chacune garde 3:1 sur les terres, l'océan et le fond du bloc dans les
+  4 thèmes clair et sombre (test). Quatre couleurs ne peuvent pas toutes différer de 3:1 entre elles en
+  luminance : elles se distinguent par la teinte (écart de couleur CIE76 d'au moins 30, testé) et par le
+  trait fin entre régions. Point `text1` cerclé du fond du bloc pour la position connue.
+  **Données** : avec le consentement « Carte en ligne » (même garde que OSM, désactivé par défaut), la fiche
+  demande à GBIF.org, par région GADM niveau 1, le nombre d'observations humaines CC0 / CC BY depuis 2010 de
+  l'espèce, une requête de comptage (facette `gadmLevel1Gid`, aucun enregistrement téléchargé) par saison, et
+  le même comptage pour tous les oiseaux (l'effort d'observation, une fois pour toutes les espèces, gardé 180
+  jours). Une région compte pour une saison si l'effort est d'au moins 200, l'espèce d'au moins 5 et son taux
+  (espèce / oiseaux) d'au moins 0,3 %, et d'au moins 10 % du taux médian de l'espèce sur les régions qui ont
+  passé ce test (contre le bruit des zones peu observées, sans effacer l'hivernage africain). Toute l'année =
+  été et hiver, Nidification = été sans hiver, Hivernage = hiver sans été, De passage = seulement printemps ou
+  automne. La région GADM est reportée sur les régions de la carte par une table de jointure par clés
+  (`gadm1_to_regions.json.gz`) : aucune géométrie GADM n'est embarquée, seulement ses identifiants ; GADM n'est
+  pas redistribué. Limite : « été » et « hiver » sont ceux du calendrier nord (juin à août, décembre à
+  février) ; une espèce australe qui niche en décembre apparaîtra en Hivernage.
+  Légende sous la carte : 4 pastilles et libellés (toujours les quatre), phrase de synthèse « Nidification :
+  nord de l'Europe · Hivernage : Afrique de l'Ouest · ~6 200 km » (région dominante par aire pour chaque classe,
+  une classe de moins de 10 % de l'aire de l'espèce n'est pas citée ; distance entre nidification et hivernage
+  seulement si elle dépasse 1 000 km), « Nidification : avril à juillet » si la fiche IA la donne. Un appui sur
+  une région coloriée affiche son nom et sa classe sous la carte (un deuxième appui ou un appui ailleurs
+  l'efface). Libellé accessible : la phrase de synthèse. Squelette à la forme finale puis fondu.
+  Attribution sous la carte : « Observations GBIF.org · CC BY 4.0 » (deux cibles de 48 dp : le site GBIF, puis
+  « Licences des contenus » qui donne les filtres et la citation « GBIF.org (année) GBIF Occurrence Data »).
+  Vie privée : seul le nom scientifique de l'espèce part vers GBIF, jamais la position ; aucune requête sans
+  consentement (testé).
+  **Repli** (sans consentement, hors ligne sans cache, erreur GBIF, ou GBIF trop pauvre pour l'espèce) : le
+  géomodèle sur sa grille de 5° (mêmes 4 semaines), ramené au même style : chaque région prend la classe de la
+  cellule qui contient son centroïde (pas de calcul de plus, ce qui garde le coût du géomodèle d'avant ; la
+  carte est plus en blocs), présentée comme « Estimation du géomodèle BirdNET », avec, sans consentement
+  seulement, la ligne discrète « Carte précise : activez la carte en ligne » (cible 48 dp, `accentText`) qui
+  ouvre le dialogue de consentement existant (« Autoriser » charge la carte GBIF sur place). Pas de bloc ni
+  d'espacement sans carte.
 - Chant de référence : aucun son embarqué, le bouton ouvre la page d'écoute eBird (icône de lien).
 - Colonne de 600 dp au plus en paysage et sur tablette.
 

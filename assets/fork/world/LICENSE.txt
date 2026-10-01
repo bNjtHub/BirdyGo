@@ -1,5 +1,12 @@
-land_110m.bin: derived from Natural Earth 1:110m Physical Vectors, "Land"
-(ne_110m_land). Natural Earth data is in the public domain:
-https://www.naturalearthdata.com/about/terms-of-use/
+regions_admin1.bin.gz: derived from Natural Earth 1:10m Cultural Vectors,
+"Admin 1 - States, Provinces" (ne_10m_admin_1_states_provinces). Natural Earth
+data is in the public domain: https://www.naturalearthdata.com/about/terms-of-use/
+The country borders in the same file are the dissolved admin-1 regions.
 
-Built by tools/fork_land_110m.py (format described in that script).
+gadm1_to_regions.json.gz: a table of identifiers only (GADM level-1 ids, as
+GBIF reports them, and Natural Earth admin-1 codes). No GADM geometry or
+attribute is included. The table was made by asking the GBIF geocoding API
+(api.gbif.org/v1/geocode/reverse) which GADM region lies at a few points of
+each Natural Earth region.
+
+Both built by tools/fork_world_regions.py (formats described in its header).

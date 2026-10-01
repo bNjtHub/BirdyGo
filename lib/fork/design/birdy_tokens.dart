@@ -229,6 +229,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     required this.toCheck,
     required this.skeleton,
     required this.skeletonSheen,
+    required this.rangeBreeding,
+    required this.rangeWintering,
+    required this.rangeResident,
+    required this.rangePassage,
   });
 
   final Brightness brightness;
@@ -313,6 +317,16 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
   /// translucent, painted over [skeleton]. Static fill with reduced motion.
   final Color skeletonSheen;
 
+  /// Species range map (J7 world map), one color per way a species uses a
+  /// region: nesting (orange), wintering (blue), all year (green), passage
+  /// (yellow). Meaning colors: the same for every bird theme. Each keeps 3:1
+  /// on the map's land and sea (test), and they are told apart by hue and by
+  /// the hairline between regions, not by luminance.
+  final Color rangeBreeding;
+  final Color rangeWintering;
+  final Color rangeResident;
+  final Color rangePassage;
+
   final LevelColors sure;
   final LevelColors probable;
   final LevelColors toCheck;
@@ -383,6 +397,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     veil: Color(0xC70C1829),
     skeleton: Color(0xFFD6DCD2),
     skeletonSheen: Color(0x8CFFFFFF),
+    rangeBreeding: Color(0xFFC25A00),
+    rangeWintering: Color(0xFF2B6CB0),
+    rangeResident: Color(0xFF2F7D4F),
+    rangePassage: Color(0xFF8A7A00),
     sure: LevelColors(
       foreground: Color(0xFF4B6023),
       background: Color(0xFFE6EDD6),
@@ -427,6 +445,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     veil: Color(0xC70C1829),
     skeleton: Color(0xFF29425F),
     skeletonSheen: Color(0x1FFFFFFF),
+    rangeBreeding: Color(0xFFF08A3E),
+    rangeWintering: Color(0xFF6FA8E8),
+    rangeResident: Color(0xFF5CBF86),
+    rangePassage: Color(0xFFEBD34B),
     sure: LevelColors(
       foreground: Color(0xFFB7CF83),
       background: Color(0x339DB46A),
@@ -492,6 +514,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
     toCheck: toCheck,
     skeleton: skeleton,
     skeletonSheen: skeletonSheen,
+    rangeBreeding: rangeBreeding,
+    rangeWintering: rangeWintering,
+    rangeResident: rangeResident,
+    rangePassage: rangePassage,
   );
 
   /// Tokens are fixed per theme: use [light] or [dark].
@@ -530,6 +556,10 @@ class BirdyColors extends ThemeExtension<BirdyColors> {
       veil: c(veil, other.veil),
       skeleton: c(skeleton, other.skeleton),
       skeletonSheen: c(skeletonSheen, other.skeletonSheen),
+      rangeBreeding: c(rangeBreeding, other.rangeBreeding),
+      rangeWintering: c(rangeWintering, other.rangeWintering),
+      rangeResident: c(rangeResident, other.rangeResident),
+      rangePassage: c(rangePassage, other.rangePassage),
       sure: LevelColors.lerp(sure, other.sure, t),
       probable: LevelColors.lerp(probable, other.probable, t),
       toCheck: LevelColors.lerp(toCheck, other.toCheck, t),
