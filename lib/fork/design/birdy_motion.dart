@@ -282,10 +282,6 @@ abstract final class BirdyMotion {
   /// Maximum opacity of a bird-colored tint behind a celebration.
   static const double tintMaxOpacity = 0.15;
 
-  /// Opacity of a play button whose clip is still being saved (disabled,
-  /// same size as the live one).
-  static const double pendingOpacity = 0.4;
-
   /// Bottom sheet spring.
   static final SpringDescription sheetSpring =
       SpringDescription.withDampingRatio(mass: 1, stiffness: 500, ratio: 0.85);

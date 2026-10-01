@@ -207,6 +207,7 @@ void main() {
     );
 
     final merle = _frame([_high], _high);
+    final merleMid = _frame([_mid], _mid);
     final merle2 = _frame([_high, _high], _high);
     final merle3 = _frame([_high, _high, _high], _high);
 
@@ -217,7 +218,7 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       levels['Turdus merula'] = ReliabilityLevel.probable;
-      await tester.pumpWidget(table([merle]));
+      await tester.pumpWidget(table([merleMid]));
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Confirmé'), findsNothing);
 
@@ -245,6 +246,21 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('the geo-model arriving late is not a confirmation', (
+      tester,
+    ) async {
+      // Without presence a high score stays Probable; the presence comes
+      // in and the level rises with the same best score.
+      levels['Turdus merula'] = ReliabilityLevel.probable;
+      await tester.pumpWidget(table([merle]));
+      await tester.pump(const Duration(milliseconds: 500));
+      levels['Turdus merula'] = ReliabilityLevel.sure;
+      await tester.pumpWidget(table([merle2]));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Confirmé'), findsNothing);
+      expect(find.text('Sûr'), findsOneWidget);
+    });
+
     testWidgets('a species that arrives Sure is not « confirmed »', (
       tester,
     ) async {
@@ -258,7 +274,7 @@ void main() {
     testWidgets('reduced motion: only the badge changes', (tester) async {
       final handle = tester.ensureSemantics();
       levels['Turdus merula'] = ReliabilityLevel.probable;
-      await tester.pumpWidget(table([merle], reduced: true));
+      await tester.pumpWidget(table([merleMid], reduced: true));
       levels['Turdus merula'] = ReliabilityLevel.sure;
       await tester.pumpWidget(table([merle2], reduced: true));
       await tester.pump();

@@ -90,8 +90,9 @@ class _LiveTableState extends State<LiveTable> {
   /// Species that entered during this screen's life.
   final Set<String> _arrived = {};
 
-  /// Last level seen per species (J7).
+  /// Last level and best score seen per species (J7).
   final Map<String, ReliabilityLevel> _levels = {};
+  final Map<String, double> _scores = {};
 
   /// Species already confirmed during this outing, and those showing
   /// « Confirmé » now.
@@ -112,6 +113,7 @@ class _LiveTableState extends State<LiveTable> {
     if (levelFor == null) return;
     if (widget.entries.isEmpty) {
       _levels.clear();
+      _scores.clear();
       _confirmedOnce.clear();
       _confirmedNow.clear();
       for (final timer in _timers.values) {
@@ -124,8 +126,14 @@ class _LiveTableState extends State<LiveTable> {
       final name = entry.scientificName;
       final level = levelFor(entry);
       final before = _levels[name];
+      final scoreBefore = _scores[name];
       _levels[name] = level;
+      _scores[name] = entry.bestScore;
+      // Only a new contact or a better score confirms: the geo-model
+      // presence arriving late can lift the level without either.
       if (before == null ||
+          scoreBefore == null ||
+          entry.bestScore <= scoreBefore ||
           before == ReliabilityLevel.sure ||
           level != ReliabilityLevel.sure ||
           !_confirmedOnce.add(name)) {

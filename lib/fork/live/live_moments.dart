@@ -180,6 +180,44 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
     _check();
   }
 
+  /// Wait for the clip of the shown species (J7): while it sings, then
+  /// [ReliabilityConfig.clipWaitGrace]. Once over, the play button slot goes.
+  Timer? _clipTimer;
+  String? _clipWaitFor;
+  bool _clipWaitOver = false;
+
+  bool get _clipPending =>
+      widget.clipsPending && _shown != null && !_clipWaitOver;
+
+  void _syncClipWait() {
+    final moment = _shown;
+    if (moment == null) {
+      _clipTimer?.cancel();
+      _clipTimer = null;
+      _clipWaitFor = null;
+      return;
+    }
+    final name = moment.entry.scientificName;
+    if (_clipWaitFor != name) {
+      _clipWaitFor = name;
+      _clipWaitOver = false;
+      _clipTimer?.cancel();
+      _clipTimer = null;
+    }
+    final singing = widget.entries.any(
+      (e) => e.scientificName == name && e.singing,
+    );
+    if (_clipWaitOver || widget.clips.containsKey(name) || singing) {
+      _clipTimer?.cancel();
+      _clipTimer = null;
+      return;
+    }
+    _clipTimer ??= Timer(ReliabilityConfig.clipWaitGrace, () {
+      _clipTimer = null;
+      if (mounted) setState(() => _clipWaitOver = true);
+    });
+  }
+
   @override
   void didUpdateWidget(LiveMoments old) {
     super.didUpdateWidget(old);
@@ -197,10 +235,12 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _count.dispose();
+    _clipTimer?.cancel();
     super.dispose();
   }
 
   void _check() {
+    _syncClipWait();
     final tracker = _tracker;
     if (tracker == null) return;
     final taxonomy = ref.read(taxonomyServiceProvider).value;
@@ -249,6 +289,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
     BirdyHaptics.light();
     _count.stop();
     _shown = moment;
+    _syncClipWait();
     _answer = null;
     _tracker?.shown(moment);
     if (moment.kind == LiveMomentKind.firstTime) {
@@ -367,7 +408,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
                                 ),
                                 clipPath:
                                     widget.clips[moment.entry.scientificName],
-                                clipPending: widget.clipsPending,
+                                clipPending: _clipPending,
                                 controller: widget.controller,
                                 onClose: _advance,
                                 count: _count,
@@ -384,7 +425,7 @@ class _LiveMomentsState extends ConsumerState<LiveMoments>
                                 ),
                                 clipPath:
                                     widget.clips[moment.entry.scientificName],
-                                clipPending: widget.clipsPending,
+                                clipPending: _clipPending,
                                 controller: widget.controller,
                                 presenceScore: widget.presenceScoreOf(
                                   moment.entry.scientificName,
@@ -1075,15 +1116,17 @@ class _ReplayLine extends StatelessWidget {
         ),
       ],
     );
-    if (!hasClip) return texts;
     return Row(
       children: [
-        _ClipSlot(
-          controller: controller,
-          clipPath: clipPath,
-          size: BirdySizes.mainAction,
+        _CollapsingSlot(
+          show: hasClip,
+          gap: BirdySpace.m,
+          child: _ClipSlot(
+            controller: controller,
+            clipPath: clipPath,
+            size: BirdySizes.mainAction,
+          ),
         ),
-        const SizedBox(width: BirdySpace.m),
         Expanded(child: texts),
       ],
     );
@@ -1109,14 +1152,11 @@ class _ClipSlot extends StatelessWidget {
     final path = clipPath;
     final Widget button =
         path == null
-            ? Opacity(
+            ? ClipPlayButton(
               key: const ValueKey('clip-slot-pending'),
-              opacity: BirdyMotion.pendingOpacity,
-              child: ClipPlayButton(
-                size: size,
-                state: ClipPlayState.idle,
-                semanticLabel: AppLocalizations.of(context)!.forkReplayPending,
-              ),
+              size: size,
+              state: ClipPlayState.pending,
+              semanticLabel: AppLocalizations.of(context)!.forkReplayPending,
             )
             : ReplayButton(
               key: const ValueKey('clip-slot-ready'),
@@ -1130,6 +1170,39 @@ class _ClipSlot extends StatelessWidget {
           BirdyMotion.reduced(context)
               ? button
               : BirdyCrossFade(child: button),
+    );
+  }
+}
+
+/// [child] and a [gap] before what follows, folding away in place when
+/// [show] turns false (a clip that never came): no jump, nothing animated
+/// with reduced motion.
+class _CollapsingSlot extends StatelessWidget {
+  const _CollapsingSlot({
+    required this.show,
+    required this.gap,
+    required this.child,
+  });
+
+  final bool show;
+  final double gap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final content =
+        show
+            ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [child, SizedBox(width: gap)],
+            )
+            : const SizedBox.shrink();
+    if (BirdyMotion.reduced(context)) return content;
+    return AnimatedSize(
+      alignment: AlignmentDirectional.centerStart,
+      duration: BirdyMotion.enter,
+      curve: BirdyMotion.standard,
+      child: content,
     );
   }
 }
@@ -1156,10 +1229,11 @@ class _Buttons extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      if (clipPath != null || clipPending) ...[
-        _ClipSlot(controller: controller, clipPath: clipPath),
-        const SizedBox(width: BirdySpace.s),
-      ],
+      _CollapsingSlot(
+        show: clipPath != null || clipPending,
+        gap: BirdySpace.s,
+        child: _ClipSlot(controller: controller, clipPath: clipPath),
+      ),
       Expanded(
         child: FilledButton(
           style: BirdyButtonStyles.primary(context),

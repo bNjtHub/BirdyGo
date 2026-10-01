@@ -29,7 +29,7 @@ class _FakeController implements LiveController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-LiveTableEntry _entry(String name, double score) {
+LiveTableEntry _entry(String name, double score, {bool singing = false}) {
   final record = DetectionRecord(
     scientificName: name,
     commonName: name,
@@ -43,7 +43,7 @@ LiveTableEntry _entry(String name, double score) {
     total: 1,
     lastHeard: _t0,
     record: record,
-    singing: false,
+    singing: singing,
   );
 }
 
@@ -60,6 +60,8 @@ void main() {
     required bool pending,
     Map<String, String> clips = const {},
     bool reduced = false,
+    bool singing = false,
+    bool paused = true,
   }) => ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
@@ -77,12 +79,13 @@ void main() {
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: LiveMoments(
-          entries: [_entry(name, 0.95)],
+          entries: [_entry(name, 0.95, singing: singing)],
           controller: controller,
           presenceOf: _presence,
           presenceScoreOf: (_) => 0.02,
           clips: clips,
           clipsPending: pending,
+          paused: paused,
           verifiedBefore: () async => const {},
         ),
       ),
@@ -165,6 +168,39 @@ void main() {
       );
     }
   }
+
+  testWidgets('the wait is bounded: the slot leaves once the clip is not coming', (
+    tester,
+  ) async {
+    await open(tester, app('Dendrocopos major', pending: true));
+    // The spinner state, not tappable, with the right label.
+    expect(pendingSlot, findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump(ReliabilityConfig.clipWaitGrace);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(pendingSlot, findsNothing);
+    expect(find.byType(ReplayButton), findsNothing);
+    expect(find.byType(FilledButton), findsOneWidget);
+  });
+
+  testWidgets('while the species sings the wait goes on', (tester) async {
+    await open(tester, app('Dendrocopos major', pending: true, singing: true));
+    await tester.pump(ReliabilityConfig.clipWaitGrace * 2);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(pendingSlot, findsOneWidget);
+    // It stops singing: the grace starts, then the slot goes.
+    await tester.pumpWidget(app('Dendrocopos major', pending: true));
+    await tester.pump(ReliabilityConfig.clipWaitGrace);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(pendingSlot, findsNothing);
+  });
+
+  testWidgets('reduced motion: the slot leaves at once', (tester) async {
+    await open(tester, app('Dendrocopos major', pending: true, reduced: true));
+    await tester.pump(ReliabilityConfig.clipWaitGrace);
+    await tester.pump();
+    expect(pendingSlot, findsNothing);
+  });
 
   testWidgets('no clip recording: no slot at all', (tester) async {
     await open(tester, app('Dendrocopos major', pending: false));
