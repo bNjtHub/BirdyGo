@@ -7,12 +7,13 @@ import 'package:birdnet_live/fork/design/birdy_motion.dart';
 import 'package:birdnet_live/fork/design/birdy_page_transitions.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/widgets/entrance.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _app({bool reduced = false, required Widget next}) {
   return MaterialApp(
-    theme: BirdyTheme.light(),
+    theme: BirdyTheme.light().copyWith(platform: TargetPlatform.linux),
     builder:
         (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
@@ -37,17 +38,17 @@ Widget _app({bool reduced = false, required Widget next}) {
 double _nextX(WidgetTester t) => t.getTopLeft(find.byKey(const Key('next'))).dx;
 
 void main() {
-  test('theme uses the BirdyGo transition on every platform', () {
-    final theme = BirdyTheme.light();
-    for (final p in TargetPlatform.values) {
-      expect(
-        theme.pageTransitionsTheme.builders[p],
-        isA<BirdyPageTransitionsBuilder>(),
-      );
-    }
-    const b = BirdyPageTransitionsBuilder();
-    expect(b.transitionDuration, BirdyMotion.enter);
-    expect(b.reverseTransitionDuration, lessThan(b.transitionDuration));
+  test('builder per platform: system gestures kept on Android and iOS', () {
+    final b = BirdyTheme.light().pageTransitionsTheme.builders;
+    expect(
+      b[TargetPlatform.android],
+      isA<PredictiveBackPageTransitionsBuilder>(),
+    );
+    expect(b[TargetPlatform.iOS], isA<CupertinoPageTransitionsBuilder>());
+    expect(b[TargetPlatform.linux], isA<BirdyPageTransitionsBuilder>());
+    const t = BirdyPageTransitionsBuilder();
+    expect(t.transitionDuration, BirdyMotion.enter);
+    expect(t.reverseTransitionDuration, lessThan(t.transitionDuration));
   });
 
   testWidgets('a pushed page slides at most maxOffset, then rests', (
@@ -100,6 +101,31 @@ void main() {
     expect(tester.widget<FadeTransition>(entrance).opacity.value, 0);
     await tester.pump(BirdyMotion.enter);
     await tester.pump(BirdyMotion.enter ~/ 2);
+    expect(
+      tester.widget<FadeTransition>(entrance).opacity.value,
+      greaterThan(0),
+    );
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('BirdyEntrance does not wait under reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        reduced: true,
+        next: const Scaffold(
+          body: BirdyEntrance(child: SizedBox(key: Key('next'))),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('go')));
+    await tester.pump();
+    await tester.pump(BirdyMotion.enter ~/ 2);
+    final entrance = find.descendant(
+      of: find.byType(BirdyEntrance),
+      matching: find.byType(FadeTransition),
+    );
     expect(
       tester.widget<FadeTransition>(entrance).opacity.value,
       greaterThan(0),

@@ -1,5 +1,6 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_screen.dart';
+import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
 import 'package:birdnet_live/fork/game/game_config.dart';
 import 'package:birdnet_live/fork/game/game_loader.dart';
 import 'package:birdnet_live/fork/game/game_progress.dart';
@@ -209,11 +210,9 @@ void main() {
     // would time out waiting on that pipeline) to confirm the navigation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    // The quiz screen opened on top with its own big « Qui chante ? »
-    // heading (the Profil's own quiz-entry row, still mounted underneath,
-    // keeps showing its smaller heading too, until the page transition ends
-    // and the route below goes offstage: J7's 220 ms transition ends first).
-    expect(find.text('Qui chante ?'), findsWidgets);
+    // The Profil's own quiz-entry row stays mounted underneath, offstage or
+    // not depending on where the page transition is.
+    expect(find.byType(QuizEntryRow, skipOffstage: false), findsOneWidget);
     expect(find.byType(FineEarQuizScreen), findsOneWidget);
   });
 

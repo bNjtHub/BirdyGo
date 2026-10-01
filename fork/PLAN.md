@@ -944,6 +944,7 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
 - Réécoute pendant l'écoute : session audio playAndRecord avec defaultToSpeaker et Bluetooth, sinon
   le son sort par l'écouteur.
 - Reprendre la liste des points iOS notés pendant les jalons Android.
+- Transition de page (J7) : iOS et macOS gardent `CupertinoPageTransitionsBuilder` (glisser-retour du bord) ; Android garde `PredictiveBackPageTransitionsBuilder` (aperçu du retour prédictif, `enableOnBackInvokedCallback` activé). La transition du fork (`BirdyPageTransitionsBuilder`) ne sert que pour les autres plateformes. À vérifier sur iPhone.
 - Notification de nouvelle espèce (J6h) : `NotificationsGateway` demande déjà l'autorisation iOS (`requestPermissions`) ; sans `UIBackgroundModes: audio` (ci-dessous) l'écoute s'arrête en arrière-plan, donc pas de notification. À tester.
 - Photo dans la notification (J6h) : Android utilise `largeIcon` + `BigPictureStyleInformation` (octets PNG, `lib/fork/notifications/notification_images.dart`). Côté iOS : écrire le PNG dans le dossier temporaire et le joindre via `DarwinNotificationDetails(attachments: [DarwinNotificationAttachment(path)])`.
 - Localisation écran éteint (J7) : Android n'utilise plus `ACCESS_BACKGROUND_LOCATION`. Côté iOS il

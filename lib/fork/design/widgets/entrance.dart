@@ -63,6 +63,11 @@ class _BirdyEntranceState extends State<BirdyEntrance>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_started) return;
+    // Reduced motion: the page only fades, nothing to wait for.
+    if (BirdyMotion.reduced(context)) {
+      _start();
+      return;
+    }
     // The route's own controller, read at once: its `animation` proxy still
     // reports completed on the first frame of a push. (`controller` is
     // protected, but only meant to stay out of subclasses' way here.)

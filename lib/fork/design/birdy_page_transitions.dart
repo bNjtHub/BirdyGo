@@ -4,10 +4,11 @@
 /// [BirdyMotion]; the exit is shorter than the enter. With reduced motion,
 /// only the fade remains (fork/DESIGN.md, Animations).
 ///
-/// Set once on the theme ([BirdyTheme]), so every `MaterialPageRoute`,
-/// upstream ones included, uses it.
+/// Set on the theme ([BirdyTheme]) for the platforms without a system
+/// gesture to keep, see [theme].
 library;
 
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'birdy_motion.dart';
@@ -47,14 +48,17 @@ class BirdyPageTransitionsBuilder extends PageTransitionsBuilder {
     );
   }
 
-  /// Every platform gets the same transition.
+  /// Android keeps the system's predictive back preview (the manifest turns
+  /// it on; on a button press it falls back to Flutter's fade-forwards), iOS
+  /// keeps the swipe-back; the fork's own transition covers the other
+  /// platforms.
   static const PageTransitionsTheme theme = PageTransitionsTheme(
     builders: {
-      TargetPlatform.android: BirdyPageTransitionsBuilder(),
-      TargetPlatform.iOS: BirdyPageTransitionsBuilder(),
+      TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.fuchsia: BirdyPageTransitionsBuilder(),
       TargetPlatform.linux: BirdyPageTransitionsBuilder(),
-      TargetPlatform.macOS: BirdyPageTransitionsBuilder(),
       TargetPlatform.windows: BirdyPageTransitionsBuilder(),
     },
   );
