@@ -2016,5 +2016,7 @@
   "@forkMoreReviewSub": {"description": "BirdyGo fork: « Plus » menu (M).", "placeholders": {"n": {"type": "int"}}},
   "forkWorldExpand": "Ouvrir la carte en plein écran",
   "forkWorldMapHint": "Pincer pour zoomer, glisser pour déplacer, double appui pour zoomer",
-  "forkWorldZoomValue": "Zoom {factor}"
+  "forkWorldZoomValue": "Zoom {factor}",
+  "forkFicheNotInBookTitle": "Pas encore dans ton carnet",
+  "forkFicheListenToFind": "Écouter pour le trouver"
 }

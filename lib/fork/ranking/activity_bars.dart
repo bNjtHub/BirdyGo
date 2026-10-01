@@ -7,6 +7,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 
 /// Bars for [values], with a few axis [labels] under them.
@@ -24,7 +25,13 @@ class ActivityBars extends StatelessWidget {
     this.highlightIndex,
     this.highlightColor,
     this.labelStyle,
+    this.selectedIndex,
+    this.dimUnselected = false,
   });
+
+  /// Opacity of the unselected bars when [dimUnselected] is on and a bar is
+  /// selected.
+  static const double dimmedOpacity = 0.4;
 
   final List<int> values;
 
@@ -63,6 +70,14 @@ class ActivityBars extends StatelessWidget {
   /// labelSmall by default.
   final TextStyle? labelStyle;
 
+  /// The selected bar (kept by the caller, usually from [onSelect]); only
+  /// used by [dimUnselected].
+  final int? selectedIndex;
+
+  /// Opt-in: with a [selectedIndex], the other bars fade to [dimmedOpacity]
+  /// (animated, [BirdyMotion.enter]). Off by default: bars are unchanged.
+  final bool dimUnselected;
+
   void _select(Offset local, double width) {
     final onSelect = this.onSelect;
     if (onSelect == null || values.isEmpty || width <= 0) return;
@@ -86,7 +101,7 @@ class ActivityBars extends StatelessWidget {
             height: height,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final chart = CustomPaint(
+                Widget paint(double othersOpacity) => CustomPaint(
                   painter: _BarsPainter(
                     values: values,
                     color: color ?? theme.colorScheme.primary,
@@ -95,8 +110,21 @@ class ActivityBars extends StatelessWidget {
                     colorForValue: colorForValue,
                     highlightIndex: highlightIndex,
                     highlightColor: highlightColor ?? theme.colorScheme.primary,
+                    selectedIndex: selectedIndex,
+                    othersOpacity: othersOpacity,
                   ),
                 );
+                final chart =
+                    dimUnselected
+                        ? TweenAnimationBuilder<double>(
+                          tween: Tween(
+                            end: selectedIndex == null ? 1 : dimmedOpacity,
+                          ),
+                          duration: BirdyMotion.enter,
+                          curve: BirdyMotion.standard,
+                          builder: (context, v, _) => paint(v),
+                        )
+                        : paint(1);
                 if (onSelect == null) return chart;
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -166,6 +194,8 @@ class _BarsPainter extends CustomPainter {
     this.colorForValue,
     this.highlightIndex,
     required this.highlightColor,
+    this.selectedIndex,
+    this.othersOpacity = 1,
   });
 
   final List<int> values;
@@ -174,6 +204,10 @@ class _BarsPainter extends CustomPainter {
   final Color Function(int value, int maxValue)? colorForValue;
   final int? highlightIndex;
   final Color highlightColor;
+  final int? selectedIndex;
+
+  /// Opacity of every bar but [selectedIndex] (1 = none dimmed).
+  final double othersOpacity;
 
   /// Dot of the highlighted bar, and the strip it sits in under the bars.
   static const double _dotRadius = 3;
@@ -199,10 +233,13 @@ class _BarsPainter extends CustomPainter {
         barWidth,
         h,
       );
-      final barColor =
+      var barColor =
           values[i] == 0
               ? emptyColor
               : (colorForValue?.call(values[i], maxValue) ?? color);
+      if (othersOpacity < 1 && selectedIndex != null && i != selectedIndex) {
+        barColor = barColor.withValues(alpha: barColor.a * othersOpacity);
+      }
       canvas.drawRRect(
         RRect.fromRectAndCorners(rect, topLeft: radius, topRight: radius),
         Paint()..color = barColor,
@@ -224,6 +261,8 @@ class _BarsPainter extends CustomPainter {
       old.colorForValue != colorForValue ||
       old.highlightIndex != highlightIndex ||
       old.highlightColor != highlightColor ||
+      old.selectedIndex != selectedIndex ||
+      old.othersOpacity != othersOpacity ||
       !_sameValues(old.values, values);
 
   static bool _sameValues(List<int> a, List<int> b) {

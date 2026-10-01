@@ -6478,5 +6478,9 @@
   "forkWorldMapHint": "Pinch to zoom, drag to move, double tap to zoom in",
   "@forkWorldMapHint": {"description": "BirdyGo fork: full-screen world map usage hint for screen readers (J7)."},
   "forkWorldZoomValue": "Zoom {factor}",
-  "@forkWorldZoomValue": {"description": "BirdyGo fork: full-screen world map zoom level, e.g. Zoom x2.5 (J7).", "placeholders": {"factor": {"type": "String"}}}
+  "@forkWorldZoomValue": {"description": "BirdyGo fork: full-screen world map zoom level, e.g. Zoom x2.5 (J7).", "placeholders": {"factor": {"type": "String"}}},
+  "forkFicheNotInBookTitle": "Not in your notebook yet",
+  "@forkFicheNotInBookTitle": {"description": "BirdyGo fork: species page, never-heard block title."},
+  "forkFicheListenToFind": "Listen to find it",
+  "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."}
 }
