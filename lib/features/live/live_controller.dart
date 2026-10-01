@@ -588,7 +588,8 @@ class LiveController {
     _state = LiveState.active;
     _notifyListeners();
 
-    _session?.startSegment();
+    // The closed segment is already included in recordedDurationSeconds.
+    _session?.startSegment(mergeRecent: false);
     _segmentStart = DateTime.now();
 
     debugPrint('[LiveController] session resumed');

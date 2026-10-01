@@ -1401,13 +1401,15 @@ class LiveSession {
       '$uniqueSpeciesCount species)';
 
   /// Starts a new active recording segment.
-  void startSegment() {
+  void startSegment({bool mergeRecent = true}) {
     if (endTime != null) return;
     final now = DateTime.now();
     if (segments.isNotEmpty) {
       final last = segments.last;
       final lastEnd = last.endTime;
-      if (lastEnd != null && now.difference(lastEnd).inSeconds <= 2) {
+      if (mergeRecent &&
+          lastEnd != null &&
+          now.difference(lastEnd).inSeconds <= 2) {
         // Resume/extend the last segment instead of starting a new one,
         // because it was closed just for a periodic persist tick or a very brief pause.
         last.endTime = null;
