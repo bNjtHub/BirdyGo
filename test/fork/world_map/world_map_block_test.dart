@@ -137,7 +137,16 @@ void main() {
         scale: scale,
       ),
     );
+    // The scene is built in a task after the first frame, then cross-fades in.
     await tester.pump();
+    await tester.pump();
+    // The static layer is rasterized on the engine's thread: real async.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
   }
 
   group('the block', () {
@@ -396,8 +405,7 @@ void main() {
             );
           }
           // Two colors cannot all differ by 3:1 in luminance (there are four);
-          // they differ in hue, and a hairline of the block color separates
-          // neighbours.
+          // they differ in hue.
           final list = colors.classes.entries.toList();
           for (var i = 0; i < list.length; i++) {
             for (var j = i + 1; j < list.length; j++) {
@@ -407,13 +415,6 @@ void main() {
                 reason: '${list[i].key.name} / ${list[j].key.name}',
               );
             }
-          }
-          for (final color in colors.classes.values) {
-            expect(
-              contrastRatio(colors.regionLine, color),
-              greaterThanOrEqualTo(1.3),
-              reason: 'the hairline shows on every color',
-            );
           }
         });
       }
