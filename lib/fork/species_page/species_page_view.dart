@@ -18,6 +18,8 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../ranking/activity_bars.dart';
+import '../reliability/reliability_badge.dart';
+import '../reliability/reliability_config.dart';
 import 'section_title.dart';
 import 'species_page_model.dart';
 import 'species_page_text.dart';
@@ -39,7 +41,14 @@ class SpeciesPageHeader extends StatelessWidget {
     this.summary,
     this.heardLine,
     this.heardLoading = false,
+    this.verified = false,
+    this.precision,
   });
+
+  /// The reliability badge and the « 37 bonnes sur 38 vérifiées » line that
+  /// used to sit in the counters block, kept under the heard line.
+  final bool verified;
+  final String? precision;
 
   final String name;
 
@@ -70,6 +79,34 @@ class SpeciesPageHeader extends StatelessWidget {
   /// Inside a sheet over a listening: adds the grab handle and swaps the
   /// back arrow for a close X.
   final bool inSheet;
+
+  /// Placeholder of the heard line: one line (the compact case), then the
+  /// level badge and review count. Whether that last row shows, and whether
+  /// the sentence wraps to a second line, depends on data not in yet, so the
+  /// block may settle a little taller or shorter once the record lands.
+  static Widget _heardSkeleton() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      BirdySkeleton.text(
+        BirdyText.caption,
+        placeholder: '000000000000000000000000000000',
+      ),
+      const SizedBox(height: BirdySpace.s),
+      Wrap(
+        spacing: BirdySpace.s,
+        runSpacing: BirdySpace.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          BirdySkeleton.box(
+            width: BirdySizes.skeletonTagM,
+            height: BirdySizes.pill,
+            radius: BirdyRadii.pill,
+          ),
+          BirdySkeleton.text(BirdyText.caption, placeholder: '00000000000000'),
+        ],
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -182,25 +219,58 @@ class SpeciesPageHeader extends StatelessWidget {
                       style: BirdyText.bodyCompact.copyWith(color: ink),
                     ),
                   ],
-                  if (heardLoading) ...[
+                  // The heard line (J7): in place from the first frame as a
+                  // skeleton that reserves two lines and the level row, like
+                  // the counters block it replaces; gone when never heard.
+                  if (heardLoading || heardLine != null) ...[
                     const SizedBox(height: BirdySpace.s),
-                    KeyedSubtree(
-                      key: const ValueKey('fiche-heard-skeleton'),
-                      child: BirdySkeleton.text(
-                        BirdyText.caption,
-                        placeholder: '000000000000000000000000000000',
-                      ),
-                    ),
-                  ] else if (heardLine != null) ...[
-                    const SizedBox(height: BirdySpace.s),
-                    Text(
-                      heardLine!,
+                    SizedBox(
                       key: const ValueKey('fiche-heard'),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: BirdyText.caption.copyWith(
-                        color: c.isDark ? c.text2 : BirdyBrand.bark,
-                      ),
+                      width: double.infinity,
+                      child:
+                          heardLoading
+                              ? KeyedSubtree(
+                                key: const ValueKey('fiche-heard-skeleton'),
+                                child: _heardSkeleton(),
+                              )
+                              : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    heardLine!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: BirdyText.caption.copyWith(
+                                      color: c.isDark ? c.text2 : BirdyBrand.bark,
+                                    ),
+                                  ),
+                                  if (verified || precision != null) ...[
+                                    const SizedBox(height: BirdySpace.s),
+                                    Wrap(
+                                      spacing: BirdySpace.s,
+                                      runSpacing: BirdySpace.xs,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        if (verified)
+                                          const ReliabilityBadge(
+                                            level: ReliabilityLevel.sure,
+                                          ),
+                                        if (precision != null)
+                                          Text(
+                                            precision!,
+                                            style: BirdyText.caption.copyWith(
+                                              color:
+                                                  c.isDark
+                                                      ? c.text2
+                                                      : BirdyBrand.bark,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
                     ),
                   ],
                 ],

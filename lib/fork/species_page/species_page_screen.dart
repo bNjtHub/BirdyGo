@@ -33,6 +33,7 @@ import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
 import '../lpo/species_lpo_entry.dart';
 import '../ranking/species_activity_section.dart';
+import '../reliability/reliability_screen.dart' show precisionLine; // FORK: heard line (J7)
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
@@ -526,6 +527,11 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               summary: summary,
               heardLine: heard,
               heardLoading: loadingRecord,
+              verified: record?.verified ?? false,
+              precision:
+                  record == null
+                      ? null
+                      : precisionLine(l10n, record.confirmed, record.reviewed),
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
