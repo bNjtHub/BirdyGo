@@ -39,6 +39,7 @@ class WorldMapBlock extends StatefulWidget {
     this.generation,
     this.onGbifTap,
     this.onLicenseTap,
+    this.onExpand,
   });
 
   final WorldRegions regions;
@@ -56,6 +57,9 @@ class WorldMapBlock extends StatefulWidget {
   /// Open GBIF's site, and the licenses page that cites it.
   final VoidCallback? onGbifTap;
   final VoidCallback? onLicenseTap;
+
+  /// Opens the full-screen map: the expand button shows only when set.
+  final VoidCallback? onExpand;
 
   /// Where the user is, when known.
   final GridCell? user;
@@ -111,8 +115,11 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
 
   /// What the cached raster / the build in flight was made for.
   ({Size size, double ratio, WorldMapColors colors})? _pending;
-  ({Size size, double ratio, WorldMapColors colors}) _rasterKey =
-      (size: Size.zero, ratio: 0, colors: WorldMapColors.of(BirdyColors.light));
+  ({Size size, double ratio, WorldMapColors colors}) _rasterKey = (
+    size: Size.zero,
+    ratio: 0,
+    colors: WorldMapColors.of(BirdyColors.light),
+  );
   ui.Image? _image;
   bool _hasImage = false;
 
@@ -130,7 +137,12 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
     // animation runs (the skeleton's shimmer included).
     SchedulerBinding.instance.scheduleTask<void>(() async {
       if (!mounted || _pending != key) return;
-      final scene = _sceneCache.get(widget.regions, widget.classes, _frame, size);
+      final scene = _sceneCache.get(
+        widget.regions,
+        widget.classes,
+        _frame,
+        size,
+      );
       try {
         final image = await renderStaticLayer(scene, colors, size, ratio);
         if (!mounted || _pending != key) {
@@ -178,9 +190,10 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   void _tap(Offset position, Size size) {
     final at = MapProjection(_frame, size).unproject(position);
     final region = widget.regions.regionAt(at.longitude, at.latitude);
-    final id = region != null && widget.classes.containsKey(region.id)
-        ? region.id
-        : null;
+    final id =
+        region != null && widget.classes.containsKey(region.id)
+            ? region.id
+            : null;
     setState(() => _selected = id == _selected ? null : id);
   }
 
@@ -200,69 +213,83 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
         children: [
           SectionTitle(icon: AppIcons.public, text: l10n.forkWorldTitle),
           const SizedBox(height: BirdySpace.m),
-          Semantics(
-            container: true,
-            label: l10n.forkWorldMapLabel(legend),
-            excludeSemantics: true,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(BirdyRadii.chip),
-              child: AspectRatio(
-                aspectRatio: frameAspect(_frame),
-                child: LayoutBuilder(
-                  builder: (context, box) {
-                    final size = box.biggest;
-                    final ratio = MediaQuery.devicePixelRatioOf(context);
-                    final fresh =
-                        _hasImage &&
-                        _rasterKey == (size: size, ratio: ratio, colors: colors);
-                    if (!fresh && !_rasterFailed) {
-                      _prebuild(size, ratio, colors);
-                    }
-                    // A stale image (theme change) is not drawn: vectors take
-                    // over until the new one is ready.
-                    final ready =
-                        fresh ||
-                        (_sceneCache.has(
-                          widget.regions,
-                          widget.classes,
-                          _frame,
-                          size,
-                        ) &&
-                            (_hasImage || _rasterFailed));
-                    return BirdyCrossFade(
-                      child: !ready
-                          ? KeyedSubtree(
-                              key: const ValueKey('world-map-canvas-pending'),
-                              child: BirdySkeleton.box(
-                                width: double.infinity,
-                                height: double.infinity,
-                                radius: BirdyRadii.chip,
-                              ),
-                            )
-                          : GestureDetector(
-                              key: const ValueKey('world-map-canvas'),
-                              behavior: HitTestBehavior.opaque,
-                              onTapUp: (d) => _tap(d.localPosition, size),
-                              child: RepaintBoundary(
-                                child: CustomPaint(
-                                  painter: WorldMapPainter(
-                                    regions: widget.regions,
-                                    classes: widget.classes,
-                                    frame: _frame,
-                                    colors: colors,
-                                    user: widget.user,
-                                    selected: _selected,
-                                    staticImage: fresh ? _image : null,
-                                    cache: _sceneCache,
+          Stack(
+            children: [
+              Semantics(
+                container: true,
+                label: l10n.forkWorldMapLabel(legend),
+                excludeSemantics: true,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(BirdyRadii.chip),
+                  child: AspectRatio(
+                    aspectRatio: frameAspect(_frame),
+                    child: LayoutBuilder(
+                      builder: (context, box) {
+                        final size = box.biggest;
+                        final ratio = MediaQuery.devicePixelRatioOf(context);
+                        final fresh =
+                            _hasImage &&
+                            _rasterKey ==
+                                (size: size, ratio: ratio, colors: colors);
+                        if (!fresh && !_rasterFailed) {
+                          _prebuild(size, ratio, colors);
+                        }
+                        // A stale image (theme change) is not drawn: vectors take
+                        // over until the new one is ready.
+                        final ready =
+                            fresh ||
+                            (_sceneCache.has(
+                                  widget.regions,
+                                  widget.classes,
+                                  _frame,
+                                  size,
+                                ) &&
+                                (_hasImage || _rasterFailed));
+                        return BirdyCrossFade(
+                          child:
+                              !ready
+                                  ? KeyedSubtree(
+                                    key: const ValueKey(
+                                      'world-map-canvas-pending',
+                                    ),
+                                    child: BirdySkeleton.box(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      radius: BirdyRadii.chip,
+                                    ),
+                                  )
+                                  : GestureDetector(
+                                    key: const ValueKey('world-map-canvas'),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTapUp: (d) => _tap(d.localPosition, size),
+                                    child: RepaintBoundary(
+                                      child: CustomPaint(
+                                        painter: WorldMapPainter(
+                                          regions: widget.regions,
+                                          classes: widget.classes,
+                                          frame: _frame,
+                                          colors: colors,
+                                          user: widget.user,
+                                          selected: _selected,
+                                          staticImage: fresh ? _image : null,
+                                          cache: _sceneCache,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ),
+              if (widget.onExpand != null)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: _ExpandButton(onTap: widget.onExpand!),
+                ),
+            ],
           ),
           if (selected != null && selectedClass != null) ...[
             const SizedBox(height: BirdySpace.s),
@@ -279,7 +306,7 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
             ),
           ],
           const SizedBox(height: BirdySpace.s),
-          _Key(colors: colors, showYou: widget.user != null),
+          WorldMapKey(colors: colors, showYou: widget.user != null),
           const SizedBox(height: BirdySpace.s),
           Text(legend, style: BirdyText.bodyCompact.copyWith(color: c.text1)),
           if (nesting != null) ...[
@@ -290,7 +317,7 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
             ),
           ],
           const SizedBox(height: BirdySpace.s),
-          _SourceNote(
+          WorldMapSourceNote(
             source: widget.source,
             generation: widget.generation,
             onGbifTap: widget.onGbifTap,
@@ -302,9 +329,10 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   }
 }
 
-/// Key under the map: the four classes and, when known, the user.
-class _Key extends StatelessWidget {
-  const _Key({required this.colors, required this.showYou});
+/// Key under the map (also used by the full-screen page): the four classes
+/// and, when known, the user.
+class WorldMapKey extends StatelessWidget {
+  const WorldMapKey({super.key, required this.colors, required this.showYou});
 
   final WorldMapColors colors;
   final bool showYou;
@@ -359,8 +387,9 @@ class _Key extends StatelessWidget {
 
 /// Mention under the map: the geo-model estimate, or the GBIF credit with two
 /// links: GBIF's site and the licenses page (48 dp targets).
-class _SourceNote extends StatelessWidget {
-  const _SourceNote({
+class WorldMapSourceNote extends StatelessWidget {
+  const WorldMapSourceNote({
+    super.key,
     required this.source,
     this.generation,
     this.onGbifTap,
@@ -385,9 +414,10 @@ class _SourceNote extends StatelessWidget {
       children: [
         _LinkTarget(
           key: const ValueKey('world-map-source'),
-          label: generation == null
-              ? l10n.forkLicensesGbifRow
-              : l10n.forkWorldSourceGbif('${generation! ~/ 10000}'),
+          label:
+              generation == null
+                  ? l10n.forkLicensesGbifRow
+                  : l10n.forkWorldSourceGbif('${generation! ~/ 10000}'),
           style: caption,
           onTap: onGbifTap,
         ),
@@ -435,6 +465,50 @@ class _LinkTarget extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             widthFactor: 1,
             child: text,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Top-right corner of the inline map: opens the full-screen map. A 48 dp
+/// target around a smaller disc, so it does not hide the map.
+class _ExpandButton extends StatelessWidget {
+  const _ExpandButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = BirdyColors.of(context);
+    return Semantics(
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      label: l10n.forkWorldExpand,
+      onTap: onTap,
+      child: Tooltip(
+        message: l10n.forkWorldExpand,
+        child: InkResponse(
+          key: const ValueKey('world-map-expand'),
+          onTap: onTap,
+          radius: BirdySizes.target / 2,
+          child: SizedBox(
+            width: BirdySizes.target,
+            height: BirdySizes.target,
+            child: Center(
+              child: Container(
+                width: WorldMapConfig.expandDisc,
+                height: WorldMapConfig.expandDisc,
+                decoration: BoxDecoration(
+                  color: c.surface1.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(AppIcons.fullscreen, size: 20, color: c.text1),
+              ),
+            ),
           ),
         ),
       ),

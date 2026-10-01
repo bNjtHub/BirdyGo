@@ -1988,5 +1988,8 @@
   "forkLicensesMaps": "Fonds de carte",
   "forkLicensesMapsSub": "© OpenStreetMap contributors (ODbL) ; © IGN – Géoplateforme (Licence Ouverte Etalab 2.0)",
   "forkLicensesCode": "Licences du code",
-  "forkLicensesCodeSub": "Logiciels libres utilisés par l'app"
+  "forkLicensesCodeSub": "Logiciels libres utilisés par l'app",
+  "forkWorldExpand": "Ouvrir la carte en plein écran",
+  "forkWorldMapHint": "Pincer pour zoomer, glisser pour déplacer, double appui pour zoomer",
+  "forkWorldZoomValue": "Zoom {factor}"
 }

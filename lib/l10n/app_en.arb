@@ -6424,5 +6424,11 @@
   "forkLicensesCode": "Code licenses",
   "@forkLicensesCode": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
   "forkLicensesCodeSub": "Open-source software used by the app",
-  "@forkLicensesCodeSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."}
+  "@forkLicensesCodeSub": {"description": "BirdyGo fork: J7 content licenses screen (About)."},
+  "forkWorldExpand": "Open the map full screen",
+  "@forkWorldExpand": {"description": "BirdyGo fork: button on the species page world map (J7)."},
+  "forkWorldMapHint": "Pinch to zoom, drag to move, double tap to zoom in",
+  "@forkWorldMapHint": {"description": "BirdyGo fork: full-screen world map usage hint for screen readers (J7)."},
+  "forkWorldZoomValue": "Zoom {factor}",
+  "@forkWorldZoomValue": {"description": "BirdyGo fork: full-screen world map zoom level, e.g. Zoom x2.5 (J7).", "placeholders": {"factor": {"type": "String"}}}
 }

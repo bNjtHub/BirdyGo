@@ -413,6 +413,7 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       if (ref.watch(worldMapVisibleProvider(widget.scientificName)))
         WorldMapSection(
           scientificName: widget.scientificName,
+          speciesName: widget.commonName, // FORK: title of the full-screen map
           nesting: sheet?.nesting,
         ),
       if (sheet != null && sheet.sections.isNotEmpty)

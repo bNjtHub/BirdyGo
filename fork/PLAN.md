@@ -924,6 +924,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 ## J7 : publication Android
 
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
+- [x] Carte du monde plein écran (PR #130) : bouton d'agrandissement sur la carte de la fiche, page zoomable (pincer, glisser, double appui ×2, zoom 1 à 8) recadrée sur l'aire de l'espèce ; la couche statique est refaite à la résolution de l'écran à la fin du geste (`lib/fork/world_map/world_map_fullscreen.dart`, `world_map_viewport.dart`).
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
       de celle d'upstream.
 - [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
