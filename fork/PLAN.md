@@ -296,31 +296,37 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       le champ `nesting` est lu (`NestingPeriod`) pour une future carte du monde.
 - [x] Fiche espèce, carte du monde des saisons (PR « J7 Fiche espèce : carte du monde », empilée sur celle
       des sons et saisons) : bloc « Dans le monde » après « Ici en ce moment » (`lib/fork/world_map/`).
-      Contour des terres Natural Earth 1:110m (domaine public) converti par `tools/fork_land_110m.py` en
-      `assets/fork/world/land_110m.bin` (20 Ko), dessiné par `CustomPainter`, sans tuiles ni réseau.
       Le géomodèle est interrogé sur une grille de 5° (cellules sur terre seulement, ~200) pour 4 semaines
       représentatives, par lots avec pauses, en cache mémoire par espèce ; squelette puis fondu ; bloc
-      masqué sans géomodèle. Puces Hiver / Printemps / Été / Automne (saison courante, encre), légende
-      régions d'été et d'hiver + distance, « Nidification : … » si la fiche IA la donne. Rien de natif :
-      rien à faire côté iOS.
-- [x] Carte du monde, observations GBIF à la demande (PR « J7 Carte du monde : observations GBIF à la
-      demande », empilée sur la carte des saisons) : la grille géomodèle à 5° est trop grossière. L'extraction
-      en masse (téléchargement SQL, asset `ranges_gbif.bin`) est abandonnée : trop longue. À l'ouverture de la
-      fiche, avec le consentement « Carte en ligne » (`privacyAllowMapProvider`), l'app demande à GBIF la
-      carte de l'espèce affichée : `species/match` (taxonKey, mis en cache avec la carte) puis 4 tuiles PNG
-      par saison de l'API de cartes ad hoc (`/v2/map/occurrence/adhoc`, EPSG:4326, zoom 1, 16 requêtes,
-      4 en parallèle, ~1 s mesuré), filtrées sur CC0 / CC BY, observations humaines depuis 2010, mois de la
-      saison. Les carrés (cases de 0,70°) sont relus en cellules de la grille du painter (3 niveaux
-      d'intensité d'après la rampe de couleur de GBIF), donc légende, couleurs et contrastes sont ceux
-      du géomodèle. Cache disque `<cache>/gbif_maps/` par espèce (4 saisons), 90 jours, 20 Mo avec éviction
-      des moins récemment vues ; hors ligne, une carte périmée vaut mieux que rien. Sans consentement, hors
-      ligne sans cache ou erreur GBIF : carte du géomodèle (inchangée), plus la ligne « Carte précise :
-      activez la carte en ligne » (ouvre le dialogue de consentement, la carte GBIF se charge ensuite sur place) quand le consentement manque. Attribution sous la
-      carte (« Observations GBIF.org · CC BY 4.0 », liens GBIF et Licences des contenus), bloc GBIF et
-      citation dans « Licences des contenus ». Textes du consentement (dialogue, réglage) : le nom de
-      l'espèce est envoyé à GBIF, jamais la position. Constantes dans `world_map_config.dart`, code dans
-      `lib/fork/world_map/gbif_*.dart`. Légende : région dominante par saison, mois pour l'hémisphère sud ;
-      calcul géomodèle annulé quand on quitte la fiche ; pas d'espacement sans bloc. Section iOS : rien de natif (HTTP et dart:ui), rien à faire.
+      masqué sans géomodèle. Rien de natif : rien à faire côté iOS.
+- [x] Carte du monde par régions (PR « J7 Carte du monde : répartition par régions (GBIF) », empilée sur la
+      carte des saisons) : remplace la carte à carrés (puces de saison, tuiles GBIF) par une carte par régions
+      administratives, style guide d'oiseaux, une seule carte à 4 couleurs (Nidification, Hivernage, Toute
+      l'année, De passage ; jetons `range*` de `BirdyColors`), cadrée sur l'aire de l'espèce.
+      Assets (`tools/fork_world_regions.py`, venv shapely/numpy documenté en tête du script) :
+      `assets/fork/world/regions_admin1.bin.gz` (2 959 régions Natural Earth admin-1 de la zone, simplifiées à
+      0,03°, coordonnées au centième de degré, frontières des pays tirées de ces régions ; 284 Ko) et
+      `gadm1_to_regions.json.gz` (identifiants GADM niveau 1 vers régions, jointure par clés, 12 Ko, aucune
+      géométrie GADM). La table de correspondance `tools/fork_world_regions_data/ne_to_gadm.json` est
+      commitée ; `--rebuild-mapping` la refait par `geocode/reverse` de GBIF (~5 000 appels, ~47 min).
+      Remplace `land_110m.bin` et son script. À l'ouverture de la fiche, avec le consentement « Carte en
+      ligne » : `species/match` (taxonKey, gardé), 4 comptages par région GADM (facette `gadmLevel1Gid`, une par
+      saison, 2 en parallèle, 3 réessais sur 429 / 5xx) et les 4 mêmes comptages pour tous les oiseaux
+      (effort, cache 180 jours partagé), cache disque `<cache>/gbif_ranges/` (90 jours par espèce, 20 Mo,
+      éviction des moins récemment vues, une fiche périmée vaut mieux que rien hors ligne). Seuils (constantes
+      de `world_map_config.dart`) : effort ≥ 200, espèce ≥ 5, taux ≥ 0,3 %, et ≥ 10 % du taux médian de
+      l'espèce. Repli : géomodèle à 5° reporté sur les régions par leur centroïde. Retiré : tuiles PNG,
+      relecture de carrés, intensité à 3 niveaux, puces de saison, légende en mois pour l'hémisphère sud,
+      contour des terres. Attribution, consentement et ligne « Carte précise » inchangés. Code dans
+      `lib/fork/world_map/` (`world_regions`, `range_class`, `range_frame`, `range_legend`, `gbif_*`).
+      Section iOS : rien de natif (HTTP, dart:io, dart:ui), rien à faire.
+- [x] Carte du monde précalculée (PR #130) : les appels GBIF au runtime, leur cache disque, le consentement
+      « Carte en ligne » et la ligne « Carte précise » de cette carte sont retirés (`gbif_service`, `gbif_cache`,
+      `gbif_ranges`, `classifyGadm`, `GadmJoin`, seuils d'effort). Les classes par région viennent de
+      `assets/fork/world/ranges.bin.gz` (format `BGR1`, lu une fois dans un isolate par `world_ranges.dart`,
+      index nom vers offset) : affichage immédiat et hors ligne. Espèce absente ou fichier manquant : repli sur
+      le géomodèle comme avant. Crédit « Observations GBIF.org (année) · CC BY 4.0 ». Le fichier
+      `gadm1_to_regions.json.gz` n'est plus lu par l'app (à supprimer des assets). Rien de natif côté iOS.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
       (`tools/fork_species_sheets.py`, valeur invalide non livrée). Génération non lancée.
 - [ ] (Benjamin) Régénérer le bundle avec la nidification : `write` (ou compléter les fiches

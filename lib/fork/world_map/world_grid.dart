@@ -1,17 +1,15 @@
-/// The grid the geo-model is asked about: cell centers on land only.
+/// The grid the geo-model is asked about (the fallback map): cell centers on
+/// land only.
 library;
 
-import 'land_outline.dart';
 import 'world_map_config.dart';
+import 'world_regions.dart';
 
-/// Center of a grid cell, in degrees.
-typedef GridCell = ({double latitude, double longitude});
-
-/// Cells of [step] degrees over the default view whose center is on land,
-/// north to south, west to east. Done once (the provider caches it): the
-/// point-in-polygon test is not free.
+/// Cells of [step] degrees over the map area whose center is inside a region
+/// of [regions] (land), north to south, west to east. Done once (the provider
+/// caches it): the point-in-polygon test is not free.
 List<GridCell> landCells(
-  LandOutline outline, {
+  WorldRegions regions, {
   double step = WorldMapConfig.gridStep,
 }) {
   final cells = <GridCell>[];
@@ -21,7 +19,7 @@ List<GridCell> landCells(
     final lat = WorldMapConfig.latMax - step / 2 - row * step;
     for (var col = 0; col < cols; col++) {
       final lon = WorldMapConfig.lonMin + step / 2 + col * step;
-      if (outline.contains(lon, lat)) {
+      if (regions.regionAt(lon, lat) != null) {
         cells.add((latitude: lat, longitude: lon));
       }
     }

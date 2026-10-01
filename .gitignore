@@ -163,3 +163,6 @@ review_decisions.json
 
 # FORK: golden test failure images
 **/goldens/failures/
+
+# FORK: world ranges download cache
+tools/fork_world_ranges_cache/

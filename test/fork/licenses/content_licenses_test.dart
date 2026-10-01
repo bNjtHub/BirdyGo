@@ -102,7 +102,7 @@ void main() {
     expect(find.byKey(const ValueKey('licenses-code')), findsOneWidget);
   });
 
-  testWidgets('credits GBIF: filters, on-demand maps and the citation', (
+  testWidgets('credits GBIF: filters, precomputed maps and the citation', (
     tester,
   ) async {
     await pump(tester);
@@ -113,7 +113,7 @@ void main() {
     );
     expect(find.text('Observations GBIF.org'), findsOneWidget);
     expect(find.textContaining('CC0 et CC BY 4.0'), findsOneWidget);
-    expect(find.textContaining('API GBIF'), findsOneWidget);
+    expect(find.textContaining("à l'avance"), findsOneWidget);
     expect(
       find.text(
         'GBIF.org (${DateTime.now().year}) GBIF Occurrence Data, https://www.gbif.org',

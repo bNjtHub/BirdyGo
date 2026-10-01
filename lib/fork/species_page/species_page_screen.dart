@@ -413,7 +413,6 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       if (ref.watch(worldMapVisibleProvider(widget.scientificName)))
         WorldMapSection(
           scientificName: widget.scientificName,
-          currentMonth: now.month,
           nesting: sheet?.nesting,
         ),
       if (sheet != null && sheet.sections.isNotEmpty)

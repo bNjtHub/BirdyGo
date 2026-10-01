@@ -1,5 +1,5 @@
-/// Wires `WorldMapBlock` to its data (J7): GBIF observations when the
-/// online-map consent is given and GBIF answers, else the geo-model estimate. A skeleton of the final
+/// Wires `WorldMapBlock` to its data (J7): the bundled GBIF range when the
+/// species is in it, else the geo-model estimate. A skeleton of the final
 /// shape while it loads, then a cross-fade; nothing at all when neither is
 /// available.
 library;
@@ -9,10 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../design/widgets/birdy_cross_fade.dart';
 import '../species_sheet/species_sheet.dart';
-import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../licenses/content_licenses_screen.dart';
-import '../map/map_consent_dialog.dart';
 import 'world_map_block.dart';
 import 'world_map_config.dart';
 import 'world_map_providers.dart';
@@ -21,41 +19,36 @@ class WorldMapSection extends ConsumerWidget {
   const WorldMapSection({
     super.key,
     required this.scientificName,
-    required this.currentMonth,
     this.nesting,
   });
 
   final String scientificName;
-  final int currentMonth;
   final NestingPeriod? nesting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final presence = ref.watch(worldMapDataProvider(scientificName));
-    final outline = ref.watch(landOutlineProvider);
-    final consent = ref.watch(privacyAllowMapProvider);
+    final regions = ref.watch(worldRegionsProvider);
     final user = ref.watch(worldMapUserPositionProvider).asData?.value;
     final Widget child;
-    if (presence.hasError || outline.hasError) {
+    if (presence.hasError || regions.hasError) {
       child = const SizedBox.shrink(key: ValueKey('world-map-hidden'));
-    } else if (presence.isLoading || outline.isLoading) {
+    } else if (presence.isLoading || regions.isLoading) {
       child = KeyedSubtree(
         key: const ValueKey('world-map-skeleton'),
         child: WorldMapBlock.skeleton(context),
       );
-    } else if (presence.value == null || outline.value == null) {
+    } else if (presence.value == null || regions.value == null) {
       child = const SizedBox.shrink(key: ValueKey('world-map-hidden'));
     } else {
       child = WorldMapBlock(
         key: const ValueKey('world-map-real'),
-        outline: outline.value!,
-        presence: presence.value!.presence,
+        regions: regions.value!,
+        classes: presence.value!.classes,
         source: presence.value!.source,
+        generation: presence.value!.generation,
         onGbifTap: () => openExternalUrl(context, WorldMapConfig.gbifSiteUrl),
         onLicenseTap: () => _openLicenses(context),
-        onOnlineHintTap:
-            consent ? null : () => requestMapTileConsent(context, ref),
-        currentMonth: currentMonth,
         user: user,
         nesting: nesting,
       );

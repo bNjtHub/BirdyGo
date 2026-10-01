@@ -1,17 +1,18 @@
-/// Words of the world map block (J7): seasons, regions and the legend.
+/// Words of the world map block (J7): the four classes, the regions and the
+/// summary under the map.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-import 'season_legend.dart';
-import 'world_map_config.dart';
+import 'range_class.dart';
+import 'range_legend.dart';
 
-String seasonName(AppLocalizations l10n, Season season) => switch (season) {
-  Season.winter => l10n.forkWorldSeasonWinter,
-  Season.spring => l10n.forkWorldSeasonSpring,
-  Season.summer => l10n.forkWorldSeasonSummer,
-  Season.autumn => l10n.forkWorldSeasonAutumn,
+String className(AppLocalizations l10n, RangeClass c) => switch (c) {
+  RangeClass.breeding => l10n.forkWorldClassBreeding,
+  RangeClass.wintering => l10n.forkWorldClassWintering,
+  RangeClass.resident => l10n.forkWorldClassResident,
+  RangeClass.passage => l10n.forkWorldClassPassage,
 };
 
 String regionName(
@@ -32,67 +33,26 @@ String regionName(
   WorldRegion.other => l10n.forkWorldRegionOther,
 };
 
-/// « Été : nord de l'Europe · Hiver : Afrique de l'Ouest · ~4 500 km ».
+/// « Nidification : nord de l'Europe · Hivernage : Afrique de l'Ouest ·
+/// ~4 500 km ». One part per class present, in the order of the key; the
+/// distance only for a migration.
 String legendText(
   AppLocalizations l10n,
   String languageCode,
-  SeasonLegend legend,
+  RangeLegend legend,
 ) {
-  switch (legend.kind) {
-    case LegendKind.none:
-      return l10n.forkWorldLegendNone;
-    case LegendKind.passage:
-      return l10n.forkWorldLegendPassage;
-    case LegendKind.allYear:
-      return l10n.forkWorldLegendAllYear;
-    case LegendKind.seasons:
-      final summer = legend.summer;
-      final winter = legend.winter;
-      if (legend.southern) return _monthsLegend(l10n, languageCode, legend);
-      if (winter == null && summer != null) {
-        return l10n.forkWorldLegendSummerOnly(regionName(l10n, summer));
-      }
-      if (summer == null && winter != null) {
-        return l10n.forkWorldLegendWinterOnly(regionName(l10n, winter));
-      }
-      final km = legend.distanceKm;
-      if (km == null) {
-        return l10n.forkWorldLegendSeasons(
-          regionName(l10n, summer!),
-          regionName(l10n, winter!),
-        );
-      }
-      return l10n.forkWorldLegendSeasonsDistance(
-        regionName(l10n, summer!),
-        regionName(l10n, winter!),
+  if (legend.isEmpty) return l10n.forkWorldLegendNone;
+  final parts = [
+    for (final c in RangeClass.values)
+      if (legend.regions[c] case final region?)
+        l10n.forkWorldLegendClass(
+          className(l10n, c),
+          regionName(l10n, region),
+        ),
+    if (legend.distanceKm case final km?)
+      l10n.forkWorldLegendDistance(
         NumberFormat.decimalPattern(languageCode).format(km),
-      );
-  }
-}
-
-/// The legend of a species of the southern hemisphere: months instead of
-/// seasons, since « summer » (June to August) is its winter.
-String _monthsLegend(
-  AppLocalizations l10n,
-  String languageCode,
-  SeasonLegend legend,
-) {
-  String region(WorldRegion? r) =>
-      r == null ? l10n.forkWorldLegendOutside : regionName(l10n, r);
-  final km = legend.distanceKm;
-  if (km == null) {
-    return l10n.forkWorldLegendMonthsPair(
-      l10n.forkWorldMonthsJunAug,
-      region(legend.summer),
-      l10n.forkWorldMonthsDecFeb,
-      region(legend.winter),
-    );
-  }
-  return l10n.forkWorldLegendMonthsPairDistance(
-    l10n.forkWorldMonthsJunAug,
-    region(legend.summer),
-    l10n.forkWorldMonthsDecFeb,
-    region(legend.winter),
-    NumberFormat.decimalPattern(languageCode).format(km),
-  );
+      ),
+  ];
+  return parts.join(' · ');
 }

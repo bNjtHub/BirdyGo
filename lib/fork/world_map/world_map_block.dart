@@ -1,6 +1,7 @@
-/// « Dans le monde » block of the species page (J7): the seasonal range of
-/// the species on a world map, from the geo-model. Widgets only: the screen
-/// wires the data (see `WorldMapSection`).
+/// « Dans le monde » block of the species page (J7): the range of the species
+/// on a map by administrative regions, as in a field guide, in four colors
+/// (nesting, wintering, all year, passage). Widgets only: the screen wires the
+/// data (see `WorldMapSection`).
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -10,51 +11,47 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
-import '../design/widgets/birdy_filter_chip.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../species_page/section_title.dart';
 import '../species_page/species_page_text.dart';
 import '../species_sheet/species_sheet.dart';
-import 'gbif_map.dart';
-import 'land_outline.dart';
-import 'season_legend.dart';
-import 'season_presence.dart';
-import 'world_grid.dart';
+import 'range_class.dart';
+import 'range_frame.dart';
+import 'range_legend.dart';
 import 'world_map_config.dart';
+import 'world_map_data.dart';
 import 'world_map_painter.dart';
 import 'world_map_text.dart';
+import 'world_regions.dart';
 
 class WorldMapBlock extends StatefulWidget {
   const WorldMapBlock({
     super.key,
-    required this.outline,
-    required this.presence,
-    required this.currentMonth,
+    required this.regions,
+    required this.classes,
     this.user,
     this.nesting,
     this.source = WorldMapSource.geomodel,
+    this.generation,
     this.onGbifTap,
     this.onLicenseTap,
-    this.onOnlineHintTap,
   });
 
-  final LandOutline outline;
-  final SeasonPresence presence;
+  final WorldRegions regions;
 
-  /// GBIF observations or the geo-model estimate: sets the key and the
-  /// mention under the map.
+  /// Class of each region the species uses, by region id.
+  final Map<String, RangeClass> classes;
+
+  /// GBIF observations or the geo-model estimate: sets the mention under the
+  /// map.
   final WorldMapSource source;
+
+  /// Generation date (yyyymmdd) of the GBIF data, for the credit.
+  final int? generation;
 
   /// Open GBIF's site, and the licenses page that cites it.
   final VoidCallback? onGbifTap;
   final VoidCallback? onLicenseTap;
-
-  /// Shown under the geo-model map when the online map is off: opens the
-  /// setting. Null hides the line.
-  final VoidCallback? onOnlineHintTap;
-
-  /// 1 to 12: the season shown first.
-  final int currentMonth;
 
   /// Where the user is, when known.
   final GridCell? user;
@@ -62,7 +59,7 @@ class WorldMapBlock extends StatefulWidget {
   /// From the AI sheet, when there is one.
   final NestingPeriod? nesting;
 
-  /// Same shape as the loaded block: title, season chips, map, legend.
+  /// Same shape as the loaded block: title, map, key, summary.
   static Widget skeleton(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return BirdyBlock(
@@ -70,18 +67,6 @@ class WorldMapBlock extends StatefulWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(icon: AppIcons.public, text: l10n.forkWorldTitle),
-          const SizedBox(height: BirdySpace.m),
-          Wrap(
-            spacing: BirdySpace.s,
-            runSpacing: BirdySpace.s,
-            children: [
-              for (var i = 0; i < Season.values.length; i++)
-                BirdySkeleton.bar(
-                  width: _skeletonChipWidth,
-                  height: BirdySizes.target,
-                ),
-            ],
-          ),
           const SizedBox(height: BirdySpace.m),
           AspectRatio(
             aspectRatio: WorldMapConfig.aspect,
@@ -94,9 +79,9 @@ class WorldMapBlock extends StatefulWidget {
           const SizedBox(height: BirdySpace.m),
           BirdySkeleton.text(
             BirdyText.bodyCompact,
-            placeholder: l10n.forkWorldLegendSeasons(
+            placeholder: l10n.forkWorldLegendClass(
+              l10n.forkWorldClassBreeding,
               l10n.forkWorldRegionNorthernEurope,
-              l10n.forkWorldRegionWestAfrica,
             ),
             maxLines: null,
           ),
@@ -105,17 +90,37 @@ class WorldMapBlock extends StatefulWidget {
     );
   }
 
-  static const double _skeletonChipWidth = 88;
-
   @override
   State<WorldMapBlock> createState() => _WorldMapBlockState();
 }
 
 class _WorldMapBlockState extends State<WorldMapBlock> {
-  late Season _season = Season.ofMonth(widget.currentMonth);
+  /// Computed once per data: the frame and the summary.
+  late MapFrame _frame = frameOf(widget.regions, widget.classes);
+  late RangeLegend _legend = buildRangeLegend(widget.regions, widget.classes);
 
-  /// Computed once: four seasons are already in [WorldMapBlock.presence].
-  late final SeasonLegend _legend = buildLegend(widget.presence);
+  /// Id of the tapped region.
+  String? _selected;
+
+  @override
+  void didUpdateWidget(WorldMapBlock old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.classes, widget.classes) ||
+        !identical(old.regions, widget.regions)) {
+      _frame = frameOf(widget.regions, widget.classes);
+      _legend = buildRangeLegend(widget.regions, widget.classes);
+      _selected = null;
+    }
+  }
+
+  void _tap(Offset position, Size size) {
+    final at = MapProjection(_frame, size).unproject(position);
+    final region = widget.regions.regionAt(at.longitude, at.latitude);
+    final id = region != null && widget.classes.containsKey(region.id)
+        ? region.id
+        : null;
+    setState(() => _selected = id == _selected ? null : id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,60 +129,61 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
     final language = Localizations.localeOf(context).languageCode;
     final colors = WorldMapColors.of(c);
     final legend = legendText(l10n, language, _legend);
-    final season = seasonName(l10n, _season);
     final nesting = widget.nesting;
+    final selected = _selected == null ? null : widget.regions.byId(_selected!);
+    final selectedClass = selected == null ? null : widget.classes[selected.id];
     return BirdyBlock(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(icon: AppIcons.public, text: l10n.forkWorldTitle),
           const SizedBox(height: BirdySpace.m),
-          Wrap(
-            spacing: BirdySpace.s,
-            runSpacing: BirdySpace.s,
-            children: [
-              for (final s in Season.values)
-                BirdyFilterChip(
-                  label: seasonName(l10n, s),
-                  selected: s == _season,
-                  selectedColors: BirdyChipColors.ink(c),
-                  unselectedColor: c.background,
-                  onSelected: () => setState(() => _season = s),
-                ),
-            ],
-          ),
-          const SizedBox(height: BirdySpace.m),
-          // One label for the map and its legend: it changes with the season,
-          // and a live region announces it.
           Semantics(
             container: true,
-            liveRegion: true,
-            label: l10n.forkWorldMapLabel(season, legend),
+            label: l10n.forkWorldMapLabel(legend),
             excludeSemantics: true,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(BirdyRadii.chip),
               child: AspectRatio(
-                aspectRatio: WorldMapConfig.aspect,
-                child: RepaintBoundary(
-                  child: CustomPaint(
-                    painter: WorldMapPainter(
-                      outline: widget.outline,
-                      presence: widget.presence,
-                      season: _season,
-                      colors: colors,
-                      user: widget.user,
+                aspectRatio: frameAspect(_frame),
+                child: LayoutBuilder(
+                  builder: (context, box) => GestureDetector(
+                    key: const ValueKey('world-map-canvas'),
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: (d) => _tap(d.localPosition, box.biggest),
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: WorldMapPainter(
+                          regions: widget.regions,
+                          classes: widget.classes,
+                          frame: _frame,
+                          colors: colors,
+                          user: widget.user,
+                          selected: _selected,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
+          if (selected != null && selectedClass != null) ...[
+            const SizedBox(height: BirdySpace.s),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                l10n.forkWorldRegionStatus(
+                  selected.name,
+                  className(l10n, selectedClass),
+                ),
+                key: const ValueKey('world-map-selected'),
+                style: BirdyText.bodyCompact.copyWith(color: c.text1),
+              ),
+            ),
+          ],
           const SizedBox(height: BirdySpace.s),
-          _Key(
-            colors: colors,
-            showYou: widget.user != null,
-            gbif: widget.source == WorldMapSource.gbif,
-          ),
+          _Key(colors: colors, showYou: widget.user != null),
           const SizedBox(height: BirdySpace.s),
           Text(legend, style: BirdyText.bodyCompact.copyWith(color: c.text1)),
           if (nesting != null) ...[
@@ -190,9 +196,9 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
           const SizedBox(height: BirdySpace.s),
           _SourceNote(
             source: widget.source,
+            generation: widget.generation,
             onGbifTap: widget.onGbifTap,
             onLicenseTap: widget.onLicenseTap,
-            onOnlineHintTap: widget.onOnlineHintTap,
           ),
         ],
       ),
@@ -200,17 +206,12 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
   }
 }
 
-/// Small key under the map: expected, other seasons, the user.
+/// Key under the map: the four classes and, when known, the user.
 class _Key extends StatelessWidget {
-  const _Key({
-    required this.colors,
-    required this.showYou,
-    required this.gbif,
-  });
+  const _Key({required this.colors, required this.showYou});
 
   final WorldMapColors colors;
   final bool showYou;
-  final bool gbif;
 
   @override
   Widget build(BuildContext context) {
@@ -226,25 +227,23 @@ class _Key extends StatelessWidget {
         ),
       ],
     );
-    Widget square(Color color) => Container(
-      width: WorldMapConfig.keySwatch,
-      height: WorldMapConfig.keySwatch,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(
-          WorldMapConfig.keySwatch * WorldMapConfig.cellRadius,
-        ),
-      ),
-    );
     return Wrap(
       spacing: BirdySpace.l,
       runSpacing: BirdySpace.xs,
       children: [
-        item(
-          square(colors.present),
-          gbif ? l10n.forkWorldKeyObserved : l10n.forkWorldKeyPresent,
-        ),
-        item(square(colors.other), l10n.forkWorldKeyOther),
+        for (final k in RangeClass.values)
+          item(
+            Container(
+              key: ValueKey('world-map-key-${k.name}'),
+              width: WorldMapConfig.keySwatch,
+              height: WorldMapConfig.keySwatch,
+              decoration: BoxDecoration(
+                color: colors.classes[k],
+                borderRadius: BorderRadius.circular(BirdyRadii.xs),
+              ),
+            ),
+            className(l10n, k),
+          ),
         if (showYou)
           item(
             Container(
@@ -262,21 +261,20 @@ class _Key extends StatelessWidget {
   }
 }
 
-/// Mention under the map: the geo-model estimate (with, when the online map
-/// is off, a line that opens the setting), or the GBIF credit with two
+/// Mention under the map: the geo-model estimate, or the GBIF credit with two
 /// links: GBIF's site and the licenses page (48 dp targets).
 class _SourceNote extends StatelessWidget {
   const _SourceNote({
     required this.source,
+    this.generation,
     this.onGbifTap,
     this.onLicenseTap,
-    this.onOnlineHintTap,
   });
 
   final WorldMapSource source;
+  final int? generation;
   final VoidCallback? onGbifTap;
   final VoidCallback? onLicenseTap;
-  final VoidCallback? onOnlineHintTap;
 
   @override
   Widget build(BuildContext context) {
@@ -284,27 +282,16 @@ class _SourceNote extends StatelessWidget {
     final c = BirdyColors.of(context);
     final caption = BirdyText.caption.copyWith(color: c.text2);
     if (source == WorldMapSource.geomodel) {
-      final hint = onOnlineHintTap;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.forkWorldEstimate, style: caption),
-          if (hint != null)
-            _LinkTarget(
-              key: const ValueKey('world-map-online-hint'),
-              label: l10n.forkWorldOnlineHint,
-              style: BirdyText.caption.copyWith(color: c.accentText),
-              onTap: hint,
-            ),
-        ],
-      );
+      return Text(l10n.forkWorldEstimate, style: caption);
     }
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _LinkTarget(
           key: const ValueKey('world-map-source'),
-          label: l10n.forkWorldSourceGbif,
+          label: generation == null
+              ? l10n.forkLicensesGbifRow
+              : l10n.forkWorldSourceGbif('${generation! ~/ 10000}'),
           style: caption,
           onTap: onGbifTap,
         ),
