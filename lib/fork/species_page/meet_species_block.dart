@@ -33,6 +33,9 @@ List<SheetSection> meetAvailable(SpeciesSheet sheet) => [
     if (sheet.sections.containsKey(s)) s,
 ];
 
+/// Text scale above which the title and the counter stack.
+const double _kMeetStackedTextScale = 1.6;
+
 /// Discs per row of the grid.
 const int _kMeetColumns = 3;
 
@@ -192,23 +195,37 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.forkMeetTitle,
-                      style: BirdyText.heading.copyWith(color: c.text1),
+              // Title and counter side by side; stacked at very large text,
+              // where the counter alone is wider than the block (J7 fix).
+              if (MediaQuery.textScalerOf(context).scale(1) >
+                  _kMeetStackedTextScale) ...[
+                Text(
+                  l10n.forkMeetTitle,
+                  style: BirdyText.heading.copyWith(color: c.text1),
+                ),
+                const SizedBox(height: BirdySpace.xs),
+                Text(
+                  l10n.forkMeetCount(read.length, sections.length),
+                  style: BirdyText.badge.copyWith(color: c.accentText),
+                ),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.forkMeetTitle,
+                        style: BirdyText.heading.copyWith(color: c.text1),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: BirdySpace.s),
-                  Text(
-                    l10n.forkMeetCount(read.length, sections.length),
-                    style: BirdyText.badge.copyWith(color: c.accentText),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: BirdySpace.s),
+                    Text(
+                      l10n.forkMeetCount(read.length, sections.length),
+                      style: BirdyText.badge.copyWith(color: c.accentText),
+                    ),
+                  ],
+                ),
               if (summary != null) ...[
                 const SizedBox(height: BirdySpace.s),
                 Text(
@@ -253,7 +270,7 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                     children: [
                       Positioned(
                         right: -BirdySpace.s,
-                        bottom: -BirdySpace.s,
+                        top: -BirdySpace.s,
                         child: ExcludeSemantics(
                           child: Icon(
                             _iconOf(current),
@@ -487,7 +504,13 @@ class _MeetButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: BirdyText.labelCompact),
+          // Shrinks in a narrow button at large text (J7 fix).
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(label, maxLines: 1, style: BirdyText.labelCompact),
+            ),
+          ),
           if (trailing != null) ...[
             const SizedBox(width: BirdySpace.s),
             Icon(trailing, size: BirdyGlyph.xl),
