@@ -77,6 +77,17 @@ Set<DateTime> listenedDays(Iterable<(DateTime, DateTime?)> listenings) {
   };
 }
 
+/// Where a listening stops counting. An ended one stops at its [end]; one
+/// that is the running listening ([active]) counts up to [now]; an orphan
+/// without end (app killed) counts up to the last time it is known to have
+/// been alive ([lastSeen]: its last detection), or not at all.
+DateTime? listeningEnd({
+  required DateTime? end,
+  required DateTime? lastSeen,
+  required bool active,
+  required DateTime now,
+}) => end ?? (active ? now : lastSeen);
+
 /// The série on [now], from the [listened] days.
 Streak computeStreak(Set<DateTime> listened, DateTime now) {
   final today = _day(now);
