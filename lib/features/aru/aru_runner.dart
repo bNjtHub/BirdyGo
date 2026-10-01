@@ -60,6 +60,7 @@ class AruRunner {
   AruRunner(this._ref);
 
   static const Duration _recordingTick = Duration(seconds: 1);
+  static const Duration _checkpointInterval = Duration(seconds: 30);
   static const Duration _waitingMaxTick = Duration(minutes: 1);
   static const Duration _boundaryLeadTime = Duration(seconds: 1);
   static const Duration _minTick = Duration(milliseconds: 500);
@@ -78,6 +79,7 @@ class AruRunner {
   bool _aruInferenceActive = false;
   bool _batteryPaused = false;
   DateTime? _lastBatteryCheck;
+  DateTime? _lastCheckpoint;
   Future<void> _syncDetectionsTail = Future<void>.value();
 
   AppLocalizations? _l10n;
@@ -100,8 +102,8 @@ class AruRunner {
   }
 
   /// Start (or re-confirm) the drive loop. Idempotent: safe to call from every
-  /// entry point that activates a deployment (fresh start, restore, notification
-  /// relaunch). The caller must have already started/restored the
+  /// entry point that activates a deployment (fresh start, notification
+  /// relaunch). The caller must have already started the
   /// [AruController] and published its state to [aruStateProvider]/
   /// [aruSessionProvider].
   void attach(AppLocalizations l10n, {required bool use24Hour}) {
@@ -172,6 +174,18 @@ class AruRunner {
         return;
       }
       await _syncInferenceSession(controller.state, controller.session);
+      if (controller.state == AruControllerState.recording) {
+        final now = DateTime.now();
+        if (_lastCheckpoint == null ||
+            now.difference(_lastCheckpoint!) >= _checkpointInterval) {
+          _lastCheckpoint = now;
+          try {
+            await controller.checkpoint();
+          } catch (error, stack) {
+            debugPrint('ARU checkpoint failed: $error\n$stack');
+          }
+        }
+      }
       await _syncNotification();
     } finally {
       _tickBusy = false;
@@ -195,7 +209,6 @@ class AruRunner {
     if (session == null) return _waitingMaxTick;
     if (controller.state == AruControllerState.recording ||
         controller.state == AruControllerState.preparing ||
-        controller.state == AruControllerState.recovering ||
         controller.state == AruControllerState.finalizingCycle) {
       return _recordingTick;
     }

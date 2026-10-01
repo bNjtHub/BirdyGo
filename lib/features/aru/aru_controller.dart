@@ -15,7 +15,6 @@ enum AruControllerState {
   waiting,
   recording,
   finalizingCycle,
-  recovering,
   stopping,
   completed,
   error,
@@ -113,39 +112,6 @@ class AruController {
       return null;
     }
     return candidate;
-  }
-
-  Future<void> restoreDeployment(LiveSession session, {DateTime? now}) async {
-    if (session.type != SessionType.aru || session.aruMetadata == null) {
-      throw ArgumentError('Session is not an ARU deployment');
-    }
-    if (session.endTime != null) {
-      throw ArgumentError('ARU deployment is already completed');
-    }
-    if (_state != AruControllerState.idle &&
-        _state != AruControllerState.completed &&
-        _state != AruControllerState.error) {
-      throw StateError('ARU deployment already started');
-    }
-
-    _state = AruControllerState.recovering;
-    _errorMessage = null;
-    _session = session;
-    _calculator = AruScheduleCalculator(
-      session.aruMetadata!.toScheduleConfig(),
-    );
-    _activeCycleIndex = null;
-    _activeCycleStart = null;
-    _clipPeakTracker.clear();
-    _lastReviewSession = session;
-    _sampler = AruDetectionSampler(
-      mode: samplingModeFromString(session.aruMetadata!.samplingMode),
-      topN: session.aruMetadata!.topNPerSpecies,
-      scopeKeyFor: _samplingScopeKeyFor,
-    );
-
-    _normalizeRecoveredCycles(now ?? _now());
-    await evaluate(now: now ?? _now());
   }
 
   Future<void> startDeployment({
@@ -747,8 +713,8 @@ class AruController {
     if (metadata == null) return false;
     // "One session per cycle" deployments keep only their per-cycle sessions;
     // the aggregate is never part of the final library, regardless of recording
-    // mode. (It is still persisted while the deployment runs so it can be
-    // restored after a process kill — see _persist.)
+    // mode. (It is still checkpointed while the deployment runs so a process
+    // kill leaves the unfinished cycle in the library — see _persist.)
     return metadata.eachCycleIsSession;
   }
 
@@ -770,43 +736,13 @@ class AruController {
     }
   }
 
-  void _normalizeRecoveredCycles(DateTime now) {
-    final cycles = _session?.aruMetadata?.cycles;
-    if (cycles == null) return;
-
-    for (final cycle in cycles.toList()) {
-      if (cycle.status != AruCycleStatus.recording) continue;
-      // If the recording window is still active, leave the cycle marked as
-      // recording so evaluate() resumes capture in the same cycle instead of
-      // abandoning it and waiting for the next window. Only cycles whose window
-      // already elapsed while the app was down are finalized as partial.
-      if (now.isBefore(cycle.plannedEnd)) continue;
-      final end = now.isAfter(cycle.plannedEnd) ? cycle.plannedEnd : now;
-      _upsertCycle(
-        AruCycleMetadata(
-          index: cycle.index,
-          plannedStart: cycle.plannedStart,
-          plannedEnd: cycle.plannedEnd,
-          actualStart: cycle.actualStart,
-          actualEnd: end,
-          status: AruCycleStatus.partial,
-          recordingPath: cycle.recordingPath,
-          detectionCount: cycle.detectionCount,
-          retainedClipCount: cycle.retainedClipCount,
-          droppedClipCount: cycle.droppedClipCount,
-          note: cycle.note,
-        ),
-      );
-    }
-  }
-
   Future<void> _persist() async {
     final session = _session;
     if (session == null) return;
     // Per-cycle deployments persist the aggregate while in progress so an
-    // interrupted deployment can be restored from disk (restore looks for an
-    // ARU session with endTime == null). Once completed, the aggregate is
-    // discarded so only the per-cycle sessions remain in the library.
+    // interrupted deployment keeps its unfinished cycle in the library. Once
+    // completed, the aggregate is discarded so only the per-cycle sessions
+    // remain.
     if (_shouldDiscardAggregateSession(session)) {
       if (_state == AruControllerState.completed) {
         await _discardAggregateSession(session);
@@ -817,6 +753,9 @@ class AruController {
     }
     await _saveSession(session);
   }
+
+  /// Periodic checkpoint for a recording window with no new detections.
+  Future<void> checkpoint() => _persist();
 
   AruDeploymentMetadata? _cycleDeploymentMetadata(
     LiveSession session,
