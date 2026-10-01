@@ -27,13 +27,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:isolate';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart';
 
 import 'survey_notification.dart';
 import 'survey_alert_coordinator.dart';
@@ -44,7 +41,7 @@ import '../../core/services/memory_monitor.dart';
 import '../announcements/announcements_controller.dart'
     show AnnouncementDetection;
 import '../audio/ring_buffer.dart';
-import '../history/session_path_codec.dart';
+import '../history/session_repository.dart';
 import '../inference/advanced_pooling_params.dart';
 import '../inference/detection_accumulator.dart';
 import '../inference/detection_clip_writer.dart';
@@ -76,11 +73,14 @@ class SurveyController {
   SurveyController({
     required this.ringBuffer,
     required this.recordingService,
+    SessionRepository? repository,
     bool Function()? gpsEnabled,
-  }) : _gpsEnabled = gpsEnabled;
+  }) : _gpsEnabled = gpsEnabled,
+       _repository = repository ?? SessionRepository();
 
   final RingBuffer ringBuffer;
   final RecordingService recordingService;
+  final SessionRepository _repository;
 
   /// Reads Settings → Location → Use GPS. When off, no GPS tracker is
   /// created and the survey runs on the coordinates chosen in setup.
@@ -597,6 +597,7 @@ class SurveyController {
       if (await _cancelStartIfRequested()) return;
 
       _state = SurveyState.active;
+      unawaited(_persistSession());
       _armNextInference();
       onSessionStarted?.call();
       _notifyListeners();
@@ -770,6 +771,7 @@ class SurveyController {
       );
 
       _state = SurveyState.active;
+      unawaited(_persistSession());
       _armNextInference();
       _notifyListeners();
 
@@ -974,9 +976,6 @@ class SurveyController {
     try {
       // Final persist.
       await _persistSession();
-
-      // Delete recovery file.
-      await _deleteRecoveryFile();
     } catch (e, st) {
       debugPrint('[SurveyController] finalize persist error: $e\n$st');
       _errorMessage = e.toString();
@@ -1385,79 +1384,34 @@ class SurveyController {
     final session = _session;
     if (session == null) return Future<void>.value();
 
-    // Roll the segment forward so the persisted recordedDurationSeconds
-    // reflects time recorded since the last persist tick. We immediately
-    // open a new segment for active surveys so [elapsed] keeps ticking
-    // smoothly. Final persists run after [LiveSession.end] and must not
-    // reopen a segment, otherwise saved Survey durations keep growing in
-    // Session Library. This stays synchronous so a queued write can never
-    // reopen a segment after stopSurvey has closed it.
-    _closeRecordingSegment();
-    if (session.endTime == null) {
-      session.startSegment();
-      _segmentStart = DateTime.now();
-    }
+    // Only the final persist, which runs after [LiveSession.end], closes the
+    // segment and accumulates its time. An active Survey keeps its segment
+    // open: saveCheckpoint closes it in the snapshot and derives the recorded
+    // duration from it, so rolling it here would split the timeline into one
+    // segment per tick. This stays synchronous so a queued write can never
+    // touch the segment after stopSurvey has closed it.
+    if (session.endTime != null) _closeRecordingSegment();
 
     // The periodic tick does not await persistence. Queue writes so an older
     // snapshot still encoding off-isolate cannot finish after, and overwrite,
     // a newer one such as the final persist.
-    final write = _persistTail.then((_) => _writeSessionFile(session));
+    final write = _persistTail.then((_) async {
+      try {
+        if (session.endTime == null) {
+          await _repository.saveCheckpoint(session);
+        } else {
+          await _repository.save(session);
+        }
+      } catch (e) {
+        debugPrint('[SurveyController] persist error: $e');
+      }
+    });
     _persistTail = write;
     return write;
   }
 
-  Future<void> _writeSessionFile(LiveSession session) async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final sessionsDir = Directory('${appDir.path}/sessions');
-      if (!sessionsDir.existsSync()) {
-        await sessionsDir.create(recursive: true);
-      }
-
-      final sessionFile = File('${sessionsDir.path}/${session.id}.json');
-      final recoveryFile = File(
-        '${sessionsDir.path}/${session.id}.recovery.json',
-      );
-
-      // Write-ahead: rename current → recovery, write new, delete recovery.
-      if (await sessionFile.exists()) {
-        await sessionFile.rename(recoveryFile.path);
-      }
-
-      final documentsPath = appDir.path;
-      final jsonStr = await Isolate.run(
-        () => json.encode(
-          sessionJsonForStorage(session, documentsPath: documentsPath),
-        ),
-      );
-      await sessionFile.writeAsString(jsonStr, flush: true);
-
-      if (await recoveryFile.exists()) {
-        await recoveryFile.delete();
-      }
-
-      debugPrint(
-        '[SurveyController] session persisted '
-        '(${session.detections.length} detections, '
-        '${session.gpsTrack.length} GPS points)',
-      );
-    } catch (e) {
-      debugPrint('[SurveyController] persist error: $e');
-    }
-  }
-
-  Future<void> _deleteRecoveryFile() async {
-    if (_session == null) return;
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final recoveryFile = File(
-        '${appDir.path}/sessions/${_session!.id}.recovery.json',
-      );
-      if (await recoveryFile.exists()) {
-        await recoveryFile.delete();
-      }
-    } catch (_) {}
-  }
+  /// Flush the current survey when the app is backgrounded.
+  Future<void> checkpoint() => _persistSession();
 
   // ── Notification + battery ─────────────────────────────────────────────
 
