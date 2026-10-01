@@ -11,9 +11,13 @@ import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _app({bool reduced = false, required Widget next}) {
+Widget _app({
+  bool reduced = false,
+  TargetPlatform platform = TargetPlatform.linux,
+  required Widget next,
+}) {
   return MaterialApp(
-    theme: BirdyTheme.light().copyWith(platform: TargetPlatform.linux),
+    theme: BirdyTheme.light().copyWith(platform: platform),
     builder:
         (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
@@ -101,6 +105,34 @@ void main() {
     expect(tester.widget<FadeTransition>(entrance).opacity.value, 0);
     await tester.pump(BirdyMotion.enter);
     await tester.pump(BirdyMotion.enter ~/ 2);
+    expect(
+      tester.widget<FadeTransition>(entrance).opacity.value,
+      greaterThan(0),
+    );
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('BirdyEntrance waits at most the fork transition duration', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        platform: TargetPlatform.android, // 450 ms system transition
+        next: const Scaffold(
+          body: BirdyEntrance(child: SizedBox(key: Key('next'))),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('go')));
+    await tester.pump();
+    final entrance = find.descendant(
+      of: find.byType(BirdyEntrance),
+      matching: find.byType(FadeTransition),
+    );
+    await tester.pump(BirdyMotion.enter - const Duration(milliseconds: 20));
+    expect(tester.widget<FadeTransition>(entrance).opacity.value, 0);
+    await tester.pump(const Duration(milliseconds: 40));
+    await tester.pump(const Duration(milliseconds: 60));
     expect(
       tester.widget<FadeTransition>(entrance).opacity.value,
       greaterThan(0),
