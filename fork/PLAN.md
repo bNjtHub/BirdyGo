@@ -981,6 +981,10 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 Fini quand : la build de test interne s'installe depuis le Play Store et tient une matinée d'écoute
 écran éteint sur le Xiaomi.
 
+## Version anglaise
+
+- [x] Fonctions France (LPO / Faune-France, comptage des jardins, NaturaList) masquées hors France : visibles si la région de l'appareil est FR ou si l'interface est en français (`lib/fork/settings/france_features.dart`).
+
 ## Garder le fork à jour avec BirdNET
 
 Une fois par mois, sur le PC :

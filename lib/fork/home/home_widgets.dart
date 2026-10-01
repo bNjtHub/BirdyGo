@@ -380,7 +380,10 @@ class _ReliabilityBadgeSkeleton extends StatelessWidget {
           const SizedBox(width: BirdySpace.tight),
           // « Sûr », the shortest level label: a longer one only grows
           // this pill a little once real, never shrinks it.
-          BirdySkeleton.text(BirdyText.badge, placeholder: 'Sûr'),
+          BirdySkeleton.text(
+            BirdyText.badge,
+            placeholder: AppLocalizations.of(context)!.forkLevelSure,
+          ),
         ],
       ),
     ),

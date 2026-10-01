@@ -30,7 +30,8 @@ import '../../fork/sound_library/sound_library_screen.dart'; // FORK: sound libr
 import '../../fork/reliability/quick_review_screen.dart'; // FORK: quick review (J3)
 import '../../fork/ranking/ranking_screen.dart'; // FORK: palmarès (J4)
 import '../../fork/map/contact_map_screen.dart'; // FORK: contact map (J5)
-import '../../fork/garden/garden_count_screen.dart'; // FORK: garden count (J5b)
+import '../../fork/garden/garden_count_screen.dart';
+import '../../fork/settings/france_features.dart'; // FORK: France-only gate // FORK: garden count (J5b)
 import '../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheets (J4b)
 import '../../fork/shell/fork_shell.dart'; // FORK: BirdyGo home and navigation (J6e)
 
@@ -1000,7 +1001,9 @@ class _Footer extends StatelessWidget {
               ),
         ),
         // FORK: "Oiseaux des jardins" garden count (fork/PLAN.md J5b).
-        _FooterButton(
+        FranceOnly(
+          // FORK: France-only feature, hidden outside France / French UI.
+          child: _FooterButton(
           icon: AppIcons.parkRounded,
           label: l10n.forkGardenTitle,
           color: color,
@@ -1012,6 +1015,7 @@ class _Footer extends StatelessWidget {
                   builder: (_) => const GardenCountScreen(),
                 ),
               ),
+        ),
         ),
         // FORK: quick review of doubtful detections (fork/PLAN.md J3).
         _FooterButton(

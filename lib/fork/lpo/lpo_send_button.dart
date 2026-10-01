@@ -4,15 +4,17 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../design/birdy_tokens.dart';
 
 import '../../features/live/live_session.dart';
 import '../../shared/utils/app_icons.dart';
 import '../practice/practice.dart';
+import '../settings/france_features.dart';
 import 'lpo_send_screen.dart';
 
 /// Full-width secondary button and its caption.
-class LpoSendButton extends StatelessWidget {
+class LpoSendButton extends ConsumerWidget {
   const LpoSendButton({super.key, required this.session, this.detections});
 
   final LiveSession session;
@@ -22,7 +24,9 @@ class LpoSendButton extends StatelessWidget {
   final List<DetectionRecord>? detections;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // France-only (see france_features.dart).
+    if (!watchFranceFeatures(context, ref)) return const SizedBox.shrink();
     // A recording is not an observation (J5c): nothing to send.
     if (!countsAsObservation(session)) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;

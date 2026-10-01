@@ -25,6 +25,9 @@ List<String> gardenSummaryLines(
   required String Function(String scientificName) names,
   required DateTime now,
 }) {
+  // Fixed dd/MM/yyyy and HH:mm on purpose: this summary is copied into the
+  // French « Oiseaux des jardins » site, whose format it is. The feature
+  // only shows for France / French UI (france_features.dart).
   final start = count.start.toLocal();
   final seen = count.seen;
   final total = seen.values.fold<int>(0, (a, b) => a + b);
