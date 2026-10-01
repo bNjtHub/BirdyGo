@@ -34,9 +34,17 @@ Widget _homeGrid(Streak streak) => HomeGrid(
   streak: StreakBlock(streak: streak),
 );
 
+/// Width of a connector half that stays inside its clipping cell.
+double _visible(WidgetTester tester, String half, int cell) {
+  final rect = tester.getRect(find.byKey(ValueKey('streak-connector-$half')));
+  final clip = tester.getRect(
+    find.byKey(ValueKey('streak-connector-cell-$cell')),
+  );
+  return rect.intersect(clip).width;
+}
+
 double _visibleLength(WidgetTester tester, int i) =>
-    tester.getSize(find.byKey(ValueKey('streak-connector-$i-end'))).width +
-    tester.getSize(find.byKey(ValueKey('streak-connector-$i-start'))).width;
+    _visible(tester, '$i-end', i) + _visible(tester, '$i-start', i + 1);
 
 void main() {
   final now = DateTime(2026, 9, 27, 12);
@@ -60,7 +68,7 @@ void main() {
         final line = tester.getSize(
           find.byKey(const ValueKey('streak-connector-0-end')),
         );
-        expect(line.height, BirdyStroke.regular);
+        expect(line.height, closeTo(BirdyStroke.regular, 0.01));
       });
     }
   }
@@ -81,6 +89,45 @@ void main() {
         );
       }
     }
+  });
+
+  testWidgets('at 200% text the lines stay centered on the dots', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: BirdyTheme.light(),
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder:
+            (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(BirdySpace.page),
+            child: SizedBox(width: 300, child: _homeGrid(threeDays)),
+          ),
+        ),
+      ),
+    );
+    final dot = tester.getCenter(find.byKey(const ValueKey('day-today')));
+    // The last cell holds today's dot: its start half is the line next to it.
+    final line = tester.getCenter(
+      find.byKey(const ValueKey('streak-connector-5-start')),
+    );
+    expect((line.dy - dot.dy).abs(), lessThanOrEqualTo(1));
+    final other = tester.getCenter(
+      find.byKey(const ValueKey('day-missed')).first,
+    );
+    final line2 = tester.getCenter(
+      find.byKey(const ValueKey('streak-connector-0-end')),
+    );
+    expect((line2.dy - other.dy).abs(), lessThanOrEqualTo(1));
   });
 
   testWidgets('the loading skeleton has them too', (tester) async {

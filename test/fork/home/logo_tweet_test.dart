@@ -26,7 +26,45 @@ class _FakeTweet implements LogoTweetPlayer {
   Future<void> dispose() async {}
 }
 
+class _FlakyAudio implements TweetAudio {
+  int setAssets = 0;
+  int plays = 0;
+
+  @override
+  Future<void> setAsset(String asset) async => setAssets++;
+
+  @override
+  Future<void> seekToStart() async {}
+
+  @override
+  Future<void> play() async => plays++;
+
+  @override
+  Future<void> dispose() async {}
+}
+
 void main() {
+  test('a failing engine constructor is retried on the next prepare', () async {
+    var created = 0;
+    final audio = _FlakyAudio();
+    final player = JustAudioTweetPlayer(
+      createAudio: () {
+        created++;
+        if (created == 1) throw StateError('no engine yet');
+        return audio;
+      },
+    );
+    await player.prepare();
+    expect(audio.setAssets, 0);
+    await player.prepare();
+    expect(created, 2);
+    expect(audio.setAssets, 1);
+    // Prepared: a play loads nothing more.
+    await player.play();
+    expect(audio.setAssets, 1);
+    expect(audio.plays, 1);
+  });
+
   Future<(_FakeTweet, ProviderContainer)> pump(
     WidgetTester tester, {
     bool reduced = false,
