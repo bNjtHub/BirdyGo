@@ -10,7 +10,7 @@ import 'range_class.dart';
 import 'world_map_config.dart';
 import 'world_regions.dart';
 
-/// Coarse regions of the default view, for the legend's wording only.
+/// Coarse regions of the world, for the legend's wording only.
 enum WorldRegion {
   northernEurope,
   westernEurope,
@@ -23,6 +23,13 @@ enum WorldRegion {
   southernAfrica,
   middleEast,
   centralAsia,
+  southAsia,
+  eastAsia,
+  southeastAsia,
+  oceania,
+  northAmerica,
+  centralAmerica,
+  southAmerica,
 
   /// A centre that falls in none of the boxes.
   other,
@@ -77,6 +84,27 @@ const List<RegionBox> kRegionBoxes = [
     lonMax: 36,
   ),
   (
+    region: WorldRegion.southAsia,
+    latMin: 5,
+    latMax: 35,
+    lonMin: 62,
+    lonMax: 93,
+  ),
+  (
+    region: WorldRegion.eastAsia,
+    latMin: 22,
+    latMax: 42,
+    lonMin: 93,
+    lonMax: 150,
+  ),
+  (
+    region: WorldRegion.southeastAsia,
+    latMin: -11,
+    latMax: 22,
+    lonMin: 93,
+    lonMax: 141,
+  ),
+  (
     region: WorldRegion.middleEast,
     latMin: 12,
     latMax: 42,
@@ -117,6 +145,41 @@ const List<RegionBox> kRegionBoxes = [
     latMax: -12,
     lonMin: 5,
     lonMax: 60,
+  ),
+  (
+    region: WorldRegion.southAmerica,
+    latMin: -60,
+    latMax: 13,
+    lonMin: -82,
+    lonMax: -30,
+  ),
+  (
+    region: WorldRegion.centralAmerica,
+    latMin: 7,
+    latMax: 22,
+    lonMin: -120,
+    lonMax: -60,
+  ),
+  (
+    region: WorldRegion.northAmerica,
+    latMin: 22,
+    latMax: 90,
+    lonMin: -170,
+    lonMax: -50,
+  ),
+  (
+    region: WorldRegion.oceania,
+    latMin: -60,
+    latMax: 0,
+    lonMin: 110,
+    lonMax: 180,
+  ),
+  (
+    region: WorldRegion.oceania,
+    latMin: -30,
+    latMax: 25,
+    lonMin: -180,
+    lonMax: -140,
   ),
 ];
 

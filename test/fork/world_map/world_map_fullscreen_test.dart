@@ -326,7 +326,11 @@ void main() {
     });
 
     test('anchored keeps the point under the finger, and clamps', () {
-      final v = MapViewport.home(kWorldFrame, size);
+      // A regional home frame: the whole world is wider than the box.
+      final v = MapViewport.home(
+        (lon0: -25, lat0: -35, lon1: 65, lat1: 72),
+        size,
+      );
       const finger = Offset(100, 200);
       final geo = MapProjection(v.frame, size).unproject(finger);
       final z = v.anchored(geo, finger, 4);

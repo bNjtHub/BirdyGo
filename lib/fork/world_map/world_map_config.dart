@@ -22,7 +22,7 @@ enum Season {
 abstract final class WorldMapConfig {
   // ---- Region assets (see tools/fork_world_regions.py) ----
 
-  /// Natural Earth admin-1 regions of the map area and the country borders
+  /// Natural Earth admin-1 regions of the whole world and the country borders
   /// (gzip, see the script's header for the format).
   static const String regionsAsset = 'assets/fork/world/regions_admin1.bin.gz';
 
@@ -33,11 +33,17 @@ abstract final class WorldMapConfig {
   /// Units per degree of the regions asset's integer coordinates.
   static const double regionsScale = 100;
 
-  /// Area the assets cover (degrees): Europe, Africa and West Asia.
-  static const double lonMin = -25;
-  static const double lonMax = 65;
-  static const double latMin = -35;
-  static const double latMax = 72;
+  /// Area the assets cover (degrees): the whole world without Antarctica.
+  static const double lonMin = -180;
+  static const double lonMax = 180;
+  static const double latMin = -60;
+  static const double latMax = 85;
+
+  /// A frame that crosses the antimeridian (a range on both sides of 180,
+  /// drawn Pacific-centred) may reach up to this longitude: the map is drawn
+  /// twice, the second copy shifted by [lonPeriod].
+  static const double lonWrapMax = 540;
+  static const double lonPeriod = 360;
 
   // ---- Framing: the map is cut to the species' range ----
 

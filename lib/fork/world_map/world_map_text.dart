@@ -30,6 +30,13 @@ String regionName(
   WorldRegion.southernAfrica => l10n.forkWorldRegionSouthernAfrica,
   WorldRegion.middleEast => l10n.forkWorldRegionMiddleEast,
   WorldRegion.centralAsia => l10n.forkWorldRegionCentralAsia,
+  WorldRegion.southAsia => l10n.forkWorldRegionSouthAsia,
+  WorldRegion.eastAsia => l10n.forkWorldRegionEastAsia,
+  WorldRegion.southeastAsia => l10n.forkWorldRegionSoutheastAsia,
+  WorldRegion.oceania => l10n.forkWorldRegionOceania,
+  WorldRegion.northAmerica => l10n.forkWorldRegionNorthAmerica,
+  WorldRegion.centralAmerica => l10n.forkWorldRegionCentralAmerica,
+  WorldRegion.southAmerica => l10n.forkWorldRegionSouthAmerica,
   WorldRegion.other => l10n.forkWorldRegionOther,
 };
 
