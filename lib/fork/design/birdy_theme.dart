@@ -237,15 +237,26 @@ abstract final class BirdyTheme {
 /// Keeps an already matching theme, and the upstream high-contrast palette
 /// when the user chose it.
 class ListeningTheme extends StatelessWidget {
-  const ListeningTheme({super.key, required this.child, this.light = false});
+  const ListeningTheme({
+    super.key,
+    required this.child,
+    this.light = false,
+    this.follow = false,
+  });
 
   final Widget child;
+
+  /// J7: keep the theme of the app (light or dark, chosen bird included);
+  /// nothing is forced. Off when the user asked for the listening screen
+  /// always dark.
+  final bool follow;
 
   /// The user chose the light listening screen (`liveThemeProvider`).
   final bool light;
 
   @override
   Widget build(BuildContext context) {
+    if (follow) return child;
     final current = Theme.of(context);
     final wanted = light ? Brightness.light : Brightness.dark;
     if (current.brightness == wanted) return child;

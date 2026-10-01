@@ -145,11 +145,16 @@ class SimpleSettingsScreen extends ConsumerWidget {
                         ref.read(themeModeProvider.notifier).setThemeMode(mode);
                       },
                     ),
-                    _LiveThemeRow(
-                      theme: ref.watch(liveThemeProvider),
-                      onChanged: (theme) {
+                    // FORK: J7, the listening screen follows the theme unless asked dark
+                    BirdySwitchRow(
+                      key: const ValueKey('settings-live-always-dark'),
+                      icon: AppIcons.hearing,
+                      title: l10n.forkLiveAlwaysDark,
+                      hint: l10n.forkLiveAlwaysDarkHint,
+                      value: ref.watch(liveAlwaysDarkProvider),
+                      onChanged: (on) {
                         HapticFeedback.selectionClick();
-                        ref.read(liveThemeProvider.notifier).set(theme);
+                        ref.read(liveAlwaysDarkProvider.notifier).set(on);
                       },
                     ),
                   ],
@@ -384,55 +389,6 @@ class _ThemeChoice extends StatelessWidget {
             ),
         ],
       ),
-    );
-  }
-}
-
-/// « Écran d'écoute »: dark well or light page for the live screen.
-class _LiveThemeRow extends StatelessWidget {
-  const _LiveThemeRow({required this.theme, required this.onChanged});
-
-  final LiveTheme theme;
-  final ValueChanged<LiveTheme> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final c = BirdyColors.of(context);
-    final labels = {
-      LiveTheme.dark: l10n.settingsThemeDark,
-      LiveTheme.light: l10n.settingsThemeLight,
-    };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        BirdyListRow(
-          icon: AppIcons.hearing,
-          title: l10n.forkLiveThemeTitle,
-          subtitle: l10n.forkLiveThemeCaption,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            BirdySpace.l,
-            0,
-            BirdySpace.l,
-            BirdySpace.l,
-          ),
-          child: _ChipGrid(
-            chips: [
-              for (final entry in labels.entries)
-                BirdyFilterChip(
-                  key: ValueKey('live-theme-${entry.key.name}'),
-                  label: entry.value,
-                  selected: theme == entry.key,
-                  selectedColors: BirdyChipColors.ink(c),
-                  centered: true,
-                  onSelected: () => onChanged(entry.key),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

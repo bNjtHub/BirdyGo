@@ -21,6 +21,7 @@ import 'listening_options.dart';
 import 'live_header.dart';
 import 'live_spectrogram_panel.dart';
 import 'live_table.dart';
+import '../reliability/reliability_config.dart';
 import 'live_table_model.dart';
 
 class LiveListeningLayout extends StatefulWidget {
@@ -44,6 +45,8 @@ class LiveListeningLayout extends StatefulWidget {
     this.replaying,
     this.imageFor,
     this.badgeFor,
+    this.levelFor,
+    this.onBadgeTap,
     this.actionFor,
     this.onOpen,
     this.empty,
@@ -82,6 +85,10 @@ class LiveListeningLayout extends StatefulWidget {
   final ImageProvider? Function(String scientificName)? imageFor;
   final Widget Function(LiveTableEntry entry, {required bool compact})?
   badgeFor;
+
+  /// J7: level of a row, and the tap on its badge (see [LiveTable]).
+  final ReliabilityLevel Function(LiveTableEntry entry)? levelFor;
+  final void Function(LiveTableEntry entry)? onBadgeTap;
   final Widget? Function(LiveTableEntry entry)? actionFor;
   final void Function(LiveTableEntry entry)? onOpen;
 
@@ -187,6 +194,8 @@ class _LiveListeningLayoutState extends State<LiveListeningLayout> {
       compact: compact,
       imageFor: widget.imageFor,
       badgeFor: widget.badgeFor,
+      levelFor: widget.levelFor,
+      onBadgeTap: widget.onBadgeTap,
       actionFor: widget.actionFor,
       onOpen: widget.onOpen,
       empty: widget.empty,

@@ -44,7 +44,9 @@ Couleur d'espèce : chaque espèce a sa teinte, tirée de sa photo ou de son ic�
 ligne dans le tableau en direct et ses célébrations. Couleur de statut : chaque statut du jeu a la
 sienne (fixée en J6e). Le texte posé sur ces couleurs garde un contraste AA.
 
-L'écoute s'ouvre en thème sombre par défaut : on l'utilise souvent à l'aube, et l'écran OLED consomme moins.
+L'écoute suit le thème de l'app (clair ou sombre, et l'oiseau choisi) ; le réglage « Écran d'écoute
+toujours sombre » (Réglages, bloc Thème, et feuille d'options de l'écoute) la garde sombre : on l'utilise
+souvent à l'aube, et l'écran OLED consomme moins.
 Les rampes de score et les palettes du spectrogramme d'upstream ne changent pas.
 Élévation par teinte de surface (Material 3), pas la même ombre grise sous chaque carte.
 
@@ -323,7 +325,43 @@ de vie, le préchargement et la réécoute restent ceux d'upstream et de J2.
   et palette de repli stable, jusqu'aux icônes de J6d.
 - Écarts assumés avec la maquette : pas de halo ni d'onde sur la ligne réentendue (un seul effet à la
   fois), pas de bande « niveau du micro », pas de nom de lieu sous « En écoute ». Les dialogues
-  et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) sont sombres aussi.
+  et feuilles ouverts depuis l'écoute (confirmation d'arrêt, fiche espèce, aide) ont le thème de l'écran
+  d'écoute (J7 : celui de l'app, sombre si « toujours sombre »).
+
+### Écoute en thème clair, niveau stable, « Confirmé » (J7)
+
+- **Thème.** `LiveScreen` enveloppe l'écran dans `ListeningTheme(follow: !liveAlwaysDark)` : par défaut
+  rien n'est forcé, l'écoute prend le thème de l'app et l'oiseau choisi ; `liveAlwaysDarkProvider`
+  (`fork_live_always_dark_v1`, faux par défaut, repris de l'ancien choix explicite « sombre » de
+  `fork_live_theme_v1`) rend le comportement d'avant (sombre forcé). Réglage : ligne à interrupteur
+  « Écran d'écoute toujours sombre » dans le bloc Thème des Réglages, même interrupteur dans la feuille
+  d'options de l'écoute. Le puits du spectrogramme reste sombre dans les deux cas (sa palette et son
+  dégradé `wellTop`/`wellBottom` ne dépendent pas du fond) ; ses repères et noms utilisent les jetons
+  sombres. Contrastes vérifiés dans les 4 thèmes clair et sombre (`test/fork/live/live_contrast_test.dart`) ;
+  goldens du Live dans `test/fork/goldens/live_*.png`. Limite : la bordure Loriot des cartes de moment
+  (décorative, la carte a sa propre surface) reste à moins de 3:1 sur le fond clair.
+- **Bouton play de la première fois.** La carte « Première rencontre » et la carte d'un oiseau rare
+  réservent le bouton dès la première image (`_ClipSlot`), à sa taille et sa place finales : grisé
+  (`BirdyMotion.pendingOpacity`) tant que l'extrait n'est pas enregistré, puis le bouton actif apparaît
+  au même endroit en fondu (`BirdyCrossFade`, rien sous animations réduites). Rien n'est réservé quand
+  l'enregistrement des extraits est éteint. La lecture garde le mécanisme de J2 (`ReplayButton` :
+  inférence suspendue pendant la lecture, plus 0,5 s).
+- **Niveau du tableau.** Le niveau d'une ligne est celui du meilleur contact de la sortie
+  (`LiveTableEntry.levelRecord`, `liveLevelOf` : `reliabilityFor` avec les seuils de `ReliabilityConfig` ;
+  un contact confirmé gagne, sinon le meilleur score, à égalité le plus ancien). Il ne redescend pas
+  pendant la sortie. `record` reste l'extrait en cours. Le Bilan de fin de sortie applique la même
+  règle (`ListeningSummary.of` garde le meilleur niveau des contacts). Les moments (première rencontre,
+  oiseau rare) lisent aussi `levelRecord`.
+- **Barres « chante ».** Leur hauteur suit le score de l'extrait en cours (de
+  `BirdyMotion.singingBarsMinScale` à 1 de la hauteur, lissé sur `BirdyMotion.enter`, sans transition
+  sous animations réduites) ; le badge de niveau reste fixe.
+- **« Confirmé ».** Quand une ligne passe d'un autre niveau à « Sûr » pendant l'écoute, une pastille
+  « Confirmé » avec coche (couleurs de « Sûr ») remplace le badge 2,5 s (`BirdyMotion.confirmedShown`)
+  en fondu, une seule fois par espèce et par sortie. Animations réduites : seul le badge change. Dans
+  les deux cas, `Semantics(liveRegion)` annonce « <espèce> : confirmé ».
+- **Feuille des niveaux.** Toucher le badge d'une ligne ouvre `LevelsSheet` avec, en tête, le niveau de
+  l'espèce, son meilleur score, l'heure du meilleur contact et le nombre de contacts de la sortie
+  (`LevelsSpecies`). Sans espèce (bouton « i » des options), la feuille est celle d'avant.
 
 ## Mise en œuvre (J6c-bis-b, Live : « Analyse… » et fin rapide)
 

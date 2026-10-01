@@ -136,16 +136,14 @@ class ListeningOptionsSheet extends ConsumerWidget {
           SwitchListTile(
             key: const ValueKey('listening-options-light'),
             contentPadding: EdgeInsets.zero,
-            secondary: Icon(AppIcons.wbSunny, color: c.text1),
+            secondary: Icon(AppIcons.hearing, color: c.text1),
             title: Text(
-              l10n.forkLiveLightScreen,
+              l10n.forkLiveAlwaysDark,
               style: BirdyText.label.copyWith(color: c.text1),
             ),
-            value: ref.watch(liveThemeProvider) == LiveTheme.light,
+            value: ref.watch(liveAlwaysDarkProvider),
             onChanged:
-                (on) => ref
-                    .read(liveThemeProvider.notifier)
-                    .set(on ? LiveTheme.light : LiveTheme.dark),
+                (on) => ref.read(liveAlwaysDarkProvider.notifier).set(on),
           ),
           SwitchListTile(
             key: const ValueKey('listening-options-notify'),
