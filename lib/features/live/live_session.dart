@@ -18,6 +18,7 @@ import 'package:intl/intl.dart';
 import '../../shared/models/weather_snapshot.dart';
 
 import '../../shared/models/gps_point.dart';
+import '../../shared/models/altitude_reference.dart';
 import '../aru/aru_schedule.dart';
 import '../inference/models/detection.dart';
 import '../inference/models/species.dart';
@@ -466,6 +467,10 @@ class DetectionRecord {
     this.evidence,
     this.latitude,
     this.longitude,
+    this.altitude,
+    this.altitudeAccuracy,
+    this.altitudeReference,
+    this.locationFixTime,
     this.reviewStatus = ReviewStatus.unreviewed,
     this.reviewedAt,
     this.note,
@@ -544,6 +549,12 @@ class DetectionRecord {
 
   /// GPS longitude at the time of detection (null if unavailable).
   final double? longitude;
+
+  /// Height recorded with this detection's coordinates, in meters.
+  final double? altitude;
+  final double? altitudeAccuracy;
+  final AltitudeReference? altitudeReference;
+  final DateTime? locationFixTime;
 
   /// What a reviewer has decided about this detection's identification.
   ///
@@ -670,6 +681,14 @@ class DetectionRecord {
       evidence: DetectionEvidence.fromName(json['evidence'] as String?),
       latitude: (json['detLat'] as num?)?.toDouble(),
       longitude: (json['detLon'] as num?)?.toDouble(),
+      altitude: (json['detAlt'] as num?)?.toDouble(),
+      altitudeAccuracy: (json['detAltAcc'] as num?)?.toDouble(),
+      altitudeReference: AltitudeReference.fromName(
+        json['detAltRef'] as String?,
+      ),
+      locationFixTime: json['detFixTime'] is String
+          ? DateTime.parse(json['detFixTime'] as String)
+          : null,
       // Sessions written before review became three-valued carry only
       // `confirmedAt`, where a non-null value meant confirmed. Prefer the
       // explicit status when present and fall back to that legacy shape so
@@ -704,6 +723,11 @@ class DetectionRecord {
     if (evidence != null) 'evidence': evidence!.name,
     if (latitude != null) 'detLat': latitude,
     if (longitude != null) 'detLon': longitude,
+    if (altitude != null) 'detAlt': altitude,
+    if (altitudeAccuracy != null) 'detAltAcc': altitudeAccuracy,
+    if (altitudeReference != null) 'detAltRef': altitudeReference!.name,
+    if (locationFixTime != null)
+      'detFixTime': locationFixTime!.toUtc().toIso8601String(),
     if (isReviewed) 'reviewStatus': reviewStatus.name,
     if (reviewedAt != null) 'reviewedAt': reviewedAt!.toUtc().toIso8601String(),
     // Legacy mirror: a build older than the three-state change reads only
@@ -901,6 +925,10 @@ class AruDeploymentMetadata {
     this.dielPattern = AruDielPattern.anyTime,
     this.latitude,
     this.longitude,
+    this.altitude,
+    this.altitudeAccuracy,
+    this.altitudeReference,
+    this.locationFixTime,
     this.recordingMode = 'full',
     this.recordingFormat = 'flac',
     this.samplingMode = 'smart',
@@ -922,6 +950,10 @@ class AruDeploymentMetadata {
   final AruDielPattern dielPattern;
   final double? latitude;
   final double? longitude;
+  final double? altitude;
+  final double? altitudeAccuracy;
+  final AltitudeReference? altitudeReference;
+  final DateTime? locationFixTime;
   final String recordingMode;
   final String recordingFormat;
   final String samplingMode;
@@ -966,6 +998,14 @@ class AruDeploymentMetadata {
       ),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      altitude: (json['altitude'] as num?)?.toDouble(),
+      altitudeAccuracy: (json['altitudeAccuracy'] as num?)?.toDouble(),
+      altitudeReference: AltitudeReference.fromName(
+        json['altitudeReference'] as String?,
+      ),
+      locationFixTime: json['locationFixTime'] is String
+          ? DateTime.parse(json['locationFixTime'] as String)
+          : null,
       recordingMode: json['recordingMode'] as String? ?? 'full',
       recordingFormat: json['recordingFormat'] as String? ?? 'flac',
       samplingMode: json['samplingMode'] as String? ?? 'smart',
@@ -998,6 +1038,11 @@ class AruDeploymentMetadata {
     if (dielPattern != AruDielPattern.anyTime) 'dielPattern': dielPattern.name,
     if (latitude != null) 'latitude': latitude,
     if (longitude != null) 'longitude': longitude,
+    if (altitude != null) 'altitude': altitude,
+    if (altitudeAccuracy != null) 'altitudeAccuracy': altitudeAccuracy,
+    if (altitudeReference != null) 'altitudeReference': altitudeReference!.name,
+    if (locationFixTime != null)
+      'locationFixTime': locationFixTime!.toUtc().toIso8601String(),
     'recordingMode': recordingMode,
     'recordingFormat': recordingFormat,
     'samplingMode': samplingMode,
@@ -1025,6 +1070,10 @@ class LiveSession {
     this.trimEndSec,
     this.latitude,
     this.longitude,
+    this.altitude,
+    this.altitudeAccuracy,
+    this.altitudeReference,
+    this.locationFixTime,
     this.locationName,
     List<GpsPoint>? gpsTrack,
     this.distanceMeters,
@@ -1094,6 +1143,12 @@ class LiveSession {
 
   /// Recording location longitude (null if location unavailable).
   double? longitude;
+
+  /// Height paired with this session's representative coordinates.
+  double? altitude;
+  double? altitudeAccuracy;
+  AltitudeReference? altitudeReference;
+  DateTime? locationFixTime;
 
   /// Reverse-geocoded location name (e.g. "Berlin, Germany").
   ///
@@ -1283,6 +1338,10 @@ class LiveSession {
       evidence: r.evidence,
       latitude: r.latitude,
       longitude: r.longitude,
+      altitude: r.altitude,
+      altitudeAccuracy: r.altitudeAccuracy,
+      altitudeReference: r.altitudeReference,
+      locationFixTime: r.locationFixTime,
       reviewStatus: r.reviewStatus,
       reviewedAt: r.reviewedAt,
       note: r.note,
@@ -1329,6 +1388,14 @@ class LiveSession {
       trimEndSec: (json['trimEndSec'] as num?)?.toDouble(),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      altitude: (json['altitude'] as num?)?.toDouble(),
+      altitudeAccuracy: (json['altitudeAccuracy'] as num?)?.toDouble(),
+      altitudeReference: AltitudeReference.fromName(
+        json['altitudeReference'] as String?,
+      ),
+      locationFixTime: json['locationFixTime'] is String
+          ? DateTime.parse(json['locationFixTime'] as String)
+          : null,
       locationName: json['locationName'] as String?,
       customName: json['customName'] as String?,
       gpsTrack:
@@ -1379,6 +1446,11 @@ class LiveSession {
     if (trimEndSec != null) 'trimEndSec': trimEndSec,
     if (latitude != null) 'latitude': latitude,
     if (longitude != null) 'longitude': longitude,
+    if (altitude != null) 'altitude': altitude,
+    if (altitudeAccuracy != null) 'altitudeAccuracy': altitudeAccuracy,
+    if (altitudeReference != null) 'altitudeReference': altitudeReference!.name,
+    if (locationFixTime != null)
+      'locationFixTime': locationFixTime!.toUtc().toIso8601String(),
     if (locationName != null) 'locationName': locationName,
     if (customName != null) 'customName': customName,
     if (gpsTrack.isNotEmpty)
