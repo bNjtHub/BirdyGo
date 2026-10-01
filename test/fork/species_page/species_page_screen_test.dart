@@ -150,6 +150,8 @@ final _sheet = SpeciesSheet.fromJson({
   'size': '14 cm, à peu près comme un moineau.',
   'migration': 'La plupart restent toute l’année.',
   'anecdote': 'Il chante parfois la nuit.',
+  'by_ear': 'Un filet de notes perlées.',
+  'behaviour': 'Posé bas, il guette les vers.',
 });
 
 void main() {
@@ -266,7 +268,8 @@ void main() {
     expect(find.text('Surtout vers 7 h'), findsOneWidget);
     expect(find.text('Voir sur la carte'), findsOneWidget);
     // J6f-b fix: the label is short enough to stay on one line.
-    expect(find.text('En savoir plus'), findsOneWidget);
+    expect(find.text('Pour aller plus loin'), findsOneWidget);
+    expect(find.text('En savoir plus'), findsNothing);
     expect(find.text('En savoir plus sur cette espèce'), findsNothing);
     expect(find.textContaining('Garde le son pour toi'), findsOneWidget);
     // The upstream description gives way to the AI sheet.
@@ -274,11 +277,18 @@ void main() {
 
     // First chip selected; another chip shows its paragraph.
     expect(find.text(_sheet.sections[SheetSection.size]!), findsOneWidget);
-    await tester.ensureVisible(find.text('Migration'));
-    await tester.tap(find.text('Migration'));
+    await tester.ensureVisible(find.text('Anecdote'));
+    await tester.tap(find.text('Anecdote'));
     await tester.pumpAndSettle();
-    expect(find.text(_sheet.sections[SheetSection.migration]!), findsOneWidget);
+    expect(find.text(_sheet.sections[SheetSection.anecdote]!), findsOneWidget);
     expect(find.text(_sheet.sections[SheetSection.size]!), findsNothing);
+    // « À l'oreille » and the migration text are in their own groups, not in
+    // the discs (J7 order); the quiz link is gone from the page.
+    expect(find.byKey(const ValueKey('meet-disc-by_ear')), findsNothing);
+    expect(find.byKey(const ValueKey('meet-disc-migration')), findsNothing);
+    expect(find.text(_sheet.sections[SheetSection.byEar]!), findsOneWidget);
+    expect(find.text(_sheet.sections[SheetSection.migration]!), findsOneWidget);
+    expect(find.textContaining('Teste ton oreille'), findsNothing);
   });
 
   testWidgets('unexpected here: the page explains « Rare ici »', (
@@ -296,8 +306,38 @@ void main() {
     expect(find.text(explanation), findsOneWidget);
   });
 
-  testWidgets('sounds come right after the counters, before here and now '
-      '(J7)', (tester) async {
+  testWidgets('groups follow the order people ask questions (J7)', (
+    tester,
+  ) async {
+    await pump(tester);
+    double top(Finder f) {
+      expect(f, findsOneWidget);
+      return tester.getTopLeft(f).dy;
+    }
+
+    final order = [
+      top(find.text('Rougegorge familier')),
+      top(find.text(_sheet.sections[SheetSection.summary]!)),
+      top(find.byKey(const ValueKey('fiche-heard'))),
+      top(find.text('Son chant')),
+      top(find.byKey(const ValueKey('fiche-sounds'))),
+      top(find.byKey(const ValueKey('fiche-by-ear'))),
+      top(find.text('Fais sa connaissance')),
+      top(find.text('Où et quand le voir')),
+      top(find.text('Ici en ce moment')),
+      top(find.byKey(const ValueKey('fiche-migration'))),
+      top(find.text('Mes rencontres')),
+      top(find.byKey(const ValueKey('fiche-activity'))),
+      top(find.text('Pour aller plus loin')),
+      top(find.text('Wikipedia')),
+    ];
+    for (var i = 1; i < order.length; i++) {
+      expect(order[i], greaterThan(order[i - 1]), reason: 'item $i');
+    }
+  });
+
+  testWidgets('the heard line sits in the header, sounds come before here and '
+      'now (J7)', (tester) async {
     await pump(tester);
     final heard = tester.getTopLeft(find.byKey(const ValueKey('fiche-heard')));
     final sounds = tester.getTopLeft(
@@ -426,7 +466,9 @@ void main() {
   ) async {
     loader = _FakeLoader(recordValue: SpeciesRecord.empty);
     await pump(tester, sheets: SpeciesSheets.empty);
-    expect(find.text("Tu ne l'as pas encore entendu."), findsOneWidget);
+    // J7: never heard, no line under the name at all.
+    expect(find.text("Tu ne l'as pas encore entendu."), findsNothing);
+    expect(find.byKey(const ValueKey('fiche-heard')), findsNothing);
     expect(find.text('Description upstream.'), findsOneWidget);
     expect(find.text('Mes sons'), findsNothing);
     expect(find.text('Ici en ce moment'), findsNothing);

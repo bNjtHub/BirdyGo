@@ -1,6 +1,8 @@
-/// « Fais sa connaissance » (J6h): the species sheet as six round discs,
-/// one content card under them, and the link to the quiz. Replaces the old
-/// chip row. State is ephemeral: it resets each time the page opens.
+/// « Fais sa connaissance » (J6h): the species sheet as round discs (size,
+/// behaviour, enemies, anecdote since the J7 order), one content card under
+/// them. « À l'oreille » and the migration text moved to their own groups of
+/// the page. Replaces the old chip row. State is ephemeral: it resets each
+/// time the page opens.
 library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -12,26 +14,31 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
 import '../game/game_widgets.dart' show SegmentedBar;
-import '../game/quiz_entry_row.dart';
 import '../species_sheet/species_sheet.dart';
 import '../species_sheet/species_sheet_section.dart' show sheetSectionTitle;
 import 'section_title.dart';
 
-/// The six sections, in display order (a subset of [SheetSection]).
+/// The four disc sections, in display order (a subset of [SheetSection]).
 const List<SheetSection> kMeetSections = [
-  SheetSection.byEar,
   SheetSection.size,
   SheetSection.behaviour,
-  SheetSection.migration,
   SheetSection.enemies,
   SheetSection.anecdote,
 ];
+
+/// Fewer sections than this: no disc grid, plain tonal blocks instead.
+const int kMeetMinDiscs = 2;
 
 /// Sections of [sheet] that have content, in display order.
 List<SheetSection> meetAvailable(SpeciesSheet sheet) => [
   for (final s in kMeetSections)
     if (sheet.sections.containsKey(s)) s,
 ];
+
+/// Whether [MeetSpeciesBlock] would show anything for [sheet].
+bool meetHasContent(SpeciesSheet sheet) =>
+    meetAvailable(sheet).isNotEmpty ||
+    kMeetExtras.any((s) => sheet.sections[s] != null);
 
 /// Text scale above which the title and the counter stack.
 const double _kMeetStackedTextScale = 1.6;
@@ -44,37 +51,29 @@ const int _kMeetColumns = 3;
 enum _Tone { tonal, sure, probable, oriole }
 
 const Map<SheetSection, _Tone> _tones = {
-  SheetSection.byEar: _Tone.tonal,
   SheetSection.size: _Tone.sure,
   SheetSection.behaviour: _Tone.tonal,
-  SheetSection.migration: _Tone.sure,
   SheetSection.enemies: _Tone.probable,
   SheetSection.anecdote: _Tone.oriole,
 };
 
 IconData _iconOf(SheetSection s) => switch (s) {
-  SheetSection.byEar => AppIcons.hearing,
   SheetSection.size => AppIcons.straighten,
   SheetSection.behaviour => AppIcons.visibility,
-  SheetSection.migration => AppIcons.flight,
   SheetSection.enemies => AppIcons.pets,
   _ => AppIcons.lightbulbOutline,
 };
 
 String _labelOf(AppLocalizations l10n, SheetSection s) => switch (s) {
-  SheetSection.byEar => l10n.forkMeetByEar,
   SheetSection.size => l10n.forkMeetSize,
   SheetSection.behaviour => l10n.forkSheetHabits,
-  SheetSection.migration => l10n.forkMeetMigration,
   SheetSection.enemies => l10n.forkSheetEnemies,
   _ => l10n.forkMeetAnecdote,
 };
 
 String _hookOf(AppLocalizations l10n, SheetSection s) => switch (s) {
-  SheetSection.byEar => l10n.forkMeetHookByEar,
   SheetSection.size => l10n.forkMeetHookSize,
   SheetSection.behaviour => l10n.forkMeetHookBehaviour,
-  SheetSection.migration => l10n.forkMeetHookMigration,
   SheetSection.enemies => l10n.forkSheetEnemiesKicker,
   _ => l10n.forkMeetHookAnecdote,
 };
@@ -86,13 +85,19 @@ const List<SheetSection> kMeetExtras = [
   SheetSection.confusions,
 ];
 
-IconData _extraIcon(SheetSection s) =>
-    s == SheetSection.whyHere ? AppIcons.locationOn : AppIcons.swapHoriz;
+IconData _extraIcon(SheetSection s) => switch (s) {
+  SheetSection.whyHere => AppIcons.locationOn,
+  SheetSection.confusions => AppIcons.swapHoriz,
+  SheetSection.byEar => AppIcons.hearing,
+  SheetSection.migration => AppIcons.flight,
+  _ => _iconOf(s),
+};
 
 /// A section of the sheet as a tonal block: species-tint icon disc, 20
-/// title, then the text.
-class _MeetExtraBlock extends StatelessWidget {
-  const _MeetExtraBlock({super.key, required this.section, required this.text});
+/// title, then the text. Also used by the species page for « À l'oreille »
+/// and the migration text, which sit in their own groups (J7 order).
+class SheetTextBlock extends StatelessWidget {
+  const SheetTextBlock({super.key, required this.section, required this.text});
 
   final SheetSection section;
   final String text;
@@ -123,7 +128,7 @@ List<Widget> _extraBlocks(SpeciesSheet sheet) => [
   for (final s in kMeetExtras)
     if (sheet.sections[s] != null) ...[
       const SizedBox(height: BirdySpace.block),
-      _MeetExtraBlock(
+      SheetTextBlock(
         key: ValueKey('meet-extra-${s.key}'),
         section: s,
         text: sheet.sections[s]!,
@@ -140,12 +145,9 @@ List<Widget> _extraBlocks(SpeciesSheet sheet) => [
 };
 
 class MeetSpeciesBlock extends StatefulWidget {
-  const MeetSpeciesBlock({super.key, required this.sheet, this.onQuizTap});
+  const MeetSpeciesBlock({super.key, required this.sheet});
 
   final SpeciesSheet sheet;
-
-  /// Overrides opening the quiz (tests).
-  final VoidCallback? onQuizTap;
 
   @override
   State<MeetSpeciesBlock> createState() => _MeetSpeciesBlockState();
@@ -160,24 +162,31 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     final sections = meetAvailable(widget.sheet);
-    final summary = widget.sheet.sections[SheetSection.summary];
-    if (sections.isEmpty) {
+    // A grid of discs needs at least two: fewer, the sections are shown as
+    // plain tonal blocks like the extras below.
+    if (sections.length < kMeetMinDiscs) {
+      final blocks = <Widget>[
+        for (final s in sections)
+          SheetTextBlock(
+            key: ValueKey('meet-plain-${s.key}'),
+            section: s,
+            text: widget.sheet.sections[s]!,
+          ),
+        for (final s in kMeetExtras)
+          if (widget.sheet.sections[s] != null)
+            SheetTextBlock(
+              key: ValueKey('meet-extra-${s.key}'),
+              section: s,
+              text: widget.sheet.sections[s]!,
+            ),
+      ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (summary != null)
-            BirdyBlock(
-              child: Text(
-                summary,
-                style: BirdyText.bodyCompact.copyWith(color: c.text2),
-              ),
-            ),
-          ..._extraBlocks(widget.sheet),
-          const SizedBox(height: BirdySpace.block),
-          QuizEntryRow(
-            subtitle: l10n.forkMeetQuizSubtitle,
-            onTap: widget.onQuizTap,
-          ),
+          for (var i = 0; i < blocks.length; i++) ...[
+            if (i > 0) const SizedBox(height: BirdySpace.block),
+            blocks[i],
+          ],
         ],
       );
     }
@@ -226,15 +235,8 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                     ),
                   ],
                 ),
-              if (summary != null) ...[
-                const SizedBox(height: BirdySpace.s),
-                Text(
-                  summary,
-                  style: BirdyText.bodyCompact.copyWith(color: c.text2),
-                ),
-              ],
               const SizedBox(height: BirdySpace.l),
-              // 3 columns: six sections make a 3 x 2 grid.
+              // 3 columns: four sections make a 3 + 1 grid.
               for (var r = 0; r < sections.length; r += _kMeetColumns)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,11 +356,6 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
           ),
         ),
         ..._extraBlocks(widget.sheet),
-        const SizedBox(height: BirdySpace.block),
-        QuizEntryRow(
-          subtitle: l10n.forkMeetQuizSubtitle,
-          onTap: widget.onQuizTap,
-        ),
       ],
     );
   }

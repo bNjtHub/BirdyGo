@@ -26,12 +26,14 @@ import '../data/observation_index_service.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/birdy_cross_fade.dart';
+import '../../shared/utils/app_icons.dart'; // FORK: group title icons (J7)
 import '../design/widgets/birdy_sheet.dart';
 import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
 import '../lpo/species_lpo_entry.dart';
 import '../ranking/species_activity_section.dart';
+import '../reliability/reliability_screen.dart' show precisionLine; // FORK: heard line (J7)
 import '../sound_library/sound_library_screen.dart';
 import '../species_photo/species_photo.dart';
 import '../species_sheet/species_sheet.dart';
@@ -337,126 +339,170 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
     final showSounds =
         loadingRecord || (record.clips.isNotEmpty || referenceUrl != null);
     final showActivity = loadingRecord || record.heard;
+    final summary = sheet?.sections[SheetSection.summary];
+    final byEar = sheet?.sections[SheetSection.byEar];
+    final migration = sheet?.sections[SheetSection.migration];
+    final showMeet = sheet != null && meetHasContent(sheet);
+    final showWorldMap = ref.watch(worldMapVisibleProvider(widget.scientificName));
+    // Once the record is in, the group title goes when its blocks are empty.
+    final activityEmpty =
+        !loadingRecord && record.hours.every((h) => h == 0) && record.spots.isEmpty;
 
-    final blocks = <Widget>[
-      // The counters, recordings and activity/map blocks are always in
-      // place from the first frame (their skeletons reserve the same shape
-      // `_load...` will fill in): only the AI sheet/description and the
-      // links block below still wait on their own data to appear, since
-      // whether they will show at all is not knowable ahead of time.
-      KeyedSubtree(
-        key: const ValueKey('fiche-heard'),
-        child: _crossFade(
-          loadingRecord
-              ? KeyedSubtree(
-                key: const ValueKey('fiche-heard-skeleton'),
-                child: HeardBlock.skeleton(context),
-              )
-              : KeyedSubtree(
-                key: const ValueKey('fiche-heard-real'),
-                child: HeardBlock(record: record, heard: heard),
-              ),
-        ),
-      ),
-      // FORK-owned order (J7): the user's own sounds come right after the
-      // counters, before what the geo-model says about the year.
-      if (showSounds)
-        KeyedSubtree(
-          key: const ValueKey('fiche-sounds'),
-          child: _crossFade(
-            loadingRecord
-                ? KeyedSubtree(
-                  key: const ValueKey('fiche-sounds-skeleton'),
-                  child: MySoundsBlock.skeleton(context),
-                )
-                : KeyedSubtree(
-                  key: const ValueKey('fiche-sounds-real'),
-                  child: ValueListenableBuilder<String?>(
-                    valueListenable: _player.playing,
-                    builder:
-                        (context, playing, _) => MySoundsBlock(
-                          clips: record.clips,
-                          favorites: record.favorites,
-                          playing: playing,
-                          lineOf:
-                              (clip) =>
-                                  clipLine(l10n, language, clip, now: now),
-                          onPlay: _play,
-                          onFavorite: _setFavorite,
-                          onReference:
-                              referenceUrl == null
-                                  ? null
-                                  : () =>
-                                      openExternalUrl(context, referenceUrl),
-                          moreCount: record.clipCount,
-                          onMore:
-                              () => _push(
-                                SpeciesClipsScreen(
-                                  scientificName: widget.scientificName,
-                                  fallbackName: _name,
-                                ),
-                              ),
-                        ),
-                  ),
-                ),
+    // FORK-owned order (J7), the order people ask questions: who is it (the
+    // header, with the sheet summary and the heard line), its song, getting to
+    // know it, where and when to see it, my encounters, going further.
+    // The sounds and activity/map blocks are always in place from the first
+    // frame (their skeletons reserve the same shape `_load...` will fill in),
+    // and so is the heard line of the header (a one-line skeleton): only the
+    // AI sheet/description, the geo-model blocks and the links block still
+    // wait on their own data to appear, since whether they will show at all
+    // is not knowable ahead of time.
+    final groups = <List<Widget>>[
+      // 2. Son chant: my sounds, then « À l'oreille ».
+      if (showSounds || byEar != null)
+        [
+          SpeciesGroupTitle(
+            icon: AppIcons.hearing,
+            text: l10n.forkFicheGroupSong,
           ),
-        ),
-      if (_year != null)
-        HereNowCard(
-          year: _year!,
-          sentence: presenceSentence(l10n, language, _year!, now: now),
-          currentMonth: now.month,
-          rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
-        ),
-      // FORK: world map of the seasonal range (J7), hidden without a geo-model.
-      // FORK: no block, and no spacing, when there is no map to draw.
-      if (ref.watch(worldMapVisibleProvider(widget.scientificName)))
-        WorldMapSection(
-          scientificName: widget.scientificName,
-          speciesName: widget.commonName, // FORK: title of the full-screen map
-          nesting: sheet?.nesting,
-        ),
-      if (sheet != null && sheet.sections.isNotEmpty)
-        MeetSpeciesBlock(sheet: sheet)
-      else if (_description != null)
-        DescriptionBlock(
-          text: _description!,
-          source: detail?.descriptionSource,
-        ),
-      if (showActivity)
-        KeyedSubtree(
-          key: const ValueKey('fiche-activity'),
-          child: _crossFade(
-            loadingRecord
-                ? KeyedSubtree(
-                  key: const ValueKey('fiche-activity-skeleton'),
-                  child: ActivityAndMap.skeleton(context),
-                )
-                : KeyedSubtree(
-                  key: const ValueKey('fiche-activity-real'),
-                  child: ActivityAndMap(
-                    hours: record.hours,
-                    map:
-                        record.spots.isEmpty
-                            ? null
-                            : SpeciesMiniMap(
-                              spots: record.spots,
-                              tileLayer: ref.watch(speciesMiniMapTilesProvider),
-                              semanticLabel: l10n.forkFicheMapLabel,
-                              onTap: _openMap,
+          if (showSounds)
+            KeyedSubtree(
+              key: const ValueKey('fiche-sounds'),
+              child: _crossFade(
+                loadingRecord
+                    ? KeyedSubtree(
+                      key: const ValueKey('fiche-sounds-skeleton'),
+                      child: MySoundsBlock.skeleton(context),
+                    )
+                    : KeyedSubtree(
+                      key: const ValueKey('fiche-sounds-real'),
+                      child: ValueListenableBuilder<String?>(
+                        valueListenable: _player.playing,
+                        builder:
+                            (context, playing, _) => MySoundsBlock(
+                              clips: record.clips,
+                              favorites: record.favorites,
+                              playing: playing,
+                              lineOf:
+                                  (clip) =>
+                                      clipLine(l10n, language, clip, now: now),
+                              onPlay: _play,
+                              onFavorite: _setFavorite,
+                              onReference:
+                                  referenceUrl == null
+                                      ? null
+                                      : () => openExternalUrl(
+                                        context,
+                                        referenceUrl,
+                                      ),
+                              moreCount: record.clipCount,
+                              onMore:
+                                  () => _push(
+                                    SpeciesClipsScreen(
+                                      scientificName: widget.scientificName,
+                                      fallbackName: _name,
+                                    ),
+                                  ),
                             ),
-                    onSeeOnMap: record.spots.isEmpty ? null : _openMap,
-                  ),
-                ),
+                      ),
+                    ),
+              ),
+            ),
+          if (byEar != null)
+            SheetTextBlock(
+              key: const ValueKey('fiche-by-ear'),
+              section: SheetSection.byEar,
+              text: byEar,
+            ),
+        ],
+      // 3. Fais sa connaissance (the block carries its own title).
+      if (showMeet)
+        [MeetSpeciesBlock(sheet: sheet)]
+      else if ((sheet == null || sheet.sections.isEmpty) && _description != null)
+        [DescriptionBlock(text: _description!, source: detail?.descriptionSource)],
+      // 4. Où et quand le voir: the year, the world, the migration text.
+      if (_year != null || showWorldMap || migration != null)
+        [
+          SpeciesGroupTitle(
+            icon: AppIcons.travelExplore,
+            text: l10n.forkFicheGroupWhereWhen,
           ),
-        ),
-      if (detail != null)
-        LinksBlock(
-          links: _links(detail),
-          onOpen: (url) => openExternalUrl(context, url),
-        ),
-      if (_lpoSessionId != null) SpeciesLpoEntry(onSend: _sendToLpo),
-      const SpeciesPageFooter(),
+          if (_year != null)
+            HereNowCard(
+              year: _year!,
+              sentence: presenceSentence(l10n, language, _year!, now: now),
+              currentMonth: now.month,
+              rareNote: _unexpectedNow ? l10n.forkRareHereExplanation : null,
+            ),
+          // FORK: world map of the seasonal range (J7), hidden without a geo-model.
+          // FORK: no block, and no spacing, when there is no map to draw.
+          // The nesting line lives in this block only.
+          if (showWorldMap)
+            WorldMapSection(
+              scientificName: widget.scientificName,
+              speciesName: widget.commonName, // FORK: title of the full-screen map
+              nesting: sheet?.nesting,
+            ),
+          if (migration != null)
+            SheetTextBlock(
+              key: const ValueKey('fiche-migration'),
+              section: SheetSection.migration,
+              text: migration,
+            ),
+        ],
+      // 5. Mes rencontres: hours and months, mini map; only when heard.
+      if (showActivity)
+        [
+          if (!activityEmpty)
+            SpeciesGroupTitle(
+              icon: AppIcons.schedule,
+              text: l10n.forkFicheGroupMyEncounters,
+            ),
+          KeyedSubtree(
+            key: const ValueKey('fiche-activity'),
+            child: _crossFade(
+              loadingRecord
+                  ? KeyedSubtree(
+                    key: const ValueKey('fiche-activity-skeleton'),
+                    child: ActivityAndMap.skeleton(context),
+                  )
+                  : KeyedSubtree(
+                    key: const ValueKey('fiche-activity-real'),
+                    child: ActivityAndMap(
+                      hours: record.hours,
+                      map:
+                          record.spots.isEmpty
+                              ? null
+                              : SpeciesMiniMap(
+                                spots: record.spots,
+                                tileLayer: ref.watch(
+                                  speciesMiniMapTilesProvider,
+                                ),
+                                semanticLabel: l10n.forkFicheMapLabel,
+                                onTap: _openMap,
+                              ),
+                      onSeeOnMap: record.spots.isEmpty ? null : _openMap,
+                    ),
+                  ),
+            ),
+          ),
+        ],
+      // 6. Pour aller plus loin: links, LPO entry, footer.
+      [
+        if (detail != null) ...[
+          SpeciesGroupTitle(
+            icon: AppIcons.public,
+            text: l10n.forkFicheGroupGoFurther,
+          ),
+          LinksBlock(
+            links: _links(detail),
+            onOpen: (url) => openExternalUrl(context, url),
+            showLabel: false,
+          ),
+        ],
+        if (_lpoSessionId != null) SpeciesLpoEntry(onSend: _sendToLpo),
+        const SpeciesPageFooter(),
+      ],
     ];
 
     // FORK: species tint for the block titles (J6h fix)
@@ -477,6 +523,15 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               // The sheet closes like the page (J6g-e).
               onBack: () => Navigator.of(context).maybePop(),
               inSheet: inSheet,
+              // FORK: J7 order, the summary and the heard line live here.
+              summary: summary,
+              heardLine: heard,
+              heardLoading: loadingRecord,
+              verified: record?.verified ?? false,
+              precision:
+                  record == null
+                      ? null
+                      : precisionLine(l10n, record.confirmed, record.reviewed),
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
@@ -492,10 +547,20 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final block in blocks) ...[
-                    if (block != blocks.first)
-                      const SizedBox(height: BirdySpace.block),
-                    block,
+                  for (var g = 0; g < groups.length; g++) ...[
+                    // 20 between groups (DESIGN.md), 10 between blocks, and a
+                    // tighter gap under a group title.
+                    if (g > 0) const SizedBox(height: BirdySpace.xl),
+                    for (var i = 0; i < groups[g].length; i++) ...[
+                      if (i > 0)
+                        SizedBox(
+                          height:
+                              groups[g][0] is SpeciesGroupTitle && i == 1
+                                  ? BirdySpace.s
+                                  : BirdySpace.block,
+                        ),
+                      groups[g][i],
+                    ],
                   ],
                 ],
               ),
