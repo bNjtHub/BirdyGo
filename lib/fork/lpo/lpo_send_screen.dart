@@ -20,6 +20,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../features/history/services/share_file_params.dart';
 import '../../features/inference/geo_model.dart';
 import '../../features/live/live_session.dart';
+import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
@@ -168,11 +169,19 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
                         'lpo-${_observations[i].scientificName}-$i',
                       ),
                       observation: _observations[i],
+                      // French on purpose: the report feeds Faune-France, a
+                      // French database. The card header uses displayName.
                       frenchName:
                           taxonomy
                               ?.lookup(_observations[i].scientificName)
                               ?.commonNameForLocale('fr') ??
                           _observations[i].commonName,
+                      displayName:
+                          taxonomy
+                              ?.lookup(_observations[i].scientificName)
+                              ?.commonNameForLocale(
+                                ref.watch(effectiveSpeciesLocaleProvider),
+                              ),
                       image: _imageOf(
                         taxonomy,
                         _observations[i].scientificName,
@@ -209,12 +218,17 @@ class LpoObservationCard extends StatefulWidget {
     super.key,
     required this.observation,
     required this.frenchName,
+    this.displayName,
     required this.alerts,
     this.image,
   });
 
   final LpoObservation observation;
   final String frenchName;
+
+  /// Name in the user's locale, shown in the card header (the report keeps
+  /// [frenchName]); falls back to [frenchName].
+  final String? displayName;
   final Set<LpoAlert> alerts;
 
   /// Species photo from the bundle.
@@ -286,7 +300,7 @@ class _LpoObservationCardState extends State<LpoObservationCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.frenchName,
+                      widget.displayName ?? widget.frenchName,
                       style: BirdyText.species.copyWith(color: c.text1),
                     ),
                     Text(

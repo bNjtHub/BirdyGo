@@ -471,6 +471,7 @@ class _Summary extends ConsumerWidget {
     final lines = gardenSummaryLines(
       l10n,
       count,
+      // French on purpose: the summary feeds the French garden database.
       names: (sci) => taxonomy?.lookup(sci)?.commonNameForLocale('fr') ?? sci,
       now: DateTime.now(),
     );

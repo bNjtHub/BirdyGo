@@ -36,6 +36,7 @@ import '../design/widgets/dashed_border.dart';
 import '../design/widgets/pressable.dart';
 import '../game/fine_ear_quiz_screen.dart';
 import '../garden/garden_count_screen.dart';
+import '../settings/france_features.dart';
 import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../settings/simple_settings_screen.dart';
@@ -97,7 +98,7 @@ class _Entry {
 
 /// Content of the « Plus » sheet. [onOpen] closes the sheet and opens a
 /// screen; [aruScreen] picks the ARU screen (setup, or the running one).
-class MoreSheet extends StatefulWidget {
+class MoreSheet extends ConsumerStatefulWidget {
   const MoreSheet({
     super.key,
     required this.onOpen,
@@ -113,10 +114,10 @@ class MoreSheet extends StatefulWidget {
   final Widget Function() aruScreen;
 
   @override
-  State<MoreSheet> createState() => _MoreSheetState();
+  ConsumerState<MoreSheet> createState() => _MoreSheetState();
 }
 
-class _MoreSheetState extends State<MoreSheet> {
+class _MoreSheetState extends ConsumerState<MoreSheet> {
   bool _advancedOpen = false;
 
   @override
@@ -168,13 +169,15 @@ class _MoreSheetState extends State<MoreSheet> {
       ),
     ];
     final discover = <_Entry>[
-      _Entry(
-        AppIcons.parkRounded,
-        l10n.forkGardenTitle,
-        () => const GardenCountScreen(),
-        subtitle: l10n.forkMoreGardenSub,
-        tone: BirdyBlockTone.sure,
-      ),
+      // France-only (see france_features.dart).
+      if (watchFranceFeatures(context, ref))
+        _Entry(
+          AppIcons.parkRounded,
+          l10n.forkGardenTitle,
+          () => const GardenCountScreen(),
+          subtitle: l10n.forkMoreGardenSub,
+          tone: BirdyBlockTone.sure,
+        ),
       _Entry(
         AppIcons.searchRounded,
         l10n.exploreMode,
