@@ -71,6 +71,10 @@ class _Service extends InatPhotoService {
 
 class _Net {
   int apiCalls = 0;
+  int obsCalls = 0;
+
+  /// `results` of /v2/observations; empty means the taxon photos fill in.
+  List<Map<String, dynamic>> observations = [];
   int downloads = 0;
   bool apiFails = false;
 
@@ -84,6 +88,10 @@ class _Net {
       apiCalls++;
       await gate?.future;
       if (apiFails) return http.Response('', 500);
+      if (request.url.path == '/v2/observations') {
+        obsCalls++;
+        return http.Response(jsonEncode({'results': observations}), 200);
+      }
       return http.Response(
         jsonEncode({
           'results': [_taxon],
@@ -153,7 +161,7 @@ void main() {
     await _pump(tester, allowed: true, net: net);
 
     // 3, 4, 6, 7: no nd, no bundled photo (2), no unlicensed, max 4.
-    expect(net.apiCalls, 1);
+    expect(net.apiCalls, 2); // observations (none), then the taxon
     expect(net.downloads, 4);
     expect(net.agents, {AppConstants.networkUserAgent});
     for (var i = 0; i < 5; i++) {
@@ -236,7 +244,7 @@ void main() {
   testWidgets('API failure: just the bundled photo', (tester) async {
     final net = _Net()..apiFails = true;
     await _pump(tester, allowed: true, net: net);
-    expect(net.apiCalls, 1);
+    expect(net.apiCalls, 2);
     expect(_dots(), findsNothing);
     expect(find.byType(PageView), findsNothing);
   });
@@ -278,6 +286,118 @@ void main() {
     testWidgets('absent when the switch is off', (tester) async {
       await _pump(tester, allowed: false, net: _Net());
       expect(loader, findsNothing);
+    });
+  });
+  group('labels', () {
+    Map<String, dynamic> obs(int id, int? stage, {int? sex}) => {
+      'annotations': [
+        if (stage != null)
+          {
+            'controlled_attribute_id': 1,
+            'controlled_value_id': stage,
+            'vote_score': 1,
+          },
+        if (sex != null)
+          {
+            'controlled_attribute_id': 9,
+            'controlled_value_id': sex,
+            'vote_score': 0,
+          },
+      ],
+      'photos': [_photo(id, 'cc-by')],
+    };
+
+    testWidgets('observations: adults first, labels shown, taxon fills '
+        'one request', (tester) async {
+      final net =
+          _Net()
+            ..observations = [
+              obs(20, 8), // juvenile: last of the labelled
+              obs(21, 2, sex: 11),
+              obs(22, 2, sex: 11),
+              obs(23, 2, sex: 10), // other sex: second
+              obs(24, null), // no stage: left to the taxon
+            ];
+      await _pump(tester, allowed: true, net: net);
+      expect(net.obsCalls, 1);
+      expect(net.apiCalls, 1); // 4 labelled picks: no taxon request
+      // Order: 21, 23 (other sex), 22, then the juvenile 20.
+      expect(find.byKey(const ValueKey('photo-dot-5')), findsNothing);
+      expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
+      // The first page is the bundled photo: no label.
+      expect(find.byKey(const ValueKey('photo-label')), findsNothing);
+
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text('Adulte · mâle'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Photo 2 sur 5, adulte · mâle'),
+        findsWidgets,
+      );
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text('Adulte · femelle'), findsOneWidget);
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text('Adulte · mâle'), findsOneWidget);
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text('Juvénile'), findsOneWidget);
+
+      // The viewer shows the same label.
+      await tester.tapAt(tester.getCenter(find.byType(PageView)));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(SpeciesPhotoViewer),
+          matching: find.text('Juvénile'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('observations request fails: taxon photos, no label', (
+      tester,
+    ) async {
+      final net = _Net()..observations = [obs(21, 2)];
+      // Fail only the observations request.
+      final failing = MockClient((request) async {
+        if (request.url.path == '/v2/observations') {
+          net.obsCalls++;
+          return http.Response('', 500);
+        }
+        return net.client
+            .get(request.url, headers: request.headers)
+            .then((r) => r);
+      });
+      SharedPreferences.setMockInitialValues({kOnlinePhotosPref: true});
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            inatPhotoServiceProvider.overrideWithValue(_Service(failing)),
+          ],
+          child: const MaterialApp(
+            locale: Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 300,
+                height: 200,
+                child: SpeciesPhoto(species: _robin),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+      expect(net.obsCalls, 1);
+      expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
+      expect(find.byKey(const ValueKey('photo-label')), findsNothing);
     });
   });
 }

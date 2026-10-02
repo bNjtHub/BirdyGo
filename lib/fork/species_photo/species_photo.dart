@@ -12,7 +12,9 @@ import '../../shared/models/taxonomy_species.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
 import 'photo_credit.dart';
+import 'photo_label.dart';
 import 'inat_photo_service.dart';
 import 'photo_credit_sheet.dart';
 import 'species_photo_viewer.dart';
@@ -110,7 +112,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
           bundledCredit,
         ),
         for (final photo in extras)
-          ViewerPhoto(MemoryImage(photo.bytes), photo.credit),
+          ViewerPhoto(MemoryImage(photo.bytes), photo.credit, photo.label),
       ];
       final closedOn = await showSpeciesPhotoViewer(
         context,
@@ -198,7 +200,12 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder:
                   (context, i) => Semantics(
-                    label: l10n.forkPhotoPosition(i + 1, total),
+                    label: PhotoLabel.position(
+                      l10n,
+                      i + 1,
+                      total,
+                      i == 0 ? null : extras[i - 1].label,
+                    ),
                     image: true,
                     child: Stack(
                       fit: StackFit.expand,
@@ -224,6 +231,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                                     child: InkWell(onTap: openViewer),
                                   ),
                                 ),
+                                _LabelChip(label: extras[i - 1].label),
                               ],
                     ),
                   ),
@@ -233,6 +241,47 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
           ],
         );
       },
+    );
+  }
+}
+
+/// What the photo shows (life stage, sex), bottom left on a small scrim.
+/// Nothing when unknown. Read through the page's semantics label instead.
+class _LabelChip extends StatelessWidget {
+  const _LabelChip({required this.label});
+
+  final PhotoLabel? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = PhotoLabel.text(AppLocalizations.of(context)!, label);
+    if (text == null) return const SizedBox.shrink();
+    return Positioned(
+      left: BirdySpace.xs,
+      bottom: BirdySpace.xs,
+      child: ExcludeSemantics(
+        child: IgnorePointer(
+          child: DecoratedBox(
+            key: const ValueKey('photo-label'),
+            decoration: BoxDecoration(
+              color: BirdyBrand.black.withValues(
+                alpha: BirdyAlpha.photoButtonScrim,
+              ),
+              borderRadius: BorderRadius.circular(BirdyRadii.hero),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BirdySpace.s,
+                vertical: BirdySpace.xs,
+              ),
+              child: Text(
+                text,
+                style: BirdyText.labelCompact.copyWith(color: BirdyBrand.white),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

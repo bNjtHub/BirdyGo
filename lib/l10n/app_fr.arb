@@ -2033,6 +2033,12 @@
   "forkWorldZoomValue": "Zoom {factor}",
   "forkFicheNotInBookTitle": "Pas encore dans ton carnet",
   "forkFicheListenToFind": "Écouter pour le trouver",
+  "forkPhotoAdult": "Adulte",
+  "forkPhotoJuvenile": "Juvénile",
+  "forkPhotoEgg": "Œuf",
+  "forkPhotoFemale": "Femelle",
+  "forkPhotoMale": "Mâle",
+  "forkPhotoWithLabel": "{position}, {label}",
   "forkPhotoLoading": "Chargement des photos",
   "forkPhotoPosition": "Photo {current} sur {total}"
 }

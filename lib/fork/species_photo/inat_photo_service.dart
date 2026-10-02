@@ -15,6 +15,7 @@ import 'package:http/http.dart' as http;
 
 import '../../core/constants/app_constants.dart';
 import 'photo_credit.dart';
+import 'photo_label.dart';
 import 'species_photo_config.dart';
 
 /// A photo on disk and whom to credit for it.
@@ -27,10 +28,13 @@ class OnlinePhoto {
 
 /// The photo of an iNaturalist taxon chosen for the app.
 class InatPhotoChoice {
-  const InatPhotoChoice(this.url, this.credit);
+  const InatPhotoChoice(this.url, this.credit, [this.label]);
 
   final String url;
   final PhotoCredit credit;
+
+  /// What the photo shows, when iNaturalist annotations say so.
+  final PhotoLabel? label;
 
   /// First open-license landscape photo of [taxon] (a `/v1/taxa` result),
   /// in the order curated on iNaturalist, default photo first.
@@ -77,7 +81,63 @@ class InatPhotoChoice {
     return out;
   }
 
-  static InatPhotoChoice? _choiceOf(Map<String, dynamic> photo, String size) {
+  /// Up to [max] photos from `/v2/observations` [results] (best voted first),
+  /// each labelled by its annotations. Adults come first, the first adult
+  /// then one of the other sex for variety, and one juvenile last; photos
+  /// of unknown life stage are left to the taxon fallback. One photo per
+  /// observation, same licence and landscape rule as [pickAll].
+  static List<InatPhotoChoice> pickFromObservations(
+    List<Map<String, dynamic>> results, {
+    int max = kCarouselExtraPhotos,
+    Set<String> exclude = const {},
+    String size = kOnlinePhotoSize,
+  }) {
+    final seen = {...exclude};
+    final adults = <InatPhotoChoice>[];
+    InatPhotoChoice? juvenile;
+    for (final obs in results) {
+      final label = PhotoLabel.fromAnnotations(obs['annotations']);
+      final stage = label?.stage;
+      if (stage != PhotoLifeStage.adult && stage != PhotoLifeStage.juvenile) {
+        continue;
+      }
+      if (stage == PhotoLifeStage.juvenile && juvenile != null) continue;
+      final photos = obs['photos'];
+      if (photos is! List) continue;
+      final photo = photos.whereType<Map<String, dynamic>>().firstOrNull;
+      if (photo == null) continue;
+      final choice = _choiceOf(photo, size, label);
+      if (choice == null) continue;
+      if (!seen.add(choice.credit.pageUrl ?? choice.url)) continue;
+      if (stage == PhotoLifeStage.juvenile) {
+        juvenile = choice;
+      } else {
+        adults.add(choice);
+      }
+    }
+    final adultRoom = juvenile == null ? max : max - 1;
+    final out = <InatPhotoChoice>[];
+    if (adults.isNotEmpty && adultRoom > 0) {
+      final first = adults.first;
+      final other = adults.skip(1).where(
+        (a) => a.label?.sex != null && a.label!.sex != first.label?.sex,
+      );
+      out.add(first);
+      if (other.isNotEmpty && adultRoom > 1) out.add(other.first);
+      for (final a in adults.skip(1)) {
+        if (out.length >= adultRoom) break;
+        if (!out.contains(a)) out.add(a);
+      }
+    }
+    if (juvenile != null && max > 0) out.add(juvenile);
+    return out;
+  }
+
+  static InatPhotoChoice? _choiceOf(
+    Map<String, dynamic> photo,
+    String size, [
+    PhotoLabel? label,
+  ]) {
     final license = (photo['license_code'] as String? ?? '').toLowerCase();
     if (!kOpenPhotoLicenses.contains(license)) return null;
     final dims = photo['original_dimensions'];
@@ -95,16 +155,18 @@ class InatPhotoChoice {
         source: 'iNaturalist',
         pageUrl: photo['id'] == null ? null : '$kInatPhotoPage${photo['id']}',
       ),
+      label,
     );
   }
 }
 
 /// A carousel photo held in memory for the app run, with its credit.
 class GalleryPhoto {
-  const GalleryPhoto(this.bytes, this.credit);
+  const GalleryPhoto(this.bytes, this.credit, [this.label]);
 
   final Uint8List bytes;
   final PhotoCredit credit;
+  final PhotoLabel? label;
 }
 
 final _sizedUrl = RegExp(
@@ -162,6 +224,7 @@ class InatPhotoService {
 
   // Carousel, kept for the app run only: one API request per species.
   final Map<int, Future<Map<String, dynamic>?>> _taxa = {};
+  final Map<int, Future<List<Map<String, dynamic>>>> _observations = {};
   final Map<String, GalleryPhoto> _gallery = {};
 
   static const _headers = {
@@ -188,14 +251,37 @@ class InatPhotoService {
     int inatId, {
     Set<String> exclude = const {},
   }) async* {
-    final List<InatPhotoChoice> choices;
+    // Observations first (photos labelled adult, juvenile, sex), then the
+    // taxon photos (unlabelled) only if they leave room: two requests at most.
+    final choices = <InatPhotoChoice>[];
     try {
-      final taxon = await (_taxa[inatId] ??= _fetchTaxon(inatId));
-      if (taxon == null) return;
-      choices = InatPhotoChoice.pickAll(taxon, exclude: exclude);
+      final results = await (_observations[inatId] ??= _fetchObservations(
+        inatId,
+      ));
+      choices.addAll(
+        InatPhotoChoice.pickFromObservations(results, exclude: exclude),
+      );
     } on Object {
-      _taxa.remove(inatId); // a failure is not remembered
-      return;
+      _observations.remove(inatId); // a failure is not remembered
+    }
+    if (choices.length < kCarouselExtraPhotos) {
+      try {
+        final taxon = await (_taxa[inatId] ??= _fetchTaxon(inatId));
+        if (taxon != null) {
+          choices.addAll(
+            InatPhotoChoice.pickAll(
+              taxon,
+              max: kCarouselExtraPhotos - choices.length,
+              exclude: {
+                ...exclude,
+                for (final c in choices) c.credit.pageUrl ?? c.url,
+              },
+            ),
+          );
+        }
+      } on Object {
+        _taxa.remove(inatId); // a failure is not remembered
+      }
     }
     final loaded = <GalleryPhoto>[];
     for (final choice in choices) {
@@ -207,6 +293,28 @@ class InatPhotoService {
         // This photo is skipped, the next ones may work.
       }
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchObservations(int inatId) async {
+    final uri = Uri.parse('$kInatApiBaseV2/observations').replace(
+      queryParameters: {
+        'taxon_id': '$inatId',
+        'quality_grade': 'research',
+        'photos': 'true',
+        'photo_license': kOpenPhotoLicenses.where((l) => l != 'pd').join(','),
+        'order_by': 'votes',
+        'per_page': '$kObservationsPerPage',
+        'fields': kObservationFields,
+      },
+    );
+    final response = await _client
+        .get(uri, headers: _headers)
+        .timeout(kPhotoApiTimeout);
+    if (response.statusCode != 200) {
+      throw http.ClientException('HTTP ${response.statusCode}');
+    }
+    final results = (jsonDecode(response.body) as Map)['results'] as List?;
+    return (results ?? const []).whereType<Map<String, dynamic>>().toList();
   }
 
   Future<Map<String, dynamic>?> _fetchTaxon(int inatId) async {
@@ -234,7 +342,7 @@ class InatPhotoService {
         (type != null && !type.startsWith('image/'))) {
       throw http.ClientException('bad photo');
     }
-    return GalleryPhoto(response.bodyBytes, choice.credit);
+    return GalleryPhoto(response.bodyBytes, choice.credit, choice.label);
   }
 
   Future<OnlinePhoto?> _load(int inatId) async {
