@@ -28,18 +28,18 @@ void main() {
   });
 
   test('the lift is up mid-song and holds through the syllables', () {
-    expect(lift(BirdyMotion.logoLiftIn), 1);
-    expect(lift(BirdyMotion.logoLiftIn + BirdyMotion.logoLiftHold), 1);
-    expect(lift(BirdyMotion.logoLiftIn + 100), 1);
+    expect(lift(BirdyMotion.logoLeanIn), 1);
+    expect(lift(BirdyMotion.logoLeanIn + BirdyMotion.logoLeanHold), 1);
+    expect(lift(BirdyMotion.logoLeanIn + 100), 1);
     expect(lift(50), inInclusiveRange(0.1, 0.9));
   });
 
   test('the lift is back to zero after the song and never jumps', () {
     expect(
       lift(
-        BirdyMotion.logoLiftIn +
-            BirdyMotion.logoLiftHold +
-            BirdyMotion.logoLiftOut,
+        BirdyMotion.logoLeanIn +
+            BirdyMotion.logoLeanHold +
+            BirdyMotion.logoLeanOut,
       ),
       0,
     );
