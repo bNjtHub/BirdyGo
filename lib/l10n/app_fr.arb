@@ -2074,5 +2074,7 @@
   "setupHelpAlertSound": "Jouer un son pour les alertes d’espèces de Survey.",
   "setupHelpAlertVibrate": "Vibrer pour les alertes d’espèces de Survey.",
   "setupHelpAruSessionGrouping": "Enregistrez chaque cycle dans sa propre Session ou regroupez les cycles dans une seule Session. Les Sessions regroupées utilisent des clips au lieu de l’audio complet.",
-  "setupHelpRecordingMode": "Complet enregistre tout l’audio. Extraits enregistre de courts clips autour de chaque détection. Désactivé analyse sans enregistrer d’audio."
+  "setupHelpRecordingMode": "Complet enregistre tout l’audio. Extraits enregistre de courts clips autour de chaque détection. Désactivé analyse sans enregistrer d’audio.",
+  "forkFirstNameSaved": "Prénom enregistré",
+  "forkSettingSaved": "{setting} : {value}"
 }

@@ -6598,5 +6598,9 @@
   "setupHelpAruSessionGrouping": "Save each cycle as its own Session, or combine cycles into one Session. Combined Sessions use clips instead of full audio.",
   "@setupHelpAruSessionGrouping": {"description": "Explains ARU cycle Session grouping and audio behavior"},
   "setupHelpRecordingMode": "Full saves the whole recording. Clips saves short clips around each detection. Off analyzes without saving audio.",
-  "@setupHelpRecordingMode": {"description": "Help text for the Full/Clips/Off recording choice in setup wizards"}
+  "@setupHelpRecordingMode": {"description": "Help text for the Full/Clips/Off recording choice in setup wizards"},
+  "forkFirstNameSaved": "Name saved",
+  "@forkFirstNameSaved": {"description": "BirdyGo fork: toast after the first name is committed in Settings."},
+  "forkSettingSaved": "{setting}: {value}",
+  "@forkSettingSaved": {"description": "BirdyGo fork: toast after a setting is chosen in a picker.", "placeholders": {"setting": {"type": "String"}, "value": {"type": "String"}}}
 }
