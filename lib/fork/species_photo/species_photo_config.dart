@@ -56,3 +56,22 @@ const int kCarouselExtraPhotos = 4;
 /// Carousel page dots (DESIGN.md Photos).
 const double kCarouselDotSize = 6;
 const double kCarouselDotGap = 6;
+
+/// Height of the top scrim of the header photo below the status bar.
+const double kPhotoTopScrimExtra = 56;
+
+/// Full-screen photo viewer: pinch limit, double-tap zoom, drag-to-close.
+const double kViewerMaxScale = 4;
+const double kViewerDoubleTapScale = 2;
+
+/// Below this scale the photo counts as not zoomed (pages swipe, drag closes).
+const double kViewerZoomedAbove = 1.02;
+const Duration kViewerZoomDuration = Duration(milliseconds: 220);
+
+/// A drag down past this fraction of the screen height, or this fling
+/// speed (dp/s), closes the viewer.
+const double kViewerDismissFraction = 0.15;
+const double kViewerDismissVelocity = 700;
+
+/// Photo shrinks at most to this scale while dragged away.
+const double kViewerDismissMinScale = 0.85;

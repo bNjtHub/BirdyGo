@@ -15,7 +15,8 @@ import '../design/birdy_tokens.dart';
 import 'photo_credit.dart';
 import 'inat_photo_service.dart';
 import 'photo_credit_sheet.dart';
-import 'species_photo_config.dart';
+import 'species_photo_viewer.dart';
+import 'species_photo_page_dots.dart';
 import 'species_photo_providers.dart';
 
 const _placeholder = 'assets/images/dummy_species.png';
@@ -39,6 +40,20 @@ class SpeciesPhoto extends ConsumerStatefulWidget {
 
 class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
   int _page = 0;
+  final _pages = PageController();
+
+  /// Tag of the photo on screen, shared with the full-screen viewer.
+  final Object _heroTag = Object();
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  /// Only the page on screen flies to the viewer (one hero per tag).
+  Widget _heroIf(bool on, Widget child) =>
+      on ? Hero(tag: _heroTag, child: child) : child;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +95,31 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
       page == 0 ? bundledCredit : extras[page - 1].credit,
     );
 
+    // A tap on the photo opens it full screen, on the page tapped.
+    Future<void> openViewer() async {
+      final photos = [
+        ViewerPhoto(
+          // The bundled photo at full resolution, or the larger online one.
+          online != null
+              ? FileImage(online.file)
+              : AssetImage(species?.assetImagePath ?? _placeholder),
+          bundledCredit,
+        ),
+        for (final photo in extras)
+          ViewerPhoto(MemoryImage(photo.bytes), photo.credit),
+      ];
+      final closedOn = await showSpeciesPhotoViewer(
+        context,
+        photos: photos,
+        initialPage: page,
+        heroTag: _heroTag,
+      );
+      // The carousel follows the page the viewer closed on.
+      if (closedOn != null && closedOn != page && _pages.hasClients) {
+        _pages.jumpToPage(closedOn);
+      }
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -88,25 +128,34 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                 ? (width * MediaQuery.devicePixelRatioOf(context)).round()
                 : null;
         final bundledLayers = <Widget>[
-          Image.asset(
-            species?.assetImagePath ?? _placeholder,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-            // Decoded at display size, never upscaled.
-            cacheWidth: cacheWidth,
-            errorBuilder:
-                (_, _, _) => Image.asset(_placeholder, fit: BoxFit.contain),
-          ),
-          if (online != null)
-            _FadeInPhoto(
-              key: ValueKey(online.file.path),
-              file: online.file,
-              cacheWidth: cacheWidth,
+          _heroIf(
+            page == 0,
+            Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  species?.assetImagePath ?? _placeholder,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  // Decoded at display size, never upscaled.
+                  cacheWidth: cacheWidth,
+                  errorBuilder:
+                      (_, _, _) =>
+                          Image.asset(_placeholder, fit: BoxFit.contain),
+                ),
+                if (online != null)
+                  _FadeInPhoto(
+                    key: ValueKey(online.file.path),
+                    file: online.file,
+                    cacheWidth: cacheWidth,
+                  ),
+              ],
             ),
+          ),
           ExcludeSemantics(
             child: Material(
               type: MaterialType.transparency,
-              child: InkWell(onTap: showCredit),
+              child: InkWell(onTap: openViewer),
             ),
           ),
         ];
@@ -136,6 +185,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
           fit: StackFit.expand,
           children: [
             PageView.builder(
+              controller: _pages,
               itemCount: total,
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder:
@@ -148,19 +198,22 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                           i == 0
                               ? bundledLayers
                               : [
-                                Image.memory(
-                                  extras[i - 1].bytes,
-                                  fit: BoxFit.cover,
-                                  gaplessPlayback: true,
-                                  cacheWidth: cacheWidth,
-                                  excludeFromSemantics: true,
-                                  errorBuilder:
-                                      (_, _, _) => const SizedBox.shrink(),
+                                _heroIf(
+                                  i == page,
+                                  Image.memory(
+                                    extras[i - 1].bytes,
+                                    fit: BoxFit.cover,
+                                    gaplessPlayback: true,
+                                    cacheWidth: cacheWidth,
+                                    excludeFromSemantics: true,
+                                    errorBuilder:
+                                        (_, _, _) => const SizedBox.shrink(),
+                                  ),
                                 ),
                                 ExcludeSemantics(
                                   child: Material(
                                     type: MaterialType.transparency,
-                                    child: InkWell(onTap: showCredit),
+                                    child: InkWell(onTap: openViewer),
                                   ),
                                 ),
                               ],
@@ -176,7 +229,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
   }
 }
 
-/// Page dots on a small scrim, so they read on any photo.
+/// The carousel dots, at the bottom of the photo.
 class _PageDots extends StatelessWidget {
   const _PageDots({required this.count, required this.current});
 
@@ -189,47 +242,7 @@ class _PageDots extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: BirdySpace.m,
-      child: ExcludeSemantics(
-        child: IgnorePointer(
-          child: Center(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: BirdyBrand.black.withValues(
-                  alpha: BirdyAlpha.photoButtonScrim,
-                ),
-                borderRadius: BorderRadius.circular(BirdyRadii.hero),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: BirdySpace.s,
-                  vertical: BirdySpace.xs + BirdySpace.xxs,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var i = 0; i < count; i++)
-                      Container(
-                        key: ValueKey('photo-dot-$i'),
-                        width: kCarouselDotSize,
-                        height: kCarouselDotSize,
-                        margin: EdgeInsets.only(
-                          left: i == 0 ? 0 : kCarouselDotGap,
-                        ),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              i == current
-                                  ? BirdyBrand.white
-                                  : BirdyBrand.white.withValues(alpha: 0.5),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: PhotoPageDots(count: count, current: current),
     );
   }
 }
