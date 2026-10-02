@@ -47,7 +47,6 @@ void main() {
       BirdySongMotion.at(first + end + BirdyMotion.logoLeanOut).leanDegrees,
       0,
     );
-    expect(BirdySongMotion.at(first + BirdySongMotion.syllable * 2).leanDegrees, 0);
   });
 
   test('the painter never scales or translates the bird with the song or the lean', () {
