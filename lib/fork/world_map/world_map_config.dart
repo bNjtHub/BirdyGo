@@ -54,6 +54,10 @@ abstract final class WorldMapConfig {
   /// ignored when framing (a vagrant record must not zoom the map out).
   static const double frameIsolatedDeg = 10;
 
+  /// A frame at least this share of the world's width shows the whole width
+  /// (a sliver of a second copy is not worth it).
+  static const double frameWorldShare = 0.85;
+
   /// The framed area is never smaller than this (degrees, per side).
   static const double frameMinSpanDeg = 20;
 

@@ -43,35 +43,30 @@ MapFrame frameOf(WorldRegions regions, Map<String, RangeClass> classes) {
       if (regions.byId(id) case final r? when r.rings.isNotEmpty) r,
   ];
   if (used.isEmpty) return kWorldFrame;
-  var kept = used;
+  // One box list per region: its rings, small islands left out.
+  var boxes = [for (final r in used) _partsOf(r)];
   if (used.length >= 3) {
     final limit = WorldMapConfig.frameIsolatedDeg;
-    kept = [
-      for (final a in used)
-        if (used.any(
-          (b) =>
-              !identical(a, b) &&
-              math.sqrt(
-                    math.pow(a.centroid.latitude - b.centroid.latitude, 2) +
-                        math.pow(
-                          _lonDistance(
-                            a.centroid.longitude,
-                            b.centroid.longitude,
-                          ),
-                          2,
-                        ),
-                  ) <=
-                  limit,
-        ))
-          a,
+    final main = [for (final p in boxes) p.first]; // the largest ring
+    final near = [
+      for (var i = 0; i < main.length; i++)
+        if (() {
+          for (var j = 0; j < main.length; j++) {
+            if (i != j && _boxGap(main[i], main[j]) <= limit) return true;
+          }
+          return false;
+        }())
+          boxes[i],
     ];
-    if (kept.isEmpty) kept = used;
+    if (near.isNotEmpty) boxes = near;
   }
-  var (lon0, lon1) = _longitudeWindow(kept);
+  var (lon0, lon1) = _longitudeWindow([for (final p in boxes) ...p]);
   var lat0 = double.infinity, lat1 = -double.infinity;
-  for (final r in kept) {
-    lat0 = math.min(lat0, r.bounds.top);
-    lat1 = math.max(lat1, r.bounds.bottom);
+  for (final p in boxes) {
+    for (final b in p) {
+      lat0 = math.min(lat0, b.$2);
+      lat1 = math.max(lat1, b.$4);
+    }
   }
   const m = WorldMapConfig.frameMarginDeg;
   lon0 -= m;
@@ -118,8 +113,8 @@ MapFrame frameOf(WorldRegions regions, Map<String, RangeClass> classes) {
   }
 
   // A window that crosses the antimeridian (lon1 > 180) may use the second
-  // copy of the world; one as wide as the world is the plain world.
-  if (lon1 - lon0 >= WorldMapConfig.lonPeriod) {
+  // copy of the world; one nearly as wide as the world is the plain world.
+  if (lon1 - lon0 >= WorldMapConfig.lonPeriod * WorldMapConfig.frameWorldShare) {
     lon0 = WorldMapConfig.lonMin;
     lon1 = WorldMapConfig.lonMax;
   }
@@ -135,31 +130,61 @@ MapFrame frameOf(WorldRegions regions, Map<String, RangeClass> classes) {
   return (lon0: lon0, lat0: lat0, lon1: lon1, lat1: lat1);
 }
 
-/// Distance in degrees of longitude, the short way round the globe.
-double _lonDistance(double a, double b) {
-  final d = (a - b).abs() % WorldMapConfig.lonPeriod;
-  return d > WorldMapConfig.lonPeriod / 2 ? WorldMapConfig.lonPeriod - d : d;
+/// A box in degrees: west, south, east, north.
+typedef _Box = (double, double, double, double);
+
+/// Rings smaller than this (square degrees) do not count for the frame: a
+/// far island of a region must not stretch the map (largest ring always kept).
+const double _minPartArea = 1;
+
+/// Boxes of the rings of [r] worth framing, the largest first. One box per
+/// ring: a region with parts on both sides of 180 (Chukotka, the Aleutians,
+/// Fiji) has a bounding box as wide as the world.
+List<_Box> _partsOf(MapRegion r) {
+  final all = <_Box>[];
+  for (final ring in r.rings) {
+    var w = double.infinity, e = -double.infinity;
+    var s = double.infinity, n = -double.infinity;
+    for (var i = 0; i + 1 < ring.length; i += 2) {
+      final x = ring[i], y = ring[i + 1];
+      if (x < w) w = x;
+      if (x > e) e = x;
+      if (y < s) s = y;
+      if (y > n) n = y;
+    }
+    if (w <= e) all.add((w, s, e, n));
+  }
+  double area(_Box b) => (b.$3 - b.$1) * (b.$4 - b.$2);
+  all.sort((a, b) => area(b).compareTo(area(a)));
+  return [
+    for (var i = 0; i < all.length; i++)
+      if (i == 0 || area(all[i]) >= _minPartArea) all[i],
+  ];
 }
 
-/// Longitude window of [regions]: the shortest arc of the globe holding all
-/// their boxes. Usually the plain west-to-east box; when the regions sit on
-/// both sides of the antimeridian (Chukotka and Alaska, Fiji and Samoa) the
-/// window is Pacific-centred and [lon1] goes past 180 (lon0 < 180 < lon1).
-(double, double) _longitudeWindow(List<MapRegion> regions) {
-  // One box per ring: a region with parts on both sides of 180 (Chukotka,
-  // Fiji) has a bounding box as wide as the world.
-  final spans = <(double, double)>[];
-  for (final r in regions) {
-    for (final ring in r.rings) {
-      var lo = double.infinity, hi = -double.infinity;
-      for (var i = 0; i < ring.length; i += 2) {
-        final x = ring[i];
-        if (x < lo) lo = x;
-        if (x > hi) hi = x;
-      }
-      if (lo <= hi) spans.add((lo, hi));
+/// Distance in degrees between two boxes (0 when they touch), longitude the
+/// short way round the globe.
+double _boxGap(_Box a, _Box b) {
+  double axis(double a0, double a1, double b0, double b1, double period) {
+    var gap = math.max(0.0, math.max(a0 - b1, b0 - a1));
+    if (period > 0) {
+      gap = math.min(gap, math.max(0.0, math.max(a0 - b1 - period, b0 - a1 + period)));
+      gap = math.min(gap, math.max(0.0, math.max(a0 - b1 + period, b0 - a1 - period)));
     }
+    return gap;
   }
+
+  final dx = axis(a.$1, a.$3, b.$1, b.$3, WorldMapConfig.lonPeriod);
+  final dy = axis(a.$2, a.$4, b.$2, b.$4, 0);
+  return math.sqrt(dx * dx + dy * dy);
+}
+
+/// Longitude window of [boxes]: the shortest arc of the globe holding all
+/// of them. Usually the plain west-to-east box; when they sit on both sides
+/// of the antimeridian (Chukotka and Alaska, Fiji and Samoa) the window is
+/// Pacific-centred and lon1 goes past 180 (lon0 < 180 < lon1).
+(double, double) _longitudeWindow(List<_Box> boxes) {
+  final spans = [for (final b in boxes) (b.$1, b.$3)];
   spans.sort((a, b) => a.$1.compareTo(b.$1));
   // Union of the sorted boxes, then the widest gap between two of them,
   // the wrap-around gap (east end back to west start + 360) included.

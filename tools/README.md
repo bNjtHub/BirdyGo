@@ -77,8 +77,24 @@ same genus pair). It prints the match rate and the unmatched species, and
 writes `unmatched.json` / `matches.json` in the cache folder. After a rebuild,
 update `WorldMapConfig.gbifDownloadDoi` and `gbifDownloadDate`.
 
-Species of the download that are outside the map area (Europe, Africa, West
-Asia) get no entry: the app falls back to the geo-model for them.
+Species of the download that no region of the map classifies get no entry: the
+app falls back to the geo-model for them. `--fallback-regions <old regions
+asset>` renumbers the regions of the `--fallback-ranges` file when the region
+order changed.
+
+### World regions (whole world)
+
+`tools/fork_world_regions.py` builds `regions_admin1.bin.gz` (4 594 Natural Earth
+admin-1 regions of the whole world without Antarctica, simplified at 0.04
+degrees, about 570 KB), the country borders and the GADM join table
+`gadm1_to_regions.json.gz`. Needs shapely 2.1+ and numpy in a venv
+(`python -m venv .venv-world`, not committed). NE already splits polygons at
+the antimeridian; wider rings are split again as a safeguard. The app draws a
+Pacific-centred frame (longitude past 180) with a second copy of the world.
+The GBIF join (`--rebuild-mapping`) only asks for new regions, never more
+than 1 request per second, with the User-Agent `BirdyGo-regions/1.0`. The
+0.1 % minimum rate (`MIN_RATE` in `fork_world_ranges.py`) was lowered from
+0.3 % for the world: rare birds of well-watched countries fell below it.
 
 Every GBIF answer of the API route is cached in `tools/fork_world_ranges_cache/` (git-ignored),
 so a stopped run resumes where it stopped. GBIF answers in 5 to 10 s per

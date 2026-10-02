@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Builds the assets of the species page world map by administrative regions
-(lib/fork/world_map/, J7): Natural Earth admin-1 polygons of the map area, the
+(lib/fork/world_map/, J7): Natural Earth admin-1 polygons of the whole world (no Antarctica), the
 country borders, and the join table GADM level-1 id -> Natural Earth region ids.
 
 Needs shapely 2.1+ and numpy (not in the app's requirements). Set up once:
@@ -14,12 +14,15 @@ Usage (from the repository root):
 
 Inputs (Natural Earth, public domain; downloaded once into --cache):
   ne_10m_admin_1_states_provinces.geojson
-The join table tools/fork_world_regions_data/ne_to_gadm.json (committed) tells, for every
-Natural Earth region of the area, which GADM level-1 regions it falls in. It
-was made by asking GBIF `geocode/reverse` for a few points of each region.
-`--rebuild-mapping` redoes it (about 5 000 calls, ~47 minutes; GBIF asked 4
-times per second); the region order of the Natural Earth file must not change
-between the table and the assets, so rebuild the table when the file does.
+The join table tools/fork_world_regions_data/ne_to_gadm.json (committed), keyed by
+adm1_code, tells for every Natural Earth region which GADM level-1 regions it
+falls in. It was made by asking GBIF `geocode/reverse` for 1 to 3 points of
+each region. `--rebuild-mapping` asks only for the regions missing from the
+table (sequential, 1 request per second, backoff on 429/5xx, saved every 50
+regions: stop and rerun to resume; about 1 hour for 1 600 regions).
+`--migrate-index-mapping OLD_ASSET` converts an older table keyed by region
+index. The table does not depend on the region order, the ranges file does:
+rebuild it (tools/fork_world_ranges.py) after any change of the regions.
 
 Outputs (assets/fork/world/):
   regions_admin1.bin.gz   gzip of: "BGR1", uint16 regionCount, per region:

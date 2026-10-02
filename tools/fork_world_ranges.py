@@ -99,7 +99,10 @@ SEASON_MONTHS = {
 }
 MIN_EFFORT = 200
 MIN_SPECIES_RECORDS = 5
-MIN_RATE = 0.003
+# 0.3 % kept out the rare and secretive birds of the well-watched countries
+# (a saw-whet owl is far below 0.3 % of the records of a US state): 0.1 % for
+# the whole world, the relative floor below still drops the scattered records.
+MIN_RATE = 0.001
 RELATIVE_RATE = 0.1
 
 RESIDENT, BREEDING, WINTERING, PASSAGE = 0, 1, 2, 3

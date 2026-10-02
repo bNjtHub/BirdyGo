@@ -46,6 +46,24 @@ void main() {
     expect(scene.byClass[RangeClass.resident], isNotNull);
   });
 
+  test('a Pacific-centred frame draws the world twice, without streaks', () {
+    final regions = realRegions();
+    final classes = {
+      for (final p in [(172.0, 66.0), (-150.0, 64.0), (160.0, 56.0)])
+        regions.regionAt(p.$1, p.$2)!.id: RangeClass.resident,
+    };
+    final frame = frameOf(regions, classes);
+    expect(frame.lon1, greaterThan(180));
+    const size = Size(360, 240);
+    final scene = WorldMapScene(regions, classes, frame, size);
+    // Chukotka on the west side, Alaska on the east one (lon + 360).
+    final west = scene.projection.project(66, 172);
+    final east = scene.projection.project(64, -150 + 360);
+    expect(scene.byClass[RangeClass.resident]!.contains(west), isTrue);
+    expect(scene.byClass[RangeClass.resident]!.contains(east), isTrue);
+    expect(scene.land.contains(east), isTrue);
+  });
+
   testWidgets('the painter draws the static layer from a cached image', (
     tester,
   ) async {
