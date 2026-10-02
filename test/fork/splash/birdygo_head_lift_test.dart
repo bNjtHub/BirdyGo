@@ -29,19 +29,26 @@ void main() {
 
   test('the lift is up mid-song and holds through the syllables', () {
     expect(lift(BirdyMotion.logoLiftIn), 1);
-    expect(lift(600), 1);
-    expect(lift(1000), 1);
+    expect(lift(BirdyMotion.logoLiftIn + BirdyMotion.logoLiftHold), 1);
+    expect(lift(BirdyMotion.logoLiftIn + 100), 1);
     expect(lift(50), inInclusiveRange(0.1, 0.9));
   });
 
   test('the lift is back to zero after the song and never jumps', () {
-    expect(lift(1160 + BirdyMotion.logoLiftOut), 0);
+    expect(
+      lift(
+        BirdyMotion.logoLiftIn +
+            BirdyMotion.logoLiftHold +
+            BirdyMotion.logoLiftOut,
+      ),
+      0,
+    );
     var previous = lift(0);
-    for (var p = 1.0; p < 2000; p++) {
+    for (var p = 1.0; p < 1500; p++) {
       final v = lift(p);
       expect(v, inInclusiveRange(0, 1));
-      // Eases in 200 ms and out 300 ms: at most ~1/60 per ms is smooth.
-      expect((v - previous).abs(), lessThan(0.03));
+      // Eases in 160 ms: at most ~1/50 per ms is smooth.
+      expect((v - previous).abs(), lessThan(0.04));
       previous = v;
     }
   });
@@ -51,7 +58,7 @@ void main() {
   ) async {
     await tester.runAsync(() async {
       final still = await _pixels(first + 600, still: true);
-      final singing = await _pixels(first + 600);
+      final singing = await _pixels(first + 250);
       // Reduced motion: the settled mark, whatever the clock says.
       expect(listEquals(still, await _pixels(0, still: true)), isTrue);
       expect(listEquals(singing, still), isFalse);

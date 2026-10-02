@@ -11,7 +11,8 @@ class BirdySongPose {
     required this.phraseTime,
     required this.song,
     required this.lift,
-    required this.neckStretch,
+    required this.rise,
+    required this.beakLiftDegrees,
     required this.tiltDegrees,
   });
 
@@ -21,7 +22,8 @@ class BirdySongPose {
     phraseTime: BirdySongMotion.never,
     song: 0,
     lift: 0,
-    neckStretch: 0,
+    rise: 0,
+    beakLiftDegrees: 0,
     tiltDegrees: 0,
   );
 
@@ -37,9 +39,13 @@ class BirdySongPose {
   /// How far the head is lifted, 0..1.
   final double lift;
 
-  /// Extra vertical stretch of the bird about its feet, as a share of its
-  /// height (0.04: the head is 4 % higher): the raised head and neck.
-  final double neckStretch;
+  /// How far the whole bird is raised, as a share of the logo's height
+  /// (rigid translation, never a stretch).
+  final double rise;
+
+  /// Extra upward tip of the beak group about its base, in degrees (positive:
+  /// up), on top of the beak's own opening.
+  final double beakLiftDegrees;
 
   /// The song's own tilt of the bird about its feet, in degrees (negative:
   /// back); not part of the head lift.
@@ -47,7 +53,7 @@ class BirdySongPose {
 }
 
 /// The one source of truth for how the BirdyGo logo sings: the syllable
-/// timeline, the head rise, the bob, the song tilt and their easing. The splash,
+/// timeline, the single lift, the beak tip, the song tilt and their easing. The splash,
 /// the home logo, the theme logo and the flight overlay all paint through
 /// `BirdyGoSingingPainter`, which reads this and nothing else; a screen only
 /// supplies its clock. Tweak the song here (and in `BirdyMotion.logoLift*`),
@@ -78,11 +84,11 @@ abstract final class BirdySongMotion {
   static const double settled = 1e7;
   static const double never = -1e9;
 
-  /// How far the head is lifted, 0..1, [p] ms into a phrase: eases in from
-  /// the first syllable, holds through the song, eases back out after the
-  /// last syllable. Zero before the phrase and once it is done.
+  /// The lift envelope, 0..1, [p] ms into a phrase: one gesture, rising fast
+  /// from the phrase start, holding while the first notes leave, settling
+  /// softly. Zero before the phrase and once it is done.
   static double liftAt(double p) {
-    const songEnd = 2 * syllable + syllableLength;
+    const songEnd = BirdyMotion.logoLiftIn + BirdyMotion.logoLiftHold;
     if (p <= 0) return 0;
     if (p < BirdyMotion.logoLiftIn) {
       return Curves.easeOutCubic.transform(p / BirdyMotion.logoLiftIn);
@@ -134,9 +140,8 @@ abstract final class BirdySongMotion {
       phraseTime: p,
       song: song,
       lift: lift,
-      neckStretch:
-          lift * BirdyMotion.logoLiftStretch +
-          lift * song * BirdyMotion.logoLiftBobStretch,
+      rise: lift * BirdyMotion.logoLiftRise,
+      beakLiftDegrees: lift * BirdyMotion.logoLiftBeakDegrees,
       tiltDegrees: -songTiltDegrees * song,
     );
   }
