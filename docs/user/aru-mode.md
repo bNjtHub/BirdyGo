@@ -1,15 +1,16 @@
 # ARU Mode
 
 !!! note "Early implementation"
-    ARU Mode currently creates a recoverable scheduled deployment session, records scheduled cycles, runs live inference during active cycles, saves retained detection clips when that recording mode is selected, and shows Android foreground notification controls. iOS background behavior still needs field validation.
+    ARU Mode saves scheduled deployment checkpoints, records scheduled cycles, runs live inference during active cycles, saves retained detection clips when that recording mode is selected, and shows Android foreground notification controls. iOS background behavior still needs field validation.
 
 ARU (Autonomous Recording Unit) Mode is the fixed-location workflow for scheduled acoustic deployments.
 
 ## Current Setup Flow
 
-- **Deployment and audio**: 
+- **Details and analysis settings**:
     - **Metadata**: Enter a deployment name, ARU/station ID, and observer name.
-    - **Location**: Provide site coordinates using automatic GPS acquisition, manual lat/lon entry, or skip location setup. Latitude and longitude are required if using sun-anchored scheduling.
+    - **Location**: Use GPS :material-crosshairs-gps:, manual coordinates :material-map-marker-plus:, or skip location :material-map-marker-off:. The map picker uses :material-map:. Latitude and longitude are required if using sun-anchored scheduling.
+    - **Analysis**: Choose the microphone, inference rate, confidence threshold, and sensitivity.
     - **Recording Format**: Choose between FLAC (compressed lossless) and WAV (uncompressed) formats.
     - **Recording Mode**:
         - *Full*: Records the entire duration of each active cycle.
@@ -24,7 +25,17 @@ ARU (Autonomous Recording Unit) Mode is the fixed-location workflow for schedule
     - **Session Grouping**: Configure whether to save each cycle as a separate session (recommended for faster load times and modular viewing) or combine all cycles into a single, multi-segment session.
 - **Ready**: Review the schedule, estimated audio storage consumption, and diel constraints, then start the deployment.
 
-Starting a deployment immediately saves a `SessionType.aru` session with ARU schedule metadata so cycle state can be recovered later.
+The setup controls use the same icons as the other wizards: :material-microphone:
+microphone, :material-speedometer: inference rate, :material-check-decagram: confidence,
+:material-ear-hearing: sensitivity, :material-record-circle: recording mode,
+:material-timer: clip context and cycle duration, :material-filter-outline:
+detection sampling, and :material-format-list-numbered: the per-species clip
+limit. The repeat interval uses :material-repeat:, the low-battery controls use
+:material-battery-alert: and :material-battery-charging:, and test run and
+Session grouping use :material-flask-outline: and :material-bookshelf:.
+Tap the :material-help: button beside a setup control for its explanation.
+
+Starting a deployment immediately saves a `SessionType.aru` session with ARU schedule metadata. Recording cycles are also checkpointed every 30 seconds, including cycles with no detections. After a crash or power loss, the latest partial deployment appears in Session Library as an ended Session; recording does not restart. Work since its last checkpoint may be lost.
 
 JSON and ZIP exports include ARU deployment metadata. ZIP exports bundle saved per-cycle recording files under `aru_cycles/`.
 

@@ -173,6 +173,10 @@ plan, contrairement au mode Survey et à l'ARU ; HyperOS tuait ensuite le proces
       sur Xiaomi, autoriser BirdyGo sans restriction de batterie, avec un bouton vers les réglages de
       l'app. Pas de demande automatique d'exemption d'optimisation de batterie (surveillée par le
       Play Store).
+- [x] Synchro upstream (02/10/2026) : le service est désormais celui d'upstream (bail
+      `ForegroundServiceLease`, bouton « Arrêter », limite de durée en arrière-plan, réglage « Continuer
+      écran éteint » **activé par défaut** dans le fork, ligne FORK dans `settings_providers.dart`).
+      Le conseil unique de `background_tip.dart` est conservé.
 - [ ] (Benjamin) Sur le Xiaomi : 30 minutes d'écoute écran éteint, avec et sans « Pas de
       restriction » ; vérifier la notification, le bouton « Ouvrir », la reprise à l'écran, et qu'un
       Survey lancé ensuite démarre bien son propre service.
@@ -1010,6 +1014,10 @@ résoudre », push, puis une session cloud sur cette branche :
 Cette branche contient une fusion avec upstream dont les conflits sont encore marqués. Résous-les en gardant nos ajouts marqués FORK et le code de lib/fork, et la version upstream pour le reste. Lance analyze et les tests, puis résume ce qui a changé côté BirdNET.
 ```
 
+Dernières synchros :
+- 02/10/2026 : upstream `afe2febb` (écoute en arrière-plan Live et Point Count, points de reprise
+  après plantage, altitude GPS, aides contextuelles, Flutter 3.47.5). Branche `chore/sync-upstream`.
+
 ## Idées pour plus tard
 
 - Activité de chant selon la météo (upstream a déjà un service météo).
@@ -1036,8 +1044,14 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   faudra `UIBackgroundModes: location` (avec `allowBackgroundLocationUpdates`, déjà prévu par
   `buildLocationSettings(background: true)`) et la permission « Toujours » si le suivi doit continuer
   hors de l'app ; les textes `NSLocation*UsageDescription` sont à revoir.
-- Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
-  `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
+- Écoute écran éteint (J2b) : depuis la synchro upstream du 02/10/2026, le service d'arrière-plan est
+  celui d'upstream (`lib/shared/services/audio_background_notification.dart`, Android seulement ; le
+  `live_background.dart` du fork a été supprimé). Côté iOS il faudra le mode `UIBackgroundModes: audio`
+  dans `Info.plist`, une session audio active pendant l'écoute et l'équivalent de la notification
+  « Arrêter / Ouvrir » (arrêt de l'écoute depuis l'extérieur de l'app).
+- Métadonnées d'appareil dans les exports (synchro upstream du 02/10/2026) : canal
+  `com.birdnet/device_description`, côté Android dans `MainActivity.kt`, côté iOS dans
+  `AppDelegate.swift` (déjà écrit par upstream, jamais compilé ici). À vérifier sur iPhone.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
   posés dans le projet, jamais compilés. Créer l'App ID et l'App Group sur le portail Apple, renseigner
   l'équipe (DEVELOPMENT_TEAM). L'App Group ne sert qu'à une ancienne extension de partage upstream : on

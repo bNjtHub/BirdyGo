@@ -133,3 +133,5 @@ A visualização do mapa do Survey em tela cheia (o botão :material-fullscreen:
 ## Após parar
 
 O BirdNET Live salva o Survey concluído e abre o [Resumo da Session](session-review.md).
+
+O Survey ativo é salvo no início, a cada 30 segundos e quando o aplicativo sai do primeiro plano. Após uma falha ou queda de energia, o último Survey parcial aparece na Biblioteca de Sessions como uma Session encerrada. A gravação não é reiniciada. Observações posteriores ao último salvamento podem estar ausentes.
