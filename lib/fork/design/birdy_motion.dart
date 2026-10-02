@@ -214,7 +214,7 @@ abstract final class BirdyMotion {
   /// the singing clock, so it stays in sync with the sound; reduced motion
   /// draws none of it.
   static const double logoLeanIn = 160;
-  static const double logoLeanHold = 380;
+  static const double logoLeanHold = 550;
   static const double logoLeanOut = 420;
   static const double logoLeanDegrees = 10;
 
