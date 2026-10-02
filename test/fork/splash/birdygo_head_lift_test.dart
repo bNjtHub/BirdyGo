@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:birdnet_live/fork/design/birdy_motion.dart';
+import 'package:birdnet_live/fork/design/birdy_song_motion.dart';
 import 'package:birdnet_live/fork/splash/birdygo_splash_painter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -16,7 +17,7 @@ Future<List<int>> _pixels(double clock, {bool still = false}) async {
 }
 
 void main() {
-  const lift = BirdyGoSingingPainter.liftAt;
+  const lift = BirdySongMotion.liftAt;
   const first = BirdyGoSingingPainter.firstPhrase;
 
   test('the lift is zero at rest, before and after the phrase', () {
