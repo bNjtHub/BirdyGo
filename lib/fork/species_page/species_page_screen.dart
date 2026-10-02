@@ -32,6 +32,7 @@ import '../map/base_layers.dart';
 import '../map/contact_map_screen.dart';
 import '../map/contact_map_sheets.dart';
 import '../lpo/species_lpo_entry.dart';
+import '../settings/france_features.dart'; // FORK: France-only gate
 import '../ranking/species_activity_section.dart';
 import '../reliability/reliability_screen.dart' show precisionLine; // FORK: heard inset (J7)
 import '../sound_library/sound_library_screen.dart';
@@ -527,7 +528,8 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
           links: _links(detail),
           onOpen: (url) => openExternalUrl(context, url),
         ),
-      if (_lpoSessionId != null) SpeciesLpoEntry(onSend: _sendToLpo),
+      if (_lpoSessionId != null && watchFranceFeatures(context, ref))
+        SpeciesLpoEntry(onSend: _sendToLpo),
       const SpeciesPageFooter(),
     ];
 

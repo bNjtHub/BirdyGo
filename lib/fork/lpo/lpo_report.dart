@@ -57,6 +57,9 @@ List<String> lpoReportLines(
   required String frenchName,
   required LpoCardChoices choices,
 }) {
+  // Fixed dd/MM/yyyy and HH:mm on purpose: these lines are typed into the
+  // French Faune-France / NaturaList form, whose format it is. The feature
+  // only shows for France / French UI (france_features.dart).
   final local = observation.time.toLocal();
   final lat = observation.latitude?.toStringAsFixed(5);
   final lon = observation.longitude?.toStringAsFixed(5);
