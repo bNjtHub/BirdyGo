@@ -11,7 +11,7 @@ class BirdySongPose {
     required this.phraseTime,
     required this.song,
     required this.lift,
-    required this.dy,
+    required this.neckStretch,
     required this.tiltDegrees,
   });
 
@@ -21,7 +21,7 @@ class BirdySongPose {
     phraseTime: BirdySongMotion.never,
     song: 0,
     lift: 0,
-    dy: 0,
+    neckStretch: 0,
     tiltDegrees: 0,
   );
 
@@ -37,15 +37,17 @@ class BirdySongPose {
   /// How far the head is lifted, 0..1.
   final double lift;
 
-  /// Vertical offset of the whole bird, in logo-board units (negative: up).
-  final double dy;
+  /// Extra vertical stretch of the bird about its feet, as a share of its
+  /// height (0.04: the head is 4 % higher): the raised head and neck.
+  final double neckStretch;
 
-  /// Tilt of the bird about its feet, in degrees (negative: back).
+  /// The song's own tilt of the bird about its feet, in degrees (negative:
+  /// back); not part of the head lift.
   final double tiltDegrees;
 }
 
 /// The one source of truth for how the BirdyGo logo sings: the syllable
-/// timeline, the head lift, the bob, the tilt and their easing. The splash,
+/// timeline, the head rise, the bob, the song tilt and their easing. The splash,
 /// the home logo, the theme logo and the flight overlay all paint through
 /// `BirdyGoSingingPainter`, which reads this and nothing else; a screen only
 /// supplies its clock. Tweak the song here (and in `BirdyMotion.logoLift*`),
@@ -68,7 +70,8 @@ abstract final class BirdySongMotion {
   /// Length of one phrase, until its last note has faded.
   static const double phraseLength = 2 * syllable + noteDelay + noteLife;
 
-  /// Extra back tilt, in degrees, at the full swell of a syllable.
+  /// Back tilt, in degrees, at the full swell of a syllable (the original
+  /// song motion).
   static const double songTiltDegrees = 2.5;
 
   /// Time of the settled mark, and the "no phrase" marker.
@@ -131,11 +134,10 @@ abstract final class BirdySongMotion {
       phraseTime: p,
       song: song,
       lift: lift,
-      dy:
-          -lift * BirdyMotion.logoLiftUnits -
-          lift * song * BirdyMotion.logoLiftBobUnits,
-      tiltDegrees:
-          -songTiltDegrees * song - BirdyMotion.logoLiftTiltDegrees * lift,
+      neckStretch:
+          lift * BirdyMotion.logoLiftStretch +
+          lift * song * BirdyMotion.logoLiftBobStretch,
+      tiltDegrees: -songTiltDegrees * song,
     );
   }
 }
