@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui' show PlatformDispatcher; // FORK: device region
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
+import '../world_map/world_map_providers.dart'; // FORK: known position
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
@@ -38,11 +40,11 @@ import 'map_config.dart';
 import 'map_consent_dialog.dart';
 import 'map_loading.dart';
 import 'map_markers.dart';
+import 'map_region.dart'; // FORK: EN default view and IGN rule
 import 'place_bird_layer.dart';
 
 /// Where the map opens when there is nothing to show: France.
-const LatLng _defaultCenter = LatLng(46.6, 2.4);
-const double _defaultZoom = 5;
+// FORK: default view comes from emptyMapView (map_config.dart constants).
 
 /// Space under the locate button, and the room it takes above that.
 const double _locateBottom = 40;
@@ -103,7 +105,8 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
 
   ContactMapData? _data;
   int _loadGeneration = 0;
-  double _zoom = _defaultZoom;
+  double _zoom = kMapWorldZoom;
+  LatLng? _knownPosition; // FORK: last known position, never prompts
   bool _mapReady = false;
   LatLng? _userPosition;
   HexKey? _selectedSpot;
@@ -125,6 +128,34 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
       ref.read(sharedPreferencesProvider).getString(kMapBaseLayerPref),
     );
     unawaited(_load());
+    unawaited(_loadKnownPosition());
+  }
+
+  // FORK: IGN maps only in France / French UI; else fall back to OSM.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final layer = effectiveBaseLayer(
+      _layer,
+      regionCode: PlatformDispatcher.instance.locale.countryCode,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
+    if (layer != _layer) {
+      _layer = layer;
+      _tileLayer = null;
+    }
+  }
+
+  // FORK: never prompts for the location permission.
+  Future<void> _loadKnownPosition() async {
+    final cell = await ref.read(worldMapUserPositionProvider.future);
+    if (cell == null || !mounted) return;
+    _knownPosition = LatLng(cell.latitude, cell.longitude);
+    final data = _data;
+    if (_mapReady && data != null && data.isEmpty) {
+      final view = emptyMapView(_knownPosition);
+      _mapController.move(view.center, view.zoom);
+    }
   }
 
   @override
@@ -228,7 +259,10 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
     final layer = await showChoiceSheet<MapBaseLayer>(
       context,
       title: l10n.forkMapBaseLayer,
-      options: MapBaseLayer.values,
+      options: availableBaseLayers(
+        regionCode: PlatformDispatcher.instance.locale.countryCode,
+        languageCode: Localizations.localeOf(context).languageCode,
+      ),
       selected: _layer,
       label: (l) => baseLayerLabel(l10n, l),
     );
@@ -416,10 +450,12 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                         options: MapOptions(
                           initialCenter:
                               data.isEmpty
-                                  ? _defaultCenter
+                                  ? emptyMapView(_knownPosition).center
                                   : data.positions.first,
                           initialZoom:
-                              data.isEmpty ? _defaultZoom : kMapSinglePointZoom,
+                              data.isEmpty
+                                  ? emptyMapView(_knownPosition).zoom
+                                  : kMapSinglePointZoom,
                           initialCameraFit: _cameraFit(data),
                           backgroundColor:
                               theme.colorScheme.surfaceContainerLow,

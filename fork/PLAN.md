@@ -327,6 +327,7 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       index nom vers offset) : affichage immédiat et hors ligne. Espèce absente ou fichier manquant : repli sur
       le géomodèle comme avant. Crédit « Observations GBIF.org (année) · CC BY 4.0 ». Le fichier
       `gadm1_to_regions.json.gz` n'est plus lu par l'app (à supprimer des assets). Rien de natif côté iOS.
+- [x] Carte du monde, toutes les espèces (PR « J7 Carte du monde : toutes les espèces depuis un téléchargement GBIF ») : `tools/fork_world_ranges.py --from-sql` lit un téléchargement GBIF SQL (DOI 10.15468/dl.yx7895, 5,87 M de lignes) au lieu des appels par espèce ; `ranges.bin.gz` passe de 416 à 2 102 espèces (celles qui ont une aire dans la zone Europe, Afrique, Asie de l'Ouest), crédit et citation avec le DOI (`WorldMapConfig.gbifDownloadDoi`).
 - [x] Fiche espèce, nouvel ordre (PR « J7 Fiche espèce : nouvel ordre des blocs, quiz retiré », empilée sur #130) : six groupes dans l'ordre des questions : Qui est-ce ? (photo, nom, résumé de la fiche IA, ligne « Entendu… »), Son chant (Mes sons puis « À l'oreille »), Fais sa connaissance (disques taille, habitudes, ennemis, anecdote ; moins de 2 disques : blocs simples), Où et quand le voir (courbe de l'année, carte du monde, migration), Mes rencontres, Pour aller plus loin ; lien du quiz retiré de la fiche.
 - [x] Fiche espèce simplifiée (PR « J7 Fiche espèce : 7 blocs, un titre par bloc ») : sept blocs et un titre par bloc (plus de titres de groupe) ; en-tête avec étiquettes (carnet, migrateur / toute l'année, rare / peu commun ici) et encart « Entendu » ; Son chant avec « À l'oreille » et « Référence » ; Fais sa connaissance à 6 disques (Pourquoi ici, Confusions) ; Quand le voir avec la migration ; Pour aller plus loin en pastilles ; bloc « Pas encore dans ton carnet » (jamais entendu) ; barres non sélectionnées estompées.
 - [x] Générateur : champ `nesting` (« M-N », mois 1 à 12) ajouté au schéma, au prompt et au bundle
@@ -984,6 +985,7 @@ Fini quand : la build de test interne s'installe depuis le Play Store et tient u
 ## Version anglaise
 
 - [x] Fonctions France (LPO / Faune-France, comptage des jardins, NaturaList) masquées hors France : visibles si la région de l'appareil est FR ou si l'interface est en français (`lib/fork/settings/france_features.dart`).
+- [x] Carte des contacts : vue vide centrée sur la dernière position connue (sans demander la permission) ou sur le monde ; couches IGN proposées seulement si la région est FR ou l'interface en français, repli sur OSM (`lib/fork/map/map_region.dart`).
 
 ## Garder le fork à jour avec BirdNET
 
@@ -1081,3 +1083,4 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   Ville agissent sur les échantillons après le micro, comme sur Android. Seuls des essais sur le
   terrain restent à faire (le micro de l'iPhone et son traitement de la voix n'ont pas le même
   bruit de fond), dont le coût du mode Ville en `--profile`.
+
