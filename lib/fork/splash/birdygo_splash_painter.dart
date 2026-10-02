@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../design/birdy_motion.dart';
+import '../design/birdy_song_motion.dart';
 import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../home/birdygo_logo.dart';
@@ -35,15 +35,16 @@ abstract final class BirdyGoSplashTimeline {
 
   /// First phrase, time between two phrases, between two syllables, and the
   /// length of a syllable.
-  static const double firstPhrase = 1150;
-  static const double phrasePeriod = 6500;
-  static const double syllable = 400;
-  static const double syllableLength = 360;
+  // FORK: J7, the song timeline lives in BirdySongMotion (one source).
+  static const double firstPhrase = BirdySongMotion.firstPhrase;
+  static const double phrasePeriod = BirdySongMotion.phrasePeriod;
+  static const double syllable = BirdySongMotion.syllable;
+  static const double syllableLength = BirdySongMotion.syllableLength;
 
   /// A note leaves the beak [noteDelay] after its syllable starts and flies
   /// for [noteLife].
-  static const double noteDelay = 80;
-  static const double noteLife = 1300;
+  static const double noteDelay = BirdySongMotion.noteDelay;
+  static const double noteLife = BirdySongMotion.noteLife;
 
   /// Breathing of the resting bird: starts at [breatheStart], fades in over
   /// [breatheRamp], period 2π × [breathePeriod], amplitude [breatheAmount].
@@ -149,19 +150,14 @@ class BirdyGoSingingPainter extends CustomPainter {
 
   /// Start of the first phrase and time between two phrases of the loop.
   /// The home logo (`SingingLogo`) plays one phrase at a time with them.
-  static const double firstPhrase = BirdyGoSplashTimeline.firstPhrase;
-  static const double phrasePeriod = BirdyGoSplashTimeline.phrasePeriod;
+  static const double firstPhrase = BirdySongMotion.firstPhrase;
+  static const double phrasePeriod = BirdySongMotion.phrasePeriod;
 
   /// Length of one phrase, until its last note has faded; the mark is
   /// settled again after it.
-  static const double phraseLength = 2 * _syllable + _noteDelay + _noteLife;
+  static const double phraseLength = BirdySongMotion.phraseLength;
 
-  static const double _syllable = BirdyGoSplashTimeline.syllable;
-  static const double _syllableLength = BirdyGoSplashTimeline.syllableLength;
-  static const double _noteDelay = BirdyGoSplashTimeline.noteDelay;
-  static const double _noteLife = BirdyGoSplashTimeline.noteLife;
-  static const double _settled = 1e7;
-  static const double _never = -1e9;
+  static const double _settled = BirdySongMotion.settled;
 
   static const Offset _beakHinge = Offset(118.1, 202.6);
 
@@ -250,39 +246,14 @@ class BirdyGoSingingPainter extends CustomPainter {
       ..restore();
   }
 
-  /// How far the bird has lifted its head, 0..1, [p] ms into a phrase: eases
-  /// in from the first syllable, holds through the song, eases back out after
-  /// the last syllable. Zero before the phrase and once it is done.
-  // FORK: J7, the bird lifts its head while it sings.
-  static double liftAt(double p) {
-    const songEnd = 2 * _syllable + _syllableLength;
-    if (p <= 0) return 0;
-    if (p < BirdyMotion.logoLiftIn) {
-      return Curves.easeOutCubic.transform(p / BirdyMotion.logoLiftIn);
-    }
-    if (p <= songEnd) return 1;
-    final u = (p - songEnd) / BirdyMotion.logoLiftOut;
-    if (u >= 1) return 0;
-    return Curves.easeInOutCubic.transform(1 - u);
-  }
-
   @override
   void paint(Canvas canvas, Size size) {
     final t = still ? _settled : clock.value;
-    final phrase =
-        still || t < firstPhrase
-            ? -1
-            : loop
-            ? ((t - firstPhrase) / phrasePeriod).floor()
-            : 0;
-    // Time inside the current phrase.
-    final p = phrase < 0 ? _never : t - (firstPhrase + phrase * phrasePeriod);
-    // How open the beak is, 0..1.
-    var song = 0.0;
-    for (var i = 0; i < 3; i++) {
-      final u = (p - i * _syllable) / _syllableLength;
-      if (u > 0 && u < 1) song = math.max(song, math.sin(math.pi * u));
-    }
+    // FORK: J7, every pose value comes from BirdySongMotion (one source).
+    final pose = BirdySongMotion.at(t, loop: loop, reduced: still);
+    final phrase = pose.phrase;
+    final p = pose.phraseTime;
+    final song = pose.song;
 
     canvas.save();
     canvas.scale(size.width / viewBox.width, size.height / viewBox.height);
@@ -309,20 +280,11 @@ class BirdyGoSingingPainter extends CustomPainter {
     }
     // FORK: J7, the lift of the head: a rise and a back tilt about the feet,
     // a small bob with each syllable. Only the bird; the notes stay put.
-    final headLift = still ? 0.0 : liftAt(p);
     canvas
-      ..translate(
-        0,
-        -headLift * BirdyMotion.logoLiftUnits -
-            headLift * song * BirdyMotion.logoLiftBobUnits,
-      )
+      ..translate(0, pose.dy)
       ..translate(0, _Timeline.arrivalTravel * (1 - lift))
       ..translate(_feet.dx, _feet.dy)
-      ..rotate(
-        (-2.5 * song - BirdyMotion.logoLiftTiltDegrees * headLift) *
-            math.pi /
-            180,
-      )
+      ..rotate(pose.tiltDegrees * math.pi / 180)
       ..scale(grow * (1 - .014 * song), grow * (1 + .045 * song))
       ..translate(-_feet.dx, -_feet.dy);
 
@@ -409,18 +371,11 @@ class BirdyGoSingingPainter extends CustomPainter {
 
     // One note per syllable; the notes of the previous phrase may still fly.
     for (var i = 0; i < 3; i++) {
-      double? age;
-      for (final k in [phrase, phrase - 1]) {
-        if (k < 0) continue;
-        final a =
-            t - (firstPhrase + k * phrasePeriod + i * _syllable + _noteDelay);
-        if (a >= 0 && a < _noteLife) {
-          age = a;
-          break;
-        }
-      }
+      final age =
+          BirdySongMotion.noteAge(t, phrase, i) ??
+          BirdySongMotion.noteAge(t, phrase - 1, i);
       if (age == null) continue;
-      paintNote(canvas, i, age / _noteLife, brand: brand);
+      paintNote(canvas, i, age / BirdySongMotion.noteLife, brand: brand);
     }
     canvas.restore();
   }
