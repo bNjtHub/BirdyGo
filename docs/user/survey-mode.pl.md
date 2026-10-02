@@ -138,3 +138,5 @@ Pełnoekranowy widok mapy Survey (przycisk :material-fullscreen: w Przeglądzie 
 ## Po zatrzymaniu
 
 BirdNET Live zapisuje zakończony Survey i otwiera [Przegląd Session](session-review.md).
+
+Trwający Survey jest zapisywany na starcie, co 30 sekund i gdy aplikacja opuszcza pierwszy plan. Po awarii lub utracie zasilania ostatni częściowy Survey pojawia się w Bibliotece Sessions jako zakończona Session. Nagrywanie nie wznawia się samo. Może brakować obserwacji od ostatniego zapisu.

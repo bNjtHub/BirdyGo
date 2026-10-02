@@ -214,6 +214,8 @@ To ustawienie dotyczy otwierania trybu Live wewnątrz aplikacji. [Widżet Quick 
 
 Po włączeniu (domyślnie) zakończona Session trybu Live lub Point Count jest dodawana do biblioteki automatycznie w chwili jej zakończenia. Po wyłączeniu zakończona Session otwiera się w przeglądzie z oznaczeniem **niezapisana**: ikona zapisu jest podświetlona i musisz jej dotknąć, aby zachować Session. Wyjście z przeglądu bez zapisania odrzuca Session i jej nagrania. Pasuje to do krótkiego nasłuchiwania, gdy chcesz zachować jedynie sporadyczny ciekawy wynik, zamiast gromadzić każde krótkie nagranie. Wdrożenia Survey i ARU zawsze zapisują się automatycznie — długi, bezobsługowy przebieg jest zbyt cenny, aby stracić go przez zapomnienie o zapisie — więc ten przełącznik tam nie obowiązuje.
 
+Gdy automatyczne zapisywanie jest włączone, tryb Live i Point Count zapisują też częściową Session na starcie, co 30 sekund i gdy aplikacja opuszcza pierwszy plan. Ogranicza to utratę danych po awarii lub utracie zasilania. Przy wyłączonym ustawieniu te zapisy pośrednie nie są zachowywane. Survey i ARU zapisują punkty kontrolne niezależnie od tego ustawienia.
+
 ## Odtwarzanie
 
 ### Nakładka odtwarzania w przeglądzie

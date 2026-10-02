@@ -65,3 +65,5 @@ Het scherm van de lopende punttelling draait om een dashboard met de klok.
 ## Na de telling
 
 Wanneer de punttelling eindigt, slaat BirdNET Live de Session op en opent het [Session-overzicht](session-review.md).
+
+Met automatisch opslaan aan wordt een lopende telling ook opgeslagen bij de start, elke 30 seconden en wanneer de app de voorgrond verlaat. Na een crash of stroomuitval staat de laatst opgeslagen gedeeltelijke telling in de Session-bibliotheek.

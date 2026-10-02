@@ -215,6 +215,8 @@ Esta configuração vale para abrir o modo Live de dentro do aplicativo. O [widg
 
 Quando ativado (o padrão), uma Session de Live ou Point Count concluída é adicionada à sua biblioteca automaticamente no momento em que termina. Quando desativado, uma Session finalizada abre no resumo marcada como **não salva**: o ícone de salvar fica destacado e você precisa tocá-lo para manter a Session. Sair do resumo sem salvar descarta a Session e suas gravações. Isso combina com escutas rápidas em que você só quer guardar um resultado notável de vez em quando, em vez de acumular cada gravação curta. Implantações de Survey e ARU sempre salvam automaticamente — uma execução longa e sem supervisão é valiosa demais para se perder por esquecer de tocar em Salvar —, então esse botão não se aplica ali.
 
+Enquanto o salvamento automático estiver ativado, o modo Live e o Point Count também salvam uma Session parcial no início, a cada 30 segundos e quando o aplicativo sai do primeiro plano. Isso limita a perda de dados após uma falha ou queda de energia. Com a configuração desativada, esses salvamentos intermediários não são mantidos. Survey e ARU salvam seus pontos de controle independentemente desta configuração.
+
 ## Reprodução
 
 ### Sobreposição de reprodução no resumo

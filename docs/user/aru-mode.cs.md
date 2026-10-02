@@ -1,7 +1,7 @@
 # Režim ARU
 
 !!! note "Předběžná implementace"
-    Režim ARU nyní vytváří obnovitelnou naplánovanou Session nasazení, nahrává plánované cykly, spouští živou inferenci během aktivních cyklů, ukládá uchované detekční klipy při zvoleném režimu nahrávání a zobrazuje ovládání oznámení na popředí v Androidu. Chování na pozadí v iOS stále vyžaduje terénní ověření.
+    Režim ARU nyní průběžně ukládá naplánované nasazení, nahrává plánované cykly, spouští živou inferenci během aktivních cyklů, ukládá uchované detekční klipy při zvoleném režimu nahrávání a zobrazuje ovládání oznámení na popředí v Androidu. Chování na pozadí v iOS stále vyžaduje terénní ověření.
 
 Režim ARU (Autonomous Recording Unit) je workflow pro plánovaná akustická nasazení na pevném místě.
 
@@ -24,7 +24,7 @@ Režim ARU (Autonomous Recording Unit) je workflow pro plánovaná akustická na
     - **Seskupování relací**: Nakonfigurujte, zda se má každý cyklus ukládat jako samostatná Session (doporučeno pro rychlejší načítání a modulární prohlížení), nebo zda se mají všechny cykly sloučit do jediné vícesegmentové Session.
 - **Připraveno**: Zkontrolujte plán, odhadovanou spotřebu úložného prostoru a dielní omezení a poté spusťte nasazení.
 
-Při spuštění se okamžitě uloží `SessionType.aru` Session s metadaty plánu ARU, aby bylo možné později obnovit stav cyklů.
+Při spuštění se okamžitě uloží `SessionType.aru` Session s metadaty plánu ARU. Nahrávací cykly se navíc ukládají každých 30 sekund, včetně cyklů bez detekcí. Po pádu aplikace nebo výpadku napájení se poslední uložené nasazení objeví v Knihovně Sessions jako ukončená Session; nahrávání se znovu nespustí. Data od posledního uložení mohou být ztracena.
 
 Exporty JSON a ZIP obsahují metadata nasazení ARU. ZIP exporty přibalí uložené nahrávky jednotlivých cyklů pod `aru_cycles/`.
 

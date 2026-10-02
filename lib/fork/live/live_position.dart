@@ -27,6 +27,7 @@ import '../../core/services/location_service.dart';
 import '../../features/inference/models/detection.dart';
 import '../../features/live/live_session.dart';
 import '../../features/survey/survey_gps_tracker.dart';
+import '../../shared/models/altitude_reference.dart';
 import '../../shared/models/gps_point.dart';
 import '../reliability/reliability_config.dart';
 
@@ -175,12 +176,24 @@ class LivePositionTracker {
     final point = _source?.lastPoint;
     double? latitude;
     double? longitude;
+    double? altitude;
+    double? altitudeAccuracy;
+    AltitudeReference? altitudeReference;
+    DateTime? locationFixTime;
     if (point != null) {
       latitude = point.latitude;
       longitude = point.longitude;
+      altitude = point.altitude;
+      altitudeAccuracy = point.altitudeAccuracy;
+      altitudeReference = point.altitudeReference;
+      locationFixTime = point.timestamp;
     } else if (session != null && _source != null && !_replaceStartPosition) {
       latitude = session.latitude;
       longitude = session.longitude;
+      altitude = session.altitude;
+      altitudeAccuracy = session.altitudeAccuracy;
+      altitudeReference = session.altitudeReference;
+      locationFixTime = session.locationFixTime;
     }
     return DetectionRecord(
       scientificName: detection.species.scientificName,
@@ -189,6 +202,10 @@ class LivePositionTracker {
       timestamp: timestamp,
       latitude: latitude,
       longitude: longitude,
+      altitude: altitude,
+      altitudeAccuracy: altitudeAccuracy,
+      altitudeReference: altitudeReference,
+      locationFixTime: locationFixTime,
     );
   }
 
@@ -236,6 +253,10 @@ class LivePositionTracker {
       _replaceStartPosition = false;
       session.latitude = point.latitude;
       session.longitude = point.longitude;
+      session.altitude = point.altitude;
+      session.altitudeAccuracy = point.altitudeAccuracy;
+      session.altitudeReference = point.altitudeReference;
+      session.locationFixTime = point.timestamp;
       debugPrint('[LivePosition] session position set from first fix');
     }
   }

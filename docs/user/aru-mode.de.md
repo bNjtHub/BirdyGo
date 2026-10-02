@@ -1,7 +1,7 @@
 # ARU-Modus
 
 !!! note "Frühe Implementierung"
-    Der ARU-Modus erstellt derzeit eine wiederherstellbare geplante ARU-Aufstellung, zeichnet geplante Zyklen auf, führt Live-Inferenz während aktiver Zyklen aus, speichert aufbewahrte Detektionsclips, wenn dieser Aufnahmemodus gewählt ist, und zeigt unter Android Vordergrundbenachrichtigungen. Das iOS-Hintergrundverhalten muss noch im Feld validiert werden.
+    Der ARU-Modus speichert derzeit Zwischenstände geplanter ARU-Aufstellungen, zeichnet geplante Zyklen auf, führt Live-Inferenz während aktiver Zyklen aus, speichert aufbewahrte Detektionsclips, wenn dieser Aufnahmemodus gewählt ist, und zeigt unter Android Vordergrundbenachrichtigungen. Das iOS-Hintergrundverhalten muss noch im Feld validiert werden.
 
 Der ARU-Modus (Autonomous Recording Unit) ist der feste Standort-Workflow für geplante akustische Aufstellungen.
 
@@ -24,7 +24,7 @@ Der ARU-Modus (Autonomous Recording Unit) ist der feste Standort-Workflow für g
     - **Session-Gruppierung**: Konfigurieren Sie, ob jeder Zyklus als separate Session gespeichert werden soll (empfohlen für schnellere Ladezeiten und modulare Betrachtung) oder ob alle Zyklen in einer einzigen, mehrteiligen Session zusammengefasst werden sollen.
 - **Bereit**: Überprüfen Sie den Zeitplan, den geschätzten Audiospeicherverbrauch und die Diel-Einschränkungen und starten Sie dann die Aufstellung.
 
-Beim Start wird sofort eine `SessionType.aru`-Session mit ARU-Zeitplanmetadaten gespeichert, damit der Zyklusstatus später wiederhergestellt werden kann.
+Beim Start wird sofort eine `SessionType.aru`-Session mit ARU-Zeitplanmetadaten gespeichert. Aufnahmezyklen werden außerdem alle 30 Sekunden gesichert, auch Zyklen ohne Detektionen. Nach einem Absturz oder Stromausfall erscheint die zuletzt gesicherte Aufstellung als beendete Session in der Session-Bibliothek; die Aufnahme wird nicht neu gestartet. Was seit der letzten Sicherung aufgenommen wurde, kann verloren gehen.
 
 JSON- und ZIP-Exporte enthalten ARU-Aufstellungsmetadaten. ZIP-Exporte bündeln gespeicherte Aufnahmedateien pro Zyklus unter `aru_cycles/`.
 
