@@ -92,7 +92,7 @@ void main() {
 
     test('background defaults are separate for Live and Point Count', () {
       expect(container.read(liveBackgroundEnabledProvider), isTrue); // FORK: on by default
-      expect(container.read(liveBackgroundMaxMinutesProvider), 30);
+      expect(container.read(liveBackgroundMaxMinutesProvider), 120); // FORK: 120 min
       expect(container.read(pointCountBackgroundEnabledProvider), isTrue);
     });
 
@@ -113,7 +113,7 @@ void main() {
       expect(reopened.read(pointCountBackgroundEnabledProvider), isFalse);
     });
 
-    test('invalid saved background limit falls back to 30 minutes', () async {
+    test('invalid saved background limit falls back to 120 minutes' /* FORK */, () async {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(PrefKeys.liveBackgroundMaxMinutes, 999);
       final reopened = ProviderContainer(
@@ -121,9 +121,9 @@ void main() {
       );
       addTearDown(reopened.dispose);
 
-      expect(reopened.read(liveBackgroundMaxMinutesProvider), 30);
+      expect(reopened.read(liveBackgroundMaxMinutesProvider), 120); // FORK
       await reopened.read(liveBackgroundMaxMinutesProvider.notifier).set(0);
-      expect(reopened.read(liveBackgroundMaxMinutesProvider), 30);
+      expect(reopened.read(liveBackgroundMaxMinutesProvider), 120); // FORK
     });
 
     test('clipContext defaults to 1', () {
