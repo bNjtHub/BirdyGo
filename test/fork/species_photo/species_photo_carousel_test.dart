@@ -6,6 +6,7 @@ import 'package:birdnet_live/fork/species_photo/inat_photo_service.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo_config.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo_providers.dart';
+import 'package:birdnet_live/fork/species_photo/species_photo_viewer.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/models/taxonomy_species.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -169,6 +170,62 @@ void main() {
     expect(find.text('Photo : Author 3'), findsOneWidget);
     expect(find.text('Licence : CC0 1.0'), findsOneWidget);
     expect(find.text('Source : iNaturalist'), findsOneWidget);
+  });
+
+  testWidgets('tap opens the viewer on the page tapped; the carousel follows '
+      'the page it closes on', (tester) async {
+    final net = _Net();
+    await _pump(tester, allowed: true, net: net);
+
+    // Page 1 (bundled): the viewer opens on it, with its credit.
+    await tester.tapAt(tester.getCenter(find.byType(PageView)));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPhotoViewer), findsOneWidget);
+    expect(find.text('Bundled Author · CC BY · iNaturalist'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('viewer-close')));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPhotoViewer), findsNothing);
+
+    // Swipe the carousel to page 2, tap: the viewer opens on page 2.
+    await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getCenter(find.byType(PageView)));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Photo 2 sur 5'), findsWidgets);
+    expect(find.text('Author 3 · CC0 1.0 · iNaturalist'), findsOneWidget);
+
+    // Swipe to page 3 inside the viewer, close: the carousel is on page 3.
+    await tester.fling(
+      find.descendant(
+        of: find.byType(SpeciesPhotoViewer),
+        matching: find.byType(PageView),
+      ),
+      const Offset(-300, 0),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('viewer-close')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Crédit photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Photo : Author 4'), findsOneWidget);
+  });
+
+  testWidgets('switch off: tap opens the viewer on the bundled photo, '
+      '(i) still opens the credit sheet', (tester) async {
+    final net = _Net();
+    await _pump(tester, allowed: false, net: net);
+    await tester.tapAt(tester.getCenter(find.byType(SpeciesPhoto)));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPhotoViewer), findsOneWidget);
+    expect(find.byKey(const ValueKey('photo-dot-0')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('viewer-close')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Crédit photo'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SpeciesPhotoViewer), findsNothing);
+    expect(find.text('Photo : Bundled Author'), findsOneWidget);
   });
 
   testWidgets('API failure: just the bundled photo', (tester) async {

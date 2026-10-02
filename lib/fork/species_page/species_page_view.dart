@@ -5,6 +5,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../shared/utils/app_icons.dart';
@@ -19,6 +20,7 @@ import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/dashed_border.dart';
 import '../ranking/activity_bars.dart';
+import '../species_photo/species_photo_config.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
 import 'section_title.dart';
@@ -102,7 +104,15 @@ class SpeciesPageHeader extends StatelessWidget {
     const radius = BorderRadius.vertical(
       bottom: Radius.circular(BirdyRadii.hero),
     );
-    return ClipRRect(
+    // FORK: J7 light status bar icons over the photo (indentation of the
+    // body left as it was, to keep the merge diff small).
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: BirdyBrand.clear,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: ClipRRect(
       borderRadius: radius,
       child: ColoredBox(
         color: background,
@@ -115,6 +125,32 @@ class SpeciesPageHeader extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   photo,
+                  // FORK: J7 scrim, so the status bar and the buttons read on
+                  // any photo (light icons while the header is on screen).
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height:
+                        MediaQuery.paddingOf(context).top + kPhotoTopScrimExtra,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        key: const ValueKey('fiche-photo-top-scrim'),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              BirdyBrand.black.withValues(
+                                alpha: BirdyAlpha.photoTopScrim,
+                              ),
+                              BirdyBrand.clear,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned(
                     top: BirdySpace.l + MediaQuery.paddingOf(context).top,
                     left: BirdySpace.l,
@@ -240,6 +276,7 @@ class SpeciesPageHeader extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
