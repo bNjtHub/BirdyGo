@@ -12,6 +12,7 @@ import 'package:birdnet_live/fork/world_map/range_legend.dart';
 import 'package:birdnet_live/fork/world_map/season_presence.dart';
 import 'package:birdnet_live/fork/world_map/world_grid.dart';
 import 'package:birdnet_live/fork/world_map/world_map_config.dart';
+import 'package:birdnet_live/fork/world_map/world_map_painter.dart' show worldCopyOffsets;
 import 'package:birdnet_live/fork/world_map/world_regions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -53,10 +54,10 @@ void main() {
   });
 
   group('region assets', () {
-    test('are small and hold the regions of the area', () {
+    test('are small and hold the regions of the world', () {
       final size = File(WorldMapConfig.regionsAsset).lengthSync();
-      expect(size, lessThan(500 * 1024));
-      expect(regions.regions.length, greaterThan(2500));
+      expect(size, lessThan(600 * 1024));
+      expect(regions.regions.length, greaterThan(4000));
       expect(regions.borders, isNotEmpty);
     });
 
@@ -76,7 +77,7 @@ void main() {
         regions.regions.length,
       );
       final empty = regions.regions.where((r) => r.rings.isEmpty).length;
-      expect(empty, lessThan(10), reason: 'only specks vanish in simplifying');
+      expect(empty, lessThan(20), reason: 'only specks vanish in simplifying');
     });
 
     test('parses the documented format', () {
@@ -165,6 +166,69 @@ void main() {
     });
   });
 
+  group('the whole world', () {
+    String? idAt(double lon, double lat) => regions.regionAt(lon, lat)?.id;
+
+    test('regionAt wraps past the antimeridian', () {
+      final a = regions.regionAt(-175, 67);
+      expect(a, isNotNull);
+      expect(regions.regionAt(185, 67), same(a));
+      expect(regions.regionAt(-175 - 360, 67), same(a));
+    });
+
+    test('a range on both sides of 180 is framed Pacific-centred', () {
+      // Chukotka, Kamchatka and Alaska: the short way round is the Pacific.
+      final ids = [
+        idAt(172, 66)!,
+        idAt(160, 56)!,
+        idAt(-150, 64)!,
+        idAt(-165, 62)!,
+      ];
+      final f = frameOf(regions, {for (final id in ids) id: RangeClass.resident});
+      expect(f.lon1, greaterThan(180), reason: 'second copy of the world');
+      expect(f.lon0, greaterThan(100));
+      expect(f.lon1 - f.lon0, lessThan(150));
+      expect(f.lon1, lessThanOrEqualTo(WorldMapConfig.lonWrapMax));
+      // The scene draws the world twice for it.
+      expect(worldCopyOffsets(f), [0, WorldMapConfig.lonPeriod]);
+      expect(worldCopyOffsets(kWorldFrame), [0]);
+    });
+
+    test('a range on the Americas is framed there, not on the whole world', () {
+      final ids = [idAt(-80, 35)!, idAt(-100, 40)!, idAt(-90, 30)!];
+      final f = frameOf(regions, {for (final id in ids) id: RangeClass.resident});
+      expect(f.lon0, greaterThan(-130));
+      expect(f.lon1, lessThan(-40));
+      expect(frameAspect(f), inInclusiveRange(WorldMapConfig.aspectMin - 1e-6, WorldMapConfig.aspectMax + 1e-6));
+    });
+
+    test('a circumpolar range gets a window inside the area, at most the world wide', () {
+      final ids = [
+        for (final p in [
+          (-100.0, 66.0), (-150.0, 66.0), (100.0, 70.0), (30.0, 68.0),
+          (60.0, 66.0), (150.0, 68.0), (-70.0, 58.0),
+        ])
+          idAt(p.$1, p.$2),
+      ].whereType<String>().toList();
+      expect(ids.length, greaterThanOrEqualTo(5));
+      final f = frameOf(regions, {for (final id in ids) id: RangeClass.resident});
+      expect(f.lon1 - f.lon0, lessThanOrEqualTo(WorldMapConfig.lonPeriod));
+      expect(f.lat0, greaterThanOrEqualTo(WorldMapConfig.latMin));
+      expect(f.lat1, lessThanOrEqualTo(WorldMapConfig.latMax));
+    });
+
+    test('the legend names the Americas, Asia and Oceania', () {
+      expect(regionOf(40, -100), WorldRegion.northAmerica);
+      expect(regionOf(-10, -60), WorldRegion.southAmerica);
+      expect(regionOf(10, -85), WorldRegion.centralAmerica);
+      expect(regionOf(-25, 135), WorldRegion.oceania);
+      expect(regionOf(20, -157), WorldRegion.oceania);
+      expect(regionOf(35, 105), WorldRegion.eastAsia);
+      expect(regionOf(20, 78), WorldRegion.southAsia);
+      expect(regionOf(0, 110), WorldRegion.southeastAsia);
+    });
+  });
+
   group('legend', () {
     test('a migrant: nesting and wintering areas, and the distance', () {
       final l = buildRangeLegend(regions, fixtureClasses(regions, 'Apus apus'));
@@ -209,13 +273,13 @@ void main() {
     setUpAll(() => cells = landCells(regions));
 
     test('keeps only cells on land, inside the view', () {
-      expect(cells.length, inInclusiveRange(150, 400));
+      expect(cells.length, inInclusiveRange(400, 900));
       for (final c in cells) {
         expect(c.longitude, inInclusiveRange(WorldMapConfig.lonMin, WorldMapConfig.lonMax));
         expect(c.latitude, inInclusiveRange(WorldMapConfig.latMin, WorldMapConfig.latMax));
       }
-      expect(cells, contains((latitude: 49.5, longitude: 2.5)));
-      expect(cells, isNot(contains((latitude: 34.5, longitude: -17.5))));
+      expect(cells, contains((latitude: 47.5, longitude: 2.5)));
+      expect(cells, isNot(contains((latitude: 32.5, longitude: -17.5))));
     });
 
     test('a migrant moves, a resident stays', () async {

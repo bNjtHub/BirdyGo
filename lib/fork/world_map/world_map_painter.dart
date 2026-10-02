@@ -85,6 +85,14 @@ class WorldMapColors {
   );
 }
 
+/// Longitude shifts at which the world is drawn for [frame]: 0, and one
+/// period more when the frame goes past 180 (a Pacific-centred range), so the
+/// map continues across the antimeridian.
+List<double> worldCopyOffsets(MapFrame frame) => [
+  0,
+  if (frame.lon1 > WorldMapConfig.lonMax) WorldMapConfig.lonPeriod,
+];
+
 /// Where a map point of a [frame] falls in a [size] box, and back.
 class MapProjection {
   MapProjection(this.frame, this.size)
@@ -125,50 +133,68 @@ class WorldMapScene {
   WorldMapScene(this.regions, this.classes, this.frame, this.size)
     : projection = MapProjection(frame, size) {
     final m = projection.matrix;
-    bool inFrame(Rect b) =>
-        b.right >= frame.lon0 - _pad &&
-        b.left <= frame.lon1 + _pad &&
-        b.bottom >= frame.lat0 - _pad &&
-        b.top <= frame.lat1 + _pad;
+    final offsets = worldCopyOffsets(frame);
     final rawLand = Path()..fillType = PathFillType.evenOdd;
-    for (final r in regions.regions) {
-      if (r.rings.isEmpty || !inFrame(r.bounds)) continue;
-      rawLand.addPath(r.path, Offset.zero);
+    for (final off in offsets) {
+      bool inFrame(Rect b) =>
+          b.right + off >= frame.lon0 - _pad &&
+          b.left + off <= frame.lon1 + _pad &&
+          b.bottom >= frame.lat0 - _pad &&
+          b.top <= frame.lat1 + _pad;
+      for (final r in regions.regions) {
+        if (r.rings.isEmpty || !inFrame(r.bounds)) continue;
+        rawLand.addPath(r.path, Offset(off, 0));
+      }
     }
     // Same transform as the full path had, on the subset: same pixels.
     land = rawLand.transform(m);
     for (final c in RangeClass.values) {
       byClass[c] = Path()..fillType = PathFillType.evenOdd;
     }
-    for (final e in classes.entries) {
-      final region = regions.byId(e.key);
-      if (region == null || region.rings.isEmpty || !inFrame(region.bounds)) {
-        continue;
+    for (final off in offsets) {
+      bool inFrame(Rect b) =>
+          b.right + off >= frame.lon0 - _pad &&
+          b.left + off <= frame.lon1 + _pad &&
+          b.bottom >= frame.lat0 - _pad &&
+          b.top <= frame.lat1 + _pad;
+      for (final e in classes.entries) {
+        final region = regions.byId(e.key);
+        if (region == null ||
+            region.rings.isEmpty ||
+            !inFrame(region.bounds)) {
+          continue;
+        }
+        byClass[e.value]!.addPath(
+          off == 0 ? region.path : region.path.shift(Offset(off, 0)),
+          Offset.zero,
+          matrix4: m,
+        );
       }
-      byClass[e.value]!.addPath(region.path, Offset.zero, matrix4: m);
     }
     final rawBorders = Path()..fillType = PathFillType.evenOdd;
-    for (final ring in regions.borders) {
-      final n = ring.length ~/ 2;
-      var minX = double.infinity, maxX = -double.infinity;
-      var minY = double.infinity, maxY = -double.infinity;
-      for (var i = 0; i < n; i++) {
-        final x = ring[i * 2], y = ring[i * 2 + 1];
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-      if (n == 0 ||
-          maxX < frame.lon0 - _pad ||
-          minX > frame.lon1 + _pad ||
-          maxY < frame.lat0 - _pad ||
-          minY > frame.lat1 + _pad) {
-        continue;
-      }
-      for (var i = 0; i < n; i++) {
-        final x = ring[i * 2].toDouble(), y = -ring[i * 2 + 1].toDouble();
-        i == 0 ? rawBorders.moveTo(x, y) : rawBorders.lineTo(x, y);
+    for (final off in offsets) {
+      for (final ring in regions.borders) {
+        final n = ring.length ~/ 2;
+        var minX = double.infinity, maxX = -double.infinity;
+        var minY = double.infinity, maxY = -double.infinity;
+        for (var i = 0; i < n; i++) {
+          final x = ring[i * 2], y = ring[i * 2 + 1];
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+        if (n == 0 ||
+            maxX + off < frame.lon0 - _pad ||
+            minX + off > frame.lon1 + _pad ||
+            maxY < frame.lat0 - _pad ||
+            minY > frame.lat1 + _pad) {
+          continue;
+        }
+        for (var i = 0; i < n; i++) {
+          final x = ring[i * 2].toDouble() + off, y = -ring[i * 2 + 1].toDouble();
+          i == 0 ? rawBorders.moveTo(x, y) : rawBorders.lineTo(x, y);
+        }
       }
     }
     borders = rawBorders.transform(m);
@@ -298,29 +324,42 @@ void paintMapOverlay(
   final m = projection.matrix;
   final tapped = selected == null ? null : regions.byId(selected);
   if (tapped != null) {
-    canvas.drawPath(
-      tapped.path.transform(m),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = WorldMapConfig.selectedLineWidth
-        ..strokeJoin = StrokeJoin.round
-        ..color = colors.selected,
-    );
+    final outline =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = WorldMapConfig.selectedLineWidth
+          ..strokeJoin = StrokeJoin.round
+          ..color = colors.selected;
+    for (final off in worldCopyOffsets(frame)) {
+      canvas.drawPath(
+        (off == 0 ? tapped.path : tapped.path.shift(Offset(off, 0))).transform(m),
+        outline,
+      );
+    }
   }
   final u = user;
-  if (u != null &&
-      u.longitude >= frame.lon0 &&
-      u.longitude <= frame.lon1 &&
-      u.latitude >= frame.lat0 &&
-      u.latitude <= frame.lat1) {
-    final p = projection.project(u.latitude, u.longitude);
-    canvas
-      ..drawCircle(
-        p,
-        WorldMapConfig.userDot / 2 + WorldMapConfig.userDotRing,
-        Paint()..color = colors.userRing,
-      )
-      ..drawCircle(p, WorldMapConfig.userDot / 2, Paint()..color = colors.user);
+  if (u != null) {
+    for (final off in worldCopyOffsets(frame)) {
+      final lon = u.longitude + off;
+      if (lon < frame.lon0 ||
+          lon > frame.lon1 ||
+          u.latitude < frame.lat0 ||
+          u.latitude > frame.lat1) {
+        continue;
+      }
+      final p = projection.project(u.latitude, lon);
+      canvas
+        ..drawCircle(
+          p,
+          WorldMapConfig.userDot / 2 + WorldMapConfig.userDotRing,
+          Paint()..color = colors.userRing,
+        )
+        ..drawCircle(
+          p,
+          WorldMapConfig.userDot / 2,
+          Paint()..color = colors.user,
+        );
+    }
   }
 }
 

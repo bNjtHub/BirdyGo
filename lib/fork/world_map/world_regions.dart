@@ -183,6 +183,9 @@ class WorldRegions {
 
   /// The region holding ([lon], [lat]), or null at sea.
   MapRegion? regionAt(double lon, double lat) {
+    // A Pacific-centred map goes past 180: the same world, shifted.
+    if (lon > WorldMapConfig.lonMax) lon -= WorldMapConfig.lonPeriod;
+    if (lon < WorldMapConfig.lonMin) lon += WorldMapConfig.lonPeriod;
     for (final region in regions) {
       if (region.contains(lon, lat)) return region;
     }

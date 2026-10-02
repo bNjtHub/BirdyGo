@@ -100,7 +100,10 @@ class MapViewport {
       centerLon,
       size.width / pixelsPerLon,
       WorldMapConfig.lonMin,
-      WorldMapConfig.lonMax,
+      // A Pacific-centred home frame may use the second copy of the world.
+      home.lon1 > WorldMapConfig.lonMax
+          ? WorldMapConfig.lonWrapMax
+          : WorldMapConfig.lonMax,
     );
     final lat = clamp(
       centerLat,

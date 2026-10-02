@@ -99,7 +99,10 @@ SEASON_MONTHS = {
 }
 MIN_EFFORT = 200
 MIN_SPECIES_RECORDS = 5
-MIN_RATE = 0.003
+# 0.3 % kept out the rare and secretive birds of the well-watched countries
+# (a saw-whet owl is far below 0.3 % of the records of a US state): 0.1 % for
+# the whole world, the relative floor below still drops the scattered records.
+MIN_RATE = 0.001
 RELATIVE_RATE = 0.1
 
 RESIDENT, BREEDING, WINTERING, PASSAGE = 0, 1, 2, 3
@@ -574,7 +577,7 @@ def read_ranges(path):
     return out
 
 
-def build_from_sql(zip_path, out_path, date, cache, fallback=None):
+def build_from_sql(zip_path, out_path, date, cache, fallback=None, fallback_regions=None):
     ids = read_region_ids(REGIONS_ASSET)
     region_index = {rid: i for i, rid in enumerate(ids)}
     join = json.loads(gzip.decompress(JOIN_ASSET.read_bytes()))
@@ -608,6 +611,19 @@ def build_from_sql(zip_path, out_path, date, cache, fallback=None):
         # Species the download cannot name (GBIF leaves some without a species
         # rank): keep their entry from an earlier ranges file, if it has one.
         old = read_ranges(fallback)
+        if fallback_regions:
+            # The earlier file counts regions in the order of the earlier
+            # regions asset: renumber them for the current one.
+            old_ids = read_region_ids(fallback_regions)
+            remapped = {}
+            for n, entries in old.items():
+                out = []
+                for e in entries:
+                    rid = old_ids[e >> 2]
+                    if rid in region_index:
+                        out.append((region_index[rid] << 2) | (e & 3))
+                remapped[n] = sorted(out)
+            old = remapped
         have = {n for n, _ in rows}
         for n in unmatched:
             if n in old and n not in have:
@@ -647,6 +663,9 @@ def main():
                     help="GBIF SQL download (species, level1gid, month, n): no network, all species")
     ap.add_argument("--fallback-ranges", type=Path, metavar="BIN",
                     help="with --from-sql: earlier ranges file, used for species the download cannot name")
+    ap.add_argument("--fallback-regions", type=Path, metavar="BIN",
+                    help="with --fallback-ranges: the regions asset that file was built with, "
+                         "when the region order has changed since")
     ap.add_argument("--build-only", action="store_true", help="no network: rebuild from the cache")
     ap.add_argument("--workers", type=int, default=1, choices=[1, 2])
     ap.add_argument("--rate", type=float, default=1.0, help="requests per second, all workers")
@@ -658,7 +677,7 @@ def main():
     if args.from_sql:
         build_from_sql(args.from_sql, args.out,
                        args.date or (today.year * 10000 + today.month * 100 + today.day),
-                       args.cache, args.fallback_ranges)
+                       args.cache, args.fallback_ranges, args.fallback_regions)
         return
     date = args.date or (today.year * 10000 + today.month * 100 + today.day)
     last_year = args.year or today.year
