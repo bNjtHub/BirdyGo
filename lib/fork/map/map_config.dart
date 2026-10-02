@@ -46,3 +46,16 @@ const int kIgnMaxNativeZoom = 19;
 /// Size of the grid sensitive species' positions snap to in exports, in
 /// degrees (0.1° is about 11 km north–south).
 const double kSensitiveBlurDegrees = 0.1;
+
+/// Neutral world view of the contact map when there is no contact and no
+/// known position (English version prep).
+const double kMapWorldCenterLat = 20;
+const double kMapWorldCenterLng = 0;
+const double kMapWorldZoom = 2;
+
+/// Zoom of the empty map when it centers on the last known position.
+const double kMapKnownPositionZoom = 6;
+
+/// Regions whose users get the IGN base maps (France only coverage).
+const String kMapIgnRegionCode = 'FR';
+const String kMapIgnLanguageCode = 'fr';
