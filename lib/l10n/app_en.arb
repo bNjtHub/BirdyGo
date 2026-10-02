@@ -6514,5 +6514,9 @@
   "forkFicheNotInBookTitle": "Not in your notebook yet",
   "@forkFicheNotInBookTitle": {"description": "BirdyGo fork: species page, never-heard block title."},
   "forkFicheListenToFind": "Listen to find it",
-  "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."}
+  "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."},
+  "forkFirstNameSaved": "Name saved",
+  "@forkFirstNameSaved": {"description": "BirdyGo fork: toast after the first name is committed in Settings."},
+  "forkSettingSaved": "{setting}: {value}",
+  "@forkSettingSaved": {"description": "BirdyGo fork: toast after a setting is chosen in a picker.", "placeholders": {"setting": {"type": "String"}, "value": {"type": "String"}}}
 }
