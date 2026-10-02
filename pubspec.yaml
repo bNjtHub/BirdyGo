@@ -50,7 +50,7 @@ dependencies:
   package_info_plus: ^10.1.0
 
   # Export
-  archive: ^4.0.2
+  archive: ^4.3.0
   crypto: ^3.0.3
 
   # Localization
