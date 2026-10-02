@@ -6,6 +6,7 @@ import 'package:birdnet_live/core/constants/app_constants.dart';
 import 'package:birdnet_live/fork/species_photo/inat_photo_service.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo_config.dart';
+import 'package:birdnet_live/fork/species_photo/species_photo_page_dots.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo_providers.dart';
 import 'package:birdnet_live/fork/species_photo/species_photo_viewer.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -122,6 +123,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required bool allowed,
   required _Net net,
+  bool reducedMotion = false,
 }) async {
   SharedPreferences.setMockInitialValues({kOnlinePhotosPref: allowed});
   final prefs = await SharedPreferences.getInstance();
@@ -133,11 +135,18 @@ Future<void> _pump(
           _Service(net.client, net.dir),
         ),
       ],
-      child: const MaterialApp(
-        locale: Locale('fr'),
+      child: MaterialApp(
+        builder:
+            (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(disableAnimations: reducedMotion),
+              child: child!,
+            ),
+        locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
+        home: const Scaffold(
           body: Center(
             child: SizedBox(
               width: 300,
@@ -157,7 +166,14 @@ Future<void> _pump(
 /// The gallery reads and writes files: real time must pass between pumps.
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 100; i++) {
-    if (i > 5 &&
+    // Wait for the extras (the pending pill and its delay run in fake time);
+    // with none to come (switch off, failure), a fixed minimum.
+    if ((i > 60 ||
+            (i > 5 &&
+                find
+                    .byKey(const ValueKey('photo-dot-1'))
+                    .evaluate()
+                    .isNotEmpty)) &&
         find.byKey(const ValueKey('photo-loader')).evaluate().isEmpty) {
       break;
     }
@@ -274,33 +290,134 @@ void main() {
   });
   group('loading indicator', () {
     final loader = find.byKey(const ValueKey('photo-loader'));
+    final pill = find.byKey(const ValueKey('photo-pill'));
 
-    testWidgets('shown while pending (alone), gone after completion', (
+    /// Past the delay before the pending pill shows.
+    Future<void> pastDelay(WidgetTester tester) async {
+      await tester.pump(
+        kCarouselPendingDelay + const Duration(milliseconds: 50),
+      );
+    }
+
+    testWidgets('pending pill while loading: single photo, no pages, same '
+        'height as the final dots pill', (tester) async {
+      final net = _Net()..gate = Completer<void>();
+      await _pump(tester, allowed: true, net: net);
+      await pastDelay(tester);
+      expect(loader, findsOneWidget);
+      expect(find.bySemanticsLabel('Chargement des photos'), findsOneWidget);
+      expect(find.byType(PageView), findsNothing);
+      expect(_dots(), findsNothing);
+      final pendingHeight = tester.getSize(pill).height;
+      expect(pendingHeight, kPhotoPillHeight);
+
+      net.gate!.complete();
+      await _settle(tester);
+      await tester.pumpAndSettle();
+      expect(loader, findsNothing);
+      expect(tester.getSize(pill).height, pendingHeight);
+    });
+
+    testWidgets('no page is added before completion; all appear at once', (
       tester,
     ) async {
       final net = _Net()..gate = Completer<void>();
       await _pump(tester, allowed: true, net: net);
-      expect(loader, findsOneWidget);
-      expect(_dots(), findsNothing);
-      expect(find.bySemanticsLabel('Chargement des photos'), findsOneWidget);
+      await pastDelay(tester);
+      expect(find.byType(PageView), findsNothing);
 
       net.gate!.complete();
-      await _settle(tester);
+      // Downloads run in real time: no page may show before the end.
+      var sawPartial = false;
+      for (var i = 0; i < 60; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump(const Duration(milliseconds: 5));
+        final n =
+            [
+              for (var d = 0; d < 5; d++)
+                if (find.byKey(ValueKey('photo-dot-$d')).evaluate().isNotEmpty)
+                  d,
+            ].length;
+        if (n != 0 && n != 5) sawPartial = true;
+      }
+      await tester.pumpAndSettle();
+      expect(sawPartial, isFalse);
+      expect(find.byType(PageView), findsOneWidget);
+      expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
       expect(loader, findsNothing);
-      expect(_dots(), findsOneWidget);
     });
 
-    testWidgets('gone after failure', (tester) async {
+    testWidgets('failure: the pill is gone', (tester) async {
       final net =
           _Net()
             ..apiFails = true
             ..gate = Completer<void>();
       await _pump(tester, allowed: true, net: net);
+      await pastDelay(tester);
       expect(loader, findsOneWidget);
       net.gate!.complete();
       await _settle(tester);
+      await tester.pumpAndSettle();
       expect(loader, findsNothing);
+      expect(pill, findsNothing);
       expect(_dots(), findsNothing);
+    });
+
+    testWidgets('cache hit: dots right away, never a pending pill', (
+      tester,
+    ) async {
+      final net = _Net();
+      await _pump(tester, allowed: true, net: net); // fills the disk cache
+      await tester.pumpWidget(const SizedBox());
+      final calls = net.apiCalls;
+      await _pump(tester, allowed: true, net: net);
+      await tester.pumpAndSettle();
+      expect(net.apiCalls, calls);
+      expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
+      expect(loader, findsNothing);
+    });
+
+    testWidgets('reduced motion: static pending dots at rest opacity', (
+      tester,
+    ) async {
+      final net = _Net()..gate = Completer<void>();
+      await _pump(tester, allowed: true, net: net, reducedMotion: true);
+      await pastDelay(tester);
+      expect(loader, findsOneWidget);
+      double alpha(int i) {
+        final box =
+            tester
+                    .widget<Container>(
+                      find.descendant(
+                        of: find.byKey(ValueKey('photo-pending-dot-$i')),
+                        matching: find.byType(Container),
+                      ),
+                    )
+                    .decoration!
+                as BoxDecoration;
+        return box.color!.a;
+      }
+
+      final before = [for (var i = 0; i < 3; i++) alpha(i)];
+      await tester.pump(const Duration(milliseconds: 400));
+      expect([for (var i = 0; i < 3; i++) alpha(i)], before);
+      expect(before.every((a) => (a - kCarouselDimAlpha).abs() < 0.01), isTrue);
+      net.gate!.complete();
+      await _settle(tester);
+    });
+
+    testWidgets('timeout: loaded photos are revealed, pill goes', (
+      tester,
+    ) async {
+      final net = _Net()..gate = Completer<void>();
+      await _pump(tester, allowed: true, net: net);
+      await tester.pump(kCarouselRevealTimeout + const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(loader, findsNothing);
+      net.gate!.complete();
+      await _settle(tester);
     });
 
     testWidgets('absent when the switch is off', (tester) async {
