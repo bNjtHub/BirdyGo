@@ -44,3 +44,20 @@ final onlineSpeciesPhotoProvider = FutureProvider.autoDispose
       if (!ref.watch(onlinePhotosAllowedProvider)) return null;
       return ref.watch(inatPhotoServiceProvider).photoFor(inatId);
     });
+
+/// The extra carousel photos of iNaturalist taxon `inatId`, growing as they
+/// load. `bundledPage` is the page of the bundled photo, left out. Empty
+/// and silent (no request) while online photos are off.
+final speciesGalleryProvider = StreamProvider.autoDispose
+    .family<List<GalleryPhoto>, ({int inatId, String? bundledPage})>((
+      ref,
+      key,
+    ) {
+      if (!ref.watch(onlinePhotosAllowedProvider)) return const Stream.empty();
+      return ref
+          .watch(inatPhotoServiceProvider)
+          .galleryFor(
+            key.inatId,
+            exclude: {if (key.bundledPage != null) key.bundledPage!},
+          );
+    });

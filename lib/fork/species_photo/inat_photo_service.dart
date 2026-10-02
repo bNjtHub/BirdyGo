@@ -9,6 +9,7 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -45,27 +46,65 @@ class InatPhotoChoice {
       taxon['default_photo'],
     ];
     for (final photo in candidates.whereType<Map<String, dynamic>>()) {
-      final license = (photo['license_code'] as String? ?? '').toLowerCase();
-      if (!kOpenPhotoLicenses.contains(license)) continue;
-      final dims = photo['original_dimensions'];
-      final width = dims is Map ? dims['width'] as num? : null;
-      final height = dims is Map ? dims['height'] as num? : null;
-      if (width == null || height == null || height <= 0) continue;
-      if (width / height < kPhotoMinAspectRatio) continue;
-      final url = inatSizedUrl(photo, size);
-      if (url == null) continue;
-      return InatPhotoChoice(
-        url,
-        PhotoCredit(
-          author: inatAuthor(photo),
-          license: license,
-          source: 'iNaturalist',
-          pageUrl: photo['id'] == null ? null : '$kInatPhotoPage${photo['id']}',
-        ),
-      );
+      final choice = _choiceOf(photo, size);
+      if (choice != null) return choice;
     }
     return null;
   }
+
+  /// Up to [max] open-license landscape photos of [taxon], same rule as
+  /// [pick], without those whose page is in [exclude] (the photo the sheet
+  /// already shows) and without duplicates. Carousel photos (J7).
+  static List<InatPhotoChoice> pickAll(
+    Map<String, dynamic> taxon, {
+    int max = kCarouselExtraPhotos,
+    Set<String> exclude = const {},
+    String size = kOnlinePhotoSize,
+  }) {
+    final candidates = <Object?>[
+      for (final taxonPhoto in taxon['taxon_photos'] as List? ?? const [])
+        if (taxonPhoto is Map) taxonPhoto['photo'],
+    ];
+    final seen = {...exclude};
+    final out = <InatPhotoChoice>[];
+    for (final photo in candidates.whereType<Map<String, dynamic>>()) {
+      final choice = _choiceOf(photo, size);
+      if (choice == null) continue;
+      if (!seen.add(choice.credit.pageUrl ?? choice.url)) continue;
+      out.add(choice);
+      if (out.length >= max) break;
+    }
+    return out;
+  }
+
+  static InatPhotoChoice? _choiceOf(Map<String, dynamic> photo, String size) {
+    final license = (photo['license_code'] as String? ?? '').toLowerCase();
+    if (!kOpenPhotoLicenses.contains(license)) return null;
+    final dims = photo['original_dimensions'];
+    final width = dims is Map ? dims['width'] as num? : null;
+    final height = dims is Map ? dims['height'] as num? : null;
+    if (width == null || height == null || height <= 0) return null;
+    if (width / height < kPhotoMinAspectRatio) return null;
+    final url = inatSizedUrl(photo, size);
+    if (url == null) return null;
+    return InatPhotoChoice(
+      url,
+      PhotoCredit(
+        author: inatAuthor(photo),
+        license: license,
+        source: 'iNaturalist',
+        pageUrl: photo['id'] == null ? null : '$kInatPhotoPage${photo['id']}',
+      ),
+    );
+  }
+}
+
+/// A carousel photo held in memory for the app run, with its credit.
+class GalleryPhoto {
+  const GalleryPhoto(this.bytes, this.credit);
+
+  final Uint8List bytes;
+  final PhotoCredit credit;
 }
 
 final _sizedUrl = RegExp(
@@ -121,6 +160,10 @@ class InatPhotoService {
 
   final Map<int, Future<OnlinePhoto?>> _inFlight = {};
 
+  // Carousel, kept for the app run only: one API request per species.
+  final Map<int, Future<Map<String, dynamic>?>> _taxa = {};
+  final Map<String, GalleryPhoto> _gallery = {};
+
   static const _headers = {
     'User-Agent': AppConstants.networkUserAgent,
     'Accept': 'application/json',
@@ -134,6 +177,65 @@ class InatPhotoService {
         // this future wait for itself.
         _inFlight.remove(inatId);
       });
+
+  /// The extra photos of the carousel of taxon [inatId], as a growing list:
+  /// one yield per photo once it is fully downloaded, so a page only exists
+  /// when its image is ready. One API request per species and app run, then
+  /// the photos one after the other (the next one is thus always prefetched).
+  /// [exclude] holds the photo pages already shown. Never throws: any
+  /// failure just ends the stream with what was loaded.
+  Stream<List<GalleryPhoto>> galleryFor(
+    int inatId, {
+    Set<String> exclude = const {},
+  }) async* {
+    final List<InatPhotoChoice> choices;
+    try {
+      final taxon = await (_taxa[inatId] ??= _fetchTaxon(inatId));
+      if (taxon == null) return;
+      choices = InatPhotoChoice.pickAll(taxon, exclude: exclude);
+    } on Object {
+      _taxa.remove(inatId); // a failure is not remembered
+      return;
+    }
+    final loaded = <GalleryPhoto>[];
+    for (final choice in choices) {
+      try {
+        final photo = _gallery[choice.url] ??= await _download(choice);
+        loaded.add(photo);
+        yield List.unmodifiable(loaded);
+      } on Object {
+        // This photo is skipped, the next ones may work.
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>?> _fetchTaxon(int inatId) async {
+    final response = await _client
+        .get(Uri.parse('$kInatApiBase/taxa/$inatId'), headers: _headers)
+        .timeout(kPhotoApiTimeout);
+    if (response.statusCode == 404) return null;
+    if (response.statusCode != 200) {
+      throw http.ClientException('HTTP ${response.statusCode}');
+    }
+    final results = (jsonDecode(response.body) as Map)['results'] as List?;
+    final taxa = (results ?? const []).whereType<Map<String, dynamic>>();
+    return taxa.where((t) => t['id'] == inatId).firstOrNull ??
+        taxa.firstOrNull;
+  }
+
+  Future<GalleryPhoto> _download(InatPhotoChoice choice) async {
+    final response = await _client
+        .get(Uri.parse(choice.url), headers: _headers)
+        .timeout(kPhotoDownloadTimeout);
+    final type = response.headers['content-type'];
+    if (response.statusCode != 200 ||
+        response.bodyBytes.isEmpty ||
+        response.bodyBytes.length > kOnlinePhotoMaxBytes ||
+        (type != null && !type.startsWith('image/'))) {
+      throw http.ClientException('bad photo');
+    }
+    return GalleryPhoto(response.bodyBytes, choice.credit);
+  }
 
   Future<OnlinePhoto?> _load(int inatId) async {
     try {

@@ -2032,5 +2032,6 @@
   "forkWorldMapHint": "Pincer pour zoomer, glisser pour déplacer, double appui pour zoomer",
   "forkWorldZoomValue": "Zoom {factor}",
   "forkFicheNotInBookTitle": "Pas encore dans ton carnet",
-  "forkFicheListenToFind": "Écouter pour le trouver"
+  "forkFicheListenToFind": "Écouter pour le trouver",
+  "forkPhotoPosition": "Photo {current} sur {total}"
 }

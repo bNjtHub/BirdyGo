@@ -49,3 +49,10 @@ const Duration kPhotoDownloadTimeout = Duration(seconds: 20);
 
 /// Settings key of the "large photos (online)" switch, off by default.
 const String kOnlinePhotosPref = 'fork_allow_online_photos';
+
+/// Online photos added after the bundled one in the species page carousel.
+const int kCarouselExtraPhotos = 4;
+
+/// Carousel page dots (DESIGN.md Photos).
+const double kCarouselDotSize = 6;
+const double kCarouselDotGap = 6;

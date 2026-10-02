@@ -6514,5 +6514,7 @@
   "forkFicheNotInBookTitle": "Not in your notebook yet",
   "@forkFicheNotInBookTitle": {"description": "BirdyGo fork: species page, never-heard block title."},
   "forkFicheListenToFind": "Listen to find it",
-  "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."}
+  "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."},
+  "forkPhotoPosition": "Photo {current} of {total}",
+  "@forkPhotoPosition": {"description": "BirdyGo fork: species page photo carousel, screen reader label.", "placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}}
 }

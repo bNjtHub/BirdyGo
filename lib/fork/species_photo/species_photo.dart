@@ -13,7 +13,9 @@ import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import 'photo_credit.dart';
+import 'inat_photo_service.dart';
 import 'photo_credit_sheet.dart';
+import 'species_photo_config.dart';
 import 'species_photo_providers.dart';
 
 const _placeholder = 'assets/images/dummy_species.png';
@@ -21,27 +23,62 @@ const _placeholder = 'assets/images/dummy_species.png';
 /// Fills its parent, which sets the frame: wrap it in an [AspectRatio] of
 /// `kSpeciesPhotoAspectRatio`. The online photo fades in over the bundled
 /// one inside the same frame, so nothing moves.
-class SpeciesPhoto extends ConsumerWidget {
+///
+/// With online photos allowed, up to 4 more photos follow as a swipeable
+/// carousel (J7): a page exists only once its image is downloaded. With
+/// them off, it is the single bundled photo, no dots, no request.
+class SpeciesPhoto extends ConsumerStatefulWidget {
   const SpeciesPhoto({super.key, required this.species});
 
   /// Null while the taxonomy loads: the placeholder shows.
   final TaxonomySpecies? species;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SpeciesPhoto> createState() => _SpeciesPhotoState();
+}
+
+class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
+  int _page = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final species = this.species;
+    final species = widget.species;
     final inatId = species?.inatId;
     final online =
         inatId == null
             ? null
             : ref.watch(onlineSpeciesPhotoProvider(inatId)).value;
-    final credit =
+    final bundledCredit =
         online?.credit ??
         (species == null
             ? const PhotoCredit()
             : PhotoCredit.fromSpecies(species));
-    void showCredit() => showPhotoCreditSheet(context, credit);
+    final gallery =
+        inatId == null
+            ? const <GalleryPhoto>[]
+            : ref
+                    .watch(
+                      speciesGalleryProvider((
+                        inatId: inatId,
+                        bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
+                      )),
+                    )
+                    .value ??
+                const <GalleryPhoto>[];
+    final extras = [
+      for (final photo in gallery)
+        if (photo.credit.pageUrl == null ||
+            photo.credit.pageUrl != online?.credit.pageUrl)
+          photo,
+    ];
+    final total = 1 + extras.length;
+    final page = _page.clamp(0, total - 1);
+    // The credit follows the page on screen.
+    void showCredit() => showPhotoCreditSheet(
+      context,
+      page == 0 ? bundledCredit : extras[page - 1].credit,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -50,47 +87,149 @@ class SpeciesPhoto extends ConsumerWidget {
             width.isFinite
                 ? (width * MediaQuery.devicePixelRatioOf(context)).round()
                 : null;
+        final bundledLayers = <Widget>[
+          Image.asset(
+            species?.assetImagePath ?? _placeholder,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            // Decoded at display size, never upscaled.
+            cacheWidth: cacheWidth,
+            errorBuilder:
+                (_, _, _) => Image.asset(_placeholder, fit: BoxFit.contain),
+          ),
+          if (online != null)
+            _FadeInPhoto(
+              key: ValueKey(online.file.path),
+              file: online.file,
+              cacheWidth: cacheWidth,
+            ),
+          ExcludeSemantics(
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(onTap: showCredit),
+            ),
+          ),
+        ];
+        final creditButton = Positioned(
+          right: BirdySpace.xs,
+          bottom: BirdySpace.xs,
+          child: IconButton(
+            onPressed: showCredit,
+            tooltip: l10n.forkPhotoCredit,
+            iconSize: BirdySizes.blockIcon,
+            icon: const Icon(AppIcons.infoOutline),
+            style: IconButton.styleFrom(
+              backgroundColor: BirdyBrand.black.withValues(
+                alpha: BirdyAlpha.photoButtonScrim,
+              ),
+              foregroundColor: BirdyBrand.white,
+            ),
+          ),
+        );
+        if (extras.isEmpty) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [...bundledLayers, creditButton],
+          );
+        }
         return Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              species?.assetImagePath ?? _placeholder,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-              // Decoded at display size, never upscaled.
-              cacheWidth: cacheWidth,
-              errorBuilder:
-                  (_, _, _) => Image.asset(_placeholder, fit: BoxFit.contain),
+            PageView.builder(
+              itemCount: total,
+              onPageChanged: (i) => setState(() => _page = i),
+              itemBuilder:
+                  (context, i) => Semantics(
+                    label: l10n.forkPhotoPosition(i + 1, total),
+                    image: true,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children:
+                          i == 0
+                              ? bundledLayers
+                              : [
+                                Image.memory(
+                                  extras[i - 1].bytes,
+                                  fit: BoxFit.cover,
+                                  gaplessPlayback: true,
+                                  cacheWidth: cacheWidth,
+                                  excludeFromSemantics: true,
+                                  errorBuilder:
+                                      (_, _, _) => const SizedBox.shrink(),
+                                ),
+                                ExcludeSemantics(
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: InkWell(onTap: showCredit),
+                                  ),
+                                ),
+                              ],
+                    ),
+                  ),
             ),
-            if (online != null)
-              _FadeInPhoto(
-                key: ValueKey(online.file.path),
-                file: online.file,
-                cacheWidth: cacheWidth,
-              ),
-            ExcludeSemantics(
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(onTap: showCredit),
-              ),
-            ),
-            Positioned(
-              right: BirdySpace.xs,
-              bottom: BirdySpace.xs,
-              child: IconButton(
-                onPressed: showCredit,
-                tooltip: l10n.forkPhotoCredit,
-                iconSize: BirdySizes.blockIcon,
-                icon: const Icon(AppIcons.infoOutline),
-                style: IconButton.styleFrom(
-                  backgroundColor: BirdyBrand.black.withValues(alpha: BirdyAlpha.photoButtonScrim),
-                  foregroundColor: BirdyBrand.white,
-                ),
-              ),
-            ),
+            _PageDots(count: total, current: page),
+            creditButton,
           ],
         );
       },
+    );
+  }
+}
+
+/// Page dots on a small scrim, so they read on any photo.
+class _PageDots extends StatelessWidget {
+  const _PageDots({required this.count, required this.current});
+
+  final int count;
+  final int current;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: BirdySpace.m,
+      child: ExcludeSemantics(
+        child: IgnorePointer(
+          child: Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: BirdyBrand.black.withValues(
+                  alpha: BirdyAlpha.photoButtonScrim,
+                ),
+                borderRadius: BorderRadius.circular(BirdyRadii.hero),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BirdySpace.s,
+                  vertical: BirdySpace.xs + BirdySpace.xxs,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < count; i++)
+                      Container(
+                        key: ValueKey('photo-dot-$i'),
+                        width: kCarouselDotSize,
+                        height: kCarouselDotSize,
+                        margin: EdgeInsets.only(
+                          left: i == 0 ? 0 : kCarouselDotGap,
+                        ),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              i == current
+                                  ? BirdyBrand.white
+                                  : BirdyBrand.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
