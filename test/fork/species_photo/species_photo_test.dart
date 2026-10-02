@@ -52,6 +52,13 @@ class _FakePhotoService extends InatPhotoService {
     calls.add(inatId);
     return photo;
   }
+
+  // No disk in a widget test: the carousel gallery is out of scope here.
+  @override
+  Stream<List<GalleryPhoto>> galleryFor(
+    int inatId, {
+    Set<String> exclude = const {},
+  }) => Stream.value(const []);
 }
 
 Future<void> _pumpPhoto(

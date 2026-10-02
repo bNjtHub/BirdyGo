@@ -71,14 +71,29 @@ final speciesGalleryProvider = StreamProvider.autoDispose
       );
     });
 
-/// Marks every event as "still loading", then the end of the stream (done or
-/// failed) as finished.
+/// Marks every event as "still loading", then ends with an explicit
+/// "finished" event whatever happened (done, partly failed, error).
 Stream<SpeciesGallery> _withProgress(Stream<List<GalleryPhoto>> source) async* {
   var last = const <GalleryPhoto>[];
   yield const SpeciesGallery([], loading: true);
-  await for (final photos in source) {
-    last = photos;
-    yield SpeciesGallery(photos, loading: true);
+  try {
+    await for (final photos in source) {
+      last = photos;
+      yield SpeciesGallery(photos, loading: true);
+    }
+  } on Object {
+    // Whatever loaded so far stays.
   }
   yield SpeciesGallery(last, loading: false);
+}
+
+/// Test hook for [_withProgress].
+Stream<SpeciesGallery> withGalleryProgress(Stream<List<GalleryPhoto>> source) =>
+    _withProgress(source);
+
+/// Whether the spinner shows: only while the gallery stream has neither
+/// finished nor failed.
+bool galleryLoading(AsyncValue<SpeciesGallery> state) {
+  if (state.hasError) return false;
+  return state.value?.loading ?? true;
 }
