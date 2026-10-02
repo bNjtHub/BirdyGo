@@ -23,7 +23,6 @@ import '../audio/audio_providers.dart';
 import '../explore/explore_providers.dart';
 import '../../fork/live/live_position.dart'; // FORK: GPS track (J6c)
 import '../explore/widgets/species_info_overlay.dart';
-import '../history/session_library_screen.dart';
 // FORK: SessionReviewScreen import dropped, the stop flow opens the Bilan (J6g-e)
 import '../history/session_checkpoint_writer.dart';
 import '../inference/advanced_pooling_params.dart';
@@ -1086,15 +1085,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen>
             ),
           );
         }
+        // FORK: go straight from the live screen to the listening summary
+        // (J6c, J6g-e). No session library in between: it flashed under the
+        // page transition, and closing the summary pops to the first route.
         navigator.pushReplacement(
-          PageRouteBuilder<void>(
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-            pageBuilder: (a, b, c) => const SessionLibraryScreen(),
-          ),
+          afterStopSummaryRoute(session, saved: autoSave),
         );
-        // FORK: always the listening summary, saved or not (J6c, J6g-e)
-        navigator.push(afterStopSummaryRoute(session, saved: autoSave));
       }
     } catch (error, stack) {
       debugPrint('LiveScreen: finalization failed: $error\n$stack');
