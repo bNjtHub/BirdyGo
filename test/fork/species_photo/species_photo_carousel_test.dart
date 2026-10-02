@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -72,12 +73,16 @@ class _Net {
   int apiCalls = 0;
   int downloads = 0;
   bool apiFails = false;
+
+  /// When set, the API answers only once it completes.
+  Completer<void>? gate;
   final agents = <String?>{};
 
   late final client = MockClient((request) async {
     agents.add(request.headers['User-Agent']);
     if (request.url.host == 'api.inaturalist.org') {
       apiCalls++;
+      await gate?.future;
       if (apiFails) return http.Response('', 500);
       return http.Response(
         jsonEncode({
@@ -234,5 +239,45 @@ void main() {
     expect(net.apiCalls, 1);
     expect(_dots(), findsNothing);
     expect(find.byType(PageView), findsNothing);
+  });
+  group('loading indicator', () {
+    final loader = find.byKey(const ValueKey('photo-loader'));
+
+    testWidgets('shown while pending (alone), gone after completion', (
+      tester,
+    ) async {
+      final net = _Net()..gate = Completer<void>();
+      await _pump(tester, allowed: true, net: net);
+      expect(loader, findsOneWidget);
+      expect(_dots(), findsNothing);
+      expect(find.bySemanticsLabel('Chargement des photos'), findsOneWidget);
+
+      net.gate!.complete();
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+      expect(loader, findsNothing);
+      expect(_dots(), findsOneWidget);
+    });
+
+    testWidgets('gone after failure', (tester) async {
+      final net =
+          _Net()
+            ..apiFails = true
+            ..gate = Completer<void>();
+      await _pump(tester, allowed: true, net: net);
+      expect(loader, findsOneWidget);
+      net.gate!.complete();
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+      expect(loader, findsNothing);
+      expect(_dots(), findsNothing);
+    });
+
+    testWidgets('absent when the switch is off', (tester) async {
+      await _pump(tester, allowed: false, net: _Net());
+      expect(loader, findsNothing);
+    });
   });
 }

@@ -2033,5 +2033,6 @@
   "forkWorldZoomValue": "Zoom {factor}",
   "forkFicheNotInBookTitle": "Pas encore dans ton carnet",
   "forkFicheListenToFind": "Écouter pour le trouver",
+  "forkPhotoLoading": "Chargement des photos",
   "forkPhotoPosition": "Photo {current} sur {total}"
 }

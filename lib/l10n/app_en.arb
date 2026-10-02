@@ -6515,6 +6515,8 @@
   "@forkFicheNotInBookTitle": {"description": "BirdyGo fork: species page, never-heard block title."},
   "forkFicheListenToFind": "Listen to find it",
   "@forkFicheListenToFind": {"description": "BirdyGo fork: species page, never-heard block button."},
+  "forkPhotoLoading": "Loading photos",
+  "@forkPhotoLoading": {"description": "BirdyGo fork: species page photo carousel, screen reader label of the loading indicator."},
   "forkPhotoPosition": "Photo {current} of {total}",
   "@forkPhotoPosition": {"description": "BirdyGo fork: species page photo carousel, screen reader label.", "placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}}
 }

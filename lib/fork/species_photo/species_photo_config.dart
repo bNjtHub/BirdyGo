@@ -57,6 +57,15 @@ const int kCarouselExtraPhotos = 4;
 const double kCarouselDotSize = 6;
 const double kCarouselDotGap = 6;
 
+/// "More photos are coming" spinner after the dots: size, stroke, and the
+/// fixed progress shown instead of the spin with reduced motion.
+const double kCarouselLoaderSize = 11;
+const double kCarouselLoaderStroke = 1.5;
+const double kCarouselLoaderStaticProgress = 0.3;
+
+/// Opacity of the inactive dots and of the spinner.
+const double kCarouselDimAlpha = 0.5;
+
 /// Height of the top scrim of the header photo below the status bar.
 const double kPhotoTopScrimExtra = 56;
 

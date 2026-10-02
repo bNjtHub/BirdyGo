@@ -69,18 +69,22 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         (species == null
             ? const PhotoCredit()
             : PhotoCredit.fromSpecies(species));
-    final gallery =
+    final galleryState =
         inatId == null
-            ? const <GalleryPhoto>[]
+            ? null
             : ref
-                    .watch(
-                      speciesGalleryProvider((
-                        inatId: inatId,
-                        bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
-                      )),
-                    )
-                    .value ??
-                const <GalleryPhoto>[];
+                .watch(
+                  speciesGalleryProvider((
+                    inatId: inatId,
+                    bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
+                  )),
+                )
+                .value;
+    final gallery = galleryState?.photos ?? const <GalleryPhoto>[];
+    final loading =
+        inatId != null &&
+        ref.watch(onlinePhotosAllowedProvider) &&
+        (galleryState?.loading ?? true);
     final extras = [
       for (final photo in gallery)
         if (photo.credit.pageUrl == null ||
@@ -178,7 +182,11 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         if (extras.isEmpty) {
           return Stack(
             fit: StackFit.expand,
-            children: [...bundledLayers, creditButton],
+            children: [
+              ...bundledLayers,
+              _PageDots(count: 1, current: 0, loading: loading),
+              creditButton,
+            ],
           );
         }
         return Stack(
@@ -220,7 +228,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                     ),
                   ),
             ),
-            _PageDots(count: total, current: page),
+            _PageDots(count: total, current: page, loading: loading),
             creditButton,
           ],
         );
@@ -231,10 +239,15 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
 
 /// The carousel dots, at the bottom of the photo.
 class _PageDots extends StatelessWidget {
-  const _PageDots({required this.count, required this.current});
+  const _PageDots({
+    required this.count,
+    required this.current,
+    required this.loading,
+  });
 
   final int count;
   final int current;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +255,18 @@ class _PageDots extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: BirdySpace.m,
-      child: PhotoPageDots(count: count, current: current),
+      child: AnimatedSwitcher(
+        duration: BirdyMotion.exit,
+        child:
+            count > 1 || loading
+                ? PhotoPageDots(
+                  key: const ValueKey('photo-dots'),
+                  count: count,
+                  current: current,
+                  loading: loading,
+                )
+                : const SizedBox.shrink(key: ValueKey('photo-dots-none')),
+      ),
     );
   }
 }
