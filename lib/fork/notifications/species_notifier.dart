@@ -6,6 +6,8 @@
 /// still the top route: the listening never left it (J2b foreground service).
 library;
 
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -168,13 +170,36 @@ final speciesNotifierProvider = Provider<SpeciesNotifier>(
   (ref) => SpeciesNotifier(gateway: LocalNotificationsGateway()),
 );
 
+/// Clock time of a notification: « 7:41 » (24 h) for locales that use it,
+/// « 7:41 PM » for locales whose default is 12 h (English) unless the
+/// platform asks for 24 h ([alwaysUse24Hour], default: the platform setting).
+String notificationTime(
+  DateTime time,
+  String localeName, {
+  bool? alwaysUse24Hour,
+}) {
+  final use24 =
+      alwaysUse24Hour ??
+      PlatformDispatcher.instance.alwaysUse24HourFormat;
+  final twelveHourLocale = DateFormat.jm(localeName).pattern!.contains('a');
+  return twelveHourLocale && !use24
+      ? DateFormat.jm(localeName).format(time)
+      : DateFormat('H:mm', localeName).format(time);
+}
+
 /// Strings of the notifications from the app's localizations.
-SpeciesNotifierStrings speciesNotifierStrings(AppLocalizations l10n) =>
-    SpeciesNotifierStrings(
+SpeciesNotifierStrings speciesNotifierStrings(
+  AppLocalizations l10n, {
+  bool? alwaysUse24Hour,
+}) => SpeciesNotifierStrings(
       channelName: l10n.forkNewSpeciesChannel,
       channelDescription: l10n.forkNewSpeciesChannelDesc,
       body: (heardAt, level, rare) {
-        final time = DateFormat('H:mm').format(heardAt);
+        final time = notificationTime(
+          heardAt,
+          l10n.localeName,
+          alwaysUse24Hour: alwaysUse24Hour,
+        );
         final label =
             level == ReliabilityLevel.sure
                 ? l10n.forkLevelSure

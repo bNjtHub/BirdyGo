@@ -5,6 +5,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/live/live_session.dart';
 import '../../shared/utils/app_icons.dart';
@@ -12,6 +13,7 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/pressable.dart';
+import '../settings/france_features.dart';
 import 'lpo_send_screen.dart';
 
 /// Opens [LpoSendScreen] for [scientificName] only, from [session].
@@ -33,13 +35,15 @@ Future<void> openLpoSendForSpecies(
 );
 
 /// Full-width secondary button and its caption.
-class SpeciesLpoEntry extends StatelessWidget {
+class SpeciesLpoEntry extends ConsumerWidget {
   const SpeciesLpoEntry({super.key, required this.onSend});
 
   final VoidCallback onSend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // France-only (see france_features.dart).
+    if (!watchFranceFeatures(context, ref)) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     return Column(
