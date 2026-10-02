@@ -425,7 +425,8 @@ class LiveBackgroundMaxMinutesNotifier extends StateNotifier<int> {
 
   static int _read(SharedPreferences prefs) {
     final value = prefs.getInt(PrefKeys.liveBackgroundMaxMinutes);
-    return liveBackgroundMaxMinuteOptions.contains(value) ? value! : 30;
+    // FORK: 120 min by default, a walk lasts longer than 30 min.
+    return liveBackgroundMaxMinuteOptions.contains(value) ? value! : 120;
   }
 
   Future<void> set(int minutes) async {
