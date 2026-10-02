@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:birdnet_live/fork/species_sheet/species_sheet.dart';
 import 'package:birdnet_live/fork/species_sheet/species_sheet_section.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
+import 'package:birdnet_live/shared/providers/settings_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 List<int> _gzip(Map<String, dynamic> json) =>
@@ -57,10 +60,70 @@ void main() {
       expect(const NestingPeriod(4, 7).includes(8), isFalse);
     });
 
-    test('only for French species names', () {
+    test('only for French and English species names', () {
       expect(sheetsApplyTo('fr'), isTrue);
       expect(sheetsApplyTo('fr-CA'), isTrue);
-      expect(sheetsApplyTo('en'), isFalse);
+      expect(sheetsApplyTo('en'), isTrue);
+      expect(sheetsApplyTo('en-GB'), isTrue);
+      expect(sheetsApplyTo('de'), isFalse);
+    });
+
+    test('one bundle per language', () {
+      expect(speciesSheetsAssetFor('fr'), speciesSheetsAsset);
+      expect(speciesSheetsAssetFor('en-GB'), speciesSheetsAssetEn);
+      expect(speciesSheetsAssetEn, endsWith('species_sheets_en.json.gz'));
+    });
+
+    test('the English bundle is valid and as big as the French one', () {
+      final fr = SpeciesSheets.fromGzip(
+        File(speciesSheetsAsset).readAsBytesSync(),
+      );
+      final en = SpeciesSheets.fromGzip(
+        File(speciesSheetsAssetEn).readAsBytesSync(),
+      );
+      expect(en.length, fr.length);
+      expect(en['Erithacus rubecula']!.name, 'European Robin');
+    });
+
+    test('the provider loads the bundle of the species language', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final loaded = <String>[];
+      messenger.setMockMessageHandler('flutter/assets', (message) async {
+        final key = utf8.decode(message!.buffer.asUint8List());
+        loaded.add(key);
+        final name = key.contains('_en') ? 'Robin' : 'Rougegorge';
+        final bytes = Uint8List.fromList(
+          _gzip({
+            'version': 1,
+            'species': {
+              'Erithacus rubecula': {'name': name, 'summary': 'x'},
+            },
+          }),
+        );
+        return ByteData.sublistView(bytes);
+      });
+      addTearDown(() => messenger.setMockMessageHandler('flutter/assets', null));
+
+      Future<String?> nameFor(String locale) async {
+        final container = ProviderContainer(
+          overrides: [
+            effectiveSpeciesLocaleProvider.overrideWithValue(locale),
+          ],
+        );
+        addTearDown(container.dispose);
+        final sheets = await container.read(speciesSheetsProvider.future);
+        return sheets['Erithacus rubecula']?.name;
+      }
+
+      expect(await nameFor('fr'), 'Rougegorge');
+      expect(await nameFor('en'), 'Robin');
+      expect(loaded, [speciesSheetsAsset, speciesSheetsAssetEn]);
+      loaded.clear();
+      // Other languages: no bundle read at all.
+      expect(await nameFor('de'), isNull);
+      expect(loaded, isEmpty);
     });
 
     test('the bundled asset is valid', () {
@@ -106,6 +169,39 @@ void main() {
       find.text('Fiche rédigée par IA : elle peut contenir des erreurs.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('English species page: English sheet and footer', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          effectiveSpeciesLocaleProvider.overrideWithValue('en'),
+          speciesSheetsProvider.overrideWith(
+            (ref) async => const SpeciesSheets({
+              'Erithacus rubecula': SpeciesSheet(
+                name: 'European Robin',
+                sections: {
+                  SheetSection.summary: 'A small round bird.',
+                  SheetSection.byEar: 'A fluty song.',
+                },
+              ),
+            }),
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SpeciesSheetSection(scientificName: 'Erithacus rubecula'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('A small round bird.'), findsOneWidget);
+    expect(find.text('A fluty song.'), findsOneWidget);
+    expect(find.text('Written by AI: it may contain mistakes.'), findsOneWidget);
   });
 }
 

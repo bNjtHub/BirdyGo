@@ -62,6 +62,16 @@ REVIEW_HTML = SHEETS_DIR / "review.html"
 TAXONOMY_CSV = ROOT / "assets" / "models" / "taxonomy.csv"
 BUNDLE = ROOT / "assets" / "fork" / "species_sheets_fr.json.gz"
 
+LANGS = ("fr", "en")
+
+
+def set_language(lang: str) -> None:
+    """Points the sheets file and the bundle at one language (default fr)."""
+    global SHEETS_JSONL, BUNDLE
+    SHEETS_JSONL = SHEETS_DIR / f"{lang}.jsonl"
+    BUNDLE = ROOT / "assets" / "fork" / f"species_sheets_{lang}.json.gz"
+
+
 USER_AGENT = "BirdyGo-species-sheets/1.0 (https://github.com/bNjtHub/BirdyGo)"
 PILOT_SIZE = 20
 MAX_ARTICLE_CHARS = 24_000
@@ -947,7 +957,7 @@ def valid_nesting(text: str) -> str:
     return f"{start}-{end}"
 
 
-def bundle_payload(sheets: dict) -> dict:
+def bundle_payload(sheets: dict, language: str = "fr") -> dict:
     species = {}
     for sci, sheet in sorted(sheets.items()):
         if not shippable(sheet):
@@ -960,11 +970,11 @@ def bundle_payload(sheets: dict) -> dict:
             if text:
                 entry[field] = text
         species[sci] = entry
-    return {"version": 1, "language": "fr", "species": species}
+    return {"version": 1, "language": language, "species": species}
 
 
 def cmd_bundle(args) -> None:
-    payload = bundle_payload(load_sheets())
+    payload = bundle_payload(load_sheets(), args.lang)
     BUNDLE.parent.mkdir(parents=True, exist_ok=True)
     data = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     # mtime=0 keeps the file identical from one run to the next.
@@ -1048,12 +1058,17 @@ def main() -> None:
     p.set_defaults(func=cmd_apply_review)
 
     p = sub.add_parser("bundle", help="write the app asset")
+    p.add_argument("--lang", choices=LANGS, default="fr",
+                   help="sheets language (fr.jsonl or en.jsonl)")
     p.set_defaults(func=cmd_bundle)
 
     p = sub.add_parser("status", help="progress summary")
+    p.add_argument("--lang", choices=LANGS, default="fr",
+                   help="sheets language (fr.jsonl or en.jsonl)")
     p.set_defaults(func=cmd_status)
 
     args = parser.parse_args()
+    set_language(getattr(args, "lang", "fr"))
     args.func(args)
 
 
