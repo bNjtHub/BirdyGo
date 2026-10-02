@@ -278,14 +278,14 @@ class BirdyGoSingingPainter extends CustomPainter {
     } else {
       canvas.save();
     }
-    // FORK: J7, the raised head: the bird is stretched about its feet (neck
-    // stretch, a small bob with each syllable). Only the bird; the notes
-    // stay put.
+    // FORK: J7, the bird stands taller to sing: a rigid rise (translation
+    // only, no stretch). Only the bird; the notes stay put.
     canvas
       ..translate(0, _Timeline.arrivalTravel * (1 - lift))
+      ..translate(0, -pose.rise * viewBox.height)
       ..translate(_feet.dx, _feet.dy)
       ..rotate(pose.tiltDegrees * math.pi / 180)
-      ..scale(grow * (1 - .014 * song), grow * (1 + .045 * song + pose.neckStretch))
+      ..scale(grow)
       ..translate(-_feet.dx, -_feet.dy);
 
     final plumage =
@@ -306,9 +306,13 @@ class BirdyGoSingingPainter extends CustomPainter {
       (
         BirdyGoLogoPainter.lowerBeak,
         brand.highlightDeep,
-        -11 * song,
+        -11 * song + pose.beakLiftDegrees,
       ),
-      (BirdyGoLogoPainter.upperBeak, brand.highlight, 13 * song),
+      (
+        BirdyGoLogoPainter.upperBeak,
+        brand.highlight,
+        13 * song + pose.beakLiftDegrees,
+      ),
     ]) {
       canvas.save();
       _rotateAbout(canvas, _beakHinge, degrees);
