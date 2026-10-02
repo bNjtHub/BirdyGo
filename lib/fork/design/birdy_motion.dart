@@ -205,6 +205,20 @@ abstract final class BirdyMotion {
   static const double logoWinkBob = 6;
   static const double logoWinkBobCycles = 2;
 
+  /// The bird lifts its head while it sings (J7): it rises [logoLiftUnits]
+  /// and tilts back [logoLiftTiltDegrees] about its feet, easing in over
+  /// [logoLiftIn] (easeOutCubic) from the first syllable, bobbing by at most
+  /// [logoLiftBobUnits] with each syllable, and settling back over
+  /// [logoLiftOut] (easeInOutCubic) after the last. Units are the logo
+  /// board's (570 x 450 box): at the header's 40 dp mark, 28 units are about
+  /// 2.4 dp and 8 units about 0.7 dp. Painted from the singing clock, so it
+  /// stays in sync with the sound; reduced motion draws none of it.
+  static const double logoLiftIn = 200;
+  static const double logoLiftOut = 300;
+  static const double logoLiftUnits = 28;
+  static const double logoLiftBobUnits = 8;
+  static const double logoLiftTiltDegrees = 3.5;
+
   /// Wing beats while flying, and the share of a bar the beat never takes.
   static const int logoWinkFlapCycles = 6;
   static const double logoWinkFlapFloor = 0.35;
