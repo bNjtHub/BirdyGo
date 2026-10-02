@@ -1993,7 +1993,7 @@
   "forkLicensesGbifRow": "Observations GBIF.org",
   "forkLicensesGbifRowSub": "Seulement les données CC0 et CC BY 4.0, observations humaines depuis {year}. Cartes calculées à l'avance à partir des données GBIF.",
   "forkLicensesGbifCitationTitle": "Citation",
-  "forkLicensesGbifCitation": "GBIF.org ({year}) GBIF Occurrence Data, https://www.gbif.org",
+  "forkLicensesGbifCitation": "GBIF.org ({date}) GBIF Occurrence Download {url}",
   "forkLicensesFonts": "Polices",
   "forkLicensesFontsSub": "Fraunces, Atkinson Hyperlegible Next et Nunito, sous licence SIL OFL 1.1",
   "forkLicensesModel": "Modèle BirdNET",

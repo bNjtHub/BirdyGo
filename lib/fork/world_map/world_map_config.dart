@@ -69,8 +69,16 @@ abstract final class WorldMapConfig {
   /// licenses page).
   static const int gbifFirstYear = 2010;
 
-  /// Citation required by GBIF for the maps' data: the year is the current
-  /// one when the page is read.
+  /// GBIF SQL download behind the bundled ranges (see tools/README.md): the
+  /// citation GBIF asks for is "GBIF.org (date) GBIF Occurrence Download
+  /// https://doi.org/doi". Update with the file when it is rebuilt.
+  static const String gbifDownloadDoi = '10.15468/dl.yx7895';
+  static const String gbifDownloadUrl = 'https://doi.org/$gbifDownloadDoi';
+
+  /// Date of the download (the access date of the citation).
+  static final DateTime gbifDownloadDate = DateTime(2026, 10, 2);
+
+  /// Licence of the records kept in the download (CC0 and CC BY 4.0).
   static const String gbifLicenseUrl =
       'https://creativecommons.org/licenses/by/4.0/';
 

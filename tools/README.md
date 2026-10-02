@@ -39,12 +39,48 @@ passage) of every Natural Earth admin-1 region, from GBIF observation counts,
 with the same rules as the app (`lib/fork/world_map/`). Standard library only.
 
 ```
-python tools/fork_world_ranges.py --workers 2          # full run, resumable
+python tools/fork_world_ranges.py --workers 2          # API route: full run, resumable (slow)
 python tools/fork_world_ranges.py --species "Hirundo rustica,Apus apus"
 python tools/fork_world_ranges.py --build-only         # rebuild from the cache
 ```
 
-Every GBIF answer is cached in `tools/fork_world_ranges_cache/` (git-ignored),
+### SQL route (the bundled file)
+
+The API route is too slow and rate-limited for the whole list. The bundled
+`ranges.bin.gz` comes from one GBIF SQL download (GBIF account needed, run on
+https://www.gbif.org/occurrence/download, "SQL" tab; DOI of the current one:
+`10.15468/dl.yx7895`, also in `WorldMapConfig.gbifDownloadDoi`):
+
+```sql
+SELECT species, level1gid, "month", COUNT(*) AS n
+FROM occurrence
+WHERE "class" = 'Aves' AND basisofrecord = 'HUMAN_OBSERVATION'
+  AND occurrencestatus = 'PRESENT' AND hasgeospatialissues = FALSE
+  AND "year" >= 2010 AND license IN ('CC0_1_0', 'CC_BY_4_0')
+  AND species IS NOT NULL AND level1gid IS NOT NULL
+GROUP BY species, level1gid, "month"
+```
+
+```
+python tools/fork_world_ranges.py --from-sql <download>.zip \
+    --fallback-ranges <earlier ranges.bin.gz> --date 20261002
+```
+
+No network. The zip is streamed, never extracted (keep it out of git). The
+script sums the 12 months into the 4 seasons, takes the effort of a (region,
+season) as the sum over all species of the download (the API route counted all
+birds, including records without a species rank: a close approximation), then
+classifies exactly as above. BirdNET names are matched to the GBIF binomials
+by exact name, then `taxonomy.csv`, `SYNONYMS` in the script, Latin gender
+endings, and genus moves (same epithet, same order, at least 2 species on the
+same genus pair). It prints the match rate and the unmatched species, and
+writes `unmatched.json` / `matches.json` in the cache folder. After a rebuild,
+update `WorldMapConfig.gbifDownloadDoi` and `gbifDownloadDate`.
+
+Species of the download that are outside the map area (Europe, Africa, West
+Asia) get no entry: the app falls back to the geo-model for them.
+
+Every GBIF answer of the API route is cached in `tools/fork_world_ranges_cache/` (git-ignored),
 so a stopped run resumes where it stopped. GBIF answers in 5 to 10 s per
 request, 4 requests per species plus 1 match: expect more than a day for the
 whole list (2 workers); use `--species-file` to do the priority species first.
