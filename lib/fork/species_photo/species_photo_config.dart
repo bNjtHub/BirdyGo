@@ -57,13 +57,24 @@ const int kCarouselExtraPhotos = 4;
 const double kCarouselDotSize = 6;
 const double kCarouselDotGap = 6;
 
-/// "More photos are coming" spinner after the dots: size, stroke, and the
-/// fixed progress shown instead of the spin with reduced motion.
-const double kCarouselLoaderSize = 11;
-const double kCarouselLoaderStroke = 1.5;
-const double kCarouselLoaderStaticProgress = 0.3;
+/// "More photos are coming": a pill of the same height as the dots pill,
+/// holding [kCarouselPendingDots] dots that pulse one after the other (a
+/// typing indicator). One pulse cycle lasts [kCarouselPendingPeriod], each
+/// dot starting [kCarouselPendingStagger] (share of the cycle) after the
+/// previous one.
+const int kCarouselPendingDots = 3;
+const Duration kCarouselPendingPeriod = Duration(milliseconds: 1200);
+const double kCarouselPendingStagger = 0.18;
 
-/// Opacity of the inactive dots and of the spinner.
+/// The pending pill shows only after this delay, so a gallery read from the
+/// disk cache (a few tens of ms) never flashes it: its dots just appear.
+const Duration kCarouselPendingDelay = Duration(milliseconds: 300);
+
+/// Safety net: if the gallery still loads after this, the photos loaded so
+/// far are revealed, the pending pill goes, and later ones join silently.
+const Duration kCarouselRevealTimeout = Duration(seconds: 4);
+
+/// Opacity of the inactive dots and of the pending dots at rest.
 const double kCarouselDimAlpha = 0.5;
 
 /// Height of the top scrim of the header photo below the status bar.

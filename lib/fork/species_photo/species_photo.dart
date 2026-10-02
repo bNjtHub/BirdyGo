@@ -2,6 +2,7 @@
 /// (fork/PLAN.md J6b, DESIGN.md Photos).
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import 'photo_credit.dart';
 import 'photo_label.dart';
 import 'inat_photo_service.dart';
 import 'photo_credit_sheet.dart';
+import 'species_photo_config.dart';
 import 'species_photo_viewer.dart';
 import 'species_photo_page_dots.dart';
 import 'species_photo_providers.dart';
@@ -47,8 +49,39 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
   /// Tag of the photo on screen, shared with the full-screen viewer.
   final Object _heroTag = Object();
 
+  /// Gallery loading: extras stay hidden until it ends (or times out), the
+  /// pending pill shows after a short delay. Started while loading.
+  Timer? _pendingTimer;
+  Timer? _revealTimer;
+  bool _pendingDelayDone = false;
+  bool _revealTimedOut = false;
+
+  @override
+  void didUpdateWidget(SpeciesPhoto old) {
+    super.didUpdateWidget(old);
+    if (old.species?.inatId != widget.species?.inatId) _resetLoadingTimers();
+  }
+
+  void _resetLoadingTimers() {
+    _pendingTimer?.cancel();
+    _revealTimer?.cancel();
+    _pendingTimer = _revealTimer = null;
+    _pendingDelayDone = _revealTimedOut = false;
+  }
+
+  void _startLoadingTimers() {
+    _pendingTimer ??= Timer(kCarouselPendingDelay, () {
+      if (mounted) setState(() => _pendingDelayDone = true);
+    });
+    _revealTimer ??= Timer(kCarouselRevealTimeout, () {
+      if (mounted) setState(() => _revealTimedOut = true);
+    });
+  }
+
   @override
   void dispose() {
+    _pendingTimer?.cancel();
+    _revealTimer?.cancel();
     _pages.dispose();
     super.dispose();
   }
@@ -86,8 +119,15 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         galleryAsync != null &&
         ref.watch(onlinePhotosAllowedProvider) &&
         galleryLoading(galleryAsync);
+    if (loading) _startLoadingTimers();
+    // FORK: one visual change. While loading, the extras stay hidden (the
+    // single bundled photo, a pending pill); they are revealed all at once
+    // when the gallery ends, or at the safety timeout (the rest then joins
+    // silently).
+    final hold = loading && !_revealTimedOut;
+    final pending = hold && _pendingDelayDone;
     final extras = [
-      for (final photo in gallery)
+      for (final photo in hold ? const <GalleryPhoto>[] : gallery)
         if (photo.credit.pageUrl == null ||
             photo.credit.pageUrl != online?.credit.pageUrl)
           photo,
@@ -185,7 +225,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
             fit: StackFit.expand,
             children: [
               ...bundledLayers,
-              _PageDots(count: 1, current: 0, loading: loading),
+              _PageDots(count: 1, current: 0, pending: pending),
               creditButton,
             ],
           );
@@ -235,7 +275,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                     ),
                   ),
             ),
-            _PageDots(count: total, current: page, loading: loading),
+            _PageDots(count: total, current: page, pending: pending),
             creditButton,
           ],
         );
@@ -290,12 +330,12 @@ class _PageDots extends StatelessWidget {
   const _PageDots({
     required this.count,
     required this.current,
-    required this.loading,
+    required this.pending,
   });
 
   final int count;
   final int current;
-  final bool loading;
+  final bool pending;
 
   @override
   Widget build(BuildContext context) {
@@ -306,12 +346,12 @@ class _PageDots extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: BirdyMotion.exit,
         child:
-            count > 1 || loading
+            count > 1 || pending
                 ? PhotoPageDots(
                   key: const ValueKey('photo-dots'),
                   count: count,
                   current: current,
-                  loading: loading,
+                  pending: pending,
                 )
                 : const SizedBox.shrink(key: ValueKey('photo-dots-none')),
       ),
