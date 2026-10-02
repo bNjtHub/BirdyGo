@@ -2076,5 +2076,13 @@
   "setupHelpAruSessionGrouping": "Enregistrez chaque cycle dans sa propre Session ou regroupez les cycles dans une seule Session. Les Sessions regroupées utilisent des clips au lieu de l’audio complet.",
   "setupHelpRecordingMode": "Complet enregistre tout l’audio. Extraits enregistre de courts clips autour de chaque détection. Désactivé analyse sans enregistrer d’audio.",
   "forkFirstNameSaved": "Prénom enregistré",
-  "forkSettingSaved": "{setting} : {value}"
+  "forkSettingSaved": "{setting} : {value}",
+  "forkPhotoAdult": "Adulte",
+  "forkPhotoJuvenile": "Juvénile",
+  "forkPhotoEgg": "Œuf",
+  "forkPhotoFemale": "Femelle",
+  "forkPhotoMale": "Mâle",
+  "forkPhotoWithLabel": "{position}, {label}",
+  "forkPhotoLoading": "Chargement des photos",
+  "forkPhotoPosition": "Photo {current} sur {total}"
 }

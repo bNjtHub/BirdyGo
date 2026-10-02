@@ -13,16 +13,20 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import 'photo_credit.dart';
 import 'photo_credit_sheet.dart';
+import 'photo_label.dart';
 import 'species_photo_config.dart';
 import 'species_photo_page_dots.dart';
 
 /// One page of the viewer: the image already loaded by the carousel and its
 /// credit.
 class ViewerPhoto {
-  const ViewerPhoto(this.image, this.credit);
+  const ViewerPhoto(this.image, this.credit, [this.label]);
 
   final ImageProvider image;
   final PhotoCredit credit;
+
+  /// What the photo shows (life stage, sex), when known.
+  final PhotoLabel? label;
 }
 
 /// Opens the viewer on [initialPage]; completes with the page on screen when
@@ -159,7 +163,12 @@ class _SpeciesPhotoViewerState extends State<SpeciesPhotoViewer> {
                         }),
                     itemBuilder:
                         (context, i) => Semantics(
-                          label: l10n.forkPhotoPosition(i + 1, total),
+                          label: PhotoLabel.position(
+                            l10n,
+                            i + 1,
+                            total,
+                            widget.photos[i].label,
+                          ),
                           image: true,
                           child: _ZoomablePhoto(
                             key: ValueKey('viewer-photo-$i'),
@@ -184,6 +193,7 @@ class _SpeciesPhotoViewerState extends State<SpeciesPhotoViewer> {
                     bottom: 0,
                     child: _CreditBar(
                       credit: widget.photos[_page].credit,
+                      label: widget.photos[_page].label,
                       count: total,
                       current: _page,
                       bottomInset: padding.bottom,
@@ -336,12 +346,14 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto>
 class _CreditBar extends StatelessWidget {
   const _CreditBar({
     required this.credit,
+    required this.label,
     required this.count,
     required this.current,
     required this.bottomInset,
   });
 
   final PhotoCredit credit;
+  final PhotoLabel? label;
   final int count;
   final int current;
   final double bottomInset;
@@ -356,6 +368,7 @@ class _CreditBar extends StatelessWidget {
       if (credit.source != null) credit.source!,
     ];
     final text = parts.isEmpty ? l10n.forkPhotoNoCredit : parts.join(' · ');
+    final labelText = PhotoLabel.text(l10n, label);
     final pageUrl = credit.pageUrl;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -382,6 +395,12 @@ class _CreditBar extends StatelessWidget {
               PhotoPageDots(count: count, current: current),
               const SizedBox(height: BirdySpace.s),
             ],
+            if (labelText != null)
+              Text(
+                labelText,
+                key: const ValueKey('viewer-label'),
+                style: BirdyText.labelCompact.copyWith(color: BirdyBrand.white),
+              ),
             Semantics(
               button: true,
               child: InkWell(

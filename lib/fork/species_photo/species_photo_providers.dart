@@ -45,19 +45,40 @@ final onlineSpeciesPhotoProvider = FutureProvider.autoDispose
       return ref.watch(inatPhotoServiceProvider).photoFor(inatId);
     });
 
+/// The extra photos loaded so far, and whether more may still come.
+class SpeciesGallery {
+  const SpeciesGallery(this.photos, {required this.loading});
+
+  final List<GalleryPhoto> photos;
+
+  /// The API call is pending or downloads remain.
+  final bool loading;
+}
+
 /// The extra carousel photos of iNaturalist taxon `inatId`, growing as they
 /// load. `bundledPage` is the page of the bundled photo, left out. Empty
 /// and silent (no request) while online photos are off.
 final speciesGalleryProvider = StreamProvider.autoDispose
-    .family<List<GalleryPhoto>, ({int inatId, String? bundledPage})>((
-      ref,
-      key,
-    ) {
+    .family<SpeciesGallery, ({int inatId, String? bundledPage})>((ref, key) {
       if (!ref.watch(onlinePhotosAllowedProvider)) return const Stream.empty();
-      return ref
-          .watch(inatPhotoServiceProvider)
-          .galleryFor(
-            key.inatId,
-            exclude: {if (key.bundledPage != null) key.bundledPage!},
-          );
+      return _withProgress(
+        ref
+            .watch(inatPhotoServiceProvider)
+            .galleryFor(
+              key.inatId,
+              exclude: {if (key.bundledPage != null) key.bundledPage!},
+            ),
+      );
     });
+
+/// Marks every event as "still loading", then the end of the stream (done or
+/// failed) as finished.
+Stream<SpeciesGallery> _withProgress(Stream<List<GalleryPhoto>> source) async* {
+  var last = const <GalleryPhoto>[];
+  yield const SpeciesGallery([], loading: true);
+  await for (final photos in source) {
+    last = photos;
+    yield SpeciesGallery(photos, loading: true);
+  }
+  yield SpeciesGallery(last, loading: false);
+}

@@ -12,7 +12,9 @@ import '../../shared/models/taxonomy_species.dart';
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
+import '../design/birdy_typography.dart';
 import 'photo_credit.dart';
+import 'photo_label.dart';
 import 'inat_photo_service.dart';
 import 'photo_credit_sheet.dart';
 import 'species_photo_viewer.dart';
@@ -69,18 +71,22 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         (species == null
             ? const PhotoCredit()
             : PhotoCredit.fromSpecies(species));
-    final gallery =
+    final galleryState =
         inatId == null
-            ? const <GalleryPhoto>[]
+            ? null
             : ref
-                    .watch(
-                      speciesGalleryProvider((
-                        inatId: inatId,
-                        bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
-                      )),
-                    )
-                    .value ??
-                const <GalleryPhoto>[];
+                .watch(
+                  speciesGalleryProvider((
+                    inatId: inatId,
+                    bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
+                  )),
+                )
+                .value;
+    final gallery = galleryState?.photos ?? const <GalleryPhoto>[];
+    final loading =
+        inatId != null &&
+        ref.watch(onlinePhotosAllowedProvider) &&
+        (galleryState?.loading ?? true);
     final extras = [
       for (final photo in gallery)
         if (photo.credit.pageUrl == null ||
@@ -106,7 +112,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
           bundledCredit,
         ),
         for (final photo in extras)
-          ViewerPhoto(MemoryImage(photo.bytes), photo.credit),
+          ViewerPhoto(MemoryImage(photo.bytes), photo.credit, photo.label),
       ];
       final closedOn = await showSpeciesPhotoViewer(
         context,
@@ -178,7 +184,11 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         if (extras.isEmpty) {
           return Stack(
             fit: StackFit.expand,
-            children: [...bundledLayers, creditButton],
+            children: [
+              ...bundledLayers,
+              _PageDots(count: 1, current: 0, loading: loading),
+              creditButton,
+            ],
           );
         }
         return Stack(
@@ -190,7 +200,12 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder:
                   (context, i) => Semantics(
-                    label: l10n.forkPhotoPosition(i + 1, total),
+                    label: PhotoLabel.position(
+                      l10n,
+                      i + 1,
+                      total,
+                      i == 0 ? null : extras[i - 1].label,
+                    ),
                     image: true,
                     child: Stack(
                       fit: StackFit.expand,
@@ -216,11 +231,12 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                                     child: InkWell(onTap: openViewer),
                                   ),
                                 ),
+                                _LabelChip(label: extras[i - 1].label),
                               ],
                     ),
                   ),
             ),
-            _PageDots(count: total, current: page),
+            _PageDots(count: total, current: page, loading: loading),
             creditButton,
           ],
         );
@@ -229,12 +245,58 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
   }
 }
 
+/// What the photo shows (life stage, sex), bottom left on a small scrim.
+/// Nothing when unknown. Read through the page's semantics label instead.
+class _LabelChip extends StatelessWidget {
+  const _LabelChip({required this.label});
+
+  final PhotoLabel? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = PhotoLabel.text(AppLocalizations.of(context)!, label);
+    if (text == null) return const SizedBox.shrink();
+    return Positioned(
+      left: BirdySpace.xs,
+      bottom: BirdySpace.xs,
+      child: ExcludeSemantics(
+        child: IgnorePointer(
+          child: DecoratedBox(
+            key: const ValueKey('photo-label'),
+            decoration: BoxDecoration(
+              color: BirdyBrand.black.withValues(
+                alpha: BirdyAlpha.photoButtonScrim,
+              ),
+              borderRadius: BorderRadius.circular(BirdyRadii.hero),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BirdySpace.s,
+                vertical: BirdySpace.xs,
+              ),
+              child: Text(
+                text,
+                style: BirdyText.labelCompact.copyWith(color: BirdyBrand.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The carousel dots, at the bottom of the photo.
 class _PageDots extends StatelessWidget {
-  const _PageDots({required this.count, required this.current});
+  const _PageDots({
+    required this.count,
+    required this.current,
+    required this.loading,
+  });
 
   final int count;
   final int current;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +304,18 @@ class _PageDots extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: BirdySpace.m,
-      child: PhotoPageDots(count: count, current: current),
+      child: AnimatedSwitcher(
+        duration: BirdyMotion.exit,
+        child:
+            count > 1 || loading
+                ? PhotoPageDots(
+                  key: const ValueKey('photo-dots'),
+                  count: count,
+                  current: current,
+                  loading: loading,
+                )
+                : const SizedBox.shrink(key: ValueKey('photo-dots-none')),
+      ),
     );
   }
 }

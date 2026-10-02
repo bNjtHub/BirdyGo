@@ -57,6 +57,15 @@ const int kCarouselExtraPhotos = 4;
 const double kCarouselDotSize = 6;
 const double kCarouselDotGap = 6;
 
+/// "More photos are coming" spinner after the dots: size, stroke, and the
+/// fixed progress shown instead of the spin with reduced motion.
+const double kCarouselLoaderSize = 11;
+const double kCarouselLoaderStroke = 1.5;
+const double kCarouselLoaderStaticProgress = 0.3;
+
+/// Opacity of the inactive dots and of the spinner.
+const double kCarouselDimAlpha = 0.5;
+
 /// Height of the top scrim of the header photo below the status bar.
 const double kPhotoTopScrimExtra = 56;
 
@@ -75,3 +84,26 @@ const double kViewerDismissVelocity = 700;
 
 /// Photo shrinks at most to this scale while dragged away.
 const double kViewerDismissMinScale = 0.85;
+
+/// Observations of a taxon, for photos labelled by life stage and sex.
+/// API v2 with `fields`: ~25 KB instead of ~8 MB with v1.
+const String kInatApiBaseV2 = 'https://api.inaturalist.org/v2';
+const int kObservationsPerPage = 30;
+const String kObservationFields =
+    'annotations.controlled_attribute_id,annotations.controlled_value_id,'
+    'annotations.vote_score,photos.id,photos.url,photos.license_code,'
+    'photos.attribution,photos.original_dimensions.width,'
+    'photos.original_dimensions.height';
+
+/// iNaturalist controlled terms (checked against /v1/controlled_terms):
+/// 1 = Life Stage, 9 = Sex.
+const int kInatTermLifeStage = 1;
+const int kInatValueAdult = 2;
+const int kInatValueJuvenile = 8;
+const int kInatValueEgg = 7;
+const int kInatTermSex = 9;
+const int kInatValueFemale = 10;
+const int kInatValueMale = 11;
+
+/// An annotation counts unless the community voted it down.
+const int kInatMinAnnotationScore = 0;
