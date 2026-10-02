@@ -278,13 +278,13 @@ class BirdyGoSingingPainter extends CustomPainter {
     } else {
       canvas.save();
     }
-    // FORK: J7, the bird stands taller to sing: a rigid rise (translation
-    // only, no stretch). Only the bird; the notes stay put.
+    // FORK: J7, the bird throws its head back to sing: a rigid lean about its
+    // feet (clockwise: the bird faces left; rotation only, no stretch). Only the
+    // bird; the notes stay put.
     canvas
       ..translate(0, _Timeline.arrivalTravel * (1 - lift))
-      ..translate(0, -pose.rise * viewBox.height)
       ..translate(_feet.dx, _feet.dy)
-      ..rotate(pose.tiltDegrees * math.pi / 180)
+      ..rotate((pose.tiltDegrees + pose.leanDegrees) * math.pi / 180)
       ..scale(grow)
       ..translate(-_feet.dx, -_feet.dy);
 
@@ -306,12 +306,12 @@ class BirdyGoSingingPainter extends CustomPainter {
       (
         BirdyGoLogoPainter.lowerBeak,
         brand.highlightDeep,
-        -11 * song + pose.beakLiftDegrees,
+        -11 * song,
       ),
       (
         BirdyGoLogoPainter.upperBeak,
         brand.highlight,
-        13 * song + pose.beakLiftDegrees,
+        13 * song,
       ),
     ]) {
       canvas.save();

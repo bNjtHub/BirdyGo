@@ -205,20 +205,18 @@ abstract final class BirdyMotion {
   static const double logoWinkBob = 6;
   static const double logoWinkBobCycles = 2;
 
-  /// The bird stands taller to sing (J7), like a real songbird: ONE gesture
-  /// per phrase, around the first notes leaving the beak, and no deformation
-  /// (no stretch, no scale). The whole bird rises rigidly by [logoLiftRise]
-  /// (a share of the logo's height) in [logoLiftIn] (easeOutCubic, snappy),
-  /// holds [logoLiftHold] while the notes leave, and settles in [logoLiftOut]
-  /// (easeInOutCubic); the beak group tips up by [logoLiftBeakDegrees] about
-  /// its base during the same envelope ("sings to the sky"). Painted from the
-  /// singing clock, so it stays in sync with the sound; reduced motion draws
-  /// none of it.
-  static const double logoLiftIn = 160;
-  static const double logoLiftHold = 200;
-  static const double logoLiftOut = 420;
-  static const double logoLiftRise = .045;
-  static const double logoLiftBeakDegrees = 8;
+  /// The bird throws its head back to sing (J7), like a real songbird: ONE
+  /// gesture per phrase, around the first notes leaving the beak, and no
+  /// deformation (no stretch, no squash) and no translation. The whole bird
+  /// leans backward rigidly by [logoLeanDegrees] about its feet, in
+  /// [logoLeanIn] (easeOutCubic, snappy), holds [logoLeanHold] while the
+  /// notes leave, and settles in [logoLeanOut] (easeInOutCubic). Painted from
+  /// the singing clock, so it stays in sync with the sound; reduced motion
+  /// draws none of it.
+  static const double logoLeanIn = 160;
+  static const double logoLeanHold = 200;
+  static const double logoLeanOut = 420;
+  static const double logoLeanDegrees = 10;
 
   /// Wing beats while flying, and the share of a bar the beat never takes.
   static const int logoWinkFlapCycles = 6;
