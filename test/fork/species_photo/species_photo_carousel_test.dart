@@ -62,8 +62,8 @@ final _taxon = {
 };
 
 class _Service extends InatPhotoService {
-  _Service(http.Client client)
-    : super(client: client, cacheDir: () async => Directory.systemTemp);
+  _Service(http.Client client, Directory dir)
+    : super(client: client, cacheDir: () async => dir);
 
   @override
   Future<OnlinePhoto?> photoFor(int inatId) async => null;
@@ -73,8 +73,10 @@ class _Net {
   int apiCalls = 0;
   int obsCalls = 0;
 
-  /// `results` of /v2/observations; empty means the taxon photos fill in.
-  List<Map<String, dynamic>> observations = [];
+  /// `results` of /v2/observations per "term:value" query (male "9:11",
+  /// female "9:10", juvenile "1:8"); empty means the taxon photos fill in.
+  Map<String, List<Map<String, dynamic>>> observations = {};
+  final dir = Directory.systemTemp.createTempSync('gallery_');
   int downloads = 0;
   bool apiFails = false;
 
@@ -90,7 +92,15 @@ class _Net {
       if (apiFails) return http.Response('', 500);
       if (request.url.path == '/v2/observations') {
         obsCalls++;
-        return http.Response(jsonEncode({'results': observations}), 200);
+        return http.Response(
+          jsonEncode({
+            'results':
+                observations['${request.url.queryParameters['term_id']}:'
+                    '${request.url.queryParameters['term_value_id']}'] ??
+                const [],
+          }),
+          200,
+        );
       }
       return http.Response(
         jsonEncode({
@@ -119,7 +129,9 @@ Future<void> _pump(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
-        inatPhotoServiceProvider.overrideWithValue(_Service(net.client)),
+        inatPhotoServiceProvider.overrideWithValue(
+          _Service(net.client, net.dir),
+        ),
       ],
       child: const MaterialApp(
         locale: Locale('fr'),
@@ -139,7 +151,19 @@ Future<void> _pump(
       ),
     ),
   );
-  for (var i = 0; i < 20; i++) {
+  await _settle(tester);
+}
+
+/// The gallery reads and writes files: real time must pass between pumps.
+Future<void> _settle(WidgetTester tester) async {
+  for (var i = 0; i < 100; i++) {
+    if (i > 5 &&
+        find.byKey(const ValueKey('photo-loader')).evaluate().isEmpty) {
+      break;
+    }
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 15)),
+    );
     await tester.pump(const Duration(milliseconds: 10));
   }
 }
@@ -161,7 +185,7 @@ void main() {
     await _pump(tester, allowed: true, net: net);
 
     // 3, 4, 6, 7: no nd, no bundled photo (2), no unlicensed, max 4.
-    expect(net.apiCalls, 2); // observations (none), then the taxon
+    expect(net.apiCalls, 4); // 3 targeted queries (none), then the taxon
     expect(net.downloads, 4);
     expect(net.agents, {AppConstants.networkUserAgent});
     for (var i = 0; i < 5; i++) {
@@ -244,7 +268,7 @@ void main() {
   testWidgets('API failure: just the bundled photo', (tester) async {
     final net = _Net()..apiFails = true;
     await _pump(tester, allowed: true, net: net);
-    expect(net.apiCalls, 2);
+    expect(net.apiCalls, 4);
     expect(_dots(), findsNothing);
     expect(find.byType(PageView), findsNothing);
   });
@@ -261,9 +285,7 @@ void main() {
       expect(find.bySemanticsLabel('Chargement des photos'), findsOneWidget);
 
       net.gate!.complete();
-      for (var i = 0; i < 30; i++) {
-        await tester.pump(const Duration(milliseconds: 20));
-      }
+      await _settle(tester);
       expect(loader, findsNothing);
       expect(_dots(), findsOneWidget);
     });
@@ -276,9 +298,7 @@ void main() {
       await _pump(tester, allowed: true, net: net);
       expect(loader, findsOneWidget);
       net.gate!.complete();
-      for (var i = 0; i < 30; i++) {
-        await tester.pump(const Duration(milliseconds: 20));
-      }
+      await _settle(tester);
       expect(loader, findsNothing);
       expect(_dots(), findsNothing);
     });
@@ -307,21 +327,19 @@ void main() {
       'photos': [_photo(id, 'cc-by')],
     };
 
-    testWidgets('observations: adults first, labels shown, taxon fills '
-        'one request', (tester) async {
+    testWidgets('targeted queries: adults first, labels shown, no taxon '
+        'request', (tester) async {
       final net =
           _Net()
-            ..observations = [
-              obs(20, 8), // juvenile: last of the labelled
-              obs(21, 2, sex: 11),
-              obs(22, 2, sex: 11),
-              obs(23, 2, sex: 10), // other sex: second
-              obs(24, null), // no stage: left to the taxon
-            ];
+            ..observations = {
+              '9:11': [obs(21, 2, sex: 11), obs(22, 2, sex: 11)],
+              '9:10': [obs(23, 2, sex: 10)],
+              '1:8': [obs(20, 8)],
+            };
       await _pump(tester, allowed: true, net: net);
-      expect(net.obsCalls, 1);
-      expect(net.apiCalls, 1); // 4 labelled picks: no taxon request
-      // Order: 21, 23 (other sex), 22, then the juvenile 20.
+      expect(net.obsCalls, 3);
+      expect(net.apiCalls, 3); // 4 labelled picks: no taxon request
+      // Order: 21 (male), 23 (female), 22 (spare adult), juvenile 20.
       expect(find.byKey(const ValueKey('photo-dot-5')), findsNothing);
       expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
       // The first page is the bundled photo: no label.
@@ -339,7 +357,7 @@ void main() {
       expect(find.text('Adulte · femelle'), findsOneWidget);
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
-      expect(find.text('Adulte · mâle'), findsOneWidget);
+      expect(find.text('Adulte'), findsOneWidget);
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
       expect(find.text('Juvénile'), findsOneWidget);
@@ -359,7 +377,7 @@ void main() {
     testWidgets('observations request fails: taxon photos, no label', (
       tester,
     ) async {
-      final net = _Net()..observations = [obs(21, 2)];
+      final net = _Net();
       // Fail only the observations request.
       final failing = MockClient((request) async {
         if (request.url.path == '/v2/observations') {
@@ -376,7 +394,9 @@ void main() {
         ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(prefs),
-            inatPhotoServiceProvider.overrideWithValue(_Service(failing)),
+            inatPhotoServiceProvider.overrideWithValue(
+              _Service(failing, net.dir),
+            ),
           ],
           child: const MaterialApp(
             locale: Locale('fr'),
@@ -392,10 +412,8 @@ void main() {
           ),
         ),
       );
-      for (var i = 0; i < 20; i++) {
-        await tester.pump(const Duration(milliseconds: 10));
-      }
-      expect(net.obsCalls, 1);
+      await _settle(tester);
+      expect(net.obsCalls, 3);
       expect(find.byKey(const ValueKey('photo-dot-4')), findsOneWidget);
       expect(find.byKey(const ValueKey('photo-label')), findsNothing);
     });

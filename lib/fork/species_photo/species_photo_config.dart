@@ -88,7 +88,12 @@ const double kViewerDismissMinScale = 0.85;
 /// Observations of a taxon, for photos labelled by life stage and sex.
 /// API v2 with `fields`: ~25 KB instead of ~8 MB with v1.
 const String kInatApiBaseV2 = 'https://api.inaturalist.org/v2';
-const int kObservationsPerPage = 30;
+
+/// Targeted queries (one per wanted slot) need only a few results each.
+const int kTargetedObservationsPerPage = 10;
+
+/// Schema of the on-disk carousel selection; bump it to change the rules.
+const int kGalleryCacheVersion = 1;
 const String kObservationFields =
     'annotations.controlled_attribute_id,annotations.controlled_value_id,'
     'annotations.vote_score,photos.id,photos.url,photos.license_code,'

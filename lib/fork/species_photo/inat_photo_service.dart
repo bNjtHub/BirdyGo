@@ -119,9 +119,11 @@ class InatPhotoChoice {
     final out = <InatPhotoChoice>[];
     if (adults.isNotEmpty && adultRoom > 0) {
       final first = adults.first;
-      final other = adults.skip(1).where(
-        (a) => a.label?.sex != null && a.label!.sex != first.label?.sex,
-      );
+      final other = adults
+          .skip(1)
+          .where(
+            (a) => a.label?.sex != null && a.label!.sex != first.label?.sex,
+          );
       out.add(first);
       if (other.isNotEmpty && adultRoom > 1) out.add(other.first);
       for (final a in adults.skip(1)) {
@@ -132,6 +134,14 @@ class InatPhotoChoice {
     if (juvenile != null && max > 0) out.add(juvenile);
     return out;
   }
+
+  /// The choice for one iNaturalist [photo] when it passes the licence and
+  /// landscape rules.
+  static InatPhotoChoice? ofPhoto(
+    Map<String, dynamic> photo,
+    String size, [
+    PhotoLabel? label,
+  ]) => _choiceOf(photo, size, label);
 
   static InatPhotoChoice? _choiceOf(
     Map<String, dynamic> photo,
@@ -222,10 +232,8 @@ class InatPhotoService {
 
   final Map<int, Future<OnlinePhoto?>> _inFlight = {};
 
-  // Carousel, kept for the app run only: one API request per species.
+  // The taxon gallery, asked at most once per app run and species.
   final Map<int, Future<Map<String, dynamic>?>> _taxa = {};
-  final Map<int, Future<List<Map<String, dynamic>>>> _observations = {};
-  final Map<String, GalleryPhoto> _gallery = {};
 
   static const _headers = {
     'User-Agent': AppConstants.networkUserAgent,
@@ -242,68 +250,227 @@ class InatPhotoService {
       });
 
   /// The extra photos of the carousel of taxon [inatId], as a growing list:
-  /// one yield per photo once it is fully downloaded, so a page only exists
-  /// when its image is ready. One API request per species and app run, then
-  /// the photos one after the other (the next one is thus always prefetched).
-  /// [exclude] holds the photo pages already shown. Never throws: any
-  /// failure just ends the stream with what was loaded.
+  /// one yield per photo once it is fully available, so a page only exists
+  /// when its image is ready. The selection is chosen once (targeted
+  /// iNaturalist queries) and kept on disk for [infoMaxAge]: the same photos
+  /// show on every visit, offline too. [exclude] holds the photo pages
+  /// already shown. Never throws: any failure just ends the stream with what
+  /// was loaded.
   Stream<List<GalleryPhoto>> galleryFor(
     int inatId, {
     Set<String> exclude = const {},
   }) async* {
-    // Observations first (photos labelled adult, juvenile, sex), then the
-    // taxon photos (unlabelled) only if they leave room: two requests at most.
+    final loaded = <GalleryPhoto>[];
+    Directory? dir;
+    _GalleryCache? cache;
+    try {
+      dir = await _cacheDir();
+      await dir.create(recursive: true);
+      cache = await _readGallery(File('${dir.path}/gallery_$inatId.json'));
+    } on Object {
+      // No disk: the selection is simply not kept.
+    }
+    final fresh =
+        cache != null && _now().difference(cache.fetchedAt) < infoMaxAge;
+    if (fresh) {
+      await for (final photos in _fromCache(dir!, cache, exclude)) {
+        yield photos;
+      }
+      return;
+    }
+
+    // Stale or no cache: choose again.
+    var complete = true;
     final choices = <InatPhotoChoice>[];
     try {
-      final results = await (_observations[inatId] ??= _fetchObservations(
-        inatId,
-      ));
-      choices.addAll(
-        InatPhotoChoice.pickFromObservations(results, exclude: exclude),
-      );
+      choices.addAll(await _selectChoices(inatId, exclude));
     } on Object {
-      _observations.remove(inatId); // a failure is not remembered
+      complete = false;
     }
-    if (choices.length < kCarouselExtraPhotos) {
-      try {
-        final taxon = await (_taxa[inatId] ??= _fetchTaxon(inatId));
-        if (taxon != null) {
-          choices.addAll(
-            InatPhotoChoice.pickAll(
-              taxon,
-              max: kCarouselExtraPhotos - choices.length,
-              exclude: {
-                ...exclude,
-                for (final c in choices) c.credit.pageUrl ?? c.url,
-              },
-            ),
-          );
-        }
-      } on Object {
-        _taxa.remove(inatId); // a failure is not remembered
+    if (choices.isEmpty && cache != null) {
+      // Offline: an old selection beats none.
+      await for (final photos in _fromCache(dir!, cache, exclude)) {
+        yield photos;
       }
+      return;
     }
-    final loaded = <GalleryPhoto>[];
+    final kept = <_GalleryItem>[];
     for (final choice in choices) {
       try {
-        final photo = _gallery[choice.url] ??= await _download(choice);
-        loaded.add(photo);
+        final stored = await _storeGallery(dir, inatId, kept.length, choice);
+        kept.add(stored.$1);
+        loaded.add(stored.$2);
         yield List.unmodifiable(loaded);
       } on Object {
-        // This photo is skipped, the next ones may work.
+        complete = false; // this photo is skipped, the next ones may work
+      }
+    }
+    if (dir != null && complete && kept.isNotEmpty) {
+      try {
+        await _writeGallery(
+          File('${dir.path}/gallery_$inatId.json'),
+          _GalleryCache(_now(), kept),
+        );
+        for (final old in cache?.items ?? const <_GalleryItem>[]) {
+          if (!kept.any((k) => k.file == old.file)) {
+            await _delete(File('${dir.path}/${old.file}'));
+          }
+        }
+        await _evict(dir, keep: File('${dir.path}/${kept.last.file}'));
+      } on Object {
+        // The selection will be chosen again next time.
       }
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchObservations(int inatId) async {
+  Stream<List<GalleryPhoto>> _fromCache(
+    Directory dir,
+    _GalleryCache cache,
+    Set<String> exclude,
+  ) async* {
+    final loaded = <GalleryPhoto>[];
+    for (final item in cache.items) {
+      if (exclude.contains(item.credit.pageUrl ?? item.url)) continue;
+      try {
+        loaded.add(await _cachedOrDownload(dir, item));
+        yield List.unmodifiable(loaded);
+      } on Object {
+        // Skipped, the next ones may work.
+      }
+    }
+  }
+
+  /// Targeted queries, one after the other (male, female, juvenile), then
+  /// the curated taxon gallery if fewer than [kCarouselExtraPhotos] photos
+  /// were found. Adults first, juvenile last. Throws only when nothing was
+  /// found and a request failed.
+  Future<List<InatPhotoChoice>> _selectChoices(
+    int inatId,
+    Set<String> exclude,
+  ) async {
+    final seen = {...exclude};
+    var failures = 0;
+
+    Future<List<Map<String, dynamic>>> ask(int term, int value) async {
+      try {
+        return await _fetchObservations(inatId, term, value);
+      } on Object {
+        failures++;
+        return const [];
+      }
+    }
+
+    // Valid photos of [results], those annotated adult first. A photo
+    // annotated juvenile or egg never serves as an adult.
+    List<InatPhotoChoice> candidates(
+      List<Map<String, dynamic>> results,
+      PhotoSex? sex,
+      PhotoLifeStage? forcedStage,
+    ) {
+      final out = <(int, InatPhotoChoice)>[];
+      for (final obs in results) {
+        final annotated = PhotoLabel.fromAnnotations(obs['annotations']);
+        final stage = forcedStage ?? annotated?.stage;
+        if (forcedStage == null &&
+            stage != null &&
+            stage != PhotoLifeStage.adult) {
+          continue;
+        }
+        final photos = obs['photos'];
+        if (photos is! List) continue;
+        final photo = photos.whereType<Map<String, dynamic>>().firstOrNull;
+        if (photo == null) continue;
+        final label = PhotoLabel(stage: stage, sex: sex ?? annotated?.sex);
+        final choice = InatPhotoChoice.ofPhoto(photo, kOnlinePhotoSize, label);
+        if (choice == null) continue;
+        out.add((stage == PhotoLifeStage.adult ? 0 : 1, choice));
+      }
+      out.sort((x, y) => x.$1.compareTo(y.$1)); // stable
+      return [for (final c in out) c.$2];
+    }
+
+    InatPhotoChoice? take(List<InatPhotoChoice> list) {
+      for (final c in list) {
+        if (seen.add(c.credit.pageUrl ?? c.url)) return c;
+      }
+      return null;
+    }
+
+    final male = candidates(
+      await ask(kInatTermSex, kInatValueMale),
+      PhotoSex.male,
+      null,
+    );
+    final female = candidates(
+      await ask(kInatTermSex, kInatValueFemale),
+      PhotoSex.female,
+      null,
+    );
+    final young = candidates(
+      await ask(kInatTermLifeStage, kInatValueJuvenile),
+      null,
+      PhotoLifeStage.juvenile,
+    );
+
+    final adults = <InatPhotoChoice>[];
+    final firstMale = take(male);
+    if (firstMale != null) adults.add(firstMale);
+    final firstFemale = take(female);
+    if (firstFemale != null) adults.add(firstFemale);
+    final juvenile = take(young);
+    final room = kCarouselExtraPhotos - (juvenile == null ? 0 : 1);
+    // A sex without photos: other adults fill in, labelled "Adult" only.
+    for (final spare in [...male, ...female]) {
+      if (adults.length >= room) break;
+      if (spare.label?.stage != PhotoLifeStage.adult) continue;
+      final c = InatPhotoChoice(
+        spare.url,
+        spare.credit,
+        const PhotoLabel(stage: PhotoLifeStage.adult),
+      );
+      if (seen.add(c.credit.pageUrl ?? c.url)) adults.add(c);
+    }
+
+    final out = [...adults];
+    if (out.length < room) {
+      try {
+        final taxon = await (_taxa[inatId] ??= _fetchTaxon(inatId));
+        if (taxon != null) {
+          out.addAll(
+            InatPhotoChoice.pickAll(
+              taxon,
+              max: room - out.length,
+              exclude: seen,
+            ),
+          );
+        }
+      } on Object {
+        _taxa.remove(inatId);
+        failures++;
+      }
+    }
+    if (juvenile != null) out.add(juvenile);
+    if (out.isEmpty && failures > 0) {
+      throw http.ClientException('gallery requests failed');
+    }
+    return out;
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchObservations(
+    int inatId,
+    int term,
+    int value,
+  ) async {
     final uri = Uri.parse('$kInatApiBaseV2/observations').replace(
       queryParameters: {
         'taxon_id': '$inatId',
         'quality_grade': 'research',
         'photos': 'true',
         'photo_license': kOpenPhotoLicenses.where((l) => l != 'pd').join(','),
+        'term_id': '$term',
+        'term_value_id': '$value',
         'order_by': 'votes',
-        'per_page': '$kObservationsPerPage',
+        'per_page': '$kTargetedObservationsPerPage',
         'fields': kObservationFields,
       },
     );
@@ -317,6 +484,63 @@ class InatPhotoService {
     return (results ?? const []).whereType<Map<String, dynamic>>().toList();
   }
 
+  /// Downloads [choice] into the cache folder (when there is one).
+  Future<(_GalleryItem, GalleryPhoto)> _storeGallery(
+    Directory? dir,
+    int inatId,
+    int index,
+    InatPhotoChoice choice,
+  ) async {
+    final photo = await _download(choice);
+    final name = 'g${inatId}_${index}_${_now().millisecondsSinceEpoch}.photo';
+    if (dir != null) {
+      final file = File('${dir.path}/$name');
+      final part = File('${file.path}.part');
+      await part.writeAsBytes(photo.bytes, flush: true);
+      await part.rename(file.path);
+    }
+    return (_GalleryItem(choice.url, name, choice.credit, choice.label), photo);
+  }
+
+  Future<GalleryPhoto> _cachedOrDownload(
+    Directory dir,
+    _GalleryItem item,
+  ) async {
+    final file = File('${dir.path}/${item.file}');
+    if (await file.exists()) {
+      final bytes = await file.readAsBytes();
+      if (bytes.isNotEmpty) {
+        await _touched(OnlinePhoto(file, item.credit));
+        return GalleryPhoto(bytes, item.credit, item.label);
+      }
+    }
+    // Evicted: download it again, no API request.
+    final photo = await _download(
+      InatPhotoChoice(item.url, item.credit, item.label),
+    );
+    try {
+      await file.writeAsBytes(photo.bytes, flush: true);
+    } on Object {
+      // Kept in memory only.
+    }
+    return photo;
+  }
+
+  Future<_GalleryCache?> _readGallery(File file) async {
+    try {
+      if (!await file.exists()) return null;
+      final json =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      if (json['version'] != kGalleryCacheVersion) return null;
+      return _GalleryCache.fromJson(json);
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> _writeGallery(File file, _GalleryCache cache) =>
+      file.writeAsString(jsonEncode(cache.toJson()), flush: true);
+
   Future<Map<String, dynamic>?> _fetchTaxon(int inatId) async {
     final response = await _client
         .get(Uri.parse('$kInatApiBase/taxa/$inatId'), headers: _headers)
@@ -327,8 +551,7 @@ class InatPhotoService {
     }
     final results = (jsonDecode(response.body) as Map)['results'] as List?;
     final taxa = (results ?? const []).whereType<Map<String, dynamic>>();
-    return taxa.where((t) => t['id'] == inatId).firstOrNull ??
-        taxa.firstOrNull;
+    return taxa.where((t) => t['id'] == inatId).firstOrNull ?? taxa.firstOrNull;
   }
 
   Future<GalleryPhoto> _download(InatPhotoChoice choice) async {
@@ -522,5 +745,56 @@ class _CacheInfo {
     'url': url,
     'file': file,
     'credit': credit?.toJson(),
+  };
+}
+
+/// One chosen carousel photo as kept on disk.
+class _GalleryItem {
+  const _GalleryItem(this.url, this.file, this.credit, this.label);
+
+  factory _GalleryItem.fromJson(Map<String, dynamic> json) => _GalleryItem(
+    json['url'] as String,
+    json['file'] as String,
+    PhotoCredit.fromJson(json['credit'] as Map<String, dynamic>),
+    json['stage'] == null && json['sex'] == null
+        ? null
+        : PhotoLabel(
+          stage: PhotoLifeStage.values.asNameMap()[json['stage']],
+          sex: PhotoSex.values.asNameMap()[json['sex']],
+        ),
+  );
+
+  final String url;
+  final String file;
+  final PhotoCredit credit;
+  final PhotoLabel? label;
+
+  Map<String, dynamic> toJson() => {
+    'url': url,
+    'file': file,
+    'credit': credit.toJson(),
+    'stage': label?.stage?.name,
+    'sex': label?.sex?.name,
+  };
+}
+
+/// The carousel selection of a taxon, with the schema version
+/// [kGalleryCacheVersion] and the date it was chosen.
+class _GalleryCache {
+  const _GalleryCache(this.fetchedAt, this.items);
+
+  factory _GalleryCache.fromJson(Map<String, dynamic> json) =>
+      _GalleryCache(DateTime.parse(json['fetched_at'] as String), [
+        for (final i in json['items'] as List)
+          _GalleryItem.fromJson(i as Map<String, dynamic>),
+      ]);
+
+  final DateTime fetchedAt;
+  final List<_GalleryItem> items;
+
+  Map<String, dynamic> toJson() => {
+    'version': kGalleryCacheVersion,
+    'fetched_at': fetchedAt.toIso8601String(),
+    'items': [for (final i in items) i.toJson()],
   };
 }

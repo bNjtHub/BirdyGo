@@ -71,22 +71,21 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         (species == null
             ? const PhotoCredit()
             : PhotoCredit.fromSpecies(species));
-    final galleryState =
+    final galleryAsync =
         inatId == null
             ? null
-            : ref
-                .watch(
-                  speciesGalleryProvider((
-                    inatId: inatId,
-                    bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
-                  )),
-                )
-                .value;
-    final gallery = galleryState?.photos ?? const <GalleryPhoto>[];
+            : ref.watch(
+              speciesGalleryProvider((
+                inatId: inatId,
+                bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
+              )),
+            );
+    final gallery = galleryAsync?.value?.photos ?? const <GalleryPhoto>[];
+    // FORK: an errored or ended stream must not keep the spinner on.
     final loading =
-        inatId != null &&
+        galleryAsync != null &&
         ref.watch(onlinePhotosAllowedProvider) &&
-        (galleryState?.loading ?? true);
+        galleryLoading(galleryAsync);
     final extras = [
       for (final photo in gallery)
         if (photo.credit.pageUrl == null ||
