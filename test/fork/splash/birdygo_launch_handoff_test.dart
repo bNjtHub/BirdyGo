@@ -11,7 +11,6 @@ import 'package:birdnet_live/features/audio/ring_buffer.dart';
 import 'package:birdnet_live/features/live/live_screen.dart';
 import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/features/recording/recording_service.dart';
-import 'package:birdnet_live/features/home/home_screen.dart';
 import 'package:birdnet_live/features/inference/geo_model.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
