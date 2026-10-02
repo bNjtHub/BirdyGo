@@ -8,14 +8,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const first = BirdySongMotion.firstPhrase;
 
-  test('the pose lifts and tilts back mid-song, rests otherwise', () {
+  test('the pose raises the head mid-song, rests otherwise', () {
     final mid = BirdySongMotion.at(first + 600);
     expect(mid.lift, 1);
-    expect(mid.dy, lessThan(-BirdyMotion.logoLiftUnits + 1));
-    expect(mid.tiltDegrees, lessThan(-BirdyMotion.logoLiftTiltDegrees + .01));
+    expect(mid.neckStretch, greaterThan(BirdyMotion.logoLiftStretch - .001));
+    expect(
+      mid.neckStretch,
+      lessThanOrEqualTo(
+        BirdyMotion.logoLiftStretch + BirdyMotion.logoLiftBobStretch,
+      ),
+    );
+    // The tilt is the song's own, not the lift's.
+    expect(mid.tiltDegrees, -BirdySongMotion.songTiltDegrees * mid.song);
     for (final t in [0.0, first - 1, first + BirdySongMotion.phraseLength]) {
       final rest = BirdySongMotion.at(t);
-      expect(rest.dy, 0);
+      expect(rest.neckStretch, 0);
       expect(rest.tiltDegrees, 0);
       expect(rest.song, 0);
     }
@@ -23,7 +30,7 @@ void main() {
 
   test('reduced motion is the rest pose whatever the clock says', () {
     final p = BirdySongMotion.at(first + 600, reduced: true);
-    expect(p.dy, 0);
+    expect(p.neckStretch, 0);
     expect(p.tiltDegrees, 0);
     expect(p.lift, 0);
     expect(p.phrase, -1);
@@ -32,7 +39,7 @@ void main() {
   test('the same clock gives the same pose; the loop repeats it', () {
     final a = BirdySongMotion.at(first + 700);
     final b = BirdySongMotion.at(first + 700 + BirdySongMotion.phrasePeriod);
-    expect(b.dy, a.dy);
+    expect(b.neckStretch, a.neckStretch);
     expect(b.tiltDegrees, a.tiltDegrees);
     expect(b.phrase, 1);
     // Without the loop only the first phrase sings.
