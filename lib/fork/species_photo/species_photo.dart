@@ -56,6 +56,10 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
   bool _pendingDelayDone = false;
   bool _revealTimedOut = false;
 
+  /// FORK: the extras of this page visit, set once (gallery complete, or
+  /// safety timeout) and never changed after: later emissions are ignored.
+  List<GalleryPhoto>? _frozen;
+
   @override
   void didUpdateWidget(SpeciesPhoto old) {
     super.didUpdateWidget(old);
@@ -67,6 +71,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
     _revealTimer?.cancel();
     _pendingTimer = _revealTimer = null;
     _pendingDelayDone = _revealTimedOut = false;
+    _frozen = null;
   }
 
   void _startLoadingTimers() {
@@ -120,14 +125,21 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         ref.watch(onlinePhotosAllowedProvider) &&
         galleryLoading(galleryAsync);
     if (loading) _startLoadingTimers();
-    // FORK: one visual change. While loading, the extras stay hidden (the
-    // single bundled photo, a pending pill); they are revealed all at once
-    // when the gallery ends, or at the safety timeout (the rest then joins
-    // silently).
-    final hold = loading && !_revealTimedOut;
+    // FORK: one visual change, once per visit. While loading, the extras
+    // stay hidden (the single bundled photo, a pending pill). The first time
+    // the gallery is complete, or at the safety timeout, they are revealed
+    // all at once and frozen: later emissions are ignored until the page is
+    // reopened (they still land in the disk cache).
+    if (_frozen == null &&
+        galleryAsync != null &&
+        ref.watch(onlinePhotosAllowedProvider) &&
+        (!loading || _revealTimedOut)) {
+      _frozen = List.unmodifiable(gallery);
+    }
+    final hold = _frozen == null && loading;
     final pending = hold && _pendingDelayDone;
     final extras = [
-      for (final photo in hold ? const <GalleryPhoto>[] : gallery)
+      for (final photo in _frozen ?? const <GalleryPhoto>[])
         if (photo.credit.pageUrl == null ||
             photo.credit.pageUrl != online?.credit.pageUrl)
           photo,

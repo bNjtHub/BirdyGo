@@ -71,8 +71,9 @@ const double kCarouselPendingStagger = 0.18;
 const Duration kCarouselPendingDelay = Duration(milliseconds: 300);
 
 /// Safety net: if the gallery still loads after this, the photos loaded so
-/// far are revealed, the pending pill goes, and later ones join silently.
-const Duration kCarouselRevealTimeout = Duration(seconds: 4);
+/// far are revealed and frozen for this page visit (later ones only reach
+/// the disk cache). Long enough for a slow connection to finish all photos.
+const Duration kCarouselRevealTimeout = Duration(seconds: 8);
 
 /// Opacity of the inactive dots and of the pending dots at rest.
 const double kCarouselDimAlpha = 0.5;
