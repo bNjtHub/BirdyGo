@@ -234,6 +234,7 @@ pas de rotation, de rebond ni de tremblement ; 500 ms au plus pour une célébra
   règle. Le cri BirdyGo joue une fois à l'arrivée, un retour haptique léger au clin d'œil ; pendant ce
   temps le logo de l'en-tête est masqué (un seul oiseau à l'écran). Animations réduites : un clin
   d'œil rapide sur place (450 ms). Les appuis pendant la séquence sont ignorés.
+- Le logo qui chante lève la tête (J7) : l'oiseau seul monte d'environ 2,4 dp et se penche en arrière de 3,5° (en plus des 2,5° du chant) autour de ses pattes, entrée 200 ms `easeOutCubic`, petit rebond de 0,7 dp au plus à chaque syllabe, retour 300 ms `easeInOutCubic` (`BirdyMotion.logoLift*`). Dessiné depuis l'horloge du chant, donc synchrone avec le son et sans saut si on retouche ; les notes ne bougent pas. Animations réduites : aucun mouvement.
 - Première rencontre en série (J6h) : les Sûres entendues pendant qu'une carte est ouverte, ou app en arrière-plan,
   forment une file (rang figé, « 1 sur 3 nouvelles », points `BirdyStepDots`) ; un rare passe devant. Barre de
   décompte 6 px (`BirdyProgressBar`, 6 s linéaires, `firstEncounterShown`) et texte « Se referme seul dans n s » /

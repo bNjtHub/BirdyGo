@@ -1,0 +1,70 @@
+import 'dart:ui' as ui;
+
+import 'package:birdnet_live/fork/design/birdy_motion.dart';
+import 'package:birdnet_live/fork/splash/birdygo_splash_painter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+Future<List<int>> _pixels(double clock, {bool still = false}) async {
+  final recorder = ui.PictureRecorder();
+  BirdyGoSingingPainter(clock: ValueNotifier(clock), still: still)
+      .paint(Canvas(recorder), const Size(114, 90));
+  final image = await recorder.endRecording().toImage(114, 90);
+  final data = await image.toByteData();
+  return data!.buffer.asUint8List().toList();
+}
+
+void main() {
+  const lift = BirdyGoSingingPainter.liftAt;
+  const first = BirdyGoSingingPainter.firstPhrase;
+
+  test('the lift is zero at rest, before and after the phrase', () {
+    expect(lift(-500), 0);
+    expect(lift(0), 0);
+    expect(lift(BirdyGoSingingPainter.phrasePeriod - 1), 0);
+    expect(lift(BirdyGoSingingPainter.phraseLength), 0);
+  });
+
+  test('the lift is up mid-song and holds through the syllables', () {
+    expect(lift(BirdyMotion.logoLiftIn), 1);
+    expect(lift(600), 1);
+    expect(lift(1000), 1);
+    expect(lift(50), inInclusiveRange(0.1, 0.9));
+  });
+
+  test('the lift is back to zero after the song and never jumps', () {
+    expect(lift(1160 + BirdyMotion.logoLiftOut), 0);
+    var previous = lift(0);
+    for (var p = 1.0; p < 2000; p++) {
+      final v = lift(p);
+      expect(v, inInclusiveRange(0, 1));
+      // Eases in 200 ms and out 300 ms: at most ~1/60 per ms is smooth.
+      expect((v - previous).abs(), lessThan(0.03));
+      previous = v;
+    }
+  });
+
+  testWidgets('the bird is painted lifted mid-song, identical at rest', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final still = await _pixels(first + 600, still: true);
+      final singing = await _pixels(first + 600);
+      // Reduced motion: the settled mark, whatever the clock says.
+      expect(listEquals(still, await _pixels(0, still: true)), isTrue);
+      expect(listEquals(singing, still), isFalse);
+      // Between phrases the bird is exactly where it rests (the lift and the
+      // song are both over, nothing else moves the bird by then).
+      final later = await _pixels(first + 5000);
+      final later2 = await _pixels(first + 5000);
+      expect(listEquals(later, later2), isTrue);
+    });
+  });
+
+  test('a repeated phrase starts and ends at rest (no restart jump)', () {
+    const again = first + BirdyGoSingingPainter.phrasePeriod;
+    final p = again - (first + 0);
+    expect(lift(p - BirdyGoSingingPainter.phrasePeriod), 0);
+  });
+}

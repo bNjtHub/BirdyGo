@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../design/birdy_motion.dart';
 import '../design/birdy_theme_choice.dart';
 import '../design/birdy_tokens.dart';
 import '../home/birdygo_logo.dart';
@@ -249,6 +250,22 @@ class BirdyGoSingingPainter extends CustomPainter {
       ..restore();
   }
 
+  /// How far the bird has lifted its head, 0..1, [p] ms into a phrase: eases
+  /// in from the first syllable, holds through the song, eases back out after
+  /// the last syllable. Zero before the phrase and once it is done.
+  // FORK: J7, the bird lifts its head while it sings.
+  static double liftAt(double p) {
+    const songEnd = 2 * _syllable + _syllableLength;
+    if (p <= 0) return 0;
+    if (p < BirdyMotion.logoLiftIn) {
+      return Curves.easeOutCubic.transform(p / BirdyMotion.logoLiftIn);
+    }
+    if (p <= songEnd) return 1;
+    final u = (p - songEnd) / BirdyMotion.logoLiftOut;
+    if (u >= 1) return 0;
+    return Curves.easeInOutCubic.transform(1 - u);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final t = still ? _settled : clock.value;
@@ -290,10 +307,22 @@ class BirdyGoSingingPainter extends CustomPainter {
     } else {
       canvas.save();
     }
+    // FORK: J7, the lift of the head: a rise and a back tilt about the feet,
+    // a small bob with each syllable. Only the bird; the notes stay put.
+    final headLift = still ? 0.0 : liftAt(p);
     canvas
+      ..translate(
+        0,
+        -headLift * BirdyMotion.logoLiftUnits -
+            headLift * song * BirdyMotion.logoLiftBobUnits,
+      )
       ..translate(0, _Timeline.arrivalTravel * (1 - lift))
       ..translate(_feet.dx, _feet.dy)
-      ..rotate(-2.5 * song * math.pi / 180)
+      ..rotate(
+        (-2.5 * song - BirdyMotion.logoLiftTiltDegrees * headLift) *
+            math.pi /
+            180,
+      )
       ..scale(grow * (1 - .014 * song), grow * (1 + .045 * song))
       ..translate(-_feet.dx, -_feet.dy);
 
