@@ -2083,6 +2083,5 @@
   "forkPhotoFemale": "Femelle",
   "forkPhotoMale": "Mâle",
   "forkPhotoWithLabel": "{position}, {label}",
-  "forkPhotoLoading": "Chargement des photos",
-  "forkPhotoPosition": "Photo {current} sur {total}"
+  "forkPhotoLoading": "Chargement des photos"
 }
