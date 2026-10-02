@@ -1,4 +1,8 @@
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
+import 'package:birdnet_live/fork/design/birdy_theme_choice.dart';
+import 'package:birdnet_live/fork/design/birdy_tokens.dart';
+import 'package:birdnet_live/fork/design/species_tint.dart';
+import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:birdnet_live/fork/settings/simple_settings_screen.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -41,6 +45,26 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(find.text(fr.forkFirstNameSaved), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byIcon(AppIcons.checkCircle),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  test('toast check icon reaches 3:1 on surface3 in every bird and theme', () {
+    for (final b in BirdyBird.values) {
+      for (final br in Brightness.values) {
+        final c = BirdyColors.forBird(b, br);
+        expect(
+          contrastRatio(c.sure.foreground, c.surface3),
+          greaterThanOrEqualTo(3),
+          reason: '$b $br',
+        );
+      }
+    }
   });
 
   testWidgets('a picker choice shows the toast', (tester) async {
