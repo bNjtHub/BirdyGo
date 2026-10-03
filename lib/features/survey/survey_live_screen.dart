@@ -1401,7 +1401,7 @@ class _SurveyStatusBarState extends ConsumerState<_SurveyStatusBar> {
         children: [
           // Stop button (matches point count).
           IconButton(
-            icon: const Icon(AppIcons.stopRounded, size: 22),
+            icon: const Icon(AppIcons.stopRounded, size: 22, fill: 1), // FORK: filled glyph (Material Symbols)
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             onPressed: widget.isActive

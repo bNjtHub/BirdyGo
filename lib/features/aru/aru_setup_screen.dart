@@ -1298,7 +1298,7 @@ class _ScheduleStep extends ConsumerWidget {
             ButtonSegment(
               value: _ScheduleEndMode.manual,
               label: Text(l10n.aruScheduleEndManual),
-              icon: const Icon(AppIcons.stopRounded, size: 18),
+              icon: const Icon(AppIcons.stopRounded, size: 18, fill: 1), // FORK: filled glyph (Material Symbols)
             ),
             ButtonSegment(
               value: _ScheduleEndMode.cycles,

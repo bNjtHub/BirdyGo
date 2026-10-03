@@ -1897,7 +1897,12 @@ class _CaptureButton extends StatelessWidget {
                     ),
                   )
                 : ExcludeSemantics(
-                    child: Icon(icon, color: iconColor, size: 28),
+                    child: Icon(
+                      icon,
+                      color: iconColor,
+                      size: 28,
+                      fill: isActive ? 1 : null, // FORK: filled stop (Material Symbols)
+                    ),
                   ),
           ),
         ),

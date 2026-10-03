@@ -131,6 +131,7 @@ class _SessionMapScreenState extends ConsumerState<SessionMapScreen> {
               height: 40,
               child: Icon(
                 AppIcons.locationOnFilled,
+                fill: 1, // FORK: filled glyph (Material Symbols)
                 color: theme.colorScheme.error,
                 size: 40,
               ),
