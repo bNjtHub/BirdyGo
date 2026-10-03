@@ -52,6 +52,13 @@ class _FakePhotoService extends InatPhotoService {
     calls.add(inatId);
     return photo;
   }
+
+  // No disk in a widget test: the carousel gallery is out of scope here.
+  @override
+  Stream<List<GalleryPhoto>> galleryFor(
+    int inatId, {
+    Set<String> exclude = const {},
+  }) => Stream.value(const []);
 }
 
 Future<void> _pumpPhoto(
@@ -107,9 +114,22 @@ void main() {
     await _pumpPhoto(tester, allowed: false, service: service);
     expect(service.calls, isEmpty);
 
+    // A tap on the photo opens it full screen, credit line at the bottom.
     await tester.tap(find.byType(SpeciesPhoto));
     await tester.pumpAndSettle();
-    expect(find.text('Crédit photo'), findsOneWidget);
+    expect(
+      find.text(
+        'Ryan Schain · Tous droits réservés · Macaulay Library ML44599871',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('viewer-close')));
+    await tester.pumpAndSettle();
+
+    // The (i) button opens the credit sheet.
+    await tester.tap(find.byTooltip('Crédit photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Crédit photo'), findsWidgets);
     expect(find.text('Photo : Ryan Schain'), findsOneWidget);
     expect(find.text('Licence : Tous droits réservés'), findsOneWidget);
     expect(find.text('Source : Macaulay Library ML44599871'), findsOneWidget);
@@ -155,8 +175,6 @@ void main() {
 
     await tester.tap(find.byType(SpeciesPhoto));
     await tester.pumpAndSettle();
-    expect(find.text('Photo : Ann'), findsOneWidget);
-    expect(find.text('Licence : CC BY-SA'), findsOneWidget);
-    expect(find.text('Source : iNaturalist'), findsOneWidget);
+    expect(find.text('Ann · CC BY-SA · iNaturalist'), findsOneWidget);
   });
 }

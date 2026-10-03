@@ -292,6 +292,8 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       graphique de présence existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
       sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
       par IA : elle peut contenir des erreurs. ») en français et en anglais.
+- [x] Fiche espèce, carrousel de photos (PR « J7 Fiche espèce : carrousel de photos ») : photo hors ligne puis jusqu'à 4 photos iNaturalist libres (mêmes licences que la grande photo), seulement si « Photos en grand (en ligne) » est actif ; points, crédit de la page courante. Tests dans `test/fork/species_photo/species_photo_carousel_test.dart`.
+- [x] Fiche espèce, photo en plein écran (même PR) : un appui sur la photo l'ouvre en noir, zoom (pincer, double appui), balayage entre les photos, glisser vers le bas pour fermer, crédit toujours visible ; bouton (i) inchangé. Dégradé sombre sous la barre d'état, icônes claires tant que l'en-tête est visible. Tests `species_photo_viewer_test.dart`.
 - [x] Fiche espèce, sons et saisons (PR « J7 Fiche espèce ») : « Mes sons » juste après « Entendu… »
       (le meilleur son devient un lecteur mis en avant, grand bouton), « Ici en ce moment » garde sa
       courbe compacte de 12 mois, avec la phrase calculée sur 48 semaines (« Arrive début mars ·
