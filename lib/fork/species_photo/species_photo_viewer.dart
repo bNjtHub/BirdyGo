@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../shared/services/link_launcher.dart';
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -212,7 +212,7 @@ class _SpeciesPhotoViewerState extends State<SpeciesPhotoViewer> {
                         width: kMinInteractiveDimension,
                         height: kMinInteractiveDimension,
                       ),
-                      icon: const Icon(AppIcons.close),
+                      icon: const Icon(BirdyIcons.close),
                       style: IconButton.styleFrom(
                         backgroundColor: BirdyBrand.black.withValues(
                           alpha: BirdyAlpha.photoButtonScrim,
