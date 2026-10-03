@@ -1,0 +1,36 @@
+BirdyGo écoute les oiseaux autour de vous et vous dit qui chante, sans connexion Internet.
+
+RECONNAISSANCE HORS LIGNE
+Appuyez sur Écouter : l'analyse du chant se fait entièrement sur votre téléphone, avec le modèle BirdNET+. Aucun enregistrement ne quitte l'appareil. Pratique en forêt, en montagne, au jardin, et même écran éteint, téléphone en poche.
+
+DES RÉSULTATS EN CLAIR
+Chaque espèce est classée Sûr, Probable ou À vérifier, pour savoir tout de suite si vous pouvez vous y fier. L'app tient compte de l'endroit et de la saison pour écarter les espèces peu plausibles. Ce sont des estimations : à vous de confirmer ou d'écarter chaque détection.
+
+VOTRE CARNET D'OBSERVATIONS
+Chaque écoute est gardée avec les espèces entendues, l'heure, le lieu et un extrait audio à réécouter. Retrouvez vos oiseaux par espèce, par jour ou par lieu.
+
+QUIZ ET PROGRESSION
+Entraînez-vous à reconnaître les chants avec le quiz, gagnez des statuts et suivez vos objectifs du jour. Le jeu ne récompense que les détections sûres ou confirmées par vous.
+
+CARTES
+La carte des contacts montre où chaque oiseau a été entendu (fonds OpenStreetMap et IGN, chargés seulement si vous l'autorisez). Sur chaque fiche, une carte du monde montre où l'espèce vit, et à quelle saison, même hors connexion.
+
+FICHES ESPÈCES
+Photo, description et carte de répartition, disponibles hors ligne.
+
+SONOTHÈQUE
+Réécoutez les extraits que vous avez gardés.
+
+QUATRE OISEAUX AU CHOIX
+Choisissez le compagnon de l'app : loriot, martin, flamant ou étourneau, chacun avec ses couleurs.
+
+PARTAGEZ VOS OBSERVATIONS
+Préparez l'envoi d'une observation à Faune-France (LPO) avec l'extrait audio et la position, ou exportez vos sessions (CSV, GPX, JSON, rapport HTML). Rien n'est envoyé sans votre action.
+
+VIE PRIVÉE
+Pas de compte, pas de publicité, pas de pistage. L'audio et la position restent sur votre téléphone. Cartes, noms de lieux, météo et photos en grand format ne se chargent que si vous les activez dans Paramètres > Confidentialité. Pour les personnes de 13 ans et plus.
+
+CRÉDITS
+BirdyGo est un fork indépendant de BirdNET Live, l'application du Cornell Lab of Ornithology et de la Technische Universität Chemnitz (code sous licence MIT). Les modèles BirdNET+ sont sous licence Apache 2.0. BirdyGo n'est ni approuvée ni soutenue par l'équipe BirdNET.
+Photos : contributeurs d'iNaturalist et de Wikimedia Commons, sous licences Creative Commons ; auteur et licence de chaque photo sont indiqués dans l'app (À propos > Licences des contenus). Cartes de répartition : observations GBIF (licences CC0 et CC BY) et limites Natural Earth (domaine public). Fonds de carte : © les contributeurs d'OpenStreetMap, Géoplateforme de l'IGN.
+Les résultats sont des estimations probabilistes : vérifiez avant toute décision scientifique ou de conservation, et n'utilisez pas l'app pour nuire à la faune.

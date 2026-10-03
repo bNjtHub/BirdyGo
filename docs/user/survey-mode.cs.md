@@ -131,3 +131,5 @@ Celoobrazovkové zobrazení mapy Survey (tlačítko :material-fullscreen: v Pře
 ## Po zastavení
 
 BirdNET Live uloží dokončenou survey a otevře [Přehled Session](session-review.md).
+
+Probíhající survey se ukládá při spuštění, každých 30 sekund a když aplikace opustí popředí. Po pádu aplikace nebo výpadku napájení se poslední uložená část survey objeví v Knihovně Sessions jako ukončená Session. Nahrávání se znovu nespustí. Pozorování od posledního uložení mohou chybět.

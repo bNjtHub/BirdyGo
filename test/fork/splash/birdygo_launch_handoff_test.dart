@@ -6,11 +6,14 @@ import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/file_analysis/file_analysis_controller.dart';
 import 'package:birdnet_live/features/file_analysis/file_analysis_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
-import 'package:birdnet_live/features/home/home_screen.dart';
+import 'package:birdnet_live/features/file_analysis/file_analysis_screen.dart';
+import 'package:birdnet_live/features/audio/ring_buffer.dart';
+import 'package:birdnet_live/features/live/live_screen.dart';
+import 'package:birdnet_live/features/live/live_session.dart';
+import 'package:birdnet_live/features/recording/recording_service.dart';
 import 'package:birdnet_live/features/inference/geo_model.dart';
 import 'package:birdnet_live/features/live/live_controller.dart';
 import 'package:birdnet_live/features/live/live_providers.dart';
-import 'package:birdnet_live/features/live/live_session.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
@@ -34,9 +37,15 @@ class _PendingRepository extends SessionRepository {
   Future<List<LiveSession>> listAll() => scan.future;
 }
 
-class _IdleLive extends Fake implements LiveController {
-  @override
-  LiveState get state => LiveState.idle;
+class _IdleLive extends LiveController {
+  _IdleLive()
+    : this._(RingBuffer());
+
+  _IdleLive._(RingBuffer ring)
+    : super(
+        ringBuffer: ring,
+        recordingService: RecordingService(ringBuffer: ring),
+      );
 
   @override
   Future<void> loadModel() async {} // No native model runs in this widget test.
@@ -45,6 +54,12 @@ class _IdleLive extends Fake implements LiveController {
 class _IdleFileAnalysis extends Fake implements FileAnalysisController {
   @override
   FileAnalysisState get state => FileAnalysisState.idle;
+
+  @override
+  String? get errorMessage => null;
+
+  @override
+  VoidCallback? onStateChanged;
 }
 
 class _EmptyHome extends Fake implements HomeLoader {
@@ -132,20 +147,15 @@ void main() {
           await tester.pump();
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
-          expect(find.byType(BirdyGoSplash), findsOneWidget);
-          expect(find.byType(HomeScreen), findsNothing);
-          expect(find.byType(HomeScreen, skipOffstage: false), findsOneWidget);
-
-          // A failed storage read must reveal the fail-closed dialog, not leave
-          // startup stuck behind it. This exercises both real App listeners.
-          repository.scan.completeError(StateError('Storage unavailable'));
-          await tester.pump();
-          await tester.pump();
-          await tester.pump();
-          // No clock advance: explicit launches reveal their controls even when
-          // the normal startup introduction still has time left.
+          // FORK: upstream no longer scans storage for an unfinished ARU
+          // deployment before a launch hand-off (session checkpoints), so the
+          // explicit launch is revealed as soon as the app is built.
           expect(find.byType(BirdyGoSplash), findsNothing);
-          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(find.byType(AlertDialog), findsNothing);
+          expect(
+            find.byType(share ? FileAnalysisScreen : LiveScreen),
+            findsOneWidget,
+          );
           expect(tester.takeException(), isNull);
           await tester.pump(const Duration(milliseconds: 350));
           await tester.pumpWidget(const SizedBox());

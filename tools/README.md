@@ -28,10 +28,7 @@ Full documentation: `docs/developer/species-bundle.md`.
 <!-- FORK: region photo pack (fork/PLAN.md J6b) -->
 BirdyGo: `--species-list tools/fork_sheets/region_species.csv` bundles photos
 for the region's species only, and `--replace-reserved` swaps photos without
-an open license for iNaturalist ones (see `tools/fork_species_photos.py`). A
-species with no shippable photo (reserved, or CC BY-ND since photos are
-cropped) loses its photo and credit. `--verify-photos` exits 1 if the pack
-list still has one (also checked by `tools/test_fork_species_photos.py`).
+an open license for iNaturalist ones (see `tools/fork_species_photos.py`).
 
 <!-- FORK: world map ranges (fork/PLAN.md J7) -->
 ## World map ranges (BirdyGo)

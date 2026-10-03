@@ -212,6 +212,8 @@ Toto nastavení se týká otevírání režimu Live uvnitř aplikace. [Widget Qu
 
 Po zapnutí (výchozí) se dokončená Session režimu Live nebo Point Count přidá do vaší knihovny automaticky ve chvíli, kdy skončí. Po vypnutí se dokončená Session otevře v přehledu s označením **neuloženo**: ikona uložení je zvýrazněná a musíte na ni klepnout, aby se Session zachovala. Odchod z přehledu bez uložení Session i s nahrávkami zahodí. To se hodí pro krátký poslech, kdy chcete uchovat jen občasný pozoruhodný výsledek místo hromadění každé krátké nahrávky. Nasazení Survey a ARU se ukládají vždy automaticky – dlouhý běh bez dozoru je příliš cenný, aby se ztratil kvůli zapomenutému uložení – takže tam se tento přepínač neuplatní.
 
+Dokud je automatické ukládání zapnuté, režim Live a Point Count navíc ukládají rozpracovanou Session při spuštění, každých 30 sekund a když aplikace opustí popředí. Tím se omezí ztráta dat po pádu aplikace nebo výpadku napájení. Při vypnutém nastavení se tato průběžná uložení neuchovávají. Survey a ARU ukládají průběžný stav nezávisle na tomto nastavení.
+
 ## Přehrávání
 
 ### Překryv přehrávače v přehledu

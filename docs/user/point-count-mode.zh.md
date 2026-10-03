@@ -59,3 +59,5 @@ Point Count 模式是 BirdNET Live 中定点计时的工作方式。
 ## 计数结束后
 
 样点计数结束时，BirdNET Live 会保存 Session 并打开 [Session 回顾](session-review.md)。
+
+启用自动保存时，未完成的计数还会在开始时、每 30 秒以及应用离开前台时保存。发生崩溃或断电后，最近保存的部分计数可在 Session 库中找到。
