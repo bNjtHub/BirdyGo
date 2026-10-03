@@ -17,6 +17,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
+import 'package:birdnet_live/fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/services/link_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -129,9 +130,9 @@ class _SessionMapScreenState extends ConsumerState<SessionMapScreen> {
               point: center,
               width: 40,
               height: 40,
-              child: Icon(
-                AppIcons.locationOnFilled,
-                fill: 1, // FORK: filled glyph (Material Symbols)
+              child: BirdyIcon( // FORK: icon roles
+                BirdyIcons.place, // FORK: icon roles
+                active: true, // FORK: icon roles
                 color: theme.colorScheme.error,
                 size: 40,
               ),
@@ -157,7 +158,7 @@ class _SessionMapScreenState extends ConsumerState<SessionMapScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              AppIcons.map,
+              BirdyIcons.map, // FORK: icon roles
               size: 64,
               color: theme.colorScheme.onSurface.withAlpha(100),
             ),
@@ -170,7 +171,7 @@ class _SessionMapScreenState extends ConsumerState<SessionMapScreen> {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _requestConsent,
-              icon: const Icon(AppIcons.map),
+              icon: const Icon(BirdyIcons.map), // FORK: icon roles
               label: Text(l10n.mapLoadButton),
             ),
             const SizedBox(height: 8),

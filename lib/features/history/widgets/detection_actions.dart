@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
+import 'package:birdnet_live/fork/design/birdy_icons.dart'; // FORK: icon roles
 import 'package:birdnet_live/shared/utils/share_sheet.dart';
 
 /// Bundle of optional per-detection action callbacks.
@@ -223,7 +224,7 @@ class DetectionActionsOverflow extends StatelessWidget {
             PopupMenuItem<_OverflowAction>(
               value: _OverflowAction.editNote,
               child: _OverflowRow(
-                icon: AppIcons.stickyNote2,
+                icon: BirdyIcons.note, // FORK: icon roles
                 label:
                     actions.hasNote
                         ? l10n.detectionEditNote
@@ -237,7 +238,7 @@ class DetectionActionsOverflow extends StatelessWidget {
             PopupMenuItem<_OverflowAction>(
               value: _OverflowAction.editVoiceMemo,
               child: _OverflowRow(
-                icon: AppIcons.mic,
+                icon: BirdyIcons.voiceMemo, // FORK: icon roles
                 label:
                     actions.hasVoiceMemo
                         ? l10n.detectionReplaceVoiceMemo

@@ -24,6 +24,7 @@ import '../../core/theme/app_theme.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/utils/locale_time_format.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../../shared/utils/share_sheet.dart';
@@ -495,7 +496,7 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
           isSelectMode
               ? AppBar(
                 leading: IconButton(
-                  icon: const Icon(AppIcons.close),
+                  icon: const Icon(BirdyIcons.close), // FORK: icon roles
                   tooltip: l10n.cancel,
                   onPressed: _clearSelection,
                 ),
@@ -557,7 +558,7 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
               )
               : AppBar(
                 leading: IconButton(
-                  icon: const Icon(AppIcons.arrowBackRounded),
+                  icon: const Icon(BirdyIcons.back), // FORK: icon roles
                   tooltip: l10n.tooltipBack,
                   onPressed: _returnToHome,
                 ),
@@ -577,7 +578,7 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
                 actions: [
                   if (_showSearch)
                     IconButton(
-                      icon: const Icon(AppIcons.close),
+                      icon: const Icon(BirdyIcons.close), // FORK: icon roles
                       tooltip: l10n.tooltipClearSearch,
                       onPressed:
                           () => setState(() {
@@ -592,7 +593,7 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
                       onPressed: () => setState(() => _showSearch = true),
                     ),
                     IconButton(
-                      icon: const Icon(AppIcons.helpOutlineRounded),
+                      icon: const Icon(BirdyIcons.help), // FORK: icon roles
                       tooltip: l10n.sessionLibraryHelpTitle,
                       onPressed: _showHelp,
                     ),
@@ -867,7 +868,7 @@ class _SessionLibraryScreenState extends ConsumerState<SessionLibraryScreen> {
                     trailing:
                         m.type == _newSessionMode
                             ? Icon(
-                              AppIcons.checkRounded,
+                              BirdyIcons.tick, // FORK: icon roles
                               color: theme.colorScheme.primary,
                             )
                             : null,
@@ -1204,7 +1205,7 @@ class _SessionTile extends ConsumerWidget {
                           children: [
                             Icon(
                               session.latitude != null
-                                  ? AppIcons.locationOn
+                                  ? BirdyIcons.place // FORK: icon roles
                                   : AppIcons.locationOff,
                               size: 14,
                               color: theme.colorScheme.onSurfaceVariant,
@@ -1293,7 +1294,7 @@ class _SessionTile extends ConsumerWidget {
                     variant: StatChipVariant.badge,
                   ),
                   StatChip(
-                    icon: AppIcons.detections,
+                    icon: BirdyIcons.detections, // FORK: icon roles
                     value: '$detectionCount det.',
                     variant: StatChipVariant.badge,
                   ),

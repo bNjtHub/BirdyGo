@@ -23,6 +23,7 @@ import 'package:fftea/fftea.dart';
 import 'package:flutter/material.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
+import 'package:birdnet_live/fork/design/birdy_icons.dart'; // FORK: icon roles
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -679,7 +680,7 @@ class _ClipPlayerSheetState extends ConsumerState<_ClipPlayerSheet> {
                       : _spectrogramImage == null
                       ? Center(
                         child: Icon(
-                          AppIcons.graphicEq,
+                          BirdyIcons.song, // FORK: icon roles
                           color: Colors.white.withAlpha(80),
                           size: 32,
                         ),
@@ -771,10 +772,10 @@ class _ClipPlayerSheetState extends ConsumerState<_ClipPlayerSheet> {
                         ensureAudible(context, ref); // FORK: volume prompt (J6h)
                         _player.play();
                       },
-                  icon: Icon(
+                  icon: BirdyIcon( // FORK: icon roles
                     _isPlaying
-                        ? AppIcons.pauseRounded
-                        : AppIcons.playArrowRounded,
+                        ? BirdyIcons.pause // FORK: icon roles
+                        : BirdyIcons.play, // FORK: icon roles
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -934,8 +935,9 @@ class _ConfirmToggle extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(
-            confirmed ? AppIcons.checkCircle : AppIcons.checkCircleOutline,
+          child: BirdyIcon( // FORK: icon roles
+            BirdyIcons.confirmed,
+            active: confirmed,
             size: 28,
             color:
                 confirmed
