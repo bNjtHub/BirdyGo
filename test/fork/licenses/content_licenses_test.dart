@@ -4,6 +4,7 @@ import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/licenses/content_licenses_screen.dart';
 import 'package:birdnet_live/fork/licenses/description_credit.dart';
+import 'package:birdnet_live/fork/species_photo/species_photo_providers.dart';
 import 'package:birdnet_live/fork/licenses/licenses_model.dart';
 import 'package:birdnet_live/fork/world_map/world_map_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';

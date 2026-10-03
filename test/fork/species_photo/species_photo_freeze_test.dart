@@ -92,11 +92,10 @@ Future<void> _pump(
 }
 
 /// Number of page dots on screen (0 when none).
-int _dotCount(WidgetTester tester) =>
-    [
-      for (var d = 0; d < 8; d++)
-        if (find.byKey(ValueKey('photo-dot-$d')).evaluate().isNotEmpty) d,
-    ].length;
+int _dotCount(WidgetTester tester) => [
+  for (var d = 0; d < 8; d++)
+    if (find.byKey(ValueKey('photo-dot-$d')).evaluate().isNotEmpty) d,
+].length;
 
 int _pageCount(WidgetTester tester) {
   final view = find.byType(PageView);

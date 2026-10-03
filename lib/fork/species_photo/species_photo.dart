@@ -100,24 +100,26 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
     final l10n = AppLocalizations.of(context)!;
     final species = widget.species;
     final inatId = species?.inatId;
-    final online =
-        inatId == null
-            ? null
-            : ref.watch(onlineSpeciesPhotoProvider(inatId)).value;
+    final online = inatId == null
+        ? null
+        : ref.watch(onlineSpeciesPhotoProvider(inatId)).value;
+    final bundledIds =
+        ref.watch(bundledImageIdsProvider).value ?? const <String>{};
     final bundledCredit =
         online?.credit ??
         (species == null
             ? const PhotoCredit()
-            : PhotoCredit.fromSpecies(species));
-    final galleryAsync =
-        inatId == null
-            ? null
-            : ref.watch(
-              speciesGalleryProvider((
-                inatId: inatId,
-                bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
-              )),
-            );
+            : PhotoCredit.fromSpecies(species, bundledIds: bundledIds));
+    final galleryAsync = inatId == null
+        ? null
+        : ref.watch(
+            speciesGalleryProvider((
+              inatId: inatId,
+              // Not tied to bundledIds: the provider key must not change when
+              // the asset list finishes loading (that would refetch).
+              bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
+            )),
+          );
     final gallery = galleryAsync?.value?.photos ?? const <GalleryPhoto>[];
     // FORK: an errored or ended stream must not keep the spinner on.
     final loading =
@@ -180,10 +182,9 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final cacheWidth =
-            width.isFinite
-                ? (width * MediaQuery.devicePixelRatioOf(context)).round()
-                : null;
+        final cacheWidth = width.isFinite
+            ? (width * MediaQuery.devicePixelRatioOf(context)).round()
+            : null;
         final bundledLayers = <Widget>[
           _heroIf(
             page == 0,
@@ -196,9 +197,8 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
                   gaplessPlayback: true,
                   // Decoded at display size, never upscaled.
                   cacheWidth: cacheWidth,
-                  errorBuilder:
-                      (_, _, _) =>
-                          Image.asset(_placeholder, fit: BoxFit.contain),
+                  errorBuilder: (_, _, _) =>
+                      Image.asset(_placeholder, fit: BoxFit.contain),
                 ),
                 if (online != null)
                   _FadeInPhoto(
@@ -249,43 +249,41 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
               controller: _pages,
               itemCount: total,
               onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder:
-                  (context, i) => Semantics(
-                    label: PhotoLabel.position(
-                      l10n,
-                      i + 1,
-                      total,
-                      i == 0 ? null : extras[i - 1].label,
-                    ),
-                    image: true,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children:
-                          i == 0
-                              ? bundledLayers
-                              : [
-                                _heroIf(
-                                  i == page,
-                                  Image.memory(
-                                    extras[i - 1].bytes,
-                                    fit: BoxFit.cover,
-                                    gaplessPlayback: true,
-                                    cacheWidth: cacheWidth,
-                                    excludeFromSemantics: true,
-                                    errorBuilder:
-                                        (_, _, _) => const SizedBox.shrink(),
-                                  ),
-                                ),
-                                ExcludeSemantics(
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: InkWell(onTap: openViewer),
-                                  ),
-                                ),
-                                _LabelChip(label: extras[i - 1].label),
-                              ],
-                    ),
-                  ),
+              itemBuilder: (context, i) => Semantics(
+                label: PhotoLabel.position(
+                  l10n,
+                  i + 1,
+                  total,
+                  i == 0 ? null : extras[i - 1].label,
+                ),
+                image: true,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: i == 0
+                      ? bundledLayers
+                      : [
+                          _heroIf(
+                            i == page,
+                            Image.memory(
+                              extras[i - 1].bytes,
+                              fit: BoxFit.cover,
+                              gaplessPlayback: true,
+                              cacheWidth: cacheWidth,
+                              excludeFromSemantics: true,
+                              errorBuilder: (_, _, _) =>
+                                  const SizedBox.shrink(),
+                            ),
+                          ),
+                          ExcludeSemantics(
+                            child: Material(
+                              type: MaterialType.transparency,
+                              child: InkWell(onTap: openViewer),
+                            ),
+                          ),
+                          _LabelChip(label: extras[i - 1].label),
+                        ],
+                ),
+              ),
             ),
             _PageDots(count: total, current: page, pending: pending),
             creditButton,
@@ -357,15 +355,14 @@ class _PageDots extends StatelessWidget {
       bottom: BirdySpace.m,
       child: AnimatedSwitcher(
         duration: BirdyMotion.exit,
-        child:
-            count > 1 || pending
-                ? PhotoPageDots(
-                  key: const ValueKey('photo-dots'),
-                  count: count,
-                  current: current,
-                  pending: pending,
-                )
-                : const SizedBox.shrink(key: ValueKey('photo-dots-none')),
+        child: count > 1 || pending
+            ? PhotoPageDots(
+                key: const ValueKey('photo-dots'),
+                count: count,
+                current: current,
+                pending: pending,
+              )
+            : const SizedBox.shrink(key: ValueKey('photo-dots-none')),
       ),
     );
   }

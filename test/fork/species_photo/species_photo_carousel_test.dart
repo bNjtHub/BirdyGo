@@ -131,18 +131,17 @@ Future<void> _pump(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
+        bundledImageIdsProvider.overrideWith((ref) async => {'BN00001'}),
         inatPhotoServiceProvider.overrideWithValue(
           _Service(net.client, net.dir),
         ),
       ],
       child: MaterialApp(
-        builder:
-            (context, child) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(disableAnimations: reducedMotion),
-              child: child!,
-            ),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(disableAnimations: reducedMotion),
+          child: child!,
+        ),
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -334,12 +333,10 @@ void main() {
           () => Future<void>.delayed(const Duration(milliseconds: 5)),
         );
         await tester.pump(const Duration(milliseconds: 5));
-        final n =
-            [
-              for (var d = 0; d < 5; d++)
-                if (find.byKey(ValueKey('photo-dot-$d')).evaluate().isNotEmpty)
-                  d,
-            ].length;
+        final n = [
+          for (var d = 0; d < 5; d++)
+            if (find.byKey(ValueKey('photo-dot-$d')).evaluate().isNotEmpty) d,
+        ].length;
         if (n != 0 && n != 5) sawPartial = true;
       }
       await tester.pumpAndSettle();
@@ -350,10 +347,9 @@ void main() {
     });
 
     testWidgets('failure: the pill is gone', (tester) async {
-      final net =
-          _Net()
-            ..apiFails = true
-            ..gate = Completer<void>();
+      final net = _Net()
+        ..apiFails = true
+        ..gate = Completer<void>();
       await _pump(tester, allowed: true, net: net);
       await pastDelay(tester);
       expect(loader, findsOneWidget);
@@ -446,13 +442,12 @@ void main() {
 
     testWidgets('targeted queries: adults first, labels shown, no taxon '
         'request', (tester) async {
-      final net =
-          _Net()
-            ..observations = {
-              '9:11': [obs(21, 2, sex: 11), obs(22, 2, sex: 11)],
-              '9:10': [obs(23, 2, sex: 10)],
-              '1:8': [obs(20, 8)],
-            };
+      final net = _Net()
+        ..observations = {
+          '9:11': [obs(21, 2, sex: 11), obs(22, 2, sex: 11)],
+          '9:10': [obs(23, 2, sex: 10)],
+          '1:8': [obs(20, 8)],
+        };
       await _pump(tester, allowed: true, net: net);
       expect(net.obsCalls, 3);
       expect(net.apiCalls, 3); // 4 labelled picks: no taxon request
@@ -511,6 +506,7 @@ void main() {
         ProviderScope(
           overrides: [
             sharedPreferencesProvider.overrideWithValue(prefs),
+            bundledImageIdsProvider.overrideWith((ref) async => {'BN00001'}),
             inatPhotoServiceProvider.overrideWithValue(
               _Service(failing, net.dir),
             ),

@@ -70,16 +70,15 @@ class _FakeInat {
 void main() {
   group('InatPhotoChoice.pick', () {
     test('first open landscape photo, in curated order, at large size', () {
-      final choice =
-          InatPhotoChoice.pick(
-            _taxon(1, [
-              _photo(10, license: null),
-              _photo(11, license: 'cc-by-nc-nd'),
-              _photo(12, width: 1000, height: 1000),
-              _photo(13, license: 'cc-by-nc'),
-              _photo(14),
-            ]),
-          )!;
+      final choice = InatPhotoChoice.pick(
+        _taxon(1, [
+          _photo(10, license: null),
+          _photo(11, license: 'cc-by-nc-nd'),
+          _photo(12, width: 1000, height: 1000),
+          _photo(13, license: 'cc-by-nc'),
+          _photo(14),
+        ]),
+      )!;
       expect(choice.url, '$_s3/13/large.jpg');
       expect(choice.credit.author, 'Author 13');
       expect(choice.credit.license, 'cc-by-nc');

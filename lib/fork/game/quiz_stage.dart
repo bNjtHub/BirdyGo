@@ -7,6 +7,7 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
@@ -15,6 +16,7 @@ import '../design/birdy_typography.dart';
 import '../design/widgets/pressable.dart';
 import '../species_photo/photo_credit.dart';
 import '../species_photo/photo_credit_sheet.dart';
+import '../species_photo/species_photo_providers.dart';
 import 'fine_ear_quiz_widgets.dart';
 import 'quiz_decor.dart';
 import 'quiz_fx.dart';
@@ -398,11 +400,20 @@ class _RevealCard extends StatelessWidget {
             button: true,
             label: l10n.forkPhotoCredit,
             excludeSemantics: true,
-            child: GestureDetector(
-              onTap:
-                  () => showPhotoCreditSheet(
-                    context,
-                    PhotoCredit.fromSpecies(species),
+            child: Consumer(
+              builder:
+                  (context, ref, child) => GestureDetector(
+                    onTap:
+                        () => showPhotoCreditSheet(
+                          context,
+                          PhotoCredit.fromSpecies(
+                            species,
+                            bundledIds:
+                                ref.read(bundledImageIdsProvider).value ??
+                                const {},
+                          ),
+                        ),
+                    child: child,
                   ),
               child: art,
             ),

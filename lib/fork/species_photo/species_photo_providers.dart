@@ -3,6 +3,7 @@ library;
 
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:http/http.dart' as http;
@@ -12,8 +13,16 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
+import '../licenses/licenses_model.dart';
 import 'inat_photo_service.dart';
 import 'species_photo_config.dart';
+
+/// Ids of the species images bundled in the app: the one rule for "this
+/// species has a photo of its own" (credit shown, licenses listed).
+final bundledImageIdsProvider = FutureProvider<Set<String>>((ref) async {
+  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+  return bundledImageIds(manifest.listAssets());
+});
 
 /// "Large photos (online)": off by default, like upstream's map and weather.
 /// While off, no request leaves the phone.

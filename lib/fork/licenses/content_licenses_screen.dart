@@ -9,7 +9,6 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -23,6 +22,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../map/base_layers.dart';
+import '../species_photo/species_photo_providers.dart';
 import '../world_map/world_map_config.dart';
 import 'description_credit.dart';
 import 'licenses_model.dart';
@@ -37,12 +37,6 @@ const String _apacheUrl = 'https://www.apache.org/licenses/LICENSE-2.0';
 const String _oflUrl = 'https://openfontlicense.org/';
 const String _wikipediaUrl = 'https://www.wikipedia.org/';
 const String _osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
-
-/// Ids of the species images bundled in the app.
-final bundledImageIdsProvider = FutureProvider<Set<String>>((ref) async {
-  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-  return bundledImageIds(manifest.listAssets());
-});
 
 /// Bundled photos with their credit, in the app language.
 final licensedPhotosProvider =
