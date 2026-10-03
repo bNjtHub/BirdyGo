@@ -57,6 +57,7 @@ import 'home_loader.dart';
 import 'home_model.dart';
 import 'home_text.dart';
 import 'home_widgets.dart';
+import 'logo_tweet.dart';
 import 'more_sheet.dart';
 
 /// Widest column on tablets.
@@ -84,6 +85,8 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
       if (!mounted) return;
       unawaited(_reload());
       unawaited(_loadPlace());
+      // Warm the logo tweet once (silent) so the first tap has no delay.
+      prepareLogoTweet(ref);
     });
   }
 

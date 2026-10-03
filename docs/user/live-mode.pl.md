@@ -73,3 +73,5 @@ Nagrywaniem sterujesz w [Ustawieniach](settings.md).
 - **Wyłączone** wyłącza nagrywanie.
 
 Gdy zatrzymasz tryb Live, BirdNET Live zapisuje Session i otwiera [Przegląd Session](session-review.md).
+
+Gdy automatyczne zapisywanie Sessions jest włączone, tryb Live zapisuje też częściową Session na starcie, co 30 sekund i gdy aplikacja przechodzi w tło. Po awarii lub utracie zasilania ostatni zapisany stan jest dostępny w Bibliotece Sessions. Zmiany od tego zapisu mogą zostać utracone. Wyłączenie automatycznego zapisywania wyłącza też te zapisy pośrednie.

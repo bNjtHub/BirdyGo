@@ -1,0 +1,3 @@
+<fr-FR>
+Première version de test interne : reconnaissance des chants hors ligne, carnet, quiz, cartes, fiches espèces. Merci de signaler tout ce qui gêne, surtout écran éteint en écoute longue.
+</fr-FR>

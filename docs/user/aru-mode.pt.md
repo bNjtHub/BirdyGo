@@ -1,7 +1,7 @@
 # Modo ARU
 
 !!! note "Implementação preliminar"
-    O modo ARU atualmente cria uma Session de implantação agendada e recuperável, grava ciclos agendados, executa inferência ao vivo durante os ciclos ativos, salva clipes de detecção retidos quando esse modo de gravação é selecionado e mostra controles de notificação em primeiro plano no Android. O comportamento em segundo plano no iOS ainda precisa de validação em campo.
+    O modo ARU atualmente salva pontos de controle da implantação agendada, grava ciclos agendados, executa inferência ao vivo durante os ciclos ativos, salva clipes de detecção retidos quando esse modo de gravação é selecionado e mostra controles de notificação em primeiro plano no Android. O comportamento em segundo plano no iOS ainda precisa de validação em campo.
 
 O modo ARU (Autonomous Recording Unit) é o fluxo de trabalho em local fixo para implantações acústicas agendadas.
 
@@ -24,7 +24,7 @@ O modo ARU (Autonomous Recording Unit) é o fluxo de trabalho em local fixo para
     - **Agrupamento de Sessions**: configure se deseja salvar cada ciclo como uma Session separada (recomendado para carregamentos mais rápidos e visualização modular) ou combinar todos os ciclos em uma única Session multisegmentada.
 - **Pronto**: revise o cronograma, a estimativa de consumo de armazenamento de áudio e as restrições baseadas no sol, depois inicie a implantação.
 
-Ao iniciar uma implantação, salva-se imediatamente uma Session `SessionType.aru` com os metadados de cronograma do ARU, para que o estado dos ciclos possa ser recuperado posteriormente.
+Ao iniciar uma implantação, salva-se imediatamente uma Session `SessionType.aru` com os metadados de cronograma do ARU. Os ciclos de gravação também são salvos a cada 30 segundos, inclusive ciclos sem detecções. Após uma falha ou queda de energia, a última implantação parcial aparece na Biblioteca de Sessions como uma Session encerrada; a gravação não é reiniciada. O que foi registrado desde o último salvamento pode ser perdido.
 
 As exportações JSON e ZIP incluem os metadados da implantação ARU. As exportações ZIP agrupam os arquivos de gravação salvos por ciclo sob `aru_cycles/`.
 

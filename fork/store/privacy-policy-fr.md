@@ -4,7 +4,15 @@
 
 > Brouillon adapté de la politique de BirdNET Live (`docs/privacy.fr.md`). À héberger à une adresse web
 > publique avant de la renseigner dans la Play Console. Remplir les champs entre crochets et relire
-> après tout changement des fonctions réseau.
+> après tout changement des fonctions réseau. Supprimer cet encadré avant publication.
+>
+> **Points non vérifiés (à contrôler avant publication) :**
+> - Sauvegarde Android : le manifeste ne fixe pas `allowBackup`, donc la sauvegarde automatique vers le
+>   compte Google de l'utilisateur est active par défaut ; elle peut inclure sessions, positions et
+>   extraits audio. La section « Conservation » la mentionne ; à confirmer ou à désactiver.
+> - Les durées de conservation des services tiers (OSM, IGN, Open-Meteo, iNaturalist) ne sont pas
+>   reprises (les 90 jours d'Open-Meteo viennent de la politique upstream).
+> - Le lien « Politique de confidentialité » de l'écran À propos pointe encore vers le site upstream.
 
 Cette politique s'applique à **BirdyGo** (l'**application**, identifiant `fr.justcodeit.birdygo`), un fork
 indépendant de BirdNET Live. L'application est publiée par [NOM DU DÉVELOPPEUR] (**nous**).
@@ -68,8 +76,9 @@ sur votre appareil.
   applique sa propre politique.
 - **Exports** (CSV, GPX, JSON, rapport HTML, extraits audio) : créés sur votre appareil et partagés par
   la feuille de partage du système, uniquement quand vous le demandez. Ils peuvent contenir la position
-  GPS. Le rapport HTML peut charger des images d'espèces depuis Internet lorsque vous l'ouvrez dans un
-  navigateur.
+  GPS. Le rapport HTML, ouvert dans un navigateur, peut charger des images d'espèces
+  (birdnet.cornell.edu) et la bibliothèque de carte Leaflet (unpkg.com) : ces sites voient alors votre
+  adresse IP.
 - **Liens externes** (eBird, iNaturalist, Wikipédia, Faune-France, etc.) : ils s'ouvrent dans votre
   navigateur uniquement quand vous les touchez ; le site visité applique sa propre politique.
 
@@ -95,7 +104,9 @@ services listés ci-dessus.
 
 ## Conservation et suppression
 
-Tout est stocké sur votre appareil. Vous pouvez supprimer une session depuis le carnet, ou tout effacer
+Tout est stocké sur votre appareil. Si la sauvegarde automatique d'Android est activée sur votre
+téléphone, le système peut en copier une partie vers votre compte Google ; c'est un réglage du système,
+que nous ne recevons pas. Vous pouvez supprimer une session depuis le carnet, ou tout effacer
 dans **Paramètres > Zone dangereuse > Effacer toutes les données**. Désinstaller l'application supprime
 aussi ses données locales. Comme nous ne recevons aucune donnée, nous n'avons rien à supprimer de notre côté.
 
@@ -104,6 +115,11 @@ aussi ses données locales. Comme nous ne recevons aucune donnée, nous n'avons 
 Ne détenant aucune donnée personnelle vous concernant, il n'y a rien à consulter, corriger ou
 effacer chez nous. Pour les données traitées par les services tiers, adressez-vous à eux. Vous pouvez
 introduire une réclamation auprès de la CNIL (cnil.fr).
+
+## Données intégrées à l'application
+
+Photos, descriptions, cartes de répartition (observations GBIF, limites Natural Earth) et modèles sont
+**intégrés à l'application** : leur affichage ne fait aucune requête réseau.
 
 ## Crédits et licences
 

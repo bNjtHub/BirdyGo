@@ -8,7 +8,8 @@ import 'package:birdnet_live/fork/design/birdy_tokens.dart';
 import 'package:birdnet_live/fork/game/fine_ear.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_screen.dart';
 import 'package:birdnet_live/fork/game/fine_ear_quiz_widgets.dart';
-import 'package:birdnet_live/fork/game/quiz_sfx.dart';
+import 'package:birdnet_live/fork/sound/birdy_sfx.dart';
+import '../helpers/fake_birdy_sfx.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -34,13 +35,6 @@ class _FakePlayer implements SpeciesClipPlayer {
   Future<void> stop() async => _playing.value = null;
 }
 
-class _FakeSfx implements QuizSfxPlayer {
-  @override
-  Future<void> play(QuizSound sound) async {}
-
-  @override
-  Future<void> dispose() async {}
-}
 
 IndexedDetection _clip(String name) => IndexedDetection(
   key: name,
@@ -79,7 +73,7 @@ Future<void> _checkFit(
           sharedPreferencesProvider.overrideWithValue(prefs),
           fineEarStoreProvider.overrideWithValue(FineEarStore(prefs)),
           speciesClipPlayerProvider.overrideWithValue(_FakePlayer()),
-          quizSfxPlayerProvider.overrideWithValue(_FakeSfx()),
+          birdySfxProvider.overrideWithValue(FakeBirdySfx()),
           effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
           taxonomyServiceProvider.overrideWith(
             (ref) async => TaxonomyService(),

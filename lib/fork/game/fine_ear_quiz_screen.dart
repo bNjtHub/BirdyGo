@@ -112,6 +112,10 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   void initState() {
     super.initState();
     _load();
+    // Warm the jingles (silent) so the first one is not late.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) prepareQuizSounds(ref);
+    });
   }
 
   @override
