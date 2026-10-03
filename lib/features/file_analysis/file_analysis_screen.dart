@@ -1629,7 +1629,7 @@ class _AnalysisStepState extends State<_AnalysisStep> {
             // ── Cancel button ─────────────────────────────────
             OutlinedButton.icon(
               onPressed: onCancel,
-              icon: const Icon(AppIcons.stop),
+              icon: const Icon(AppIcons.stop, fill: 1), // FORK: filled glyph (Material Symbols)
               label: Text(l10n.cancel),
             ),
           ],

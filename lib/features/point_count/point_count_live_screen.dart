@@ -984,7 +984,7 @@ class _CountdownStatusBar extends StatelessWidget {
         children: [
           // Stop button (replaces back arrow).
           IconButton(
-            icon: const Icon(AppIcons.stopRounded, size: 22),
+            icon: const Icon(AppIcons.stopRounded, size: 22, fill: 1), // FORK: filled glyph (Material Symbols)
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             onPressed: onStop,

@@ -433,6 +433,7 @@ class _SurveyMapWidgetState extends ConsumerState<SurveyMapWidget> {
             child: ExcludeSemantics(
               child: Icon(
                 AppIcons.flagFilled,
+                fill: 1, // FORK: filled glyph (Material Symbols)
                 color: AppSemanticColors.of(context).success,
                 size: 28,
               ),
@@ -456,6 +457,7 @@ class _SurveyMapWidgetState extends ConsumerState<SurveyMapWidget> {
             child: ExcludeSemantics(
               child: Icon(
                 AppIcons.flagFilled,
+                fill: 1, // FORK: filled glyph (Material Symbols)
                 color: theme.colorScheme.error,
                 size: 28,
               ),

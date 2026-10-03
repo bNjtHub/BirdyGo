@@ -728,6 +728,7 @@ class _RecordButton extends StatelessWidget {
           child: Icon(
             isRecording ? AppIcons.stop : AppIcons.mic,
             size: 40,
+            fill: isRecording ? 1 : null, // FORK: filled stop (Material Symbols)
             color:
                 isRecording
                     ? theme.colorScheme.onError

@@ -304,7 +304,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                         child: FilledButton.icon(
                           style: BirdyButtonStyles.stop(context),
                           onPressed: () {},
-                          icon: const Icon(AppIcons.stop),
+                          icon: const Icon(AppIcons.stop, fill: 1),
                           label: Text(l10n.forkStop),
                         ),
                       ),

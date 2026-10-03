@@ -153,7 +153,7 @@ class _SessionButtons extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onStop,
               style: BirdyButtonStyles.stop(context),
-              icon: const Icon(AppIcons.stopRounded),
+              icon: const Icon(AppIcons.stopRounded, fill: 1),
               label: Text(l10n.forkStop),
             ),
           ),

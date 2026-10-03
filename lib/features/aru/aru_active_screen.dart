@@ -452,6 +452,7 @@ class _AruStatusBarState extends State<_AruStatusBar> {
             icon: Icon(
               _isActive ? AppIcons.stopRounded : AppIcons.arrowBackRounded,
               size: 22,
+              fill: _isActive ? 1 : null, // FORK: filled stop (Material Symbols)
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),

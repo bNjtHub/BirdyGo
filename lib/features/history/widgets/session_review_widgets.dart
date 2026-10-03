@@ -205,6 +205,8 @@ class _SummaryHeader extends ConsumerWidget {
                         ? AppIcons.flagFilled
                         : AppIcons.locationOn,
                     size: 18,
+                    // FORK: filled flag (Material Symbols); pin stays outlined.
+                    fill: session.type == SessionType.survey ? 1 : null,
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 4),
@@ -3795,6 +3797,7 @@ class _AnnotationRowState extends State<_AnnotationRow> {
                 child: Icon(
                   _isPlaying ? AppIcons.stopCircle : AppIcons.playCircleOutline,
                   size: 18,
+                  fill: _isPlaying ? 1 : null, // FORK: filled stop (Material Symbols)
                   color: theme.colorScheme.primary,
                 ),
               ),
