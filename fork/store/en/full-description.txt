@@ -1,0 +1,36 @@
+BirdyGo listens to the birds around you and tells you who is singing, with no internet connection.
+
+OFFLINE IDENTIFICATION
+Tap Listen: the song analysis runs entirely on your phone, with the BirdNET+ model. No recording leaves the device. Handy in the forest, in the mountains, in the garden, and even with the screen off and the phone in your pocket.
+
+CLEAR RESULTS
+Each species is rated Sure, Probable or To check, so you know right away how far to trust it. The app uses place and season to set aside unlikely species. Results are estimates: you confirm or dismiss each detection.
+
+YOUR OBSERVATION NOTEBOOK
+Every listening session is kept with the species heard, the time, the place and an audio clip to replay. Find your birds by species, by day or by place.
+
+QUIZ AND PROGRESS
+Train your ear with the quiz, earn ranks and follow your daily goals. The game only rewards sure detections or ones you confirmed.
+
+MAPS
+The contacts map shows where each bird was heard (OpenStreetMap base maps, loaded only if you allow it). On every species page, a world map shows where the species lives and in which season, even offline.
+
+SPECIES PAGES
+Photo, description and range map for hundreds of species, available offline.
+
+SOUND LIBRARY
+Replay the clips you kept.
+
+FOUR BIRDS TO CHOOSE FROM
+Pick the app's companion: oriole, bee-eater, flamingo or starling, each with its own colours.
+
+SHARE YOUR OBSERVATIONS
+Export your sessions (CSV, GPX, JSON, HTML report). Nothing is sent unless you do it.
+
+PRIVACY
+No account, no ads, no tracking. Audio and location stay on your phone. Maps, place names, weather and large photos only load if you turn them on in Settings > Privacy. For ages 13 and over.
+
+CREDITS
+BirdyGo is an independent fork of BirdNET Live, the app by the Cornell Lab of Ornithology and Chemnitz University of Technology (code under the MIT licence). The BirdNET+ models are under the Apache 2.0 licence. BirdyGo is not endorsed by or affiliated with the BirdNET team.
+Photos: iNaturalist and Wikimedia Commons contributors, under Creative Commons licences; author and licence of each photo are shown in the app (About > Content licences). Range maps: GBIF observations (CC0 and CC BY licences) and Natural Earth boundaries (public domain). Base maps: © OpenStreetMap contributors.
+Results are probabilistic estimates: verify before any scientific or conservation decision, and do not use the app to harm wildlife.

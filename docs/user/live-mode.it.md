@@ -73,3 +73,5 @@ La registrazione si controlla in [Impostazioni](settings.md).
 - **Disattivata** disabilita la registrazione.
 
 Quando interrompi la modalità Live, BirdNET Live salva la Session e apre il [Riepilogo sessione](session-review.md).
+
+Quando il salvataggio automatico delle Session è attivo, la modalità Live salva anche una Session parziale all'avvio, ogni 30 secondi e quando l'app passa in background. Dopo un arresto anomalo o un'interruzione di corrente, l'ultimo salvataggio è disponibile nella Libreria Sessions. Le modifiche successive a quel salvataggio possono andare perse. Disattivando il salvataggio automatico si disattivano anche questi salvataggi intermedi.

@@ -65,3 +65,5 @@ L'écran du point d'écoute en direct se concentre sur un tableau de bord minut�
 ## Après le comptage
 
 Lorsque le point d'écoute se termine, BirdNET Live enregistre la session et ouvre le [Résumé de la session](session-review.md).
+
+Lorsque l'enregistrement automatique est activé, un comptage en cours est aussi enregistré au démarrage, toutes les 30 secondes et lorsque l'application quitte le premier plan. Après un plantage ou une coupure de courant, le dernier comptage partiel est disponible dans la Bibliothèque de sessions.

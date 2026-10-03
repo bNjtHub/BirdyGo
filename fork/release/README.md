@@ -65,13 +65,13 @@ Notes sur la build :
 3. Tableau de bord, « Configurer votre application » : remplir les rubriques ci-dessous.
 4. Test > Test interne > Créer une version : envoyer `app-release.aab`, notes de version en français.
    Ajouter une liste de testeurs (adresses Gmail), copier le lien d'inscription, l'ouvrir sur le Xiaomi.
-5. La fiche (textes et captures) est dans `store_listing_fr.md`, la politique de confidentialité dans
-   `privacy_policy_fr.md`.
+5. La fiche (textes et captures) est dans `fork/store/fr/`, la politique de confidentialité dans
+   `fork/store/privacy-policy-fr.md`.
 
 ### Contenu de l'application
 
 - **Politique de confidentialité** : URL publique obligatoire (page web, pas un fichier du dépôt privé).
-  Héberger `privacy_policy_fr.md` (GitHub Pages, Netlify, page du site, etc.) après avoir rempli le contact.
+  Héberger `fork/store/privacy-policy-fr.md` (GitHub Pages, Netlify, page du site, etc.) après avoir rempli le contact.
 - **Accès à l'application** : tout est accessible sans compte ni identifiant. Choisir « Toutes les
   fonctionnalités sont disponibles sans restriction ». Indiquer aux relecteurs que le microphone et la
   localisation sont demandés à l'usage.

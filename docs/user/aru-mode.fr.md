@@ -1,7 +1,7 @@
 # Mode ARU
 
 !!! note "Implémentation préliminaire"
-    Le mode ARU crée actuellement une Session de déploiement planifiée et récupérable, enregistre les cycles planifiés, exécute l'inférence en direct pendant les cycles actifs, enregistre les clips de détection conservés lorsque ce mode d'enregistrement est sélectionné et affiche des contrôles de notification de premier plan sur Android. Le comportement en arrière-plan sur iOS doit encore être validé sur le terrain.
+    Le mode ARU enregistre actuellement des sauvegardes intermédiaires du déploiement planifié, enregistre les cycles planifiés, exécute l'inférence en direct pendant les cycles actifs, enregistre les clips de détection conservés lorsque ce mode d'enregistrement est sélectionné et affiche des contrôles de notification de premier plan sur Android. Le comportement en arrière-plan sur iOS doit encore être validé sur le terrain.
 
 Le mode ARU (Autonomous Recording Unit) est le flux de travail pour les déploiements acoustiques planifiés sur site fixe.
 
@@ -24,7 +24,7 @@ Le mode ARU (Autonomous Recording Unit) est le flux de travail pour les déploie
     - **Regroupement des Sessions** : configurez s'il faut enregistrer chaque cycle dans une Session distincte (recommandé pour des temps de chargement plus rapides et un affichage modulaire) ou combiner tous les cycles au sein d'une seule Session multisegment.
 - **Prêt** : passez en revue le planning, l'estimation de stockage audio et les contraintes liées au soleil, puis lancez le déploiement.
 
-Au démarrage, une Session `SessionType.aru` est immédiatement enregistrée avec les métadonnées du planning ARU afin que l'état des cycles puisse être récupéré plus tard.
+Au démarrage, une Session `SessionType.aru` est immédiatement enregistrée avec les métadonnées du planning ARU. Les cycles d'enregistrement sont en outre sauvegardés toutes les 30 secondes, y compris ceux sans détection. Après un plantage ou une coupure de courant, le dernier déploiement partiel apparaît dans la Bibliothèque de sessions comme une Session terminée ; l'enregistrement ne redémarre pas. Ce qui a été capté depuis la dernière sauvegarde peut être perdu.
 
 Les exports JSON et ZIP incluent les métadonnées du déploiement ARU. Les exports ZIP regroupent les fichiers d'enregistrement par cycle enregistrés sous `aru_cycles/`.
 

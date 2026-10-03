@@ -173,6 +173,10 @@ plan, contrairement au mode Survey et à l'ARU ; HyperOS tuait ensuite le proces
       sur Xiaomi, autoriser BirdyGo sans restriction de batterie, avec un bouton vers les réglages de
       l'app. Pas de demande automatique d'exemption d'optimisation de batterie (surveillée par le
       Play Store).
+- [x] Synchro upstream (02/10/2026) : le service est désormais celui d'upstream (bail
+      `ForegroundServiceLease`, bouton « Arrêter », limite de durée en arrière-plan, réglage « Continuer
+      écran éteint » **activé par défaut** dans le fork, ligne FORK dans `settings_providers.dart`).
+      Le conseil unique de `background_tip.dart` est conservé.
 - [ ] (Benjamin) Sur le Xiaomi : 30 minutes d'écoute écran éteint, avec et sans « Pas de
       restriction » ; vérifier la notification, le bouton « Ouvrir », la reprise à l'écran, et qu'un
       Survey lancé ensuite démarre bien son propre service.
@@ -288,6 +292,8 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       graphique de présence existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
       sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
       par IA : elle peut contenir des erreurs. ») en français et en anglais.
+- [x] Fiche espèce, carrousel de photos (PR « J7 Fiche espèce : carrousel de photos ») : photo hors ligne puis jusqu'à 4 photos iNaturalist libres (mêmes licences que la grande photo), seulement si « Photos en grand (en ligne) » est actif ; points, crédit de la page courante. Tests dans `test/fork/species_photo/species_photo_carousel_test.dart`.
+- [x] Fiche espèce, photo en plein écran (même PR) : un appui sur la photo l'ouvre en noir, zoom (pincer, double appui), balayage entre les photos, glisser vers le bas pour fermer, crédit toujours visible ; bouton (i) inchangé. Dégradé sombre sous la barre d'état, icônes claires tant que l'en-tête est visible. Tests `species_photo_viewer_test.dart`.
 - [x] Fiche espèce, sons et saisons (PR « J7 Fiche espèce ») : « Mes sons » juste après « Entendu… »
       (le meilleur son devient un lecteur mis en avant, grand bouton), « Ici en ce moment » garde sa
       courbe compacte de 12 mois, avec la phrase calculée sur 48 semaines (« Arrive début mars ·
@@ -952,13 +958,14 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 
 - [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
 - [x] J7 Réglages (retours) : confirmation par toast (`showSettingSaved`, `showFirstNameSaved` dans `birdy_toast.dart`) quand une valeur est validée sans changement visible : prénom (validation ou perte du focus), langue de l'app et des espèces. Pas de toast pour les interrupteurs ni les puces de thème. Réglages avancés (upstream) non couverts.
+- [x] J7 Fiche espèce : préchargement au repos après le splash (descriptions, régions, aires et cellules de terre de la carte, courbe annuelle du géomodèle), séquentiel, arrêt en arrière-plan ; mesures PC : taxonomie 1250 ms (déjà au lancement), cellules 180, descriptions 230, régions 90, aires 30.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
       l'interrupteur de la carte Position ; écrit `privacyAllowMapProvider`.
 - [x] Carte du monde plein écran (PR #130) : bouton d'agrandissement sur la carte de la fiche, page zoomable (pincer, glisser, double appui ×2, zoom 1 à 8) recadrée sur l'aire de l'espèce ; la couche statique est refaite à la résolution de l'écran à la fin du geste (`lib/fork/world_map/world_map_fullscreen.dart`, `world_map_viewport.dart`).
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
-      de celle d'upstream.
-- [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
+      de celle d'upstream. (Préparé : `fork/RELEASE.md`, `fork/store/` ; reste la Console et l'hébergement de la politique, à Benjamin.)
+- [x] Avant de publier (fait le 02/10, `chore/release-interne` : `has_open_license` refuse « nd », repli observations iNaturalist puis Wikimedia Commons, 569 photos libres) : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
 - [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
@@ -1009,6 +1016,10 @@ résoudre », push, puis une session cloud sur cette branche :
 Cette branche contient une fusion avec upstream dont les conflits sont encore marqués. Résous-les en gardant nos ajouts marqués FORK et le code de lib/fork, et la version upstream pour le reste. Lance analyze et les tests, puis résume ce qui a changé côté BirdNET.
 ```
 
+Dernières synchros :
+- 02/10/2026 : upstream `afe2febb` (écoute en arrière-plan Live et Point Count, points de reprise
+  après plantage, altitude GPS, aides contextuelles, Flutter 3.47.5). Branche `chore/sync-upstream`.
+
 ## Idées pour plus tard
 
 - Activité de chant selon la météo (upstream a déjà un service météo).
@@ -1035,8 +1046,14 @@ Même code Flutter, BirdNET Live tourne déjà sur iOS. À faire à ce moment-l�
   faudra `UIBackgroundModes: location` (avec `allowBackgroundLocationUpdates`, déjà prévu par
   `buildLocationSettings(background: true)`) et la permission « Toujours » si le suivi doit continuer
   hors de l'app ; les textes `NSLocation*UsageDescription` sont à revoir.
-- Écoute écran éteint (J2b) : `live_background.dart` ne fait rien sur iOS. Il faudra le mode
-  `UIBackgroundModes: audio` dans `Info.plist` et une session audio active pendant l'écoute.
+- Écoute écran éteint (J2b) : depuis la synchro upstream du 02/10/2026, le service d'arrière-plan est
+  celui d'upstream (`lib/shared/services/audio_background_notification.dart`, Android seulement ; le
+  `live_background.dart` du fork a été supprimé). Côté iOS il faudra le mode `UIBackgroundModes: audio`
+  dans `Info.plist`, une session audio active pendant l'écoute et l'équivalent de la notification
+  « Arrêter / Ouvrir » (arrêt de l'écoute depuis l'extérieur de l'app).
+- Métadonnées d'appareil dans les exports (synchro upstream du 02/10/2026) : canal
+  `com.birdnet/device_description`, côté Android dans `MainActivity.kt`, côté iOS dans
+  `AppDelegate.swift` (déjà écrit par upstream, jamais compilé ici). À vérifier sur iPhone.
 - Identifiants (J0) : bundle id `fr.justcodeit.birdygo` et App Group `group.fr.justcodeit.birdygo`
   posés dans le projet, jamais compilés. Créer l'App ID et l'App Group sur le portail Apple, renseigner
   l'équipe (DEVELOPMENT_TEAM). L'App Group ne sert qu'à une ancienne extension de partage upstream : on

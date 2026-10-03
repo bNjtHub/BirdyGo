@@ -14,6 +14,7 @@ import 'fork/design/font_licenses.dart'; // FORK: OFL font licenses (J6a)
 import 'fork/settings/fork_prefs.dart'; // FORK: bird theme (J6i)
 import 'fork/splash/birdygo_startup.dart'; // FORK: visible startup (J6c)
 import 'fork/splash/birdygo_warm_up.dart'; // FORK: real loading (J6c)
+import 'fork/splash/species_page_warm_up.dart'; // FORK: perf
 import 'shared/providers/app_providers.dart';
 import 'shared/services/quick_action_service.dart';
 import 'shared/services/shared_media_service.dart';
@@ -62,6 +63,14 @@ Future<void> main() async {
           birdyGoWarmUpTasks(container),
           progress,
           pause: birdyGoFramePause,
+        );
+        // FORK: perf, species page resources loaded at idle after the splash.
+        unawaited(
+          runSpeciesPageWarmUp(
+            speciesPageWarmUpTasks(container),
+            isForeground: appIsForeground,
+            pause: birdyGoFramePause,
+          ),
         );
       },
     ),

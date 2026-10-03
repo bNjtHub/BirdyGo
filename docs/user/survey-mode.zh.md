@@ -127,3 +127,5 @@ Survey 模式在录音期间会保持一条常驻前台通知，以免 Android �
 ## 停止之后
 
 BirdNET Live 会保存已完成的 Survey 并打开 [Session 回顾](session-review.md)。
+
+进行中的 Survey 会在开始时、每 30 秒以及应用离开前台时保存。发生崩溃或断电后，最近保存的部分 Survey 会作为已结束的 Session 出现在 Session 库中。录音不会自动重新开始。上次保存之后的观察记录可能会缺失。

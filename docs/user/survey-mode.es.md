@@ -140,3 +140,5 @@ La vista del mapa del Survey a pantalla completa (el botón :material-fullscreen
 ## Después de detener
 
 BirdNET Live guarda el Survey terminado y abre el [Resumen de la Session](session-review.md).
+
+El Survey activo se guarda al inicio, cada 30 segundos y cuando la aplicación deja el primer plano. Tras un cierre inesperado o un corte de energía, el último Survey parcial aparece en la Biblioteca de sesiones como una Session finalizada. La grabación no se reinicia. Pueden faltar las observaciones posteriores al último guardado.

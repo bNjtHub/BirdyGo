@@ -76,9 +76,10 @@ class LicenseTest(unittest.TestCase):
         self.assertEqual(photos.normalize_license(None), "")
 
     def test_open_licenses(self):
-        for code in ("cc0", "cc-by-nc", "cc-by-nc-nd", "CC BY-SA 3.0", "pd"):
+        for code in ("cc0", "cc-by-nc", "CC BY-SA 3.0", "CC BY 2.0", "pd"):
             self.assertTrue(photos.has_open_license(code), code)
-        for code in ("© Macaulay Library", "", None, "all rights reserved"):
+        for code in ("© Macaulay Library", "", None, "all rights reserved",
+                     "cc-by-nd", "cc-by-nc-nd", "CC BY-ND 2.0"):
             self.assertFalse(photos.has_open_license(code), code)
 
 
@@ -166,7 +167,7 @@ class ReplaceReservedTest(unittest.TestCase):
         # Open photos are left alone and only reserved taxa are requested.
         self.assertEqual(self.entries["Turdus merula"]["image"]["medium"],
                          "cornell/blackbird")
-        self.assertEqual(self.requests, [f"{photos.INAT_API}/taxa/9398,13094"])
+        self.assertEqual(self.requests[0], f"{photos.INAT_API}/taxa/9398,13094")
 
     def test_a_failed_request_keeps_the_original_photos(self):
         def offline(url):
@@ -185,6 +186,47 @@ class ReplaceReservedTest(unittest.TestCase):
                           delay_s=0)
         self.assertEqual(len(urls), 3)
         self.assertTrue(urls[2].endswith("/taxa/61"))
+
+
+class FallbackSourcesTest(unittest.TestCase):
+    def test_observation_photo_needs_free_licence_and_landscape(self):
+        obs = [
+            {"photos": [{"id": 1, "license_code": "cc-by-nc",
+                         "original_dimensions": {"width": 900, "height": 600},
+                         "url": f"{S3}/1/square.jpg"}]},
+            {"photos": [{"id": 2, "license_code": "cc-by",
+                         "original_dimensions": {"width": 600, "height": 900},
+                         "url": f"{S3}/2/square.jpg"}]},
+            {"photos": [{"id": 3, "license_code": "cc-by", "attribution_name": "Ann",
+                         "original_dimensions": {"width": 900, "height": 600},
+                         "url": f"{S3}/3/square.jpg"}]},
+        ]
+        got = photos.pick_observation_photo(obs)
+        self.assertEqual((got["id"], got["license"], got["author"]), (3, "cc-by", "Ann"))
+        self.assertEqual(got["url"], f"{S3}/3/medium.jpg")
+
+    def test_commons_licences(self):
+        self.assertEqual(photos.commons_license("CC BY-SA 4.0"), "cc-by-sa-4.0")
+        self.assertEqual(photos.commons_license("CC0"), "cc0")
+        self.assertEqual(photos.commons_license("Public domain"), "pd")
+        self.assertIsNone(photos.commons_license("CC BY-NC 4.0"))
+        self.assertIsNone(photos.commons_license("CC BY-ND 2.0"))
+        self.assertIsNone(photos.commons_license("Fair use"))
+
+    def test_commons_photo_via_wikidata(self):
+        def fetch(url):
+            if "wikidata" in url:
+                return {"entities": {"Q1": {"claims": {"P18": [
+                    {"mainsnak": {"datavalue": {"value": "Bird.jpg"}}}]}}}}
+            return {"query": {"pages": {"9": {"imageinfo": [{
+                "width": 1200, "height": 800, "thumburl": "https://c/thumb.jpg",
+                "extmetadata": {"LicenseShortName": {"value": "CC BY-SA 4.0"},
+                                "Artist": {"value": "<a href='x'>Jane</a>"}}}]}}}}
+
+        got = photos.find_commons_photo("Parus major", fetch, delay_s=0)
+        self.assertEqual(got["license"], "cc-by-sa-4.0")
+        self.assertEqual(got["author"], "Jane")
+        self.assertEqual(got["source"], "Wikimedia Commons File:Bird.jpg")
 
 
 class UpdatePhotoCreditsTest(unittest.TestCase):

@@ -49,3 +49,78 @@ const Duration kPhotoDownloadTimeout = Duration(seconds: 20);
 
 /// Settings key of the "large photos (online)" switch, off by default.
 const String kOnlinePhotosPref = 'fork_allow_online_photos';
+
+/// Online photos added after the bundled one in the species page carousel.
+const int kCarouselExtraPhotos = 4;
+
+/// Carousel page dots (DESIGN.md Photos).
+const double kCarouselDotSize = 6;
+const double kCarouselDotGap = 6;
+
+/// "More photos are coming": a pill of the same height as the dots pill,
+/// holding [kCarouselPendingDots] dots that pulse one after the other (a
+/// typing indicator). One pulse cycle lasts [kCarouselPendingPeriod], each
+/// dot starting [kCarouselPendingStagger] (share of the cycle) after the
+/// previous one.
+const int kCarouselPendingDots = 3;
+const Duration kCarouselPendingPeriod = Duration(milliseconds: 1200);
+const double kCarouselPendingStagger = 0.18;
+
+/// The pending pill shows only after this delay, so a gallery read from the
+/// disk cache (a few tens of ms) never flashes it: its dots just appear.
+const Duration kCarouselPendingDelay = Duration(milliseconds: 300);
+
+/// Safety net: if the gallery still loads after this, the photos loaded so
+/// far are revealed and frozen for this page visit (later ones only reach
+/// the disk cache). Long enough for a slow connection to finish all photos.
+const Duration kCarouselRevealTimeout = Duration(seconds: 8);
+
+/// Opacity of the inactive dots and of the pending dots at rest.
+const double kCarouselDimAlpha = 0.5;
+
+/// Height of the top scrim of the header photo below the status bar.
+const double kPhotoTopScrimExtra = 56;
+
+/// Full-screen photo viewer: pinch limit, double-tap zoom, drag-to-close.
+const double kViewerMaxScale = 4;
+const double kViewerDoubleTapScale = 2;
+
+/// Below this scale the photo counts as not zoomed (pages swipe, drag closes).
+const double kViewerZoomedAbove = 1.02;
+const Duration kViewerZoomDuration = Duration(milliseconds: 220);
+
+/// A drag down past this fraction of the screen height, or this fling
+/// speed (dp/s), closes the viewer.
+const double kViewerDismissFraction = 0.15;
+const double kViewerDismissVelocity = 700;
+
+/// Photo shrinks at most to this scale while dragged away.
+const double kViewerDismissMinScale = 0.85;
+
+/// Observations of a taxon, for photos labelled by life stage and sex.
+/// API v2 with `fields`: ~25 KB instead of ~8 MB with v1.
+const String kInatApiBaseV2 = 'https://api.inaturalist.org/v2';
+
+/// Targeted queries (one per wanted slot) need only a few results each.
+const int kTargetedObservationsPerPage = 10;
+
+/// Schema of the on-disk carousel selection; bump it to change the rules.
+const int kGalleryCacheVersion = 1;
+const String kObservationFields =
+    'annotations.controlled_attribute_id,annotations.controlled_value_id,'
+    'annotations.vote_score,photos.id,photos.url,photos.license_code,'
+    'photos.attribution,photos.original_dimensions.width,'
+    'photos.original_dimensions.height';
+
+/// iNaturalist controlled terms (checked against /v1/controlled_terms):
+/// 1 = Life Stage, 9 = Sex.
+const int kInatTermLifeStage = 1;
+const int kInatValueAdult = 2;
+const int kInatValueJuvenile = 8;
+const int kInatValueEgg = 7;
+const int kInatTermSex = 9;
+const int kInatValueFemale = 10;
+const int kInatValueMale = 11;
+
+/// An annotation counts unless the community voted it down.
+const int kInatMinAnnotationScore = 0;

@@ -216,6 +216,8 @@ Questa impostazione riguarda l'apertura della modalità Live dall'interno dell'a
 
 Una volta attivo (impostazione predefinita), una Session Live o Point Count completata viene aggiunta automaticamente alla tua libreria nel momento in cui termina. Se disattivato, una Session conclusa si apre nel riepilogo contrassegnata come **non salvata**: l'icona di salvataggio è evidenziata e devi toccarla per conservare la Session. Uscire dal riepilogo senza salvare elimina la Session e le sue registrazioni. È adatto agli ascolti rapidi, in cui vuoi conservare solo l'occasionale risultato interessante invece di accumulare ogni breve registrazione. I deployment Survey e ARU salvano sempre automaticamente — un'esecuzione lunga e non presidiata è troppo preziosa per perderla dimenticando di toccare Salva — quindi lì questo interruttore non si applica.
 
+Finché il salvataggio automatico è attivo, la modalità Live e Point Count salvano anche una Session parziale all'avvio, ogni 30 secondi e quando l'app lascia il primo piano. In questo modo si limita la perdita di dati dopo un arresto anomalo o un'interruzione di corrente. Con l'impostazione disattivata, questi salvataggi intermedi non vengono conservati. Survey e ARU salvano i propri checkpoint indipendentemente da questa impostazione.
+
 ## Riproduzione
 
 ### Overlay di riproduzione nel riepilogo
