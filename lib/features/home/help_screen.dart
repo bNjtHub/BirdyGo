@@ -13,6 +13,7 @@ import 'package:birdnet_live/shared/utils/app_icons.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/session_type_visuals.dart';
 import '../../shared/widgets/content_width_constraint.dart';
@@ -56,7 +57,7 @@ class HelpScreen extends StatelessWidget {
             // first, in order of increasing structure / commitment:
             //   Live  → Point Count → Survey → File Analysis
             _SectionHeader(
-              icon: AppIcons.micNoneOutlined,
+              icon: BirdyIcons.heard, // FORK: icon roles
               title: l10n.helpModesTitle,
             ),
             const SizedBox(height: 12),
@@ -154,7 +155,7 @@ class HelpScreen extends StatelessWidget {
             // *what to expect* before recording — these two screens are
             // where they go.
             _SectionHeader(
-              icon: AppIcons.travelExplore,
+              icon: BirdyIcons.world, // FORK: icon roles
               title: l10n.helpToolsTitle,
             ),
             const SizedBox(height: 12),
@@ -166,7 +167,7 @@ class HelpScreen extends StatelessWidget {
               body: l10n.helpExploreBody,
             ),
             _HelpSection(
-              icon: AppIcons.libraryBooks,
+              icon: BirdyIcons.detections, // FORK: icon roles
               color: theme.colorScheme.secondary,
               containerColor: theme.colorScheme.secondaryContainer,
               title: l10n.helpSessionsTitle,
@@ -184,17 +185,17 @@ class HelpScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _ControlCard(
-              icon: AppIcons.tuneRounded,
+              icon: BirdyIcons.settings, // FORK: icon roles
               title: l10n.settings,
               body: l10n.helpControlSettings,
             ),
             _ControlCard(
-              icon: AppIcons.helpOutlineRounded,
+              icon: BirdyIcons.help, // FORK: icon roles
               title: l10n.helpTitle,
               body: l10n.helpControlHelp,
             ),
             _ControlCard(
-              icon: AppIcons.infoOutline,
+              icon: BirdyIcons.info, // FORK: icon roles
               title: l10n.about,
               body: l10n.helpControlAbout,
             ),
@@ -205,7 +206,7 @@ class HelpScreen extends StatelessWidget {
 
             // ── 5. Tips for best results ─────────────────────────
             _SectionHeader(
-              icon: AppIcons.lightbulbOutline,
+              icon: BirdyIcons.tip, // FORK: icon roles
               title: l10n.helpTipsTitle,
             ),
             const SizedBox(height: 12),
@@ -231,7 +232,7 @@ class HelpScreen extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          AppIcons.menuBook,
+                          BirdyIcons.document, // FORK: icon roles
                           size: 20,
                           color: theme.colorScheme.primary,
                         ),

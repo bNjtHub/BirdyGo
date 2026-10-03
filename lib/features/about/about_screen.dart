@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
@@ -234,7 +235,7 @@ class AboutScreen extends ConsumerWidget {
 
             // Links
             ListTile(
-              leading: const Icon(AppIcons.menuBook),
+              leading: const Icon(BirdyIcons.help), // FORK: icon roles
               title: Text(l10n.aboutUserGuide),
               trailing: const Icon(AppIcons.openInNew),
               onTap:

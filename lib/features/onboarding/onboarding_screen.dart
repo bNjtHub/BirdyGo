@@ -32,6 +32,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:record/record.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../core/services/location_service.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
@@ -234,7 +235,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   _WelcomePage(l10n: l10n, theme: theme),
                   _InfoPage(
-                    icon: AppIcons.graphicEqRounded,
+                    icon: BirdyIcons.song, // FORK: icon roles
                     title: l10n.onboardingHowItWorksTitle,
                     body: l10n.onboardingHowItWorksBody,
                     theme: theme,
@@ -582,7 +583,7 @@ class _PermissionsPage extends ConsumerWidget {
                 padding: EdgeInsets.zero,
                 children: [
                   _PermissionTile(
-                    icon: AppIcons.micRounded,
+                    icon: BirdyIcons.heard, // FORK: icon roles
                     title: l10n.permissionMicrophoneTitle,
                     description: l10n.permissionMicrophoneDescription,
                     granted: micGranted,
@@ -594,7 +595,7 @@ class _PermissionsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   _PermissionTile(
-                    icon: AppIcons.locationOnRounded,
+                    icon: BirdyIcons.place, // FORK: icon roles
                     title: l10n.permissionLocationTitle,
                     description: l10n.permissionLocationDescription,
                     granted: locGranted,
@@ -606,7 +607,7 @@ class _PermissionsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   _ConsentTile(
-                    icon: AppIcons.mapSheet,
+                    icon: BirdyIcons.map, // FORK: icon roles
                     title: l10n.settingsPrivacyAllowMap,
                     description: l10n.settingsPrivacyAllowMapSubtitle,
                     value: ref.watch(privacyAllowMapProvider),
@@ -617,7 +618,7 @@ class _PermissionsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   _ConsentTile(
-                    icon: AppIcons.public,
+                    icon: BirdyIcons.world, // FORK: icon roles
                     title: l10n.settingsPrivacyAllowReverseGeocoding,
                     description:
                         l10n.settingsPrivacyAllowReverseGeocodingSubtitle,
@@ -740,8 +741,9 @@ class _PermissionTile extends StatelessWidget {
               ],
             )
           else if (granted)
-            Icon(
-              AppIcons.checkCircleRounded,
+            BirdyIcon( // FORK: icon roles
+              BirdyIcons.confirmed, // FORK: icon roles
+              active: true,
               color: AppSemanticColors.of(context).success,
               size: 28,
             )

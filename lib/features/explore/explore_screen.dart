@@ -23,6 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 
 import '../../core/services/reverse_geocoding_service.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/models/taxonomy_species.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
@@ -298,7 +299,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   Widget _buildSearchButton(AppLocalizations l10n) {
     return IconButton(
-      icon: Icon(_searchVisible ? AppIcons.close : AppIcons.search),
+      icon: Icon(_searchVisible ? BirdyIcons.close : AppIcons.search), // FORK: icon roles
       tooltip:
           _searchVisible ? l10n.tooltipClearSearch : l10n.exploreSearchTooltip,
       onPressed: _toggleSearch,
@@ -307,7 +308,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   Widget _buildHelpButton(AppLocalizations l10n) {
     return IconButton(
-      icon: const Icon(AppIcons.helpOutlineRounded),
+      icon: const Icon(BirdyIcons.help), // FORK: icon roles
       tooltip: l10n.exploreHelpTitle,
       onPressed: _showHelp,
     );
@@ -388,7 +389,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                   _query.isNotEmpty
                                       ? IconButton(
                                         icon: const Icon(
-                                          AppIcons.clear,
+                                          BirdyIcons.close, // FORK: icon roles
                                           size: 20,
                                         ),
                                         tooltip: l10n.tooltipClearSearch,
@@ -942,7 +943,7 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
       items.add(
         _ListEntry.header(
           l10n.exploreSectionAtLocation(atLocation.length),
-          AppIcons.locationOn,
+          BirdyIcons.place, // FORK: icon roles
         ),
       );
       items.addAll(atLocation.map(_ListEntry.hit));
@@ -954,7 +955,7 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
         items.add(
           _ListEntry.header(
             l10n.exploreSectionElsewhere(elsewhere.length),
-            AppIcons.public,
+            BirdyIcons.world, // FORK: icon roles
           ),
         );
       }
@@ -1152,7 +1153,7 @@ class _LocationHeaderState extends ConsumerState<_LocationHeader> {
           Row(
             children: [
               Icon(
-                AppIcons.locationOn,
+                BirdyIcons.place, // FORK: icon roles
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
@@ -1386,7 +1387,7 @@ class _ExploreHelpSheet extends StatelessWidget {
       title: l10n.exploreHelpTitle,
       initialChildSize: 0.62,
       sections: [
-        AppHelpSection(icon: AppIcons.infoOutline, body: l10n.exploreHelpBody),
+        AppHelpSection(icon: BirdyIcons.info, body: l10n.exploreHelpBody), // FORK: icon roles
         AppHelpSection(
           icon: AppIcons.scienceOutlined,
           body: l10n.exploreHelpTiers,
@@ -1394,7 +1395,7 @@ class _ExploreHelpSheet extends StatelessWidget {
         ),
         AppHelpSection(icon: AppIcons.refresh, body: l10n.exploreHelpRefresh),
         AppHelpSection(
-          icon: AppIcons.helpOutlineRounded,
+          icon: BirdyIcons.help, // FORK: icon roles
           body: l10n.exploreHelpLocation,
         ),
         AppHelpSection(
