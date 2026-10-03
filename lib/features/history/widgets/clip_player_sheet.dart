@@ -936,8 +936,8 @@ class _ConfirmToggle extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: BirdyIcon( // FORK: icon roles
-            BirdyIcons.confirmed,
-            active: confirmed,
+            BirdyIcons.confirmed, // FORK: icon roles
+            active: confirmed, // FORK: icon roles
             size: 28,
             color:
                 confirmed

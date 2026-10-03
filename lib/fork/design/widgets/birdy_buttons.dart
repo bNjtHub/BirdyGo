@@ -136,6 +136,7 @@ class BirdyIconButton extends StatelessWidget {
     required this.semanticLabel,
     required this.onPressed,
     this.iconColor,
+    this.active = false,
   });
 
   final IconData icon;
@@ -146,6 +147,9 @@ class BirdyIconButton extends StatelessWidget {
   /// the active listening mode's color (J6f). Defaults to [BirdyColors.text1].
   final Color? iconColor;
 
+  /// Draws [icon] filled (selected, in progress, favorite).
+  final bool active;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
@@ -154,7 +158,7 @@ class BirdyIconButton extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         tooltip: semanticLabel,
-        icon: BirdyIcon(icon),
+        icon: BirdyIcon(icon, active: active),
         style: IconButton.styleFrom(
           fixedSize: const Size.square(BirdySizes.target),
           backgroundColor: c.isDark ? c.line : c.surface1,

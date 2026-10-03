@@ -535,19 +535,15 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                               ],
                             ),
                           ),
-                          // Material Symbols read `fill` from the icon theme:
-                          // a filled star means favorite.
-                          IconTheme.merge(
-                            data: IconThemeData(fill: isFavorite ? 1 : 0),
-                            child: BirdyIconButton(
-                              semanticLabel:
-                                  isFavorite
-                                      ? l10n.forkSoundLibraryUnfavorite
-                                      : l10n.forkSoundLibraryFavorite,
-                              icon: BirdyIcons.favorite,
-                              onPressed:
-                                  () => _toggleFavorite(clip, !isFavorite),
-                            ),
+                          // A filled star means favorite.
+                          BirdyIconButton(
+                            semanticLabel:
+                                isFavorite
+                                    ? l10n.forkSoundLibraryUnfavorite
+                                    : l10n.forkSoundLibraryFavorite,
+                            icon: BirdyIcons.favorite,
+                            active: isFavorite,
+                            onPressed: () => _toggleFavorite(clip, !isFavorite),
                           ),
                         ],
                       ),

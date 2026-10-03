@@ -1934,7 +1934,7 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                                   padding: const EdgeInsets.only(left: 4),
                                   child: BirdyIcon( // FORK: icon roles
                                     BirdyIcons.confirmed, // FORK: icon roles
-                                    active: true,
+                                    active: true, // FORK: icon roles
                                     size: 14,
                                     color:
                                         AppSemanticColors.of(context).success,
@@ -2528,8 +2528,8 @@ class _ClusterRow extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: BirdyIcon( // FORK: icon roles
-                    BirdyIcons.confirmed,
-                    active: confirmed,
+                    BirdyIcons.confirmed, // FORK: icon roles
+                    active: confirmed, // FORK: icon roles
                     size: 24,
                     color:
                         confirmed

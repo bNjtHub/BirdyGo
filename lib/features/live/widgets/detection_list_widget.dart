@@ -419,7 +419,7 @@ class DetectionTile extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               child: BirdyIcon( // FORK: icon roles
                 BirdyIcons.confirmed, // FORK: icon roles
-                active: actions.isConfirmed,
+                active: actions.isConfirmed, // FORK: icon roles
                 size: 24,
                 color:
                     actions.isConfirmed

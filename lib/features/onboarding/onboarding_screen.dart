@@ -743,7 +743,7 @@ class _PermissionTile extends StatelessWidget {
           else if (granted)
             BirdyIcon( // FORK: icon roles
               BirdyIcons.confirmed, // FORK: icon roles
-              active: true,
+              active: true, // FORK: icon roles
               color: AppSemanticColors.of(context).success,
               size: 28,
             )

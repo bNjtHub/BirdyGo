@@ -95,7 +95,6 @@ abstract final class BirdyIcons {
 
   /// Roles that are filled whatever the state.
   static final Set<IconData> alwaysFilled = {
-
     play,
     pause,
     stop,

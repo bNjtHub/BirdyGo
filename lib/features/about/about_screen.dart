@@ -235,7 +235,7 @@ class AboutScreen extends ConsumerWidget {
 
             // Links
             ListTile(
-              leading: const Icon(BirdyIcons.help), // FORK: icon roles
+              leading: const Icon(BirdyIcons.document), // FORK: icon roles
               title: Text(l10n.aboutUserGuide),
               trailing: const Icon(AppIcons.openInNew),
               onTap:

@@ -802,7 +802,7 @@ class _DetectionStatsTile extends ConsumerWidget {
               children: [
                 BirdyIcon( // FORK: icon roles
                   BirdyIcons.confirmed, // FORK: icon roles
-                  active: true,
+                  active: true, // FORK: icon roles
                   size: 20,
                   // Black keeps maximum contrast against the white
                   // high-contrast panel; normal themes use the vibrant
