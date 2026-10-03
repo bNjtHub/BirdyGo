@@ -292,6 +292,8 @@ licence CC BY-SA imposée puisque le texte ne dérive pas d'un article.
       graphique de présence existant (géomodèle, jamais l'IA). Sans fiche, ou si les noms d'espèces ne
       sont pas en français, la description existante reste. Titres et pied de fiche (« Fiche rédigée
       par IA : elle peut contenir des erreurs. ») en français et en anglais.
+- [x] Fiche espèce, carrousel de photos (PR « J7 Fiche espèce : carrousel de photos ») : photo hors ligne puis jusqu'à 4 photos iNaturalist libres (mêmes licences que la grande photo), seulement si « Photos en grand (en ligne) » est actif ; points, crédit de la page courante. Tests dans `test/fork/species_photo/species_photo_carousel_test.dart`.
+- [x] Fiche espèce, photo en plein écran (même PR) : un appui sur la photo l'ouvre en noir, zoom (pincer, double appui), balayage entre les photos, glisser vers le bas pour fermer, crédit toujours visible ; bouton (i) inchangé. Dégradé sombre sous la barre d'état, icônes claires tant que l'en-tête est visible. Tests `species_photo_viewer_test.dart`.
 - [x] Fiche espèce, sons et saisons (PR « J7 Fiche espèce ») : « Mes sons » juste après « Entendu… »
       (le meilleur son devient un lecteur mis en avant, grand bouton), « Ici en ce moment » garde sa
       courbe compacte de 12 mois, avec la phrase calculée sur 48 semaines (« Arrive début mars ·
@@ -955,6 +957,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       libellé « Oiseau mystère » retiré. Tests dans `test/fork/game/fine_ear_test.dart`.
 
 - [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
+- [x] J7 Fiche espèce : préchargement au repos après le splash (descriptions, régions, aires et cellules de terre de la carte, courbe annuelle du géomodèle), séquentiel, arrêt en arrière-plan ; mesures PC : taxonomie 1250 ms (déjà au lancement), cellules 180, descriptions 230, régions 90, aires 30.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
       l'interrupteur de la carte Position ; écrit `privacyAllowMapProvider`.
