@@ -690,9 +690,10 @@ class StatusBlock extends StatelessWidget {
           '${l10n.forkHomeLevelOpen}',
       child: Row(
         children: [
-          // Same ring and emblem as the Profil « Mon niveau » card.
-          StatusRing(
-            status: status,
+          // Same emblem and gauge as the Profil « Mon niveau » card.
+          StatusEmblem(
+            status: status ?? GameConfig.statuses.first,
+            reached: status != null,
             progress: progress.progress,
             size: BirdySizes.homeLevelRing,
             semanticLabel: l10n.forkStatusRingLabel(percent),

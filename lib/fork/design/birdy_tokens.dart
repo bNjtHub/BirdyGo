@@ -68,6 +68,23 @@ abstract final class BirdyBrand {
 
   /// Unselected rim of a quiz answer dot in the light theme.
   static const Color mistTrack = Color(0xFFE1E5DE);
+
+  /// Unlit gauge segment of a status emblem or badge medal (J6k), shown at
+  /// [BirdyAlpha.gaugeOff].
+  static const Color gaugeOff = Color(0xFF8A96A3);
+
+  /// Locked (not reached) game disc, light theme (J6k): disc, rim, glyph
+  /// body and glyph detail.
+  static const Color lockedDisc = Color(0xFFCBD2CA);
+  static const Color lockedDeep = Color(0xFFB5BDB4);
+  static const Color lockedGlyph = Color(0xFFE8ECE6);
+  static const Color lockedInk = Color(0xFFAEB6AD);
+
+  /// Same, dark theme.
+  static const Color lockedDiscDark = Color(0xFF2A3C54);
+  static const Color lockedDeepDark = Color(0xFF223249);
+  static const Color lockedGlyphDark = Color(0xFF4A5E78);
+  static const Color lockedInkDark = Color(0xFF1B2A3F);
 }
 
 /// Colors of the shared confetti (`BirdyConfetti`, J6e quiz, J6f moments),
@@ -1058,8 +1075,8 @@ abstract final class BirdyAlpha {
   /// Big watermark icon of the species page's knowledge card.
   static const double knowledgeWatermark = 0.12;
 
-  /// Thin inner white ring on a reached level emblem/ring (J6f).
-  static const double emblemInnerRing = 0.5;
+  /// Opacity of the unlit segments of a game disc's gauge (J6k).
+  static const double gaugeOff = 0.35;
 
   /// Scrim behind the photo credit button on a species photo.
   static const double photoButtonScrim = 0.45;

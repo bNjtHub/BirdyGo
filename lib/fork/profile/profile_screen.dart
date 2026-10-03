@@ -321,8 +321,9 @@ class _LevelCardState extends State<_LevelCard> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            StatusRing(
-              status: status,
+            StatusEmblem(
+              status: status ?? GameConfig.statuses.first,
+              reached: status != null,
               progress: progress.progress,
               size: BirdyGlyph.disc96,
               semanticLabel: l10n.forkStatusRingLabel(percent),
@@ -575,7 +576,6 @@ class _LadderCell extends StatelessWidget {
                           size: BirdySizes.levelEmblem,
                           reached: reached,
                           current: isCurrent,
-                          innerRing: reached,
                         ),
                         if (isCurrent)
                           Positioned(
@@ -706,7 +706,6 @@ class _LevelInfoBox extends StatelessWidget {
               status: status,
               size: BirdySizes.levelInfoIcon,
               reached: reached,
-              innerRing: reached,
             ),
             const SizedBox(width: BirdySpace.m),
             Expanded(
