@@ -57,7 +57,6 @@ abstract final class AppIcons {
   static const IconData cloud = Symbols.cloud;
   static const IconData cloudy = Symbols.cloudy;
   static const IconData code = Symbols.code;
-  static const IconData contrast = Symbols.contrast; // FORK: « peu commun » mark (J6e)
   static const IconData contentCut = Symbols.content_cut;
   static const IconData darkMode = Symbols.dark_mode;
   static const IconData deleteOutline = Symbols.delete;
@@ -79,7 +78,7 @@ abstract final class AppIcons {
       Symbols.fiber_manual_record_rounded;
   static const IconData filterAltRounded = Symbols.filter_alt_rounded;
   static const IconData filterList = Symbols.filter_list;
-  static const IconData flagFilled = Icons.flag;
+  static const IconData flagFilled = Symbols.flag; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData flagRounded = Symbols.flag_rounded;
   static const IconData foggy = Symbols.foggy;
   static const IconData formatListNumberedRounded =
@@ -110,7 +109,7 @@ abstract final class AppIcons {
   static const IconData locationOff = Symbols.location_off;
   static const IconData locationOffRounded = Symbols.location_off_rounded;
   static const IconData locationOn = Symbols.location_on;
-  static const IconData locationOnFilled = Icons.location_on;
+  static const IconData locationOnFilled = Symbols.location_on; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData locationOnRounded = Symbols.location_on_rounded;
   static const IconData layers = Symbols.layers; // FORK: map base layers (J5)
   static const IconData leaderboard = Symbols.leaderboard; // FORK: Palmarès (J6e)
@@ -131,7 +130,6 @@ abstract final class AppIcons {
   static const IconData moreVert = Symbols.more_vert;
   static const IconData wbTwilight = Symbols.wb_twilight; // FORK: J6h
   static const IconData smartphone = Symbols.smartphone; // FORK: J6h
-  static const IconData lightMode = Symbols.light_mode; // FORK: J6h
   static const IconData translate = Symbols.translate; // FORK: J6h
   static const IconData image = Symbols.image; // FORK: J6h
   static const IconData visibilityOff = Symbols.visibility_off; // FORK: J6h
@@ -201,13 +199,13 @@ abstract final class AppIcons {
   static const IconData speciesFallback = brokenImage;
   static const IconData speedRounded = Symbols.speed_rounded;
   static const IconData stickyNote2 = Symbols.sticky_note_2;
-  static const IconData stop = Icons.stop;
+  static const IconData stop = Symbols.stop; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData star = Symbols.star; // FORK: sound library favorites
   static const IconData contentCopy =
       Symbols.content_copy; // FORK: LPO card (J5b)
   static const IconData remove = Symbols.remove; // FORK: counters (J5b)
-  static const IconData stopCircle = Icons.stop_circle;
-  static const IconData stopRounded = Icons.stop_rounded;
+  static const IconData stopCircle = Symbols.stop_circle; // FORK: unify on Material Symbols (callers use fill: 1)
+  static const IconData stopRounded = Symbols.stop_rounded; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData storage = Symbols.storage;
   static const IconData straighten = Symbols.straighten;
   static const IconData summaryChart = Symbols.bar_chart;
@@ -242,11 +240,9 @@ abstract final class AppIcons {
   static const IconData wbTwilightRounded = Symbols.wb_twilight_rounded;
   static const IconData weatherSnowy = Symbols.weather_snowy;
   // FORK: quiz « Qui chante ? » v2, Material Symbols Rounded (J6e).
-  static const IconData quizBird = Symbols.raven_rounded; // FORK: quiz
   static const IconData quizCheck = Symbols.check_rounded; // FORK: quiz
   static const IconData quizClose = Symbols.close_rounded; // FORK: quiz
   static const IconData quizSpark = Symbols.auto_awesome_rounded; // FORK: quiz
-  static const IconData quizStar = Symbols.star_rounded; // FORK: quiz
   static const IconData quizStop = Symbols.stop_rounded; // FORK: quiz
   // FORK: listening modes « Conditions d'écoute » (J6f).
   static const IconData listeningNormal = Symbols.wb_sunny_rounded; // FORK
