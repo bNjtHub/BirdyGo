@@ -216,6 +216,8 @@ Deze instelling regelt het openen van de Live-modus binnen de app. De [Quick Lis
 
 Staat die aan (de standaard), dan wordt een afgeronde Live- of Point Count-Session automatisch aan je bibliotheek toegevoegd op het moment dat die eindigt. Staat die uit, dan opent een afgeronde Session in het overzicht met de markering **niet opgeslagen**: het opslaanpictogram licht op en je moet erop tikken om de Session te bewaren. Verlaat je het overzicht zonder op te slaan, dan worden de Session en de opnamen weggegooid. Dat past bij kort meeluisteren waarbij je alleen af en toe een opmerkelijk resultaat wilt bewaren in plaats van elke korte opname te verzamelen. Survey- en ARU-inzetten slaan altijd automatisch op — een lange onbemande run is te kostbaar om te verliezen door het opslaan te vergeten — dus daar geldt deze schakelaar niet.
 
+Zolang automatisch opslaan aanstaat, slaan de Live-modus en Point Count ook een gedeeltelijke Session op bij de start, elke 30 seconden en wanneer de app de voorgrond verlaat. Zo blijft gegevensverlies na een crash of stroomuitval beperkt. Staat de instelling uit, dan worden deze tussenstanden niet bewaard. Survey en ARU slaan hun tussenstanden op, ongeacht deze instelling.
+
 ## Weergave
 
 ### Weergave-overlay in het overzicht

@@ -215,6 +215,8 @@ Diese Einstellung betrifft das Öffnen des Live-Modus innerhalb der App. Das [Qu
 
 Wenn aktiviert (die Voreinstellung), wird eine abgeschlossene Live- oder Point-Count-Session in dem Moment automatisch zu Ihrer Bibliothek hinzugefügt, in dem sie endet. Wenn deaktiviert, öffnet sich eine beendete Session in der Übersicht als **nicht gespeichert**: Das Speichersymbol ist hervorgehoben und Sie müssen es antippen, um die Session zu behalten. Verlassen Sie die Übersicht ohne zu speichern, werden Session und Aufnahmen verworfen. Das eignet sich für kurzes Hineinhören, bei dem Sie nur gelegentlich ein bemerkenswertes Ergebnis behalten wollen, statt jede kurze Aufnahme anzusammeln. Survey- und ARU-Einsätze speichern immer automatisch – ein langer unbeaufsichtigter Lauf ist zu wertvoll, um ihn durch vergessenes Speichern zu verlieren –, dieser Schalter gilt dort also nicht.
 
+Solange das automatische Speichern aktiviert ist, sichern Live-Modus und Point Count außerdem beim Start, alle 30 Sekunden und beim Verlassen des Vordergrunds eine Teil-Session. Das begrenzt Datenverluste nach einem Absturz oder Stromausfall. Bei deaktivierter Einstellung werden diese Zwischenstände nicht behalten. Survey und ARU sichern ihre Zwischenstände unabhängig von dieser Einstellung.
+
 ## Wiedergabe
 
 ### Wiedergabe-Overlay in der Übersicht

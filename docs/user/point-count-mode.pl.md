@@ -64,3 +64,5 @@ Ekran trwającego liczenia punktowego skupia się na panelu z odliczaniem.
 ## Po zakończeniu liczenia
 
 Gdy liczenie punktowe dobiegnie końca, BirdNET Live zapisuje Session i otwiera [Przegląd Session](session-review.md).
+
+Przy włączonym automatycznym zapisywaniu niedokończone liczenie jest też zapisywane na starcie, co 30 sekund i gdy aplikacja opuszcza pierwszy plan. Po awarii lub utracie zasilania ostatnie częściowe liczenie jest dostępne w Bibliotece Sessions.
