@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import '../../features/explore/explore_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
@@ -240,7 +241,7 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           ),
           BirdyListRow(
             key: const ValueKey('licenses-gbif-citation'),
-            icon: AppIcons.menuBook,
+            icon: BirdyIcons.document,
             title: l10n.forkLicensesGbifCitationTitle,
             subtitle: l10n.forkLicensesGbifCitation(
               DateFormat.yMMMMd(Localizations.localeOf(context).toString())
@@ -266,7 +267,7 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
       title: l10n.forkLicensesOtherTitle,
       children: [
         BirdyListRow(
-          icon: AppIcons.menuBook,
+          icon: BirdyIcons.document,
           title: l10n.forkLicensesFonts,
           subtitle: l10n.forkLicensesFontsSub,
           onTap: () => openExternalUrl(context, _oflUrl),
@@ -278,20 +279,20 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           onTap: () => openExternalUrl(context, _apacheUrl),
         ),
         BirdyListRow(
-          icon: AppIcons.menuBook,
+          icon: BirdyIcons.document,
           title: l10n.forkLicensesSheets,
           subtitle: l10n.forkLicensesSheetsSub,
           showChevron: false,
         ),
         BirdyListRow(
-          icon: AppIcons.mapSheet,
+          icon: BirdyIcons.map,
           title: l10n.forkLicensesMaps,
           subtitle: '${l10n.forkLicensesMapsSub}\n${maps.join(' · ')}',
           onTap: () => openExternalUrl(context, _osmCopyrightUrl),
         ),
         BirdyListRow(
           key: const ValueKey('licenses-code'),
-          icon: AppIcons.public,
+          icon: BirdyIcons.world,
           title: l10n.forkLicensesCode,
           subtitle: l10n.forkLicensesCodeSub,
           onTap:

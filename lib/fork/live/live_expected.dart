@@ -21,7 +21,6 @@ import 'package:intl/intl.dart';
 import '../../features/announcements/geo_commonness_provider.dart';
 import '../../features/explore/explore_providers.dart';
 import '../../shared/providers/settings_providers.dart';
-import '../../shared/utils/app_icons.dart';
 import '../daily_goal/daily_goal_providers.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -35,6 +34,7 @@ import '../notebook/notebook_loader.dart';
 import '../reliability/geo_presence_service.dart';
 import '../reliability/reliability_config.dart';
 import '../summary/listening_summary.dart';
+import '../design/birdy_icons.dart';
 
 /// Why a species is listed as expected here.
 enum LiveExpectedReason { frequent, peak, possible }
@@ -461,7 +461,7 @@ class LiveExpectedTip extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              AppIcons.lightbulbOutline,
+              BirdyIcons.tip,
               size: BirdySizes.tipIcon,
               color: c.orioleText,
             ),

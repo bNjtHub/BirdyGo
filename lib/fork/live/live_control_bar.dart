@@ -13,6 +13,8 @@ import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/entrance.dart';
 import '../design/widgets/pressable.dart';
+import '../design/birdy_icons.dart';
+import '../design/widgets/birdy_wing_icon.dart';
 
 enum LiveControlPhase {
   /// No session: « Écouter ».
@@ -125,7 +127,7 @@ class _StartButton extends StatelessWidget {
                     color: c.text2,
                   ),
                 )
-                : const Icon(AppIcons.graphicEq),
+                : const BirdyWingIcon(),
         label: Text(l10n.forkListen),
       ),
     );
@@ -153,7 +155,7 @@ class _SessionButtons extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onStop,
               style: BirdyButtonStyles.stop(context),
-              icon: const Icon(AppIcons.stopRounded, fill: 1),
+              icon: const BirdyIcon(BirdyIcons.stop),
               label: Text(l10n.forkStop),
             ),
           ),
@@ -164,8 +166,8 @@ class _SessionButtons extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onTogglePause,
               style: BirdyButtonStyles.pause(context),
-              icon: Icon(
-                paused ? AppIcons.playArrowRounded : AppIcons.pauseRounded,
+              icon: BirdyIcon(
+                paused ? BirdyIcons.play : BirdyIcons.pause,
               ),
               label: Text(paused ? l10n.forkResume : l10n.forkPause),
             ),

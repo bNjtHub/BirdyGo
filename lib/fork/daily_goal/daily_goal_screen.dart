@@ -17,6 +17,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../../shared/widgets/content_width_constraint.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
@@ -312,8 +313,9 @@ class _DailyGoalScreenState extends ConsumerState<DailyGoalScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            heard ? AppIcons.checkCircle : AppIcons.hearing,
+          BirdyIcon(
+            heard ? BirdyIcons.confirmed : BirdyIcons.heard,
+            active: heard,
             color: heard ? c.sure.foreground : c.text2,
           ),
           BirdyIconButton(

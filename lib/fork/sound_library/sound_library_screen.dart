@@ -17,6 +17,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
@@ -217,7 +218,7 @@ class _SoundLibraryScreenState extends ConsumerState<SoundLibraryScreen> {
               onSelected: () => setState(() => _favoritesOnly = false),
             ),
             BirdyFilterChip(
-              leading: Icon(AppIcons.star, fill: 1, color: c.orioleText),
+              leading: BirdyIcon(BirdyIcons.favorite, active: _favoritesOnly, color: c.orioleText),
               label: l10n.forkSoundLibraryFavoritesOnly,
               selected: _favoritesOnly,
               selectedColors: BirdyChipColors.ink(c),
@@ -229,7 +230,7 @@ class _SoundLibraryScreenState extends ConsumerState<SoundLibraryScreen> {
         if (shown.isEmpty)
           BirdyEmptyState.inline(
             kind: BirdyEmptyKind.filtered,
-            icon: AppIcons.star,
+            icon: BirdyIcons.favorite,
             title: l10n.forkSoundLibraryNoFavoritesTitle,
             body: l10n.forkSoundLibraryNoFavorites,
             action: l10n.forkSoundLibraryAllClips,
@@ -315,7 +316,7 @@ class _Hero extends StatelessWidget {
                 color: c.surface1,
                 shape: BoxShape.circle,
               ),
-              child: Icon(AppIcons.graphicEq, size: BirdyGlyph.disc36, color: c.accentText),
+              child: Icon(BirdyIcons.song, size: BirdyGlyph.disc36, color: c.accentText),
             ),
             const SizedBox(width: BirdySpace.l),
             Expanded(
@@ -445,7 +446,7 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                     },
                   ),
                 BirdyFilterChip(
-                  leading: Icon(AppIcons.star, fill: 1, color: c.orioleText),
+                  leading: BirdyIcon(BirdyIcons.favorite, active: _favoritesOnly, color: c.orioleText),
                   label: l10n.forkSoundLibraryFavoritesOnly,
                   selected: _favoritesOnly,
                   selectedColors: BirdyChipColors.oriole(c),
@@ -470,7 +471,7 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                   return _favoritesOnly
                       ? BirdyEmptyState(
                         kind: BirdyEmptyKind.filtered,
-                        icon: AppIcons.star,
+                        icon: BirdyIcons.favorite,
                         title: l10n.forkSoundLibraryNoFavoritesTitle,
                         body: l10n.forkSoundLibraryNoFavorites,
                         action: l10n.forkSoundLibraryAllClips,
@@ -543,7 +544,7 @@ class _SpeciesClipsScreenState extends ConsumerState<SpeciesClipsScreen> {
                                   isFavorite
                                       ? l10n.forkSoundLibraryUnfavorite
                                       : l10n.forkSoundLibraryFavorite,
-                              icon: AppIcons.star,
+                              icon: BirdyIcons.favorite,
                               onPressed:
                                   () => _toggleFavorite(clip, !isFavorite),
                             ),

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../design/activity_scale.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_tint.dart';
@@ -125,8 +126,8 @@ class SpeciesPageHeader extends StatelessWidget {
                           BirdyIconButton(
                             icon:
                                 inSheet
-                                    ? AppIcons.close
-                                    : AppIcons.arrowBackRounded,
+                                    ? BirdyIcons.close
+                                    : BirdyIcons.back,
                             semanticLabel:
                                 inSheet
                                     ? MaterialLocalizations.of(
@@ -264,14 +265,14 @@ class _TagPill extends StatelessWidget {
     final (label, icon, fill, fore, text) = switch (tag) {
       SpeciesTag.inBook => (
         l10n.forkFicheTagInBook,
-        AppIcons.menuBook,
+        BirdyIcons.notebook,
         c.sure.background,
         c.sure.foreground,
         c.sure.foreground,
       ),
       SpeciesTag.toDiscover => (
         l10n.forkFicheTagToDiscover,
-        AppIcons.hearing,
+        BirdyIcons.heard,
         c.headerChip,
         c.toCheck.foreground,
         ink,
@@ -386,7 +387,7 @@ class _HeardInset extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: BirdySpace.xxs),
                         child: Icon(
-                          AppIcons.hearing,
+                          BirdyIcons.heard,
                           size: BirdyGlyph.l,
                           color: c.sure.foreground,
                         ),
@@ -650,7 +651,7 @@ class SongBlock extends StatelessWidget {
           children: [
             Expanded(
               child: SectionTitle(
-                icon: AppIcons.hearing,
+                icon: BirdyIcons.song,
                 text: l10n.forkFicheGroupSong,
               ),
             ),
@@ -743,7 +744,7 @@ class SongBlock extends StatelessWidget {
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionTitle(icon: AppIcons.hearing, text: l10n.forkFicheGroupSong),
+        SectionTitle(icon: BirdyIcons.song, text: l10n.forkFicheGroupSong),
         for (var i = 0; i < rows; i++)
           Padding(
             padding: const EdgeInsets.only(top: BirdySpace.s),
@@ -799,7 +800,7 @@ class _FavoriteButton extends StatelessWidget {
         minimumSize: const Size.square(BirdySizes.target),
       ),
       icon: Icon(
-        AppIcons.star,
+        BirdyIcons.favorite,
         fill: favorite ? 1 : 0,
         color: favorite ? BirdyBrand.oriole : c.text2,
       ),
@@ -858,7 +859,7 @@ class ActivityAndMap extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SectionTitle(icon: AppIcons.locationOn, text: l10n.forkFicheMapLabel),
+                  SectionTitle(icon: BirdyIcons.map, text: l10n.forkFicheMapLabel),
                   const SizedBox(height: BirdySpace.m),
                   SizedBox(height: BirdyGlyph.disc96, child: map),
                   if (onSeeOnMap != null)
@@ -919,7 +920,7 @@ class ActivityAndMap extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SectionTitle(icon: AppIcons.locationOn, text: l10n.forkFicheMapLabel),
+              SectionTitle(icon: BirdyIcons.map, text: l10n.forkFicheMapLabel),
               const SizedBox(height: BirdySpace.m),
               BirdySkeleton.box(
                 width: double.infinity,
@@ -1029,7 +1030,7 @@ class GoFurtherBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(
-            icon: AppIcons.public,
+            icon: BirdyIcons.world,
             text: l10n.forkFicheGroupGoFurther,
           ),
           const SizedBox(height: BirdySpace.m),
@@ -1122,7 +1123,7 @@ class _LinkPill extends StatelessWidget {
                   link.iconAsset,
                   width: BirdySpace.roomy,
                   height: BirdySpace.roomy,
-                  errorBuilder: (_, _, _) => const Icon(AppIcons.public),
+                  errorBuilder: (_, _, _) => const Icon(BirdyIcons.world),
                 ),
                 const SizedBox(width: BirdySpace.s),
                 Text(

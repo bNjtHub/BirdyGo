@@ -28,6 +28,7 @@ import '../reliability/reliability_config.dart';
 import 'home_model.dart';
 import 'logo_tweet.dart';
 import 'singing_logo.dart';
+import '../design/birdy_icons.dart';
 
 /// Singing mark and name, small, alone above the header (Accueil only; the
 /// menu button now sits in [BirdyTabHeader]'s action row).
@@ -414,7 +415,7 @@ class _ReplayButton extends StatelessWidget {
           onTap: onPressed,
           child: SizedBox.square(
             dimension: BirdySizes.target,
-            child: Icon(AppIcons.playArrowRounded, color: inkOnAccent(accent)),
+            child: BirdyIcon(BirdyIcons.play, color: inkOnAccent(accent)),
           ),
         ),
       ),
@@ -1061,7 +1062,7 @@ class TodayEmptyBlock extends StatelessWidget {
               color: birdyTrackOnTint(c),
               shape: BoxShape.circle,
             ),
-            child: Icon(AppIcons.hearing, size: BirdyGlyph.disc36, color: c.accentText),
+            child: BirdyIcon(BirdyIcons.heard, size: BirdyGlyph.disc36, color: c.accentText),
           ),
           const SizedBox(width: BirdySpace.l),
           Expanded(

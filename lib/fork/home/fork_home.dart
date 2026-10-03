@@ -25,7 +25,6 @@ import '../../features/history/widgets/clip_player_sheet.dart';
 import '../../features/live/live_screen.dart';
 import '../../features/live/live_session.dart';
 import '../../shared/providers/settings_providers.dart';
-import '../../shared/utils/app_icons.dart';
 import '../data/observation_index_service.dart';
 import '../day/day_times.dart';
 import '../daily_goal/daily_goal_block.dart';
@@ -58,6 +57,7 @@ import 'home_model.dart';
 import 'home_text.dart';
 import 'home_widgets.dart';
 import 'more_sheet.dart';
+import '../design/birdy_icons.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -245,7 +245,7 @@ class _ForkHomeState extends ConsumerState<ForkHome> {
         const Expanded(child: HomeLogoRow()),
         const SizedBox(width: BirdySpace.s),
         BirdyIconButton(
-          icon: AppIcons.menu,
+          icon: BirdyIcons.menu,
           semanticLabel: l10n.forkHomeMenu,
           onPressed: _showMenu,
         ),

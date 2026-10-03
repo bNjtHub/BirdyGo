@@ -5,6 +5,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import 'game_config.dart';
 
 String statusName(AppLocalizations l10n, StatusDef status) => switch (status
@@ -61,12 +62,12 @@ IconData? badgeIcon(BadgeKind kind) => switch (kind) {
   BadgeKind.dawnChorus => AppIcons.wbTwilightRounded,
   BadgeKind.earlyBird => AppIcons.schedule,
   BadgeKind.nightOwl => AppIcons.darkMode,
-  BadgeKind.reviewer => AppIcons.check,
+  BadgeKind.reviewer => BirdyIcons.tick,
   BadgeKind.migrant => null,
   BadgeKind.streak => AppIcons.calendarToday,
   // Until the species icons of J6d.
   BadgeKind.tits => AppIcons.bird,
-  BadgeKind.fineEar => AppIcons.headphones,
+  BadgeKind.fineEar => BirdyIcons.fineEar,
 };
 
 Glyph? badgeGlyph(BadgeKind kind) =>

@@ -9,9 +9,9 @@ import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
 import '../design/widgets/birdy_buttons.dart';
+import '../design/widgets/birdy_wing_icon.dart';
 import '../design/widgets/pressable.dart';
 import '../design/widgets/species_avatar.dart';
-import '../../shared/utils/app_icons.dart';
 
 class NeverHeardBlock extends StatelessWidget {
   const NeverHeardBlock({super.key, required this.onListen});
@@ -56,7 +56,7 @@ class NeverHeardBlock extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onListen,
               style: BirdyButtonStyles.primary(context),
-              icon: const Icon(AppIcons.hearing),
+              icon: const BirdyWingIcon(size: BirdyGlyph.x3l),
               label: Text(l10n.forkFicheListenToFind),
             ),
           ),

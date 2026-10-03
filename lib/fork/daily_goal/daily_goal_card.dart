@@ -13,6 +13,7 @@ import '../../features/explore/explore_providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
@@ -334,7 +335,7 @@ class _BirdCircle extends StatelessWidget {
                 ),
               ),
               child: Icon(
-                AppIcons.checkRounded,
+                BirdyIcons.tick,
                 size: DailyGoalCardSizes.checkIcon,
                 color: c.surface1,
               ),

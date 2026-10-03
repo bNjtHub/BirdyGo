@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
@@ -74,7 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                     actions: [
                       // « Palmarès » is the first entry of the menu.
                       BirdyIconButton(
-                        icon: AppIcons.menu,
+                        icon: BirdyIcons.menu,
                         semanticLabel: l10n.forkHomeMenu,
                         onPressed: () => showMoreSheet(context, ref),
                       ),
@@ -594,7 +594,7 @@ class _LadderCell extends StatelessWidget {
                                 ),
                               ),
                               child: const Icon(
-                                AppIcons.check,
+                                BirdyIcons.tick,
                                 size: BirdyGlyph.xxs,
                                 color: BirdyBrand.white,
                               ),

@@ -7,6 +7,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
@@ -104,14 +105,14 @@ class SummaryActionsSheet extends StatelessWidget {
             ),
           if (onDetails != null)
             BirdyListRow(
-              icon: AppIcons.detections,
+              icon: BirdyIcons.detections,
               title: l10n.forkSummaryDetailsRow,
               subtitle: l10n.forkSummaryDetailsHint,
               onTap: closing(onDetails),
             ),
           if (onMarkRecording != null)
             BirdyListRow(
-              icon: AppIcons.mic,
+              icon: BirdyIcons.voiceMemo,
               title:
                   isRecording
                       ? l10n.forkPracticeUnmark

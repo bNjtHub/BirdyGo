@@ -6,6 +6,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -58,7 +59,7 @@ class ReviewTopBar extends StatelessWidget {
             style: BirdyText.label.copyWith(color: c.text1),
           ),
         BirdyIconButton(
-          icon: AppIcons.verifiedRounded,
+          icon: BirdyIcons.confirmed,
           semanticLabel: l10n.forkReliabilityTitle,
           onPressed: onReliability,
         ),
@@ -535,7 +536,7 @@ class VerdictButtons extends StatelessWidget {
           button(
             answer: ReviewAnswer.itIsNot,
             label: notLabel ?? l10n.forkReviewItIsNot,
-            icon: AppIcons.close,
+            icon: BirdyIcons.close,
             iconColor: c.toCheck.foreground,
             circle: c.surface1,
             ring: c.toCheck.foreground,
@@ -546,7 +547,7 @@ class VerdictButtons extends StatelessWidget {
           button(
             answer: ReviewAnswer.dontKnow,
             label: dontKnowLabel ?? l10n.forkReviewDontKnow,
-            icon: AppIcons.question,
+            icon: BirdyIcons.help,
             iconColor: c.probable.foreground,
             circle: c.probable.background,
             background: c.surface1,
@@ -556,7 +557,7 @@ class VerdictButtons extends StatelessWidget {
           button(
             answer: ReviewAnswer.itIs,
             label: yesLabel ?? l10n.forkReviewItIs,
-            icon: AppIcons.check,
+            icon: BirdyIcons.tick,
             iconColor: BirdyBrand.ink,
             circle: BirdyBrand.lichen,
             background: c.sure.background,
@@ -582,7 +583,8 @@ class ReviewAllDone extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BirdyEmptyState(
       kind: BirdyEmptyKind.done,
-      icon: AppIcons.check,
+      icon: BirdyIcons.confirmed,
+      iconActive: true,
       title:
           sorted == 0
               ? l10n.forkQuickReviewEmptyTitle

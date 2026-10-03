@@ -15,6 +15,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
@@ -297,7 +298,7 @@ class _Running extends ConsumerWidget {
         Pressable(
           child: FilledButton.icon(
             style: BirdyButtonStyles.primary(context),
-            icon: const Icon(AppIcons.check),
+            icon: const BirdyIcon(BirdyIcons.tick),
             label: Text(l10n.forkGardenFinish),
             onPressed: () => controller.finish(DateTime.now()),
           ),

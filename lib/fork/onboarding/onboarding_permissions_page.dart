@@ -20,6 +20,7 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/pressable.dart';
 import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
+import '../design/birdy_icons.dart';
 
 class OnboardingPermissionsPage extends ConsumerWidget {
   const OnboardingPermissionsPage({
@@ -56,7 +57,7 @@ class OnboardingPermissionsPage extends ConsumerWidget {
                 key: const ValueKey('onb-mic'),
                 id: 'onb-mic',
                 tone: BirdyBlockTone.tonal,
-                icon: AppIcons.micRounded,
+                icon: BirdyIcons.heard,
                 name: l10n.forkOnbMicName,
                 tag: l10n.forkOnbNeeded,
                 why: l10n.forkOnbMicWhy,
@@ -73,7 +74,7 @@ class OnboardingPermissionsPage extends ConsumerWidget {
                 key: const ValueKey('onb-location'),
                 id: 'onb-location',
                 tone: BirdyBlockTone.oriole,
-                icon: AppIcons.locationOnRounded,
+                icon: BirdyIcons.place,
                 name: l10n.forkOnbLocName,
                 tag: l10n.forkOnbOptional,
                 why: l10n.forkOnbLocWhy,
@@ -90,7 +91,7 @@ class OnboardingPermissionsPage extends ConsumerWidget {
                 key: const ValueKey('onb-map'),
                 id: 'onb-map',
                 tone: BirdyBlockTone.tonal,
-                icon: AppIcons.mapSheet,
+                icon: BirdyIcons.map,
                 name: l10n.forkOnbMapName,
                 tag: l10n.forkOnbOptional,
                 why: l10n.forkOnbMapWhy,
@@ -183,10 +184,10 @@ class _PermissionCard extends StatelessWidget {
         liveRegion: true,
         child: Row(
           children: [
-            Icon(
-              AppIcons.checkCircleRounded,
+            BirdyIcon(
+              BirdyIcons.confirmed,
+              active: true,
               size: BirdyGlyph.x5l,
-              fill: 1,
               color: c.sure.foreground,
             ),
             const SizedBox(width: BirdySpace.s),
@@ -233,7 +234,7 @@ class _PermissionCard extends StatelessWidget {
                 key: ValueKey('$id-settings'),
                 style: BirdyButtonStyles.secondary(context),
                 onPressed: onOpenSettings,
-                icon: const Icon(AppIcons.tuneRounded),
+                icon: const BirdyIcon(BirdyIcons.settings),
                 label: Text(l10n.forkOnbOpenSettings),
               ),
             ),
@@ -345,7 +346,7 @@ class _MapChoiceState extends ConsumerState<_MapChoice> {
     final c = BirdyColors.of(context);
     final yes = _choice == true;
     final no = _choice == false;
-    const selectedIcon = Icon(AppIcons.checkRounded);
+    const selectedIcon = BirdyIcon(BirdyIcons.tick);
     final fullWidth = WidgetStatePropertyAll(
       const Size.fromHeight(BirdySizes.target),
     );

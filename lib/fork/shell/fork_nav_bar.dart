@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/live/live_controller.dart';
 import '../../features/live/live_providers.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -85,11 +86,11 @@ class ForkNavBar extends StatelessWidget {
                   tab(ForkTab.home, AppIcons.home, l10n.forkNavHome),
                   tab(
                     ForkTab.notebook,
-                    AppIcons.menuBook,
+                    BirdyIcons.notebook,
                     l10n.forkNavNotebook,
                   ),
                   Expanded(child: _ListenSlot(onTap: onListen)),
-                  tab(ForkTab.map, AppIcons.mapSheet, l10n.forkMap),
+                  tab(ForkTab.map, BirdyIcons.map, l10n.forkMap),
                   tab(
                     ForkTab.profile,
                     AppIcons.personOutline,

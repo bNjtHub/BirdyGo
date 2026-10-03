@@ -8,7 +8,7 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -317,10 +317,9 @@ class _BigPlayButton extends StatelessWidget {
                 onTap: onPressed,
                 child: SizedBox.square(
                   dimension: size,
-                  child: Icon(
-                    playing ? AppIcons.quizStop : AppIcons.playArrowRounded,
+                  child: BirdyIcon(
+                    playing ? BirdyIcons.stop : BirdyIcons.play,
                     size: playing ? size * 0.5 : size * 0.6,
-                    fill: 1,
                     color: BirdyBrand.ink,
                   ),
                 ),
@@ -549,7 +548,7 @@ class _EncouragePill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            AppIcons.graphicEqRounded,
+            BirdyIcons.song,
             size: BirdyGlyph.s,
             color: c.accentText,
           ),

@@ -9,6 +9,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/species_accents.dart';
@@ -180,7 +181,7 @@ class ListeningSummaryView extends StatelessWidget {
                     actions: [
                       if (onMap != null)
                         BirdyIconButton(
-                          icon: AppIcons.mapSheet,
+                          icon: BirdyIcons.map,
                           semanticLabel: l10n.forkSummaryOnMap,
                           onPressed: onMap,
                         ),
@@ -698,7 +699,7 @@ class _Actions extends StatelessWidget {
             enabled: onCheck != null,
             child: FilledButton.icon(
               style: BirdyButtonStyles.primary(context),
-              icon: const Icon(AppIcons.check),
+              icon: const Icon(BirdyIcons.tick),
               label: Text(l10n.forkSummaryToCheck(toCheck.length)),
               onPressed: onCheck,
             ),
@@ -717,7 +718,7 @@ class _Actions extends StatelessWidget {
           Pressable(
             child: OutlinedButton.icon(
               style: BirdyButtonStyles.secondary(context),
-              icon: const Icon(AppIcons.moreHoriz),
+              icon: const Icon(BirdyIcons.more),
               label: Text(l10n.forkSummaryMoreActions),
               onPressed: onMore,
             ),

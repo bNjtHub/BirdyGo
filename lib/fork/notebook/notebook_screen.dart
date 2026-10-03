@@ -36,6 +36,7 @@ import 'notebook_loader.dart';
 import 'notebook_model.dart';
 import 'notebook_seen_store.dart';
 import 'notebook_visuals.dart';
+import '../design/birdy_icons.dart';
 
 /// Widest column on tablets.
 const double _maxWidth = 600;
@@ -192,7 +193,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
         SliverFillRemaining(
           hasScrollBody: false,
           child: BirdyEmptyState(
-            icon: AppIcons.menuBook,
+            icon: BirdyIcons.notebook,
             title: l10n.forkNotebookEmptyTitle,
             body: l10n.forkNotebookEmpty,
           ),
@@ -766,7 +767,7 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
       return [
         SliverToBoxAdapter(
           child: BirdyEmptyState.inline(
-            icon: AppIcons.menuBook,
+            icon: BirdyIcons.notebook,
             title: l10n.forkNotebookEmptyFilteredTitle,
             body: l10n.forkNotebookEmptyFiltered,
             kind: BirdyEmptyKind.filtered,

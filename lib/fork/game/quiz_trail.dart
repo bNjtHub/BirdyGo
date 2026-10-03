@@ -10,7 +10,7 @@ import 'dart:math' as math;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import 'fine_ear_quiz_widgets.dart';
@@ -255,7 +255,7 @@ class QuizStone extends StatelessWidget {
               ),
             ),
             child: Icon(
-              AppIcons.quizClose,
+              BirdyIcons.close,
               size: BirdyGlyph.s * scale,
               color: c.text2,
             ),

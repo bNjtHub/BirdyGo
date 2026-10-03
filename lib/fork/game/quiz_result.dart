@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/utils/app_icons.dart';
 import '../audio_output/volume_guard.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_buttons.dart';
@@ -475,12 +476,9 @@ class _MissedRow extends StatelessWidget {
                       onTap: onPressed,
                       child: SizedBox.square(
                         dimension: BirdySizes.target,
-                        child: Icon(
-                          playing
-                              ? AppIcons.quizStop
-                              : AppIcons.playArrowRounded,
+                        child: BirdyIcon(
+                          playing ? BirdyIcons.stop : BirdyIcons.play,
                           size: BirdyGlyph.x5l,
-                          fill: 1,
                           color: c.accentText,
                         ),
                       ),
@@ -643,7 +641,7 @@ class _RecapBird extends StatelessWidget {
                   boxShadow: [BoxShadow(color: c.surface1, spreadRadius: 2)],
                 ),
                 child: Icon(
-                  right ? AppIcons.quizCheck : AppIcons.quizClose,
+                  right ? BirdyIcons.tick : BirdyIcons.close,
                   size: mark * (right ? 0.7 : 0.65),
                   weight: 600,
                   color: c.surface1,
