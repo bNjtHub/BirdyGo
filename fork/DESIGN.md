@@ -698,6 +698,7 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   statut suivant est un arc partiel dans le segment qui suit le rang (`StatusEmblem.progress`), plus
   d'anneau autour. Sur « Nouveau statut », les segments s'allument un par un
   (`BirdyMotion.statusGauge`, immobile en animations réduites).
+  La jauge n'apparaît que sur les grands disques (`BirdyGlyph.gaugeMinSize`, 72 px et plus : Accueil, Profil, « Nouveau statut ») ; en dessous, le disque occupe toute la boîte (rayon 47, glyphe à l'échelle 2,3) et `progress` est ignoré.
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.

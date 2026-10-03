@@ -665,6 +665,10 @@ abstract final class BirdyGlyph {
   static const double disc72 = 72;
   static const double disc96 = 96;
   static const double disc136 = 136;
+
+  /// Smallest game disc (status emblem, badge medal) that draws its segment
+  /// gauge; below, the disc fills the box alone (lists, next status).
+  static const double gaugeMinSize = disc72;
 }
 
 /// Spacing scale (SPEC.md 2.8).

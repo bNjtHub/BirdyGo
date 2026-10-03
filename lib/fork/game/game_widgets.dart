@@ -104,6 +104,13 @@ abstract final class _Disc {
   static const double faceRadius = 36.8;
   static const double faceCenterY = 49;
   static const double glyphBox = 44.4;
+
+  /// Gauge-less (small) disc: it fills the box and the glyph grows with it
+  /// (glyph scale 2.3 instead of 1.85).
+  static const double flatRimRadius = 47;
+  static const double flatFaceRadius = 45.4;
+  static const double flatFaceCenterY = 48.6;
+  static const double flatGlyphBox = glyphBox * 2.3 / 1.85;
   static const double faceTopAlpha = 0.84;
   static const double faceSolidStop = 0.6;
 
@@ -147,6 +154,7 @@ class GameDisc extends StatelessWidget {
     this.ring,
     this.partial,
     this.child,
+    this.showGauge,
   });
 
   final double size;
@@ -163,6 +171,15 @@ class GameDisc extends StatelessWidget {
   /// 0 to 1: share of the segment after the lit ones drawn in [gaugeOn].
   final double? partial;
   final Widget? child;
+
+  /// Draw the gauge. Null: only from [BirdyGlyph.gaugeMinSize] up. Without
+  /// it the disc fills the box and [partial] is ignored.
+  final bool? showGauge;
+
+  bool get gauged => showGauge ?? hasGaugeAt(size);
+
+  /// The one size rule: gauge from [BirdyGlyph.gaugeMinSize] up.
+  static bool hasGaugeAt(double size) => size >= BirdyGlyph.gaugeMinSize;
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
@@ -200,52 +217,55 @@ class _DiscPainter extends CustomPainter {
       ..translate(center.dx - radius, center.dy - radius)
       ..scale(radius * 2 / 100);
 
-    final gaugeRect = Rect.fromCircle(
-      center: const Offset(50, 50),
-      radius: _Disc.gaugeRadius,
-    );
-    final sweep = 2 * math.pi / disc.segments;
-    final segment =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _Disc.gaugeStroke
-          ..strokeCap = StrokeCap.round;
-    for (var k = 0; k < disc.segments; k++) {
-      segment.color =
-          k < disc.lit
-              ? disc.gaugeOn
-              : BirdyBrand.gaugeOff.withValues(alpha: BirdyAlpha.gaugeOff);
-      canvas.drawArc(
-        gaugeRect,
-        -math.pi / 2 + k * sweep + _Disc.gaugeGap / 2,
-        sweep - _Disc.gaugeGap,
-        false,
-        segment,
+    final gauged = disc.gauged;
+    if (gauged) {
+      final gaugeRect = Rect.fromCircle(
+        center: const Offset(50, 50),
+        radius: _Disc.gaugeRadius,
       );
-    }
-    final partial = disc.partial;
-    if (partial != null && partial > 0 && disc.lit < disc.segments) {
-      canvas.drawArc(
-        gaugeRect,
-        -math.pi / 2 + disc.lit * sweep + _Disc.gaugeGap / 2,
-        (sweep - _Disc.gaugeGap) * partial.clamp(0.0, 1.0),
-        false,
-        segment..color = disc.gaugeOn,
-      );
+      final sweep = 2 * math.pi / disc.segments;
+      final segment =
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = _Disc.gaugeStroke
+            ..strokeCap = StrokeCap.round;
+      for (var k = 0; k < disc.segments; k++) {
+        segment.color =
+            k < disc.lit
+                ? disc.gaugeOn
+                : BirdyBrand.gaugeOff.withValues(alpha: BirdyAlpha.gaugeOff);
+        canvas.drawArc(
+          gaugeRect,
+          -math.pi / 2 + k * sweep + _Disc.gaugeGap / 2,
+          sweep - _Disc.gaugeGap,
+          false,
+          segment,
+        );
+      }
+      final partial = disc.partial;
+      if (partial != null && partial > 0 && disc.lit < disc.segments) {
+        canvas.drawArc(
+          gaugeRect,
+          -math.pi / 2 + disc.lit * sweep + _Disc.gaugeGap / 2,
+          (sweep - _Disc.gaugeGap) * partial.clamp(0.0, 1.0),
+          false,
+          segment..color = disc.gaugeOn,
+        );
+      }
     }
 
     canvas.drawCircle(
       const Offset(50, 50),
-      _Disc.rimRadius,
+      gauged ? _Disc.rimRadius : _Disc.flatRimRadius,
       Paint()..color = disc.deep,
     );
     final face = Rect.fromCircle(
-      center: const Offset(50, _Disc.faceCenterY),
-      radius: _Disc.faceRadius,
+      center: Offset(50, gauged ? _Disc.faceCenterY : _Disc.flatFaceCenterY),
+      radius: gauged ? _Disc.faceRadius : _Disc.flatFaceRadius,
     );
     canvas.drawCircle(
       face.center,
-      _Disc.faceRadius,
+      face.width / 2,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
@@ -265,8 +285,8 @@ class _DiscPainter extends CustomPainter {
         canvas,
         Rect.fromCenter(
           center: const Offset(50, 50),
-          width: _Disc.glyphBox,
-          height: _Disc.glyphBox,
+          width: gauged ? _Disc.glyphBox : _Disc.flatGlyphBox,
+          height: gauged ? _Disc.glyphBox : _Disc.flatGlyphBox,
         ),
         glyph,
         disc.glyphColor,
@@ -287,7 +307,8 @@ class _DiscPainter extends CustomPainter {
       old.disc.glyphColor != disc.glyphColor ||
       old.disc.tones != disc.tones ||
       old.disc.ring != disc.ring ||
-      old.disc.partial != disc.partial;
+      old.disc.partial != disc.partial ||
+      old.disc.gauged != disc.gauged;
 }
 
 /// Status disc with its glyph and its gauge of one segment per status, lit
@@ -386,7 +407,8 @@ class BadgeMedal extends StatelessWidget {
     final locked = _locked(c.isDark);
     final metal = tier == 0 ? null : GameConfig.badgeMedals[tier - 1];
     final ink = metal?.ink ?? c.text2;
-    final glyphSize = size / 2;
+    // Without the gauge the disc fills the box: the face grows with it.
+    final glyphSize = size / 2 * (GameDisc.hasGaugeAt(size) ? 1 : 2.3 / 1.85);
     final face =
         child != null
             ? child!(ink)
