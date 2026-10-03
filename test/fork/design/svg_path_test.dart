@@ -30,7 +30,11 @@ void main() {
       GameConfig.migrantGlyph,
     ];
     for (final glyph in glyphs) {
-      for (final d in [...glyph.paths, ...glyph.filled]) {
+      for (final layer in glyph.layers.where((l) => l.circle == null)) {
+        final d = layer.d;
+        // Layers with their own scale (the migrant V, sparkles) sit on their
+        // own origin, not on the grid.
+        if (layer.scale != 1) continue;
         final bounds = parseSvgPath(d).getBounds();
         expect(
           bounds.isEmpty && bounds.width == 0 && bounds.height == 0,
@@ -38,8 +42,9 @@ void main() {
           reason: d,
         );
         expect(
-          const Rect.fromLTRB(0, 0, 24, 24).expandToInclude(bounds),
-          const Rect.fromLTRB(0, 0, 24, 24),
+          // One unit of margin: the owl's ear waves reach past the grid.
+          const Rect.fromLTRB(-1, -1, 25, 25).expandToInclude(bounds),
+          const Rect.fromLTRB(-1, -1, 25, 25),
           reason: d,
         );
       }

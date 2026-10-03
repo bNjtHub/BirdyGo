@@ -17,35 +17,267 @@ import 'game_config.dart';
 final Map<String, Path> _paths = {};
 Path _path(String d) => _paths.putIfAbsent(d, () => parseSvgPath(d));
 
-/// Paints a 24-grid [Glyph] in [rect].
-void paintGlyph(Canvas canvas, Rect rect, Glyph glyph, Color color) {
-  final scale = rect.width / 24;
+final Map<GlyphLayer, Path> _layerPaths = {};
+Path _layerPath(GlyphLayer layer) => _layerPaths.putIfAbsent(layer, () {
+  final dot = layer.circle;
+  final path =
+      dot == null
+          ? _path(layer.d)
+          : (Path()..addOval(
+            Rect.fromCircle(center: Offset(dot.$1, dot.$2), radius: dot.$3),
+          ));
+  final cut = layer.cut;
+  return cut == null
+      ? path
+      : Path.combine(PathOperation.difference, path, _path(cut));
+});
+
+/// Paints a 24-grid [Glyph] in [rect]. With [tones] each layer takes its
+/// tone (and its true-life color when [GlyphTones.real]); without, the whole
+/// glyph is one flat [color], a silhouette.
+void paintGlyph(
+  Canvas canvas,
+  Rect rect,
+  Glyph glyph,
+  Color color, {
+  GlyphTones? tones,
+}) {
+  final real = tones?.real ?? false;
   canvas
     ..save()
     ..translate(rect.left, rect.top)
-    ..scale(scale);
-  final stroke =
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-  for (final d in glyph.paths) {
-    canvas.drawPath(_path(d), stroke);
-  }
-  for (final (x, y, r) in glyph.circles) {
-    canvas.drawCircle(Offset(x, y), r, stroke);
-  }
-  final fill = Paint()..color = color;
-  for (final d in glyph.filled) {
-    canvas.drawPath(_path(d), fill);
+    ..scale(rect.width / 24);
+  for (final layer in glyph.layers) {
+    if (layer.realOnly && !real) continue;
+    final base =
+        tones == null
+            ? color
+            : (real ? layer.real : null) ?? tones.of(layer.tone);
+    final opacity = real ? (layer.realOpacity ?? layer.opacity) : layer.opacity;
+    final paint =
+        Paint()
+          ..color = base.withValues(alpha: base.a * opacity)
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+    canvas
+      ..save()
+      ..translate(layer.dx, layer.dy)
+      ..scale(layer.scale);
+    if (layer.rotate != 0) {
+      canvas
+        ..translate(12, 12)
+        ..rotate(layer.rotate * math.pi / 180)
+        ..translate(-12, -12);
+    }
+    final path = _layerPath(layer);
+    if (layer.line) {
+      canvas.drawPath(
+        path,
+        paint
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = layer.width,
+      );
+    } else {
+      canvas.drawPath(path, paint..style = PaintingStyle.fill);
+      if (layer.outline > 0) {
+        canvas.drawPath(
+          path,
+          paint
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = layer.outline,
+        );
+      }
+    }
+    canvas.restore();
   }
   canvas.restore();
 }
 
-/// Status disc with its glyph. [reached] false: the muted look of a status
-/// to come.
+/// Geometry of the game disc on a 100 box (J6k, « Mélange 2 »): a gauge of
+/// round segments around a coloured disc with a deep rim and a faint
+/// vertical gradient, the glyph on top.
+abstract final class _Disc {
+  static const double gaugeRadius = 45.5;
+  static const double gaugeStroke = 4.6;
+  static const double gaugeGap = 0.2;
+  static const double rimRadius = 38;
+  static const double faceRadius = 36.8;
+  static const double faceCenterY = 49;
+  static const double glyphBox = 44.4;
+  static const double faceTopAlpha = 0.84;
+  static const double faceSolidStop = 0.6;
+
+  /// Width of the « current » ring and its gap to the disc, in px.
+  static const double ringStroke = 3;
+  static const double ringInset = 7;
+}
+
+/// Disc colors of a locked (not reached) status or badge level.
+({Color disc, Color deep, Color glyph, Color ink}) _locked(bool dark) =>
+    dark
+        ? (
+          disc: BirdyBrand.lockedDiscDark,
+          deep: BirdyBrand.lockedDeepDark,
+          glyph: BirdyBrand.lockedGlyphDark,
+          ink: BirdyBrand.lockedInkDark,
+        )
+        : (
+          disc: BirdyBrand.lockedDisc,
+          deep: BirdyBrand.lockedDeep,
+          glyph: BirdyBrand.lockedGlyph,
+          ink: BirdyBrand.lockedInk,
+        );
+
+/// The one disc of the game: status emblems and badge medals share it.
+/// [segments] gauge segments around, the first [lit] in [gaugeOn]; a
+/// [glyph] (with [tones], or flat in [glyphColor]) or a [child] in the
+/// middle; [ring] draws the « current » ring outside.
+class GameDisc extends StatelessWidget {
+  const GameDisc({
+    super.key,
+    required this.size,
+    required this.color,
+    required this.deep,
+    required this.segments,
+    required this.lit,
+    required this.gaugeOn,
+    this.glyph,
+    this.glyphColor = BirdyBrand.white,
+    this.tones,
+    this.ring,
+    this.child,
+  });
+
+  final double size;
+  final Color color;
+  final Color deep;
+  final int segments;
+  final int lit;
+  final Color gaugeOn;
+  final Glyph? glyph;
+  final Color glyphColor;
+  final GlyphTones? tones;
+  final Color? ring;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: CustomPaint(
+      painter: _DiscPainter(this),
+      child: child == null ? null : Center(child: child),
+    ),
+  );
+}
+
+class _DiscPainter extends CustomPainter {
+  const _DiscPainter(this.disc);
+
+  final GameDisc disc;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var radius = size.width / 2;
+    final center = size.center(Offset.zero);
+    final ring = disc.ring;
+    if (ring != null) {
+      canvas.drawCircle(
+        center,
+        radius - _Disc.ringStroke / 2,
+        Paint()
+          ..color = ring
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _Disc.ringStroke,
+      );
+      radius -= _Disc.ringInset;
+    }
+    canvas
+      ..save()
+      ..translate(center.dx - radius, center.dy - radius)
+      ..scale(radius * 2 / 100);
+
+    final gaugeRect = Rect.fromCircle(
+      center: const Offset(50, 50),
+      radius: _Disc.gaugeRadius,
+    );
+    final sweep = 2 * math.pi / disc.segments;
+    final segment =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _Disc.gaugeStroke
+          ..strokeCap = StrokeCap.round;
+    for (var k = 0; k < disc.segments; k++) {
+      segment.color =
+          k < disc.lit
+              ? disc.gaugeOn
+              : BirdyBrand.gaugeOff.withValues(alpha: BirdyAlpha.gaugeOff);
+      canvas.drawArc(
+        gaugeRect,
+        -math.pi / 2 + k * sweep + _Disc.gaugeGap / 2,
+        sweep - _Disc.gaugeGap,
+        false,
+        segment,
+      );
+    }
+
+    canvas.drawCircle(
+      const Offset(50, 50),
+      _Disc.rimRadius,
+      Paint()..color = disc.deep,
+    );
+    final face = Rect.fromCircle(
+      center: const Offset(50, _Disc.faceCenterY),
+      radius: _Disc.faceRadius,
+    );
+    canvas.drawCircle(
+      face.center,
+      _Disc.faceRadius,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            disc.color.withValues(alpha: _Disc.faceTopAlpha),
+            disc.color,
+            disc.color,
+          ],
+          stops: const [0, _Disc.faceSolidStop, 1],
+        ).createShader(face),
+    );
+
+    final glyph = disc.glyph;
+    if (glyph != null) {
+      paintGlyph(
+        canvas,
+        Rect.fromCenter(
+          center: const Offset(50, 50),
+          width: _Disc.glyphBox,
+          height: _Disc.glyphBox,
+        ),
+        glyph,
+        disc.glyphColor,
+        tones: disc.tones,
+      );
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_DiscPainter old) =>
+      old.disc.color != disc.color ||
+      old.disc.deep != disc.deep ||
+      old.disc.segments != disc.segments ||
+      old.disc.lit != disc.lit ||
+      old.disc.gaugeOn != disc.gaugeOn ||
+      old.disc.glyph != disc.glyph ||
+      old.disc.glyphColor != disc.glyphColor ||
+      old.disc.tones != disc.tones ||
+      old.disc.ring != disc.ring;
+}
+
+/// Status disc with its glyph and its gauge of one segment per status, lit
+/// up to the status' rank. [reached] false: the grey look of a status to
+/// come, gauge unlit.
 class StatusEmblem extends StatelessWidget {
   const StatusEmblem({
     super.key,
@@ -53,7 +285,7 @@ class StatusEmblem extends StatelessWidget {
     this.size = 36,
     this.reached = true,
     this.current = false,
-    this.innerRing = false,
+    this.gaugeReveal = 1,
   });
 
   final StatusDef status;
@@ -63,95 +295,38 @@ class StatusEmblem extends StatelessWidget {
   /// 3 px ink ring with a 4 px gap (the ladder's current status).
   final bool current;
 
-  /// Thin white ring near the edge, at half opacity (J6f, reached levels on
-  /// the ladder and the level ring): the mockup's premium-medal touch.
-  final bool innerRing;
+  /// 0 to 1: share of the lit segments shown, to make them appear one by
+  /// one (the « Nouveau statut » screen).
+  final double gaugeReveal;
 
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
-    return CustomPaint(
-      size: Size.square(size),
-      painter: _EmblemPainter(
-        status: status,
-        fill:
-            reached
-                ? status.color
-                : (c.isDark
-                    ? BirdyBrand.mist.withValues(alpha: 0.10)
-                    : BirdyBrand.mistTrack),
-        ink:
-            reached
-                ? BirdyBrand.ink
-                : (c.isDark ? BirdyBrand.mist : BirdyBrand.ink).withValues(
-                  alpha: 0.4,
-                ),
-        ring: current ? c.text1 : null,
-        innerRing: reached && innerRing,
-      ),
+    final locked = _locked(c.isDark);
+    return GameDisc(
+      size: size,
+      color: reached ? status.color : locked.disc,
+      deep: reached ? status.deep : locked.deep,
+      segments: GameConfig.statuses.length,
+      lit: reached ? (status.rank * gaugeReveal).ceil() : 0,
+      gaugeOn: status.gauge,
+      glyph: status.glyph,
+      tones:
+          reached
+              ? GlyphTones(
+                main: status.glyphMain,
+                accent: status.glyphAccent,
+                deep: status.glyphInk,
+                real: true,
+              )
+              : GlyphTones(
+                main: locked.glyph,
+                accent: locked.glyph,
+                deep: locked.ink,
+              ),
+      ring: current ? c.text1 : null,
     );
   }
-}
-
-class _EmblemPainter extends CustomPainter {
-  const _EmblemPainter({
-    required this.status,
-    required this.fill,
-    required this.ink,
-    this.ring,
-    this.innerRing = false,
-  });
-
-  final StatusDef status;
-  final Color fill;
-  final Color ink;
-  final Color? ring;
-  final bool innerRing;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    var radius = size.width / 2;
-    if (ring != null) {
-      canvas.drawCircle(
-        center,
-        radius - 1.5,
-        Paint()
-          ..color = ring!
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3,
-      );
-      radius -= 7;
-    }
-    canvas.drawCircle(center, radius, Paint()..color = fill);
-    if (innerRing) {
-      canvas.drawCircle(
-        center,
-        radius * 0.86,
-        Paint()
-          ..color = BirdyBrand.white.withValues(
-            alpha: BirdyAlpha.emblemInnerRing,
-          )
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * 0.05,
-      );
-    }
-    final glyph = radius * 2 * 14 / 24;
-    paintGlyph(
-      canvas,
-      Rect.fromCenter(center: center, width: glyph, height: glyph),
-      status.glyph,
-      ink,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_EmblemPainter old) =>
-      old.status != status ||
-      old.fill != fill ||
-      old.ink != ink ||
-      old.ring != ring ||
-      old.innerRing != innerRing;
 }
 
 /// Progress ring around the current status (SPEC.md 5.7): track, arc of
@@ -195,7 +370,6 @@ class StatusRing extends StatelessWidget {
               status: shown,
               size: size * 58 / 84,
               reached: status != null,
-              innerRing: true,
             ),
           ],
         ),
@@ -244,9 +418,9 @@ class _RingPainter extends CustomPainter {
       old.progress != progress || old.track != track || old.color != color;
 }
 
-/// Badge medal: bronze, silver or gold once earned (a metal gradient, a rim
-/// and an engraved inner ring), a flat disc in the theme neutrals while
-/// locked. Carries an icon or a [glyph].
+/// Badge medal: the same disc as a status emblem, flat in bronze, silver or
+/// gold once earned with a gauge of three segments (1, 2, 3 plumes), grey
+/// while locked. Carries an icon or a [glyph].
 class BadgeMedal extends StatelessWidget {
   const BadgeMedal({
     super.key,
@@ -270,9 +444,9 @@ class BadgeMedal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
+    final locked = _locked(c.isDark);
     final metal = tier == 0 ? null : GameConfig.badgeMedals[tier - 1];
     final ink = metal?.ink ?? c.text2;
-    final rim = math.max(1.5, size / 26);
     final glyphSize = size / 2;
     final face =
         child != null
@@ -283,53 +457,14 @@ class BadgeMedal extends StatelessWidget {
               painter: _GlyphPainter(glyph!, ink),
             )
             : Icon(icon, size: glyphSize, color: ink);
-
-    if (metal == null) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: c.lineOpaque,
-          shape: BoxShape.circle,
-          border: Border.all(color: c.border, width: rim),
-        ),
-        alignment: Alignment.center,
-        child: face,
-      );
-    }
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: metal.rim, width: rim),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [metal.highlight, metal.base, metal.shadow],
-          stops: const [0, .55, 1],
-        ),
-      ),
-      padding: EdgeInsets.all(size * .1),
-      // Engraved ring: light on the lower right, shade on the upper left,
-      // as if struck into the metal.
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [metal.base, metal.highlight.withValues(alpha: .9)],
-          ),
-          border: Border.all(
-            color: metal.shadow.withValues(alpha: .55),
-            width: BirdyStroke.hairline,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: face,
-      ),
+    return GameDisc(
+      size: size,
+      color: metal?.base ?? locked.disc,
+      deep: metal?.deep ?? locked.deep,
+      segments: GameConfig.badgeMedals.length,
+      lit: tier,
+      gaugeOn: metal?.deep ?? locked.deep,
+      child: face,
     );
   }
 }

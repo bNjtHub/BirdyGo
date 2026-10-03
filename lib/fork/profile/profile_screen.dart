@@ -575,7 +575,6 @@ class _LadderCell extends StatelessWidget {
                           size: BirdySizes.levelEmblem,
                           reached: reached,
                           current: isCurrent,
-                          innerRing: reached,
                         ),
                         if (isCurrent)
                           Positioned(
@@ -706,7 +705,6 @@ class _LevelInfoBox extends StatelessWidget {
               status: status,
               size: BirdySizes.levelInfoIcon,
               reached: reached,
-              innerRing: reached,
             ),
             const SizedBox(width: BirdySpace.m),
             Expanded(
