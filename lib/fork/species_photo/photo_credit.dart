@@ -68,7 +68,18 @@ class PhotoCredit {
   /// The bundle script writes `iNaturalist <photo id>` for the photos it
   /// replaced (J6b) and upstream `Macaulay Library ML<asset>`: both link to
   /// the photo's page.
-  factory PhotoCredit.fromSpecies(TaxonomySpecies species) {
+  ///
+  /// With [bundledIds] (ids of the photos really in the app, see
+  /// `bundledImageIdsProvider`), a species without a bundled photo has no
+  /// credit: the app shows its default image, which nobody owns. Without
+  /// [bundledIds] the credit is read as is.
+  factory PhotoCredit.fromSpecies(
+    TaxonomySpecies species, {
+    Set<String>? bundledIds,
+  }) {
+    if (bundledIds != null && !bundledIds.contains(species.birdnetId)) {
+      return const PhotoCredit();
+    }
     final source = _clean(species.imageSource);
     final inat = source == null ? null : _inatSource.firstMatch(source);
     final macaulay = source == null ? null : _macaulaySource.firstMatch(source);

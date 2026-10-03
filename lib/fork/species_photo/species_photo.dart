@@ -40,7 +40,10 @@ class SpeciesPhoto extends ConsumerWidget {
         online?.credit ??
         (species == null
             ? const PhotoCredit()
-            : PhotoCredit.fromSpecies(species));
+            : PhotoCredit.fromSpecies(
+              species,
+              bundledIds: ref.watch(bundledImageIdsProvider).value ?? const {},
+            ));
     void showCredit() => showPhotoCreditSheet(context, credit);
 
     return LayoutBuilder(

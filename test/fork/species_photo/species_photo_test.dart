@@ -58,6 +58,7 @@ Future<void> _pumpPhoto(
   WidgetTester tester, {
   required bool allowed,
   required InatPhotoService service,
+  bool bundled = true,
 }) async {
   SharedPreferences.setMockInitialValues({kOnlinePhotosPref: allowed});
   final prefs = await SharedPreferences.getInstance();
@@ -66,6 +67,9 @@ Future<void> _pumpPhoto(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         inatPhotoServiceProvider.overrideWithValue(service),
+        bundledImageIdsProvider.overrideWith(
+          (ref) async => bundled ? {'BN00001'} : <String>{},
+        ),
       ],
       child: const MaterialApp(
         locale: Locale('fr'),
@@ -105,6 +109,7 @@ void main() {
   ) async {
     final service = _FakePhotoService(null);
     await _pumpPhoto(tester, allowed: false, service: service);
+    await tester.pumpAndSettle();
     expect(service.calls, isEmpty);
 
     await tester.tap(find.byType(SpeciesPhoto));
@@ -114,6 +119,21 @@ void main() {
     expect(find.text('Licence : Tous droits réservés'), findsOneWidget);
     expect(find.text('Source : Macaulay Library ML44599871'), findsOneWidget);
     expect(find.text('Voir la photo en ligne'), findsOneWidget);
+  });
+
+  testWidgets('no bundled photo: the default image has no credit', (
+    tester,
+  ) async {
+    final service = _FakePhotoService(null);
+    await _pumpPhoto(tester, allowed: false, service: service, bundled: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(SpeciesPhoto));
+    await tester.pumpAndSettle();
+    expect(find.text('Crédit photo'), findsOneWidget);
+    expect(find.text('Photo : Ryan Schain'), findsNothing);
+    expect(find.textContaining('Macaulay'), findsNothing);
+    expect(find.textContaining('Tous droits réservés'), findsNothing);
   });
 
   testWidgets('turning the switch on in the credit sheet asks for the photo', (

@@ -2,10 +2,11 @@ import 'package:birdnet_live/fork/species_photo/photo_credit.dart';
 import 'package:birdnet_live/shared/models/taxonomy_species.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-TaxonomySpecies _species({String? author, String? license, String? source}) =>
+TaxonomySpecies _species({String? author, String? license, String? source, String? id}) =>
     TaxonomySpecies(
       scientificName: 'Erithacus rubecula',
       commonName: 'European Robin',
+      birdnetId: id,
       imageAuthor: author,
       imageLicense: license,
       imageSource: source,
@@ -83,6 +84,24 @@ void main() {
       expect(credit.pageUrl, isNull);
       expect(credit.isEmpty, isFalse);
       expect(PhotoCredit.fromSpecies(_species()).isEmpty, isTrue);
+    });
+
+    test('without a bundled photo there is no credit', () {
+      final robin = _species(
+        id: 'BN00001',
+        author: 'Ryan Schain',
+        license: '© Macaulay Library',
+        source: 'Macaulay Library ML44599871',
+      );
+      expect(PhotoCredit.fromSpecies(robin, bundledIds: {}).isEmpty, isTrue);
+      expect(
+        PhotoCredit.fromSpecies(robin, bundledIds: {'BN00002'}).isEmpty,
+        isTrue,
+      );
+      expect(
+        PhotoCredit.fromSpecies(robin, bundledIds: {'BN00001'}).author,
+        'Ryan Schain',
+      );
     });
   });
 
