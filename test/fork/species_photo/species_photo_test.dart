@@ -148,9 +148,13 @@ void main() {
     await _pumpPhoto(tester, allowed: false, service: service, bundled: false);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(SpeciesPhoto));
+    await tester.tap(find.byTooltip('Crédit photo'));
     await tester.pumpAndSettle();
     expect(find.text('Crédit photo'), findsOneWidget);
+    expect(
+      find.text("On ne connaît pas l'auteur de cette photo."),
+      findsOneWidget,
+    );
     expect(find.text('Photo : Ryan Schain'), findsNothing);
     expect(find.textContaining('Macaulay'), findsNothing);
     expect(find.textContaining('Tous droits réservés'), findsNothing);
@@ -172,13 +176,12 @@ void main() {
   testWidgets('the online photo fades in without moving, with its credit', (
     tester,
   ) async {
-    final file =
-        (await tester.runAsync(() async {
-          final dir = await Directory.systemTemp.createTemp('species_photo_');
-          final file = File('${dir.path}/13094_1.photo');
-          await file.writeAsBytes(base64Decode(_png));
-          return file;
-        }))!;
+    final file = (await tester.runAsync(() async {
+      final dir = await Directory.systemTemp.createTemp('species_photo_');
+      final file = File('${dir.path}/13094_1.photo');
+      await file.writeAsBytes(base64Decode(_png));
+      return file;
+    }))!;
     addTearDown(() => file.parent.deleteSync(recursive: true));
     final service = _FakePhotoService(OnlinePhoto(file, _onlineCredit));
 

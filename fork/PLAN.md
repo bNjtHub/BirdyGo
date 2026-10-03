@@ -967,6 +967,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [x] Avant de publier (fait le 02/10, `chore/release-interne` : `has_open_license` refuse « nd », repli observations iNaturalist puis Wikimedia Commons, 569 photos libres) : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
+      Ensuite (PR #155) : `--verify-photos` (échoue si une photo non autorisée revient) ; le crédit d'une photo ne s'affiche que si la photo est dans le pack (`PhotoCredit.fromSpecies(bundledIds:)`) ; les photos en ligne passent déjà par `kOpenPhotoLicenses` (sans nd), aucune URL Macaulay n'est chargée.
 - [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.

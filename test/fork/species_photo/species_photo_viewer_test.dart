@@ -50,27 +50,24 @@ Future<void> _open(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        builder:
-            (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
-              child: child!,
-            ),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
+          child: child!,
+        ),
         home: Builder(
-          builder:
-              (context) => Scaffold(
-                body: Center(
-                  child: TextButton(
-                    onPressed:
-                        () => showSpeciesPhotoViewer(
-                          context,
-                          photos: photos ?? _photos,
-                          initialPage: page,
-                          heroTag: 'hero',
-                        ),
-                    child: const Text('open'),
-                  ),
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => showSpeciesPhotoViewer(
+                  context,
+                  photos: photos ?? _photos,
+                  initialPage: page,
+                  heroTag: 'hero',
                 ),
+                child: const Text('open'),
               ),
+            ),
+          ),
         ),
       ),
     ),
@@ -81,10 +78,9 @@ Future<void> _open(
 
 Finder get _viewer => find.byType(SpeciesPhotoViewer);
 
-TransformationController _tc(WidgetTester tester) =>
-    tester
-        .widget<InteractiveViewer>(find.byType(InteractiveViewer).first)
-        .transformationController!;
+TransformationController _tc(WidgetTester tester) => tester
+    .widget<InteractiveViewer>(find.byType(InteractiveViewer).first)
+    .transformationController!;
 
 Future<void> _doubleTap(WidgetTester tester, Offset at) async {
   await tester.tapAt(at);

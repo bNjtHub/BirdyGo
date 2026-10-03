@@ -115,10 +115,9 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
         : ref.watch(
             speciesGalleryProvider((
               inatId: inatId,
-              bundledPage: PhotoCredit.fromSpecies(
-                species!,
-                bundledIds: bundledIds,
-              ).pageUrl,
+              // Not tied to bundledIds: the provider key must not change when
+              // the asset list finishes loading (that would refetch).
+              bundledPage: PhotoCredit.fromSpecies(species!).pageUrl,
             )),
           );
     final gallery = galleryAsync?.value?.photos ?? const <GalleryPhoto>[];

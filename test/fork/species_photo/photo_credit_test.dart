@@ -2,15 +2,19 @@ import 'package:birdnet_live/fork/species_photo/photo_credit.dart';
 import 'package:birdnet_live/shared/models/taxonomy_species.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-TaxonomySpecies _species({String? author, String? license, String? source, String? id}) =>
-    TaxonomySpecies(
-      scientificName: 'Erithacus rubecula',
-      commonName: 'European Robin',
-      birdnetId: id,
-      imageAuthor: author,
-      imageLicense: license,
-      imageSource: source,
-    );
+TaxonomySpecies _species({
+  String? author,
+  String? license,
+  String? source,
+  String? id,
+}) => TaxonomySpecies(
+  scientificName: 'Erithacus rubecula',
+  commonName: 'European Robin',
+  birdnetId: id,
+  imageAuthor: author,
+  imageLicense: license,
+  imageSource: source,
+);
 
 void main() {
   group('PhotoLicense.parse', () {
