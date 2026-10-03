@@ -1063,6 +1063,14 @@ abstract final class BirdyAlpha {
 
   /// Scrim behind the photo credit button on a species photo.
   static const double photoButtonScrim = 0.45;
+
+  /// Top of the header photo, behind the status bar and the buttons (J7):
+  /// black at this opacity fading to nothing. Same in light and dark.
+  static const double photoTopScrim = 0.45;
+
+  /// Credit line of the full-screen photo: bottom scrim, and the dimmed
+  /// page dots.
+  static const double photoViewerScrim = 0.6;
 }
 
 /// Contact map markers (J6g-f). The map tiles stay light in both themes, so

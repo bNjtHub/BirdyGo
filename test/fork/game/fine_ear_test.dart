@@ -14,6 +14,8 @@ import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart';
 import 'package:birdnet_live/fork/game/quiz_fx.dart';
 import 'package:birdnet_live/fork/game/quiz_sfx.dart';
+import 'package:birdnet_live/fork/sound/birdy_sfx.dart';
+import '../helpers/fake_birdy_sfx.dart';
 import 'package:birdnet_live/fork/game/quiz_stop_sheet.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/fork/species_page/species_clip_player.dart';
@@ -70,15 +72,6 @@ class _FakePlayer implements SpeciesClipPlayer {
   Future<void> stop() async => _playing.value = null;
 }
 
-class _FakeSfx implements QuizSfxPlayer {
-  final played = <QuizSound>[];
-
-  @override
-  Future<void> play(QuizSound sound) async => played.add(sound);
-
-  @override
-  Future<void> dispose() async {}
-}
 
 /// Pumps frames for [seconds]: the quiz has looping animations, so
 /// pumpAndSettle would never return.
@@ -194,7 +187,7 @@ void main() {
   group('quiz screen', () {
     late SharedPreferences prefs;
     late _FakePlayer player;
-    late _FakeSfx sfx;
+    late FakeBirdySfx sfx;
 
     /// French names for species 0 to 5; others keep the index's name.
     TaxonomyService taxonomy() =>
@@ -222,7 +215,7 @@ void main() {
       });
       prefs = await SharedPreferences.getInstance();
       player = _FakePlayer();
-      sfx = _FakeSfx();
+      sfx = FakeBirdySfx();
       tester.view.physicalSize = size * 2;
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
@@ -232,7 +225,7 @@ void main() {
             sharedPreferencesProvider.overrideWithValue(prefs),
             fineEarStoreProvider.overrideWithValue(FineEarStore(prefs)),
             speciesClipPlayerProvider.overrideWithValue(player),
-            quizSfxPlayerProvider.overrideWithValue(sfx),
+            birdySfxProvider.overrideWithValue(sfx),
             taxonomyServiceProvider.overrideWith((ref) async => taxonomy()),
             effectiveSpeciesLocaleProvider.overrideWith((ref) => 'fr'),
           ],
@@ -452,7 +445,7 @@ void main() {
       final wrong = _species(4).keys.firstWhere((s) => s != answer);
       expect(player.played, hasLength(1));
       await tapChoice(tester, french(wrong)); // settles 3 s
-      expect(sfx.played, [QuizSound.soft]);
+      expect(sfx.played, [QuizSound.soft.asset]);
       expect(player.played, hasLength(2));
       expect(playing(), answer);
       expect(player.playing.value, player.played.last);
@@ -474,7 +467,7 @@ void main() {
       );
       await tester.tap(choice);
       await tester.pump(const Duration(milliseconds: 100));
-      expect(sfx.played, [QuizSound.soft]);
+      expect(sfx.played, [QuizSound.soft.asset]);
       expect(player.played, hasLength(1)); // not yet
       await settle(tester, seconds: 1);
       expect(player.played, hasLength(2));
@@ -1016,7 +1009,7 @@ void main() {
       expect(confetti.numberOfParticles, 110);
       final at = tester.getTopLeft(find.byType(ConfettiWidget));
       expect((at - center).distance, lessThan(1));
-      expect(sfx.played, [QuizSound.success]);
+      expect(sfx.played, [QuizSound.success.asset]);
       await settle(tester);
       expect(find.text('+1 Oreille fine'), findsOneWidget);
       expect(
@@ -1038,7 +1031,7 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.byType(ConfettiWidget), findsNothing);
-      expect(sfx.played, [QuizSound.soft]);
+      expect(sfx.played, [QuizSound.soft.asset]);
       await settle(tester);
       expect(find.byType(QuizRays), findsNothing);
       final picked = tester.widget<QuizChoiceCard>(
@@ -1063,7 +1056,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ConfettiWidget), findsNothing);
       expect(find.text('Bravo !'), findsOneWidget);
-      expect(sfx.played, [QuizSound.success]);
+      expect(sfx.played, [QuizSound.success.asset]);
     });
 
     testWidgets('the result: stars, a 5 × 2 grid, buttons, rain, fanfare', (
@@ -1094,7 +1087,7 @@ void main() {
       }
       expect(find.byKey(const ValueKey('quiz-recap-row-2')), findsNothing);
       expect(find.byType(ConfettiWidget), findsNWidgets(3));
-      expect(sfx.played.last, QuizSound.fanfare);
+      expect(sfx.played.last, QuizSound.fanfare.asset);
       expect(find.widgetWithText(OutlinedButton, 'Terminer'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Rejouer'), findsOneWidget);
       // The glow is the card's own decoration.
@@ -1122,7 +1115,7 @@ void main() {
       expect(star.color, BirdyColors.light.lineOpaque);
       expect(star.rim, BirdyColors.light.border);
       expect(find.byType(ConfettiWidget), findsNothing);
-      expect(sfx.played, isNot(contains(QuizSound.fanfare)));
+      expect(sfx.played, isNot(contains(QuizSound.fanfare.asset)));
     });
 
     for (final size in const [Size(390, 844), Size(360, 640), Size(320, 640)]) {

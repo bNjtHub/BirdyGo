@@ -468,7 +468,18 @@ class _SpeciesPageState extends ConsumerState<SpeciesPage> {
       if (showMeet)
         MeetSpeciesBlock(sheet: sheet)
       else if ((sheet == null || sheet.sections.isEmpty) && _description != null)
-        DescriptionBlock(text: _description!, source: detail?.descriptionSource),
+        DescriptionBlock(
+          text: _description!,
+          source: detail?.descriptionSource,
+          wikipediaUrl:
+              detail == null
+                  ? null
+                  : pickWikipediaUrl(
+                    scientificName: widget.scientificName,
+                    bundledUrls: detail.wikipediaUrls,
+                    locale: ref.read(effectiveSpeciesLocaleProvider),
+                  ),
+        ),
       // 4. Quand le voir: the year and the migration text.
       if (_year != null)
         HereNowCard(

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'dart:io' show Platform;
+
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
 import 'package:birdnet_live/features/inference/geo_abundance.dart';
@@ -10,6 +12,10 @@ import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/design/birdygo_silhouette.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_block.dart'
     show BirdyProgressRing;
+import 'package:birdnet_live/fork/design/widgets/birdy_pill.dart'
+    show NoveltyPill;
+import 'package:birdnet_live/fork/design/widgets/species_avatar.dart';
+import 'package:birdnet_live/fork/design/widgets/species_card.dart';
 import 'package:birdnet_live/fork/game/game_widgets.dart' show SegmentedBar;
 import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:birdnet_live/fork/design/widgets/birdy_filter_chip.dart';
@@ -29,6 +35,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/fonts.dart';
 
 class _FakeLoader implements NotebookLoader {
   _FakeLoader(this.species, this.expectedHere);
@@ -596,5 +604,169 @@ void main() {
       expect(find.text('5 cartes'), findsOneWidget);
       expect(find.byKey(const ValueKey('notebook-chips-fade')), findsOneWidget);
     });
+  });
+  group('uniform grid', () {
+    setUpAll(() async {
+      await loadAppFonts(icons: true);
+    });
+
+    const names = [
+      ('Sp one', 'Pie', 1),
+      ('Sp two', 'Rougegorge familier', 42),
+      ('Sp three', 'Gobemouche à collier des jardins', 142),
+      ('Sp four', 'Mésange à longue queue', 1234),
+      ('Sp five', 'Roitelet huppé', 7),
+      ('Sp six', 'Bergeronnette des ruisseaux', 99),
+      ('Sp seven', 'Grimpereau des jardins', 3),
+    ];
+    final heard = [
+      for (final (sci, common, n) in names)
+        HeardSpecies(
+          scientificName: sci,
+          commonName: common,
+          contacts: n,
+          verified: sci != 'Sp six',
+          inQueue: sci == 'Sp six' ? 1 : 0,
+        ),
+    ];
+    final expected = [
+      for (var i = 0; i < names.length; i++)
+        ExpectedSpecies(
+          scientificName: names[i].$1,
+          commonName: names[i].$2,
+          score: [0.9, 0.5, 0.04, 0.8, 0.02, 0.3, 0.6][i],
+          tier: ExploreTier.values[i % ExploreTier.values.length],
+        ),
+      const ExpectedSpecies(
+        scientificName: 'Sp mystery',
+        commonName: 'Mystery',
+        score: 0.7,
+        tier: ExploreTier.common,
+      ),
+    ];
+    // Only some species are already « seen », so the others wear « Nouveau ».
+    final stored = <String, Object>{
+      kNotebookSeenPref: ['Sp one', 'Sp three', 'Sp five'],
+    };
+
+    Future<void> pumpGrid(WidgetTester tester, {bool dark = false}) => pump(
+      tester,
+      heard: heard,
+      expected: expected,
+      stored: stored,
+      dark: dark,
+    );
+
+    testWidgets('same size, same caption spot, centered visual', (
+      tester,
+    ) async {
+      await pumpGrid(tester);
+      final cards = find.byType(SpeciesCard);
+      expect(cards.evaluate().length, greaterThanOrEqualTo(8));
+      // Pills in some cards, none in others: the mix the grid must absorb.
+      expect(find.byType(NoveltyPill), findsWidgets);
+      final first = tester.getRect(cards.first);
+      final firstAvatarDy =
+          tester
+              .getRect(
+                find
+                    .descendant(
+                      of: cards.first,
+                      matching: find.byType(SpeciesAvatar),
+                    )
+                    .first,
+              )
+              .center
+              .dy -
+          first.top;
+      for (var i = 0; i < cards.evaluate().length; i++) {
+        final card = cards.at(i);
+        final rect = tester.getRect(card);
+        expect(rect.size, first.size, reason: 'card $i size');
+        // The visual is centered horizontally in its card.
+        final avatar = find.descendant(
+          of: card,
+          matching: find.byType(SpeciesAvatar),
+        );
+        expect(
+          tester.getRect(avatar.first).center.dx,
+          closeTo(rect.center.dx, 0.5),
+          reason: 'card $i visual',
+        );
+        // Same vertical spot too (ring or not, the visual box is the same).
+        expect(
+          tester.getRect(avatar.first).center.dy - rect.top,
+          closeTo(firstAvatarDy, 0.5),
+          reason: 'card $i visual top',
+        );
+        // The caption (« N fois », « À confirmer » or the hint) starts at
+        // the same offset in every card.
+        final caption = find.descendant(
+          of: card,
+          matching: find.byType(DefaultTextStyle),
+        );
+        expect(caption, findsWidgets);
+      }
+    });
+
+    testWidgets('« N fois » sits at the same offset in every card', (
+      tester,
+    ) async {
+      await pumpGrid(tester);
+      final cards = find.byType(SpeciesCard);
+      Offset? reference;
+      var counted = 0;
+      for (var i = 0; i < cards.evaluate().length; i++) {
+        final card = cards.at(i);
+        final times = find.descendant(
+          of: card,
+          matching: find.textContaining(RegExp(r'\d+ fois?$')),
+        );
+        if (times.evaluate().isEmpty) continue;
+        counted++;
+        final offset = tester.getTopLeft(times.first) - tester.getTopLeft(card);
+        reference ??= offset;
+        expect(offset, reference, reason: 'card $i');
+      }
+      expect(counted, greaterThanOrEqualTo(5));
+    });
+
+    testWidgets('all rows are as tall as each other, gaps are equal', (
+      tester,
+    ) async {
+      await pumpGrid(tester);
+      final cards = find.byType(SpeciesCard);
+      final rects = [
+        for (var i = 0; i < cards.evaluate().length; i++)
+          tester.getRect(cards.at(i)),
+      ];
+      for (var i = 2; i < rects.length; i++) {
+        expect(
+          rects[i].top - rects[i - 2].bottom,
+          closeTo(rects[2].top - rects[0].bottom, 0.01),
+          reason: 'row gap before card $i',
+        );
+      }
+      expect(
+        rects[1].left - rects[0].right,
+        closeTo(rects[2].top - rects[0].bottom, 0.01),
+      );
+    });
+
+    for (final dark in [false, true]) {
+      final mode = dark ? 'dark' : 'light';
+      testWidgets(
+        'golden $mode',
+        (tester) async {
+          await pumpGrid(tester, dark: dark);
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('../goldens/notebook_grid_$mode.png'),
+          );
+        },
+        tags: ['golden'],
+        skip: !Platform.isWindows,
+      );
+    }
   });
 }

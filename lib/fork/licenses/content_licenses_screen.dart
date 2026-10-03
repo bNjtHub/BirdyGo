@@ -9,7 +9,6 @@ library;
 
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -24,7 +23,9 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../map/base_layers.dart';
+import '../species_photo/species_photo_providers.dart';
 import '../world_map/world_map_config.dart';
+import 'description_credit.dart';
 import 'licenses_model.dart';
 
 /// Widest column on tablets.
@@ -35,13 +36,8 @@ const int kLicensesPageSize = 40;
 
 const String _apacheUrl = 'https://www.apache.org/licenses/LICENSE-2.0';
 const String _oflUrl = 'https://openfontlicense.org/';
+const String _wikipediaUrl = 'https://www.wikipedia.org/';
 const String _osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
-
-/// Ids of the species images bundled in the app.
-final bundledImageIdsProvider = FutureProvider<Set<String>>((ref) async {
-  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-  return bundledImageIds(manifest.listAssets());
-});
 
 /// Bundled photos with their credit, in the app language.
 final licensedPhotosProvider =
@@ -258,6 +254,7 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
   }
 
   Widget _otherBlock(BuildContext context, AppLocalizations l10n) {
+    final c = BirdyColors.of(context);
     final maps = [
       for (final layer in MapBaseLayer.values)
         ...baseLayerAttributions(layer),
@@ -279,10 +276,27 @@ class _ContentLicensesScreenState extends ConsumerState<ContentLicensesScreen> {
           onTap: () => openExternalUrl(context, _apacheUrl),
         ),
         BirdyListRow(
+          key: const ValueKey('licenses-wikipedia'),
+          icon: BirdyIcons.document,
+          title: l10n.forkLicensesWikipedia,
+          subtitle: l10n.forkLicensesWikipediaSub,
+          trailing: Icon(AppIcons.openInNew, size: BirdyGlyph.xl, color: c.text2),
+          onTap: () => openExternalUrl(context, wikipediaTextLicenseUrl),
+        ),
+        BirdyListRow(
+          key: const ValueKey('licenses-wikipedia-site'),
+          icon: BirdyIcons.world,
+          title: l10n.forkLicensesWikipediaSite,
+          trailing: Icon(AppIcons.openInNew, size: BirdyGlyph.xl, color: c.text2),
+          onTap: () => openExternalUrl(context, _wikipediaUrl),
+        ),
+        BirdyListRow(
+          key: const ValueKey('licenses-sheets'),
           icon: BirdyIcons.document,
           title: l10n.forkLicensesSheets,
           subtitle: l10n.forkLicensesSheetsSub,
-          showChevron: false,
+          trailing: Icon(AppIcons.openInNew, size: BirdyGlyph.xl, color: c.text2),
+          onTap: () => openExternalUrl(context, wikipediaTextLicenseUrl),
         ),
         BirdyListRow(
           icon: BirdyIcons.map,

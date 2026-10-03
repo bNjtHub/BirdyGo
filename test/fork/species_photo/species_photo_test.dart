@@ -52,12 +52,20 @@ class _FakePhotoService extends InatPhotoService {
     calls.add(inatId);
     return photo;
   }
+
+  // No disk in a widget test: the carousel gallery is out of scope here.
+  @override
+  Stream<List<GalleryPhoto>> galleryFor(
+    int inatId, {
+    Set<String> exclude = const {},
+  }) => Stream.value(const []);
 }
 
 Future<void> _pumpPhoto(
   WidgetTester tester, {
   required bool allowed,
   required InatPhotoService service,
+  bool bundled = true,
 }) async {
   SharedPreferences.setMockInitialValues({kOnlinePhotosPref: allowed});
   final prefs = await SharedPreferences.getInstance();
@@ -66,6 +74,9 @@ Future<void> _pumpPhoto(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         inatPhotoServiceProvider.overrideWithValue(service),
+        bundledImageIdsProvider.overrideWith(
+          (ref) async => bundled ? {'BN00001'} : <String>{},
+        ),
       ],
       child: const MaterialApp(
         locale: Locale('fr'),
@@ -105,15 +116,48 @@ void main() {
   ) async {
     final service = _FakePhotoService(null);
     await _pumpPhoto(tester, allowed: false, service: service);
+    await tester.pumpAndSettle();
     expect(service.calls, isEmpty);
 
+    // A tap on the photo opens it full screen, credit line at the bottom.
     await tester.tap(find.byType(SpeciesPhoto));
     await tester.pumpAndSettle();
-    expect(find.text('Crédit photo'), findsOneWidget);
+    expect(
+      find.text(
+        'Ryan Schain · Tous droits réservés · Macaulay Library ML44599871',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('viewer-close')));
+    await tester.pumpAndSettle();
+
+    // The (i) button opens the credit sheet.
+    await tester.tap(find.byTooltip('Crédit photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Crédit photo'), findsWidgets);
     expect(find.text('Photo : Ryan Schain'), findsOneWidget);
     expect(find.text('Licence : Tous droits réservés'), findsOneWidget);
     expect(find.text('Source : Macaulay Library ML44599871'), findsOneWidget);
     expect(find.text('Voir la photo en ligne'), findsOneWidget);
+  });
+
+  testWidgets('no bundled photo: the default image has no credit', (
+    tester,
+  ) async {
+    final service = _FakePhotoService(null);
+    await _pumpPhoto(tester, allowed: false, service: service, bundled: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Crédit photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Crédit photo'), findsOneWidget);
+    expect(
+      find.text("On ne connaît pas l'auteur de cette photo."),
+      findsOneWidget,
+    );
+    expect(find.text('Photo : Ryan Schain'), findsNothing);
+    expect(find.textContaining('Macaulay'), findsNothing);
+    expect(find.textContaining('Tous droits réservés'), findsNothing);
   });
 
   testWidgets('turning the switch on in the credit sheet asks for the photo', (
@@ -132,13 +176,12 @@ void main() {
   testWidgets('the online photo fades in without moving, with its credit', (
     tester,
   ) async {
-    final file =
-        (await tester.runAsync(() async {
-          final dir = await Directory.systemTemp.createTemp('species_photo_');
-          final file = File('${dir.path}/13094_1.photo');
-          await file.writeAsBytes(base64Decode(_png));
-          return file;
-        }))!;
+    final file = (await tester.runAsync(() async {
+      final dir = await Directory.systemTemp.createTemp('species_photo_');
+      final file = File('${dir.path}/13094_1.photo');
+      await file.writeAsBytes(base64Decode(_png));
+      return file;
+    }))!;
     addTearDown(() => file.parent.deleteSync(recursive: true));
     final service = _FakePhotoService(OnlinePhoto(file, _onlineCredit));
 
@@ -155,8 +198,6 @@ void main() {
 
     await tester.tap(find.byType(SpeciesPhoto));
     await tester.pumpAndSettle();
-    expect(find.text('Photo : Ann'), findsOneWidget);
-    expect(find.text('Licence : CC BY-SA'), findsOneWidget);
-    expect(find.text('Source : iNaturalist'), findsOneWidget);
+    expect(find.text('Ann · CC BY-SA · iNaturalist'), findsOneWidget);
   });
 }

@@ -324,7 +324,9 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                       color: c.accent,
                       track: track,
                       child: Padding(
-                        padding: const EdgeInsets.all(BirdySpace.m + BirdySpace.xs),
+                        padding: const EdgeInsets.all(
+                          BirdySpace.m + BirdySpace.xs,
+                        ),
                         child: FittedBox(
                           child: Text(
                             '${notebook.expectedFound}',
@@ -714,10 +716,12 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
           children: [
-            BirdySkeleton.box(
-              width: visualSize,
-              height: visualSize,
-              radius: BirdyRadii.thumb,
+            Center(
+              child: BirdySkeleton.box(
+                width: visualSize,
+                height: visualSize,
+                radius: BirdyRadii.thumb,
+              ),
             ),
             const SizedBox(height: BirdySpace.snug),
             SizedBox(
@@ -730,8 +734,16 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                 ),
               ),
             ),
-            const Spacer(),
-            BirdySkeleton.text(BirdyText.caption, placeholder: '00000000'),
+            SizedBox(
+              height: gridCaptionHeight(context),
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                child: BirdySkeleton.text(
+                  BirdyText.caption,
+                  placeholder: '00000000',
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -805,7 +817,15 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               card.scientificName,
               size: visualSize,
             ),
-            caption: card.hint == null ? null : Text(card.hint!),
+            uniform: true,
+            caption:
+                card.hint == null
+                    ? null
+                    : Text(
+                      card.hint!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
           ),
         );
       case NotebookCardKind.toConfirm:
@@ -829,20 +849,17 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               badge: NotebookBadge.toConfirm,
             ),
             largeName: true,
-            caption: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n.forkNotebookToConfirm,
-                  style: TextStyle(
-                    color: c.toCheck.foreground,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                ..._pills(card),
-              ],
+            uniform: true,
+            caption: Text(
+              l10n.forkNotebookToConfirm,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: c.toCheck.foreground,
+                fontWeight: FontWeight.w700,
+              ),
             ),
+            footer: _pills(card),
             onTap: () => _openCard(card),
           ),
         );
@@ -868,14 +885,13 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
             ),
             tint: SpeciesAccents.tintOf(card.scientificName),
             largeName: true,
-            caption: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l10n.forkNotebookTimes(card.contacts)),
-                ..._pills(card),
-              ],
+            uniform: true,
+            caption: Text(
+              l10n.forkNotebookTimes(card.contacts),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
+            footer: _pills(card),
             onTap: () => _openCard(card),
           ),
         );
@@ -891,26 +907,25 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   };
 
   /// Rarity in words next to « Nouveau », at the bottom of the card (no
-  /// corner mark hiding the bird). Empty when neither applies.
-  List<Widget> _pills(NotebookCard card) {
+  /// corner mark hiding the bird). Null when neither applies. The card
+  /// scales the row down to its one-pill-high slot.
+  Widget? _pills(NotebookCard card) {
     final rarity = switch (card.rarity) {
       RarityMark.none => null,
       RarityMark.uncommon => NoveltyKind.uncommonHere,
       RarityMark.rare => NoveltyKind.rareHere,
       RarityMark.exceptional => NoveltyKind.exceptionalHere,
     };
-    if (rarity == null && !card.isNew) return const [];
-    return [
-      const SizedBox(height: BirdySpace.snug),
-      Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: [
-          if (rarity != null) NoveltyPill(kind: rarity, short: true),
-          if (card.isNew) const NoveltyPill(kind: NoveltyKind.isNew),
-        ],
-      ),
-    ];
+    if (rarity == null && !card.isNew) return null;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (rarity != null) NoveltyPill(kind: rarity, short: true),
+        if (rarity != null && card.isNew)
+          const SizedBox(width: BirdySpace.tight),
+        if (card.isNew) const NoveltyPill(kind: NoveltyKind.isNew),
+      ],
+    );
   }
 }
 

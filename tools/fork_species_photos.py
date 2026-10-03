@@ -360,6 +360,28 @@ def replace_reserved_photos(
     return {"replaced": replaced, "kept": sorted(kept)}
 
 
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SPECIES_LIST = ROOT / "tools" / "fork_sheets" / "region_species.csv"
+TAXONOMY_CSV = ROOT / "assets" / "models" / "taxonomy.csv"
+
+
+def find_reserved_credits(taxonomy_csv: Path, species_csv: Path) -> list[tuple[str, str]]:
+    """--verify-photos: (scientific name, license) of every species of the
+    pack list that has a photo credit which is not shippable (see
+    has_open_license). A species without a photo is fine. Empty means the
+    pack is clean."""
+    listed = load_species_list(species_csv)
+    with open(taxonomy_csv, encoding="utf-8", newline="") as f:
+        rows = {r.get("scientific_name", ""): r for r in csv.DictReader(f)}
+    bad = []
+    for sci in listed:
+        row = rows.get(sci)
+        if (row is not None and row.get("image_url")
+                and not has_open_license(row.get("image_license"))):
+            bad.append((sci, row.get("image_license", "")))
+    return bad
+
+
 # Photo columns of taxonomy.csv, as rebuild_taxonomy_csv() writes them.
 PHOTO_CREDIT_COLUMNS = ("image_url", "image_author", "image_license", "image_source")
 

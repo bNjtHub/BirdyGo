@@ -304,5 +304,35 @@ class UpdatePhotoCreditsTest(unittest.TestCase):
             "image_source": ""})
 
 
+class VerifyPackTest(unittest.TestCase):
+    def test_lists_reserved_credits_of_the_listed_species_only(self):
+        nl = chr(10)
+        macaulay = "© Macaulay Library"
+        with tempfile.TemporaryDirectory() as tmp:
+            listed = Path(tmp) / "list.csv"
+            listed.write_text(
+                nl.join(["scientific_name", "A a", "B b", "C c", "E e"]) + nl,
+                encoding="utf-8")
+            csv_path = Path(tmp) / "taxonomy.csv"
+            csv_path.write_text(nl.join([
+                "scientific_name,image_url,image_license",
+                "A a,u,cc-by",
+                "B b,u," + macaulay,
+                "C c,u,cc-by-nd",
+                "E e,,",
+                "D d,u," + macaulay,
+            ]) + nl, encoding="utf-8")
+            self.assertEqual(
+                photos.find_reserved_credits(csv_path, listed),
+                [("B b", macaulay), ("C c", "cc-by-nd")])
+
+    def test_the_real_pack_has_no_reserved_photo(self):
+        if not photos.TAXONOMY_CSV.exists() or not photos.DEFAULT_SPECIES_LIST.exists():
+            self.skipTest("pack files not present")
+        self.assertEqual(
+            photos.find_reserved_credits(
+                photos.TAXONOMY_CSV, photos.DEFAULT_SPECIES_LIST), [])
+
+
 if __name__ == "__main__":
     unittest.main()
