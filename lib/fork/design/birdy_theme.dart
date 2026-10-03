@@ -188,6 +188,8 @@ abstract final class BirdyTheme {
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
+            fill: states.contains(WidgetState.selected) ? 1 : 0,
+            weight: 400,
             color:
                 states.contains(WidgetState.selected) ? c.accentText : c.text2,
           ),

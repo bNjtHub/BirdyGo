@@ -161,6 +161,8 @@ class _NavTab extends StatelessWidget {
                           icon,
                           color: iconTheme?.color,
                           size: iconTheme?.size,
+                          fill: iconTheme?.fill,
+                          weight: iconTheme?.weight,
                         ),
                       ),
                     ),

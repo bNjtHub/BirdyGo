@@ -1060,6 +1060,10 @@ Règles transverses :
     de la carte) : forme pleine, ni aile ni « ? », couleur du texte ou de l'icône.
 - **Une icône = un sens.** Tri : `sort`. Autres actions : `moreHoriz`. À vérifier (Accueil) : `search`.
   Le « ? » est réservé à « Je ne sais pas ».
+- **Remplissage des icônes (J6k).** Material Symbols Rounded, graisse 400, un rôle = un glyphe dans
+  `BirdyIcons` (`lib/fork/design/birdy_icons.dart` ; le widget `BirdyIcon` applique la règle). Contour
+  au repos, plein pour actif / sélectionné / en cours / confirmé ; play, pause, stop toujours pleins ;
+  favori plein seulement si favori. « Écouter » = `BirdyWingIcon`, « espèce » = `BirdyGoSilhouetteIcon`.
 - **Fiche, carte de contenu de « Fais sa connaissance ».** Le filigrane de l'icône de la rubrique est en haut à droite de la carte (pas en bas).
 - **Fiche, « Fais sa connaissance » (6 rubriques).** Grille 3 × 2 de pastilles de 52 (`BirdySizes.knowledgeDisc`), libellés 13 sur une ligne qui se réduisent dans leur colonne (jamais de débordement, même à 320 dp et 130 %). Ordre : Taille (`sure`), Habitudes (`tonal`), Pourquoi ici (`tonal`), Ennemis (patte, `probable`, accroche « Qui le chasse »), Confusions (`probable`), Anecdote (`oriole`) ; « À l'oreille » est dans Son chant et la migration dans Quand le voir. Une rubrique sans texte est masquée ; compteur « {n}/{total} découverts » avec total = rubriques présentes. « Comportement » devient « Habitudes » partout (fiche et bloc).
 - **L'aile.** Les 4 barres de `BirdyGoLogoPainter.bars` (Brume, Loriot, Brume, `BirdyBrand.wingSky`
