@@ -2055,6 +2055,8 @@
   "forkWorldZoomValue": "Zoom {factor}",
   "forkFicheNotInBookTitle": "Pas encore dans ton carnet",
   "forkFicheListenToFind": "Écouter pour le trouver",
+  "forkFirstNameSaved": "Prénom enregistré",
+  "forkSettingSaved": "{setting} : {value}",
   "forkPhotoAdult": "Adulte",
   "forkPhotoJuvenile": "Juvénile",
   "forkPhotoEgg": "Œuf",

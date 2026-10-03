@@ -957,6 +957,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       libellé « Oiseau mystère » retiré. Tests dans `test/fork/game/fine_ear_test.dart`.
 
 - [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
+- [x] J7 Réglages (retours) : confirmation par toast (`showSettingSaved`, `showFirstNameSaved` dans `birdy_toast.dart`) quand une valeur est validée sans changement visible : prénom (validation ou perte du focus), langue de l'app et des espèces. Pas de toast pour les interrupteurs ni les puces de thème. Réglages avancés (upstream) non couverts.
 - [x] J7 Fiche espèce : préchargement au repos après le splash (descriptions, régions, aires et cellules de terre de la carte, courbe annuelle du géomodèle), séquentiel, arrêt en arrière-plan ; mesures PC : taxonomie 1250 ms (déjà au lancement), cellules 180, descriptions 230, régions 90, aires 30.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
