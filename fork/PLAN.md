@@ -956,8 +956,8 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       l'interrupteur de la carte Position ; écrit `privacyAllowMapProvider`.
 - [x] Carte du monde plein écran (PR #130) : bouton d'agrandissement sur la carte de la fiche, page zoomable (pincer, glisser, double appui ×2, zoom 1 à 8) recadrée sur l'aire de l'espèce ; la couche statique est refaite à la résolution de l'écran à la fin du geste (`lib/fork/world_map/world_map_fullscreen.dart`, `world_map_viewport.dart`).
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
-      de celle d'upstream.
-- [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
+      de celle d'upstream. (Préparé : `fork/RELEASE.md`, `fork/store/` ; reste la Console et l'hébergement de la politique, à Benjamin.)
+- [x] Avant de publier (fait le 02/10, `chore/release-interne` : `has_open_license` refuse « nd », repli observations iNaturalist puis Wikimedia Commons, 569 photos libres) : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
 - [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`

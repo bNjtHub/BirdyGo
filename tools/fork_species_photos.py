@@ -89,8 +89,12 @@ def normalize_license(code: str | None) -> str:
 
 
 def has_open_license(code: str | None) -> bool:
-    """True for any Creative Commons or public domain license."""
-    return normalize_license(code).startswith(("cc", "pd"))
+    """True for a Creative Commons or public domain license that allows
+    derivatives: the pack crops and recompresses photos, so "nd" is out."""
+    norm = normalize_license(code)
+    if not norm.startswith(("cc", "pd")):
+        return False
+    return "nd" not in re.split(r"[-.]", norm)
 
 
 def sized_url(photo: dict, size: str) -> str | None:
@@ -178,6 +182,124 @@ def _inat_id(entry: dict) -> int | None:
         return None
 
 
+# Fallback sources when the taxon's curated photos have no usable open photo.
+# Stricter than OPEN_LICENSES: no NC, the replacements stay usable if the app
+# is ever monetised.
+FREE_LICENSES = ("cc0", "cc-by", "cc-by-sa", "pd")
+OBS_PER_PAGE = 15
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+WIKIDATA_API = "https://www.wikidata.org/w/api.php"
+# iNaturalist life stage "adult" (term 1 = Life Stage, value 2 = Adult).
+_ADULT = "&term_id=1&term_value_id=2"
+
+
+def pick_observation_photo(
+    observations: list[dict], size: str = BUNDLE_PHOTO_SIZE
+) -> dict | None:
+    """First landscape free-license photo among observations (already sorted)."""
+    for obs in observations:
+        for photo in (obs.get("photos") or [])[:2]:
+            lic = normalize_license(photo.get("license_code"))
+            if lic not in FREE_LICENSES:
+                continue
+            dims = photo.get("original_dimensions") or {}
+            width, height = dims.get("width") or 0, dims.get("height") or 0
+            if not width or not height or width / height < MIN_ASPECT_RATIO:
+                continue
+            url = sized_url(photo, size)
+            if url:
+                return {"id": photo.get("id"), "url": url, "license": lic,
+                        "author": author_of(photo), "source": f"iNaturalist {photo.get('id')}"}
+    return None
+
+
+def find_inat_observation_photo(
+    inat_id: int,
+    fetch: Callable[[str], dict] = _fetch_json,
+    delay_s: float = REQUEST_DELAY_S,
+) -> dict | None:
+    """Most-faved research-grade observation photo (adult first), free licence."""
+    base = (f"{INAT_API}/observations?taxon_id={inat_id}"
+            "&photo_license=cc0,cc-by,cc-by-sa&quality_grade=research&photos=true"
+            f"&order_by=votes&order=desc&per_page={OBS_PER_PAGE}")
+    for extra in (_ADULT, ""):
+        if delay_s:
+            time.sleep(delay_s)
+        try:
+            data = fetch(base + extra)
+        except Exception as exc:
+            print(f"  WARN: iNaturalist observations failed ({inat_id}): {exc}")
+            return None
+        photo = pick_observation_photo(data.get("results", []))
+        if photo:
+            return photo
+    return None
+
+
+def _strip_html(text: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", text or "")).strip()
+
+
+def commons_license(short_name: str | None) -> str | None:
+    """'CC BY-SA 4.0' -> 'cc-by-sa-4.0', 'CC0' -> 'cc0', PD -> 'pd'; else None."""
+    text = (short_name or "").strip().lower()
+    if text in ("cc0", "cc0 1.0") or text.startswith("cc0"):
+        return "cc0"
+    if text.startswith("public domain") or text in ("pd", "pdm"):
+        return "pd"
+    norm = normalize_license(short_name)
+    if re.match(r"^cc-by(-sa)?(-\d\.\d)?(-[a-z]{2})?$", norm):
+        return norm
+    return None
+
+
+def find_commons_photo(
+    scientific_name: str,
+    fetch: Callable[[str], dict] = _fetch_json,
+    delay_s: float = REQUEST_DELAY_S,
+    width: int = 800,
+) -> dict | None:
+    """Wikidata P18 image of the species, if Commons says its licence is free."""
+    from urllib.parse import quote
+
+    def get(url: str) -> dict | None:
+        if delay_s:
+            time.sleep(delay_s)
+        try:
+            return fetch(url)
+        except Exception as exc:
+            print(f"  WARN: Commons/Wikidata request failed ({scientific_name}): {exc}")
+            return None
+
+    data = get(f"{WIKIDATA_API}?action=wbgetentities&sites=specieswiki"
+               f"&titles={quote(scientific_name)}&props=claims&format=json")
+    filename = None
+    for entity in (data or {}).get("entities", {}).values():
+        for claim in (entity.get("claims") or {}).get("P18", []):
+            filename = (claim.get("mainsnak", {}).get("datavalue") or {}).get("value")
+            if filename:
+                break
+    if not filename:
+        return None
+    data = get(f"{COMMONS_API}?action=query&format=json&prop=imageinfo"
+               f"&titles={quote('File:' + filename)}&iiprop=url|size|extmetadata"
+               f"&iiurlwidth={width}")
+    for page in ((data or {}).get("query") or {}).get("pages", {}).values():
+        for info in page.get("imageinfo") or []:
+            meta = info.get("extmetadata") or {}
+            lic = commons_license((meta.get("LicenseShortName") or {}).get("value"))
+            w, h = info.get("width") or 0, info.get("height") or 0
+            if not lic or not w or not h or w / h < MIN_ASPECT_RATIO:
+                continue
+            url = info.get("thumburl") or info.get("url")
+            if not url:
+                continue
+            return {"id": filename, "url": url, "license": lic,
+                    "author": _strip_html((meta.get("Artist") or {}).get("value", "")),
+                    "source": "Wikimedia Commons File:" + filename}
+    return None
+
+
 def replace_reserved_photos(
     species: Iterable[str],
     resolve: Callable[[str], dict | None],
@@ -201,26 +323,35 @@ def replace_reserved_photos(
             entry.get("image_license")
         ):
             continue
-        inat_id = _inat_id(entry)
-        if inat_id is None:
-            kept.append(sci)
-        else:
-            todo.append((sci, entry, inat_id))
+        todo.append((sci, entry, _inat_id(entry)))
 
     print(f"  Reserved photos: {len(todo) + len(kept)}, "
           f"asking iNaturalist for {len(todo)} taxa ...")
-    taxa = fetch_taxa(sorted({i for _, _, i in todo}), fetch, delay_s)
+    taxa = fetch_taxa(sorted({i for _, _, i in todo if i}), fetch, delay_s)
     replaced: list[str] = []
+    by_source: dict[str, int] = {}
     for sci, entry, inat_id in todo:
-        photo = pick_photo(taxa.get(inat_id, {}))
+        photo = pick_photo(taxa.get(inat_id, {})) if inat_id else None
+        if photo is not None:
+            photo.setdefault("source", f"iNaturalist {photo['id']}")
+            origin = "inat_taxon"
+        else:
+            photo = (find_inat_observation_photo(inat_id, fetch, delay_s)
+                     if inat_id else None)
+            origin = "inat_observation"
+        if photo is None:
+            photo = find_commons_photo(sci, fetch, delay_s)
+            origin = "commons"
         if photo is None:
             kept.append(sci)
             continue
         entry["image"] = {"medium": photo["url"]}
         entry["image_author"] = photo["author"]
         entry["image_license"] = photo["license"]
-        entry["image_source"] = f"iNaturalist {photo['id']}"
+        entry["image_source"] = photo["source"]
         replaced.append(sci)
+        by_source[origin] = by_source.get(origin, 0) + 1
+    print(f"  Replacement sources: {by_source}")
 
     print(f"  Replaced {len(replaced)} reserved photos with iNaturalist ones")
     if kept:
