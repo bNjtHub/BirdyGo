@@ -683,6 +683,21 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
 
 - Statuts selon le nombre d'espèces découvertes (confirmées ou Sûr), à thème oiseau, chacun avec sa
   couleur et son emblème. Noms et seuils fixés en J6e, à partir de la maquette.
+- Emblème de statut (J6k, `StatusEmblem` sur `GameDisc`, planche « Mélange 2 ») : un disque coloré
+  (rayon 38 sur 100, liseré de la teinte foncée, léger dégradé vertical) entouré d'une jauge de
+  8 segments (rayon 45,5, trait 4,6, bouts ronds, écart de 0,2 rad), allumés jusqu'au rang dans la
+  couleur du statut ; au rang 8 toute la jauge est en Loriot. Segments éteints : `BirdyBrand.gaugeOff`
+  à 35 %. Les couleurs montent de la terre au vert, au ciel, à l'indigo puis au turquoise
+  (`GameConfig.statuses`, couleur + teinte foncée) : Terre #A8805A, Brique #C9694A, Mousse #7F9A45,
+  Vert #3E8B57, Écorce #8E5E33, Ciel #2F76BF, Indigo #3D3A7A (rang 7), Turquoise #0E8D98. Glyphes pleins
+  (`StatusGlyphs`, grille 24, couches `GlyphLayer`) : corps blanc, un détail Loriot, ombres dans la
+  teinte foncée ; rang 7 inversé (corps Loriot, détail blanc, encre #1A1840). Oisillon (bec) et
+  Martin-pêcheur gardent leurs vraies couleurs une fois le statut atteint. Statut à venir : disque
+  gris (`BirdyBrand.locked*`, variante sombre), glyphe en gris clair, jauge éteinte. Contraste du
+  blanc sur le disque : 3:1 ou plus partout (test). Sur l'Accueil et le Profil, la progression vers le
+  statut suivant est un arc partiel dans le segment qui suit le rang (`StatusEmblem.progress`), plus
+  d'anneau autour. Sur « Nouveau statut », les segments s'allument un par un
+  (`BirdyMotion.statusGauge`, immobile en animations réduites).
 - Carnet façon collection : les espèces découvertes en couleur, et en silhouette mystère celles
   attendues ici en cette saison (géomodèle), avec un indice (« Chante au lever du jour dans les haies »).
 - Badges (lève-tôt, noctambule, réviseur…), série de jours qui pardonne un jour manqué, défis de la semaine.
@@ -745,11 +760,13 @@ Code dans `lib/fork/map/` (écran, feuilles). On suit SPEC.md 9.14, 5.9 et 5.10.
   la fois, arrêt en quittant l'écran) ; « Terminer » (contour) et « Rejouer » côte à côte.
   Mouvement : exception autorisée aux règles de retenue (voir « Animations »), animations réduites =
   tout est immobile et sans confettis.
-- Médailles des badges (`BadgeMedal`) : bronze, argent, or pour 1, 2, 3 plumes, avec un dégradé
-  métallique (reflet en haut à gauche, ombre en bas à droite), un liseré et un anneau gravé. Le métal
-  est le même dans les deux thèmes ; la médaille verrouillée est un disque neutre du thème
-  (`lineOpaque`, bordure `border`, icône `text2`). Couleurs dans `GameConfig.badgeMedals`, qui
-  remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le métal (test).
+- Médailles des badges (`BadgeMedal`, J6k) : le même disque que l'emblème de statut (`GameDisc`), à
+  plat, sans dégradé métallique ni biseau : couleur du métal (bronze, argent, or pour 1, 2, 3 plumes),
+  liseré de sa teinte foncée, et une jauge de 3 segments allumés jusqu'au niveau (teinte foncée du
+  métal). Le métal est le même dans les deux thèmes ; la médaille verrouillée est un disque gris comme
+  un statut à venir (icône `text2` en contour) ; l'icône d'un badge obtenu est pleine (`fill: 1`). Couleurs dans `GameConfig.badgeMedals` (base, foncé, encre,
+  teinte pâle), qui remplace les pastilles de SPEC.md 2.7 ; l'icône garde un contraste de 3:1 sur le
+  métal (test).
 - Profil en couleur (J6f), langage de blocs de l'Accueil : statut sur bloc Sûr, échelle dans un bloc
   blanc avec le statut en cours sur une pastille tonale (seuil en Martin-pêcheur texte), série sur
   bloc Loriot, badges en mini-blocs Loriot / tonal / Sûr en alternance (jamais deux voisins pareils),

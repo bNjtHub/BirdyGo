@@ -137,7 +137,20 @@ class _NewStatusScreenState extends State<NewStatusScreen> {
                             clipBehavior: Clip.none,
                             children: [
                               MomentAppear(
-                                child: StatusEmblem(status: status, size: BirdyGlyph.disc136),
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0, end: 1),
+                                  duration:
+                                      BirdyMotion.reduced(context)
+                                          ? Duration.zero
+                                          : BirdyMotion.statusGauge,
+                                  curve: BirdyMotion.standard,
+                                  builder:
+                                      (context, reveal, _) => StatusEmblem(
+                                        status: status,
+                                        size: BirdyGlyph.disc136,
+                                        gaugeReveal: reveal,
+                                      ),
+                                ),
                               ),
                               BirdyConfetti.burst(
                                 colors: [

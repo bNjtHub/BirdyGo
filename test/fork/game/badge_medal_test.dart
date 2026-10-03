@@ -24,9 +24,7 @@ void main() {
   test('bronze, silver, gold: the glyph reads on the metal (3:1)', () {
     expect(GameConfig.badgeMedals, hasLength(3));
     for (final metal in GameConfig.badgeMedals) {
-      for (final face in [metal.base, metal.highlight]) {
-        expect(_contrast(metal.ink, face), greaterThanOrEqualTo(3));
-      }
+      expect(_contrast(metal.ink, metal.base), greaterThanOrEqualTo(3));
     }
   });
 

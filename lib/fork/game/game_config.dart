@@ -6,63 +6,67 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../design/birdy_tokens.dart';
+import 'glyph.dart';
+import 'status_glyphs.dart';
+
+export 'glyph.dart';
 
 /// One of the 8 statuses, reached with [from] verified species.
+///
+/// Colours (DESIGN.md « Jeu »): [color] is the disc, [deep] its rim and the
+/// glyph's deep tone. The glyph is white with a Loriot detail ([glyphMain],
+/// [glyphAccent]); [glyphInk] and [gauge] default to [deep] and [color].
 class StatusDef {
   const StatusDef({
     required this.rank,
     required this.from,
     required this.color,
+    required this.deep,
     required this.glyph,
-  });
+    this.glyphMain = BirdyBrand.white,
+    this.glyphAccent = BirdyBrand.oriole,
+    Color? glyphInk,
+    Color? gauge,
+  }) : _glyphInk = glyphInk,
+       _gauge = gauge;
 
   /// 1 to 8.
   final int rank;
   final int from;
   final Color color;
+  final Color deep;
 
-  /// Line drawing on a 24 grid (SPEC.md 4.3), in ink on [color].
+  /// Layered drawing on a 24 grid (SPEC.md 4.3).
   final Glyph glyph;
+  final Color glyphMain;
+  final Color glyphAccent;
+  final Color? _glyphInk;
+  final Color? _gauge;
+
+  Color get glyphInk => _glyphInk ?? deep;
+
+  /// Colour of the lit gauge segments.
+  Color get gauge => _gauge ?? color;
 }
 
-/// Stroked paths and circles of a 24 × 24 line glyph; [filled] paths are
-/// painted solid.
-/// Metal of an earned badge medal: a top-left light, the body color, a
-/// bottom-right shade, the rim and the engraved glyph.
+/// Medal of an earned badge tier: a flat [base] disc with its [deep] rim,
+/// the engraved face in [ink] (DESIGN.md « Jeu »).
 @immutable
 class MedalMetal {
   const MedalMetal({
-    required this.highlight,
     required this.base,
-    required this.shadow,
-    required this.rim,
+    required this.deep,
     required this.ink,
     required this.tone,
   });
 
-  final Color highlight;
   final Color base;
-  final Color shadow;
-  final Color rim;
+  final Color deep;
   final Color ink;
 
   /// Pale tone of the medal metal: background of an earned badge tile
   /// (J6f, Profil « À gagner ») and of the quiz result medal card.
   final Color tone;
-}
-
-class Glyph {
-  const Glyph({
-    this.paths = const [],
-    this.circles = const [],
-    this.filled = const [],
-  });
-
-  final List<String> paths;
-
-  /// (cx, cy, r).
-  final List<(double, double, double)> circles;
-  final List<String> filled;
 }
 
 enum BadgeKind {
@@ -111,95 +115,73 @@ abstract final class GameConfig {
     (ChallengeKind.weekSpecies, 10),
   ];
 
-  /// SPEC.md 7.2 and 2.6.
+  /// SPEC.md 7.2 and 2.6. Colours climb from earth to green, sky, indigo and
+  /// turquoise; the last rank lights its whole gauge in Loriot.
   static const List<StatusDef> statuses = [
     StatusDef(
       rank: 1,
       from: 1,
-      color: Color(0xFFF2B98B),
-      glyph: Glyph(
-        paths: [
-          'M12 3.5c3.3 0 6 4.9 6 9.3a6 6 0 0 1-12 0c0-4.4 2.7-9.3 6-9.3z',
-          'M7 12.6l2.4 1.5 2.6-2.1 2.6 2.1 2.4-1.5',
-        ],
-      ),
+      color: Color(0xFFA8805A),
+      deep: Color(0xFF6E4F33),
+      glyph: StatusGlyphs.chick,
     ),
     StatusDef(
       rank: 2,
       from: 5,
-      color: Color(0xFFE9836B),
-      glyph: Glyph(
-        paths: [
-          'M5.5 20.5 16 10',
-          'M19.5 3.5C12 3.5 7 7.5 7 15l2 2c7.5 0 11.5-5.5 10.5-13.5z',
-        ],
-      ),
+      color: Color(0xFFC9694A),
+      deep: Color(0xFF86402A),
+      glyph: StatusGlyphs.youngFeather,
     ),
     StatusDef(
       rank: 3,
       from: 10,
-      color: Color(0xFF9DB46A),
-      glyph: Glyph(
-        paths: [
-          'M2.5 9.5c2.8-2.3 6-2.3 9.5 1.2 3.5-3.5 6.7-3.5 9.5-1.2',
-          'M7.5 15.5c1.5-1.1 3-1.1 4.5.5 1.5-1.6 3-1.6 4.5-.5',
-        ],
-      ),
+      color: Color(0xFF7F9A45),
+      deep: Color(0xFF4F6527),
+      glyph: StatusGlyphs.firstFlight,
     ),
     StatusDef(
       rank: 4,
       from: 20,
-      color: Color(0xFF5DA46A),
-      glyph: Glyph(
-        paths: [
-          'M3 13.5S6.5 8 12 8s9 5.5 9 5.5-3.5 5.5-9 5.5-9-5.5-9-5.5z',
-          'M12 2.5v2.5M6.5 4.5l1.3 2M17.5 4.5l-1.3 2',
-        ],
-        circles: [(12, 13.5, 2.5)],
-      ),
+      color: Color(0xFF3E8B57),
+      deep: Color(0xFF235936),
+      glyph: StatusGlyphs.sentinel,
     ),
     StatusDef(
       rank: 5,
       from: 35,
-      color: Color(0xFFC28A55),
-      glyph: Glyph(
-        paths: [
-          'M5 4l3.2 3.4M19 4l-3.2 3.4',
-          'M5 4c-.7 2.2-1 4.6-1 7a8 8 0 0 0 16 0c0-2.4-.3-4.8-1-7',
-          'M11 15.8l1 1.4 1-1.4',
-        ],
-        circles: [(9, 11.5, 2.4), (15, 11.5, 2.4)],
-      ),
+      color: Color(0xFF8E5E33),
+      deep: Color(0xFF5A3818),
+      glyph: StatusGlyphs.owl,
     ),
-    StatusDef(rank: 6, from: 50, color: Color(0xFF5A9BE0), glyph: migrantGlyph),
+    StatusDef(
+      rank: 6,
+      from: 50,
+      color: Color(0xFF2F76BF),
+      deep: Color(0xFF1B4C80),
+      glyph: migrantGlyph,
+    ),
     StatusDef(
       rank: 7,
       from: 75,
-      color: Color(0xFFF4C542),
-      glyph: Glyph(
-        paths: [
-          'M4.5 21 14 11.5',
-          'M17.5 5.5C11 5.5 7 9 7 15.5l1.8 1.8c6.5 0 10-4.3 8.7-11.8z',
-        ],
-        filled: [
-          'M19.5 1.8c.3 1.6.9 2.2 2.5 2.5-1.6.3-2.2.9-2.5 2.5-.3-1.6-.9-2.2-2.5-2.5 1.6-.3 2.2-.9 2.5-2.5z',
-        ],
-      ),
+      color: Color(0xFF3D3A7A),
+      deep: Color(0xFF26234F),
+      glyph: StatusGlyphs.goldFeather,
+      glyphMain: BirdyBrand.oriole,
+      glyphAccent: BirdyBrand.white,
+      glyphInk: Color(0xFF1A1840),
     ),
     StatusDef(
       rank: 8,
       from: 100,
-      color: Color(0xFF19A7B3),
-      glyph: Glyph(paths: ['M5 10v4M8.5 7v10M12 4.5v15M15.5 8v8M19 10.5v3']),
+      color: Color(0xFF0E8D98),
+      deep: Color(0xFF085F67),
+      glyph: StatusGlyphs.kingfisher,
+      gauge: BirdyBrand.oriole,
     ),
   ];
 
-  /// Glyph `migrateur` (status 6, Migrateur badge).
-  static const Glyph migrantGlyph = Glyph(
-    paths: [
-      'M2.5 6.5 4.3 8l1.8-1.5M6.8 10.5l1.8 1.5 1.8-1.5M11.1 14.5l1.8 1.5 1.8-1.5M13.6 10.5l1.8 1.5 1.8-1.5M17.9 6.5 19.7 8l1.8-1.5',
-    ],
-  );
+  /// Glyph `migrateur` (status 6, Migrateur badge): a V of birds.
+  static const Glyph migrantGlyph = StatusGlyphs.migrant;
 
   /// Badge tiers (1, 2, 3 plumes), SPEC.md 7.3.
   static const Map<BadgeKind, List<int>> badgeTiers = {
@@ -228,29 +210,23 @@ abstract final class GameConfig {
 
   /// Medal of each earned tier: bronze, silver, gold for 1, 2, 3 plumes.
   /// The same in both themes, like real metal; a locked badge takes the
-  /// theme neutrals instead (DESIGN.md « Jeu »).
+  /// locked disc colors instead (DESIGN.md « Jeu »).
   static const List<MedalMetal> badgeMedals = [
     MedalMetal(
-      highlight: Color(0xFFE9B98E),
       base: Color(0xFFC27F4A),
-      shadow: Color(0xFF8C542C),
-      rim: Color(0xFF6E3F1F),
+      deep: Color(0xFF8C542C),
       ink: Color(0xFF3F220C),
       tone: Color(0xFFF6EBE1),
     ),
     MedalMetal(
-      highlight: Color(0xFFF7F9FB),
       base: Color(0xFFC9D0D7),
-      shadow: Color(0xFF8F99A4),
-      rim: Color(0xFF6F7984),
+      deep: Color(0xFF8F99A4),
       ink: Color(0xFF2F3943),
       tone: Color(0xFFEBEFF3),
     ),
     MedalMetal(
-      highlight: Color(0xFFFFE9A0),
       base: BirdyBrand.oriole,
-      shadow: Color(0xFFC49224),
-      rim: Color(0xFF9A7010),
+      deep: Color(0xFFC49224),
       ink: Color(0xFF5A4000),
       tone: Color(0xFFFBEFC8),
     ),

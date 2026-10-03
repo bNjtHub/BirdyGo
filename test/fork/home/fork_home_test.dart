@@ -24,7 +24,7 @@ import 'package:birdnet_live/fork/game/game_config.dart' show ChallengeKind;
 import 'package:birdnet_live/fork/game/game_progress.dart';
 import 'package:birdnet_live/fork/game/quiz_entry_row.dart';
 import 'package:birdnet_live/fork/game/quiz_playable.dart';
-import 'package:birdnet_live/fork/game/game_widgets.dart' show StatusRing;
+import 'package:birdnet_live/fork/game/game_widgets.dart' show StatusEmblem;
 import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
@@ -703,7 +703,7 @@ void main() {
   testWidgets('the level block opens the profile', (tester) async {
     final pushes = await pump(tester);
     await scrollTo(tester, find.byKey(const ValueKey('home-status-block')));
-    expect(find.byType(StatusRing), findsOneWidget);
+    expect(find.byType(StatusEmblem), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('home-status-block')));
     expect(await pushedScreen(tester, pushes), isA<ProfileScreen>());
   });
