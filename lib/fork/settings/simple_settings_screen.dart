@@ -19,6 +19,7 @@ import '../design/widgets/birdy_headers.dart';
 import '../design/widgets/birdy_list_block.dart';
 import '../design/widgets/birdy_list_row.dart';
 import '../design/widgets/birdy_sheet.dart';
+import '../design/widgets/birdy_toast.dart'; // FORK: J7 settings toast
 import '../game/quiz_sfx.dart';
 import '../map/sensitive_species.dart';
 import '../species_photo/online_photos_tile.dart';
@@ -280,6 +281,10 @@ class _ChoiceRow<T> extends StatelessWidget {
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       onChanged(option);
+                      // The row outlives the sheet: confirm the choice.
+                      if (context.mounted && option != value) {
+                        showSettingSaved(context, title, text);
+                      }
                     },
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -407,8 +412,30 @@ class _FirstNameFieldState extends ConsumerState<_FirstNameField> {
     text: ref.read(firstNameProvider) ?? '',
   );
 
+  final FocusNode _focus = FocusNode();
+  String _committed = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _committed = _controller.text;
+    _focus.addListener(() {
+      if (!_focus.hasFocus) _confirm();
+    });
+  }
+
+  /// Toast once per committed change (submit or focus loss).
+  void _confirm() {
+    final v = _controller.text.trim();
+    if (v == _committed.trim()) return;
+    _committed = v;
+    ref.read(firstNameProvider.notifier).set(v);
+    if (mounted) showFirstNameSaved(context);
+  }
+
   @override
   void dispose() {
+    _focus.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -440,6 +467,7 @@ class _FirstNameFieldState extends ConsumerState<_FirstNameField> {
             child: TextField(
               key: const ValueKey('settings-first-name'),
               controller: _controller,
+              focusNode: _focus,
               maxLength: kFirstNameMaxLength,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
               textCapitalization: TextCapitalization.words,
@@ -452,7 +480,7 @@ class _FirstNameFieldState extends ConsumerState<_FirstNameField> {
                 border: InputBorder.none,
               ),
               onChanged: (v) => ref.read(firstNameProvider.notifier).set(v),
-              onSubmitted: (v) => ref.read(firstNameProvider.notifier).set(v),
+              onSubmitted: (_) => _confirm(),
             ),
           ),
         ],

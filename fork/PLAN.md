@@ -957,6 +957,7 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       libellé « Oiseau mystère » retiré. Tests dans `test/fork/game/fine_ear_test.dart`.
 
 - [x] J7 Accueil (retours) : horaires du jour resserrés (moins d'espace au-dessus et en dessous), cri du logo préchargé (plus de retard au premier appui), connecteurs entre les points de la série.
+- [x] J7 Réglages (retours) : confirmation par toast (`showSettingSaved`, `showFirstNameSaved` dans `birdy_toast.dart`) quand une valeur est validée sans changement visible : prénom (validation ou perte du focus), langue de l'app et des espèces. Pas de toast pour les interrupteurs ni les puces de thème. Réglages avancés (upstream) non couverts.
 - [x] J7 Fiche espèce : préchargement au repos après le splash (descriptions, régions, aires et cellules de terre de la carte, courbe annuelle du géomodèle), séquentiel, arrêt en arrière-plan ; mesures PC : taxonomie 1250 ms (déjà au lancement), cellules 180, descriptions 230, régions 90, aires 30.
 - [x] Signature de l'app (clé d'upload), build `appbundle` en release. Config dans `android/app/build.gradle` (lit `android/key.properties`), pas à pas dans `fork/release/README.md`. Reste à Benjamin : créer la clé et lancer la build.
 - [x] Onboarding : carte dédiée « Carte en ligne » (Oui / Non, rien coché d'office) à la place de
@@ -968,9 +969,13 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
       Ensuite (PR #155) : `--verify-photos` (échoue si une photo non autorisée revient) ; le crédit d'une photo ne s'affiche que si la photo est dans le pack (`PhotoCredit.fromSpecies(bundledIds:)`) ; les photos en ligne passent déjà par `kOpenPhotoLicenses` (sans nd), aucune URL Macaulay n'est chargée.
-- [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
-      de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
-      avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
+- [x] Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
+      de `taxonomy.csv`), polices, modèle, cartes, textes Wikipédia et fiches IA sous CC BY-SA 4.0
+      avec liens. Crédit « Source : Wikipedia · CC BY-SA 4.0 » (source + licence + liens) sous les
+      descriptions : `lib/fork/licenses/description_credit.dart`, utilisé par la page espèce et par
+      `SpeciesInfoOverlay`. Icônes d'espèces CC BY (J6d) : aucune n'est livrée dans main
+      (`assets/fork/species_icons/` ne contient que `mystere.svg`), donc rien à créditer ; à ajouter
+      à la page si J6d est un jour repris.
 - [x] Renommer ce qui dit encore « BirdNET Live » : texte de partage d'une détection, nom des fichiers
       exportés (`BirdNET_Live_…`), champ creator des exports GPX et JSON, rapport HTML. Adapter les
       tests upstream concernés.

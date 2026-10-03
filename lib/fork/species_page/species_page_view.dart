@@ -19,6 +19,7 @@ import '../design/widgets/birdy_buttons.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/dashed_border.dart';
+import '../licenses/description_credit.dart';
 import '../ranking/activity_bars.dart';
 import '../species_photo/species_photo_config.dart';
 import '../reliability/reliability_badge.dart';
@@ -847,14 +848,21 @@ class _FavoriteButton extends StatelessWidget {
 /// Upstream description when there is no AI sheet (other languages, or a
 /// species without one), with its source.
 class DescriptionBlock extends StatelessWidget {
-  const DescriptionBlock({super.key, required this.text, this.source});
+  const DescriptionBlock({
+    super.key,
+    required this.text,
+    this.source,
+    this.wikipediaUrl,
+  });
 
   final String text;
   final String? source;
 
+  /// Wikipedia page of the species, linked in the credit.
+  final String? wikipediaUrl;
+
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final c = BirdyColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -862,10 +870,7 @@ class DescriptionBlock extends StatelessWidget {
         Text(text, style: BirdyText.bodyCompact.copyWith(color: c.text1)),
         if (source != null) ...[
           const SizedBox(height: BirdySpace.xs),
-          Text(
-            l10n.speciesDescriptionSource(source!),
-            style: BirdyText.caption.copyWith(color: c.text2),
-          ),
+          DescriptionCredit(source: source!, wikipediaUrl: wikipediaUrl),
         ],
       ],
     );
