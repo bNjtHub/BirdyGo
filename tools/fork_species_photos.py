@@ -28,6 +28,10 @@ import urllib.request
 from pathlib import Path
 from typing import Callable, Iterable
 
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SPECIES_LIST = ROOT / "tools" / "fork_sheets" / "region_species.csv"
+TAXONOMY_CSV = ROOT / "assets" / "models" / "taxonomy.csv"
+
 INAT_API = "https://api.inaturalist.org/v1"
 USER_AGENT = "BirdyGo-Builder/1.0 (fr.justcodeit.birdygo)"
 
@@ -89,8 +93,11 @@ def normalize_license(code: str | None) -> str:
 
 
 def has_open_license(code: str | None) -> bool:
-    """True for any Creative Commons or public domain license."""
-    return normalize_license(code).startswith(("cc", "pd"))
+    """True for a license the pack may ship: Creative Commons or public
+    domain, without "-nd" (the pack crops photos, a derivative). Anything
+    else, "© Macaulay Library" included, is reserved."""
+    code = normalize_license(code)
+    return code.startswith(("cc", "pd")) and "-nd" not in code
 
 
 def sized_url(photo: dict, size: str) -> str | None:
@@ -178,6 +185,13 @@ def _inat_id(entry: dict) -> int | None:
         return None
 
 
+def _remove_photo(entry: dict) -> None:
+    """No photo, no credit: the bundle skips it and taxonomy.csv blanks it."""
+    entry["image"] = {}
+    for key in ("image_author", "image_license", "image_source"):
+        entry[key] = ""
+
+
 def replace_reserved_photos(
     species: Iterable[str],
     resolve: Callable[[str], dict | None],
@@ -188,10 +202,14 @@ def replace_reserved_photos(
 
     *resolve* maps a model label to its taxonomy JSON entry; the entry's
     image URL and credit are rewritten, so the downloaded photo and the
-    taxonomy.csv credit stay in step. Returns {"replaced": [...], "kept": [...]}.
+    taxonomy.csv credit stay in step. A taxon with no open photo (or no iNaturalist
+    id) loses its photo and credit: the app then shows its no-photo display.
+    A taxon iNaturalist could not be asked about keeps its photo (offline run).
+    Returns {"replaced": [...], "removed": [...], "kept": [...]}.
     """
     todo: list[tuple[str, dict, int]] = []
     kept: list[str] = []
+    removed: list[str] = []
     for sci in species:
         entry = resolve(sci)
         if entry is None:
@@ -203,7 +221,8 @@ def replace_reserved_photos(
             continue
         inat_id = _inat_id(entry)
         if inat_id is None:
-            kept.append(sci)
+            _remove_photo(entry)
+            removed.append(sci)
         else:
             todo.append((sci, entry, inat_id))
 
@@ -212,9 +231,13 @@ def replace_reserved_photos(
     taxa = fetch_taxa(sorted({i for _, _, i in todo}), fetch, delay_s)
     replaced: list[str] = []
     for sci, entry, inat_id in todo:
-        photo = pick_photo(taxa.get(inat_id, {}))
-        if photo is None:
+        if inat_id not in taxa:
             kept.append(sci)
+            continue
+        photo = pick_photo(taxa[inat_id])
+        if photo is None:
+            _remove_photo(entry)
+            removed.append(sci)
             continue
         entry["image"] = {"medium": photo["url"]}
         entry["image_author"] = photo["author"]
@@ -222,11 +245,29 @@ def replace_reserved_photos(
         entry["image_source"] = f"iNaturalist {photo['id']}"
         replaced.append(sci)
 
-    print(f"  Replaced {len(replaced)} reserved photos with iNaturalist ones")
+    print(f"  Replaced {len(replaced)} reserved photos with iNaturalist ones, "
+          f"removed {len(removed)} (no open photo): {', '.join(sorted(removed))}")
     if kept:
         shown = ", ".join(sorted(kept)[:10]) + (" ..." if len(kept) > 10 else "")
-        print(f"  WARN: {len(kept)} reserved photos kept (no open photo found): {shown}")
-    return {"replaced": replaced, "kept": sorted(kept)}
+        print(f"  WARN: {len(kept)} reserved photos kept (iNaturalist unreachable): {shown}")
+    return {"replaced": replaced, "removed": sorted(removed), "kept": sorted(kept)}
+
+
+def find_reserved_credits(taxonomy_csv: Path, species_csv: Path) -> list[tuple[str, str]]:
+    """--verify-photos: (scientific name, license) of every species of the
+    pack list whose taxonomy.csv photo credit is not shippable (see
+    has_open_license). A species without a photo is fine. Empty means the
+    pack is clean."""
+    listed = load_species_list(species_csv)
+    with open(taxonomy_csv, encoding="utf-8", newline="") as f:
+        rows = {r.get("scientific_name", ""): r for r in csv.DictReader(f)}
+    bad = []
+    for sci in listed:
+        row = rows.get(sci)
+        if (row is not None and row.get("image_url")
+                and not has_open_license(row.get("image_license"))):
+            bad.append((sci, row.get("image_license", "")))
+    return bad
 
 
 # Photo columns of taxonomy.csv, as rebuild_taxonomy_csv() writes them.

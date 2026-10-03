@@ -630,7 +630,20 @@ def main():
         "--replace-reserved", action="store_true",
         help="replace photos without an open license by iNaturalist ones",
     )
+    parser.add_argument(
+        "--verify-photos", action="store_true",
+        help="check taxonomy.csv: exit 1 if a species of --species-list "
+             "(default: the region list) has a reserved photo license",
+    )
     args = parser.parse_args()
+    if args.verify_photos:  # FORK: nothing is built, see fork_species_photos
+        bad = fork_species_photos.find_reserved_credits(
+            TAXONOMY_CSV_PATH, args.species_list or fork_species_photos.DEFAULT_SPECIES_LIST,
+        )
+        for sci, lic in bad:
+            print(f"  NOT ALLOWED: {sci} ({lic or 'no license'})", file=sys.stderr)
+        print(f"Reserved photos in the pack: {len(bad)}")
+        sys.exit(1 if bad else 0)
 
     taxonomy_json = resolve_taxonomy_json(args.taxonomy_json)
     labels_csv = resolve_labels_csv(args.labels_csv)

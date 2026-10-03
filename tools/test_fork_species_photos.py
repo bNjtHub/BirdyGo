@@ -12,6 +12,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import fork_species_photos as photos  # noqa: E402
 
+NL = chr(10)
+MACAULAY = "© Macaulay Library"
 S3 = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
 
@@ -76,9 +78,11 @@ class LicenseTest(unittest.TestCase):
         self.assertEqual(photos.normalize_license(None), "")
 
     def test_open_licenses(self):
-        for code in ("cc0", "cc-by-nc", "cc-by-nc-nd", "CC BY-SA 3.0", "pd"):
+        for code in ("cc0", "cc-by", "cc-by-sa", "cc-by-nc", "cc-by-nc-sa",
+                     "CC BY-SA 3.0", "pd"):
             self.assertTrue(photos.has_open_license(code), code)
-        for code in ("© Macaulay Library", "", None, "all rights reserved"):
+        for code in ("© Macaulay Library", "", None, "all rights reserved",
+                     "cc-by-nd", "cc-by-nc-nd"):
             self.assertFalse(photos.has_open_license(code), code)
 
 
@@ -156,8 +160,14 @@ class ReplaceReservedTest(unittest.TestCase):
         )
         self.assertEqual(report, {
             "replaced": ["Erithacus rubecula"],
-            "kept": ["Carduelis carduelis", "Serinus serinus"],
+            "removed": ["Carduelis carduelis", "Serinus serinus"],
+            "kept": [],
         })
+        goldfinch = self.entries["Carduelis carduelis"]
+        self.assertEqual(goldfinch["image"], {})
+        self.assertEqual(photos.photo_credit(goldfinch), {
+            "image_url": "", "image_author": "", "image_license": "",
+            "image_source": ""})
         robin = self.entries["Erithacus rubecula"]
         self.assertEqual(robin["image"], {"medium": f"{S3}/2/medium.jpg"})
         self.assertEqual(robin["image_author"], "Author 2")
@@ -176,6 +186,8 @@ class ReplaceReservedTest(unittest.TestCase):
             ["Erithacus rubecula"], self.entries.get, offline, delay_s=0
         )
         self.assertEqual(report["replaced"], [])
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(report["kept"], ["Erithacus rubecula"])
         self.assertEqual(self.entries["Erithacus rubecula"]["image"]["medium"],
                          "cornell/robin")
 
@@ -260,6 +272,32 @@ class UpdatePhotoCreditsTest(unittest.TestCase):
         self.assertEqual(photos.photo_credit({}), {
             "image_url": "", "image_author": "", "image_license": "",
             "image_source": ""})
+
+
+class VerifyPackTest(unittest.TestCase):
+    def test_lists_reserved_credits_of_the_listed_species_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            listed = Path(tmp) / "list.csv"
+            listed.write_text("scientific_name" + NL + NL.join(["A a", "B b", "C c", "E e"]) + NL,
+                              encoding="utf-8")
+            csv_path = Path(tmp) / "taxonomy.csv"
+            csv_path.write_text(NL.join([
+                "scientific_name,image_url,image_license",
+                "A a,u,cc-by",
+                "B b,u," + MACAULAY,
+                "C c,u,cc-by-nd",
+                "E e,,",
+                "D d,u," + MACAULAY,
+            ]) + NL, encoding="utf-8")
+            self.assertEqual(
+                photos.find_reserved_credits(csv_path, listed),
+                [("B b", MACAULAY), ("C c", "cc-by-nd")])
+
+    def test_the_real_pack_has_no_reserved_photo(self):
+        if not photos.TAXONOMY_CSV.exists() or not photos.DEFAULT_SPECIES_LIST.exists():
+            self.skipTest("pack files not present")
+        self.assertEqual(
+            photos.find_reserved_credits(photos.TAXONOMY_CSV, photos.DEFAULT_SPECIES_LIST), [])
 
 
 if __name__ == "__main__":

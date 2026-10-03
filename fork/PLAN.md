@@ -957,9 +957,14 @@ Fini quand, mesuré en mode profile sur le Xiaomi :
 - [x] Carte du monde plein écran (PR #130) : bouton d'agrandissement sur la carte de la fiche, page zoomable (pincer, glisser, double appui ×2, zoom 1 à 8) recadrée sur l'aire de l'espèce ; la couche statique est refaite à la résolution de l'écran à la fin du geste (`lib/fork/world_map/world_map_fullscreen.dart`, `world_map_viewport.dart`).
 - [ ] Piste de test interne sur le Play Store, fiche en français, politique de confidentialité adaptée
       de celle d'upstream.
-- [ ] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
+- [x] Avant de publier : retirer du pack les photos marquées « © Macaulay Library » (droits réservés),
       garder CC0, CC BY et CC BY-SA, et CC BY-NC seulement si l'app reste gratuite.
       `--replace-reserved` (J6b) en remplace déjà la plupart ; le script liste celles qui restent.
+      Fait : 0 photo « © Macaulay Library » restait dans le pack (569 photos) ; 50 photos CC BY-ND
+      (recadrées, donc dérivées) traitées comme interdites : 48 remplacées par des photos libres,
+      2 retirées (Regulus regulus, Dendrocoptes medius : pas de photo libre, l'app affiche l'image
+      par défaut). `python tools/build_species_bundle.py --verify-photos` échoue si une photo non
+      autorisée revient (test dans `tools/test_fork_species_photos.py`).
 - [ ] (fait : photos par licence, polices, modèle, cartes ; reste : textes Wikipédia et icônes d’espèces CC BY) Page « Licences des contenus » dans À propos : licence de chaque photo (colonne `image_license`
       de `taxonomy.csv`, à afficher aussi dans le crédit), textes Wikipédia et fiches IA sous CC BY-SA
       avec lien, icônes d'espèces tirées d'une base CC BY (J6d) avec leur auteur. La mention actuelle « Source : wikipedia » ne suffit pas pour la CC BY-SA.
