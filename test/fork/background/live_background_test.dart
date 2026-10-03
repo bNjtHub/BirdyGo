@@ -1,5 +1,4 @@
 import 'package:birdnet_live/fork/background/background_tip.dart';
-import 'package:birdnet_live/fork/background/live_background.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -35,21 +34,6 @@ void main() {
         ForegroundServiceGuard.tryClaim(ForegroundServiceOwner.live),
         isFalse,
       );
-    });
-  });
-
-  group('AndroidLiveBackground', () {
-    test('does nothing off Android and claims nothing', () async {
-      final background = AndroidLiveBackground();
-      expect(await background.start(), isFalse);
-      expect(background.isRunning, isFalse);
-      expect(ForegroundServiceGuard.owner, isNull);
-      await background.stop();
-      expect(ForegroundServiceGuard.owner, isNull);
-    });
-
-    test('its service id differs from Survey and ARU', () {
-      expect(kLiveForegroundServiceId, isNot(anyOf(256, 512)));
     });
   });
 

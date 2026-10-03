@@ -36,6 +36,10 @@ faudra faire côté iOS. Pas de build ni de test iOS pour l'instant.
 - Icônes via `AppIcons` (`lib/shared/utils/app_icons.dart`), jamais `Icons.*` en direct.
 - Cartes : réutiliser les réglages de tuiles partagés, pas de préchargement massif de tuiles OSM.
 - Nouvelle dépendance : seulement si le plan du jalon la prévoit, sinon demander.
+- Une seule source de vérité (règle importante) : composants, fonctions, règles métier, constantes,
+  timings et courbes d'animation existent à un seul endroit. Chercher l'existant avant de créer,
+  l'adapter (paramètre optionnel, défauts inchangés) et le brancher partout ; supprimer les doublons
+  rencontrés dans le code du fork.
 
 ## Commandes
 

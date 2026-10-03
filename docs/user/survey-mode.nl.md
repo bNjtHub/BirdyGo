@@ -138,3 +138,5 @@ De Survey-kaart op volledig scherm (de knop :material-fullscreen: in het Session
 ## Na het stoppen
 
 BirdNET Live slaat de afgeronde Survey op en opent het [Session-overzicht](session-review.md).
+
+De lopende Survey wordt opgeslagen bij de start, elke 30 seconden en wanneer de app de voorgrond verlaat. Na een crash of stroomuitval verschijnt de laatst opgeslagen gedeeltelijke Survey als beëindigde Session in de Session-bibliotheek. De opname start niet opnieuw. Waarnemingen sinds de laatste opslag kunnen ontbreken.

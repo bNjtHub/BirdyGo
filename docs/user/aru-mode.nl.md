@@ -1,7 +1,7 @@
 # ARU-modus
 
 !!! note "Vroege implementatie"
-    De ARU-modus maakt momenteel een herstelbare Session voor een geplande inzet aan, neemt geplande cycli op, draait live inferentie tijdens actieve cycli, bewaart detectiefragmenten wanneer die opnamemodus is gekozen en toont op Android bediening via een voorgrondmelding. Het gedrag op de achtergrond op iOS moet nog in het veld worden gevalideerd.
+    De ARU-modus slaat momenteel tussenstanden van een geplande inzet op, neemt geplande cycli op, draait live inferentie tijdens actieve cycli, bewaart detectiefragmenten wanneer die opnamemodus is gekozen en toont op Android bediening via een voorgrondmelding. Het gedrag op de achtergrond op iOS moet nog in het veld worden gevalideerd.
 
 De ARU-modus (Autonomous Recording Unit) is de workflow voor geplande akoestische inzetten op een vaste locatie.
 
@@ -24,7 +24,7 @@ De ARU-modus (Autonomous Recording Unit) is de workflow voor geplande akoestisch
     - **Groepering van Sessions**: Stel in of elke cyclus als een aparte Session wordt opgeslagen (aanbevolen voor snellere laadtijden en modulair bekijken) of dat alle cycli in één Session met meerdere segmenten worden gecombineerd.
 - **Gereed**: Bekijk de planning, het geschatte opslagverbruik voor audio en de beperkingen op het dagritme, en start dan de inzet.
 
-Zodra je een inzet start, wordt meteen een Session van het type `SessionType.aru` met de metadata van de ARU-planning opgeslagen, zodat de staat van de cycli later kan worden hersteld.
+Zodra je een inzet start, wordt meteen een Session van het type `SessionType.aru` met de metadata van de ARU-planning opgeslagen. Opnamecycli worden daarnaast elke 30 seconden tussentijds opgeslagen, ook cycli zonder detecties. Na een crash of stroomuitval verschijnt de laatst opgeslagen inzet als beëindigde Session in de Session-bibliotheek; de opname start niet opnieuw. Wat sinds de laatste tussentijdse opslag is opgenomen, kan verloren gaan.
 
 JSON- en ZIP-exports bevatten de metadata van de ARU-inzet. ZIP-exports bundelen de opgeslagen opnamebestanden per cyclus onder `aru_cycles/`.
 

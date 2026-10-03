@@ -1,0 +1,3 @@
+<en-US>
+First internal test build: offline song identification, notebook, quiz, maps, species pages. Please report anything that gets in the way, especially long listening with the screen off.
+</en-US>

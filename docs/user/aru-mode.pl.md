@@ -1,7 +1,7 @@
 # Tryb ARU
 
 !!! note "Wczesna implementacja"
-    Tryb ARU tworzy obecnie odtwarzalną Session zaplanowanego wdrożenia, nagrywa zaplanowane cykle, prowadzi wnioskowanie na żywo w trakcie aktywnych cykli, zapisuje zachowane fragmenty wykryć, gdy wybrano ten tryb nagrywania, i pokazuje sterowanie w powiadomieniu pierwszoplanowym na Androidzie. Zachowanie w tle na iOS wymaga jeszcze weryfikacji w terenie.
+    Tryb ARU zapisuje obecnie punkty kontrolne zaplanowanego wdrożenia, nagrywa zaplanowane cykle, prowadzi wnioskowanie na żywo w trakcie aktywnych cykli, zapisuje zachowane fragmenty wykryć, gdy wybrano ten tryb nagrywania, i pokazuje sterowanie w powiadomieniu pierwszoplanowym na Androidzie. Zachowanie w tle na iOS wymaga jeszcze weryfikacji w terenie.
 
 Tryb ARU (Autonomous Recording Unit) to sposób pracy w stałej lokalizacji, przeznaczony do zaplanowanych wdrożeń akustycznych.
 
@@ -24,7 +24,7 @@ Tryb ARU (Autonomous Recording Unit) to sposób pracy w stałej lokalizacji, prz
     - **Grupowanie Sessions**: ustal, czy każdy cykl ma być zapisywany jako osobna Session (zalecane ze względu na szybsze wczytywanie i modułowy podgląd), czy wszystkie cykle mają trafić do jednej Session z wieloma segmentami.
 - **Gotowe**: sprawdź harmonogram, szacowane zużycie pamięci na dźwięk i ograniczenia dobowe, a następnie rozpocznij wdrożenie.
 
-Rozpoczęcie wdrożenia od razu zapisuje Session typu `SessionType.aru` z metadanymi harmonogramu ARU, dzięki czemu stan cykli można później odtworzyć.
+Rozpoczęcie wdrożenia od razu zapisuje Session typu `SessionType.aru` z metadanymi harmonogramu ARU. Cykle nagrywania są też zapisywane co 30 sekund, również te bez wykryć. Po awarii lub utracie zasilania ostatnio zapisane wdrożenie pojawia się w Bibliotece Sessions jako zakończona Session; nagrywanie nie wznawia się samo. Dane od ostatniego zapisu mogą zostać utracone.
 
 Eksporty JSON i ZIP zawierają metadane wdrożenia ARU. Eksporty ZIP grupują zapisane pliki nagrań poszczególnych cykli w katalogu `aru_cycles/`.
 

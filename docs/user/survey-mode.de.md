@@ -212,3 +212,5 @@ ausgegraut.
 
 BirdNET Live speichert den abgeschlossenen Survey und öffnet die
 [Session-Übersicht](session-review.md).
+
+Der laufende Survey wird beim Start, alle 30 Sekunden und beim Verlassen des Vordergrunds gesichert. Nach einem Absturz oder Stromausfall erscheint der zuletzt gesicherte Teil-Survey als beendete Session in der Session-Bibliothek. Die Aufnahme wird nicht neu gestartet. Beobachtungen seit der letzten Sicherung können fehlen.

@@ -216,6 +216,8 @@ Este ajuste rige la apertura del modo Live desde dentro de la aplicación. El [w
 
 Al activarlo (el valor predeterminado), una sesión de Live o Point Count completada se añade a tu biblioteca automáticamente en el momento en que termina. Al desactivarlo, una sesión finalizada se abre en la revisión marcada como **sin guardar**: el icono de guardar aparece resaltado y debes tocarlo para conservar la sesión. Salir de la revisión sin guardar descarta la sesión y sus grabaciones. Esto encaja con escuchas rápidas en las que solo quieres conservar algún resultado destacable en lugar de acumular cada grabación corta. Los despliegues de Survey y ARU siempre se guardan automáticamente —una ejecución larga sin supervisión es demasiado valiosa como para perderla por olvidar tocar Guardar—, así que este interruptor no se aplica allí.
 
+Mientras el guardado automático está activado, el modo Live y Point Count también guardan una sesión parcial al inicio, cada 30 segundos y cuando la aplicación deja el primer plano. Así se limita la pérdida de datos tras un cierre inesperado o un corte de energía. Con el ajuste desactivado, estos guardados intermedios no se conservan. Survey y ARU guardan sus puntos de control independientemente de este ajuste.
+
 ## Reproducción
 
 ### Superposición de reproducción en la revisión

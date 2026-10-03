@@ -65,3 +65,5 @@ Der Live-Bildschirm des Point Counts konzentriert sich auf ein zeitgesteuertes D
 ## Nach der Zählung
 
 Wenn der Point Count endet, speichert BirdNET Live die Session und öffnet die [Session-Übersicht](session-review.md).
+
+Bei aktiviertem automatischem Speichern wird eine laufende Zählung außerdem beim Start, alle 30 Sekunden und beim Verlassen des Vordergrunds gesichert. Nach einem Absturz oder Stromausfall steht die zuletzt gesicherte Teilzählung in der Session-Bibliothek bereit.

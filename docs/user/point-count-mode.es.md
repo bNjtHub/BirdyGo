@@ -54,3 +54,5 @@ La pantalla del Point Count en vivo se centra en un panel cronometrado.
 ## Después del conteo
 
 Cuando finaliza el Point Count, BirdNET Live guarda la Session y abre el [Resumen de la Session](session-review.md).
+
+Con el guardado automático activado, un conteo sin terminar también se guarda al inicio, cada 30 segundos y cuando la aplicación deja el primer plano. Tras un cierre inesperado o un corte de energía, el último conteo parcial está disponible en la Biblioteca de sesiones.

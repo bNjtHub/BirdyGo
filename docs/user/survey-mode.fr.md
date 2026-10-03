@@ -140,3 +140,5 @@ La vue carte plein écran du relevé (le bouton :material-fullscreen: dans le R�
 ## Après l'arrêt
 
 BirdNET Live enregistre le relevé terminé et ouvre le [Résumé de la session](session-review.md).
+
+Le relevé en cours est enregistré au démarrage, toutes les 30 secondes et lorsque l'application quitte le premier plan. Après un plantage ou une coupure de courant, le dernier relevé partiel apparaît dans la Bibliothèque de sessions comme une session terminée. L'enregistrement ne redémarre pas. Les observations postérieures à la dernière sauvegarde peuvent manquer.
