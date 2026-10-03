@@ -1100,6 +1100,7 @@ void _showPointCountLiveHelp(BuildContext context) {
         ),
         AppHelpSection(
           icon: AppIcons.stopRounded,
+          iconFill: 1, // FORK: keep filled stop glyph after Symbols migration
           body: l10n.pointCountLiveHelpFinish,
         ),
       ],

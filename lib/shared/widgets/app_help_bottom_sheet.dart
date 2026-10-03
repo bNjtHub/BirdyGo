@@ -10,13 +10,22 @@
 import 'package:flutter/material.dart';
 
 class AppHelpSection {
-  const AppHelpSection({required this.icon, required this.body, this.child});
+  const AppHelpSection({
+    required this.icon,
+    required this.body,
+    this.child,
+    this.iconFill, // FORK: keep filled stop glyph after Symbols migration
+  });
 
   final IconData icon;
   final String body;
 
   /// Optional widget rendered under [body] (e.g. a small legend or example).
   final Widget? child;
+
+  /// Optional Material Symbols fill (0..1) for [icon]; null keeps the default.
+  // FORK: keep filled stop glyph after Symbols migration
+  final double? iconFill;
 }
 
 class AppHelpBottomSheet extends StatelessWidget {
@@ -83,6 +92,7 @@ class AppHelpBottomSheet extends StatelessWidget {
                       Icon(
                         section.icon,
                         size: 22,
+                        fill: section.iconFill, // FORK: keep filled stop glyph after Symbols migration
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 12),
