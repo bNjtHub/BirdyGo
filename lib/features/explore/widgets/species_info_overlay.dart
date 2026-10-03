@@ -32,6 +32,7 @@ import '../../inference/geo_model.dart';
 import '../../history/global_species_history.dart';
 import '../../live/live_providers.dart';
 import 'pick_wikipedia_url.dart';
+import '../../../fork/licenses/description_credit.dart'; // FORK: CC BY-SA credit (J7)
 import '../../../fork/reliability/reliability_screen.dart'; // FORK: precision (J3)
 import '../../../fork/ranking/species_activity_section.dart'; // FORK: activity (J4)
 import '../../../fork/species_sheet/species_sheet.dart'; // FORK: AI sheet (J4b)
@@ -306,10 +307,10 @@ class _SpeciesInfoSheetState extends ConsumerState<_SpeciesInfoSheet> {
                   if (_detail?.descriptionSource != null)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: Text(
-                        AppLocalizations.of(context)!.speciesDescriptionSource(
-                          _detail!.descriptionSource!,
-                        ),
+                      // FORK: CC BY-SA credit (source + license + links) for Wikipedia texts
+                      child: DescriptionCredit(
+                        source: _detail!.descriptionSource!,
+                        wikipediaUrl: _pickWikipediaUrl(_detail!),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withAlpha(100),
                           fontStyle: FontStyle.italic,

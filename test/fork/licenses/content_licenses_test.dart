@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
 import 'package:birdnet_live/fork/licenses/content_licenses_screen.dart';
+import 'package:birdnet_live/fork/licenses/description_credit.dart';
 import 'package:birdnet_live/fork/licenses/licenses_model.dart';
 import 'package:birdnet_live/fork/world_map/world_map_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
@@ -122,6 +123,49 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('credits Wikipedia texts and AI sheets as CC BY-SA', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('licenses-wikipedia')),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Textes de Wikipédia'), findsOneWidget);
+    expect(find.textContaining('CC BY-SA 4.0'), findsNWidgets(2));
+    expect(find.byKey(const ValueKey('licenses-wikipedia-site')), findsOneWidget);
+    expect(find.byKey(const ValueKey('licenses-sheets')), findsOneWidget);
+  });
+
+  testWidgets('description credit: Wikipedia gets license and links', (
+    tester,
+  ) async {
+    Future<void> show(String source) => tester.pumpWidget(
+      MaterialApp(
+        theme: BirdyTheme.light(),
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: DescriptionCredit(
+            source: source,
+            wikipediaUrl: 'https://fr.wikipedia.org/wiki/Parus_major',
+          ),
+        ),
+      ),
+    );
+    await show('wikipedia');
+    expect(find.byKey(const ValueKey('description-credit-wikipedia')), findsOneWidget);
+    expect(find.byKey(const ValueKey('description-credit-license')), findsOneWidget);
+    expect(find.text('CC BY-SA 4.0'), findsOneWidget);
+    await show('birdnet');
+    expect(find.byKey(const ValueKey('description-credit-license')), findsNothing);
+    expect(find.text('Source : birdnet'), findsOneWidget);
+    expect(isWikipediaSource(' Wikipedia '), isTrue);
+    expect(wikipediaTextLicenseUrl, 'https://creativecommons.org/licenses/by-sa/4.0/');
   });
 
   testWidgets('search filters the list', (tester) async {
