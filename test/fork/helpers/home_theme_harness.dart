@@ -14,7 +14,8 @@ import 'package:birdnet_live/fork/game/streak.dart';
 import 'package:birdnet_live/fork/home/fork_home.dart';
 import 'package:birdnet_live/fork/home/home_loader.dart';
 import 'package:birdnet_live/fork/home/home_model.dart';
-import 'package:birdnet_live/fork/home/logo_tweet.dart';
+import 'package:birdnet_live/fork/sound/birdy_sfx.dart';
+import 'fake_birdy_sfx.dart';
 import 'package:birdnet_live/fork/reliability/reliability_config.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/providers/app_providers.dart';
@@ -132,7 +133,7 @@ Future<void> pumpHome(WidgetTester tester, BirdyBird bird, bool dark) async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         homeClockProvider.overrideWithValue(() => _fixedNow),
-        logoTweetPlayerProvider.overrideWithValue(_SilentTweet()),
+        birdySfxProvider.overrideWithValue(FakeBirdySfx()),
         homeLoaderProvider.overrideWithValue(_Loader()),
         gameProgressProvider.overrideWith((ref) async => _game()),
         taxonomyServiceProvider.overrideWith((ref) async => TaxonomyService()),
@@ -163,13 +164,3 @@ Future<void> pumpHome(WidgetTester tester, BirdyBird bird, bool dark) async {
 }
 
 /// No audio plugin in tests: the tweet is prepared and played by a no-op.
-class _SilentTweet implements LogoTweetPlayer {
-  @override
-  Future<void> prepare() async {}
-
-  @override
-  Future<void> play() async {}
-
-  @override
-  Future<void> dispose() async {}
-}

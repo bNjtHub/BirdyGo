@@ -40,13 +40,6 @@ class HomeLogoRow extends ConsumerStatefulWidget {
 
 class _HomeLogoRowState extends ConsumerState<HomeLogoRow> {
   @override
-  void initState() {
-    super.initState();
-    // Load the tweet now (silent) so the first tap plays without delay.
-    prepareLogoTweet(ref);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     return SingingLogo(
