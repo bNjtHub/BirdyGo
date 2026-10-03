@@ -24,6 +24,7 @@ import '../../../shared/services/taxonomy_service.dart';
 import '../../../shared/widgets/detection_evidence_badge.dart';
 import '../../explore/explore_providers.dart';
 import '../../history/widgets/detection_actions.dart';
+import '../../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../live_session.dart';
 import 'live_tips.dart';
 
@@ -295,7 +296,7 @@ class DetectionTile extends ConsumerWidget {
                             detection.source ==
                                 DetectionSource.userSpecified) ...[
                           Icon(
-                            AppIcons.editNote,
+                            BirdyIcons.note, // FORK: icon roles
                             size: 14,
                             color: theme.colorScheme.primary,
                           ),
@@ -416,10 +417,9 @@ class DetectionTile extends ConsumerWidget {
             borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: Icon(
-                actions.isConfirmed
-                    ? AppIcons.checkCircle
-                    : AppIcons.checkCircleOutline,
+              child: BirdyIcon( // FORK: icon roles
+                BirdyIcons.confirmed, // FORK: icon roles
+                active: actions.isConfirmed, // FORK: icon roles
                 size: 24,
                 color:
                     actions.isConfirmed
@@ -527,7 +527,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon ?? (isActive ? AppIcons.hearing : AppIcons.micOff),
+              icon ?? (isActive ? BirdyIcons.heard : AppIcons.micOff), // FORK: icon roles
               size: 40,
               color: theme.colorScheme.onSurface.withAlpha(77),
             ),

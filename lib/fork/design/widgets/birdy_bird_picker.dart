@@ -13,9 +13,9 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
 import '../../game/quiz_fx.dart' show QuizPop;
 import '../../home/birdygo_logo.dart';
+import '../birdy_icons.dart';
 import '../birdy_motion.dart';
 import '../birdy_theme_choice.dart';
 import '../birdy_tokens.dart';
@@ -173,7 +173,7 @@ class BirdyBirdCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        AppIcons.check,
+                        BirdyIcons.tick,
                         size: BirdySizes.inlineIcon,
                         weight: 700,
                         color: BirdyBrand.ink,

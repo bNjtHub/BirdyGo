@@ -97,19 +97,19 @@ class _DayPill extends StatelessWidget {
       DayMoment.morningBirds || DayMoment.eveningBirds => (
         c.tonal,
         c.accentText,
-        BirdyGoSilhouetteIcon.glyph(size: _iconSize, color: c.accentText),
+        BirdyGoSilhouetteIcon.glyph(size: BirdyGlyph.pill, color: c.accentText),
       ),
       DayMoment.sunrise => (
         c.surface1,
         c.text1,
-        Icon(AppIcons.wbSunny, size: _iconSize, color: c.orioleText, fill: 1),
+        Icon(AppIcons.wbSunny, size: BirdyGlyph.pill, color: c.orioleText, fill: 1),
       ),
       DayMoment.goldenHour => (
         c.orioleContainer,
         c.orioleText,
         Icon(
           AppIcons.autoAwesome,
-          size: _iconSize,
+          size: BirdyGlyph.pill,
           color: c.orioleText,
           fill: 1,
         ),
@@ -119,7 +119,7 @@ class _DayPill extends StatelessWidget {
         c.text1,
         Icon(
           AppIcons.wbTwilight,
-          size: _iconSize,
+          size: BirdyGlyph.pill,
           color: c.probable.foreground,
         ),
       ),
@@ -167,6 +167,4 @@ class _DayPill extends StatelessWidget {
       ),
     );
   }
-
-  static const double _iconSize = 15;
 }

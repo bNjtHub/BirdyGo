@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/services/app_data_clear_service.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/widgets/content_width_constraint.dart';
@@ -1309,7 +1310,7 @@ class SettingHelpIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return IconButton(
-      icon: const Icon(AppIcons.helpOutline, size: 18),
+      icon: const Icon(BirdyIcons.help, size: 18), // FORK: icon roles
       visualDensity: VisualDensity.compact,
       tooltip: l10n.settingsHelpTooltip,
       padding: EdgeInsets.zero,
@@ -1761,7 +1762,7 @@ class _ManualCoordinatesTileState
             alignment: Alignment.centerLeft,
             child: OutlinedButton.icon(
               onPressed: () => _pickOnMap(l10n),
-              icon: const Icon(AppIcons.map, size: 18),
+              icon: const Icon(BirdyIcons.map, size: 18), // FORK: icon roles
               label: Text(l10n.settingsPickOnMap),
             ),
           ),
@@ -2278,7 +2279,7 @@ class _GpsRefreshTileState extends ConsumerState<_GpsRefreshTile> {
             ? l10n.settingsGpsRefreshSubtitle
             : '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}';
     return ListTile(
-      leading: const Icon(AppIcons.myLocation),
+      leading: const Icon(BirdyIcons.myPosition), // FORK: icon roles
       title: Text(l10n.settingsGpsRefresh),
       subtitle: Text(subtitle),
       trailing:

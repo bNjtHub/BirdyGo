@@ -15,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/providers/app_providers.dart';
-import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -27,6 +26,7 @@ import 'onboarding_pages.dart';
 import 'onboarding_permissions.dart';
 import 'onboarding_permissions_page.dart';
 import 'onboarding_steps.dart';
+import '../design/birdy_icons.dart';
 
 /// Steps counted in « Étape n sur N » (first name, bird), and the dots of the
 /// other pages (three story pages and the permissions page).
@@ -375,10 +375,10 @@ class _FinishButton extends StatelessWidget {
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
             textStyle: BirdyText.labelLarge,
-            iconSize: 32,
+            iconSize: BirdyGlyph.x7l,
           ),
           onPressed: onPressed,
-          icon: const Icon(AppIcons.playArrowRounded, fill: 1),
+          icon: const BirdyIcon(BirdyIcons.play),
           label: Text(label, textAlign: TextAlign.center),
         ),
       ),

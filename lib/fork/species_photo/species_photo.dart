@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/models/taxonomy_species.dart';
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -223,7 +223,7 @@ class _SpeciesPhotoState extends ConsumerState<SpeciesPhoto> {
             onPressed: showCredit,
             tooltip: l10n.forkPhotoCredit,
             iconSize: BirdySizes.blockIcon,
-            icon: const Icon(AppIcons.infoOutline),
+            icon: const Icon(BirdyIcons.info),
             style: IconButton.styleFrom(
               backgroundColor: BirdyBrand.black.withValues(
                 alpha: BirdyAlpha.photoButtonScrim,

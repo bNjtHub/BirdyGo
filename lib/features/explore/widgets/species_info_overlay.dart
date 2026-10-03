@@ -21,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../../core/theme/score_colors.dart';
 import '../../../shared/models/taxonomy_species.dart';
 import '../../../shared/providers/settings_providers.dart';
@@ -469,7 +470,7 @@ class _LinkChip extends StatelessWidget {
         width: 18,
         height: 18,
         fit: BoxFit.contain,
-        errorBuilder: (a, b, c) => const Icon(AppIcons.public, size: 18),
+        errorBuilder: (a, b, c) => const Icon(BirdyIcons.world, size: 18), // FORK: icon roles
       ),
       label: Row(
         mainAxisSize: MainAxisSize.min,
@@ -723,7 +724,7 @@ class _OverlayDetectedBadge extends StatelessWidget {
         ],
       ),
       child: Icon(
-        AppIcons.check,
+        BirdyIcons.tick, // FORK: icon roles
         size: 18,
         color: highContrast ? Colors.white : theme.colorScheme.onPrimary,
       ),
@@ -799,8 +800,9 @@ class _DetectionStatsTile extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  AppIcons.checkCircle,
+                BirdyIcon( // FORK: icon roles
+                  BirdyIcons.confirmed, // FORK: icon roles
+                  active: true, // FORK: icon roles
                   size: 20,
                   // Black keeps maximum contrast against the white
                   // high-contrast panel; normal themes use the vibrant

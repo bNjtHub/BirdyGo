@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/explore/explore_providers.dart';
-import '../../shared/utils/app_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
 import '../design/widgets/species_avatar.dart';
 import '../game/game_config.dart';
 import 'notebook_model.dart';
+import '../design/birdy_icons.dart';
 
 abstract final class NotebookVisuals {
   /// A species heard: photo on the species tint, grey when [muted]. A rare
@@ -109,8 +109,8 @@ class _StateBadge extends StatelessWidget {
           color: discovered ? BirdyBrand.checkGreen : c.toCheck.foreground,
           border: Border.all(color: c.surface1, width: BirdyStroke.regular),
         ),
-        child: Icon(
-          discovered ? AppIcons.check : AppIcons.question,
+        child: BirdyIcon(
+          discovered ? BirdyIcons.tick : BirdyIcons.help,
           size: BirdyGlyph.xxs,
           color: BirdyBrand.white,
         ),

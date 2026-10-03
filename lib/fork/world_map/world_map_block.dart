@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
@@ -74,7 +75,7 @@ class WorldMapBlock extends StatefulWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionTitle(icon: AppIcons.public, text: l10n.forkWorldTitle),
+          SectionTitle(icon: BirdyIcons.world, text: l10n.forkWorldTitle),
           const SizedBox(height: BirdySpace.m),
           AspectRatio(
             aspectRatio: WorldMapConfig.aspect,
@@ -211,7 +212,7 @@ class _WorldMapBlockState extends State<WorldMapBlock> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionTitle(icon: AppIcons.public, text: l10n.forkWorldTitle),
+          SectionTitle(icon: BirdyIcons.world, text: l10n.forkWorldTitle),
           const SizedBox(height: BirdySpace.m),
           Stack(
             children: [
@@ -506,7 +507,7 @@ class _ExpandButton extends StatelessWidget {
                   color: c.surface1.withValues(alpha: 0.85),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(AppIcons.fullscreen, size: 20, color: c.text1),
+                child: Icon(AppIcons.fullscreen, size: BirdyGlyph.xl, color: c.text1),
               ),
             ),
           ),

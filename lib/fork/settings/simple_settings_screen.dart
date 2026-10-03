@@ -12,6 +12,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../shared/providers/settings_providers.dart';
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_filter_chip.dart';
@@ -97,7 +98,7 @@ class SimpleSettingsScreen extends ConsumerWidget {
                   children: [
                     _ChoiceRow<String?>(
                       key: const ValueKey('settings-app-language'),
-                      icon: AppIcons.public,
+                      icon: BirdyIcons.world,
                       title: l10n.settingsAppLanguage,
                       value: ref.watch(localeProvider)?.languageCode,
                       options: [
@@ -149,7 +150,7 @@ class SimpleSettingsScreen extends ConsumerWidget {
                     // FORK: J7, the listening screen follows the theme unless asked dark
                     BirdySwitchRow(
                       key: const ValueKey('settings-live-always-dark'),
-                      icon: AppIcons.hearing,
+                      icon: BirdyIcons.heard,
                       title: l10n.forkLiveAlwaysDark,
                       hint: l10n.forkLiveAlwaysDarkHint,
                       value: ref.watch(liveAlwaysDarkProvider),
@@ -188,7 +189,7 @@ class SimpleSettingsScreen extends ConsumerWidget {
                   key: const ValueKey('settings-advanced'),
                   children: [
                     BirdyListRow(
-                      icon: AppIcons.tune,
+                      icon: BirdyIcons.settings,
                       discColor: c.oriole,
                       iconColor: c.onOriole,
                       title: l10n.forkSettingsAdvanced,
@@ -310,7 +311,7 @@ class _ChoiceRow<T> extends StatelessWidget {
                             ),
                           ),
                           if (option == value)
-                            Icon(AppIcons.check, color: c.accentText),
+                            Icon(BirdyIcons.tick, color: c.accentText),
                         ],
                       ),
                     ),

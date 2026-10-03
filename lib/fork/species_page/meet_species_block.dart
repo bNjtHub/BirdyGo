@@ -9,6 +9,8 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
+import '../design/birdygo_silhouette.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -62,11 +64,26 @@ const Map<SheetSection, _Tone> _tones = {
 IconData _iconOf(SheetSection s) => switch (s) {
   SheetSection.size => AppIcons.straighten,
   SheetSection.behaviour => AppIcons.visibility,
-  SheetSection.whyHere => AppIcons.locationOn,
-  SheetSection.enemies => AppIcons.pets,
+  SheetSection.whyHere => BirdyIcons.place,
+  SheetSection.enemies => BirdyIcons.heard,
   SheetSection.confusions => AppIcons.swapHoriz,
-  _ => AppIcons.lightbulbOutline,
+  _ => BirdyIcons.tip,
 };
+
+/// The section glyph: the BirdyGo silhouette for the enemies (other
+/// species), the Material icon of [_iconOf] otherwise.
+Widget _glyphOf(
+  SheetSection s, {
+  required double? size,
+  required Color color,
+  double fill = 0,
+}) =>
+    s == SheetSection.enemies
+        ? BirdyGoSilhouetteIcon.glyph(
+          size: size ?? BirdyGlyph.x3l,
+          color: color,
+        )
+        : Icon(_iconOf(s), size: size, color: color, fill: fill);
 
 String _labelOf(AppLocalizations l10n, SheetSection s) => switch (s) {
   SheetSection.size => l10n.forkMeetSize,
@@ -106,6 +123,8 @@ class SheetTextBlock extends StatelessWidget {
         children: [
           SectionTitle(
             icon: _iconOf(section),
+            glyphBuilder:
+                (size, color) => _glyphOf(section, size: size, color: color),
             text: sheetSectionTitle(l10n, section),
           ),
           const SizedBox(height: BirdySpace.m),
@@ -247,8 +266,8 @@ class _MeetSpeciesBlockState extends State<MeetSpeciesBlock> {
                         right: -BirdySpace.s,
                         top: -BirdySpace.s,
                         child: ExcludeSemantics(
-                          child: Icon(
-                            _iconOf(current),
+                          child: _glyphOf(
+                            current,
                             size: BirdySizes.knowledgeWatermark,
                             fill: 1,
                             color: colors.fore.withValues(
@@ -394,8 +413,9 @@ class _MeetDisc extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: selected ? colors.fill : c.background,
                         ),
-                        child: Icon(
-                          _iconOf(section),
+                        child: _glyphOf(
+                          section,
+                          size: null,
                           color: colors.fore,
                           fill: selected ? 1 : 0,
                         ),
@@ -416,7 +436,7 @@ class _MeetDisc extends StatelessWidget {
                           border: Border.all(color: c.surface1, width: BirdyStroke.thin),
                         ),
                         child: Icon(
-                          AppIcons.check,
+                          BirdyIcons.tick,
                           size: BirdySizes.knowledgeCheck - 6,
                           color: c.surface1,
                         ),

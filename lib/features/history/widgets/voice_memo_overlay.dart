@@ -54,6 +54,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
+import 'package:birdnet_live/fork/design/birdy_icons.dart'; // FORK: icon roles
 import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -627,7 +628,7 @@ class _VoiceMemoDialogState extends State<_VoiceMemoDialog>
         Row(
           children: [
             IconButton.filled(
-              icon: Icon(_isPlaying ? AppIcons.pause : AppIcons.playArrow),
+              icon: BirdyIcon(_isPlaying ? BirdyIcons.pause : BirdyIcons.play), // FORK: icon roles
               tooltip: l10n.detectionVoiceMemoTooltip,
               onPressed: _togglePlay,
             ),
@@ -725,10 +726,9 @@ class _RecordButton extends StatelessWidget {
                     ]
                     : null,
           ),
-          child: Icon(
-            isRecording ? AppIcons.stop : AppIcons.mic,
+          child: BirdyIcon( // FORK: icon roles
+            isRecording ? BirdyIcons.stop : BirdyIcons.voiceMemo, // FORK: icon roles
             size: 40,
-            fill: isRecording ? 1 : null, // FORK: filled stop (Material Symbols)
             color:
                 isRecording
                     ? theme.colorScheme.onError

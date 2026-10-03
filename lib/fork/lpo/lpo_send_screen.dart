@@ -40,6 +40,7 @@ import 'atlas_codes.dart';
 import 'lpo_config.dart';
 import 'lpo_observation.dart';
 import 'lpo_report.dart';
+import '../design/birdy_icons.dart';
 
 /// Lists the confirmed observations of [session] as cards to report.
 class LpoSendScreen extends ConsumerStatefulWidget {
@@ -143,7 +144,7 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
                       ),
                       if (_notConfirmed > 0)
                         _Note(
-                          icon: AppIcons.infoOutline,
+                          icon: BirdyIcons.info,
                           text: l10n.forkLpoNotConfirmed(_notConfirmed),
                         ),
                     ],
@@ -156,7 +157,8 @@ class _LpoSendScreenState extends ConsumerState<LpoSendScreen> {
                     // Detections exist, none confirmed: a filter, not a void.
                     child: BirdyEmptyState.inline(
                       kind: BirdyEmptyKind.filtered,
-                      icon: AppIcons.checkCircleOutline,
+                      icon: BirdyIcons.confirmed,
+                      iconActive: true,
                       title: l10n.forkLpoEmptyTitle,
                       body: l10n.forkLpoEmpty,
                     ),

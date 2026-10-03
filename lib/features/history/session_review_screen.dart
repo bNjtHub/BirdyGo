@@ -73,6 +73,7 @@ import '../../shared/providers/settings_providers.dart';
 import '../../shared/services/taxonomy_service.dart';
 import '../../shared/services/link_launcher.dart';
 import '../../shared/utils/app_icons.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../shared/utils/locale_time_format.dart';
 import '../../shared/utils/share_sheet.dart';
 import '../../shared/utils/timestamp_format.dart';
@@ -304,7 +305,7 @@ class _ReviewWarningCard extends StatelessWidget {
             if (onDismiss != null) ...[
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(AppIcons.close, size: 20),
+                icon: const Icon(BirdyIcons.close, size: 20), // FORK: icon roles
                 color: theme.colorScheme.onErrorContainer,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -3523,7 +3524,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
               onTap: () => Navigator.of(ctx).pop('annotation'),
             ),
             ListTile(
-              leading: const Icon(AppIcons.micNone),
+              leading: const Icon(BirdyIcons.voiceMemo), // FORK: icon roles
               title: Text(l10n.sessionAddVoiceMemoOption),
               onTap: () => Navigator.of(ctx).pop('voice_memo'),
             ),
@@ -3620,7 +3621,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                   spacing: 8,
                   children: [
                     ChoiceChip(
-                      avatar: const Icon(AppIcons.public, size: 18),
+                      avatar: const Icon(BirdyIcons.world, size: 18), // FORK: icon roles
                       label: Text(l10n.sessionAnnotationGlobal),
                       selected: !atTimestamp,
                       onSelected: (_) {
@@ -3646,7 +3647,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                 if (isEdit) ...[
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    icon: const Icon(AppIcons.mic, size: 18),
+                    icon: const Icon(BirdyIcons.voiceMemo, size: 18), // FORK: icon roles
                     label: Text(l10n.detectionReplaceVoiceMemo),
                     onPressed: () async {
                       await _pausePlayersForVoiceMemo();
@@ -3785,7 +3786,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                   spacing: 8,
                   children: [
                     ChoiceChip(
-                      avatar: const Icon(AppIcons.public, size: 18),
+                      avatar: const Icon(BirdyIcons.world, size: 18), // FORK: icon roles
                       label: Text(l10n.sessionAnnotationGlobal),
                       selected: !atTimestamp,
                       onSelected: (_) =>
@@ -4093,7 +4094,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
             ),
           ),
           leading: IconButton(
-            icon: const Icon(AppIcons.close),
+            icon: const Icon(BirdyIcons.close), // FORK: icon roles
             tooltip: l10n.tooltipClose,
             onPressed: () async {
               if (_hasUnsavedWork) {
@@ -4106,12 +4107,12 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(AppIcons.helpOutline),
+              icon: const Icon(BirdyIcons.help), // FORK: icon roles
               tooltip: l10n.sessionHelpTitle,
               onPressed: _showHelp,
             ),
             IconButton(
-              icon: const Icon(AppIcons.tuneRounded),
+              icon: const Icon(BirdyIcons.settings), // FORK: icon roles
               tooltip: l10n.settings,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
@@ -4259,8 +4260,8 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
           ),
           if (_canContinueSurvey)
             IconButton(
-              icon: Icon(
-                AppIcons.playArrowRounded,
+              icon: BirdyIcon( // FORK: icon roles
+                BirdyIcons.play, // FORK: icon roles
                 color: theme.colorScheme.primary,
               ),
               tooltip: l10n.surveyContinue,
@@ -4572,7 +4573,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
       avatar: Icon(
         a.offsetInRecording != null
             ? AppIcons.schedule
-            : (a.hasVoiceMemo ? AppIcons.mic : AppIcons.shortText),
+            : (a.hasVoiceMemo ? BirdyIcons.voiceMemo : AppIcons.shortText), // FORK: icon roles
         size: 16,
       ),
       onPressed: () {
@@ -4591,7 +4592,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
           : (isTimed
                 ? l10n.detectionSeekToPosition
                 : l10n.sessionEditAnnotation),
-      deleteIcon: const Icon(AppIcons.close, size: 16),
+      deleteIcon: const Icon(BirdyIcons.close, size: 16), // FORK: icon roles
       onDeleted: () => _deleteAnnotation(i),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
@@ -4776,7 +4777,7 @@ class _SessionReviewScreenState extends ConsumerState<SessionReviewScreen> {
                   suffixIcon: _speciesSearchQuery.isEmpty
                       ? null
                       : IconButton(
-                          icon: const Icon(AppIcons.clear, size: 18),
+                          icon: const Icon(BirdyIcons.close, size: 18), // FORK: icon roles
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(
                             minWidth: 32,
@@ -5288,7 +5289,7 @@ class _FullscreenSurveyMapScreenState
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      const Icon(AppIcons.infoOutline),
+                      const Icon(BirdyIcons.info), // FORK: icon roles
                       const SizedBox(width: 12),
                       Expanded(child: Text(l10n.surveyMapFilterEmpty)),
                     ],
@@ -5627,11 +5628,12 @@ class _SpeciesPickerTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         child: Row(
           children: [
-            Icon(
+            BirdyIcon( // FORK: icon roles
               selected
-                  ? AppIcons.checkCircleRounded
+                  ? BirdyIcons.confirmed // FORK: icon roles
                   : AppIcons.radioButtonUnchecked,
               size: 20,
+              active: selected, // FORK: icon roles
               color: selected
                   ? theme.colorScheme.primary
                   : theme.colorScheme.outline,

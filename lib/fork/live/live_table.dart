@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/species_accents.dart';
-import '../../shared/utils/app_icons.dart';
 import '../design/widgets/animated_count.dart';
 import '../design/widgets/birdy_cross_fade.dart';
 import '../design/widgets/birdy_pill.dart';
@@ -27,6 +26,7 @@ import '../design/widgets/species_avatar.dart';
 import '../design/widgets/species_tile.dart';
 import 'flip_move.dart';
 import 'live_table_model.dart';
+import '../design/birdy_icons.dart';
 
 class LiveTable extends StatefulWidget {
   const LiveTable({
@@ -391,8 +391,9 @@ class ConfirmedPill extends StatelessWidget {
       label: l10n.forkLiveConfirmed,
       foreground: c.sure.foreground,
       background: c.sure.background,
-      leading: Icon(
-        AppIcons.checkRounded,
+      leading: BirdyIcon(
+        BirdyIcons.confirmed,
+        active: true,
         size: BirdyGlyph.s,
         color: c.sure.foreground,
       ),

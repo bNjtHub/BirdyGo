@@ -4,7 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
+import '../birdy_icons.dart';
 import '../birdy_tokens.dart';
 import 'pressable.dart';
 
@@ -83,10 +83,9 @@ class ClipPlayButton extends StatelessWidget {
         customBorder: shape,
         child: SizedBox.square(
           dimension: size,
-          child: Icon(
-            playing ? AppIcons.stop : AppIcons.playArrow,
+          child: BirdyIcon(
+            playing ? BirdyIcons.stop : BirdyIcons.play,
             size: size / 2,
-            fill: 1,
             color: playing ? c.onAccent : c.accentText,
           ),
         ),

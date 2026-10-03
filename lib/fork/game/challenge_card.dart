@@ -6,6 +6,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/birdygo_silhouette.dart';
@@ -107,7 +108,7 @@ class ChallengeCard extends StatelessWidget {
                 child: Center(
                   child:
                       done
-                          ? Icon(AppIcons.check, size: BirdyGlyph.xxl, color: c.onOriole)
+                          ? Icon(BirdyIcons.tick, size: BirdyGlyph.xxl, color: c.onOriole)
                           : challengeGlyph(challenge.kind, c.accentText, 22),
                 ),
               ),

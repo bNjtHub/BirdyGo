@@ -16,7 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_skeleton.dart';
@@ -249,7 +249,7 @@ class _WorldMapFullscreenState extends State<WorldMapFullscreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           key: const ValueKey('world-map-close'),
-          icon: const Icon(AppIcons.close),
+          icon: const Icon(BirdyIcons.close),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () => Navigator.of(context).maybePop(),
         ),

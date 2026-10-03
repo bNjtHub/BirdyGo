@@ -8,6 +8,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 
 class AppHelpSection {
   const AppHelpSection({
@@ -89,10 +90,10 @@ class AppHelpBottomSheet extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
+                      BirdyIcon( // FORK: icon roles
                         section.icon,
                         size: 22,
-                        fill: section.iconFill, // FORK: keep filled stop glyph after Symbols migration
+                        active: section.iconFill == 1, // FORK: icon roles
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 12),

@@ -188,7 +188,7 @@ class _SummaryHeader extends ConsumerWidget {
               ),
               const SizedBox(width: 16),
               StatChip(
-                icon: AppIcons.detections,
+                icon: BirdyIcons.detections, // FORK: icon roles
                 value: l10n.sessionDetectionCount(detectionCount),
               ),
             ],
@@ -203,7 +203,7 @@ class _SummaryHeader extends ConsumerWidget {
                   Icon(
                     session.type == SessionType.survey
                         ? AppIcons.flagFilled
-                        : AppIcons.locationOn,
+                        : BirdyIcons.place, // FORK: icon roles
                     size: 18,
                     // FORK: filled flag (Material Symbols); pin stays outlined.
                     fill: session.type == SessionType.survey ? 1 : null,
@@ -223,7 +223,7 @@ class _SummaryHeader extends ConsumerWidget {
                     ),
                   ),
                   Icon(
-                    AppIcons.mapSheet,
+                    BirdyIcons.map, // FORK: icon roles
                     size: 18,
                     color: theme.colorScheme.primary.withAlpha(178),
                   ),
@@ -625,8 +625,8 @@ class _MediaTabPanelState extends State<_MediaTabPanel>
           // icon-over-text tab is 72 dp tall, which would cost half the
           // height of the panel it labels.
           tabs: [
-            _mediaTab(AppIcons.map, l10n.surveyTabMap),
-            _mediaTab(AppIcons.graphicEq, l10n.surveyTabSpectrogram),
+            _mediaTab(BirdyIcons.map, l10n.surveyTabMap), // FORK: icon roles
+            _mediaTab(BirdyIcons.song, l10n.surveyTabSpectrogram), // FORK: icon roles
           ],
           labelPadding: const EdgeInsets.symmetric(horizontal: 8),
           indicatorWeight: 2,
@@ -1438,8 +1438,8 @@ class _PlayPauseButton extends StatelessWidget {
           onTap: onToggle,
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Icon(
-              isPlaying ? AppIcons.pause : AppIcons.playArrow,
+            child: BirdyIcon( // FORK: icon roles
+              isPlaying ? BirdyIcons.pause : BirdyIcons.play, // FORK: icon roles
               color: Colors.white,
               size: 24,
             ),
@@ -1845,10 +1845,10 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              BirdyIcon( // FORK: icon roles
                                 _activeState.isActive && widget.onPause != null
-                                    ? AppIcons.pauseRounded
-                                    : AppIcons.playArrowRounded,
+                                    ? BirdyIcons.pause // FORK: icon roles
+                                    : BirdyIcons.play, // FORK: icon roles
                                 size: 24,
                                 color: theme.colorScheme.primary,
                               ),
@@ -1932,8 +1932,9 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                               ))
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4),
-                                  child: Icon(
-                                    AppIcons.checkCircle,
+                                  child: BirdyIcon( // FORK: icon roles
+                                    BirdyIcons.confirmed, // FORK: icon roles
+                                    active: true, // FORK: icon roles
                                     size: 14,
                                     color:
                                         AppSemanticColors.of(context).success,
@@ -1953,7 +1954,7 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                                           context,
                                         )!.detectionSourceManual,
                                     child: Icon(
-                                      AppIcons.editNote,
+                                      BirdyIcons.note, // FORK: icon roles
                                       size: 16,
                                       color: theme.colorScheme.primary,
                                     ),
@@ -1973,7 +1974,7 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4),
                                   child: Icon(
-                                    AppIcons.mic,
+                                    BirdyIcons.voiceMemo, // FORK: icon roles
                                     size: 14,
                                     color: theme.colorScheme.primary,
                                   ),
@@ -1982,7 +1983,7 @@ class _SpeciesTileState extends ConsumerState<_SpeciesTile> {
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4),
                                   child: Icon(
-                                    AppIcons.stickyNote2,
+                                    BirdyIcons.note, // FORK: icon roles
                                     size: 14,
                                     color: theme.colorScheme.primary,
                                   ),
@@ -2387,12 +2388,12 @@ class _ClusterRow extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Icon(
+                  child: BirdyIcon( // FORK: icon roles
                     isActive
                         ? (onPause != null
-                            ? AppIcons.pauseRounded
-                            : AppIcons.graphicEq)
-                        : AppIcons.playArrowRounded,
+                            ? BirdyIcons.pause // FORK: icon roles
+                            : BirdyIcons.song) // FORK: icon roles
+                        : BirdyIcons.play, // FORK: icon roles
                     size: 24,
                     color: theme.colorScheme.primary,
                   ),
@@ -2406,12 +2407,12 @@ class _ClusterRow extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Icon(
+                  child: BirdyIcon( // FORK: icon roles
                     isActive
                         ? (onPause != null
-                            ? AppIcons.pauseRounded
-                            : AppIcons.graphicEq)
-                        : AppIcons.playArrowRounded,
+                            ? BirdyIcons.pause // FORK: icon roles
+                            : BirdyIcons.song) // FORK: icon roles
+                        : BirdyIcons.play, // FORK: icon roles
                     size: 24,
                     color: theme.colorScheme.primary,
                   ),
@@ -2438,7 +2439,7 @@ class _ClusterRow extends ConsumerWidget {
                 child: Tooltip(
                   message: l10n.detectionSourceManual,
                   child: Icon(
-                    AppIcons.editNote,
+                    BirdyIcons.note, // FORK: icon roles
                     size: 16,
                     color: theme.colorScheme.primary,
                   ),
@@ -2471,7 +2472,7 @@ class _ClusterRow extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Icon(
-                      AppIcons.mic,
+                      BirdyIcons.voiceMemo, // FORK: icon roles
                       size: 22,
                       color: _reviewPrimary(theme, 180),
                     ),
@@ -2488,7 +2489,7 @@ class _ClusterRow extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Icon(
-                      AppIcons.stickyNote2,
+                      BirdyIcons.note, // FORK: icon roles
                       size: 22,
                       color: _reviewPrimary(theme, 180),
                     ),
@@ -2510,7 +2511,7 @@ class _ClusterRow extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Icon(
-                    AppIcons.map,
+                    BirdyIcons.map, // FORK: icon roles
                     size: 24,
                     color: _reviewOnSurface(theme, 100),
                   ),
@@ -2526,10 +2527,9 @@ class _ClusterRow extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    confirmed
-                        ? AppIcons.checkCircle
-                        : AppIcons.checkCircleOutline,
+                  child: BirdyIcon( // FORK: icon roles
+                    BirdyIcons.confirmed, // FORK: icon roles
+                    active: confirmed, // FORK: icon roles
                     size: 24,
                     color:
                         confirmed
@@ -2922,7 +2922,7 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
                   : l10n.sessionAddSpecies),
         ),
         leading: IconButton(
-          icon: const Icon(AppIcons.close),
+          icon: const Icon(BirdyIcons.close), // FORK: icon roles
           tooltip: l10n.tooltipClose,
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -2951,7 +2951,7 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
                   ButtonSegment(
                     value: AddSpeciesInsertMode.global,
                     label: Text(l10n.sessionInsertGlobally),
-                    icon: const Icon(AppIcons.public, size: 18),
+                    icon: const Icon(BirdyIcons.world, size: 18), // FORK: icon roles
                   ),
                 ],
                 selected: {_mode},
@@ -2978,7 +2978,7 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
                 suffixIcon:
                     _searchController.text.isNotEmpty
                         ? IconButton(
-                          icon: const Icon(AppIcons.clear),
+                          icon: const Icon(BirdyIcons.close), // FORK: icon roles
                           tooltip: l10n.tooltipClearSearch,
                           onPressed: () {
                             _searchController.clear();
@@ -3013,7 +3013,7 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
                           if (split.likely.isNotEmpty) ...[
                             ListTile(
                               dense: true,
-                              leading: const Icon(AppIcons.locationOn),
+                              leading: const Icon(BirdyIcons.place), // FORK: icon roles
                               title: Text(
                                 l10n.exploreSectionAtLocation(
                                   split.likely.length,
@@ -3026,7 +3026,7 @@ class _AddSpeciesOverlayState extends ConsumerState<AddSpeciesOverlay> {
                             Divider(height: 1, color: theme.dividerColor),
                             ListTile(
                               dense: true,
-                              leading: const Icon(AppIcons.public),
+                              leading: const Icon(BirdyIcons.world), // FORK: icon roles
                               title: Text(
                                 l10n.exploreSectionElsewhere(
                                   split.other.length,
@@ -3187,7 +3187,7 @@ class _ConfirmSpeciesSheetState extends State<_ConfirmSpeciesSheet> {
             Row(
               children: [
                 _EvidenceCheckbox(
-                  icon: AppIcons.hearing,
+                  icon: BirdyIcons.heard, // FORK: icon roles
                   label: l10n.detectionEvidenceHeard,
                   value: _heard,
                   onChanged: (v) => _set(heard: v),
@@ -3477,7 +3477,7 @@ class _SearchEmptyState extends StatelessWidget {
         const Divider(height: 1),
         ListTile(
           leading: Icon(
-            AppIcons.helpOutline,
+            BirdyIcons.help, // FORK: icon roles
             color: theme.colorScheme.tertiary,
           ),
           title: Text(l10n.sessionUnknownSpecies),
@@ -3490,7 +3490,7 @@ class _SearchEmptyState extends StatelessWidget {
           onTap: onPickUnknown,
         ),
         ListTile(
-          leading: Icon(AppIcons.editNote, color: theme.colorScheme.tertiary),
+          leading: Icon(BirdyIcons.note, color: theme.colorScheme.tertiary), // FORK: icon roles
           title: Text(l10n.sessionOtherSpecies),
           subtitle: Text(
             l10n.sessionOtherSpeciesHint,
@@ -3644,7 +3644,7 @@ class _AnnotationsSectionState extends State<_AnnotationsSection> {
                 children: [
                   IconButton(
                     icon: Icon(
-                      _atTimestamp ? AppIcons.schedule : AppIcons.public,
+                      _atTimestamp ? AppIcons.schedule : BirdyIcons.world, // FORK: icon roles
                       size: 20,
                       color:
                           _atTimestamp
@@ -3794,10 +3794,9 @@ class _AnnotationRowState extends State<_AnnotationRow> {
               borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: Icon(
-                  _isPlaying ? AppIcons.stopCircle : AppIcons.playCircleOutline,
+                child: BirdyIcon( // FORK: icon roles
+                  _isPlaying ? BirdyIcons.stop : BirdyIcons.play, // FORK: icon roles
                   size: 18,
-                  fill: _isPlaying ? 1 : null, // FORK: filled stop (Material Symbols)
                   color: theme.colorScheme.primary,
                 ),
               ),
@@ -4432,10 +4431,10 @@ class _SessionHelpSheet extends StatelessWidget {
       initialChildSize: 0.72,
       sections: [
         AppHelpSection(
-          icon: AppIcons.infoOutline,
+          icon: BirdyIcons.info, // FORK: icon roles
           body: l10n.sessionHelpOverview,
         ),
-        AppHelpSection(icon: AppIcons.close, body: l10n.sessionHelpTopBar),
+        AppHelpSection(icon: BirdyIcons.close, body: l10n.sessionHelpTopBar), // FORK: icon roles
         AppHelpSection(
           icon: AppIcons.addCircleOutline,
           body: l10n.sessionHelpAddSpecies,
@@ -4448,7 +4447,7 @@ class _SessionHelpSheet extends StatelessWidget {
         AppHelpSection(icon: AppIcons.save, body: l10n.sessionHelpSaveDiscard),
         if (showContinueSurvey)
           AppHelpSection(
-            icon: AppIcons.playArrowRounded,
+            icon: BirdyIcons.play, // FORK: icon roles
             body: l10n.sessionHelpContinueSurvey,
           ),
       ],

@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import '../../features/live/live_session.dart';
 import '../../l10n/app_localizations.dart';
 import '../utils/app_icons.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 
 /// Union of the evidence across [records], for rows that stand in for more
 /// than one detection (a species header, a clustered timestamp row).
@@ -94,7 +95,7 @@ class DetectionEvidenceBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (value.includesHeard)
-              Icon(AppIcons.hearing, size: size, color: iconColor),
+              Icon(BirdyIcons.heard, size: size, color: iconColor), // FORK: icon roles
             if (value.includesHeard && value.includesSeen)
               SizedBox(width: spacing),
             if (value.includesSeen)

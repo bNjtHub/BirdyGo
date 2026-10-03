@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'package:birdnet_live/features/explore/explore_providers.dart';
 import 'package:birdnet_live/features/history/session_repository.dart';
 import 'package:birdnet_live/features/inference/geo_abundance.dart';
+import 'package:birdnet_live/fork/design/birdy_icons.dart';
 import 'package:birdnet_live/fork/data/observation_index.dart';
 import 'package:birdnet_live/fork/data/observation_index_service.dart';
 import 'package:birdnet_live/fork/design/birdy_theme.dart';
@@ -382,13 +383,13 @@ void main() {
       // A check badge on a discovery, a question mark to confirm, the BirdyGo
       // silhouette (no badge) for a mystery.
       expect(
-        find.descendant(of: discovered, matching: find.byIcon(AppIcons.check)),
+        find.descendant(of: discovered, matching: find.byIcon(BirdyIcons.tick)),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: toConfirm,
-          matching: find.byIcon(AppIcons.question),
+          matching: find.byIcon(BirdyIcons.help),
         ),
         findsOneWidget,
       );
@@ -400,7 +401,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: mystery, matching: find.byIcon(AppIcons.check)),
+        find.descendant(of: mystery, matching: find.byIcon(BirdyIcons.tick)),
         findsNothing,
       );
       // Spoken states.

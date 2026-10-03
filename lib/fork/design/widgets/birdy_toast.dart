@@ -6,7 +6,7 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
+import '../birdy_icons.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
 
@@ -61,12 +61,12 @@ void showSettingSaved(BuildContext context, String setting, String value) =>
     showBirdyToast(
       context,
       AppLocalizations.of(context)!.forkSettingSaved(setting, value),
-      icon: AppIcons.checkCircle,
+      icon: BirdyIcons.confirmed,
     );
 
 /// « Prénom enregistré » toast.
 void showFirstNameSaved(BuildContext context) => showBirdyToast(
   context,
   AppLocalizations.of(context)!.forkFirstNameSaved,
-  icon: AppIcons.checkCircle,
+  icon: BirdyIcons.confirmed,
 );

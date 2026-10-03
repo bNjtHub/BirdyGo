@@ -5,12 +5,13 @@ library;
 import 'package:flutter/widgets.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/widgets/birdy_animated_icon.dart';
 
 /// Sound and scores pulse, wind and distance slide, a download comes down,
 /// everything else fills in.
 BirdyIconMotion liveTipMotion(IconData icon) {
-  if (icon == AppIcons.graphicEq ||
+  if (icon == BirdyIcons.song ||
       icon == AppIcons.volumeUpOutlined ||
       icon == AppIcons.bluetoothAudio ||
       icon == AppIcons.percent) {

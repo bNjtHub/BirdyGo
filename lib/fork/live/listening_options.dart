@@ -20,12 +20,13 @@ import '../listening_mode/listening_mode_sheet.dart';
 import '../reliability/levels_sheet.dart';
 import '../notifications/species_notifier.dart';
 import '../settings/fork_prefs.dart';
+import '../design/birdy_icons.dart';
 
 /// Icon of the options button: the mode's own icon, except Normal which
 /// shows the neutral options icon (nothing special is on).
 IconData listeningOptionsIcon(ListeningMode? mode) =>
     mode == ListeningMode.normal
-        ? AppIcons.tuneRounded
+        ? BirdyIcons.settings
         : listeningModeIcon(mode);
 
 /// Round 48 dp button « Options d'écoute ». [mode] null means the Settings
@@ -136,7 +137,7 @@ class ListeningOptionsSheet extends ConsumerWidget {
           SwitchListTile(
             key: const ValueKey('listening-options-light'),
             contentPadding: EdgeInsets.zero,
-            secondary: Icon(AppIcons.hearing, color: c.text1),
+            secondary: BirdyIcon(BirdyIcons.heard, color: c.text1),
             title: Text(
               l10n.forkLiveAlwaysDark,
               style: BirdyText.label.copyWith(color: c.text1),
@@ -164,20 +165,20 @@ class ListeningOptionsSheet extends ConsumerWidget {
           ),
           _OptionRow(
             key: const ValueKey('listening-options-levels'),
-            icon: AppIcons.infoOutline,
+            icon: BirdyIcons.info,
             label: l10n.forkLiveOptionsLevels,
             opensMore: true,
             onTap: () => showLevelsSheet(context),
           ),
           _OptionRow(
             key: const ValueKey('listening-options-help'),
-            icon: AppIcons.helpOutlineRounded,
+            icon: BirdyIcons.help,
             label: l10n.liveScreenHelpTitle,
             onTap: () => thenClose(onHelp),
           ),
           _OptionRow(
             key: const ValueKey('listening-options-settings'),
-            icon: AppIcons.tuneRounded,
+            icon: BirdyIcons.settings,
             label: l10n.settings,
             onTap: () => thenClose(onSettings),
           ),

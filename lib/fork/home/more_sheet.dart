@@ -41,6 +41,7 @@ import '../ranking/ranking_screen.dart';
 import '../reliability/quick_review_screen.dart';
 import '../settings/simple_settings_screen.dart';
 import '../sound_library/sound_library_screen.dart';
+import '../design/birdy_icons.dart';
 
 /// Opens the « Plus » sheet. Entries push onto the navigator that [context]
 /// belongs to, like the old menu did.
@@ -126,7 +127,7 @@ class _MoreSheetState extends ConsumerState<MoreSheet> {
     final c = BirdyColors.of(context);
     final play = <_Entry>[
       _Entry(
-        AppIcons.headphones,
+        BirdyIcons.fineEar,
         l10n.forkQuizTitle,
         () => const FineEarQuizScreen(),
         subtitle: l10n.forkMoreQuizSub,
@@ -142,7 +143,7 @@ class _MoreSheetState extends ConsumerState<MoreSheet> {
     ];
     final mine = <_Entry>[
       _Entry(
-        AppIcons.verifiedRounded,
+        BirdyIcons.confirmed,
         l10n.forkQuickReview,
         () => const QuickReviewScreen(),
         subtitle:
@@ -154,7 +155,7 @@ class _MoreSheetState extends ConsumerState<MoreSheet> {
         tone: BirdyBlockTone.toCheck,
       ),
       _Entry(
-        AppIcons.graphicEqRounded,
+        BirdyIcons.song,
         l10n.forkSoundLibrary,
         () => const SoundLibraryScreen(),
         subtitle: l10n.forkMoreSoundsSub,
@@ -437,28 +438,28 @@ class _UtilityBlock extends StatelessWidget {
           children: [
             _CompactRow(
               key: const ValueKey('more-settings'),
-              icon: AppIcons.tuneRounded,
+              icon: BirdyIcons.settings,
               label: l10n.forkSettingsTitle,
               onTap: () => onOpen(const SimpleSettingsScreen()),
             ),
             line(),
             _CompactRow(
               key: const ValueKey('more-help'),
-              icon: AppIcons.helpOutlineRounded,
+              icon: BirdyIcons.help,
               label: l10n.helpTitle,
               onTap: () => onOpen(const HelpScreen()),
             ),
             line(),
             _CompactRow(
               key: const ValueKey('more-about'),
-              icon: AppIcons.infoOutline,
+              icon: BirdyIcons.info,
               label: l10n.about,
               onTap: () => onOpen(const AboutScreen()),
             ),
             line(),
             _CompactRow(
               key: const ValueKey('more-advanced-toggle'),
-              icon: AppIcons.handyman,
+              icon: BirdyIcons.more,
               label: l10n.forkMoreAdvancedTools,
               labelColor: c.text2,
               expanded: advancedOpen,

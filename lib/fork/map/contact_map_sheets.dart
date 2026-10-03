@@ -25,6 +25,7 @@ import '../design/widgets/clip_play_button.dart';
 import '../design/widgets/pressable.dart';
 import 'base_layers.dart';
 import 'contact_map_data.dart';
+import '../design/birdy_icons.dart';
 
 /// Common name of [scientificName] in the species language, falling back
 /// to the name stored with the detection.
@@ -611,7 +612,7 @@ class _ChoiceRow extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (selected) Icon(AppIcons.check, color: c.accentText),
+                    if (selected) BirdyIcon(BirdyIcons.tick, color: c.accentText),
                   ],
                 ),
               ),

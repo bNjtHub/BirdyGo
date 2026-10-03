@@ -59,6 +59,8 @@ import '../../fork/listening_mode/listening_mode.dart'; // FORK: listening scree
 import 'widgets/live_tips.dart'; // FORK: listening screen (J6c)
 import '../../fork/design/widgets/tip_card.dart'; // FORK: tip cards
 import '../../fork/live/live_tip_motion.dart'; // FORK: tip cards
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
+import '../../fork/design/widgets/birdy_wing_icon.dart'; // FORK: icon roles
 import '../../fork/summary/open_listening_summary.dart'; // FORK: listening summary (J6c, J6g-e)
 
 // =============================================================================
@@ -1741,7 +1743,7 @@ class _CompactStatusBar extends StatelessWidget {
         children: [
           // Back button.
           IconButton(
-            icon: const Icon(AppIcons.arrowBackRounded, size: 22),
+            icon: const Icon(BirdyIcons.back, size: 22), // FORK: icon roles
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             onPressed: () => Navigator.of(context).maybePop(),
@@ -1762,7 +1764,7 @@ class _CompactStatusBar extends StatelessWidget {
 
           IconButton(
             icon: Icon(
-              AppIcons.helpOutlineRounded,
+              BirdyIcons.help, // FORK: icon roles
               size: 20,
               color: theme.colorScheme.onSurface.withAlpha(180),
             ),
@@ -1775,7 +1777,7 @@ class _CompactStatusBar extends StatelessWidget {
           // Settings gear.
           IconButton(
             icon: Icon(
-              AppIcons.tuneRounded,
+              BirdyIcons.settings, // FORK: icon roles
               size: 20,
               color: theme.colorScheme.onSurface.withAlpha(180),
             ),
@@ -1808,13 +1810,13 @@ void _showLiveHelp(BuildContext context) {
     builder: (_) => AppHelpBottomSheet(
       title: l10n.liveScreenHelpTitle,
       sections: [
-        AppHelpSection(icon: AppIcons.mic, body: l10n.liveScreenHelpOverview),
+        AppHelpSection(icon: BirdyIcons.heard, body: l10n.liveScreenHelpOverview), // FORK: icon roles
         AppHelpSection(
-          icon: AppIcons.helpOutlineRounded,
+          icon: BirdyIcons.help, // FORK: icon roles
           body: l10n.liveScreenHelpControls,
         ),
         AppHelpSection(
-          icon: AppIcons.infoOutline,
+          icon: BirdyIcons.info, // FORK: icon roles
           body: l10n.liveScreenHelpInfoBar,
         ),
         AppHelpSection(
@@ -1847,23 +1849,23 @@ class _CaptureButton extends StatelessWidget {
 
     // Active → red stop button, paused → primary play button, idle → primary mic.
     final Color bgColor;
-    final IconData icon;
+    final IconData? icon; // FORK: icon roles (null = listen wing)
     final Color iconColor;
     final String semanticsLabel;
 
     if (isActive) {
       bgColor = theme.colorScheme.error;
-      icon = AppIcons.stopRounded;
+      icon = BirdyIcons.stop; // FORK: icon roles
       iconColor = theme.colorScheme.onError;
       semanticsLabel = l10n.a11yLiveCaptureStop;
     } else if (isPaused) {
       bgColor = theme.colorScheme.primary;
-      icon = AppIcons.playArrowRounded;
+      icon = BirdyIcons.play; // FORK: icon roles
       iconColor = theme.colorScheme.onPrimary;
       semanticsLabel = l10n.a11yLiveCaptureResume;
     } else {
       bgColor = theme.colorScheme.primary;
-      icon = AppIcons.mic;
+      icon = null; // FORK: icon roles
       iconColor = theme.colorScheme.onPrimary;
       semanticsLabel = l10n.a11yLiveCaptureStart;
     }
@@ -1897,12 +1899,9 @@ class _CaptureButton extends StatelessWidget {
                     ),
                   )
                 : ExcludeSemantics(
-                    child: Icon(
-                      icon,
-                      color: iconColor,
-                      size: 28,
-                      fill: isActive ? 1 : null, // FORK: filled stop (Material Symbols)
-                    ),
+                    child: icon == null // FORK: icon roles
+                        ? const BirdyWingIcon(size: 28) // FORK: icon roles
+                        : BirdyIcon(icon, color: iconColor, size: 28), // FORK: icon roles
                   ),
           ),
         ),
@@ -2037,7 +2036,7 @@ class _SessionInfoBar extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                AppIcons.infoOutline,
+                BirdyIcons.info, // FORK: icon roles
                 size: 14,
                 color: theme.colorScheme.primary,
               ),

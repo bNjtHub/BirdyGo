@@ -8,7 +8,7 @@ library;
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -177,9 +177,9 @@ class QuizChoiceCard extends StatelessWidget {
             child: QuizPop(
               duration: QuizMotion.pill,
               child: _Mark(
-                icon: AppIcons.quizCheck,
+                icon: BirdyIcons.tick,
                 color: c.sure.foreground,
-                iconSize: 20,
+                iconSize: BirdyGlyph.xl,
               ),
             ),
           ),
@@ -188,9 +188,9 @@ class QuizChoiceCard extends StatelessWidget {
             top: BirdySpace.s,
             right: BirdySpace.s,
             child: _Mark(
-              icon: AppIcons.quizClose,
+              icon: BirdyIcons.close,
               color: c.text2,
-              iconSize: 18,
+              iconSize: BirdyGlyph.l,
             ),
           ),
         if (found)

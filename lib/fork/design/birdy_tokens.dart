@@ -165,9 +165,6 @@ abstract final class BirdyQuizColors {
   static const Color knob = Color(0xFFFFFFFF);
   static const Color knobShadow = Color(0x4013233A);
 
-  /// Mystery silhouette brightened as in the mockup (CSS brightness 2.2).
-  static const double mysteryBrightness = 2.2;
-
   /// Sparks, twinkles and star burst particles on the intro hero, the
   /// result and a right reveal (Quiz v2 mockup).
   static const List<Color> sparkColors = [
@@ -645,6 +642,10 @@ abstract final class BirdyGlyph {
   static const double xxs = 12;
   static const double xs = 13;
   static const double s = 14;
+
+  /// Icon inside a small pill (the day strip).
+  static const double pill = 15;
+
   static const double m = 16;
   static const double l = 18;
   static const double xl = 20;
@@ -653,6 +654,7 @@ abstract final class BirdyGlyph {
   static const double x4l = 26;
   static const double x5l = 28;
   static const double x6l = 30;
+  static const double x7l = 32;
 
   /// Round icons and avatars, by diameter.
   static const double disc36 = 36;

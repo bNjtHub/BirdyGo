@@ -53,6 +53,7 @@ import '../replay/replay_button.dart';
 import 'live_moments_model.dart';
 import 'live_table_model.dart';
 import 'rare_halo.dart';
+import '../design/birdy_icons.dart';
 
 enum _RareAnswer { yes, no, later }
 
@@ -975,8 +976,8 @@ class _RareCard extends StatelessWidget {
                   children: [
                     Icon(
                       answer == _RareAnswer.no
-                          ? AppIcons.close
-                          : AppIcons.question,
+                          ? BirdyIcons.close
+                          : BirdyIcons.help,
                       size: BirdySizes.alertDiscIcon,
                       color: c.text2,
                     ),

@@ -14,6 +14,7 @@ import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_block.dart';
@@ -311,7 +312,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                         child:
                             _period == RankingPeriod.all
                                 ? BirdyEmptyState(
-                                  icon: AppIcons.hearing,
+                                  icon: BirdyIcons.heard,
                                   title: l10n.forkRankingEmptyTitle,
                                   body: l10n.forkRankingEmpty,
                                 )
@@ -511,7 +512,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                   ),
                 ),
                 if (checked)
-                  Icon(AppIcons.checkRounded, color: c.accentText)
+                  Icon(BirdyIcons.tick, color: c.accentText)
                 else
                   const SizedBox(width: BirdySpace.xxl),
               ],

@@ -6,7 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/widgets/birdy_skeleton.dart';
 import '../design/birdy_typography.dart';
@@ -148,7 +148,7 @@ class _StreakDot extends StatelessWidget {
           height: BirdySizes.dayDot,
           decoration: BoxDecoration(shape: BoxShape.circle, color: c.accent),
           child: Icon(
-            AppIcons.check,
+            BirdyIcons.tick,
             size: BirdySizes.dayDot * 0.7,
             color: c.onAccent,
           ),

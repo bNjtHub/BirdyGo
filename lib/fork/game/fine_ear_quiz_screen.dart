@@ -22,6 +22,7 @@ import '../../shared/services/taxonomy_service.dart';
 import '../../shared/utils/app_icons.dart';
 import '../data/observation_index.dart';
 import '../data/observation_index_service.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -356,7 +357,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
           // A cross on the score: leaving the whole quiz.
           header = _titleBar(
             context,
-            icon: AppIcons.quizClose,
+            icon: BirdyIcons.close,
             label: l10n.forkQuizQuit,
             onBack: () => Navigator.of(context).pop(),
           );
@@ -433,7 +434,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
   Widget _titleBar(
     BuildContext context, {
     required VoidCallback onBack,
-    IconData icon = AppIcons.arrowBackRounded,
+    IconData icon = BirdyIcons.back,
     String? label,
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -477,7 +478,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
         child: Row(
           children: [
             BirdyIconButton(
-              icon: AppIcons.arrowBackRounded,
+              icon: BirdyIcons.back,
               semanticLabel: l10n.tooltipBack,
               onPressed: () => Navigator.maybePop(context),
             ),
@@ -522,7 +523,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
       child: Row(
         children: [
           BirdyIconButton(
-            icon: AppIcons.quizClose,
+            icon: BirdyIcons.close,
             semanticLabel: l10n.forkQuizQuit,
             onPressed: _confirmStop,
           ),
@@ -666,7 +667,7 @@ class _FineEarQuizScreenState extends ConsumerState<FineEarQuizScreen> {
                     minimumSize: const Size(64, BirdySizes.listen),
                     shape: const StadiumBorder(),
                     textStyle: BirdyText.labelLarge,
-                    iconSize: 22,
+                    iconSize: BirdyGlyph.xxl,
                   ),
                   onPressed: _next,
                   iconAlignment: IconAlignment.end,
@@ -906,7 +907,7 @@ class _ScoreChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            AppIcons.quizCheck,
+            BirdyIcons.tick,
             size: BirdyGlyph.m,
             color: c.sure.foreground,
           ),

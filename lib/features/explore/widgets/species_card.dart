@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../../../core/theme/score_colors.dart';
-import '../../../shared/utils/app_icons.dart';
 import '../../inference/geo_model.dart';
 import '../explore_providers.dart';
 import '../explore_tier.dart';
@@ -565,7 +565,7 @@ class _DetectedBadge extends StatelessWidget {
         ],
       ),
       child: Icon(
-        AppIcons.check,
+        BirdyIcons.tick, // FORK: icon roles
         size: 12,
         color: highContrast ? Colors.white : theme.colorScheme.onPrimary,
       ),

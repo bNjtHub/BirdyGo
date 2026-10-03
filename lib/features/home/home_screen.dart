@@ -7,6 +7,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../about/about_screen.dart';
 import '../aru/aru_active_screen.dart';
 import '../aru/aru_controller.dart';
@@ -988,7 +989,7 @@ class _Footer extends StatelessWidget {
         ),
         // FORK: map of every contact (fork/PLAN.md J5).
         _FooterButton(
-          icon: AppIcons.mapSheet,
+          icon: BirdyIcons.map, // FORK: icon roles
           label: l10n.forkMap,
           color: color,
           fontSize: fontSize,
@@ -1019,7 +1020,7 @@ class _Footer extends StatelessWidget {
         ),
         // FORK: quick review of doubtful detections (fork/PLAN.md J3).
         _FooterButton(
-          icon: AppIcons.verifiedRounded,
+          icon: BirdyIcons.confirmed, // FORK: icon roles
           label: l10n.forkQuickReview,
           color: color,
           fontSize: fontSize,
@@ -1033,7 +1034,7 @@ class _Footer extends StatelessWidget {
         ),
         // FORK: sound library (fork/PLAN.md J2).
         _FooterButton(
-          icon: AppIcons.graphicEqRounded,
+          icon: BirdyIcons.song, // FORK: icon roles
           label: l10n.forkSoundLibrary,
           color: color,
           fontSize: fontSize,
@@ -1057,7 +1058,7 @@ class _Footer extends StatelessWidget {
               ),
         ),
         _FooterButton(
-          icon: AppIcons.tuneRounded,
+          icon: BirdyIcons.settings, // FORK: icon roles
           label: l10n.settings,
           color: color,
           fontSize: fontSize,
@@ -1068,7 +1069,7 @@ class _Footer extends StatelessWidget {
               ),
         ),
         _FooterButton(
-          icon: AppIcons.helpOutlineRounded,
+          icon: BirdyIcons.help, // FORK: icon roles
           label: l10n.helpTitle,
           color: color,
           fontSize: fontSize,
@@ -1079,7 +1080,7 @@ class _Footer extends StatelessWidget {
               ),
         ),
         _FooterButton(
-          icon: AppIcons.infoOutline,
+          icon: BirdyIcons.info, // FORK: icon roles
           label: l10n.about,
           color: color,
           fontSize: fontSize,

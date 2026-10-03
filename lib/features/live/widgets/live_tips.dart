@@ -26,6 +26,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:birdnet_live/shared/utils/app_icons.dart';
+import '../../../fork/design/birdy_icons.dart'; // FORK: icon roles
 
 /// One tip entry — icon + short title + one-sentence body. All localized.
 class LiveTip {
@@ -56,7 +57,7 @@ List<LiveTip> buildLiveTips(AppLocalizations l10n) => <LiveTip>[
     body: l10n.liveTipQuietPlaybackBody,
   ),
   LiveTip(
-    icon: AppIcons.public,
+    icon: BirdyIcons.world, // FORK: icon roles
     title: l10n.liveTipGeoFilterTitle,
     body: l10n.liveTipGeoFilterBody,
   ),
@@ -66,17 +67,17 @@ List<LiveTip> buildLiveTips(AppLocalizations l10n) => <LiveTip>[
     body: l10n.liveTipSaveClipsBody,
   ),
   LiveTip(
-    icon: AppIcons.editNote,
+    icon: BirdyIcons.note, // FORK: icon roles
     title: l10n.liveTipNotesTitle,
     body: l10n.liveTipNotesBody,
   ),
   LiveTip(
-    icon: AppIcons.graphicEq,
+    icon: BirdyIcons.song, // FORK: icon roles
     title: l10n.liveTipSpectrogramTitle,
     body: l10n.liveTipSpectrogramBody,
   ),
   LiveTip(
-    icon: AppIcons.tune,
+    icon: BirdyIcons.settings, // FORK: icon roles
     title: l10n.liveTipThresholdTitle,
     body: l10n.liveTipThresholdBody,
   ),

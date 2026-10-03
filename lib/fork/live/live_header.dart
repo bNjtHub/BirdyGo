@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/utils/app_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -20,6 +19,7 @@ import '../listening_mode/listening_mode.dart';
 import 'listening_options.dart';
 import 'live_control_bar.dart';
 import 'live_table_model.dart';
+import '../design/birdy_icons.dart';
 
 /// « 12:47 », or « 1:02:47 » after an hour.
 String formatListeningTime(Duration d) {
@@ -101,7 +101,7 @@ class LiveHeader extends StatelessWidget {
             Row(
               children: [
                 BirdyIconButton(
-                  icon: AppIcons.arrowBackRounded,
+                  icon: BirdyIcons.back,
                   semanticLabel: l10n.tooltipBack,
                   onPressed: onBack,
                 ),

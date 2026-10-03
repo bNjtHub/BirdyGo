@@ -29,6 +29,7 @@ import '../design/widgets/pressable.dart';
 import '../design/widgets/singing_theme_logo.dart';
 import '../game/quiz_fx.dart' show QuizRise;
 import '../settings/fork_prefs.dart';
+import '../design/birdy_icons.dart';
 import 'onboarding_pages.dart'
     show OnboardingPageFrame, kOnboardingMaxWidth;
 
@@ -50,7 +51,7 @@ class _StepHeader extends StatelessWidget {
           if (onBack != null)
             BirdyIconButton(
               key: const ValueKey('step-back'),
-              icon: AppIcons.arrowBackRounded,
+              icon: BirdyIcons.back,
               semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
               onPressed: onBack,
             ),

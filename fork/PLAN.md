@@ -934,7 +934,7 @@ les sessions cloud puissent le lire ; à suivre et à corriger au fil des sessio
 - [x] J6k Icônes : statuts et médailles redessinés (jauge de 8 segments, glyphes pleins)
       (`glyph.dart`, `status_glyphs.dart`, `GameDisc` dans `game_widgets.dart`, golden
       `test/fork/game/goldens/status_emblems_*.png`).
-- [ ] J6k Icônes : Rounded 400 partout et dictionnaire des rôles (BirdyIcons)
+- [x] J6k Icônes : Rounded 400 partout et dictionnaire des rôles (BirdyIcons)
 
    J7 Écoute (thème clair, niveau stable), branche `feat/ecoute-theme-clair` :
       - [x] L'écran d'écoute suit le thème de l'app par défaut ; réglage « Écran d'écoute toujours

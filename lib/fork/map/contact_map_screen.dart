@@ -42,6 +42,7 @@ import 'map_loading.dart';
 import 'map_markers.dart';
 import 'map_region.dart'; // FORK: EN default view and IGN rule
 import 'place_bird_layer.dart';
+import '../design/birdy_icons.dart';
 
 /// Where the map opens when there is nothing to show: France.
 // FORK: default view comes from emptyMapView (map_config.dart constants).
@@ -426,7 +427,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                 actions: [
                   if (widget.showBack)
                     BirdyIconButton(
-                      icon: AppIcons.arrowBackRounded,
+                      icon: BirdyIcons.back,
                       semanticLabel:
                           MaterialLocalizations.of(context).backButtonTooltip,
                       onPressed: () => Navigator.of(context).maybePop(),
@@ -596,7 +597,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                                       child:
                                           _indexEmpty
                                               ? BirdyEmptyState.inline(
-                                                icon: AppIcons.hearing,
+                                                icon: BirdyIcons.heard,
                                                 title: l10n.forkMapEmptyTitle,
                                                 body: l10n.forkMapEmpty,
                                               )
@@ -614,7 +615,7 @@ class _ContactMapScreenState extends ConsumerState<ContactMapScreen> {
                                 right: BirdySpace.l,
                                 bottom: _locateBottom,
                                 child: _MapButton(
-                                  icon: AppIcons.myLocation,
+                                  icon: BirdyIcons.myPosition,
                                   tooltip: l10n.forkMapLocateMe,
                                   onPressed: () => _locate(l10n),
                                 ),
@@ -688,7 +689,7 @@ class _FilterBar extends StatelessWidget {
             selected: confirmedOnly,
             selectedColors: BirdyChipColors.ink(c),
             floating: true,
-            leading: confirmedOnly ? const Icon(AppIcons.check) : null,
+            leading: confirmedOnly ? const BirdyIcon(BirdyIcons.tick) : null,
             onSelected: () => onConfirmed(!confirmedOnly),
           ),
         ],

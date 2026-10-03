@@ -10,6 +10,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_motion.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
@@ -267,7 +268,7 @@ class _StepCards extends StatelessWidget {
       (
         title: l10n.forkQuizStepListenTitle,
         body: l10n.forkQuizStepListenBody(questions),
-        icon: AppIcons.graphicEqRounded,
+        icon: BirdyIcons.song,
         bg: c.tonal,
         ink: c.accentText,
         tilt: -0.035,
@@ -275,7 +276,7 @@ class _StepCards extends StatelessWidget {
       (
         title: l10n.forkQuizStepGuessTitle,
         body: l10n.forkQuizStepGuessBody(choices),
-        icon: AppIcons.helpOutlineRounded,
+        icon: BirdyIcons.help,
         bg: c.orioleContainer,
         ink: c.orioleText,
         tilt: 0.026,
@@ -531,10 +532,10 @@ class _GoButton extends StatelessWidget {
             minimumSize: const Size(64, BirdySizes.listen),
             shape: const StadiumBorder(),
             textStyle: BirdyText.labelLarge,
-            iconSize: 32,
+            iconSize: BirdyGlyph.x7l,
           ),
           onPressed: onPressed,
-          icon: const Icon(AppIcons.playArrowRounded, fill: 1),
+          icon: const BirdyIcon(BirdyIcons.play),
           label: Text(label),
         ),
       ),

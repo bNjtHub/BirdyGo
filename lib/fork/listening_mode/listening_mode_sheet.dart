@@ -5,7 +5,7 @@ import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/utils/app_icons.dart';
+import '../design/birdy_icons.dart';
 import '../design/birdy_tokens.dart';
 import '../design/birdy_typography.dart';
 import '../design/widgets/birdy_sheet.dart';
@@ -214,8 +214,9 @@ class _ModeOption extends StatelessWidget {
                   ),
                   if (selected) ...[
                     const SizedBox(width: BirdySpace.s),
-                    Icon(
-                      AppIcons.listeningSelected,
+                    BirdyIcon(
+                      BirdyIcons.confirmed,
+                      active: true,
                       size: BirdyGlyph.xxl,
                       color: c.accentText,
                       semanticLabel: l10n.forkListeningModeSelected,

@@ -22,6 +22,7 @@ import '../game/quiz_fx.dart';
 import '../home/birdygo_logo.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
+import '../design/birdy_icons.dart';
 
 /// Widest column of an onboarding page (tablets, landscape).
 const double kOnboardingMaxWidth = 520;
@@ -170,7 +171,7 @@ class OnboardingHowPage extends StatelessWidget {
       (
         title: l10n.forkOnbStepDiscoverTitle,
         body: l10n.forkOnbStepDiscoverBody,
-        icon: Icon(AppIcons.menuBook, size: BirdyGlyph.x4l, color: c.orioleText),
+        icon: BirdyIcon(BirdyIcons.notebook, size: BirdyGlyph.x4l, color: c.orioleText),
         bg: c.orioleContainer,
         ink: c.orioleText,
         tilt: 0.017,
