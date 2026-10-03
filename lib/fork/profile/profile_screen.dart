@@ -321,8 +321,9 @@ class _LevelCardState extends State<_LevelCard> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            StatusRing(
-              status: status,
+            StatusEmblem(
+              status: status ?? GameConfig.statuses.first,
+              reached: status != null,
               progress: progress.progress,
               size: BirdyGlyph.disc96,
               semanticLabel: l10n.forkStatusRingLabel(percent),

@@ -70,6 +70,13 @@ Widget _sheet({required bool dark}) => MaterialApp(
                         current: true,
                       ),
                     ),
+                    _cell(
+                      StatusEmblem(
+                        status: GameConfig.statuses[3],
+                        size: 96,
+                        progress: 0.4,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -98,14 +105,14 @@ void main() {
     expect(s.first.glyphInk, s.first.deep);
   });
 
-  test('white glyph on every status disc: contrast report (3:1 wanted)', () {
-    final low = <int>[];
+  test('white glyph on every status disc: contrast of 3:1 at least', () {
     for (final s in GameConfig.statuses) {
-      if (_contrast(s.glyphMain, s.color) < 3) low.add(s.rank);
+      expect(
+        _contrast(s.glyphMain, s.color),
+        greaterThanOrEqualTo(3),
+        reason: 'rank ${s.rank}',
+      );
     }
-    // Rank 1 (earth, 2.95:1) sits just under; the glyph also has its deep
-    // and Loriot details, and the disc rim carries the shape.
-    expect(low, [1]);
   });
 
   for (final dark in [false, true]) {
@@ -113,12 +120,12 @@ void main() {
     testWidgets(
       'statuses (reached, locked) and medals render ($mode)',
       (tester) async {
-        tester.view.physicalSize = const Size(900, 420);
+        tester.view.physicalSize = const Size(1000, 420);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         await tester.pumpWidget(_sheet(dark: dark));
         expect(tester.takeException(), isNull);
-        expect(find.byType(StatusEmblem), findsNWidgets(17));
+        expect(find.byType(StatusEmblem), findsNWidgets(18));
         expect(find.byType(BadgeMedal), findsNWidgets(5));
         await expectLater(
           find.byKey(const ValueKey('sheet')),

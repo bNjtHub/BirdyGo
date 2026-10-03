@@ -121,8 +121,8 @@ abstract final class GameConfig {
     StatusDef(
       rank: 1,
       from: 1,
-      color: Color(0xFFB98E66),
-      deep: Color(0xFF7A5638),
+      color: Color(0xFFA8805A),
+      deep: Color(0xFF6E4F33),
       glyph: StatusGlyphs.chick,
     ),
     StatusDef(

@@ -145,6 +145,7 @@ class GameDisc extends StatelessWidget {
     this.glyphColor = BirdyBrand.white,
     this.tones,
     this.ring,
+    this.partial,
     this.child,
   });
 
@@ -158,6 +159,9 @@ class GameDisc extends StatelessWidget {
   final Color glyphColor;
   final GlyphTones? tones;
   final Color? ring;
+
+  /// 0 to 1: share of the segment after the lit ones drawn in [gaugeOn].
+  final double? partial;
   final Widget? child;
 
   @override
@@ -219,6 +223,16 @@ class _DiscPainter extends CustomPainter {
         segment,
       );
     }
+    final partial = disc.partial;
+    if (partial != null && partial > 0 && disc.lit < disc.segments) {
+      canvas.drawArc(
+        gaugeRect,
+        -math.pi / 2 + disc.lit * sweep + _Disc.gaugeGap / 2,
+        (sweep - _Disc.gaugeGap) * partial.clamp(0.0, 1.0),
+        false,
+        segment..color = disc.gaugeOn,
+      );
+    }
 
     canvas.drawCircle(
       const Offset(50, 50),
@@ -272,7 +286,8 @@ class _DiscPainter extends CustomPainter {
       old.disc.glyph != disc.glyph ||
       old.disc.glyphColor != disc.glyphColor ||
       old.disc.tones != disc.tones ||
-      old.disc.ring != disc.ring;
+      old.disc.ring != disc.ring ||
+      old.disc.partial != disc.partial;
 }
 
 /// Status disc with its glyph and its gauge of one segment per status, lit
@@ -286,6 +301,8 @@ class StatusEmblem extends StatelessWidget {
     this.reached = true,
     this.current = false,
     this.gaugeReveal = 1,
+    this.progress,
+    this.semanticLabel,
   });
 
   final StatusDef status;
@@ -299,11 +316,18 @@ class StatusEmblem extends StatelessWidget {
   /// one (the « Nouveau statut » screen).
   final double gaugeReveal;
 
+  /// 0 to 1, optional: progress towards the next status, drawn as a partial
+  /// arc in the segment after the lit ones (home and profile level cards).
+  final double? progress;
+
+  /// Spoken label of the emblem (the progress), when it carries one.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final c = BirdyColors.of(context);
     final locked = _locked(c.isDark);
-    return GameDisc(
+    final disc = GameDisc(
       size: size,
       color: reached ? status.color : locked.disc,
       deep: reached ? status.deep : locked.deep,
@@ -325,97 +349,12 @@ class StatusEmblem extends StatelessWidget {
                 deep: locked.ink,
               ),
       ring: current ? c.text1 : null,
+      partial: progress,
     );
+    return semanticLabel == null
+        ? disc
+        : Semantics(label: semanticLabel, image: true, child: disc);
   }
-}
-
-/// Progress ring around the current status (SPEC.md 5.7): track, arc of
-/// [progress] in the status color, disc and glyph. Before the first status,
-/// the first one in its muted look.
-class StatusRing extends StatelessWidget {
-  const StatusRing({
-    super.key,
-    required this.status,
-    required this.progress,
-    required this.semanticLabel,
-    this.size = 96,
-  });
-
-  final StatusDef? status;
-  final double progress;
-  final String semanticLabel;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = BirdyColors.of(context);
-    final shown = status ?? GameConfig.statuses.first;
-    return Semantics(
-      label: semanticLabel,
-      image: true,
-      child: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            CustomPaint(
-              size: Size.square(size),
-              painter: _RingPainter(
-                progress: progress,
-                track: c.progressTrack,
-                color: shown.color,
-              ),
-            ),
-            StatusEmblem(
-              status: shown,
-              size: size * 58 / 84,
-              reached: status != null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  const _RingPainter({
-    required this.progress,
-    required this.track,
-    required this.color,
-  });
-
-  final double progress;
-  final Color track;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stroke = size.width * 6 / 84;
-    final rect = Rect.fromCircle(
-      center: size.center(Offset.zero),
-      radius: size.width * 37 / 84,
-    );
-    final paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke
-          ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, 0, 2 * math.pi, false, paint..color = track);
-    if (progress > 0) {
-      canvas.drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * progress.clamp(0.0, 1.0),
-        false,
-        paint..color = color,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter old) =>
-      old.progress != progress || old.track != track || old.color != color;
 }
 
 /// Badge medal: the same disc as a status emblem, flat in bronze, silver or
@@ -456,7 +395,7 @@ class BadgeMedal extends StatelessWidget {
               size: Size.square(glyphSize),
               painter: _GlyphPainter(glyph!, ink),
             )
-            : Icon(icon, size: glyphSize, color: ink);
+            : Icon(icon, size: glyphSize, color: ink, fill: metal == null ? 0 : 1);
     return GameDisc(
       size: size,
       color: metal?.base ?? locked.disc,
