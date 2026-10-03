@@ -12,7 +12,7 @@ import 'dart:math';
 import 'package:birdnet_live/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
+import '../birdy_icons.dart';
 import '../birdy_motion.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
@@ -113,7 +113,7 @@ class BirdyTipCard extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              AppIcons.lightbulbOutline,
+                              BirdyIcons.tip,
                               size: BirdyGlyph.m,
                               color: c.orioleText,
                             ),

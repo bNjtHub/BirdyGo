@@ -34,6 +34,7 @@ import 'package:birdnet_live/shared/utils/app_icons.dart';
 
 import '../../core/services/reverse_geocoding_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../models/weather_snapshot.dart';
 import '../providers/settings_providers.dart';
 import '../services/weather_service.dart';
@@ -184,7 +185,7 @@ class _SiteContextCardState extends ConsumerState<SiteContextCard> {
     if (_locationName != null) {
       rows.add(
         _ContextRow(
-          icon: AppIcons.locationOn,
+          icon: BirdyIcons.place, // FORK: icon roles
           child: Text(
             _locationName!,
             style: theme.textTheme.bodyMedium,
@@ -196,7 +197,7 @@ class _SiteContextCardState extends ConsumerState<SiteContextCard> {
     } else if (!allowReverseGeo) {
       rows.add(
         _ConsentPromptRow(
-          icon: AppIcons.locationOn,
+          icon: BirdyIcons.place, // FORK: icon roles
           label: l10n.settingsPrivacyAllowReverseGeocoding,
           onTap: _enableLocationConsent,
         ),

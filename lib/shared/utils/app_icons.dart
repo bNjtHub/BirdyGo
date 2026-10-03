@@ -93,7 +93,6 @@ abstract final class AppIcons {
   static const IconData graphicEqRounded = Symbols.graphic_eq_rounded;
   static const IconData gridViewRounded = Symbols.grid_view_rounded;
   static const IconData hearing = Symbols.hearing_rounded;
-  static const IconData handyman = Symbols.handyman_rounded; // FORK: « Plus » sheet (M)
   static const IconData headphones =
       Symbols.headphones_rounded; // FORK: « Oreille fine » badge (J6e)
   static const IconData helpOutline = Symbols.help_rounded;
@@ -111,7 +110,6 @@ abstract final class AppIcons {
   static const IconData locationOff = Symbols.location_off_rounded;
   static const IconData locationOffRounded = Symbols.location_off_rounded;
   static const IconData locationOn = Symbols.location_on_rounded;
-  static const IconData locationOnFilled = Symbols.location_on_rounded; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData locationOnRounded = Symbols.location_on_rounded;
   static const IconData layers = Symbols.layers_rounded; // FORK: map base layers (J5)
   static const IconData leaderboard = Symbols.leaderboard_rounded; // FORK: Palmarès (J6e)
@@ -148,7 +146,6 @@ abstract final class AppIcons {
       Symbols.notifications_active_rounded;
   static const IconData openInNew = Symbols.open_in_new_rounded;
   static const IconData parkRounded = Symbols.park_rounded;
-  static const IconData pets = Symbols.pets_rounded; // FORK: J6h, Ennemis section
   static const IconData pause = Symbols.pause_rounded;
   static const IconData pauseRounded = Symbols.pause_rounded;
   static const IconData partlyCloudyDay = Symbols.partly_cloudy_day_rounded;
@@ -206,7 +203,6 @@ abstract final class AppIcons {
   static const IconData contentCopy =
       Symbols.content_copy_rounded; // FORK: LPO card (J5b)
   static const IconData remove = Symbols.remove_rounded; // FORK: counters (J5b)
-  static const IconData stopCircle = Symbols.stop_circle_rounded; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData stopRounded = Symbols.stop_rounded; // FORK: unify on Material Symbols (callers use fill: 1)
   static const IconData storage = Symbols.storage_rounded;
   static const IconData straighten = Symbols.straighten_rounded;
@@ -242,10 +238,7 @@ abstract final class AppIcons {
   static const IconData wbTwilightRounded = Symbols.wb_twilight_rounded;
   static const IconData weatherSnowy = Symbols.weather_snowy_rounded;
   // FORK: quiz « Qui chante ? » v2, Material Symbols Rounded (J6e).
-  static const IconData quizCheck = Symbols.check_rounded; // FORK: quiz
-  static const IconData quizClose = Symbols.close_rounded; // FORK: quiz
   static const IconData quizSpark = Symbols.auto_awesome_rounded; // FORK: quiz
-  static const IconData quizStop = Symbols.stop_rounded; // FORK: quiz
   // FORK: listening modes « Conditions d'écoute » (J6f).
   static const IconData listeningNormal = Symbols.wb_sunny_rounded; // FORK
   static const IconData listeningWind = Symbols.air_rounded; // FORK

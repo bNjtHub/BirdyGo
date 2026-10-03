@@ -16,6 +16,7 @@ import '../listening_mode/listening_mode.dart';
 import '../live/listening_options.dart';
 import '../reliability/reliability_badge.dart';
 import '../reliability/reliability_config.dart';
+import 'birdy_icons.dart';
 import 'birdy_motion.dart';
 import 'birdy_theme.dart';
 import 'birdy_tokens.dart';
@@ -270,7 +271,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
           OutlinedButton.icon(
             style: BirdyButtonStyles.secondary(context),
             onPressed: () {},
-            icon: const Icon(AppIcons.playArrow),
+            icon: const BirdyIcon(BirdyIcons.play),
             label: Text(l10n.forkReplay),
           ),
           FilledButton(
@@ -279,7 +280,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
             child: Text(l10n.forkGalleryReplay),
           ),
           BirdyIconButton(
-            icon: AppIcons.close,
+            icon: BirdyIcons.close,
             semanticLabel: MaterialLocalizations.of(context).closeButtonTooltip,
             onPressed: () {},
           ),
@@ -304,7 +305,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                         child: FilledButton.icon(
                           style: BirdyButtonStyles.stop(context),
                           onPressed: () {},
-                          icon: const Icon(AppIcons.stop, fill: 1),
+                          icon: const BirdyIcon(BirdyIcons.stop),
                           label: Text(l10n.forkStop),
                         ),
                       ),
@@ -314,7 +315,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
                         child: OutlinedButton.icon(
                           style: BirdyButtonStyles.pause(context),
                           onPressed: () {},
-                          icon: const Icon(AppIcons.pause),
+                          icon: const BirdyIcon(BirdyIcons.pause),
                           label: Text(l10n.forkPause),
                         ),
                       ),
@@ -491,7 +492,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
   /// The three kinds of empty state (DESIGN.md « Écrans vides »).
   List<Widget> _empty(AppLocalizations l10n) => [
     BirdyEmptyState(
-      icon: AppIcons.hearing,
+      icon: BirdyIcons.heard,
       title: l10n.forkHomeEmptyDayTitle,
       body: l10n.forkHomeEmptyDay,
       action: l10n.forkListen,
@@ -509,7 +510,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
     const SizedBox(height: BirdySpace.m),
     BirdyEmptyState.inline(
       kind: BirdyEmptyKind.done,
-      icon: AppIcons.check,
+      icon: BirdyIcons.tick,
       title: l10n.forkQuickReviewEmptyTitle,
       body: l10n.forkQuickReviewEmpty,
     ),
@@ -525,7 +526,7 @@ class _DesignGalleryScreenState extends State<DesignGalleryScreen> {
         motion: BirdyIconMotion.drift,
       ),
       BirdyTip(
-        icon: AppIcons.graphicEq,
+        icon: BirdyIcons.song,
         title: l10n.liveTipSpectrogramTitle,
         body: l10n.liveTipSpectrogramBody,
         motion: BirdyIconMotion.pulse,

@@ -21,6 +21,12 @@ abstract final class BirdyIcons {
   /// A song, a clip, a sound.
   static const IconData song = AppIcons.graphicEq;
 
+  /// Recording one's own voice (voice memo): still a microphone.
+  static const IconData voiceMemo = AppIcons.mic;
+
+  /// A reference document (licenses, fonts, citations): not the notebook.
+  static const IconData document = AppIcons.menuBook;
+
   /// The "Oreille fine" (fine ear) game and badge.
   static const IconData fineEar = AppIcons.headphones;
 
@@ -63,7 +69,7 @@ abstract final class BirdyIcons {
   /// A menu.
   static const IconData menu = AppIcons.menu;
 
-  /// Confirmed state (always filled): a reached state.
+  /// Confirmed: filled only when the thing is confirmed (`active`).
   static const IconData confirmed = AppIcons.checkCircle;
 
   /// A check mark in a list or a choice.
@@ -89,7 +95,7 @@ abstract final class BirdyIcons {
 
   /// Roles that are filled whatever the state.
   static final Set<IconData> alwaysFilled = {
-    confirmed,
+
     play,
     pause,
     stop,

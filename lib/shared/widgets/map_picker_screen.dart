@@ -12,12 +12,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:birdnet_live/l10n/app_localizations.dart';
-import 'package:birdnet_live/shared/utils/app_icons.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../fork/design/birdy_icons.dart'; // FORK: icon roles
 import '../providers/app_providers.dart';
 import '../providers/settings_providers.dart';
 import 'open_street_map_tile_layer.dart';
@@ -122,9 +122,9 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> {
                 point: _picked!,
                 width: 40,
                 height: 40,
-                child: Icon(
-                  AppIcons.locationOnFilled,
-                  fill: 1, // FORK: filled glyph (Material Symbols)
+                child: BirdyIcon( // FORK: icon roles
+                  BirdyIcons.place, // FORK: icon roles
+                  active: true, // FORK: icon roles
                   color: theme.colorScheme.error,
                   size: 40,
                 ),
@@ -149,14 +149,14 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              AppIcons.map,
+              BirdyIcons.map, // FORK: icon roles
               size: 64,
               color: theme.colorScheme.onSurface.withAlpha(100),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _requestConsent,
-              icon: const Icon(AppIcons.map),
+              icon: const Icon(BirdyIcons.map), // FORK: icon roles
               label: Text(l10n.mapLoadButton),
             ),
             const SizedBox(height: 8),

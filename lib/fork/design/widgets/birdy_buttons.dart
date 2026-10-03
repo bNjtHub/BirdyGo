@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
+import '../birdy_icons.dart';
 import 'birdy_wing_icon.dart';
 import 'pressable.dart';
 
@@ -25,7 +26,7 @@ abstract final class BirdyButtonStyles {
       padding: const EdgeInsets.symmetric(horizontal: BirdySpace.xxl),
       shape: const StadiumBorder(),
       textStyle: BirdyText.label,
-      iconSize: 22,
+      iconSize: BirdyGlyph.xxl,
     );
   }
 
@@ -40,7 +41,7 @@ abstract final class BirdyButtonStyles {
       shape: const StadiumBorder(),
       side: BorderSide(color: c.borderStrong, width: BirdyStroke.thin),
       textStyle: BirdyText.label,
-      iconSize: 22,
+      iconSize: BirdyGlyph.xxl,
     );
   }
 
@@ -54,7 +55,7 @@ abstract final class BirdyButtonStyles {
       padding: const EdgeInsets.symmetric(horizontal: BirdySpace.roomy),
       shape: const StadiumBorder(),
       textStyle: BirdyText.labelCompact,
-      iconSize: 20,
+      iconSize: BirdyGlyph.xl,
     );
   }
 
@@ -69,7 +70,7 @@ abstract final class BirdyButtonStyles {
       minimumSize: const Size(64, BirdySizes.liveControl),
       shape: const StadiumBorder(),
       textStyle: BirdyText.label,
-      iconSize: 22,
+      iconSize: BirdyGlyph.xxl,
     );
   }
 
@@ -82,7 +83,7 @@ abstract final class BirdyButtonStyles {
       shape: const StadiumBorder(),
       side: BorderSide(color: c.borderStrong, width: BirdyStroke.thin),
       textStyle: BirdyText.label,
-      iconSize: 22,
+      iconSize: BirdyGlyph.xxl,
     );
   }
 }
@@ -112,7 +113,7 @@ class ListenButton extends StatelessWidget {
             minimumSize: const Size.fromHeight(BirdySizes.listen),
             shape: const StadiumBorder(),
             textStyle: BirdyText.labelLarge,
-            iconSize: 28,
+            iconSize: BirdyGlyph.x5l,
           ),
           icon: const Padding(
             padding: EdgeInsetsDirectional.only(end: BirdySpace.wingLabelGap),
@@ -153,7 +154,7 @@ class BirdyIconButton extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         tooltip: semanticLabel,
-        icon: Icon(icon),
+        icon: BirdyIcon(icon),
         style: IconButton.styleFrom(
           fixedSize: const Size.square(BirdySizes.target),
           backgroundColor: c.isDark ? c.line : c.surface1,

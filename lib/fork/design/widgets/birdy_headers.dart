@@ -8,7 +8,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils/app_icons.dart';
+import '../birdy_icons.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
 import 'birdy_buttons.dart';
@@ -107,7 +107,7 @@ class BirdyOverlayHeader extends StatelessWidget {
       child: Row(
         children: [
           BirdyIconButton(
-            icon: closing ? AppIcons.closeRounded : AppIcons.arrowBackRounded,
+            icon: closing ? BirdyIcons.close : BirdyIcons.back,
             semanticLabel:
                 closing
                     ? MaterialLocalizations.of(context).closeButtonTooltip

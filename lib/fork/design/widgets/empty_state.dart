@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../birdy_icons.dart';
 import '../birdy_tokens.dart';
 import '../birdy_typography.dart';
 import 'birdy_buttons.dart';
@@ -31,6 +32,7 @@ class BirdyEmptyState extends StatelessWidget {
     this.kind = BirdyEmptyKind.firstUse,
     this.action,
     this.onAction,
+    this.iconActive = false,
   }) : assert(icon != null || leading != null),
        inline = false;
 
@@ -45,10 +47,14 @@ class BirdyEmptyState extends StatelessWidget {
     this.kind = BirdyEmptyKind.firstUse,
     this.action,
     this.onAction,
+    this.iconActive = false,
   }) : assert(icon != null || leading != null),
        inline = true;
 
   final IconData? icon;
+
+  /// Draws [icon] filled (a reached state, see BirdyIcons fill rule).
+  final bool iconActive;
 
   /// Feature emblem (quiz logo, wing...) drawn instead of the icon disc, at
   /// the disc size ([fullDisc] / [inlineDisc]). Null keeps the icon disc.
@@ -96,8 +102,9 @@ class BirdyEmptyState extends StatelessWidget {
           width: inline ? inlineDisc : fullDisc,
           height: inline ? inlineDisc : fullDisc,
           decoration: BoxDecoration(color: discColor, shape: BoxShape.circle),
-          child: Icon(
-            icon,
+          child: BirdyIcon(
+            icon!,
+            active: iconActive,
             size: inline ? inlineIcon : fullIcon,
             color: iconColor,
           ),
